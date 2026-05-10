@@ -1,37 +1,8 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
-/* ── Buyers (from compradores module) ── */
-const BUYERS = [
-  { id:1, nombre:"Andrea Marraco", ppto:400000, fin:"Cambio de vivienda", hab:"3", zd:["Rafal","Costa con comunicacion"], tel:"686357021", st:"nuevo" },
-  { id:2, nombre:"Malena Villalonga", ppto:350000, fin:"Primera vivienda", hab:"1-3", zd:["Palma (buen barrio)"], tel:"651442141", st:"nuevo" },
-  { id:3, nombre:"Olaia Rodriguez Ledesma", ppto:300000, fin:"Primera vivienda", hab:"3", zd:["Palma"], tel:"663277027", st:"contactado" },
-  { id:4, nombre:"Javier Rodriguez", ppto:360000, fin:"Inversion", hab:"1-3", zd:["Palma","Calvia","Andratx"], tel:"627400703", st:"cualificado" },
-  { id:5, nombre:"Erika Bastida Fernandez", ppto:325000, fin:"Primera vivienda", hab:"2", zd:["Marratxi"], tel:"633742223", st:"contactado" },
-  { id:6, nombre:"Estefania Garcia Lobato", ppto:170000, fin:"Primera vivienda", hab:"1-2", zd:["Palma","Hasta 25km"], tel:"669510889", st:"nuevo" },
-  { id:7, nombre:"Elias Catala Serra", ppto:340000, fin:"Primera vivienda", hab:"2-3", zd:["Son Oliva","Son Rapinya","La Vileta","Rafal","Vivero"], tel:"656582854", st:"nuevo" },
-  { id:8, nombre:"Miriam", ppto:270000, fin:"Primera vivienda", hab:"2", zd:["Palma"], tel:"677167788", st:"nuevo" },
-  { id:9, nombre:"Rocio Arrom", ppto:350000, fin:"Primera vivienda", hab:"4", zd:["Palma centro"], tel:"674526314", st:"nuevo" },
-  { id:10, nombre:"Alba Murillo", ppto:330000, fin:"Primera vivienda", hab:"3", zd:["Palma","Marratxi","Inca"], tel:"695601763", st:"nuevo" },
-  { id:11, nombre:"Isabel Vicente", ppto:300000, fin:"Cambio de vivienda", hab:"2+", zd:["Palma centro","Coll den Rebassa","Calvia","Can Pastilla"], tel:"651426066", st:"contactado" },
-  { id:12, nombre:"Marc Carreras Martorell", ppto:250000, fin:"Primera vivienda", hab:"2-3", zd:["Andratx a Plaza de Toros"], tel:"619768949", st:"nuevo" },
-  { id:13, nombre:"Giuliana Brovedani", ppto:500000, fin:"Primera vivienda", hab:"2", zd:["Cala Mayor","Calvia","Zonas residenciales"], tel:"610572749", st:"cualificado" },
-  { id:14, nombre:"Joan Tormo", ppto:240000, fin:"Primera vivienda", hab:"2-3", zd:["Es Vivero","Marratxi","Santa Maria","Esporles","Inca"], tel:"622906023", st:"nuevo" },
-  { id:15, nombre:"Toni Valle", ppto:300000, fin:"Segunda residencia", hab:"2", zd:["Palma","Arta","Manacor","Cala Ratjada"], tel:"+34660109223", st:"nuevo" },
-  { id:16, nombre:"Marina Moll Fontanals", ppto:250000, fin:"Primera vivienda", hab:"2", zd:["30-35min del aeropuerto"], tel:"660381314", st:"nuevo" },
-  { id:17, nombre:"Bruno Prohens Canals", ppto:320000, fin:"Primera vivienda", hab:"2", zd:["Palma"], tel:"673390720", st:"nuevo" },
-  { id:18, nombre:"Cristina Fuster Ramos", ppto:350000, fin:"Inversion", hab:"2+", zd:["SOlivera","Escorxador","Plaza de Toros","Ctra. Valldemossa"], tel:"645096684", st:"cualificado" },
-  { id:19, nombre:"Jordi Sanchez", ppto:400000, fin:"Primera vivienda", hab:"3", zd:["Son Cotoner","Son Dameto"], tel:"669271899", st:"nuevo" },
-  { id:20, nombre:"Marta Segui Aguilo", ppto:400000, fin:"Cambio de vivienda", hab:"3-4", zd:["Pere Garau","Plaza de Toros","Marques de Fuensanta"], tel:"657556864", st:"contactado" },
-];
-
-/* ── Properties (from propiedades module) ── */
-const PROPS = [
-  { id:1, ref:"MNP-001", titulo:"Piso reformado con terraza en Pere Garau", tipo:"Piso", zona:"Pere Garau", municipio:"Palma", precioVenta:399000, mConst:105, habDobles:2, habSimples:0, banos:2, estado:"publicada", agente:"Carlos M.", calidades:["Terraza","Ascensor","Piscina comunitaria","Cocina equipada","Plaza garaje incluida","Reforma reciente","Luminoso","Armarios empotrados"] },
-  { id:2, ref:"MNP-002", titulo:"Atico panoramico con terraza de 35m2", tipo:"Atico", zona:"Plaza de Toros", municipio:"Palma", precioVenta:485000, mConst:95, habDobles:2, habSimples:0, banos:1, estado:"publicada", agente:"Ana R.", calidades:["Terraza","Ascensor","Vistas al mar","Luminoso","Cocina equipada","Armarios empotrados","Plaza garaje incluida","Obra nueva","Domotica","Descalcificador"] },
-  { id:3, ref:"MNP-003", titulo:"Casa con jardin y piscina privada en Sa Cabaneta", tipo:"Casa", zona:"Sa Cabaneta", municipio:"Marratxi", precioVenta:520000, mConst:195, habDobles:3, habSimples:1, banos:2, estado:"captada", agente:"Carlos M.", calidades:["Jardin","Piscina propia","Chimenea","Barbacoa","Trastero","Cocina equipada","Alarma","Garaje privado","Vistas montana"] },
-  { id:4, ref:"MNP-004", titulo:"Local a pie de calle en Inca centro", tipo:"Local comercial", zona:"Centro", municipio:"Inca", precioVenta:109000, mConst:42, habDobles:0, habSimples:0, banos:1, estado:"publicada", agente:"Ana R.", calidades:["Centrico","Luminoso"] },
-];
+/* Data loaded from Supabase */
 
 const EST_COLORS = { nuevo:"#C8A97E", contactado:"#8FA88A", cualificado:"#D4956A", visita:"#A89BC4", negociacion:"#C4A55A", cerrado:"#6AAF8D", descartado:"#7A7870" };
 const PROP_EST_COLORS = { captada:"#C8A97E", publicada:"#8FA88A", reservada:"#D4956A", vendida:"#6AAF8D", retirada:"#7A7870" };
@@ -117,6 +88,32 @@ export default function MotorCruce() {
   const [view, setView] = useState("prop");
   const [selectedProp, setSelectedProp] = useState(null);
   const [selectedBuyer, setSelectedBuyer] = useState(null);
+  const [BUYERS, setBUYERS] = useState([]);
+  const [PROPS, setPROPS] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      setLoading(true);
+      const [bRes, pRes] = await Promise.all([
+        supabase.from("compradores").select("*").order("created_at", { ascending: false }),
+        supabase.from("propiedades").select("*").order("created_at", { ascending: false }),
+      ]);
+      if (bRes.data) setBUYERS(bRes.data.map(r => ({
+        id: r.id, nombre: r.nombre || "", ppto: r.presupuesto || 0, fin: r.finalidad || "",
+        hab: r.habitaciones || "", zd: r.zona_deseada || [], tel: r.telefono || "", st: r.estado || "nuevo",
+      })));
+      if (pRes.data) setPROPS(pRes.data.map(r => ({
+        id: r.id, ref: r.ref || "", titulo: r.titulo || "", tipo: r.tipo || "",
+        zona: r.zona || "", municipio: r.municipio || "", precioVenta: r.precio_venta || 0,
+        mConst: r.m_const || 0, habDobles: r.hab_dobles || 0, habSimples: r.hab_simples || 0,
+        banos: r.banos || 0, estado: r.estado || "", agente: r.agente || "",
+        calidades: r.calidades || [],
+      })));
+      setLoading(false);
+    }
+    load();
+  }, []);
 
   // Calculate all matches
   const matchesByProp = useMemo(() => {
@@ -125,7 +122,7 @@ export default function MotorCruce() {
       result[prop.id] = BUYERS.filter((b) => b.ppto >= prop.precioVenta);
     });
     return result;
-  }, []);
+  }, [BUYERS, PROPS]);
 
   const matchesByBuyer = useMemo(() => {
     const result = {};
@@ -133,7 +130,7 @@ export default function MotorCruce() {
       result[buyer.id] = PROPS.filter((p) => p.precioVenta <= buyer.ppto);
     });
     return result;
-  }, []);
+  }, [BUYERS, PROPS]);
 
   const totalMatches = useMemo(() => {
     let count = 0;
