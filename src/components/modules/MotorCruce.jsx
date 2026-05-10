@@ -137,9 +137,37 @@ export default function MotorCruce() {
   }, [PROPS, fMunicipio]);
   const operaciones = useMemo(() => [...new Set(PROPS.map((p) => p.op).filter(Boolean))].sort(), [PROPS]);
 
-  // Matching logic: presupuesto + municipio/zona
+  // Matching logic: presupuesto + municipio + operacion
   function isMatch(buyer, prop) {
+    // 1. Presupuesto: comprador puede pagar
     if (prop.precioVenta > buyer.ppto) return false;
+
+    // 2. Municipio: si el comprador tiene zonas deseadas, al menos una debe coincidir con el municipio
+    if (buyer.zd.length > 0) {
+      const municipioOk = buyer.zd.some((z) => {
+        const zl = z.toLowerCase().trim();
+        const ml = prop.municipio.toLowerCase();
+        return ml.includes(zl) || zl.includes(ml);
+      });
+      if (!municipioOk) return false;
+    }
+
+    // 3. Operacion: finalidad del comprador debe coincidir con op de la propiedad
+    if (buyer.fin && prop.op) {
+      const finL = buyer.fin.toLowerCase();
+      const opL = prop.op.toLowerCase();
+      // Mapeo: "Primera vivienda"/"Inversion"/"Cambio de vivienda" = Compraventa, "Alquiler" = Alquiler, "Traspaso" = Traspaso
+      const buyerIsCompra = finL.includes("vivienda") || finL.includes("inversion") || finL.includes("inversión") || finL.includes("compra");
+      const propIsCompra = opL.includes("compraventa") || opL.includes("compra") || opL.includes("venta");
+      const buyerIsAlquiler = finL.includes("alquiler");
+      const propIsAlquiler = opL.includes("alquiler");
+      const buyerIsTraspaso = finL.includes("traspaso");
+      const propIsTraspaso = opL.includes("traspaso");
+
+      if (propIsCompra && !buyerIsCompra && buyer.fin) return false;
+      if (propIsAlquiler && !buyerIsAlquiler) return false;
+      if (propIsTraspaso && !buyerIsTraspaso) return false;
+    }
 
     return true;
   }
