@@ -74,6 +74,7 @@ export default function FirmarPage() {
   const [aceptaFirma, setAceptaFirma] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [showFullPdf, setShowFullPdf] = useState(false);
+  const [hasOpenedDoc, setHasOpenedDoc] = useState(false);
   const [sending, setSending] = useState(false);
   const [codeSent, setCodeSent] = useState(false);
   const [fallbackCode, setFallbackCode] = useState(null);
@@ -304,19 +305,25 @@ export default function FirmarPage() {
           <div style={{ border: "1px solid #ddd", borderRadius: 8, overflow: "hidden", marginBottom: 12 }}>
             <iframe src={info?.pdf_url} style={{ width: "100%", height: 450, border: "none" }} />
           </div>
-          <button onClick={() => setShowFullPdf(true)} style={{ ...btnSecondary, marginBottom: 20, fontSize: 13 }}>
-            📄 Abrir documento completo
+          <button onClick={() => { setShowFullPdf(true); setHasOpenedDoc(true); }} style={{ ...btnS, marginBottom: 16, fontSize: 13 }}>
+            📄 Abrir y revisar documento completo
           </button>
 
-          <div style={checkRow}>
-            <input type="checkbox" checked={aceptaPriv} onChange={(e) => setAceptaPriv(e.target.checked)} style={{ marginTop: 3, flexShrink: 0, width: 18, height: 18 }} />
+          {!hasOpenedDoc && (
+            <div style={{ background: "#FEF3C7", border: "1px solid #F59E0B", borderRadius: 8, padding: "12px 16px", marginBottom: 16, fontSize: 12, color: "#92400E" }}>
+              ⚠️ Debes abrir y revisar el documento completo antes de poder continuar con la firma.
+            </div>
+          )}
+
+          <div style={{ ...checkRow, opacity: hasOpenedDoc ? 1 : 0.4 }}>
+            <input type="checkbox" checked={aceptaPriv} onChange={(e) => setAceptaPriv(e.target.checked)} disabled={!hasOpenedDoc} style={{ marginTop: 3, flexShrink: 0, width: 18, height: 18, cursor: hasOpenedDoc ? "pointer" : "not-allowed" }} />
             <span>Acepto la <span style={{ color: "#C8A97E", cursor: "pointer", textDecoration: "underline" }} onClick={() => setShowPrivacy(true)}>Política de privacidad</span></span>
           </div>
-          <div style={checkRow}>
-            <input type="checkbox" checked={aceptaFirma} onChange={(e) => setAceptaFirma(e.target.checked)} style={{ marginTop: 3, flexShrink: 0, width: 18, height: 18 }} />
+          <div style={{ ...checkRow, opacity: hasOpenedDoc ? 1 : 0.4 }}>
+            <input type="checkbox" checked={aceptaFirma} onChange={(e) => setAceptaFirma(e.target.checked)} disabled={!hasOpenedDoc} style={{ marginTop: 3, flexShrink: 0, width: 18, height: 18, cursor: hasOpenedDoc ? "pointer" : "not-allowed" }} />
             <span>Acepto firmar este documento y que mis datos de firma sean registrados.</span>
           </div>
-          <button onClick={() => setStep("datos")} disabled={!aceptaPriv || !aceptaFirma} style={(!aceptaPriv || !aceptaFirma) ? btnDisabled : btnS}>Firmar</button>
+          <button onClick={() => setStep("datos")} disabled={!aceptaPriv || !aceptaFirma || !hasOpenedDoc} style={(!aceptaPriv || !aceptaFirma || !hasOpenedDoc) ? btnDisabled : btnS}>Firmar</button>
         </div>
       )}
 
