@@ -120,7 +120,7 @@ function Card({ b, onClick }) {
   </div>;
 }
 
-function Detail({ b, onClose, onSave }) {
+function Detail({ b, onClose, onSave, onDelete }) {
   const [ed, setEd] = useState(false);
   const [f, setF] = useState({ ...b });
   const s = score(b);
@@ -133,6 +133,7 @@ function Detail({ b, onClose, onSave }) {
   return <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", display: "flex", justifyContent: "center", alignItems: "flex-start", padding: "40px 16px", zIndex: 1000, overflowY: "auto" }}>
     <div style={{ background: "#161513", border: "1px solid #2A2926", borderRadius: 4, width: "100%", maxWidth: 620, padding: "36px 40px", position: "relative" }}>
       <button onClick={onClose} style={{ position: "absolute", top: 20, right: 24, background: "none", border: "none", color: "#7A7870", fontSize: 20, cursor: "pointer", fontFamily: "'Manrope', sans-serif" }}>✕</button>
+      <button onClick={() => { if (onDelete) onDelete(b); }} style={{ position: "absolute", top: 22, right: 60, background: "none", border: "1px solid #D4545433", borderRadius: 3, color: "#D45454", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "'Manrope', sans-serif" }}>Eliminar</button>
       <div style={{ borderBottom: "1px solid #2A2926", paddingBottom: 24, marginBottom: 28 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
           <div>
@@ -279,7 +280,7 @@ export default function App() {
         {list.length === 0 && <div style={{ textAlign: "center", padding: 60, color: "#7A7870", fontSize: 13, fontStyle: "italic" }}>No se encontraron compradores con esos filtros</div>}
       </div>
 
-      {sel && <Detail b={sel} onClose={() => setSel(null)} onSave={u => { setData(d => d.map(b => b.id === u.id ? u : b)); setSel(null); }} />}
+      {sel && <Detail b={sel} onClose={() => setSel(null)} onSave={u => { setData(d => d.map(b => b.id === u.id ? u : b)); setSel(null); }} onDelete={async (b) => { if (confirm("¿Eliminar este comprador? Esta accion no se puede deshacer.")) { await supabase.from("compradores").delete().eq("id", b.id); setSel(null); setData(d => d.filter(x => x.id !== b.id)); }}} />}
       {showNew && <NewBuyer onClose={() => setShowNew(false)} onAdd={n => setData(d => [n, ...d])} />}
     </div>
   </div>;

@@ -98,6 +98,15 @@ export default function FirmaElectronica() {
     setDetail(firmaId);
   }
 
+  async function deleteFirma(firmaId) {
+    if (!confirm("¿Eliminar este documento de firma y todos sus datos? Esta accion no se puede deshacer.")) return;
+    await supabase.from("firmantes").delete().eq("firma_id", firmaId);
+    await supabase.from("firmas").delete().eq("id", firmaId);
+    setDetail(null);
+    setDetailData(null);
+    await loadFirmas();
+  }
+
   function copyLink(url, idx) {
     navigator.clipboard.writeText(url);
     setCopied(idx);
@@ -208,6 +217,7 @@ export default function FirmaElectronica() {
           <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)", display: "flex", justifyContent: "center", alignItems: "flex-start", padding: "30px 12px", zIndex: 1000, overflowY: "auto" }}>
             <div style={{ background: "#161513", border: "1px solid #2A2926", borderRadius: 4, width: "100%", maxWidth: 640, padding: "32px 36px", position: "relative" }}>
               <button onClick={() => { setDetail(null); setDetailData(null); }} style={{ position: "absolute", top: 16, right: 20, background: "none", border: "none", color: "#7A7870", fontSize: 20, cursor: "pointer" }}>X</button>
+              <button onClick={() => deleteFirma(detail)} style={{ position: "absolute", top: 16, right: 56, background: "none", border: "1px solid #D4545433", borderRadius: 3, color: "#D45454", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "'Manrope', sans-serif" }}>Eliminar</button>
 
               <div style={{ fontSize: 11, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 8, fontWeight: 600 }}>Detalle de firma</div>
               <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, color: "#F0EDE6", marginBottom: 4 }}>{detailData.firma?.pdf_nombre}</div>
