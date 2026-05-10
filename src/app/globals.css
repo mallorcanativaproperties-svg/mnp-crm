@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Manrope', sans-serif;
+  background: #111110;
+  color: #F0EDE6;
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+input, select, textarea, button {
+  font-family: 'Manrope', sans-serif;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #111110;
+}
+::-webkit-scrollbar-thumb {
+  background: #2A2926;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #C8A97E44;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

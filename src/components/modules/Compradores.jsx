@@ -1,0 +1,263 @@
+"use client";
+import { useState, useMemo } from "react";
+
+const BUYERS = [
+  { id: 1, ts: "15/02/2026", email: "riumarraco@gmail.com", nombre: "Andrea Marraco", tel: "686357021", fin: "Sí", ppto: 400000, finalidad: "Cambio de vivienda", hab: "3", zd: ["Rafal","Costa con comunicación"], ze: ["Son Gotleu"], alt: "Bajo", req: "Terraza al sur, vistas despejadas, parking, construcción reciente", st: "nuevo", ag: "" },
+  { id: 2, ts: "15/02/2026", email: "maleenavillalonga@gmail.com", nombre: "Malena Villalonga", tel: "651442141", fin: "Sí", ppto: 350000, finalidad: "Primera vivienda", hab: "1-3", zd: ["Palma (buen barrio)"], ze: ["Corea","Son Gotleu"], alt: "Indiferente", req: "Buena inversión, 29 años", st: "nuevo", ag: "" },
+  { id: 3, ts: "16/02/2026", email: "olaia.1987@hotmail.com", nombre: "Olaia Rodríguez Ledesma", tel: "663277027", fin: "Abierto", ppto: 300000, finalidad: "Primera vivienda", hab: "3", zd: ["Palma"], ze: ["Son Gotleu","Pere Garau"], alt: "1º", req: "Ascensor si más de un segundo", st: "contactado", ag: "" },
+  { id: 4, ts: "16/02/2026", email: "javirc1980@hotmail.com", nombre: "Javier Rodríguez", tel: "627400703", fin: "Sí", ppto: 360000, finalidad: "Inversión", hab: "1-3", zd: ["Palma","Calvià","Andratx"], ze: [], alt: "3º", req: "1-3 habitaciones", st: "cualificado", ag: "Carlos M." },
+  { id: 5, ts: "16/02/2026", email: "erikabastidafernandez@gmail.com", nombre: "Erika Bastida Fernández", tel: "633742223", fin: "No", ppto: 325000, finalidad: "Primera vivienda", hab: "2", zd: ["Marratxí"], ze: [], alt: "2º", req: "Habitaciones grandes · 3 entradas fusionadas", st: "contactado", ag: "" },
+  { id: 6, ts: "16/02/2026", email: "estefania84garcia@gmail.com", nombre: "Estefanía García Lobato", tel: "669510889", fin: "Sí", ppto: 170000, finalidad: "Primera vivienda", hab: "1-2", zd: ["Palma","Hasta 25km"], ze: ["Corea","Son Gotleu"], alt: "1º", req: "Balcón o terraza · 2 entradas fusionadas", st: "nuevo", ag: "" },
+  { id: 7, ts: "16/02/2026", email: "eliascatala71@gmail.com", nombre: "Elías Catalá Serra", tel: "656582854", fin: "Sí", ppto: 340000, finalidad: "Primera vivienda", hab: "2-3", zd: ["Son Oliva","Son Rapiña","La Vileta","Rafal","Vivero"], ze: [], alt: "1º", req: "Balcón o terraza y ascensor", st: "nuevo", ag: "" },
+  { id: 8, ts: "16/02/2026", email: "miriam.mr90@gmail.com", nombre: "Miriam", tel: "677167788", fin: "Sí", ppto: 270000, finalidad: "Primera vivienda", hab: "2", zd: ["Palma"], ze: [], alt: "2º", req: "Luz, balcón o terraza, sin reforma", st: "nuevo", ag: "" },
+  { id: 9, ts: "16/02/2026", email: "rociioarrom@gmail.com", nombre: "Rocío Arrom", tel: "674526314", fin: "Sí", ppto: 350000, finalidad: "Primera vivienda", hab: "4", zd: ["Palma centro"], ze: [], alt: "2º", req: "Para empresa", st: "nuevo", ag: "" },
+  { id: 10, ts: "16/02/2026", email: "albamurillo95@hotmail.com", nombre: "Alba Murillo", tel: "695601763", fin: "No", ppto: 330000, finalidad: "Primera vivienda", hab: "3", zd: ["Palma","Marratxí","Inca"], ze: [], alt: "1º", req: "3 hab, 2 baños o 1 baño + 1 aseo", st: "nuevo", ag: "" },
+  { id: 11, ts: "16/02/2026", email: "isab.vc@gmail.com", nombre: "Isabel Vicente", tel: "651426066", fin: "Abierto", ppto: 300000, finalidad: "Cambio de vivienda", hab: "2+", zd: ["Palma centro","Coll den Rebassa","Son Ferriol","Calvià","Can Pastilla"], ze: ["Son Gotleu","La Soledad","Polígono Levante","Corea"], alt: "2º", req: "Garaje, terraza/balcón, luminoso", st: "contactado", ag: "" },
+  { id: 12, ts: "18/02/2026", email: "marc.carreras.martorell@gmail.com", nombre: "Marc Carreras Martorell", tel: "619768949", fin: "Sí", ppto: 250000, finalidad: "Primera vivienda", hab: "2-3", zd: ["Andratx a Plaza de Toros"], ze: ["Magaluf","Calvià pueblo"], alt: "2-3º", req: "Mínimo 65m², terraza o balcón", st: "nuevo", ag: "" },
+  { id: 13, ts: "19/02/2026", email: "gcb096@gmail.com", nombre: "Giuliana Brovedani", tel: "610572749", fin: "Abierto", ppto: 500000, finalidad: "Primera vivienda", hab: "2", zd: ["Cala Mayor","Calvià","Zonas residenciales"], ze: [], alt: "Casa/Ascensor", req: "Ventana y bidé en baño", st: "cualificado", ag: "Ana R." },
+  { id: 14, ts: "21/02/2026", email: "joan.tormo.r@gmail.com", nombre: "Joan Tormo", tel: "622906023", fin: "Sí", ppto: 240000, finalidad: "Primera vivienda", hab: "2-3", zd: ["Es Vivero","Marratxí","Santa Maria","Esporles","Inca"], ze: ["Son Gotleu","La Soledad","Corea","Son Banya"], alt: "1º", req: "Patio o terraza", st: "nuevo", ag: "" },
+  { id: 15, ts: "22/02/2026", email: "tjvallefont@gmail.com", nombre: "Toni Valle", tel: "+34660109223", fin: "Abierto", ppto: 300000, finalidad: "Segunda residencia", hab: "2", zd: ["Palma","Artà","Manacor","Cala Ratjada"], ze: [], alt: "Indiferente", req: "Moderno", st: "nuevo", ag: "" },
+  { id: 16, ts: "23/02/2026", email: "marina.moll12@gmail.com", nombre: "Marina Moll Fontanals", tel: "660381314", fin: "Sí", ppto: 250000, finalidad: "Primera vivienda", hab: "2", zd: ["30-35min del aeropuerto"], ze: ["Son Gotleu","Corea"], alt: "3º", req: "Animales, terraza/patio, luminoso", st: "nuevo", ag: "" },
+  { id: 17, ts: "24/02/2026", email: "prohensbruno@gmail.com", nombre: "Bruno Prohens Canals", tel: "673390720", fin: "Sí", ppto: 320000, finalidad: "Primera vivienda", hab: "2", zd: ["Palma"], ze: [], alt: "3º", req: "Sin grandes reformas", st: "nuevo", ag: "" },
+  { id: 18, ts: "24/02/2026", email: "cristinafusteramos@hotmail.com", nombre: "Cristina Fuster Ramos", tel: "645096684", fin: "Sí", ppto: 350000, finalidad: "Inversión", hab: "2+", zd: ["S'Olivera","Escorxador","Plaza de Toros","Ctra. Valldemossa"], ze: [], alt: "Bajo", req: "", st: "cualificado", ag: "Carlos M." },
+  { id: 19, ts: "25/02/2026", email: "jordi.sanchez.roca@gmail.com", nombre: "Jordi Sánchez", tel: "669271899", fin: "Sí", ppto: 400000, finalidad: "Primera vivienda", hab: "3", zd: ["Son Cotoner","Son Dameto"], ze: [], alt: "Ascensor", req: "Parking", st: "nuevo", ag: "" },
+  { id: 20, ts: "25/02/2026", email: "marta.segui@gmail.com", nombre: "Marta Seguí Aguiló", tel: "657556864", fin: "Sí", ppto: 400000, finalidad: "Cambio de vivienda", hab: "3-4", zd: ["Pere Garau","Plaza de Toros","Marqués de Fuensanta"], ze: [], alt: "Bajo", req: "Parking y terraza o balcón", st: "contactado", ag: "" },
+];
+
+const ESTADOS = [
+  { key: "nuevo", label: "Nuevo", accent: "#C8A97E" },
+  { key: "contactado", label: "Contactado", accent: "#8FA88A" },
+  { key: "cualificado", label: "Cualificado", accent: "#D4956A" },
+  { key: "visita", label: "En visitas", accent: "#A89BC4" },
+  { key: "negociacion", label: "Negociación", accent: "#C4A55A" },
+  { key: "cerrado", label: "Cerrado", accent: "#6AAF8D" },
+  { key: "descartado", label: "Descartado", accent: "#7A7870" },
+];
+
+const FINALIDADES = ["Primera vivienda", "Inversión", "Cambio de vivienda", "Segunda residencia"];
+
+function score(b) {
+  let s = 0;
+  if (b.fin === "Sí") s += 25; else if (b.fin === "Abierto") s += 15;
+  if (b.ppto >= 300000) s += 20; else if (b.ppto >= 200000) s += 10; else if (b.ppto > 0) s += 5;
+  if (b.finalidad === "Inversión") s += 20; else if (b.finalidad === "Primera vivienda") s += 15;
+  if (b.zd.length > 0 && b.zd.length <= 5) s += 15; else if (b.zd.length > 5) s += 10;
+  if (b.hab) s += 10;
+  if (b.req && b.req.length > 10) s += 10; else if (b.req) s += 5;
+  return Math.min(s, 100);
+}
+
+function fmt(n) { return n ? n.toLocaleString("es-ES") + " €" : "—"; }
+
+function Badge({ children, color, hollow }) {
+  return <span style={{
+    display: "inline-block", fontSize: 10, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase",
+    padding: "4px 12px", borderRadius: 2,
+    background: hollow ? "transparent" : (color || "#C8A97E") + "18",
+    color: color || "#C8A97E",
+    border: hollow ? `1px solid ${color || "#C8A97E"}44` : "none",
+  }}>{children}</span>;
+}
+
+function ScoreBar({ value }) {
+  const c = value >= 75 ? "#6AAF8D" : value >= 50 ? "#C8A97E" : value >= 25 ? "#D4956A" : "#7A7870";
+  return <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+    <div style={{ width: 60, height: 3, background: "#2A2926", borderRadius: 2, overflow: "hidden" }}>
+      <div style={{ width: `${value}%`, height: "100%", background: c, borderRadius: 2, transition: "width 0.5s" }} />
+    </div>
+    <span style={{ fontSize: 11, color: c, fontWeight: 500, fontVariantNumeric: "tabular-nums" }}>{value}</span>
+  </div>;
+}
+
+function Card({ b, onClick }) {
+  const s = score(b);
+  const est = ESTADOS.find(e => e.key === b.st) || ESTADOS[0];
+  return <div onClick={onClick} style={{
+    background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, padding: "22px 26px",
+    cursor: "pointer", transition: "all 0.3s ease", position: "relative", overflow: "hidden",
+  }}
+  onMouseEnter={e => { e.currentTarget.style.borderColor = "#C8A97E55"; e.currentTarget.style.background = "#1F1E1B"; }}
+  onMouseLeave={e => { e.currentTarget.style.borderColor = "#2A2926"; e.currentTarget.style.background = "#1C1B18"; }}
+  >
+    <div style={{ position: "absolute", top: 0, left: 0, width: 3, height: "100%", background: est.accent, opacity: 0.6 }} />
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
+      <div style={{ minWidth: 0 }}>
+        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 400, color: "#F0EDE6", letterSpacing: "0.01em" }}>{b.nombre}</div>
+        <div style={{ fontSize: 12, color: "#7A7870", marginTop: 4, fontFamily: "'Manrope', sans-serif" }}>{b.tel} <span style={{ margin: "0 6px", opacity: 0.3 }}>·</span> {b.email}</div>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0 }}>
+        <Badge color={est.accent}>{est.label}</Badge>
+        <ScoreBar value={s} />
+      </div>
+    </div>
+    <div style={{ display: "flex", gap: 20, marginTop: 16, fontFamily: "'Manrope', sans-serif", fontSize: 13, color: "#A09D93", flexWrap: "wrap", alignItems: "center" }}>
+      <span style={{ color: "#C8A97E", fontWeight: 600, fontSize: 15, fontVariantNumeric: "tabular-nums" }}>{fmt(b.ppto)}</span>
+      <span style={{ opacity: 0.3 }}>|</span>
+      <span>{b.hab} hab</span>
+      <span style={{ opacity: 0.3 }}>|</span>
+      <span style={{ fontStyle: "italic" }}>{b.finalidad}</span>
+      <span style={{ opacity: 0.3 }}>|</span>
+      <span>{b.fin === "Sí" ? "Financiación ✓" : b.fin === "No" ? "Sin financiación" : "Abierto a mejorar"}</span>
+    </div>
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 12 }}>
+      {b.zd.map((z, i) => <span key={i} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 2, fontFamily: "'Manrope', sans-serif", background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E22", letterSpacing: "0.03em" }}>{z}</span>)}
+      {b.ze.map((z, i) => <span key={"e" + i} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 2, fontFamily: "'Manrope', sans-serif", background: "#D4956A0D", color: "#D4956A", border: "1px solid #D4956A22", letterSpacing: "0.03em" }}>✕ {z}</span>)}
+    </div>
+    {b.ag && <div style={{ marginTop: 10, fontSize: 11, color: "#A89BC4", fontFamily: "'Manrope', sans-serif", fontWeight: 500 }}>Agente: {b.ag}</div>}
+  </div>;
+}
+
+function Detail({ b, onClose, onSave }) {
+  const [ed, setEd] = useState(false);
+  const [f, setF] = useState({ ...b });
+  const s = score(b);
+  const est = ESTADOS.find(e => e.key === b.st) || ESTADOS[0];
+  const save = () => { onSave(f); setEd(false); };
+
+  const iSt = { width: "100%", padding: "10px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 13, fontFamily: "'Manrope', sans-serif", boxSizing: "border-box", outline: "none", transition: "border 0.2s" };
+  const L = ({ children }) => <div style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 6, fontFamily: "'Manrope', sans-serif" }}>{children}</div>;
+
+  return <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", display: "flex", justifyContent: "center", alignItems: "flex-start", padding: "40px 16px", zIndex: 1000, overflowY: "auto" }}>
+    <div style={{ background: "#161513", border: "1px solid #2A2926", borderRadius: 4, width: "100%", maxWidth: 620, padding: "36px 40px", position: "relative" }}>
+      <button onClick={onClose} style={{ position: "absolute", top: 20, right: 24, background: "none", border: "none", color: "#7A7870", fontSize: 20, cursor: "pointer", fontFamily: "'Manrope', sans-serif" }}>✕</button>
+      <div style={{ borderBottom: "1px solid #2A2926", paddingBottom: 24, marginBottom: 28 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
+          <div>
+            <div style={{ fontSize: 10, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.15em", fontFamily: "'Manrope', sans-serif", marginBottom: 8 }}>Ficha de comprador</div>
+            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 400, color: "#F0EDE6", margin: 0, lineHeight: 1.2 }}>{b.nombre}</h2>
+            <div style={{ fontSize: 12, color: "#7A7870", marginTop: 8, fontFamily: "'Manrope', sans-serif" }}>Registrado el {b.ts}</div>
+          </div>
+          <div style={{ textAlign: "right" }}><Badge color={est.accent}>{est.label}</Badge><div style={{ marginTop: 10 }}><ScoreBar value={s} /></div></div>
+        </div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px 28px", marginBottom: 28 }}>
+        <div><L>Email</L><div style={{ fontSize: 13, color: "#D0CDC4", fontFamily: "'Manrope', sans-serif" }}>{b.email}</div></div>
+        <div><L>Teléfono</L><div style={{ fontSize: 13, color: "#D0CDC4", fontFamily: "'Manrope', sans-serif" }}>{b.tel}</div></div>
+        <div><L>Presupuesto</L>{ed ? <input type="number" value={f.ppto} onChange={e => setF({ ...f, ppto: +e.target.value })} style={iSt} onFocus={e => e.target.style.borderColor = "#C8A97E44"} onBlur={e => e.target.style.borderColor = "#2A2926"} /> : <div style={{ fontSize: 18, color: "#C8A97E", fontFamily: "'Playfair Display', serif" }}>{fmt(b.ppto)}</div>}</div>
+        <div><L>Habitaciones</L>{ed ? <input value={f.hab} onChange={e => setF({ ...f, hab: e.target.value })} style={iSt} /> : <div style={{ fontSize: 13, color: "#D0CDC4", fontFamily: "'Manrope', sans-serif" }}>{b.hab}</div>}</div>
+        <div><L>Finalidad de compra</L>{ed ? <select value={f.finalidad} onChange={e => setF({ ...f, finalidad: e.target.value })} style={iSt}>{FINALIDADES.map(x => <option key={x}>{x}</option>)}</select> : <div style={{ fontSize: 13, color: "#D0CDC4", fontFamily: "'Manrope', sans-serif", fontStyle: "italic" }}>{b.finalidad}</div>}</div>
+        <div><L>Financiación</L>{ed ? <select value={f.fin} onChange={e => setF({ ...f, fin: e.target.value })} style={iSt}>{["Sí","No","Abierto"].map(x => <option key={x}>{x}</option>)}</select> : <div style={{ fontSize: 13, color: "#D0CDC4", fontFamily: "'Manrope', sans-serif" }}>{b.fin === "Sí" ? "Sí, necesita" : b.fin === "No" ? "No necesita" : "Abierto a mejorar condiciones"}</div>}</div>
+        <div><L>Altura máx. sin ascensor</L>{ed ? <input value={f.alt} onChange={e => setF({ ...f, alt: e.target.value })} style={iSt} /> : <div style={{ fontSize: 13, color: "#D0CDC4", fontFamily: "'Manrope', sans-serif" }}>{b.alt}</div>}</div>
+        <div><L>Estado</L>{ed ? <select value={f.st} onChange={e => setF({ ...f, st: e.target.value })} style={iSt}>{ESTADOS.map(x => <option key={x.key} value={x.key}>{x.label}</option>)}</select> : <Badge color={est.accent}>{est.label}</Badge>}</div>
+      </div>
+      <div style={{ marginBottom: 20 }}><L>Zonas deseadas</L><div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>{b.zd.map((z, i) => <span key={i} style={{ fontSize: 11, padding: "4px 12px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E22" }}>{z}</span>)}</div></div>
+      {b.ze.length > 0 && <div style={{ marginBottom: 20 }}><L>Zonas excluidas</L><div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>{b.ze.map((z, i) => <span key={i} style={{ fontSize: 11, padding: "4px 12px", borderRadius: 2, background: "#D4956A0D", color: "#D4956A", border: "1px solid #D4956A22" }}>✕ {z}</span>)}</div></div>}
+      <div style={{ marginBottom: 20 }}><L>Requisitos especiales</L>{ed ? <textarea value={f.req} onChange={e => setF({ ...f, req: e.target.value })} style={{ ...iSt, minHeight: 80, resize: "vertical" }} /> : <div style={{ fontSize: 13, color: "#D0CDC4", fontFamily: "'Manrope', sans-serif", lineHeight: 1.6, background: "#1C1B18", padding: "14px 18px", borderRadius: 3 }}>{b.req || "—"}</div>}</div>
+      <div style={{ marginBottom: 28 }}><L>Agente asignado</L>{ed ? <input value={f.ag} onChange={e => setF({ ...f, ag: e.target.value })} style={iSt} placeholder="Nombre del agente" /> : <div style={{ fontSize: 13, color: b.ag ? "#A89BC4" : "#7A7870", fontFamily: "'Manrope', sans-serif" }}>{b.ag || "Sin asignar"}</div>}</div>
+      <div style={{ display: "flex", gap: 12, justifyContent: "flex-end", borderTop: "1px solid #2A2926", paddingTop: 20 }}>
+        {ed ? <>
+          <button onClick={() => setEd(false)} style={{ padding: "10px 24px", borderRadius: 3, border: "1px solid #2A2926", background: "none", color: "#A09D93", cursor: "pointer", fontSize: 12, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.06em", textTransform: "uppercase" }}>Cancelar</button>
+          <button onClick={save} style={{ padding: "10px 24px", borderRadius: 3, border: "none", background: "#C8A97E", color: "#161513", cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.06em", textTransform: "uppercase" }}>Guardar</button>
+        </> : <button onClick={() => setEd(true)} style={{ padding: "10px 24px", borderRadius: 3, border: "1px solid #C8A97E44", background: "transparent", color: "#C8A97E", cursor: "pointer", fontSize: 12, fontWeight: 500, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.06em", textTransform: "uppercase", transition: "all 0.2s" }}
+          onMouseEnter={e => { e.currentTarget.style.background = "#C8A97E"; e.currentTarget.style.color = "#161513"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#C8A97E"; }}
+        >Editar ficha</button>}
+      </div>
+    </div>
+  </div>;
+}
+
+function NewBuyer({ onClose, onAdd }) {
+  const [f, setF] = useState({ nombre: "", email: "", tel: "", fin: "Sí", ppto: "", finalidad: "Primera vivienda", hab: "", zd: "", ze: "", alt: "", req: "", ag: "" });
+  const add = () => { onAdd({ ...f, id: Date.now(), ts: new Date().toLocaleDateString("es-ES"), ppto: +f.ppto || 0, zd: f.zd.split(",").map(z => z.trim()).filter(Boolean), ze: f.ze.split(",").map(z => z.trim()).filter(Boolean), st: "nuevo" }); onClose(); };
+  const iSt = { width: "100%", padding: "10px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 13, fontFamily: "'Manrope', sans-serif", boxSizing: "border-box", outline: "none" };
+  const L = ({ children }) => <div style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 6, fontFamily: "'Manrope', sans-serif" }}>{children}</div>;
+
+  return <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", display: "flex", justifyContent: "center", alignItems: "flex-start", padding: "40px 16px", zIndex: 1000, overflowY: "auto" }}>
+    <div style={{ background: "#161513", border: "1px solid #2A2926", borderRadius: 4, width: "100%", maxWidth: 560, padding: "36px 40px", position: "relative" }}>
+      <button onClick={onClose} style={{ position: "absolute", top: 20, right: 24, background: "none", border: "none", color: "#7A7870", fontSize: 20, cursor: "pointer" }}>✕</button>
+      <div style={{ fontSize: 10, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.15em", fontFamily: "'Manrope', sans-serif", marginBottom: 8 }}>Nuevo registro</div>
+      <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 400, color: "#F0EDE6", margin: "0 0 28px" }}>Añadir <em>comprador</em></h2>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px 24px" }}>
+        <div style={{ gridColumn: "span 2" }}><L>Nombre y apellidos</L><input value={f.nombre} onChange={e => setF({ ...f, nombre: e.target.value })} style={iSt} /></div>
+        <div><L>Email</L><input value={f.email} onChange={e => setF({ ...f, email: e.target.value })} style={iSt} /></div>
+        <div><L>Teléfono</L><input value={f.tel} onChange={e => setF({ ...f, tel: e.target.value })} style={iSt} /></div>
+        <div><L>Presupuesto (€)</L><input type="number" value={f.ppto} onChange={e => setF({ ...f, ppto: e.target.value })} style={iSt} /></div>
+        <div><L>Habitaciones</L><input value={f.hab} onChange={e => setF({ ...f, hab: e.target.value })} style={iSt} /></div>
+        <div><L>Finalidad</L><select value={f.finalidad} onChange={e => setF({ ...f, finalidad: e.target.value })} style={{ ...iSt, appearance: "auto" }}>{FINALIDADES.map(x => <option key={x}>{x}</option>)}</select></div>
+        <div><L>Financiación</L><select value={f.fin} onChange={e => setF({ ...f, fin: e.target.value })} style={{ ...iSt, appearance: "auto" }}>{["Sí","No","Abierto"].map(x => <option key={x}>{x}</option>)}</select></div>
+        <div><L>Altura máx.</L><input value={f.alt} onChange={e => setF({ ...f, alt: e.target.value })} style={iSt} /></div>
+        <div><L>Agente</L><input value={f.ag} onChange={e => setF({ ...f, ag: e.target.value })} style={iSt} /></div>
+        <div style={{ gridColumn: "span 2" }}><L>Zonas deseadas (comas)</L><input value={f.zd} onChange={e => setF({ ...f, zd: e.target.value })} style={iSt} placeholder="Palma, Marratxí, Inca" /></div>
+        <div style={{ gridColumn: "span 2" }}><L>Zonas excluidas (comas)</L><input value={f.ze} onChange={e => setF({ ...f, ze: e.target.value })} style={iSt} placeholder="Son Gotleu, Corea" /></div>
+        <div style={{ gridColumn: "span 2" }}><L>Requisitos</L><textarea value={f.req} onChange={e => setF({ ...f, req: e.target.value })} style={{ ...iSt, minHeight: 60, resize: "vertical" }} /></div>
+      </div>
+      <div style={{ display: "flex", gap: 12, justifyContent: "flex-end", marginTop: 28, borderTop: "1px solid #2A2926", paddingTop: 20 }}>
+        <button onClick={onClose} style={{ padding: "10px 24px", borderRadius: 3, border: "1px solid #2A2926", background: "none", color: "#A09D93", cursor: "pointer", fontSize: 12, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.06em", textTransform: "uppercase" }}>Cancelar</button>
+        <button onClick={add} disabled={!f.nombre} style={{ padding: "10px 24px", borderRadius: 3, border: "none", background: f.nombre ? "#C8A97E" : "#2A2926", color: f.nombre ? "#161513" : "#7A7870", cursor: f.nombre ? "pointer" : "default", fontSize: 12, fontWeight: 600, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.06em", textTransform: "uppercase" }}>Añadir</button>
+      </div>
+    </div>
+  </div>;
+}
+
+export default function App() {
+  const [data, setData] = useState(BUYERS);
+  const [q, setQ] = useState("");
+  const [fEst, setFEst] = useState("todos");
+  const [fFin, setFFin] = useState("todas");
+  const [sort, setSort] = useState("fecha");
+  const [sel, setSel] = useState(null);
+  const [showNew, setShowNew] = useState(false);
+
+  const list = useMemo(() => {
+    let r = [...data];
+    if (q) { const s = q.toLowerCase(); r = r.filter(b => b.nombre.toLowerCase().includes(s) || b.email.toLowerCase().includes(s) || b.tel.includes(s) || b.zd.some(z => z.toLowerCase().includes(s)) || b.req.toLowerCase().includes(s)); }
+    if (fEst !== "todos") r = r.filter(b => b.st === fEst);
+    if (fFin !== "todas") r = r.filter(b => b.finalidad === fFin);
+    if (sort === "presupuesto") r.sort((a, b) => b.ppto - a.ppto);
+    else if (sort === "score") r.sort((a, b) => score(b) - score(a));
+    else if (sort === "nombre") r.sort((a, b) => a.nombre.localeCompare(b.nombre));
+    return r;
+  }, [data, q, fEst, fFin, sort]);
+
+  const avg = Math.round(data.reduce((s, b) => s + b.ppto, 0) / data.length);
+  const withFin = data.filter(b => b.fin === "Sí").length;
+  const bySt = ESTADOS.map(s => ({ ...s, n: data.filter(b => b.st === s.key).length })).filter(s => s.n > 0);
+  const selSt = { padding: "8px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#A09D93", fontSize: 11, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.04em", cursor: "pointer", appearance: "auto" };
+
+  return <div style={{ fontFamily: "'Manrope', sans-serif", background: "#111110", minHeight: "100vh", color: "#F0EDE6", padding: "40px 24px" }}>
+    <div style={{ maxWidth: 920, margin: "0 auto" }}>
+
+      <div style={{ marginBottom: 40, borderBottom: "1px solid #2A2926", paddingBottom: 32 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 16 }}>
+          <div>
+            <div style={{ fontSize: 10, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Mallorca Nativa Properties</div>
+            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 400, margin: 0, lineHeight: 1.1 }}>Base de <em style={{ fontStyle: "italic" }}>Compradores</em></h1>
+            <p style={{ fontSize: 12, color: "#7A7870", margin: "10px 0 0", letterSpacing: "0.04em" }}>Formulario Instagram · Mallorca · {data.length} registros</p>
+          </div>
+          <button onClick={() => setShowNew(true)} style={{ padding: "12px 28px", borderRadius: 3, border: "1px solid #C8A97E", background: "transparent", color: "#C8A97E", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "'Manrope', sans-serif", transition: "all 0.3s" }}
+            onMouseEnter={e => { e.currentTarget.style.background = "#C8A97E"; e.currentTarget.style.color = "#111110"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#C8A97E"; }}
+          >+ Nuevo comprador</button>
+        </div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 16, marginBottom: 36 }}>
+        {[{ n: data.length, l: "Compradores" }, { n: fmt(avg), l: "Presupuesto medio" }, { n: Math.round(withFin / data.length * 100) + "%", l: "Con financiación" }].map((s, i) => <div key={i} style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, padding: "20px 24px", textAlign: "center" }}>
+          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: "#F0EDE6", fontWeight: 400 }}>{s.n}</div>
+          <div style={{ fontSize: 10, color: "#7A7870", marginTop: 6, textTransform: "uppercase", letterSpacing: "0.1em" }}>{s.l}</div>
+        </div>)}
+        <div style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, padding: "14px 18px", display: "flex", flexWrap: "wrap", gap: 5, alignItems: "center", justifyContent: "center" }}>
+          {bySt.map(s => <Badge key={s.key} color={s.accent} hollow>{s.n} {s.label.toLowerCase()}</Badge>)}
+        </div>
+      </div>
+
+      <div style={{ display: "flex", gap: 10, marginBottom: 24, flexWrap: "wrap", alignItems: "center" }}>
+        <input type="text" placeholder="Buscar nombre, zona, teléfono..." value={q} onChange={e => setQ(e.target.value)} style={{ flex: 1, minWidth: 200, padding: "10px 16px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 12, fontFamily: "'Manrope', sans-serif", outline: "none", letterSpacing: "0.02em" }} />
+        <select value={fEst} onChange={e => setFEst(e.target.value)} style={selSt}><option value="todos">Todos los estados</option>{ESTADOS.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}</select>
+        <select value={fFin} onChange={e => setFFin(e.target.value)} style={selSt}><option value="todas">Toda finalidad</option>{FINALIDADES.map(f => <option key={f} value={f}>{f}</option>)}</select>
+        <select value={sort} onChange={e => setSort(e.target.value)} style={selSt}><option value="fecha">Más recientes</option><option value="presupuesto">Mayor presupuesto</option><option value="score">Mayor scoring</option><option value="nombre">Nombre A-Z</option></select>
+      </div>
+
+      <div style={{ fontSize: 11, color: "#7A7870", marginBottom: 12, letterSpacing: "0.06em" }}>{list.length} de {data.length} compradores</div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {list.map(b => <Card key={b.id} b={b} onClick={() => setSel(b)} />)}
+        {list.length === 0 && <div style={{ textAlign: "center", padding: 60, color: "#7A7870", fontSize: 13, fontStyle: "italic" }}>No se encontraron compradores con esos filtros</div>}
+      </div>
+
+      {sel && <Detail b={sel} onClose={() => setSel(null)} onSave={u => { setData(d => d.map(b => b.id === u.id ? u : b)); setSel(null); }} />}
+      {showNew && <NewBuyer onClose={() => setShowNew(false)} onAdd={n => setData(d => [n, ...d])} />}
+    </div>
+  </div>;
+}
