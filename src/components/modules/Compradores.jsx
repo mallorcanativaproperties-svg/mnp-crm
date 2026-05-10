@@ -1,5 +1,18 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
+
+function mapBuyerDb(row) {
+  return {
+    id: row.id, ts: row.created_at ? new Date(row.created_at).toLocaleDateString("es-ES") : "", 
+    email: row.email || "", nombre: row.nombre || "", tel: row.telefono || "",
+    fin: row.financiacion || "", ppto: row.presupuesto || 0, finalidad: row.finalidad || "",
+    hab: row.habitaciones || "", zd: row.zona_deseada || [], ze: row.zona_excluida || [],
+    alt: row.altura_max || "", req: row.requisitos || "", st: row.estado || "nuevo",
+    ag: row.agente_asignado || "", notas: row.notas || "", scoring: row.scoring || 0,
+    origen: row.origen || "",
+  };
+}
 
 const BUYERS = [
   { id: 1, ts: "15/02/2026", email: "riumarraco@gmail.com", nombre: "Andrea Marraco", tel: "686357021", fin: "Sí", ppto: 400000, finalidad: "Cambio de vivienda", hab: "3", zd: ["Rafal","Costa con comunicación"], ze: ["Son Gotleu"], alt: "Bajo", req: "Terraza al sur, vistas despejadas, parking, construcción reciente", st: "nuevo", ag: "" },
@@ -191,7 +204,17 @@ function NewBuyer({ onClose, onAdd }) {
 }
 
 export default function App() {
-  const [data, setData] = useState(BUYERS);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => { loadBuyers(); }, []);
+
+  async function loadBuyers() {
+    setLoading(true);
+    const { data: rows } = await supabase.from("compradores").select("*").order("created_at", { ascending: false });
+    if (rows) setData(rows.map(mapBuyerDb));
+    setLoading(false);
+  }
   const [q, setQ] = useState("");
   const [fEst, setFEst] = useState("todos");
   const [fFin, setFFin] = useState("todas");

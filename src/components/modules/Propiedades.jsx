@@ -1,5 +1,61 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
+
+function mapDbToJs(row) {
+  return {
+    id: row.id, ref: row.ref || "", tipo: row.tipo || "", op: row.op || "Compraventa",
+    titulo: row.titulo || "", dir: row.dir || "", num: row.num || "", cp: row.cp || "",
+    municipio: row.municipio || "", zona: row.zona || "",
+    visDir: row.vis_dir || "Direccion exacta", orient: row.orient || "", distPlaya: row.dist_playa || "",
+    precioVenta: row.precio_venta || 0, precioProp: row.precio_prop || 0, precioAnt: row.precio_ant || 0, precioTraspaso: row.precio_traspaso || 0,
+    honorariosTipo: row.honorarios_tipo || "porcentaje", honorarios: row.honorarios || 0, ivaHon: row.iva_hon || 21,
+    certEnerg: row.cert_energ || "", conserv: row.conserv || "", anoConstruc: row.ano_construc || "",
+    mUtil: row.m_util || 0, mConst: row.m_const || 0, mParcela: row.m_parcela || 0, mTerraza: row.m_terraza || 0, mBalcon: row.m_balcon || 0, mPorche: row.m_porche || 0,
+    habDobles: row.hab_dobles || 0, habSimples: row.hab_simples || 0, banos: row.banos || 0, aseos: row.aseos || 0, planta: row.planta || "",
+    parking: row.parking || "", nPlazas: row.n_plazas || 0,
+    suelos: row.suelos || "", carpExt: row.carp_ext || "", carpInt: row.carp_int || "",
+    persianasTipo: row.persianas_tipo || "", persianasMat: row.persianas_mat || "",
+    clima: row.clima || "", aguaCal: row.agua_cal || "",
+    suministros: row.suministros || [], drenaje: row.drenaje || "",
+    elecReformada: row.elec_reformada || false, fontReformada: row.font_reformada || false,
+    ventaMobiliario: row.venta_mobiliario || false, iee: row.iee || "",
+    calidades: row.calidades || [],
+    ibi: row.ibi || 0, basuras: row.basuras || 0, comunidad: row.comunidad || 0, extraComunidad: row.extra_comunidad || 0, otrosGastos: row.otros_gastos || "",
+    desc: row.desc_texto || "", notasPriv: row.notas_priv || "",
+    propNombre: row.prop_nombre || "", propTel: row.prop_tel || "", propEmail: row.prop_email || "",
+    agente: row.agente || "", estado: row.estado || "captada",
+    destinos: row.destinos || [], fotos: row.fotos || 0, videos: row.videos || 0, tour360: row.tour360 || false, planos: row.planos || 0,
+    fechaCap: row.fecha_cap || "", visitas: row.visitas || 0,
+    cualPos: row.cual_pos || [], cualNeg: row.cual_neg || [], cualMejoras: row.cual_mejoras || [],
+  };
+}
+
+function mapJsToDb(p) {
+  return {
+    ref: p.ref, tipo: p.tipo, op: p.op, titulo: p.titulo, dir: p.dir, num: p.num, cp: p.cp,
+    municipio: p.municipio, zona: p.zona, vis_dir: p.visDir, orient: p.orient, dist_playa: p.distPlaya,
+    precio_venta: p.precioVenta, precio_prop: p.precioProp, precio_ant: p.precioAnt, precio_traspaso: p.precioTraspaso,
+    honorarios_tipo: p.honorariosTipo, honorarios: p.honorarios, iva_hon: p.ivaHon,
+    cert_energ: p.certEnerg, conserv: p.conserv, ano_construc: p.anoConstruc,
+    m_util: p.mUtil, m_const: p.mConst, m_parcela: p.mParcela, m_terraza: p.mTerraza, m_balcon: p.mBalcon, m_porche: p.mPorche,
+    hab_dobles: p.habDobles, hab_simples: p.habSimples, banos: p.banos, aseos: p.aseos, planta: p.planta,
+    parking: p.parking, n_plazas: p.nPlazas,
+    suelos: p.suelos, carp_ext: p.carpExt, carp_int: p.carpInt,
+    persianas_tipo: p.persianasTipo, persianas_mat: p.persianasMat,
+    clima: p.clima, agua_cal: p.aguaCal, suministros: p.suministros, drenaje: p.drenaje,
+    elec_reformada: p.elecReformada, font_reformada: p.fontReformada, venta_mobiliario: p.ventaMobiliario,
+    iee: p.iee, calidades: p.calidades,
+    ibi: p.ibi, basuras: p.basuras, comunidad: p.comunidad, extra_comunidad: p.extraComunidad, otros_gastos: p.otrosGastos,
+    desc_texto: p.desc, notas_priv: p.notasPriv,
+    prop_nombre: p.propNombre, prop_tel: p.propTel, prop_email: p.propEmail,
+    agente: p.agente, estado: p.estado, destinos: p.destinos,
+    fotos: p.fotos, videos: p.videos, tour360: p.tour360, planos: p.planos,
+    fecha_cap: p.fechaCap, visitas: p.visitas,
+    cual_pos: p.cualPos, cual_neg: p.cualNeg, cual_mejoras: p.cualMejoras,
+    updated_at: new Date().toISOString(),
+  };
+}
 
 const TIPO_GROUPS = [
   { label: "Piso", items: ["Apartamento","Atico","Atico Duplex","Duplex","Estudio","Loft","Piso","Planta baja"] },
@@ -746,12 +802,37 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
 }
 
 export default function CRMPropiedades() {
-  const [data, setData] = useState(SAMPLE);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [fEst, setFEst] = useState("todos");
   const [fTipo, setFTipo] = useState("todos");
   const [sort, setSort] = useState("fecha");
   const [sel, setSel] = useState(null);
+
+  useEffect(() => {
+    loadProps();
+  }, []);
+
+  async function loadProps() {
+    setLoading(true);
+    const { data: rows, error } = await supabase.from("propiedades").select("*").order("created_at", { ascending: false });
+    if (!error && rows) {
+      setData(rows.map(mapDbToJs));
+    }
+    setLoading(false);
+  }
+
+  async function saveProperty(prop) {
+    const dbData = mapJsToDb(prop);
+    if (prop.id && typeof prop.id === "string" && prop.id.length > 10) {
+      await supabase.from("propiedades").update(dbData).eq("id", prop.id);
+    } else {
+      const { data: inserted } = await supabase.from("propiedades").insert(dbData).select();
+      if (inserted && inserted[0]) prop.id = inserted[0].id;
+    }
+    await loadProps();
+  }
 
   const list = useMemo(() => {
     let r = [...data];
@@ -771,6 +852,16 @@ export default function CRMPropiedades() {
   const pub = data.filter((p) => p.estado === "publicada").length;
   const vis = data.reduce((s, p) => s + p.visitas, 0);
   const ss = { padding: "8px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#A09D93", fontSize: 11, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.04em", cursor: "pointer" };
+
+  if (loading) {
+    return (
+      <div style={{ fontFamily: "'Manrope', sans-serif", background: "#111110", minHeight: "100vh", color: "#F0EDE6", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: 12, color: "#7A7870", letterSpacing: "0.1em", textTransform: "uppercase" }}>Cargando propiedades...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ fontFamily: "'Manrope', sans-serif", background: "#111110", minHeight: "100vh", color: "#F0EDE6", padding: "40px 24px" }}>
@@ -838,7 +929,7 @@ export default function CRMPropiedades() {
           {list.length === 0 && <div style={{ textAlign: "center", padding: 60, color: "#7A7870", fontSize: 13, fontStyle: "italic" }}>Sin resultados</div>}
         </div>
 
-        {sel && <PropDetail p={sel} onClose={() => setSel(null)} onUpdate={(updated) => { setData((d) => d.map((x) => x.id === updated.id ? updated : x)); setSel(updated); }} />}
+        {sel && <PropDetail p={sel} onClose={() => setSel(null)} onUpdate={(updated) => { saveProperty(updated); setSel(updated); }} />}
       </div>
     </div>
   );
