@@ -162,16 +162,26 @@ export default function FirmaElectronica() {
             <p style={{ fontSize: 12, color: "#7A7870", marginBottom: 20 }}>Copia cada enlace y envialo por WhatsApp al firmante correspondiente.</p>
 
             {newLinks.map((link, idx) => (
-              <div key={idx} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, padding: "12px 16px", background: "#111110", borderRadius: 3, border: "1px solid #2A2926" }}>
-                <div style={{ fontSize: 14, color: "#C8A97E", fontWeight: 600, fontFamily: "'Playfair Display', serif", minWidth: 80 }}>
-                  Firmante {link.orden}
+              <div key={idx} style={{ marginBottom: 12, padding: "16px 18px", background: "#111110", borderRadius: 3, border: "1px solid #2A2926" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                  <div style={{ fontSize: 14, color: "#C8A97E", fontWeight: 600, fontFamily: "'Playfair Display', serif" }}>
+                    Firmante {link.orden}
+                  </div>
+                  <div style={{ fontSize: 12, color: "#F0EDE6", background: "#C8A97E22", border: "1px solid #C8A97E44", borderRadius: 3, padding: "4px 14px", fontWeight: 700, letterSpacing: 4 }}>
+                    {link.codigo}
+                  </div>
                 </div>
-                <div style={{ flex: 1, fontSize: 11, color: "#7A7870", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <div style={{ fontSize: 11, color: "#7A7870", marginBottom: 8, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {link.url}
                 </div>
-                <button onClick={() => copyLink(link.url, idx)} style={{ ...btnGold, padding: "6px 16px", fontSize: 10, background: copied === idx ? "#6AAF8D" : "transparent", color: copied === idx ? "#111110" : "#C8A97E", borderColor: copied === idx ? "#6AAF8D" : "#C8A97E" }}>
-                  {copied === idx ? "Copiado!" : "Copiar"}
-                </button>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button onClick={() => copyLink(link.url, `link-${idx}`)} style={{ ...btnGold, padding: "6px 16px", fontSize: 10, flex: 1, background: copied === `link-${idx}` ? "#6AAF8D" : "transparent", color: copied === `link-${idx}` ? "#111110" : "#C8A97E", borderColor: copied === `link-${idx}` ? "#6AAF8D" : "#C8A97E" }}>
+                    {copied === `link-${idx}` ? "Copiado!" : "Copiar enlace"}
+                  </button>
+                  <button onClick={() => copyLink(link.codigo, `code-${idx}`)} style={{ ...btnGold, padding: "6px 16px", fontSize: 10, flex: 1, background: copied === `code-${idx}` ? "#6AAF8D" : "transparent", color: copied === `code-${idx}` ? "#111110" : "#C8A97E", borderColor: copied === `code-${idx}` ? "#6AAF8D" : "#C8A97E" }}>
+                    {copied === `code-${idx}` ? "Copiado!" : "Copiar codigo"}
+                  </button>
+                </div>
               </div>
             ))}
 

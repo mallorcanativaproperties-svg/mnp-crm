@@ -46,13 +46,14 @@ export async function POST(request) {
 
       for (let i = 0; i < num_firmantes; i++) {
         const token = genToken();
+        const codigo = genCode();
         firmantes.push({
           firma_id,
           token,
+          codigo,
           orden: i + 1,
           estado: "pendiente",
           email: null,
-          codigo: null,
           nombre: null,
           apellidos: null,
           dni_nie: null,
@@ -89,6 +90,7 @@ export async function POST(request) {
       const links = firmantes.map((f) => ({
         orden: f.orden,
         token: f.token,
+        codigo: f.codigo,
         url: `${process.env.NEXT_PUBLIC_APP_URL || ""}/firmar?token=${f.token}`,
       }));
 
@@ -119,63 +121,31 @@ export async function POST(request) {
       });
     }
 
-    // ============ SEND VERIFICATION CODE ============
+    // ============ SAVE EMAIL (code already known by firmante via agent) ============
     if (action === "send_code") {
       const { token, email } = body;
       if (!token || !email) {
         return NextResponse.json({ error: "Faltan datos" }, { status: 400 });
       }
 
-      const codigo = genCode();
-
-      const { error } = await getSupabase()
+      // Just save the email, the code was already generated and shared by the agent
+      const { data: firmante } = await getSupabase()
         .from("firmantes")
-        .update({ email, codigo, codigo_verificado: false })
+        .select("codigo")
         .eq("token", token)
-        .eq("estado", "pendiente");
+        .eq("estado", "pendiente")
+        .single();
 
-      if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+      if (!firmante) {
+        return NextResponse.json({ error: "Enlace no valido" }, { status: 404 });
       }
 
-      // Send email with Resend
-      let emailSent = false;
-      try {
-        const resendKey = process.env.RESEND_API_KEY;
-        if (resendKey) {
-          const emailRes = await fetch("https://api.resend.com/emails", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${resendKey}`,
-            },
-            body: JSON.stringify({
-              from: "Mallorca Nativa Properties <onboarding@resend.dev>",
-              to: [email],
-              subject: "Codigo de verificacion - Firma electronica",
-              html: `
-                <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:30px;background:#f9f9f9;border-radius:8px;">
-                  <h2 style="color:#1a1a1a;margin-bottom:10px;">Mallorca Nativa Properties</h2>
-                  <p style="color:#555;">Tu código de verificación para firmar el documento es:</p>
-                  <div style="background:#fff;border:2px solid #C8A97E;border-radius:8px;padding:20px;text-align:center;margin:20px 0;">
-                    <span style="font-size:32px;font-weight:bold;letter-spacing:8px;color:#1a1a1a;">${codigo}</span>
-                  </div>
-                  <p style="color:#999;font-size:12px;">Mallorca Nativa SL · CIF B75396234 · Calle Gremi Sabaters 21, Local A37, Palma de Mallorca</p>
-                  <p style="color:#888;font-size:12px;">Si no has solicitado este código, ignora este mensaje.</p>
-                </div>
-              `,
-            }),
-          });
-          const emailData = await emailRes.json();
-          emailSent = emailRes.ok && emailData.id;
-          if (!emailSent) console.error("Resend error:", emailData);
-        }
-      } catch (emailErr) {
-        console.error("Email error:", emailErr);
-      }
+      await getSupabase()
+        .from("firmantes")
+        .update({ email })
+        .eq("token", token);
 
-      // If email failed, return the code so the agent can share it manually
-      return NextResponse.json({ ok: true, email_sent: emailSent, codigo: emailSent ? undefined : codigo });
+      return NextResponse.json({ ok: true });
     }
 
     // ============ VERIFY CODE ============
