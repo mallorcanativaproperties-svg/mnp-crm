@@ -283,10 +283,10 @@ function MediaSection({ propiedadId, propRef, onCountUpdate }) {
   const [uploadProgress, setUploadProgress] = useState("");
 
   useEffect(() => {
-    if (propiedadId) loadMedia();
+    if (propiedadId) loadMedia(false);
   }, [propiedadId]);
 
-  async function loadMedia() {
+  async function loadMedia(notify = false) {
     setLoading(true);
     const { data: rows, error } = await supabase
       .from("media_propiedades")
@@ -297,7 +297,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate }) {
       .order("created_at");
     if (!error && rows) {
       setMedia(rows);
-      updateCounts(rows);
+      if (notify) updateCounts(rows);
     }
     setLoading(false);
   }
@@ -349,7 +349,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate }) {
 
     setUploadProgress("");
     setUploading(false);
-    await loadMedia();
+    await loadMedia(true);
   }
 
   async function handleDelete(item) {
@@ -358,13 +358,13 @@ function MediaSection({ propiedadId, propRef, onCountUpdate }) {
       await supabase.storage.from("propiedades-media").remove([decodeURIComponent(pathMatch)]);
     }
     await supabase.from("media_propiedades").delete().eq("id", item.id);
-    await loadMedia();
+    await loadMedia(true);
   }
 
   async function handleSetPortada(item) {
     await supabase.from("media_propiedades").update({ es_portada: false }).eq("propiedad_id", propiedadId).eq("tipo", "foto");
     await supabase.from("media_propiedades").update({ es_portada: true }).eq("id", item.id);
-    await loadMedia();
+    await loadMedia(true);
   }
 
   async function handleReorder(itemId, direction) {
@@ -377,7 +377,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate }) {
     const b = filtered[swapIdx];
     await supabase.from("media_propiedades").update({ orden: b.orden }).eq("id", a.id);
     await supabase.from("media_propiedades").update({ orden: a.orden }).eq("id", b.id);
-    await loadMedia();
+    await loadMedia(true);
   }
 
   function onDrop(e) {
