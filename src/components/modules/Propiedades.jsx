@@ -266,6 +266,315 @@ function Fl({ label, value, pub, gold }) {
   );
 }
 
+const MEDIA_TIPOS = [
+  { key: "foto", label: "Fotos", icon: "📷", accept: "image/*", color: "#C8A97E" },
+  { key: "video", label: "Videos", icon: "🎬", accept: "video/*", color: "#A89BC4" },
+  { key: "plano", label: "Planos", icon: "📐", accept: "image/*,.pdf", color: "#6AAF8D" },
+  { key: "tour360", label: "Tour 360", icon: "🌐", accept: "image/*", color: "#D4956A" },
+];
+
+function MediaSection({ propiedadId, propRef, onCountUpdate }) {
+  const [media, setMedia] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [activeTab, setActiveTab] = useState("foto");
+  const [dragOver, setDragOver] = useState(false);
+  const [lightbox, setLightbox] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState("");
+
+  useEffect(() => {
+    if (propiedadId) loadMedia();
+  }, [propiedadId]);
+
+  async function loadMedia() {
+    setLoading(true);
+    const { data: rows, error } = await supabase
+      .from("media_propiedades")
+      .select("*")
+      .eq("propiedad_id", propiedadId)
+      .order("tipo")
+      .order("orden")
+      .order("created_at");
+    if (!error && rows) {
+      setMedia(rows);
+      updateCounts(rows);
+    }
+    setLoading(false);
+  }
+
+  function updateCounts(items) {
+    const counts = { foto: 0, video: 0, plano: 0, tour360: 0 };
+    items.forEach((m) => { counts[m.tipo] = (counts[m.tipo] || 0) + 1; });
+    if (onCountUpdate) onCountUpdate(counts);
+  }
+
+  async function handleUpload(files, tipo) {
+    if (!files || files.length === 0) return;
+    setUploading(true);
+    const total = files.length;
+    let uploaded = 0;
+
+    for (const file of files) {
+      setUploadProgress(`Subiendo ${uploaded + 1} de ${total}...`);
+      const ext = file.name.split(".").pop();
+      const path = `${propRef || propiedadId}/${tipo}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("propiedades-media")
+        .upload(path, file, { cacheControl: "3600", upsert: false });
+
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        continue;
+      }
+
+      const { data: urlData } = supabase.storage.from("propiedades-media").getPublicUrl(path);
+      const url = urlData?.publicUrl;
+
+      if (url) {
+        const currentMax = media.filter((m) => m.tipo === tipo).length;
+        await supabase.from("media_propiedades").insert({
+          propiedad_id: propiedadId,
+          tipo,
+          url,
+          nombre: file.name,
+          orden: currentMax + uploaded,
+          es_portada: tipo === "foto" && currentMax === 0 && uploaded === 0,
+          tamano: file.size,
+          mime_type: file.type,
+        });
+      }
+      uploaded++;
+    }
+
+    setUploadProgress("");
+    setUploading(false);
+    await loadMedia();
+  }
+
+  async function handleDelete(item) {
+    const pathMatch = item.url.split("/propiedades-media/")[1];
+    if (pathMatch) {
+      await supabase.storage.from("propiedades-media").remove([decodeURIComponent(pathMatch)]);
+    }
+    await supabase.from("media_propiedades").delete().eq("id", item.id);
+    await loadMedia();
+  }
+
+  async function handleSetPortada(item) {
+    await supabase.from("media_propiedades").update({ es_portada: false }).eq("propiedad_id", propiedadId).eq("tipo", "foto");
+    await supabase.from("media_propiedades").update({ es_portada: true }).eq("id", item.id);
+    await loadMedia();
+  }
+
+  async function handleReorder(itemId, direction) {
+    const filtered = media.filter((m) => m.tipo === activeTab);
+    const idx = filtered.findIndex((m) => m.id === itemId);
+    if (idx < 0) return;
+    const swapIdx = idx + direction;
+    if (swapIdx < 0 || swapIdx >= filtered.length) return;
+    const a = filtered[idx];
+    const b = filtered[swapIdx];
+    await supabase.from("media_propiedades").update({ orden: b.orden }).eq("id", a.id);
+    await supabase.from("media_propiedades").update({ orden: a.orden }).eq("id", b.id);
+    await loadMedia();
+  }
+
+  function onDrop(e) {
+    e.preventDefault();
+    setDragOver(false);
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) handleUpload(files, activeTab);
+  }
+
+  function onDragOver(e) {
+    e.preventDefault();
+    setDragOver(true);
+  }
+
+  const filteredMedia = media.filter((m) => m.tipo === activeTab);
+  const counts = {};
+  MEDIA_TIPOS.forEach((t) => { counts[t.key] = media.filter((m) => m.tipo === t.key).length; });
+  const currentTipo = MEDIA_TIPOS.find((t) => t.key === activeTab);
+
+  const btnBase = { padding: "6px 14px", borderRadius: 3, border: "1px solid #2A2926", background: "transparent", color: "#7A7870", cursor: "pointer", fontSize: 11, fontWeight: 500, letterSpacing: "0.04em", fontFamily: "'Manrope', sans-serif", transition: "all 0.2s", display: "flex", alignItems: "center", gap: 6 };
+
+  return (
+    <div>
+      {/* Contadores resumen */}
+      <div style={{ display: "flex", gap: 16, marginBottom: 18, flexWrap: "wrap" }}>
+        {MEDIA_TIPOS.map((t) => (
+          <div key={t.key} style={{ textAlign: "center", minWidth: 60 }}>
+            <div style={{ fontSize: 24, color: t.color, fontFamily: "'Playfair Display', serif" }}>{counts[t.key]}</div>
+            <div style={{ fontSize: 10, color: "#7A7870", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.08em" }}>{t.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Tabs */}
+      <div style={{ display: "flex", gap: 4, marginBottom: 16, borderBottom: "1px solid #2A2926", paddingBottom: 0 }}>
+        {MEDIA_TIPOS.map((t) => {
+          const active = activeTab === t.key;
+          return (
+            <button key={t.key} onClick={() => setActiveTab(t.key)} style={{
+              padding: "10px 18px", border: "none", borderBottom: active ? `2px solid ${t.color}` : "2px solid transparent",
+              background: "transparent", color: active ? t.color : "#7A7870", cursor: "pointer",
+              fontSize: 11, fontWeight: active ? 600 : 400, letterSpacing: "0.06em", textTransform: "uppercase",
+              fontFamily: "'Manrope', sans-serif", transition: "all 0.2s",
+            }}>
+              {t.icon} {t.label} ({counts[t.key]})
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Drop zone + Upload */}
+      <div
+        onDrop={onDrop}
+        onDragOver={onDragOver}
+        onDragLeave={() => setDragOver(false)}
+        style={{
+          border: `2px dashed ${dragOver ? currentTipo.color : "#2A2926"}`,
+          borderRadius: 4, padding: "24px 20px", textAlign: "center",
+          background: dragOver ? currentTipo.color + "0A" : "#1C1B1800",
+          transition: "all 0.2s", marginBottom: 16, cursor: "pointer", position: "relative",
+        }}
+        onClick={() => document.getElementById("media-upload-" + activeTab)?.click()}
+      >
+        <input
+          id={"media-upload-" + activeTab}
+          type="file"
+          multiple
+          accept={currentTipo.accept}
+          style={{ display: "none" }}
+          onChange={(e) => handleUpload(Array.from(e.target.files), activeTab)}
+        />
+        <div style={{ fontSize: 28, marginBottom: 8, opacity: 0.5 }}>{currentTipo.icon}</div>
+        <div style={{ fontSize: 12, color: dragOver ? currentTipo.color : "#7A7870", fontWeight: 500 }}>
+          {uploading ? uploadProgress : `Arrastra ${currentTipo.label.toLowerCase()} aqui o haz clic para subir`}
+        </div>
+        <div style={{ fontSize: 10, color: "#5A584F", marginTop: 6 }}>
+          {activeTab === "foto" && "JPG, PNG, WebP — max 10MB por archivo"}
+          {activeTab === "video" && "MP4, MOV — max 100MB por archivo"}
+          {activeTab === "plano" && "JPG, PNG, PDF — max 10MB por archivo"}
+          {activeTab === "tour360" && "JPG, PNG (equirectangular) — max 20MB"}
+        </div>
+        {uploading && (
+          <div style={{ marginTop: 12, height: 3, background: "#2A2926", borderRadius: 2, overflow: "hidden" }}>
+            <div style={{ height: "100%", background: currentTipo.color, borderRadius: 2, animation: "pulse 1.5s infinite", width: "60%" }} />
+          </div>
+        )}
+      </div>
+
+      {/* Gallery grid */}
+      {loading ? (
+        <div style={{ textAlign: "center", padding: 30, color: "#7A7870", fontSize: 12 }}>Cargando archivos...</div>
+      ) : filteredMedia.length === 0 ? (
+        <div style={{ textAlign: "center", padding: 30, color: "#5A584F", fontSize: 12, fontStyle: "italic" }}>
+          No hay {currentTipo.label.toLowerCase()} subidos
+        </div>
+      ) : (
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: activeTab === "video" ? "repeat(auto-fill, minmax(240px, 1fr))" : "repeat(auto-fill, minmax(140px, 1fr))",
+          gap: 10,
+        }}>
+          {filteredMedia.map((item, idx) => (
+            <div
+              key={item.id}
+              style={{
+                position: "relative", borderRadius: 3, overflow: "hidden",
+                border: item.es_portada ? "2px solid #C8A97E" : "1px solid #2A2926",
+                background: "#1C1B18", transition: "all 0.2s",
+              }}
+            >
+              {/* Portada badge */}
+              {item.es_portada && (
+                <div style={{
+                  position: "absolute", top: 6, left: 6, zIndex: 2,
+                  background: "#C8A97E", color: "#111110", fontSize: 9, fontWeight: 700,
+                  padding: "2px 8px", borderRadius: 2, letterSpacing: "0.08em", textTransform: "uppercase",
+                }}>
+                  Portada
+                </div>
+              )}
+
+              {/* Thumbnail */}
+              {activeTab === "video" ? (
+                <video
+                  src={item.url}
+                  style={{ width: "100%", height: 140, objectFit: "cover", display: "block", cursor: "pointer" }}
+                  onClick={() => setLightbox(item)}
+                  muted
+                />
+              ) : item.mime_type === "application/pdf" ? (
+                <div
+                  onClick={() => window.open(item.url, "_blank")}
+                  style={{ width: "100%", height: 140, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", background: "#1A1917" }}
+                >
+                  <span style={{ fontSize: 32, marginBottom: 4 }}>📄</span>
+                  <span style={{ fontSize: 10, color: "#7A7870" }}>PDF</span>
+                </div>
+              ) : (
+                <img
+                  src={item.url}
+                  alt={item.nombre}
+                  style={{ width: "100%", height: 140, objectFit: "cover", display: "block", cursor: "pointer" }}
+                  onClick={() => setLightbox(item)}
+                  loading="lazy"
+                />
+              )}
+
+              {/* Info + actions bar */}
+              <div style={{ padding: "6px 8px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: 10, color: "#7A7870", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "60%" }}>
+                  {item.nombre || `${activeTab}-${idx + 1}`}
+                </span>
+                <div style={{ display: "flex", gap: 4 }}>
+                  {/* Reorder */}
+                  {idx > 0 && (
+                    <button onClick={() => handleReorder(item.id, -1)} style={{ ...btnBase, padding: "2px 5px", fontSize: 10 }} title="Mover antes">◀</button>
+                  )}
+                  {idx < filteredMedia.length - 1 && (
+                    <button onClick={() => handleReorder(item.id, 1)} style={{ ...btnBase, padding: "2px 5px", fontSize: 10 }} title="Mover despues">▶</button>
+                  )}
+                  {/* Set as portada (only photos) */}
+                  {activeTab === "foto" && !item.es_portada && (
+                    <button onClick={() => handleSetPortada(item)} style={{ ...btnBase, padding: "2px 5px", fontSize: 10, color: "#C8A97E", borderColor: "#C8A97E33" }} title="Hacer portada">★</button>
+                  )}
+                  {/* Delete */}
+                  <button onClick={() => { if (confirm("Eliminar este archivo?")) handleDelete(item); }} style={{ ...btnBase, padding: "2px 5px", fontSize: 10, color: "#D45454", borderColor: "#D4545433" }} title="Eliminar">✕</button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Lightbox */}
+      {lightbox && (
+        <div
+          onClick={() => setLightbox(null)}
+          style={{
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", backdropFilter: "blur(12px)",
+            display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000, cursor: "pointer",
+          }}
+        >
+          <div onClick={(e) => e.stopPropagation()} style={{ position: "relative", maxWidth: "90vw", maxHeight: "90vh" }}>
+            <button onClick={() => setLightbox(null)} style={{ position: "absolute", top: -30, right: 0, background: "none", border: "none", color: "#F0EDE6", fontSize: 18, cursor: "pointer" }}>✕</button>
+            {lightbox.tipo === "video" ? (
+              <video src={lightbox.url} controls autoPlay style={{ maxWidth: "90vw", maxHeight: "85vh", borderRadius: 4 }} />
+            ) : (
+              <img src={lightbox.url} alt={lightbox.nombre} style={{ maxWidth: "90vw", maxHeight: "85vh", borderRadius: 4, objectFit: "contain" }} />
+            )}
+            <div style={{ textAlign: "center", marginTop: 8, fontSize: 11, color: "#7A7870" }}>{lightbox.nombre}</div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function PropCard({ p, onClick }) {
   const est = ESTADOS.find((e) => e.key === p.estado) || ESTADOS[0];
   return (
@@ -710,18 +1019,7 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
 
         {/* Multimedia */}
         <Sec title="Multimedia">
-          <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
-            {[["Fotos", p.fotos], ["Planos", p.planos], ["Videos", p.videos]].map(([l, n]) => (
-              <div key={String(l)} style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 28, color: "#C8A97E", fontFamily: "'Playfair Display', serif" }}>{n}</div>
-                <div style={{ fontSize: 10, color: "#7A7870", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.08em" }}>{l}</div>
-              </div>
-            ))}
-            <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 28, color: p.tour360 ? "#6AAF8D" : "#7A7870", fontFamily: "'Playfair Display', serif" }}>{p.tour360 ? "Si" : "-"}</div>
-              <div style={{ fontSize: 10, color: "#7A7870", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.08em" }}>Tour 360</div>
-            </div>
-          </div>
+          <MediaSection propiedadId={p.id} propRef={p.ref} onCountUpdate={(counts) => { if (onUpdate) onUpdate({ ...p, fotos: counts.foto, videos: counts.video, planos: counts.plano, tour360: counts.tour360 > 0 }); }} />
         </Sec>
         <div style={sep} />
 
