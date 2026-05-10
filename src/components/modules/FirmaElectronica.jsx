@@ -16,6 +16,7 @@ export default function FirmaElectronica() {
   const [uploading, setUploading] = useState(false);
   const [numFirmantes, setNumFirmantes] = useState(2);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const [newLinks, setNewLinks] = useState(null);
   const [detail, setDetail] = useState(null);
   const [detailData, setDetailData] = useState(null);
@@ -330,7 +331,7 @@ export default function FirmaElectronica() {
               </h1>
               <p style={{ fontSize: 12, color: "#7A7870", margin: "10px 0 0", letterSpacing: "0.04em" }}>Envia documentos para firmar con validez legal</p>
             </div>
-            <button onClick={() => { setCreating(true); setNewLinks(null); setSelectedFile(null); }} style={btnGold}>
+            <button onClick={() => { setCreating(true); setNewLinks(null); setSelectedFile(null); setPreviewUrl(null); }} style={btnGold}>
               + Nuevo documento
             </button>
           </div>
@@ -344,10 +345,25 @@ export default function FirmaElectronica() {
             <div style={{ marginBottom: 16 }}>
               <label style={{ fontSize: 10, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 6 }}>Documento PDF</label>
               <label style={{ ...btnGold, display: "inline-flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-                {selectedFile ? selectedFile.name : "Seleccionar PDF"}
-                <input type="file" accept=".pdf" style={{ display: "none" }} onChange={(e) => setSelectedFile(e.target.files[0])} />
+                {selectedFile ? "Cambiar PDF" : "Seleccionar PDF"}
+                <input type="file" accept=".pdf" style={{ display: "none" }} onChange={(e) => {
+                  const file = e.target.files[0];
+                  setSelectedFile(file);
+                  if (file) setPreviewUrl(URL.createObjectURL(file));
+                  else setPreviewUrl(null);
+                }} />
               </label>
+              {selectedFile && <span style={{ marginLeft: 12, fontSize: 12, color: "#D0CDC4" }}>{selectedFile.name}</span>}
             </div>
+
+            {previewUrl && (
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontSize: 10, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>Vista previa del documento</div>
+                <div style={{ border: "1px solid #2A2926", borderRadius: 3, overflow: "hidden", background: "#111110" }}>
+                  <iframe src={previewUrl} style={{ width: "100%", height: 400, border: "none" }} />
+                </div>
+              </div>
+            )}
 
             <div style={{ marginBottom: 20 }}>
               <label style={{ fontSize: 10, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 6 }}>Numero de firmantes</label>
@@ -359,7 +375,7 @@ export default function FirmaElectronica() {
               <button onClick={handleCreate} disabled={!selectedFile || uploading} style={{ ...btnGold, background: selectedFile ? "#C8A97E" : "transparent", color: selectedFile ? "#111110" : "#7A7870", opacity: selectedFile ? 1 : 0.5 }}>
                 {uploading ? "Subiendo..." : "Crear enlaces de firma"}
               </button>
-              <button onClick={() => setCreating(false)} style={{ ...btnGold, borderColor: "#7A7870", color: "#7A7870" }}>Cancelar</button>
+              <button onClick={() => { setCreating(false); setPreviewUrl(null); }} style={{ ...btnGold, borderColor: "#7A7870", color: "#7A7870" }}>Cancelar</button>
             </div>
           </div>
         )}
