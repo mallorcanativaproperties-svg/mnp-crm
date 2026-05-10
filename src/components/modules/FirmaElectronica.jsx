@@ -142,18 +142,8 @@ export default function FirmaElectronica() {
 
             <div style={{ marginBottom: 20 }}>
               <label style={{ fontSize: 10, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 6 }}>Numero de firmantes</label>
-              <div style={{ display: "flex", gap: 8 }}>
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <button key={n} onClick={() => setNumFirmantes(n)} style={{
-                    width: 44, height: 44, borderRadius: 3, border: "1px solid " + (numFirmantes === n ? "#C8A97E" : "#2A2926"),
-                    background: numFirmantes === n ? "#C8A97E22" : "transparent",
-                    color: numFirmantes === n ? "#C8A97E" : "#7A7870",
-                    cursor: "pointer", fontSize: 16, fontWeight: 600, fontFamily: "'Playfair Display', serif",
-                  }}>
-                    {n}
-                  </button>
-                ))}
-              </div>
+              <input type="number" min="1" max="20" value={numFirmantes} onChange={(e) => setNumFirmantes(Math.max(1, parseInt(e.target.value) || 1))}
+                style={{ width: 80, padding: "10px 14px", background: "#111110", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 18, fontWeight: 600, fontFamily: "'Playfair Display', serif", textAlign: "center", outline: "none" }} />
             </div>
 
             <div style={{ display: "flex", gap: 10 }}>

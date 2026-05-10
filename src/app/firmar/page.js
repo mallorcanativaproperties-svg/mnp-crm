@@ -100,16 +100,25 @@ export default function FirmarPage() {
     setLoading(false);
   }
 
+  const [fallbackCode, setFallbackCode] = useState(null);
+
   async function sendCode() {
     if (!email || !email.includes("@")) { setError("Introduce un email válido"); return; }
-    setSending(true); setError("");
+    setSending(true); setError(""); setFallbackCode(null);
     const res = await fetch("/api/firma", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "send_code", token, email }),
     });
     const data = await res.json();
     setSending(false);
-    if (data.ok) { setCodeSent(true); setStep("codigo"); }
+    if (data.ok) {
+      setCodeSent(true);
+      if (data.codigo && !data.email_sent) {
+        // Email failed - show code directly
+        setFallbackCode(data.codigo);
+      }
+      setStep("codigo");
+    }
     else setError(data.error || "Error al enviar código");
   }
 
@@ -285,11 +294,20 @@ export default function FirmarPage() {
       {step === "codigo" && (
         <div style={card}>
           <h2 style={h2s}>Introduce el código</h2>
-          <p style={ps}>Código enviado correctamente al email indicado. Ten en cuenta que puede tardar unos minutos en llegar.</p>
+          {fallbackCode ? (
+            <div>
+              <p style={ps}>No se ha podido enviar el email. Tu código de acceso es:</p>
+              <div style={{ background: "#f9f8f5", border: "2px solid #C8A97E", borderRadius: 10, padding: 20, textAlign: "center", marginBottom: 16 }}>
+                <span style={{ fontSize: 32, fontWeight: 700, letterSpacing: 10, color: "#1a1a1a" }}>{fallbackCode}</span>
+              </div>
+            </div>
+          ) : (
+            <p style={ps}>Código enviado correctamente al email indicado. Ten en cuenta que puede tardar unos minutos en llegar.</p>
+          )}
           <input type="text" placeholder="Código" value={codigo} onChange={(e) => { setCodigo(e.target.value.toUpperCase()); setError(""); }} style={{ ...inputS, textAlign: "center", fontSize: 24, letterSpacing: 10, fontWeight: 700 }} maxLength={5} />
           {error && <div style={{ color: "#c44", fontSize: 12, marginBottom: 10 }}>{error}</div>}
           <button onClick={verifyCode} disabled={sending} style={sending ? btnDisabled : btnS}>{sending ? "Verificando..." : "Acceder"}</button>
-          <p style={{ textAlign: "center", fontSize: 12, color: "#888", marginTop: 14, cursor: "pointer" }} onClick={() => { setStep("inicio"); setCodigo(""); setError(""); }}>Reenviar código</p>
+          <p style={{ textAlign: "center", fontSize: 12, color: "#888", marginTop: 14, cursor: "pointer" }} onClick={() => { setStep("inicio"); setCodigo(""); setError(""); setFallbackCode(null); }}>Reenviar código</p>
         </div>
       )}
 

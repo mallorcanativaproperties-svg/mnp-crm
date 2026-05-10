@@ -139,10 +139,11 @@ export async function POST(request) {
       }
 
       // Send email with Resend
+      let emailSent = false;
       try {
         const resendKey = process.env.RESEND_API_KEY;
         if (resendKey) {
-          await fetch("https://api.resend.com/emails", {
+          const emailRes = await fetch("https://api.resend.com/emails", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -155,21 +156,26 @@ export async function POST(request) {
               html: `
                 <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:30px;background:#f9f9f9;border-radius:8px;">
                   <h2 style="color:#1a1a1a;margin-bottom:10px;">Mallorca Nativa Properties</h2>
-                  <p style="color:#555;">Tu codigo de verificacion para firmar el documento es:</p>
+                  <p style="color:#555;">Tu código de verificación para firmar el documento es:</p>
                   <div style="background:#fff;border:2px solid #C8A97E;border-radius:8px;padding:20px;text-align:center;margin:20px 0;">
                     <span style="font-size:32px;font-weight:bold;letter-spacing:8px;color:#1a1a1a;">${codigo}</span>
                   </div>
-                  <p style="color:#888;font-size:12px;">Si no has solicitado este codigo, ignora este mensaje.</p>
+                  <p style="color:#999;font-size:12px;">Mallorca Nativa SL · CIF B75396234 · Calle Gremi Sabaters 21, Local A37, Palma de Mallorca</p>
+                  <p style="color:#888;font-size:12px;">Si no has solicitado este código, ignora este mensaje.</p>
                 </div>
               `,
             }),
           });
+          const emailData = await emailRes.json();
+          emailSent = emailRes.ok && emailData.id;
+          if (!emailSent) console.error("Resend error:", emailData);
         }
       } catch (emailErr) {
         console.error("Email error:", emailErr);
       }
 
-      return NextResponse.json({ ok: true, codigo_debug: process.env.NODE_ENV === "development" ? codigo : undefined });
+      // If email failed, return the code so the agent can share it manually
+      return NextResponse.json({ ok: true, email_sent: emailSent, codigo: emailSent ? undefined : codigo });
     }
 
     // ============ VERIFY CODE ============
