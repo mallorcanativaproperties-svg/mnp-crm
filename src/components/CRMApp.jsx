@@ -21,13 +21,13 @@ const USERS = [
 ];
 
 const MODULES = [
-  { key: "dashboard", label: "Dashboard", icon: "◆", color: "#C8A97E", roles: ["director", "agente"] },
   { key: "propiedades", label: "Propiedades", icon: "⌂", color: "#8FA88A", roles: ["director", "agente"] },
   { key: "captacion", label: "Captacion", icon: "✎", color: "#D4956A", roles: ["director", "agente"] },
   { key: "compradores", label: "Compradores", icon: "◎", color: "#A89BC4", roles: ["director", "agente"] },
   { key: "cruce", label: "Motor Cruce", icon: "⇌", color: "#6AAF8D", roles: ["director", "agente"] },
   { key: "redes", label: "Redes Sociales", icon: "◉", color: "#E1306C", roles: ["director", "agente"] },
   { key: "agentes", label: "Agentes IA", icon: "◈", color: "#D4956A", roles: ["director"] },
+  { key: "dashboard", label: "Dashboard", icon: "◆", color: "#C8A97E", roles: ["director", "agente"] },
 ];
 
 function LoginScreen({ onLogin }) {
@@ -81,7 +81,7 @@ function LoadingModule() {
 
 export default function CRMApp() {
   const [currentUser, setCurrentUser] = useState(null);
-  const [activeModule, setActiveModule] = useState("dashboard");
+  const [activeModule, setActiveModule] = useState("propiedades");
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   if (!currentUser) {
