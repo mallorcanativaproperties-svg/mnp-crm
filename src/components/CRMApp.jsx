@@ -9,6 +9,7 @@ const Compradores = dynamic(() => import("./modules/Compradores"), { ssr: false 
 const MotorCruce = dynamic(() => import("./modules/MotorCruce"), { ssr: false });
 const RedesSociales = dynamic(() => import("./modules/RedesSociales"), { ssr: false });
 const AgentesIA = dynamic(() => import("./modules/AgentesIA"), { ssr: false });
+const FirmaElectronica = dynamic(() => import("./modules/FirmaElectronica"), { ssr: false });
 
 const USERS = [
   { user: "director", pass: "mnp2026", nombre: "Silvia Lopez", role: "director" },
@@ -27,6 +28,7 @@ const MODULES = [
   { key: "cruce", label: "Motor Cruce", icon: "⇌", color: "#6AAF8D", roles: ["director", "agente"] },
   { key: "redes", label: "Redes Sociales", icon: "◉", color: "#E1306C", roles: ["director", "agente"] },
   { key: "agentes", label: "Agentes IA", icon: "◈", color: "#D4956A", roles: ["director"] },
+  { key: "firma", label: "Firma Electronica", icon: "✍", color: "#6AAF8D", roles: ["director", "agente"] },
   { key: "dashboard", label: "Dashboard", icon: "◆", color: "#C8A97E", roles: ["director", "agente"] },
 ];
 
@@ -100,6 +102,7 @@ export default function CRMApp() {
       case "cruce": return <MotorCruce />;
       case "redes": return <RedesSociales />;
       case "agentes": return <AgentesIA />;
+      case "firma": return <FirmaElectronica />;
       default: return <Dashboard />;
     }
   };
