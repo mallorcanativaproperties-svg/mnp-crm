@@ -278,9 +278,11 @@ function MediaSection({ propiedadId, propRef, onCountUpdate }) {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [activeTab, setActiveTab] = useState("foto");
-  const [dragOver, setDragOver] = useState(false);
+  const [dropZoneOver, setDropZoneOver] = useState(false);
   const [lightbox, setLightbox] = useState(null);
   const [uploadProgress, setUploadProgress] = useState("");
+  const [dragItem, setDragItem] = useState(null);
+  const [dragOverItem, setDragOverItem] = useState(null);
 
   useEffect(() => {
     if (propiedadId) loadMedia(false);
@@ -367,32 +369,73 @@ function MediaSection({ propiedadId, propRef, onCountUpdate }) {
     await loadMedia(true);
   }
 
-  async function handleReorder(itemId, direction) {
+  // Drag & drop reorder
+  function onItemDragStart(e, item) {
+    setDragItem(item);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", item.id);
+  }
+
+  function onItemDragOver(e, item) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    if (dragOverItem !== item.id) setDragOverItem(item.id);
+  }
+
+  function onItemDragLeave() {
+    setDragOverItem(null);
+  }
+
+  async function onItemDrop(e, targetItem) {
+    e.preventDefault();
+    setDragOverItem(null);
+    if (!dragItem || dragItem.id === targetItem.id) { setDragItem(null); return; }
+
     const filtered = media.filter((m) => m.tipo === activeTab);
-    const idx = filtered.findIndex((m) => m.id === itemId);
-    if (idx < 0) return;
-    const swapIdx = idx + direction;
-    if (swapIdx < 0 || swapIdx >= filtered.length) return;
-    const a = filtered[idx];
-    const b = filtered[swapIdx];
-    await supabase.from("media_propiedades").update({ orden: b.orden }).eq("id", a.id);
-    await supabase.from("media_propiedades").update({ orden: a.orden }).eq("id", b.id);
-    await loadMedia(true);
+    const fromIdx = filtered.findIndex((m) => m.id === dragItem.id);
+    const toIdx = filtered.findIndex((m) => m.id === targetItem.id);
+    if (fromIdx < 0 || toIdx < 0) { setDragItem(null); return; }
+
+    // Reorder locally first for instant feedback
+    const reordered = [...filtered];
+    const [moved] = reordered.splice(fromIdx, 1);
+    reordered.splice(toIdx, 0, moved);
+
+    // Update local state immediately
+    const newMedia = media.filter((m) => m.tipo !== activeTab);
+    reordered.forEach((item, i) => { newMedia.push({ ...item, orden: i }); });
+    setMedia(newMedia);
+    setDragItem(null);
+
+    // Persist all new orders to DB
+    const updates = reordered.map((item, i) =>
+      supabase.from("media_propiedades").update({ orden: i }).eq("id", item.id)
+    );
+    await Promise.all(updates);
   }
 
-  function onDrop(e) {
+  function onItemDragEnd() {
+    setDragItem(null);
+    setDragOverItem(null);
+  }
+
+  // File drop zone (for uploading new files)
+  function onFileDrop(e) {
     e.preventDefault();
-    setDragOver(false);
-    const files = Array.from(e.dataTransfer.files);
-    if (files.length > 0) handleUpload(files, activeTab);
+    setDropZoneOver(false);
+    // Only handle file drops, not internal reorder drops
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const files = Array.from(e.dataTransfer.files);
+      handleUpload(files, activeTab);
+    }
   }
 
-  function onDragOver(e) {
+  function onFileDragOver(e) {
     e.preventDefault();
-    setDragOver(true);
+    if (e.dataTransfer.types.includes("Files")) setDropZoneOver(true);
   }
 
-  const filteredMedia = media.filter((m) => m.tipo === activeTab);
+  const filteredMedia = media.filter((m) => m.tipo === activeTab).sort((a, b) => a.orden - b.orden);
   const counts = {};
   MEDIA_TIPOS.forEach((t) => { counts[t.key] = media.filter((m) => m.tipo === t.key).length; });
   const currentTipo = MEDIA_TIPOS.find((t) => t.key === activeTab);
@@ -428,15 +471,22 @@ function MediaSection({ propiedadId, propRef, onCountUpdate }) {
         })}
       </div>
 
+      {/* Drag hint */}
+      {filteredMedia.length > 1 && (
+        <div style={{ fontSize: 10, color: "#5A584F", marginBottom: 10, fontStyle: "italic" }}>
+          Arrastra las imagenes para reordenar. La primera sera la principal en portales.
+        </div>
+      )}
+
       {/* Drop zone + Upload */}
       <div
-        onDrop={onDrop}
-        onDragOver={onDragOver}
-        onDragLeave={() => setDragOver(false)}
+        onDrop={onFileDrop}
+        onDragOver={onFileDragOver}
+        onDragLeave={() => setDropZoneOver(false)}
         style={{
-          border: `2px dashed ${dragOver ? currentTipo.color : "#2A2926"}`,
+          border: `2px dashed ${dropZoneOver ? currentTipo.color : "#2A2926"}`,
           borderRadius: 4, padding: "24px 20px", textAlign: "center",
-          background: dragOver ? currentTipo.color + "0A" : "#1C1B1800",
+          background: dropZoneOver ? currentTipo.color + "0A" : "#1C1B1800",
           transition: "all 0.2s", marginBottom: 16, cursor: "pointer", position: "relative",
         }}
         onClick={() => document.getElementById("media-upload-" + activeTab)?.click()}
@@ -450,7 +500,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate }) {
           onChange={(e) => handleUpload(Array.from(e.target.files), activeTab)}
         />
         <div style={{ fontSize: 28, marginBottom: 8, opacity: 0.5 }}>{currentTipo.icon}</div>
-        <div style={{ fontSize: 12, color: dragOver ? currentTipo.color : "#7A7870", fontWeight: 500 }}>
+        <div style={{ fontSize: 12, color: dropZoneOver ? currentTipo.color : "#7A7870", fontWeight: 500 }}>
           {uploading ? uploadProgress : `Arrastra ${currentTipo.label.toLowerCase()} aqui o haz clic para subir`}
         </div>
         <div style={{ fontSize: 10, color: "#5A584F", marginTop: 6 }}>
@@ -482,12 +532,31 @@ function MediaSection({ propiedadId, propRef, onCountUpdate }) {
           {filteredMedia.map((item, idx) => (
             <div
               key={item.id}
+              draggable
+              onDragStart={(e) => onItemDragStart(e, item)}
+              onDragOver={(e) => onItemDragOver(e, item)}
+              onDragLeave={onItemDragLeave}
+              onDrop={(e) => onItemDrop(e, item)}
+              onDragEnd={onItemDragEnd}
               style={{
                 position: "relative", borderRadius: 3, overflow: "hidden",
-                border: item.es_portada ? "2px solid #C8A97E" : "1px solid #2A2926",
-                background: "#1C1B18", transition: "all 0.2s",
+                border: dragOverItem === item.id ? "2px solid " + currentTipo.color :
+                        item.es_portada ? "2px solid #C8A97E" : "1px solid #2A2926",
+                background: dragOverItem === item.id ? currentTipo.color + "0A" : "#1C1B18",
+                transition: "all 0.15s",
+                opacity: dragItem && dragItem.id === item.id ? 0.4 : 1,
+                cursor: "grab",
               }}
             >
+              {/* Order number */}
+              <div style={{
+                position: "absolute", top: 6, right: 6, zIndex: 2,
+                background: "#111110CC", color: "#7A7870", fontSize: 10, fontWeight: 700,
+                width: 22, height: 22, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                {idx + 1}
+              </div>
+
               {/* Portada badge */}
               {item.es_portada && (
                 <div style={{
@@ -503,14 +572,12 @@ function MediaSection({ propiedadId, propRef, onCountUpdate }) {
               {activeTab === "video" ? (
                 <video
                   src={item.url}
-                  style={{ width: "100%", height: 140, objectFit: "cover", display: "block", cursor: "pointer" }}
-                  onClick={() => setLightbox(item)}
+                  style={{ width: "100%", height: 140, objectFit: "cover", display: "block", cursor: "grab", pointerEvents: "none" }}
                   muted
                 />
               ) : item.mime_type === "application/pdf" ? (
                 <div
-                  onClick={() => window.open(item.url, "_blank")}
-                  style={{ width: "100%", height: 140, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: "pointer", background: "#1A1917" }}
+                  style={{ width: "100%", height: 140, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "#1A1917" }}
                 >
                   <span style={{ fontSize: 32, marginBottom: 4 }}>📄</span>
                   <span style={{ fontSize: 10, color: "#7A7870" }}>PDF</span>
@@ -519,31 +586,25 @@ function MediaSection({ propiedadId, propRef, onCountUpdate }) {
                 <img
                   src={item.url}
                   alt={item.nombre}
-                  style={{ width: "100%", height: 140, objectFit: "cover", display: "block", cursor: "pointer" }}
-                  onClick={() => setLightbox(item)}
+                  style={{ width: "100%", height: 140, objectFit: "cover", display: "block", pointerEvents: "none" }}
                   loading="lazy"
                 />
               )}
 
               {/* Info + actions bar */}
               <div style={{ padding: "6px 8px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: 10, color: "#7A7870", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "60%" }}>
+                <span style={{ fontSize: 10, color: "#7A7870", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "50%" }}>
                   {item.nombre || `${activeTab}-${idx + 1}`}
                 </span>
                 <div style={{ display: "flex", gap: 4 }}>
-                  {/* Reorder */}
-                  {idx > 0 && (
-                    <button onClick={() => handleReorder(item.id, -1)} style={{ ...btnBase, padding: "2px 5px", fontSize: 10 }} title="Mover antes">◀</button>
-                  )}
-                  {idx < filteredMedia.length - 1 && (
-                    <button onClick={() => handleReorder(item.id, 1)} style={{ ...btnBase, padding: "2px 5px", fontSize: 10 }} title="Mover despues">▶</button>
-                  )}
+                  {/* View */}
+                  <button onClick={(e) => { e.stopPropagation(); setLightbox(item); }} style={{ ...btnBase, padding: "2px 5px", fontSize: 10 }} title="Ver">👁</button>
                   {/* Set as portada (only photos) */}
                   {activeTab === "foto" && !item.es_portada && (
-                    <button onClick={() => handleSetPortada(item)} style={{ ...btnBase, padding: "2px 5px", fontSize: 10, color: "#C8A97E", borderColor: "#C8A97E33" }} title="Hacer portada">★</button>
+                    <button onClick={(e) => { e.stopPropagation(); handleSetPortada(item); }} style={{ ...btnBase, padding: "2px 5px", fontSize: 10, color: "#C8A97E", borderColor: "#C8A97E33" }} title="Hacer portada">★</button>
                   )}
                   {/* Delete */}
-                  <button onClick={() => { if (confirm("Eliminar este archivo?")) handleDelete(item); }} style={{ ...btnBase, padding: "2px 5px", fontSize: 10, color: "#D45454", borderColor: "#D4545433" }} title="Eliminar">✕</button>
+                  <button onClick={(e) => { e.stopPropagation(); if (confirm("Eliminar este archivo?")) handleDelete(item); }} style={{ ...btnBase, padding: "2px 5px", fontSize: 10, color: "#D45454", borderColor: "#D4545433" }} title="Eliminar">✕</button>
                 </div>
               </div>
             </div>
