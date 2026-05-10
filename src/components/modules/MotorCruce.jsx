@@ -141,22 +141,6 @@ export default function MotorCruce() {
   function isMatch(buyer, prop) {
     if (prop.precioVenta > buyer.ppto) return false;
 
-    if (buyer.zd.length > 0) {
-      const zonaOk = buyer.zd.some((z) => {
-        const zl = z.toLowerCase().trim();
-        return prop.zona.toLowerCase().includes(zl) || prop.municipio.toLowerCase().includes(zl) || zl.includes(prop.zona.toLowerCase()) || zl.includes(prop.municipio.toLowerCase());
-      });
-      if (!zonaOk) return false;
-    }
-
-    if (buyer.ze && buyer.ze.length > 0) {
-      const excluded = buyer.ze.some((z) => {
-        const zl = z.toLowerCase().trim();
-        return prop.zona.toLowerCase().includes(zl) || prop.municipio.toLowerCase().includes(zl);
-      });
-      if (excluded) return false;
-    }
-
     return true;
   }
 
@@ -183,11 +167,8 @@ export default function MotorCruce() {
       const s = fQuery.toLowerCase();
       r = r.filter((b) => b.nombre.toLowerCase().includes(s) || b.tel.includes(s));
     }
-    if (fMunicipio !== "todos") {
-      r = r.filter((b) => b.zd.length === 0 || b.zd.some((z) => z.toLowerCase().includes(fMunicipio.toLowerCase()) || fMunicipio.toLowerCase().includes(z.toLowerCase())));
-    }
     return r;
-  }, [BUYERS, fPptoMin, fPptoMax, fQuery, fMunicipio]);
+  }, [BUYERS, fPptoMin, fPptoMax, fQuery]);
 
   // Matches
   const matchesByProp = useMemo(() => {
