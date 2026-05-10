@@ -108,129 +108,202 @@ export default function FirmaElectronica() {
   }
 
   async function downloadEvidencias(firmaData) {
-    const { default: jsPDF } = await import("jspdf");
-    const doc = new jsPDF();
+    const { PDFDocument, rgb, StandardFonts } = await import("pdf-lib");
     const firma = firmaData.firma;
     const firmantes = firmaData.firmantes || [];
-    let y = 20;
+    const hashDoc = firma.hash_documento || "-";
+    const footerText = `Fichero verificado por Mallorca Nativa Properties - ${hashDoc}`;
 
-    // Header
-    doc.setFontSize(8);
-    doc.setTextColor(150);
-    doc.text("Mallorca Nativa SL · CIF B75396234 · Calle Gremi Sabaters 21, Local A37, Palma de Mallorca", 105, y, { align: "center" });
-    y += 12;
-
-    doc.setFontSize(16);
-    doc.setTextColor(40);
-    doc.text("JUSTIFICANTE DE FIRMA ELECTRONICA", 105, y, { align: "center" });
-    y += 10;
-
-    doc.setDrawColor(200, 169, 126);
-    doc.setLineWidth(0.5);
-    doc.line(20, y, 190, y);
-    y += 10;
-
-    // Document info
-    doc.setFontSize(10);
-    doc.setTextColor(80);
-    doc.text("Informacion del documento", 20, y);
-    y += 7;
-    doc.setFontSize(9);
-    doc.setTextColor(40);
-    doc.text("Documento: " + (firma.pdf_nombre || "-"), 20, y); y += 5;
-    doc.text("Identificador: " + (firma.id || "-"), 20, y); y += 5;
-    doc.text("Hash del documento: " + (firma.hash_documento || "-"), 20, y); y += 5;
-    doc.text("Estado: " + (firma.estado || "-").toUpperCase(), 20, y); y += 5;
-    doc.text("Fecha creacion: " + fmtDate(firma.created_at), 20, y); y += 5;
-    if (firma.completado_at) { doc.text("Fecha completado: " + fmtDate(firma.completado_at), 20, y); y += 5; }
-    doc.text("Numero de firmantes: " + firma.num_firmantes, 20, y); y += 10;
-
-    doc.setDrawColor(220);
-    doc.line(20, y, 190, y);
-    y += 8;
-
-    // Each firmante
-    for (const f of firmantes) {
-      if (y > 240) { doc.addPage(); y = 20; }
-
-      doc.setFontSize(11);
-      doc.setTextColor(200, 169, 126);
-      doc.text("Firmante " + f.orden, 20, y);
-      doc.setFontSize(9);
-      doc.setTextColor(f.estado === "firmado" ? 40 : 150);
-      doc.text(f.estado.toUpperCase(), 190, y, { align: "right" });
-      y += 7;
-
-      if (f.estado === "firmado") {
-        doc.setTextColor(40);
-        doc.text("Nombre: " + (f.nombre || "") + " " + (f.apellidos || ""), 24, y); y += 5;
-        doc.text("Documento: " + (f.dni_nie || "-"), 24, y); y += 5;
-        doc.text("Email: " + (f.email || "-"), 24, y); y += 5;
-        doc.text("Fecha y hora: " + fmtDate(f.firmado_at), 24, y); y += 5;
-        doc.text("IP: " + (f.ip || "No registrada"), 24, y); y += 5;
-        doc.text("Geolocalizacion: " + (f.geolocalizacion || "No registrada"), 24, y); y += 5;
-        doc.text("User Agent: " + (f.user_agent || "-").substring(0, 80), 24, y); y += 5;
-        if (f.user_agent && f.user_agent.length > 80) { doc.text(f.user_agent.substring(80, 160), 24, y); y += 5; }
-        doc.text("Codigo verificacion: " + (f.codigo || "-"), 24, y); y += 7;
-
-        // Signature image
-        if (f.firma_img) {
-          try {
-            doc.text("Firma del cliente:", 24, y); y += 3;
-            doc.addImage(f.firma_img, "PNG", 24, y, 60, 30);
-            y += 34;
-          } catch (e) { y += 5; }
-        }
-
-        // DNI images
-        if (f.dni_frontal_url) {
-          if (y > 200) { doc.addPage(); y = 20; }
-          try {
-            doc.text("Documento identidad - Frontal:", 24, y); y += 3;
-            const imgF = await loadImageAsBase64(f.dni_frontal_url);
-            if (imgF) { doc.addImage(imgF, "JPEG", 24, y, 70, 45); y += 49; }
-          } catch (e) { doc.text("[No se pudo cargar la imagen]", 24, y); y += 5; }
-        }
-        if (f.dni_dorso_url) {
-          if (y > 200) { doc.addPage(); y = 20; }
-          try {
-            doc.text("Documento identidad - Dorso:", 24, y); y += 3;
-            const imgD = await loadImageAsBase64(f.dni_dorso_url);
-            if (imgD) { doc.addImage(imgD, "JPEG", 24, y, 70, 45); y += 49; }
-          } catch (e) { doc.text("[No se pudo cargar la imagen]", 24, y); y += 5; }
-        }
-      } else {
-        doc.setTextColor(150);
-        doc.text("Pendiente de firma", 24, y); y += 5;
-      }
-
-      y += 5;
-      doc.setDrawColor(220);
-      doc.line(20, y, 190, y);
-      y += 8;
+    // 1. Fetch the original PDF
+    let originalPdfBytes;
+    try {
+      const res = await fetch(firma.pdf_url);
+      originalPdfBytes = await res.arrayBuffer();
+    } catch (e) {
+      alert("No se pudo descargar el documento original");
+      return;
     }
 
-    // Footer
-    if (y > 260) { doc.addPage(); y = 20; }
-    doc.setFontSize(8);
-    doc.setTextColor(150);
-    doc.text("Este documento certifica las evidencias electronicas generadas durante el proceso de firma electronica.", 20, y); y += 4;
-    doc.text("Firma electronica avanzada conforme al Reglamento (UE) n. 910/2014 (eIDAS).", 20, y); y += 4;
-    doc.text("Mallorca Nativa SL · CIF B75396234 · info@mallorcanativaproperties.com", 20, y);
+    // 2. Load the original PDF and add footer to every page
+    const pdfDoc = await PDFDocument.load(originalPdfBytes);
+    const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    const pages = pdfDoc.getPages();
 
-    doc.save("Justificante_Firma_" + (firma.pdf_nombre || "documento").replace(/\.[^.]+$/, "") + ".pdf");
+    for (const page of pages) {
+      const { width } = page.getSize();
+      page.drawText(footerText, {
+        x: width / 2 - helvetica.widthOfTextAtSize(footerText, 7) / 2,
+        y: 12,
+        size: 7,
+        font: helvetica,
+        color: rgb(0.5, 0.5, 0.5),
+      });
+    }
+
+    // 3. Add evidence pages for each firmante
+    for (const f of firmantes) {
+      if (f.estado !== "firmado") continue;
+
+      // --- EVIDENCE PAGE ---
+      const evPage = pdfDoc.addPage([595, 842]); // A4
+      let y = 800;
+      const left = 50;
+      const gold = rgb(0.78, 0.66, 0.49);
+      const dark = rgb(0.15, 0.15, 0.15);
+      const gray = rgb(0.45, 0.45, 0.45);
+      const lightGray = rgb(0.7, 0.7, 0.7);
+
+      // Header
+      evPage.drawText("MALLORCA NATIVA PROPERTIES, SL", { x: left, y, size: 12, font: helveticaBold, color: dark });
+      y -= 14;
+      evPage.drawText("CERTIFICA las siguientes evidencias electronicas generadas durante", { x: left, y, size: 9, font: helvetica, color: gray });
+      y -= 12;
+      evPage.drawText(`el proceso de firma electronica por parte de ${f.email || "-"}, abajo Destinatario.`, { x: left, y, size: 9, font: helvetica, color: gray });
+      y -= 12;
+      evPage.drawText("Y que el Destinatario ha aceptado la encriptacion de la biometria de su firma", { x: left, y, size: 9, font: helvetica, color: gray });
+      y -= 12;
+      evPage.drawText("para garantizar la legalidad y seguridad de la misma.", { x: left, y, size: 9, font: helvetica, color: gray });
+      y -= 24;
+
+      // Info section
+      evPage.drawText("Informacion del envio", { x: left, y, size: 13, font: helveticaBold, color: gold });
+      y -= 18;
+
+      const infoLines = [
+        ["Documento enviado:", firma.pdf_nombre || "-"],
+        ["Huella digital del documento:", hashDoc],
+        ["Identificador firma:", firma.id || "-"],
+        ["Estado final documento:", "FIRMADO"],
+        ["Destinatario:", `${f.nombre || ""} ${f.apellidos || ""} (${f.email || "-"})`],
+        ["Documento identidad:", f.dni_nie || "-"],
+      ];
+      for (const [label, val] of infoLines) {
+        evPage.drawText(label, { x: left, y, size: 9, font: helveticaBold, color: dark });
+        evPage.drawText(val, { x: left + 180, y, size: 9, font: helvetica, color: dark });
+        y -= 14;
+      }
+      y -= 10;
+
+      // Process table
+      evPage.drawText("Datos del proceso", { x: left, y, size: 13, font: helveticaBold, color: gold });
+      y -= 16;
+      evPage.drawText("En la siguiente tabla se muestran los diferentes estados registrados durante el proceso.", { x: left, y, size: 8, font: helvetica, color: gray });
+      y -= 16;
+
+      // Table header
+      const cols = [left, left + 120, left + 260, left + 380];
+      evPage.drawText("ACCION", { x: cols[0], y, size: 7, font: helveticaBold, color: gray });
+      evPage.drawText("FECHA Y HORA", { x: cols[1], y, size: 7, font: helveticaBold, color: gray });
+      evPage.drawText("IP / GEO", { x: cols[2], y, size: 7, font: helveticaBold, color: gray });
+      evPage.drawText("MAS INFO", { x: cols[3], y, size: 7, font: helveticaBold, color: gray });
+      y -= 3;
+      evPage.drawLine({ start: { x: left, y }, end: { x: 545, y }, thickness: 0.5, color: lightGray });
+      y -= 12;
+
+      // Table rows
+      const rows = [
+        ["Codigo verificado", fmtDate(f.firmado_at), "-", f.codigo || "-"],
+        ["Terminos aceptados", fmtDate(f.firmado_at), f.geolocalizacion || "-", (f.user_agent || "-").substring(0, 40)],
+        ["Firmado", fmtDate(f.firmado_at), `${f.ip || "-"} / ${f.geolocalizacion || "-"}`, (f.user_agent || "-").substring(0, 40)],
+      ];
+      for (const row of rows) {
+        evPage.drawText(row[0], { x: cols[0], y, size: 7, font: helvetica, color: dark });
+        evPage.drawText(row[1], { x: cols[1], y, size: 7, font: helvetica, color: dark });
+        evPage.drawText(row[2].substring(0, 25), { x: cols[2], y, size: 7, font: helvetica, color: dark });
+        evPage.drawText(row[3], { x: cols[3], y, size: 6, font: helvetica, color: gray });
+        y -= 12;
+      }
+      y -= 16;
+
+      // Signature image
+      evPage.drawText("Firma del cliente", { x: left, y, size: 13, font: helveticaBold, color: gold });
+      y -= 16;
+      evPage.drawText(`${f.dni_nie || "-"}: ${f.nombre || ""} ${f.apellidos || ""}`, { x: left, y, size: 9, font: helveticaBold, color: dark });
+      y -= 6;
+
+      if (f.firma_img) {
+        try {
+          const pngData = f.firma_img.split(",")[1];
+          const pngBytes = Uint8Array.from(atob(pngData), c => c.charCodeAt(0));
+          const pngImage = await pdfDoc.embedPng(pngBytes);
+          const imgDims = pngImage.scale(0.3);
+          evPage.drawImage(pngImage, { x: left, y: y - imgDims.height, width: imgDims.width, height: imgDims.height });
+          y -= imgDims.height + 10;
+        } catch (e) { y -= 5; }
+      }
+
+      // Footer
+      evPage.drawText(footerText, {
+        x: 595 / 2 - helvetica.widthOfTextAtSize(footerText, 7) / 2,
+        y: 12,
+        size: 7,
+        font: helvetica,
+        color: rgb(0.5, 0.5, 0.5),
+      });
+
+      // --- DNI PAGES ---
+      if (f.dni_frontal_url || f.dni_dorso_url) {
+        const dniPage = pdfDoc.addPage([595, 842]);
+        let dy = 790;
+
+        dniPage.drawText(`Documento de identidad - ${f.nombre || ""} ${f.apellidos || ""}`, { x: left, y: dy, size: 13, font: helveticaBold, color: gold });
+        dy -= 20;
+
+        if (f.dni_frontal_url) {
+          try {
+            const imgBytes = await fetchAsUint8(f.dni_frontal_url);
+            if (imgBytes) {
+              const img = await pdfDoc.embedJpg(imgBytes).catch(() => pdfDoc.embedPng(imgBytes));
+              const dims = img.scaleToFit(400, 260);
+              dniPage.drawText("Frontal:", { x: left, y: dy, size: 9, font: helveticaBold, color: dark });
+              dy -= 8;
+              dniPage.drawImage(img, { x: left, y: dy - dims.height, width: dims.width, height: dims.height });
+              dy -= dims.height + 20;
+            }
+          } catch (e) { dniPage.drawText("[No se pudo cargar imagen frontal]", { x: left, y: dy, size: 9, font: helvetica, color: gray }); dy -= 14; }
+        }
+
+        if (f.dni_dorso_url) {
+          try {
+            const imgBytes = await fetchAsUint8(f.dni_dorso_url);
+            if (imgBytes) {
+              const img = await pdfDoc.embedJpg(imgBytes).catch(() => pdfDoc.embedPng(imgBytes));
+              const dims = img.scaleToFit(400, 260);
+              dniPage.drawText("Dorso:", { x: left, y: dy, size: 9, font: helveticaBold, color: dark });
+              dy -= 8;
+              dniPage.drawImage(img, { x: left, y: dy - dims.height, width: dims.width, height: dims.height });
+              dy -= dims.height + 20;
+            }
+          } catch (e) { dniPage.drawText("[No se pudo cargar imagen dorso]", { x: left, y: dy, size: 9, font: helvetica, color: gray }); dy -= 14; }
+        }
+
+        dniPage.drawText(footerText, {
+          x: 595 / 2 - helvetica.widthOfTextAtSize(footerText, 7) / 2,
+          y: 12,
+          size: 7,
+          font: helvetica,
+          color: rgb(0.5, 0.5, 0.5),
+        });
+      }
+    }
+
+    // 4. Save and download
+    const pdfBytes = await pdfDoc.save();
+    const blob = new Blob([pdfBytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = (firma.pdf_nombre || "documento").replace(/\.[^.]+$/, "") + "_Firmado.pdf";
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
-  async function loadImageAsBase64(url) {
+  async function fetchAsUint8(url) {
     try {
       const res = await fetch(url);
-      const blob = await res.blob();
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = () => resolve(null);
-        reader.readAsDataURL(blob);
-      });
+      const buf = await res.arrayBuffer();
+      return new Uint8Array(buf);
     } catch (e) { return null; }
   }
 
