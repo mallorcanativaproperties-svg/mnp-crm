@@ -22,7 +22,7 @@ Durante el proceso de firma electrónica, tratamos los siguientes datos personal
 1. Verificar su identidad como firmante del documento.
 2. Registrar las evidencias electrónicas necesarias para garantizar la validez legal de la firma electrónica conforme al Reglamento (UE) nº 910/2014 (eIDAS).
 3. Generar el justificante de firma con las evidencias del proceso.
-4. Enviarle por correo electrónico una copia del documento firmado una vez completado el proceso por todos los intervinientes.
+4. Poner a disposición de su asesor inmobiliario el documento firmado con las evidencias del proceso para su entrega.
 
 ¿CUÁL ES LA BASE LEGAL?
 
@@ -414,7 +414,7 @@ export default function FirmarPage() {
           <div style={{ textAlign: "center" }}>
             <div style={{ width: 64, height: 64, borderRadius: "50%", background: "#6AAF8D22", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", fontSize: 28 }}>✓</div>
             <h2 style={h2s}>Documento firmado</h2>
-            <p style={ps}>Tu firma ha sido registrada correctamente. Recibirás una copia por email cuando todos los intervinientes hayan firmado.</p>
+            <p style={ps}>Tu firma ha sido registrada correctamente. Cuando todos los firmantes hayan completado el proceso, tu asesor te hará llegar el documento firmado.</p>
             <div style={{ background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 10, padding: "16px 20px", fontSize: 14, color: "#166534", fontWeight: 600 }}>El estado del documento es: FIRMADO</div>
             <p style={{ fontSize: 12, color: "#888", marginTop: 16 }}>Si tienes cualquier duda ponte en contacto con la persona que te facilitó esta firma.</p>
           </div>

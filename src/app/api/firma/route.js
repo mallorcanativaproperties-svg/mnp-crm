@@ -280,7 +280,7 @@ export async function POST(request) {
 
       const { data: firmantes } = await getSupabase()
         .from("firmantes")
-        .select("orden, estado, nombre, apellidos, dni_nie, email, firmado_at, ip, user_agent, geolocalizacion, token")
+        .select("orden, estado, nombre, apellidos, dni_nie, email, firmado_at, ip, user_agent, geolocalizacion, token, firma_img, dni_frontal_url, dni_dorso_url, codigo")
         .eq("firma_id", firma_id)
         .order("orden");
 

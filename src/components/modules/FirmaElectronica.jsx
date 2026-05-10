@@ -107,6 +107,133 @@ export default function FirmaElectronica() {
     await loadFirmas();
   }
 
+  async function downloadEvidencias(firmaData) {
+    const { default: jsPDF } = await import("jspdf");
+    const doc = new jsPDF();
+    const firma = firmaData.firma;
+    const firmantes = firmaData.firmantes || [];
+    let y = 20;
+
+    // Header
+    doc.setFontSize(8);
+    doc.setTextColor(150);
+    doc.text("Mallorca Nativa SL · CIF B75396234 · Calle Gremi Sabaters 21, Local A37, Palma de Mallorca", 105, y, { align: "center" });
+    y += 12;
+
+    doc.setFontSize(16);
+    doc.setTextColor(40);
+    doc.text("JUSTIFICANTE DE FIRMA ELECTRONICA", 105, y, { align: "center" });
+    y += 10;
+
+    doc.setDrawColor(200, 169, 126);
+    doc.setLineWidth(0.5);
+    doc.line(20, y, 190, y);
+    y += 10;
+
+    // Document info
+    doc.setFontSize(10);
+    doc.setTextColor(80);
+    doc.text("Informacion del documento", 20, y);
+    y += 7;
+    doc.setFontSize(9);
+    doc.setTextColor(40);
+    doc.text("Documento: " + (firma.pdf_nombre || "-"), 20, y); y += 5;
+    doc.text("Identificador: " + (firma.id || "-"), 20, y); y += 5;
+    doc.text("Hash del documento: " + (firma.hash_documento || "-"), 20, y); y += 5;
+    doc.text("Estado: " + (firma.estado || "-").toUpperCase(), 20, y); y += 5;
+    doc.text("Fecha creacion: " + fmtDate(firma.created_at), 20, y); y += 5;
+    if (firma.completado_at) { doc.text("Fecha completado: " + fmtDate(firma.completado_at), 20, y); y += 5; }
+    doc.text("Numero de firmantes: " + firma.num_firmantes, 20, y); y += 10;
+
+    doc.setDrawColor(220);
+    doc.line(20, y, 190, y);
+    y += 8;
+
+    // Each firmante
+    for (const f of firmantes) {
+      if (y > 240) { doc.addPage(); y = 20; }
+
+      doc.setFontSize(11);
+      doc.setTextColor(200, 169, 126);
+      doc.text("Firmante " + f.orden, 20, y);
+      doc.setFontSize(9);
+      doc.setTextColor(f.estado === "firmado" ? 40 : 150);
+      doc.text(f.estado.toUpperCase(), 190, y, { align: "right" });
+      y += 7;
+
+      if (f.estado === "firmado") {
+        doc.setTextColor(40);
+        doc.text("Nombre: " + (f.nombre || "") + " " + (f.apellidos || ""), 24, y); y += 5;
+        doc.text("Documento: " + (f.dni_nie || "-"), 24, y); y += 5;
+        doc.text("Email: " + (f.email || "-"), 24, y); y += 5;
+        doc.text("Fecha y hora: " + fmtDate(f.firmado_at), 24, y); y += 5;
+        doc.text("IP: " + (f.ip || "No registrada"), 24, y); y += 5;
+        doc.text("Geolocalizacion: " + (f.geolocalizacion || "No registrada"), 24, y); y += 5;
+        doc.text("User Agent: " + (f.user_agent || "-").substring(0, 80), 24, y); y += 5;
+        if (f.user_agent && f.user_agent.length > 80) { doc.text(f.user_agent.substring(80, 160), 24, y); y += 5; }
+        doc.text("Codigo verificacion: " + (f.codigo || "-"), 24, y); y += 7;
+
+        // Signature image
+        if (f.firma_img) {
+          try {
+            doc.text("Firma del cliente:", 24, y); y += 3;
+            doc.addImage(f.firma_img, "PNG", 24, y, 60, 30);
+            y += 34;
+          } catch (e) { y += 5; }
+        }
+
+        // DNI images
+        if (f.dni_frontal_url) {
+          if (y > 200) { doc.addPage(); y = 20; }
+          try {
+            doc.text("Documento identidad - Frontal:", 24, y); y += 3;
+            const imgF = await loadImageAsBase64(f.dni_frontal_url);
+            if (imgF) { doc.addImage(imgF, "JPEG", 24, y, 70, 45); y += 49; }
+          } catch (e) { doc.text("[No se pudo cargar la imagen]", 24, y); y += 5; }
+        }
+        if (f.dni_dorso_url) {
+          if (y > 200) { doc.addPage(); y = 20; }
+          try {
+            doc.text("Documento identidad - Dorso:", 24, y); y += 3;
+            const imgD = await loadImageAsBase64(f.dni_dorso_url);
+            if (imgD) { doc.addImage(imgD, "JPEG", 24, y, 70, 45); y += 49; }
+          } catch (e) { doc.text("[No se pudo cargar la imagen]", 24, y); y += 5; }
+        }
+      } else {
+        doc.setTextColor(150);
+        doc.text("Pendiente de firma", 24, y); y += 5;
+      }
+
+      y += 5;
+      doc.setDrawColor(220);
+      doc.line(20, y, 190, y);
+      y += 8;
+    }
+
+    // Footer
+    if (y > 260) { doc.addPage(); y = 20; }
+    doc.setFontSize(8);
+    doc.setTextColor(150);
+    doc.text("Este documento certifica las evidencias electronicas generadas durante el proceso de firma electronica.", 20, y); y += 4;
+    doc.text("Firma electronica avanzada conforme al Reglamento (UE) n. 910/2014 (eIDAS).", 20, y); y += 4;
+    doc.text("Mallorca Nativa SL · CIF B75396234 · info@mallorcanativaproperties.com", 20, y);
+
+    doc.save("Justificante_Firma_" + (firma.pdf_nombre || "documento").replace(/\.[^.]+$/, "") + ".pdf");
+  }
+
+  async function loadImageAsBase64(url) {
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => resolve(null);
+        reader.readAsDataURL(blob);
+      });
+    } catch (e) { return null; }
+  }
+
   function copyLink(url, idx) {
     navigator.clipboard.writeText(url);
     setCopied(idx);
@@ -227,7 +354,12 @@ export default function FirmaElectronica() {
                 </span>
               </div>
 
-              <a href={detailData.firma?.pdf_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: "#C8A97E", display: "block", marginBottom: 20 }}>Ver documento PDF</a>
+              <a href={detailData.firma?.pdf_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: "#C8A97E", display: "inline-block", marginBottom: 20, marginRight: 16 }}>Ver documento PDF</a>
+              {detailData.firma?.estado === "completado" && (
+                <button onClick={() => downloadEvidencias(detailData)} style={{ ...btnGold, padding: "8px 20px", fontSize: 10, background: "#6AAF8D", borderColor: "#6AAF8D", color: "#111110", marginBottom: 20 }}>
+                  Descargar justificante de firma
+                </button>
+              )}
 
               <div style={{ fontSize: 10, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12, fontWeight: 600 }}>Firmantes</div>
 
