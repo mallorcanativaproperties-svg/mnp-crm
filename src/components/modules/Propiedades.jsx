@@ -575,6 +575,211 @@ function MediaSection({ propiedadId, propRef, onCountUpdate }) {
   );
 }
 
+const DOC_TIPOS = [
+  { key: "nota_simple", label: "Nota Simple", icon: "📋" },
+  { key: "hoja_encargo", label: "Hoja de Encargo", icon: "📝" },
+  { key: "escritura", label: "Escritura", icon: "📜" },
+  { key: "ibi_recibo", label: "Recibo IBI", icon: "🏛️" },
+  { key: "comunidad", label: "Actas Comunidad", icon: "🏢" },
+  { key: "certificado_energetico", label: "Cert. Energetico", icon: "⚡" },
+  { key: "cedula_habitabilidad", label: "Cedula Habitabilidad", icon: "🏠" },
+  { key: "iee", label: "IEE / ITE", icon: "🔍" },
+  { key: "planos", label: "Planos Catastro", icon: "📐" },
+  { key: "contrato", label: "Contrato", icon: "✍️" },
+  { key: "dni_propietario", label: "DNI Propietario", icon: "🪪" },
+  { key: "otro", label: "Otro documento", icon: "📎" },
+];
+
+function DocsSection({ propiedadId, propRef }) {
+  const [docs, setDocs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [selectedTipo, setSelectedTipo] = useState("nota_simple");
+
+  useEffect(() => {
+    if (propiedadId) loadDocs();
+  }, [propiedadId]);
+
+  async function loadDocs() {
+    setLoading(true);
+    const { data: rows, error } = await supabase
+      .from("docs_propiedades")
+      .select("*")
+      .eq("propiedad_id", propiedadId)
+      .order("created_at", { ascending: false });
+    if (!error && rows) setDocs(rows);
+    setLoading(false);
+  }
+
+  async function handleUpload(files) {
+    if (!files || files.length === 0) return;
+    setUploading(true);
+
+    for (const file of files) {
+      const ext = file.name.split(".").pop();
+      const path = `${propRef || propiedadId}/docs/${selectedTipo}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("propiedades-media")
+        .upload(path, file, { cacheControl: "3600", upsert: false });
+
+      if (uploadError) { console.error("Upload error:", uploadError); continue; }
+
+      const { data: urlData } = supabase.storage.from("propiedades-media").getPublicUrl(path);
+      const url = urlData?.publicUrl;
+
+      if (url) {
+        await supabase.from("docs_propiedades").insert({
+          propiedad_id: propiedadId,
+          tipo: selectedTipo,
+          url,
+          nombre: file.name,
+          tamano: file.size,
+          mime_type: file.type,
+        });
+      }
+    }
+
+    setUploading(false);
+    await loadDocs();
+  }
+
+  async function handleDelete(item) {
+    const pathMatch = item.url.split("/propiedades-media/")[1];
+    if (pathMatch) {
+      await supabase.storage.from("propiedades-media").remove([decodeURIComponent(pathMatch)]);
+    }
+    await supabase.from("docs_propiedades").delete().eq("id", item.id);
+    await loadDocs();
+  }
+
+  function formatSize(bytes) {
+    if (!bytes) return "";
+    if (bytes < 1024) return bytes + " B";
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + " KB";
+    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+  }
+
+  function getIcon(mimeType, nombre) {
+    if (mimeType === "application/pdf" || nombre?.endsWith(".pdf")) return "📕";
+    if (mimeType?.startsWith("image/")) return "🖼️";
+    if (mimeType?.includes("word") || nombre?.endsWith(".docx") || nombre?.endsWith(".doc")) return "📘";
+    if (mimeType?.includes("spreadsheet") || nombre?.endsWith(".xlsx") || nombre?.endsWith(".xls")) return "📗";
+    return "📄";
+  }
+
+  const groupedDocs = {};
+  DOC_TIPOS.forEach((t) => { groupedDocs[t.key] = docs.filter((d) => d.tipo === t.key); });
+  const tiposConDocs = DOC_TIPOS.filter((t) => groupedDocs[t.key].length > 0);
+  const tiposSinDocs = DOC_TIPOS.filter((t) => groupedDocs[t.key].length === 0);
+
+  const ss = { padding: "8px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#A09D93", fontSize: 11, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.04em", cursor: "pointer" };
+  const btnDel = { background: "none", border: "1px solid #D4545433", borderRadius: 3, color: "#D45454", cursor: "pointer", fontSize: 10, padding: "2px 6px", fontFamily: "'Manrope', sans-serif" };
+
+  return (
+    <div>
+      {/* Resumen */}
+      <div style={{ display: "flex", gap: 16, marginBottom: 18, flexWrap: "wrap", alignItems: "center" }}>
+        <div style={{ textAlign: "center", minWidth: 60 }}>
+          <div style={{ fontSize: 24, color: "#C8A97E", fontFamily: "'Playfair Display', serif" }}>{docs.length}</div>
+          <div style={{ fontSize: 10, color: "#7A7870", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.08em" }}>Total</div>
+        </div>
+        <div style={{ textAlign: "center", minWidth: 60 }}>
+          <div style={{ fontSize: 24, color: "#6AAF8D", fontFamily: "'Playfair Display', serif" }}>{tiposConDocs.length}</div>
+          <div style={{ fontSize: 10, color: "#7A7870", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.08em" }}>Tipos</div>
+        </div>
+        <div style={{ textAlign: "center", minWidth: 60 }}>
+          <div style={{ fontSize: 24, color: tiposSinDocs.length > 0 ? "#D4956A" : "#6AAF8D", fontFamily: "'Playfair Display', serif" }}>{tiposSinDocs.length}</div>
+          <div style={{ fontSize: 10, color: "#7A7870", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.08em" }}>Pendientes</div>
+        </div>
+      </div>
+
+      {/* Upload */}
+      <div style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, padding: "16px 20px", marginBottom: 18 }}>
+        <div style={{ fontSize: 10, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12, fontWeight: 600 }}>Subir documento</div>
+        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+          <select value={selectedTipo} onChange={(e) => setSelectedTipo(e.target.value)} style={ss}>
+            {DOC_TIPOS.map((t) => (
+              <option key={t.key} value={t.key}>{t.icon} {t.label}</option>
+            ))}
+          </select>
+          <label style={{
+            padding: "8px 18px", borderRadius: 3, border: "1px solid #C8A97E", background: "transparent",
+            color: "#C8A97E", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.08em",
+            textTransform: "uppercase", fontFamily: "'Manrope', sans-serif", transition: "all 0.2s",
+            display: "inline-flex", alignItems: "center", gap: 6,
+          }}>
+            {uploading ? "Subiendo..." : "Seleccionar archivo"}
+            <input
+              type="file"
+              multiple
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.webp"
+              style={{ display: "none" }}
+              onChange={(e) => handleUpload(Array.from(e.target.files))}
+            />
+          </label>
+        </div>
+        <div style={{ fontSize: 10, color: "#5A584F", marginTop: 8 }}>PDF, Word, Excel, imagenes — max 10MB por archivo</div>
+      </div>
+
+      {/* Documents list grouped by tipo */}
+      {loading ? (
+        <div style={{ textAlign: "center", padding: 20, color: "#7A7870", fontSize: 12 }}>Cargando documentos...</div>
+      ) : docs.length === 0 ? (
+        <div style={{ textAlign: "center", padding: 30, color: "#5A584F", fontSize: 12, fontStyle: "italic" }}>
+          No hay documentos subidos para esta propiedad
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {tiposConDocs.map((tipo) => (
+            <div key={tipo.key}>
+              <div style={{ fontSize: 10, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8, fontWeight: 600 }}>
+                {tipo.icon} {tipo.label}
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                {groupedDocs[tipo.key].map((doc) => (
+                  <div key={doc.id} style={{
+                    display: "flex", alignItems: "center", gap: 10, padding: "10px 14px",
+                    background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3,
+                    transition: "all 0.2s",
+                  }}>
+                    <span style={{ fontSize: 20, flexShrink: 0 }}>{getIcon(doc.mime_type, doc.nombre)}</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12, color: "#D0CDC4", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{doc.nombre}</div>
+                      <div style={{ fontSize: 10, color: "#5A584F", marginTop: 2 }}>
+                        {formatSize(doc.tamano)} — {new Date(doc.created_at).toLocaleDateString("es-ES")}
+                      </div>
+                    </div>
+                    <a href={doc.url} target="_blank" rel="noopener noreferrer"
+                      style={{ fontSize: 10, color: "#8FA88A", textDecoration: "none", padding: "4px 10px", border: "1px solid #8FA88A33", borderRadius: 3 }}>
+                      Abrir
+                    </a>
+                    <button onClick={() => { if (confirm("Eliminar " + doc.nombre + "?")) handleDelete(doc); }} style={btnDel}>✕</button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Checklist de documentos pendientes */}
+      {tiposSinDocs.length > 0 && docs.length > 0 && (
+        <div style={{ marginTop: 16, padding: "14px 18px", background: "#1C1B1800", border: "1px dashed #2A2926", borderRadius: 3 }}>
+          <div style={{ fontSize: 10, color: "#D4956A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8, fontWeight: 600 }}>Documentos pendientes</div>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {tiposSinDocs.map((t) => (
+              <span key={t.key} style={{ fontSize: 10, padding: "4px 10px", borderRadius: 2, background: "#D4956A0D", color: "#D4956A", border: "1px solid #D4956A15" }}>
+                {t.icon} {t.label}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function PropCard({ p, onClick }) {
   const est = ESTADOS.find((e) => e.key === p.estado) || ESTADOS[0];
   return (
@@ -1020,6 +1225,12 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
         {/* Multimedia */}
         <Sec title="Multimedia">
           <MediaSection propiedadId={p.id} propRef={p.ref} onCountUpdate={(counts) => { if (onUpdate) onUpdate({ ...p, fotos: counts.foto, videos: counts.video, planos: counts.plano, tour360: counts.tour360 > 0 }); }} />
+        </Sec>
+        <div style={sep} />
+
+        {/* Documentos */}
+        <Sec title="Documentos">
+          <DocsSection propiedadId={p.id} propRef={p.ref} />
         </Sec>
         <div style={sep} />
 
