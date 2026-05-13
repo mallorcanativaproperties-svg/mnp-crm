@@ -237,6 +237,21 @@ export default function App() {
   const avg = Math.round(data.reduce((s, b) => s + b.ppto, 0) / data.length);
   const withFin = data.filter(b => b.fin === "Sí").length;
   const bySt = ESTADOS.map(s => ({ ...s, n: data.filter(b => b.st === s.key).length })).filter(s => s.n > 0);
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState(null);
+
+  async function syncFromSheet() {
+    setSyncing(true); setSyncResult(null);
+    try {
+      const res = await fetch("/api/sync-compradores", { method: "POST" });
+      const data = await res.json();
+      setSyncResult(data);
+      if (data.synced > 0) loadBuyers();
+      setTimeout(() => setSyncResult(null), 8000);
+    } catch (e) { setSyncResult({ error: e.message }); }
+    setSyncing(false);
+  }
+
   const selSt = { padding: "8px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#A09D93", fontSize: 11, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.04em", cursor: "pointer", appearance: "auto" };
 
   return <div style={{ fontFamily: "'Manrope', sans-serif", background: "#111110", minHeight: "100vh", color: "#F0EDE6", padding: "40px 24px" }}>
@@ -249,12 +264,29 @@ export default function App() {
             <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 400, margin: 0, lineHeight: 1.1 }}>Base de <em style={{ fontStyle: "italic" }}>Compradores</em></h1>
             <p style={{ fontSize: 12, color: "#7A7870", margin: "10px 0 0", letterSpacing: "0.04em" }}>Formulario Instagram · Mallorca · {data.length} registros</p>
           </div>
-          <button onClick={() => setShowNew(true)} style={{ padding: "12px 28px", borderRadius: 3, border: "1px solid #C8A97E", background: "transparent", color: "#C8A97E", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "'Manrope', sans-serif", transition: "all 0.3s" }}
-            onMouseEnter={e => { e.currentTarget.style.background = "#C8A97E"; e.currentTarget.style.color = "#111110"; }}
-            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#C8A97E"; }}
-          >+ Nuevo comprador</button>
+          <div style={{ display: "flex", gap: 10 }}>
+            <button onClick={syncFromSheet} disabled={syncing} style={{ padding: "12px 20px", borderRadius: 3, border: "1px solid #6AAF8D", background: "transparent", color: syncing ? "#7A7870" : "#6AAF8D", cursor: syncing ? "wait" : "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "'Manrope', sans-serif", transition: "all 0.3s" }}>
+              {syncing ? "Sincronizando..." : "↻ Sync Google Sheet"}
+            </button>
+            <button onClick={() => setShowNew(true)} style={{ padding: "12px 28px", borderRadius: 3, border: "1px solid #C8A97E", background: "transparent", color: "#C8A97E", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "'Manrope', sans-serif", transition: "all 0.3s" }}
+              onMouseEnter={e => { e.currentTarget.style.background = "#C8A97E"; e.currentTarget.style.color = "#111110"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#C8A97E"; }}
+            >+ Nuevo comprador</button>
+          </div>
         </div>
       </div>
+
+      {syncResult && (
+        <div style={{ background: syncResult.error ? "#D4545418" : "#6AAF8D18", border: "1px solid " + (syncResult.error ? "#D4545444" : "#6AAF8D44"), borderRadius: 3, padding: "14px 20px", marginBottom: 20, fontSize: 12 }}>
+          {syncResult.error ? (
+            <span style={{ color: "#D45454" }}>Error: {syncResult.error}</span>
+          ) : (
+            <span style={{ color: "#6AAF8D" }}>
+              Sincronización completada: <strong>{syncResult.synced}</strong> nuevos compradores importados, {syncResult.skipped} ya existían, {syncResult.errors} errores. Total en Sheet: {syncResult.total_sheet}.
+            </span>
+          )}
+        </div>
+      )}
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 16, marginBottom: 36 }}>
         {[{ n: data.length, l: "Compradores" }, { n: fmt(avg), l: "Presupuesto medio" }, { n: Math.round(withFin / data.length * 100) + "%", l: "Con financiación" }].map((s, i) => <div key={i} style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, padding: "20px 24px", textAlign: "center" }}>
