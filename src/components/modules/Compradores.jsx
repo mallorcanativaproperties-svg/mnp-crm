@@ -281,9 +281,21 @@ export default function App() {
           {syncResult.error ? (
             <span style={{ color: "#D45454" }}>Error: {syncResult.error}</span>
           ) : (
-            <span style={{ color: "#6AAF8D" }}>
-              Sincronización completada: <strong>{syncResult.synced}</strong> nuevos compradores importados, {syncResult.skipped} ya existían, {syncResult.errors} errores. Total en Sheet: {syncResult.total_sheet}.
-            </span>
+            <div>
+              <span style={{ color: "#6AAF8D" }}>
+                Sincronización completada: <strong>{syncResult.synced}</strong> nuevos importados, {syncResult.skipped} ya existían, {syncResult.errors} errores. Total en Sheet: {syncResult.total_sheet}.
+              </span>
+              {syncResult.duplicados && syncResult.duplicados.length > 0 && (
+                <div style={{ marginTop: 12, borderTop: "1px solid #2A2926", paddingTop: 10 }}>
+                  <div style={{ fontSize: 10, color: "#D4956A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8, fontWeight: 600 }}>Duplicados detectados (ya existen en el CRM)</div>
+                  {syncResult.duplicados.map((d, i) => (
+                    <div key={i} style={{ fontSize: 11, color: "#A09D93", padding: "4px 0", borderBottom: "1px solid #1C1B18" }}>
+                      <strong style={{ color: "#D0CDC4" }}>{d.nombre}</strong> — {d.email || "-"} — {d.telefono || "-"} — <span style={{ color: "#D4956A" }}>{d.motivo}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
         </div>
       )}

@@ -92,6 +92,7 @@ export async function POST() {
     // First row is header, rest is data
     const dataRows = allRows.slice(1);
     let synced = 0, skipped = 0, errors = 0;
+    const duplicados = [];
 
     for (const cols of dataRows) {
       // Columns: 0=Timestamp, 1=Email, 2=Nombre, 3=Telefono, 4=Financiacion,
@@ -114,8 +115,16 @@ export async function POST() {
 
       // Check duplicates
       const phoneClean = telefono.replace(/\D/g, "");
-      if (email && existingEmails.has(email)) { skipped++; continue; }
-      if (phoneClean && phoneClean.length > 5 && existingPhones.has(phoneClean)) { skipped++; continue; }
+      if (email && existingEmails.has(email)) {
+        skipped++;
+        duplicados.push({ nombre, email, telefono, motivo: "Email ya existe" });
+        continue;
+      }
+      if (phoneClean && phoneClean.length > 5 && existingPhones.has(phoneClean)) {
+        skipped++;
+        duplicados.push({ nombre, email, telefono, motivo: "Teléfono ya existe" });
+        continue;
+      }
 
       // Parse fields
       const presupuesto = parsePresupuesto(presupuestoRaw);
@@ -170,7 +179,7 @@ export async function POST() {
       }
     }
 
-    return NextResponse.json({ ok: true, total_sheet: dataRows.length, synced, skipped, errors });
+    return NextResponse.json({ ok: true, total_sheet: dataRows.length, synced, skipped, errors, duplicados });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
