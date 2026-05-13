@@ -7,29 +7,65 @@ function getSupabase() {
   return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 }
 
-function parseCsvLine(line) {
-  const fields = [];
-  let current = "";
+// Parse full CSV text properly handling quoted fields with commas and newlines
+function parseFullCsv(text) {
+  const rows = [];
+  let currentField = "";
+  let currentRow = [];
   let inQuotes = false;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (ch === '"') {
-      if (inQuotes && line[i + 1] === '"') { current += '"'; i++; }
-      else inQuotes = !inQuotes;
-    } else if (ch === "," && !inQuotes) {
-      fields.push(current.trim());
-      current = "";
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+
+    if (inQuotes) {
+      if (ch === '"') {
+        if (text[i + 1] === '"') {
+          currentField += '"';
+          i++;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        currentField += ch;
+      }
     } else {
-      current += ch;
+      if (ch === '"') {
+        inQuotes = true;
+      } else if (ch === ",") {
+        currentRow.push(currentField.trim());
+        currentField = "";
+      } else if (ch === "\n" || ch === "\r") {
+        currentRow.push(currentField.trim());
+        currentField = "";
+        if (currentRow.some(f => f !== "")) {
+          rows.push(currentRow);
+        }
+        currentRow = [];
+        if (ch === "\r" && text[i + 1] === "\n") i++;
+      } else {
+        currentField += ch;
+      }
     }
   }
-  fields.push(current.trim());
-  return fields;
+
+  // Last field/row
+  if (currentField || currentRow.length > 0) {
+    currentRow.push(currentField.trim());
+    if (currentRow.some(f => f !== "")) {
+      rows.push(currentRow);
+    }
+  }
+
+  return rows;
 }
 
 function parsePresupuesto(raw) {
   if (!raw) return 0;
-  const s = raw.toString().replace(/[€.\s]/g, "").replace(",", ".").replace(/mil/i, "000");
+  let s = raw.toString();
+  // Handle "300000 como mucho", "350.000€", "500mil", etc.
+  s = s.replace(/[€\s]/g, "").replace(/como\s*mucho/i, "").replace(/mil/i, "000");
+  s = s.replace(/\./g, ""); // remove thousand separators
+  s = s.replace(",", "."); // decimal comma to dot
   const num = parseFloat(s);
   return isNaN(num) ? 0 : num;
 }
@@ -38,23 +74,28 @@ export async function POST() {
   try {
     const supabase = getSupabase();
 
+    // Get existing to detect duplicates
     const { data: existing } = await supabase.from("compradores").select("email, telefono");
-    const existingEmails = new Set((existing || []).map(e => (e.email || "").toLowerCase().trim()));
-    const existingPhones = new Set((existing || []).map(e => (e.telefono || "").replace(/\D/g, "")));
+    const existingEmails = new Set((existing || []).map(e => (e.email || "").toLowerCase().trim()).filter(Boolean));
+    const existingPhones = new Set((existing || []).map(e => (e.telefono || "").replace(/\D/g, "")).filter(Boolean));
 
+    // Fetch CSV from Google Sheet
     const csvUrl = "https://docs.google.com/spreadsheets/d/" + SHEET_ID + "/export?format=csv";
     const res = await fetch(csvUrl);
     if (!res.ok) return NextResponse.json({ error: "No se pudo acceder al Google Sheet" }, { status: 500 });
     const csvText = await res.text();
 
-    const lines = csvText.split("\n").filter(l => l.trim());
-    if (lines.length < 2) return NextResponse.json({ error: "Sheet vacio", synced: 0 });
+    // Parse CSV properly
+    const allRows = parseFullCsv(csvText);
+    if (allRows.length < 2) return NextResponse.json({ error: "Sheet vacio", synced: 0 });
 
-    const dataLines = lines.slice(1);
+    // First row is header, rest is data
+    const dataRows = allRows.slice(1);
     let synced = 0, skipped = 0, errors = 0;
 
-    for (const line of dataLines) {
-      const cols = parseCsvLine(line);
+    for (const cols of dataRows) {
+      // Columns: 0=Timestamp, 1=Email, 2=Nombre, 3=Telefono, 4=Financiacion,
+      // 5=Presupuesto, 6=Finalidad, 7=Habitaciones, 8=Zonas, 9=Altura, 10=Requisitos
       if (cols.length < 4) continue;
 
       const timestamp = cols[0] || "";
@@ -66,26 +107,39 @@ export async function POST() {
       const finalidad = (cols[6] || "").trim();
       const habitaciones = (cols[7] || "").trim();
       const zonaRaw = (cols[8] || "").trim();
-      const sinQueEl = (cols[9] || "").trim();
-      const imprescindible = (cols[10] || "").trim();
+      const alturaMax = (cols[9] || "").trim();
+      const requisitos = (cols[10] || "").trim();
 
       if (!nombre) continue;
 
+      // Check duplicates
       const phoneClean = telefono.replace(/\D/g, "");
       if (email && existingEmails.has(email)) { skipped++; continue; }
       if (phoneClean && phoneClean.length > 5 && existingPhones.has(phoneClean)) { skipped++; continue; }
 
+      // Parse fields
       const presupuesto = parsePresupuesto(presupuestoRaw);
-      const zonas = zonaRaw ? zonaRaw.split(/[,;\/]+/).map(z => z.trim()).filter(Boolean) : [];
+      const zonas = zonaRaw ? zonaRaw.split(/[,;\/]+/).map(z => z.trim()).filter(z => z.length > 1) : [];
 
       let financiacionText = financiacion;
-      if (financiacion.toLowerCase().includes("si") || financiacion.toLowerCase().includes("sí")) financiacionText = "Sí";
-      else if (financiacion.toLowerCase().includes("no")) financiacionText = "No";
+      if (financiacion.toLowerCase().includes("estoy abierto") || financiacion.toLowerCase().includes("mejorar")) {
+        financiacionText = "Abierto a mejorar condiciones";
+      } else if (financiacion.toLowerCase() === "sí" || financiacion.toLowerCase() === "si") {
+        financiacionText = "Sí";
+      } else if (financiacion.toLowerCase() === "no") {
+        financiacionText = "No";
+      }
 
+      // Parse timestamp
       let createdAt = null;
       if (timestamp) {
         const parts = timestamp.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2}):?(\d{2})?/);
-        if (parts) createdAt = new Date(parseInt(parts[3]), parseInt(parts[2]) - 1, parseInt(parts[1]), parseInt(parts[4]), parseInt(parts[5]), parseInt(parts[6] || 0)).toISOString();
+        if (parts) {
+          createdAt = new Date(
+            parseInt(parts[3]), parseInt(parts[2]) - 1, parseInt(parts[1]),
+            parseInt(parts[4]), parseInt(parts[5]), parseInt(parts[6] || 0)
+          ).toISOString();
+        }
       }
 
       const record = {
@@ -97,7 +151,8 @@ export async function POST() {
         habitaciones,
         finalidad: finalidad || "Primera vivienda",
         financiacion: financiacionText,
-        requisitos: imprescindible || "",
+        altura_max: alturaMax,
+        requisitos,
         origen: "Instagram",
         estado: "nuevo",
         scoring: 0,
@@ -105,14 +160,17 @@ export async function POST() {
       };
 
       const { error: insertError } = await supabase.from("compradores").insert(record);
-      if (insertError) { errors++; } else {
+      if (insertError) {
+        console.error("Insert error:", insertError.message, record.nombre);
+        errors++;
+      } else {
         synced++;
-        existingEmails.add(email);
+        if (email) existingEmails.add(email);
         if (phoneClean) existingPhones.add(phoneClean);
       }
     }
 
-    return NextResponse.json({ ok: true, total_sheet: dataLines.length, synced, skipped, errors });
+    return NextResponse.json({ ok: true, total_sheet: dataRows.length, synced, skipped, errors });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
