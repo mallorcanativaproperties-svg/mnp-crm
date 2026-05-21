@@ -444,6 +444,60 @@ function AgentPanel({ convs, setConvs, isAna, selectedId, setSelectedId }) {
   );
 }
 
+/* ── Scan Emails Button ── */
+function ScanEmailsButton() {
+  const [scanning, setScanning] = useState(false);
+  const [result, setResult] = useState(null);
+
+  const scan = async () => {
+    setScanning(true);
+    setResult(null);
+    try {
+      const res = await fetch("/api/scan-emails", { method: "POST" });
+      const data = await res.json();
+      setResult(data);
+      console.log("Scan result:", data);
+    } catch (err) {
+      setResult({ error: err.message });
+    }
+    setScanning(false);
+    setTimeout(() => setResult(null), 8000);
+  };
+
+  return (
+    <div style={{ position: "relative" }}>
+      <button onClick={scan} disabled={scanning} style={{
+        padding: "8px 16px", borderRadius: 3,
+        border: "1px solid #6AAF8D33",
+        background: scanning ? "#6AAF8D22" : "transparent",
+        color: "#6AAF8D", cursor: scanning ? "wait" : "pointer",
+        fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase",
+        fontFamily: "'Manrope', sans-serif",
+        opacity: scanning ? 0.7 : 1,
+      }}>
+        {scanning ? "Escaneando..." : "📧 Escanear Idealista"}
+      </button>
+      {result && (
+        <div style={{
+          position: "absolute", top: "100%", right: 0, marginTop: 6,
+          padding: "10px 14px", borderRadius: 3, minWidth: 220,
+          background: "#1C1B18", border: "1px solid #2A2926",
+          fontSize: 11, color: result.error ? "#D45454" : "#6AAF8D",
+          zIndex: 50, boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
+        }}>
+          {result.error ? `Error: ${result.error}` :
+            `✓ ${result.processed || 0} emails procesados`}
+          {result.results?.filter(r => r.success).length > 0 && (
+            <div style={{ color: "#C8A97E", marginTop: 4 }}>
+              {result.results.filter(r => r.success).length} leads enviados por WhatsApp
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── MAIN ── */
 export default function AgentesIA() {
   const [tab, setTab] = useState("ana");
@@ -476,7 +530,8 @@ export default function AgentesIA() {
             <div style={{ fontSize: 10, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.2em", fontWeight: 500 }}>Mallorca Nativa Properties</div>
             <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 400, margin: "4px 0 0" }}>Agentes <em>IA</em></h1>
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <ScanEmailsButton />
             <button onClick={() => setEditPrompt("ana")} style={{ padding: "8px 16px", borderRadius: 3, border: "1px solid #D4956A33", background: "transparent", color: "#D4956A", cursor: "pointer", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "'Manrope', sans-serif" }}>Editar Ana</button>
             <button onClick={() => setEditPrompt("claudia")} style={{ padding: "8px 16px", borderRadius: 3, border: "1px solid #A89BC433", background: "transparent", color: "#A89BC4", cursor: "pointer", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "'Manrope', sans-serif" }}>Editar Claudia</button>
           </div>
