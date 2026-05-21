@@ -284,7 +284,56 @@ export async function POST(request) {
   }
 }
 
-// GET: Simple status check
-export async function GET() {
-  return NextResponse.json({ status: "ok", endpoint: "scan-emails" });
+// GET: Vercel cron triggers this every 2 minutes
+export async function GET(request) {
+  // Vercel crons call GET, so we run the same scan logic
+  try {
+    const client = new ImapFlow({
+      host: "imap.gmail.com",
+      port: 993,
+      secure: true,
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD,
+      },
+      logger: false,
+    });
+
+    await client.connect();
+    const lock = await client.getMailboxLock("INBOX");
+
+    const results = [];
+
+    try {
+      const messages = client.fetch(
+        { seen: false, from: "idealista" },
+        { source: true, flags: true, uid: true }
+      );
+
+      for await (const msg of messages) {
+        try {
+          const parsed = await simpleParser(msg.source);
+          const result = await processIdealistaEmail(parsed);
+          results.push(result);
+          await client.messageFlagsAdd({ uid: msg.uid }, ["\\Seen"]);
+        } catch (parseErr) {
+          console.error("Error parsing email:", parseErr.message);
+          results.push({ success: false, reason: parseErr.message });
+        }
+      }
+    } finally {
+      lock.release();
+    }
+
+    await client.logout();
+
+    return NextResponse.json({
+      success: true,
+      processed: results.length,
+      results,
+    });
+  } catch (err) {
+    console.error("Email scan error:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
 }
