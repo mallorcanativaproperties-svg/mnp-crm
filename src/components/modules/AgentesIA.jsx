@@ -446,52 +446,91 @@ function AgentPanel({ convs, setConvs, isAna, selectedId, setSelectedId }) {
 
 /* ── Scan Emails Button ── */
 function ScanEmailsButton() {
-  const [scanning, setScanning] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [emailText, setEmailText] = useState("");
+  const [subject, setSubject] = useState("");
+  const [sending, setSending] = useState(false);
   const [result, setResult] = useState(null);
 
-  const scan = async () => {
-    setScanning(true);
+  const process = async () => {
+    if (!emailText.trim()) return;
+    setSending(true);
     setResult(null);
     try {
-      const res = await fetch("/api/scan-emails", { method: "POST" });
+      const res = await fetch("/api/incoming-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ emailBody: emailText, subject }),
+      });
       const data = await res.json();
       setResult(data);
-      console.log("Scan result:", data);
+      console.log("Process result:", data);
+      if (data.success) {
+        setTimeout(() => { setShowModal(false); setEmailText(""); setSubject(""); setResult(null); }, 4000);
+      }
     } catch (err) {
       setResult({ error: err.message });
     }
-    setScanning(false);
-    setTimeout(() => setResult(null), 8000);
+    setSending(false);
+  };
+
+  const S = {
+    input: { width: "100%", padding: "10px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 12, fontFamily: "'Manrope', sans-serif", boxSizing: "border-box", outline: "none" },
+    label: { fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 },
   };
 
   return (
-    <div style={{ position: "relative" }}>
-      <button onClick={scan} disabled={scanning} style={{
+    <div>
+      <button onClick={() => setShowModal(true)} style={{
         padding: "8px 16px", borderRadius: 3,
-        border: "1px solid #6AAF8D33",
-        background: scanning ? "#6AAF8D22" : "transparent",
-        color: "#6AAF8D", cursor: scanning ? "wait" : "pointer",
+        border: "1px solid #6AAF8D33", background: "transparent",
+        color: "#6AAF8D", cursor: "pointer",
         fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase",
         fontFamily: "'Manrope', sans-serif",
-        opacity: scanning ? 0.7 : 1,
       }}>
-        {scanning ? "Escaneando..." : "📧 Escanear Idealista"}
+        📧 Lead Idealista
       </button>
-      {result && (
-        <div style={{
-          position: "absolute", top: "100%", right: 0, marginTop: 6,
-          padding: "10px 14px", borderRadius: 3, minWidth: 220,
-          background: "#1C1B18", border: "1px solid #2A2926",
-          fontSize: 11, color: result.error ? "#D45454" : "#6AAF8D",
-          zIndex: 50, boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
-        }}>
-          {result.error ? `Error: ${result.error}` :
-            `✓ ${result.processed || 0} emails procesados`}
-          {result.results?.filter(r => r.success).length > 0 && (
-            <div style={{ color: "#C8A97E", marginTop: 4 }}>
-              {result.results.filter(r => r.success).length} leads enviados por WhatsApp
+      {showModal && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => setShowModal(false)}>
+          <div style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, padding: "28px 32px", maxWidth: 600, width: "95%" }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+              <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 400, margin: 0 }}>Procesar email <em>Idealista</em></h3>
+              <button onClick={() => setShowModal(false)} style={{ background: "none", border: "none", color: "#7A7870", cursor: "pointer", fontSize: 18 }}>✕</button>
             </div>
-          )}
+            <p style={{ fontSize: 11, color: "#7A7870", marginBottom: 16 }}>Pega el contenido del email de Idealista. CLAUDIA extraerá los datos y enviará WhatsApp al cliente automáticamente.</p>
+            <div style={{ marginBottom: 14 }}>
+              <label style={S.label}>Asunto del email</label>
+              <input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Nuevo mensaje / Llamada no contestada..." style={S.input} />
+            </div>
+            <div style={{ marginBottom: 20 }}>
+              <label style={S.label}>Contenido del email (pegar todo)</label>
+              <textarea value={emailText} onChange={(e) => setEmailText(e.target.value)} rows={10} placeholder={"Pega aquí el contenido completo del email de Idealista...\n\nEjemplo:\nBara\n602 39 80 54\nbaradiop856@gmail.com\n\nHola, me interesa este piso...\n\nRef. MNAQA00031\nCódigo del anuncio: 110979381\n320.000 €"} style={{ ...S.input, resize: "vertical", lineHeight: 1.5 }} />
+            </div>
+            {result && (
+              <div style={{ marginBottom: 16, padding: "12px 16px", borderRadius: 3, background: result.success ? "#6AAF8D12" : "#D4545412", border: "1px solid " + (result.success ? "#6AAF8D33" : "#D4545433") }}>
+                {result.success ? (
+                  <div>
+                    <div style={{ fontSize: 12, color: "#6AAF8D", fontWeight: 500, marginBottom: 4 }}>✓ Lead procesado correctamente</div>
+                    <div style={{ fontSize: 11, color: "#A09D93" }}>
+                      {result.nombre && <span>Cliente: {result.nombre} · </span>}
+                      Tel: {result.phone} · Ref: {result.referencia || "N/A"} · Agente: {result.agente || "N/A"}
+                    </div>
+                    <div style={{ fontSize: 10, color: "#C8A97E", marginTop: 4 }}>WhatsApp enviado al cliente</div>
+                  </div>
+                ) : (
+                  <div style={{ fontSize: 12, color: "#D45454" }}>
+                    {result.reason === "duplicate" ? "⚠ Este lead ya fue procesado antes" : `Error: ${result.error || "Desconocido"}`}
+                  </div>
+                )}
+              </div>
+            )}
+            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+              <button onClick={() => setShowModal(false)} style={{ padding: "10px 20px", borderRadius: 3, border: "1px solid #2A2926", background: "transparent", color: "#7A7870", cursor: "pointer", fontSize: 11, fontFamily: "'Manrope', sans-serif" }}>Cancelar</button>
+              <button onClick={process} disabled={!emailText.trim() || sending} style={{ padding: "10px 24px", borderRadius: 3, border: "none", background: "linear-gradient(135deg, #C8A97E, #D4B896)", color: "#111110", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "'Manrope', sans-serif", opacity: (!emailText.trim() || sending) ? 0.5 : 1 }}>
+                {sending ? "Procesando..." : "Enviar WhatsApp"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
