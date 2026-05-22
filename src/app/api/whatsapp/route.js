@@ -20,41 +20,15 @@ const AGENTES = {
   MNSLA: { nombre: "Silvia", telefono: "655882682" },
 };
 
-const CLAUDIA_SYSTEM = `Eres Claudia, secretaria coordinadora de Mallorca Nativa Properties. Contestas por WhatsApp a compradores que se han interesado por propiedades en Idealista.
+// Fields CLAUDIA can NEVER share
+const CAMPOS_PROHIBIDOS = ["dir","num","vis_dir","precio_prop","honorarios","iva_hon","notas_priv","prop_nombre","prop_tel","prop_email","fecha_cap","visitas","cual_neg","cual_mejoras"];
 
-PERSONALIDAD: Cercana, servicial, profesional. Mensajes cortos, naturales. Tuteas siempre. NUNCA mientes. Escribes como persona real por WhatsApp: mensajes cortos de 1-2 lineas maximo.
-
-CONTEXTO: Ya le has enviado el primer mensaje presentandote y preguntando si quiere visita o tiene dudas. Ahora gestionas la conversacion segun sus respuestas.
-
-FLUJO DE CONVERSACION:
-1. Si tiene DUDAS: Resuelve solo las que esten en la ficha de la propiedad (zona, metros, habitaciones, precio, planta). Si la info no esta en la ficha: "Esa informacion te la dara [nombre agente] que es quien gestiona la propiedad, le paso tu contacto"
-2. Si quiere VISITA: "Perfecto, ¿que disponibilidad tienes para la visita?"
-3. Cuando da disponibilidad: "Perfecto, le voy a trasladar toda la informacion a [nombre agente] para que podais acordar una hora"
-4. PREGUNTA CLAVE (siempre antes de derivar al agente): "Entiendo que has hablado con tu banco y el precio esta dentro de tu presupuesto, ¿verdad?"
-5a. Si NO ha hablado con banco: "No te preocupes, nosotros disponemos de un servicio gratuito de precualificacion previa para que estes seguro de que tu presupuesto alcanza, asi evitamos que te enamores de la propiedad y luego te lleves el chasco de no poder comprarla. Es una ventaja porque asi sabras la cantidad exacta a la que puedes acceder y vas mas a tiro fijo. Te paso el contacto de nuestra broker Silvia 655882682"
-5b. Si SI ha hablado con banco: "De acuerdo, te paso el telefono de [nombre agente] [telefono agente] para que puedas acordar hora"
-
-DESPUES DE DERIVAR: Envias resumen al agente con: telefono del cliente, resumen breve de la conversacion, enlace de idealista de la propiedad.
-
-AGENTES Y CODIGOS:
-- MNSBK -> Suren, 640130766
-- MNAQA -> Anabel, 647231895
-- MNJAC -> Jaime, 630517356
-- MNGET -> Guim, 657884143
-- MNSLA -> Silvia, 655882682
-
-REGLAS:
-- NUNCA das direccion exacta de la propiedad
-- Si no sabes algo: "Esa informacion te la dara el agente que gestiona la propiedad"
-- Respuestas cortas tipo WhatsApp, 1-2 lineas
-- NUNCA mientes
-- Cuando detectes que hay que derivar al agente, incluye en tu respuesta la etiqueta [DERIVAR_AGENTE] para que el sistema lo gestione
-- Cuando detectes que necesita precualificacion, incluye [DERIVAR_BROKER]`;
+// Fields CLAUDIA can share
+const CAMPOS_PERMITIDOS = ["ref","tipo","op","titulo","cp","municipio","zona","orient","dist_playa","precio_venta","precio_ant","precio_traspaso","cert_energ","conserv","ano_construc","m_util","m_const","m_parcela","m_terraza","m_balcon","m_porche","hab_dobles","hab_simples","banos","aseos","planta","parking","n_plazas","suelos","carp_int","carp_ext","persianas_tipo","persianas_mat","clima","agua_cal","suministros","drenaje","elec_reformada","font_reformada","venta_mobiliario","iee","calidades","ibi","extra_comunidad","otros_gastos","desc_texto","estado","destinos","agente"];
 
 async function sendWhatsApp(to, text) {
   let phone = to.replace(/\D/g, "");
   if (!phone.startsWith("34") && phone.length === 9) phone = "34" + phone;
-
   const res = await fetch(GRAPH_URL, {
     method: "POST",
     headers: { Authorization: `Bearer ${WHATSAPP_TOKEN}`, "Content-Type": "application/json" },
@@ -71,10 +45,65 @@ async function markAsRead(messageId) {
   });
 }
 
-async function callClaude(conversationHistory, convData) {
-  const context = convData ? `\nCONTEXTO DE ESTA CONVERSACION:\n- Cliente: ${convData.contacto || "desconocido"}\n- Propiedad ref: ${convData.referencia || "desconocida"}\n- URL Idealista: ${convData.idealista_url || convData.enlace || "no disponible"}\n- Precio: ${convData.precio || "no disponible"}\n- Agente asignado: ${convData.agente_asignado || convData.agente || "no asignado"}\n- Canal: ${convData.canal || "whatsapp"}` : "";
+// Get property info from Supabase
+async function getPropertyInfo(referencia) {
+  if (!referencia) return null;
+  const { data } = await supabase
+    .from("propiedades")
+    .select(CAMPOS_PERMITIDOS.join(","))
+    .eq("ref", referencia)
+    .single();
+  return data;
+}
 
-  console.log("Calling Claude with", conversationHistory.length, "messages, context:", context);
+async function callClaude(conversationHistory, convData, propertyInfo) {
+  const agente = convData?.referencia ? AGENTES[convData.referencia.slice(0, 5)] : null;
+  
+  let propertyContext = "";
+  if (propertyInfo) {
+    const info = Object.entries(propertyInfo)
+      .filter(([k, v]) => v !== null && v !== "" && v !== undefined)
+      .map(([k, v]) => `${k}: ${v}`)
+      .join("\n");
+    propertyContext = `\n\nFICHA DE LA PROPIEDAD (info que puedes compartir):\n${info}`;
+  }
+
+  const context = `\nCONTEXTO DE ESTA CONVERSACION:
+- Cliente: ${convData?.contacto || "desconocido"}
+- Propiedad ref: ${convData?.referencia || "desconocida"}
+- URL Idealista: ${convData?.idealista_url || convData?.enlace || "no disponible"}
+- Precio: ${convData?.precio || "no disponible"}
+- Agente asignado: ${agente?.nombre || convData?.agente || "no asignado"}
+- Teléfono agente: ${agente?.telefono || "no disponible"}
+- Canal: ${convData?.canal || "whatsapp"}${propertyContext}
+
+CAMPOS QUE NUNCA PUEDES COMPARTIR: dirección exacta, número, precio propietario, honorarios, datos del propietario, notas privadas, cualificaciones internas.
+Si el cliente pregunta por algo que NO está en la ficha de la propiedad: "Esa información te la dará ${agente?.nombre || "el agente"} que es quien gestiona la propiedad."`;
+
+  const systemPrompt = `Eres Claudia, secretaria coordinadora de Mallorca Nativa Properties. Contestas por WhatsApp a compradores interesados en propiedades de Idealista.
+
+PERSONALIDAD: Cercana, servicial, profesional. Mensajes cortos, naturales. Tuteas siempre. NUNCA mientes. Escribes como persona real por WhatsApp: mensajes cortos de 1-3 lineas maximo.
+
+FLUJO DE CONVERSACION:
+1. Si tiene DUDAS: Resuelve solo las que esten en la ficha de la propiedad. Si la info no esta en la ficha: "Esa informacion te la dara ${agente?.nombre || "el agente"} que es quien gestiona la propiedad, le paso tu contacto"
+2. Si quiere VISITA: "Perfecto, que disponibilidad tienes para la visita?"
+3. Cuando da disponibilidad: "Perfecto, le voy a trasladar toda la informacion a ${agente?.nombre || "el agente"} para que podais acordar una hora"
+4. PREGUNTA CLAVE (siempre antes de derivar al agente): "Entiendo que has hablado con tu banco y el precio esta dentro de tu presupuesto, verdad?"
+5a. Si NO ha hablado con banco: "No te preocupes, nosotros disponemos de un servicio gratuito de precualificacion previa para que estes seguro de que tu presupuesto alcanza, asi evitamos que te enamores de la propiedad y luego te lleves el chasco de no poder comprarla. Es una ventaja porque asi sabras la cantidad exacta a la que puedes acceder y vas mas a tiro fijo. Te paso el contacto de nuestra broker Silvia 655882682"
+5b. Si SI ha hablado con banco: "De acuerdo, te paso el telefono de ${agente?.nombre || "el agente"} ${agente?.telefono || ""} para que puedas acordar hora"
+
+CUANDO DERIVES AL AGENTE: Incluye [DERIVAR_AGENTE] en tu respuesta.
+CUANDO NECESITE PRECUALIFICACION: Incluye [DERIVAR_BROKER] en tu respuesta.
+
+REGLAS:
+- NUNCA des direccion exacta de la propiedad
+- NUNCA des datos del propietario
+- NUNCA des honorarios ni precio propietario
+- NUNCA inventes informacion que no este en la ficha
+- Respuestas cortas tipo WhatsApp, 1-3 lineas
+- Si no sabes algo: "Esa informacion te la dara ${agente?.nombre || "el agente"} que gestiona la propiedad"`;
+
+  console.log("Calling Claude with", conversationHistory.length, "messages");
 
   try {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -87,22 +116,19 @@ async function callClaude(conversationHistory, convData) {
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
         max_tokens: 300,
-        system: CLAUDIA_SYSTEM + context,
+        system: systemPrompt + context,
         messages: conversationHistory,
       }),
     });
-
     const data = await res.json();
-    console.log("Claude API response status:", res.status, "data:", JSON.stringify(data).slice(0, 500));
-    
+    console.log("Claude API status:", res.status);
     if (data.error) {
       console.error("Claude API error:", data.error);
       return "";
     }
-    
     return data.content?.[0]?.text || "";
   } catch (err) {
-    console.error("Claude API call failed:", err.message);
+    console.error("Claude call failed:", err.message);
     return "";
   }
 }
@@ -121,8 +147,6 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const body = await request.json();
-    console.log("WhatsApp webhook:", JSON.stringify(body, null, 2));
-
     const entry = body.entry?.[0];
     const changes = entry?.changes?.[0];
     const value = changes?.value;
@@ -139,7 +163,6 @@ export async function POST(request) {
         else if (msgType === "audio") text = "[Audio]";
         else if (msgType === "document") text = "[Documento]";
         else if (msgType === "video") text = "[Video]";
-        else if (msgType === "location") text = `[Ubicacion]`;
         else text = `[${msgType}]`;
 
         const senderName = value.contacts?.[0]?.profile?.name || from;
@@ -151,7 +174,7 @@ export async function POST(request) {
         const phoneWithout34 = phoneClean.startsWith("34") ? phoneClean.slice(2) : phoneClean;
         const phoneWith34 = phoneClean.startsWith("34") ? phoneClean : "34" + phoneClean;
 
-        // Find or create conversation - search both phone formats
+        // Find existing conversation
         let conv;
         const { data: existingConv } = await supabase
           .from("conversaciones")
@@ -178,20 +201,20 @@ export async function POST(request) {
           conv = newConv;
         }
 
-        // Save incoming message
+        // Save incoming message (correct column names: texto, from_who)
         if (conv?.id) {
           await supabase.from("mensajes").insert({
             conversacion_id: conv.id,
-            direccion: "in",
-            contenido: text,
-            tipo: msgType,
+            from_who: "cliente",
+            texto: text,
+            timestamp: new Date().toISOString(),
             wa_message_id: msgId,
           });
         }
 
-        // If this is an Idealista lead (has reference), use CLAUDIA AI
+        // If Idealista lead, use CLAUDIA AI
         if (conv?.canal === "idealista" || conv?.referencia) {
-          // Get conversation history
+          // Get message history
           const { data: history } = await supabase
             .from("mensajes")
             .select("*")
@@ -200,27 +223,32 @@ export async function POST(request) {
             .limit(20);
 
           const claudeMessages = (history || []).map((m) => ({
-            role: m.direccion === "in" ? "user" : "assistant",
-            content: m.contenido,
-          }));
+            role: m.from_who === "cliente" ? "user" : "assistant",
+            content: m.texto || "",
+          })).filter(m => m.content);
 
-          // Call Claude for CLAUDIA response
-          let claudiaResponse = await callClaude(claudeMessages, conv);
+          console.log("History messages:", claudeMessages.length);
+
+          if (claudeMessages.length === 0) {
+            claudeMessages.push({ role: "user", content: text });
+          }
+
+          // Get property info from Supabase
+          const propertyInfo = await getPropertyInfo(conv.referencia);
+          console.log("Property found:", propertyInfo ? "yes" : "no");
+
+          // Call CLAUDIA
+          let claudiaResponse = await callClaude(claudeMessages, conv, propertyInfo);
           console.log("CLAUDIA response:", claudiaResponse);
 
-          // Check for agent derivation
+          // Handle agent derivation
           const agente = conv.referencia ? AGENTES[conv.referencia.slice(0, 5)] : null;
 
           if (claudiaResponse.includes("[DERIVAR_AGENTE]") && agente) {
             claudiaResponse = claudiaResponse.replace("[DERIVAR_AGENTE]", "").trim();
-
-            // Send summary to agent
-            const resumen = `🔔 NUEVO LEAD IDEALISTA\n\nCliente: ${conv.nombre || senderName}\nTel: ${phoneClean}\nPropiedad: ${conv.referencia || "N/A"}\nURL: ${conv.idealista_url || "N/A"}\nPrecio: ${conv.precio || "N/A"}\n\nResumen: ${text}`;
-
+            const resumen = `🔔 NUEVO LEAD IDEALISTA\n\nCliente: ${conv.contacto || senderName}\nTel: ${phoneClean}\nPropiedad: ${conv.referencia || "N/A"}\nURL: ${conv.idealista_url || conv.enlace || "N/A"}\nPrecio: ${conv.precio || "N/A"}\n\nResumen: ${text}`;
             await sendWhatsApp(agente.telefono, resumen);
-            console.log(`Summary sent to ${agente.nombre} (${agente.telefono})`);
-
-            // Update conversation status
+            console.log(`Summary sent to ${agente.nombre}`);
             await supabase.from("conversaciones").update({ estado: "derivado" }).eq("id", conv.id);
           }
 
@@ -228,32 +256,29 @@ export async function POST(request) {
             claudiaResponse = claudiaResponse.replace("[DERIVAR_BROKER]", "").trim();
           }
 
-          // Send CLAUDIA's response
+          // Send response
           if (claudiaResponse) {
             await sendWhatsApp(from, claudiaResponse);
-
-            // Save outgoing message
             if (conv?.id) {
               await supabase.from("mensajes").insert({
                 conversacion_id: conv.id,
-                direccion: "out",
-                contenido: claudiaResponse,
-                tipo: "text",
+                from_who: "claudia",
+                texto: claudiaResponse,
+                timestamp: new Date().toISOString(),
                 sent_by: "CLAUDIA",
               });
             }
           }
         } else if (!existingConv) {
-          // Generic welcome for non-Idealista contacts
+          // Generic welcome for non-Idealista
           const welcome = "¡Hola! 👋 Gracias por contactar con Mallorca Nativa Properties. Un agente te atenderá en breve. ¿En qué podemos ayudarte?";
           await sendWhatsApp(from, welcome);
-
           if (conv?.id) {
             await supabase.from("mensajes").insert({
               conversacion_id: conv.id,
-              direccion: "out",
-              contenido: welcome,
-              tipo: "text",
+              from_who: "claudia",
+              texto: welcome,
+              timestamp: new Date().toISOString(),
             });
           }
         }

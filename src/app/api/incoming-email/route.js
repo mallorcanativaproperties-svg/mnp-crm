@@ -166,8 +166,8 @@ export async function POST(request) {
     // Save outgoing messages
     if (conv?.id) {
       await supabase.from("mensajes").insert([
-        { conversacion_id: conv.id, direccion: "out", contenido: msg1, tipo: "text", sent_by: "CLAUDIA" },
-        { conversacion_id: conv.id, direccion: "out", contenido: msg2, tipo: "text", sent_by: "CLAUDIA" },
+        { conversacion_id: conv.id, from_who: "claudia", texto: msg1, timestamp: new Date().toISOString(), sent_by: "CLAUDIA" },
+        { conversacion_id: conv.id, from_who: "claudia", texto: msg2, timestamp: new Date().toISOString(), sent_by: "CLAUDIA" },
       ]);
     }
 
