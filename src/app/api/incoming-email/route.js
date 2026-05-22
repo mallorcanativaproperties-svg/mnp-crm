@@ -114,53 +114,64 @@ export async function POST(request) {
       return NextResponse.json({ error: "No phone found in email", parsed: { nombre, referencia, codigoAnuncio } }, { status: 400 });
     }
 
-    // Check duplicate - only block if same phone AND same property
+    // Check if same client asked about same property before
     let phoneClean = telefono.replace(/\D/g, "");
     if (!phoneClean.startsWith("34") && phoneClean.length === 9) phoneClean = "34" + phoneClean;
+    
+    let conv = null;
+    let isRetake = false;
     
     if (referencia) {
       const { data: existing } = await supabase
         .from("conversaciones")
-        .select("id")
+        .select("*")
         .eq("telefono", phoneClean)
         .eq("referencia", referencia)
         .single();
 
       if (existing) {
-        return NextResponse.json({ success: false, reason: "duplicate", phone: phoneClean, referencia });
+        conv = existing;
+        isRetake = true;
       }
     }
 
     const agente = getAgente(referencia);
     const idealistaUrl = codigoAnuncio ? `https://www.idealista.com/inmueble/${codigoAnuncio}/` : null;
 
-    // Save conversation
-    const { data: conv, error: convErr } = await supabase.from("conversaciones").insert({
-      contacto: nombre || `Lead ${phoneClean}`,
-      telefono: phoneClean,
-      canal: "idealista",
-      estado: "nuevo",
-      agente_asignado: agente?.nombre || null,
-      agente: agente?.nombre || null,
-      referencia: referencia,
-      codigo_anuncio: codigoAnuncio,
-      idealista_url: idealistaUrl,
-      enlace: idealistaUrl,
-      email: email,
-      precio: precio,
-      interes: mensaje || "Lead Idealista",
-    }).select().single();
+    // Create new conversation if not retake
+    if (!conv) {
+      const { data: newConv, error: convErr } = await supabase.from("conversaciones").insert({
+        contacto: nombre || `Lead ${phoneClean}`,
+        telefono: phoneClean,
+        canal: "idealista",
+        estado: "nuevo",
+        agente_asignado: agente?.nombre || null,
+        agente: agente?.nombre || null,
+        referencia: referencia,
+        codigo_anuncio: codigoAnuncio,
+        idealista_url: idealistaUrl,
+        enlace: idealistaUrl,
+        email: email,
+        precio: precio,
+        interes: mensaje || "Lead Idealista",
+      }).select().single();
 
-    console.log("Conv insert:", conv ? "OK" : "FAIL", convErr?.message || "");
+      console.log("Conv insert:", newConv ? "OK" : "FAIL", convErr?.message || "");
+      conv = newConv;
+    }
 
-    // Send WhatsApp
+    // Send WhatsApp - different message if retake
     let msg1, msg2;
-    if (nombre) {
+    if (isRetake) {
+      msg1 = `Hola${nombre ? " " + nombre : ""}, hemos visto que te has vuelto a interesar por esta propiedad${idealistaUrl ? "\n" + idealistaUrl : ""} 🏠`;
+      msg2 = "¿Pudiste ver la información que te enviamos anteriormente o hubo algún problema?";
+    } else if (nombre) {
       msg1 = `Hola ${nombre}, hemos recibido tu petición interesándote por la propiedad${idealistaUrl ? "\n" + idealistaUrl : ""} 🏠`;
+      msg2 = "¿Quieres agendar una visita o tienes alguna duda al respecto?";
     } else {
       msg1 = `Hola, hemos visto que has intentado contactarnos por la propiedad${idealistaUrl ? "\n" + idealistaUrl : ""} 🏠`;
+      msg2 = "¿Quieres agendar una visita o tienes alguna duda al respecto?";
     }
-    msg2 = "¿Quieres agendar una visita o tienes alguna duda al respecto?";
 
     const result1 = await sendWhatsApp(phoneClean, msg1);
     await new Promise((r) => setTimeout(r, 2000));
