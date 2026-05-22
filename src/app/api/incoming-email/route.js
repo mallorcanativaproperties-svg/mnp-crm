@@ -114,18 +114,21 @@ export async function POST(request) {
       return NextResponse.json({ error: "No phone found in email", parsed: { nombre, referencia, codigoAnuncio } }, { status: 400 });
     }
 
-    // Check duplicate - always store with 34 prefix
+    // Check duplicate - only block if same phone AND same property
     let phoneClean = telefono.replace(/\D/g, "");
     if (!phoneClean.startsWith("34") && phoneClean.length === 9) phoneClean = "34" + phoneClean;
-    const { data: existing } = await supabase
-      .from("conversaciones")
-      .select("id")
-      .eq("telefono", phoneClean)
-      .eq("canal", "idealista")
-      .single();
+    
+    if (referencia) {
+      const { data: existing } = await supabase
+        .from("conversaciones")
+        .select("id")
+        .eq("telefono", phoneClean)
+        .eq("referencia", referencia)
+        .single();
 
-    if (existing) {
-      return NextResponse.json({ success: false, reason: "duplicate", phone: phoneClean });
+      if (existing) {
+        return NextResponse.json({ success: false, reason: "duplicate", phone: phoneClean, referencia });
+      }
     }
 
     const agente = getAgente(referencia);
