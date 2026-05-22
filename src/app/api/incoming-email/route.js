@@ -70,12 +70,31 @@ export async function POST(request) {
       mensaje = "Llamada perdida desde Idealista";
     } else {
       // MESSAGE FORMAT
-      // Phone: 602 39 80 54 or similar
-      const phoneMatch = content.match(/(\d{3}\s?\d{2}\s?\d{2}\s?\d{2})/);
+      // First extract reference and ad code so we don't confuse them with phone
+      const refMatch = content.match(/Ref\.\s*(MN[A-Z]{3}\d{5})/i) || content.match(/(MN[A-Z]{3}\d{5})/);
+      if (refMatch) referencia = refMatch[1];
+
+      const codeMatch = content.match(/[Cc]ódigo del anuncio:?\s*(\d{6,12})/);
+      if (codeMatch) codigoAnuncio = codeMatch[1];
+
+      // Price - extract before phone to exclude price digits
+      const priceMatch = content.match(/([\d.]+)\s*€/);
+      if (priceMatch) precio = priceMatch[1];
+
+      // Phone: look for 9-digit Spanish numbers (6XX or 7XX start)
+      // Remove ad code and price from content before searching for phone
+      let cleanContent = content;
+      if (codigoAnuncio) cleanContent = cleanContent.replace(codigoAnuncio, "");
+      if (precio) cleanContent = cleanContent.replace(precio, "");
+
+      // Match phone formats: 602 39 80 54, 602398054, 602 398 054
+      const phoneMatch = cleanContent.match(/\b([67]\d{2}\s?\d{2}\s?\d{2}\s?\d{2})\b/)
+        || cleanContent.match(/\b([67]\d{8})\b/)
+        || cleanContent.match(/\b(\d{3}\s\d{2}\s\d{2}\s\d{2})\b/);
       if (phoneMatch) telefono = phoneMatch[1].replace(/\s/g, "");
 
       // Name: typically appears before the phone
-      const nameMatch = content.match(/\n\s*([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)*)\s*\n\s*\d{3}/)
+      const nameMatch = content.match(/\n\s*([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)*)\s*\n\s*[67]\d{2}/)
         || content.match(/(?:respuesta)\s*\w?\s*([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)*)\s/);
       if (nameMatch) nombre = nameMatch[1].trim();
 
@@ -87,18 +106,6 @@ export async function POST(request) {
       const msgMatch = content.match(/(?:Hola[,.]?\s*)([\s\S]*?)(?:\n\s*\n|\nResponder)/i)
         || content.match(/((?:Hola|Buenos|Buenas|Me interesa|Estoy interesad|Quería|Quisiera)[^\n]*(?:\n[^\n]+)*)/i);
       if (msgMatch) mensaje = (msgMatch[1] || msgMatch[0]).replace(/<[^>]+>/g, "").trim().slice(0, 500);
-
-      // Reference
-      const refMatch = content.match(/Ref\.\s*(MN[A-Z]{3}\d{5})/i) || content.match(/(MN[A-Z]{3}\d{5})/);
-      if (refMatch) referencia = refMatch[1];
-
-      // Ad code
-      const codeMatch = content.match(/[Cc]ódigo del anuncio:?\s*(\d{6,12})/);
-      if (codeMatch) codigoAnuncio = codeMatch[1];
-
-      // Price
-      const priceMatch = content.match(/([\d.]+)\s*€/);
-      if (priceMatch) precio = priceMatch[1];
     }
 
     console.log("Parsed:", JSON.stringify({ nombre, telefono, email, referencia, codigoAnuncio, precio, isCall }));
