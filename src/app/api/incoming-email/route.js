@@ -114,8 +114,9 @@ export async function POST(request) {
       return NextResponse.json({ error: "No phone found in email", parsed: { nombre, referencia, codigoAnuncio } }, { status: 400 });
     }
 
-    // Check duplicate
-    const phoneClean = telefono.replace(/\D/g, "");
+    // Check duplicate - always store with 34 prefix
+    let phoneClean = telefono.replace(/\D/g, "");
+    if (!phoneClean.startsWith("34") && phoneClean.length === 9) phoneClean = "34" + phoneClean;
     const { data: existing } = await supabase
       .from("conversaciones")
       .select("id")

@@ -134,13 +134,15 @@ export async function POST(request) {
         await markAsRead(msgId);
 
         const phoneClean = from.replace(/\D/g, "");
+        const phoneWithout34 = phoneClean.startsWith("34") ? phoneClean.slice(2) : phoneClean;
+        const phoneWith34 = phoneClean.startsWith("34") ? phoneClean : "34" + phoneClean;
 
-        // Find or create conversation
+        // Find or create conversation - search both phone formats
         let conv;
         const { data: existingConv } = await supabase
           .from("conversaciones")
           .select("*")
-          .eq("telefono", phoneClean)
+          .or(`telefono.eq.${phoneClean},telefono.eq.${phoneWithout34},telefono.eq.${phoneWith34}`)
           .order("created_at", { ascending: false })
           .limit(1)
           .single();
@@ -154,7 +156,7 @@ export async function POST(request) {
         } else {
           const { data: newConv } = await supabase.from("conversaciones").insert({
             nombre: senderName,
-            telefono: phoneClean,
+            telefono: phoneWith34,
             canal: "whatsapp",
             ultimo_mensaje: text,
             estado: "nuevo",
