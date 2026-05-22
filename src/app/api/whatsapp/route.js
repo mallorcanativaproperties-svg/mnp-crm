@@ -74,23 +74,37 @@ async function markAsRead(messageId) {
 async function callClaude(conversationHistory, convData) {
   const context = convData ? `\nCONTEXTO DE ESTA CONVERSACION:\n- Cliente: ${convData.contacto || "desconocido"}\n- Propiedad ref: ${convData.referencia || "desconocida"}\n- URL Idealista: ${convData.idealista_url || convData.enlace || "no disponible"}\n- Precio: ${convData.precio || "no disponible"}\n- Agente asignado: ${convData.agente_asignado || convData.agente || "no asignado"}\n- Canal: ${convData.canal || "whatsapp"}` : "";
 
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "x-api-key": ANTHROPIC_API_KEY,
-      "anthropic-version": "2023-06-01",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 300,
-      system: CLAUDIA_SYSTEM + context,
-      messages: conversationHistory,
-    }),
-  });
+  console.log("Calling Claude with", conversationHistory.length, "messages, context:", context);
 
-  const data = await res.json();
-  return data.content?.[0]?.text || "";
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "x-api-key": ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 300,
+        system: CLAUDIA_SYSTEM + context,
+        messages: conversationHistory,
+      }),
+    });
+
+    const data = await res.json();
+    console.log("Claude API response status:", res.status, "data:", JSON.stringify(data).slice(0, 500));
+    
+    if (data.error) {
+      console.error("Claude API error:", data.error);
+      return "";
+    }
+    
+    return data.content?.[0]?.text || "";
+  } catch (err) {
+    console.error("Claude API call failed:", err.message);
+    return "";
+  }
 }
 
 // GET = webhook verification
