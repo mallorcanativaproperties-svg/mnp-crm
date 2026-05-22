@@ -72,7 +72,7 @@ async function markAsRead(messageId) {
 }
 
 async function callClaude(conversationHistory, convData) {
-  const context = convData ? `\nCONTEXTO DE ESTA CONVERSACION:\n- Cliente: ${convData.nombre || "desconocido"}\n- Propiedad ref: ${convData.referencia || "desconocida"}\n- URL Idealista: ${convData.idealista_url || "no disponible"}\n- Precio: ${convData.precio || "no disponible"}\n- Agente asignado: ${convData.agente_asignado || "no asignado"}\n- Canal: ${convData.canal || "whatsapp"}` : "";
+  const context = convData ? `\nCONTEXTO DE ESTA CONVERSACION:\n- Cliente: ${convData.contacto || "desconocido"}\n- Propiedad ref: ${convData.referencia || "desconocida"}\n- URL Idealista: ${convData.idealista_url || convData.enlace || "no disponible"}\n- Precio: ${convData.precio || "no disponible"}\n- Agente asignado: ${convData.agente_asignado || convData.agente || "no asignado"}\n- Canal: ${convData.canal || "whatsapp"}` : "";
 
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -149,16 +149,16 @@ export async function POST(request) {
 
         if (existingConv) {
           await supabase.from("conversaciones").update({
-            ultimo_mensaje: text,
+            interes: text,
             updated_at: new Date().toISOString(),
           }).eq("id", existingConv.id);
           conv = existingConv;
         } else {
           const { data: newConv } = await supabase.from("conversaciones").insert({
-            nombre: senderName,
+            contacto: senderName,
             telefono: phoneWith34,
             canal: "whatsapp",
-            ultimo_mensaje: text,
+            interes: text,
             estado: "nuevo",
           }).select().single();
           conv = newConv;

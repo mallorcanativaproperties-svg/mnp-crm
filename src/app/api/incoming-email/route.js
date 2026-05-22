@@ -132,19 +132,23 @@ export async function POST(request) {
     const idealistaUrl = codigoAnuncio ? `https://www.idealista.com/inmueble/${codigoAnuncio}/` : null;
 
     // Save conversation
-    const { data: conv } = await supabase.from("conversaciones").insert({
-      nombre: nombre || `Lead ${phoneClean}`,
+    const { data: conv, error: convErr } = await supabase.from("conversaciones").insert({
+      contacto: nombre || `Lead ${phoneClean}`,
       telefono: phoneClean,
       canal: "idealista",
-      ultimo_mensaje: mensaje || "Lead Idealista",
       estado: "nuevo",
       agente_asignado: agente?.nombre || null,
+      agente: agente?.nombre || null,
       referencia: referencia,
       codigo_anuncio: codigoAnuncio,
       idealista_url: idealistaUrl,
+      enlace: idealistaUrl,
       email: email,
       precio: precio,
+      interes: mensaje || "Lead Idealista",
     }).select().single();
+
+    console.log("Conv insert:", conv ? "OK" : "FAIL", convErr?.message || "");
 
     // Send WhatsApp
     let msg1, msg2;
