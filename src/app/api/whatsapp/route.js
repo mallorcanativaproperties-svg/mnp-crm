@@ -204,19 +204,30 @@ export async function POST(request) {
         const phoneWithout34 = phoneClean.startsWith("34") ? phoneClean.slice(2) : phoneClean;
         const phoneWith34 = phoneClean.startsWith("34") ? phoneClean : "34" + phoneClean;
 
-        // Find existing conversation
+        // Find existing conversation - prioritize ones with referencia (Idealista leads)
         let conv;
         console.log(`Looking for conversation with phone: ${phoneClean} | ${phoneWithout34} | ${phoneWith34}`);
         
-        const { data: existingConv, error: convError } = await supabase
+        // First try to find a conversation with referencia (Idealista lead)
+        const { data: idealConv } = await supabase
+          .from("conversaciones")
+          .select("*")
+          .or(`telefono.eq.${phoneClean},telefono.eq.${phoneWithout34},telefono.eq.${phoneWith34}`)
+          .not("referencia", "is", null)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .single();
+        
+        // If no Idealista conv, try any conversation
+        const existingConv = idealConv || (await supabase
           .from("conversaciones")
           .select("*")
           .or(`telefono.eq.${phoneClean},telefono.eq.${phoneWithout34},telefono.eq.${phoneWith34}`)
           .order("created_at", { ascending: false })
           .limit(1)
-          .single();
+          .single()).data;
 
-        console.log(`Conv found: ${existingConv ? "YES" : "NO"}, canal: ${existingConv?.canal}, ref: ${existingConv?.referencia}, error: ${convError?.message || "none"}`);
+        console.log(`Conv found: ${existingConv ? "YES" : "NO"}, canal: ${existingConv?.canal}, ref: ${existingConv?.referencia}`);
 
         if (existingConv) {
           const updateData = {
