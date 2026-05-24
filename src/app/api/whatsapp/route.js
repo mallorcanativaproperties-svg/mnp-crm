@@ -216,10 +216,16 @@ export async function POST(request) {
           .single();
 
         if (existingConv) {
-          await supabase.from("conversaciones").update({
+          const updateData = {
             interes: text,
             updated_at: new Date().toISOString(),
-          }).eq("id", existingConv.id);
+          };
+          // Reactivate if client responds after follow-up
+          if (existingConv.estado === "sin_respuesta") {
+            updateData.estado = "activo";
+            updateData.alertas = "Cliente respondió tras seguimiento";
+          }
+          await supabase.from("conversaciones").update(updateData).eq("id", existingConv.id);
           conv = existingConv;
         } else {
           const { data: newConv } = await supabase.from("conversaciones").insert({
