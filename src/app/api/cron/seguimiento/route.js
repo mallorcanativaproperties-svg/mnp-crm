@@ -33,8 +33,8 @@ async function sendWhatsApp(to, text) {
 }
 
 const MENSAJES_SEGUIMIENTO = [
-  "Hola! 😊 Te escribo para recordarte lo de la visita a la propiedad. ¿Sigues interesado/a? Si necesitas más info o cambiar el día, dime sin problema",
-  "Hola de nuevo! Solo quería confirmar si sigues interesado/a en la propiedad. Si cambias de opinión en el futuro no dudes en escribirnos 🏡",
+  "Hola, te escribo para recordarte lo de la visita a la propiedad. Sigues interesado? Si necesitas cambiar el dia, dime sin problema",
+  "Hola de nuevo, solo queria confirmar si sigues interesado en la propiedad. Si cambias de opinion en el futuro escribenos sin problema",
 ];
 
 export async function GET(request) {
