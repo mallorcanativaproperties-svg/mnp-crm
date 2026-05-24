@@ -103,6 +103,50 @@ export async function GET(request) {
     }
 
     // ============================================
+    // PART 1B: FORMULARIO REMINDER (24h after derivation)
+    // Remind client to fill in the property preferences form
+    // ============================================
+    const hace24h = new Date(ahora.getTime() - 24 * 60 * 60 * 1000);
+    
+    const { data: paraFormulario } = await supabase
+      .from("conversaciones")
+      .select("*")
+      .in("estado", ["derivado", "broker_pendiente", "cerrado"])
+      .or("canal.eq.idealista,referencia.not.is.null")
+      .lt("updated_at", hace24h.toISOString());
+
+    console.log(`Found ${paraFormulario?.length || 0} conversations to check for formulario reminder`);
+
+    for (const conv of paraFormulario || []) {
+      const phoneCliente = conv.telefono;
+      if (!phoneCliente) continue;
+
+      // Check if formulario reminder was already sent
+      const { data: formMsgs } = await supabase
+        .from("mensajes")
+        .select("id")
+        .eq("conversacion_id", conv.id)
+        .eq("sent_by", "FORM_REMINDER")
+        .limit(1);
+
+      if (formMsgs && formMsgs.length > 0) continue;
+
+      const msgForm = "Hola de nuevo! Te acuerdas del formulario que te envie? Si lo cumplimentas te podremos enviar propiedades que se ajusten a tus preferencias antes de que salgan al mercado. Muchas no llegan a publicarse!\nhttps://docs.google.com/forms/d/e/1FAIpQLSdHXVMBpqOvsDTiGdoZ7uPYRAqkmonst_0GO9RY0CgABHdEGQ/viewform?usp=header";
+      await sendWhatsApp(phoneCliente, msgForm);
+      console.log(`Formulario reminder sent to ${conv.contacto} (${phoneCliente})`);
+
+      await supabase.from("mensajes").insert({
+        conversacion_id: conv.id,
+        from_who: "claudia",
+        texto: msgForm,
+        timestamp: new Date().toISOString(),
+        sent_by: "FORM_REMINDER",
+      });
+
+      seguimientosEnviados++;
+    }
+
+    // ============================================
     // PART 2: REGULAR FOLLOW-UP (4h + 8h)
     // Only for NON-derived conversations
     // ============================================
