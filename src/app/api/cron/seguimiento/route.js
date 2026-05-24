@@ -11,11 +11,14 @@ const AGENTES = {
 
 const HORAS_SEGUIMIENTO = 4;
 const MAX_SEGUIMIENTOS = 2;
+const HORAS_BROKER = 2;
 
 const MENSAJES_SEGUIMIENTO = [
   "Hola, te escribo para recordarte lo de la visita a la propiedad. Sigues interesado? Si necesitas cambiar el dia, dime sin problema",
   "Hola de nuevo, solo queria confirmar si sigues interesado en la propiedad. Si cambias de opinion en el futuro escribenos sin problema",
 ];
+
+const MSG_BROKER = "Se me ha olvidado comentarte que podemos hacerte un estudio hipotecario gratuito. Ahorramos una media de 20.000 euros a nuestros clientes respecto a su banco habitual. Le mando tu telefono a Silvia, nuestra broker?";
 
 async function sendWhatsApp(to, text) {
   const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN;
@@ -48,8 +51,61 @@ export async function GET(request) {
 
   try {
     const ahora = new Date();
+    const hace2h = new Date(ahora.getTime() - HORAS_BROKER * 60 * 60 * 1000);
     const hace4h = new Date(ahora.getTime() - HORAS_SEGUIMIENTO * 60 * 60 * 1000);
+    let seguimientosEnviados = 0;
 
+    // ============================================
+    // PART 1: BROKER MESSAGE (2h after derivation)
+    // For conversations already derived to agent
+    // ============================================
+    const { data: derivadas } = await supabase
+      .from("conversaciones")
+      .select("*")
+      .eq("estado", "derivado")
+      .or("canal.eq.idealista,referencia.not.is.null")
+      .lt("updated_at", hace2h.toISOString());
+
+    console.log(`Found ${derivadas?.length || 0} derived conversations to check for broker msg`);
+
+    for (const conv of derivadas || []) {
+      const phoneCliente = conv.telefono;
+      if (!phoneCliente) continue;
+
+      // Check if broker message was already sent
+      const { data: brokerMsgs } = await supabase
+        .from("mensajes")
+        .select("id")
+        .eq("conversacion_id", conv.id)
+        .eq("sent_by", "BROKER_OFFER")
+        .limit(1);
+
+      if (brokerMsgs && brokerMsgs.length > 0) continue; // Already sent
+
+      await sendWhatsApp(phoneCliente, MSG_BROKER);
+      console.log(`Broker offer sent to ${conv.contacto} (${phoneCliente})`);
+
+      await supabase.from("mensajes").insert({
+        conversacion_id: conv.id,
+        from_who: "claudia",
+        texto: MSG_BROKER,
+        timestamp: new Date().toISOString(),
+        sent_by: "BROKER_OFFER",
+      });
+
+      // Update state to wait for broker response
+      await supabase.from("conversaciones").update({
+        estado: "broker_pendiente",
+        updated_at: new Date().toISOString(),
+      }).eq("id", conv.id);
+
+      seguimientosEnviados++;
+    }
+
+    // ============================================
+    // PART 2: REGULAR FOLLOW-UP (4h + 8h)
+    // Only for NON-derived conversations
+    // ============================================
     const { data: conversaciones, error } = await supabase
       .from("conversaciones")
       .select("*")
@@ -62,8 +118,7 @@ export async function GET(request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    console.log(`Found ${conversaciones?.length || 0} conversations to check`);
-    let seguimientosEnviados = 0;
+    console.log(`Found ${conversaciones?.length || 0} non-derived conversations to check`);
 
     for (const conv of conversaciones || []) {
       const { data: ultimosMensajes } = await supabase
@@ -117,26 +172,6 @@ export async function GET(request) {
       if (agente) {
         const msgAgente = `SEGUIMIENTO ${seguimientosPrevios + 1}/2\n\n${conv.contacto || "Cliente"}\nTel: +${phoneCliente}\nRef: ${conv.referencia || "N/A"}\n${Math.round(horasSinRespuesta)}h sin responder\n\n${seguimientosPrevios === 0 ? "Le he enviado un primer recordatorio" : "Ultimo recordatorio enviado. No insistire mas"}`;
         await sendWhatsApp(agente.telefono, msgAgente);
-
-        const agentePhoneWith34 = "34" + agente.telefono;
-        const { data: agentConv } = await supabase
-          .from("conversaciones")
-          .select("id")
-          .or(`telefono.eq.${agente.telefono},telefono.eq.${agentePhoneWith34}`)
-          .eq("canal", "interno")
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .single();
-
-        if (agentConv?.id) {
-          await supabase.from("mensajes").insert({
-            conversacion_id: agentConv.id,
-            from_who: "claudia",
-            texto: msgAgente,
-            timestamp: new Date().toISOString(),
-            sent_by: "SEGUIMIENTO",
-          });
-        }
       }
 
       await supabase.from("conversaciones").update({
@@ -149,7 +184,6 @@ export async function GET(request) {
 
     return NextResponse.json({
       status: "ok",
-      checked: conversaciones?.length || 0,
       seguimientos: seguimientosEnviados,
       timestamp: ahora.toISOString(),
     });

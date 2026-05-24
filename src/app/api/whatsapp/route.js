@@ -275,6 +275,47 @@ export async function POST(request) {
           });
         }
 
+        // Handle broker offer response (estado = broker_pendiente)
+        if (conv?.estado === "broker_pendiente") {
+          const respuesta = text.toLowerCase().trim();
+          const esSi = respuesta.includes("si") || respuesta.includes("sí") || respuesta.includes("vale") || respuesta.includes("ok") || respuesta.includes("claro") || respuesta.includes("porfa") || respuesta.includes("adelante") || respuesta.includes("manda");
+          const esNo = respuesta.includes("no") || respuesta.includes("nada") || respuesta.includes("paso") || respuesta.includes("gracias pero");
+          
+          if (esSi) {
+            const BROKER_PHONE = "655882682";
+            const msgBroker = `LEAD HIPOTECARIO\n\n${conv.contacto || senderName}\nTel: +${phoneWith34}\nRef: ${conv.referencia || "N/A"}\nPrecio: ${conv.precio || "N/A"}\n\nCliente interesado en estudio hipotecario gratuito`;
+            await sendWhatsApp(BROKER_PHONE, msgBroker);
+            
+            const respCliente = "Perfecto, le paso tu telefono a Silvia para que te contacte. Un placer haberte ayudado!";
+            await sendWhatsApp(from, respCliente);
+            await supabase.from("mensajes").insert({
+              conversacion_id: conv.id, from_who: "claudia", texto: respCliente,
+              timestamp: new Date().toISOString(), sent_by: "CLAUDIA",
+            });
+            await supabase.from("conversaciones").update({ estado: "cerrado", updated_at: new Date().toISOString() }).eq("id", conv.id);
+            console.log(`Broker lead sent to Silvia for ${conv.contacto}`);
+          } else if (esNo) {
+            const respCliente = "Sin problema. Si en el futuro necesitas algo, aqui estamos. Un placer!";
+            await sendWhatsApp(from, respCliente);
+            await supabase.from("mensajes").insert({
+              conversacion_id: conv.id, from_who: "claudia", texto: respCliente,
+              timestamp: new Date().toISOString(), sent_by: "CLAUDIA",
+            });
+            await supabase.from("conversaciones").update({ estado: "cerrado", updated_at: new Date().toISOString() }).eq("id", conv.id);
+            console.log(`Client ${conv.contacto} declined broker offer`);
+          } else {
+            // Ambiguous response - ask again briefly
+            const respCliente = "Perdona, no te he entendido. Te interesa que Silvia te haga un estudio hipotecario gratuito?";
+            await sendWhatsApp(from, respCliente);
+            await supabase.from("mensajes").insert({
+              conversacion_id: conv.id, from_who: "claudia", texto: respCliente,
+              timestamp: new Date().toISOString(), sent_by: "CLAUDIA",
+            });
+          }
+          // Skip normal CLAUDIA processing
+          return NextResponse.json({ status: "ok" });
+        }
+
         // Use CLAUDIA AI if: Idealista lead, has referencia, OR has previous CLAUDIA messages
         const { data: prevClaudiaMsg } = conv?.id ? await supabase
           .from("mensajes")
@@ -425,6 +466,21 @@ export async function POST(request) {
               seguimiento: resumenCorto,
               updated_at: new Date().toISOString()
             }).eq("id", conv.id);
+            
+            // Send formulario message after giving agent phone
+            const msgFormulario = "Si me cumplimentas este formulario, recibiras propiedades antes de que esten publicadas y que solo encajen con tus preferencias, muchas propiedades no salen al mercado:\nhttps://docs.google.com/forms/d/e/1FAIpQLSdHXVMBpqOvsDTiGdoZ7uPYRAqkmonst_0GO9RY0CgABHdEGQ/viewform?usp=header";
+            await new Promise(r => setTimeout(r, 3000));
+            await sendWhatsApp(from, msgFormulario);
+            if (conv?.id) {
+              await supabase.from("mensajes").insert({
+                conversacion_id: conv.id,
+                from_who: "claudia",
+                texto: msgFormulario,
+                timestamp: new Date().toISOString(),
+                sent_by: "CLAUDIA",
+              });
+            }
+            console.log("Formulario message sent to client");
           }
 
           if (claudiaResponse.includes("[DERIVAR_BROKER]")) {
