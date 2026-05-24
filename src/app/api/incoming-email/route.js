@@ -69,43 +69,76 @@ export async function POST(request) {
       if (codeMatch) codigoAnuncio = codeMatch[1];
       mensaje = "Llamada perdida desde Idealista";
     } else {
-      // MESSAGE FORMAT
-      // First extract reference and ad code so we don't confuse them with phone
+      // MESSAGE FORMAT - supports both old format and new structured format
+      
+      // Reference
       const refMatch = content.match(/Ref\.\s*(MN[A-Z]{3}\d{5})/i) || content.match(/(MN[A-Z]{3}\d{5})/);
       if (refMatch) referencia = refMatch[1];
 
+      // Ad code
       const codeMatch = content.match(/[Cc]ódigo del anuncio:?\s*(\d{6,12})/);
       if (codeMatch) codigoAnuncio = codeMatch[1];
 
-      // Price - extract before phone to exclude price digits
+      // Price
       const priceMatch = content.match(/([\d.]+)\s*€/);
       if (priceMatch) precio = priceMatch[1];
 
       // Phone: look for 9-digit Spanish numbers (6XX or 7XX start)
-      // Remove ad code and price from content before searching for phone
       let cleanContent = content;
       if (codigoAnuncio) cleanContent = cleanContent.replace(codigoAnuncio, "");
       if (precio) cleanContent = cleanContent.replace(precio, "");
 
-      // Match phone formats: 602 39 80 54, 602398054, 602 398 054
       const phoneMatch = cleanContent.match(/\b([67]\d{2}\s?\d{2}\s?\d{2}\s?\d{2})\b/)
         || cleanContent.match(/\b([67]\d{8})\b/)
         || cleanContent.match(/\b(\d{3}\s\d{2}\s\d{2}\s\d{2})\b/);
       if (phoneMatch) telefono = phoneMatch[1].replace(/\s/g, "");
 
-      // Name: typically appears before the phone
+      // Name: multiple patterns
       const nameMatch = content.match(/\n\s*([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)*)\s*\n\s*[67]\d{2}/)
-        || content.match(/(?:respuesta)\s*\w?\s*([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)*)\s/);
+        || content.match(/(?:respuesta)\s*\w?\s*([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)*)\s/)
+        || content.match(/(?:respuesta|mensaje)\s*(?:de\s+)?([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)*)/i);
       if (nameMatch) nombre = nameMatch[1].trim();
 
       // Email
       const emailMatch = content.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
       if (emailMatch && !emailMatch[1].includes("idealista") && !emailMatch[1].includes("mallorca")) email = emailMatch[1];
 
-      // Client message
-      const msgMatch = content.match(/(?:Hola[,.]?\s*)([\s\S]*?)(?:\n\s*\n|\nResponder)/i)
-        || content.match(/((?:Hola|Buenos|Buenas|Me interesa|Estoy interesad|Quería|Quisiera)[^\n]*(?:\n[^\n]+)*)/i);
-      if (msgMatch) mensaje = (msgMatch[1] || msgMatch[0]).replace(/<[^>]+>/g, "").trim().slice(0, 500);
+      // Client message - try structured format first (new Idealista format)
+      // Look for the message box content between quotes or after specific patterns
+      const structuredMsg = content.match(/(?:Hola[,.]?\s*)([\s\S]*?)(?:\n\s*Contacto|\n\s*\n\s*Contacto)/i);
+      
+      // Also extract structured fields if present
+      const diaMatch = content.match(/D[ií]a:?\s*([^\n]+)/i);
+      const horaMatch = content.match(/Hora:?\s*([^\n]+)/i);
+      const visitaMatch = content.match(/Quiere visitar[^:]*:?\s*([^\n]+)/i);
+      const comprarMatch = content.match(/Tiene pensado comprar:?\s*([^\n]+)/i);
+      const infoMatch = content.match(/Quiere informaci[oó]n de:?\s*([^\n]+)/i);
+      
+      // Build message from structured fields or free text
+      if (structuredMsg) {
+        mensaje = structuredMsg[1].replace(/<[^>]+>/g, "").trim().slice(0, 500);
+      }
+      
+      // Enrich with structured data if available
+      let extraInfo = [];
+      if (diaMatch) extraInfo.push(`Día preferido: ${diaMatch[1].trim()}`);
+      if (horaMatch) extraInfo.push(`Hora: ${horaMatch[1].trim()}`);
+      if (visitaMatch) extraInfo.push(`Visita: ${visitaMatch[1].trim()}`);
+      if (comprarMatch) extraInfo.push(`Compra: ${comprarMatch[1].trim()}`);
+      if (infoMatch) extraInfo.push(`Info: ${infoMatch[1].trim()}`);
+      
+      if (extraInfo.length > 0) {
+        mensaje = (mensaje ? mensaje + "\n" : "") + extraInfo.join(", ");
+      }
+      
+      // Fallback to generic message patterns
+      if (!mensaje) {
+        const msgMatch = content.match(/(?:Hola[,.]?\s*)([\s\S]*?)(?:\n\s*\n|\nResponder)/i)
+          || content.match(/((?:Hola|Buenos|Buenas|Me interesa|Estoy interesad|Quería|Quisiera)[^\n]*(?:\n[^\n]+)*)/i);
+        if (msgMatch) mensaje = (msgMatch[1] || msgMatch[0]).replace(/<[^>]+>/g, "").trim().slice(0, 500);
+      }
+      
+      if (!mensaje) mensaje = "Lead Idealista - contacto por formulario";
     }
 
     console.log("Parsed:", JSON.stringify({ nombre, telefono, email, referencia, codigoAnuncio, precio, isCall }));
