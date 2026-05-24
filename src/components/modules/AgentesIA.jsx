@@ -1,5 +1,6 @@
 "use client";
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import { supabase } from "../../lib/supabase";
 
 /* ── SYSTEM PROMPTS ── */
 const ANA_PROMPT = `Eres Ana, agente comercial de Mallorca Nativa Properties. Contactas por WhatsApp a particulares que publican propiedades en venta.
@@ -541,13 +542,63 @@ function ScanEmailsButton() {
 export default function AgentesIA() {
   const [tab, setTab] = useState("ana");
   const [anaConvs, setAnaConvs] = useState(ANA_CONVS);
-  const [claudiaConvs, setClaudiaConvs] = useState(CLAUDIA_CONVS);
+  const [claudiaConvs, setClaudiaConvs] = useState([]);
   const [anaSelected, setAnaSelected] = useState(1);
-  const [claudiaSelected, setClaudiaSelected] = useState(101);
+  const [claudiaSelected, setClaudiaSelected] = useState(null);
   const [editPrompt, setEditPrompt] = useState(null);
+  const [loadingClaudia, setLoadingClaudia] = useState(false);
+
+  // Load real CLAUDIA conversations from Supabase
+  const loadClaudiaConvs = useCallback(async () => {
+    setLoadingClaudia(true);
+    try {
+      const { data: convs } = await supabase
+        .from("conversaciones")
+        .select("*")
+        .order("updated_at", { ascending: false });
+
+      if (convs && convs.length > 0) {
+        // Load messages for each conversation
+        const convsWithMessages = await Promise.all(
+          convs.map(async (c) => {
+            const { data: msgs } = await supabase
+              .from("mensajes")
+              .select("*")
+              .eq("conversacion_id", c.id)
+              .order("created_at", { ascending: true });
+
+            return {
+              ...c,
+              mensajes: (msgs || []).map((m) => ({
+                from: m.from_who || "cliente",
+                text: m.texto || "",
+                ts: m.timestamp ? new Date(m.timestamp).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) : "",
+              })),
+              alertas: [],
+              propiedad: c.referencia ? `${c.referencia} - ${c.enlace || ""}` : c.canal || "WhatsApp",
+            };
+          })
+        );
+        setClaudiaConvs(convsWithMessages);
+        if (!claudiaSelected && convsWithMessages.length > 0) {
+          setClaudiaSelected(convsWithMessages[0].id);
+        }
+      }
+    } catch (err) {
+      console.error("Error loading CLAUDIA convs:", err);
+    }
+    setLoadingClaudia(false);
+  }, []);
+
+  // Load on mount and auto-refresh every 10 seconds
+  useEffect(() => {
+    loadClaudiaConvs();
+    const interval = setInterval(loadClaudiaConvs, 10000);
+    return () => clearInterval(interval);
+  }, [loadClaudiaConvs]);
 
   const anaAlertas = anaConvs.reduce((s, c) => s + c.alertas.length, 0);
-  const claudiaAlertas = claudiaConvs.reduce((s, c) => s + c.alertas.length, 0);
+  const claudiaAlertas = claudiaConvs.reduce((s, c) => s + (c.alertas?.length || 0), 0);
 
   const tabSt = (active, color) => ({
     padding: "10px 24px", borderRadius: "3px 3px 0 0", border: "1px solid " + (active ? color + "44" : "#2A2926"),
