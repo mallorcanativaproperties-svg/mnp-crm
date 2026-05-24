@@ -402,11 +402,32 @@ function PromptEditor({ agente, onClose }) {
 
 function AgentPanel({ convs, setConvs, isAna, selectedId, setSelectedId }) {
   const [filterInteres, setFilterInteres] = useState("todos");
+  const [filterAgente, setFilterAgente] = useState("todos");
+
+  const AGENTES_FILTER = [
+    { key: "todos", label: "Todos" },
+    { key: "Suren", label: "Suren" },
+    { key: "Anabel", label: "Anabel" },
+    { key: "Jaime", label: "Jaime" },
+    { key: "Guim", label: "Guim" },
+    { key: "Silvia", label: "Silvia" },
+    { key: "sin_asignar", label: "Sin asignar" },
+  ];
 
   const filtered = useMemo(() => {
-    if (filterInteres === "todos") return convs;
-    return convs.filter((c) => c.interes === filterInteres);
-  }, [convs, filterInteres]);
+    let result = convs;
+    if (filterInteres !== "todos") {
+      result = result.filter((c) => c.interes === filterInteres);
+    }
+    if (!isAna && filterAgente !== "todos") {
+      if (filterAgente === "sin_asignar") {
+        result = result.filter((c) => !c.agente_asignado && !c.agente);
+      } else {
+        result = result.filter((c) => c.agente_asignado === filterAgente || c.agente === filterAgente);
+      }
+    }
+    return result;
+  }, [convs, filterInteres, filterAgente, isAna]);
 
   const selectedConv = convs.find((c) => c.id === selectedId);
 
@@ -422,6 +443,22 @@ function AgentPanel({ convs, setConvs, isAna, selectedId, setSelectedId }) {
   return (
     <div style={{ display: "flex", height: "calc(100vh - 145px)" }}>
       <div style={{ width: 300, borderRight: "1px solid #2A2926", display: "flex", flexDirection: "column", flexShrink: 0 }}>
+        {!isAna && (
+          <div style={{ padding: "8px 12px", borderBottom: "1px solid #2A2926", display: "flex", gap: 2, flexWrap: "wrap" }}>
+            {AGENTES_FILTER.map((a) => {
+              const count = a.key === "todos" ? convs.length 
+                : a.key === "sin_asignar" ? convs.filter(c => !c.agente_asignado && !c.agente).length
+                : convs.filter(c => c.agente_asignado === a.key || c.agente === a.key).length;
+              return <button key={a.key} onClick={() => setFilterAgente(a.key)} style={{
+                padding: "4px 8px", borderRadius: 3, border: "none",
+                background: filterAgente === a.key ? "#A89BC418" : "transparent",
+                color: filterAgente === a.key ? "#A89BC4" : "#7A7870",
+                cursor: "pointer", fontSize: 9, fontWeight: filterAgente === a.key ? 600 : 400,
+                letterSpacing: "0.04em", fontFamily: "'Manrope', sans-serif",
+              }}>{a.label} ({count})</button>;
+            })}
+          </div>
+        )}
         <div style={{ padding: "10px 12px", borderBottom: "1px solid #2A2926", display: "flex", gap: 3, flexWrap: "wrap" }}>
           <button onClick={() => setFilterInteres("todos")} style={fSt(filterInteres === "todos")}>Todos ({convs.length})</button>
           {INTERES.map((i) => {
