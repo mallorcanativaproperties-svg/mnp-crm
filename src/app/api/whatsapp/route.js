@@ -57,7 +57,15 @@ async function getPropertyInfo(referencia) {
 }
 
 async function callClaude(conversationHistory, convData, propertyInfo) {
-  const agente = convData?.referencia ? AGENTES[convData.referencia.slice(0, 5)] : null;
+  let agente = convData?.referencia ? AGENTES[convData.referencia.slice(0, 5)] : null;
+  
+  // Fallback: if no agente from referencia, try agente_asignado or agente field
+  if (!agente && convData?.agente_asignado) {
+    agente = Object.values(AGENTES).find(a => a.nombre === convData.agente_asignado) || null;
+  }
+  if (!agente && convData?.agente) {
+    agente = Object.values(AGENTES).find(a => a.nombre === convData.agente) || null;
+  }
   
   let propertyContext = "";
   if (propertyInfo) {
@@ -308,7 +316,13 @@ export async function POST(request) {
           console.log("CLAUDIA response:", claudiaResponse);
 
           // Handle agent derivation
-          const agente = conv.referencia ? AGENTES[conv.referencia.slice(0, 5)] : null;
+          let agente = conv.referencia ? AGENTES[conv.referencia.slice(0, 5)] : null;
+          if (!agente && conv.agente_asignado) {
+            agente = Object.values(AGENTES).find(a => a.nombre === conv.agente_asignado) || null;
+          }
+          if (!agente && conv.agente) {
+            agente = Object.values(AGENTES).find(a => a.nombre === conv.agente) || null;
+          }
           
           // Auto-detect derivation: if CLAUDIA mentions passing phone/contact but forgot tags
           const mencionaDerivacion = claudiaResponse.includes("te paso el telefono") || 
