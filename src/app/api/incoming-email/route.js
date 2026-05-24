@@ -51,6 +51,7 @@ export async function POST(request) {
     }
 
     const content = emailBody;
+    console.log("Email content received (first 500 chars):", content.substring(0, 500));
     const isCall = content.includes("te ha llamado") || content.includes("llamada") || (subject && subject.includes("Llamada"));
 
     let nombre = null, telefono = null, email = null, mensaje = null, referencia = null, codigoAnuncio = null, precio = null;
@@ -63,7 +64,7 @@ export async function POST(request) {
         if (p.startsWith("34") && p.length > 9) p = p.slice(2);
         telefono = p;
       }
-      const refMatch = content.match(/(MN[A-Z]{3}\d{5})/);
+      const refMatch = content.match(/(MN[A-Z]{3}\d{4,5})/);
       if (refMatch) referencia = refMatch[1];
       const codeMatch = content.match(/[Cc]ódigo del anuncio\s*(?:contactado)?:?\s*(\d{6,12})/);
       if (codeMatch) codigoAnuncio = codeMatch[1];
@@ -72,7 +73,7 @@ export async function POST(request) {
       // MESSAGE FORMAT - supports both old format and new structured format
       
       // Reference
-      const refMatch = content.match(/Ref\.\s*(MN[A-Z]{3}\d{5})/i) || content.match(/(MN[A-Z]{3}\d{5})/);
+      const refMatch = content.match(/Ref\.\s*(MN[A-Z]{3}\d{4,5})/i) || content.match(/(MN[A-Z]{3}\d{4,5})/);
       if (refMatch) referencia = refMatch[1];
 
       // Ad code
