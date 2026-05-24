@@ -263,14 +263,40 @@ export async function POST(request) {
 
           if (claudiaResponse.includes("[DERIVAR_AGENTE]") && agente) {
             claudiaResponse = claudiaResponse.replace("[DERIVAR_AGENTE]", "").trim();
-            const resumen = `🔔 NUEVO LEAD IDEALISTA\n\nCliente: ${conv.contacto || senderName}\nTel: ${phoneClean}\nPropiedad: ${conv.referencia || "N/A"}\nURL: ${conv.idealista_url || conv.enlace || "N/A"}\nPrecio: ${conv.precio || "N/A"}\n\nResumen: ${text}`;
+            
+            // Build conversation summary from full history
+            const resumenConv = (history || [])
+              .map(m => `${m.from_who === "cliente" ? "👤 Cliente" : "🤖 Claudia"}: ${m.texto}`)
+              .join("\n");
+            
+            const resumen = `🔔 NUEVO LEAD IDEALISTA\n\n👤 Cliente: ${conv.contacto || senderName}\n📱 Tel: +${phoneWith34}\n🏠 Propiedad: ${conv.referencia || "N/A"}\n🔗 ${conv.idealista_url || conv.enlace || "N/A"}\n💰 Precio: ${conv.precio || "N/A"}\n\n📋 RESUMEN CONVERSACIÓN:\n${resumenConv}`;
+            
             await sendWhatsApp(agente.telefono, resumen);
-            console.log(`Summary sent to ${agente.nombre}`);
-            await supabase.from("conversaciones").update({ estado: "derivado" }).eq("id", conv.id);
+            console.log(`Summary sent to agent ${agente.nombre} (${agente.telefono})`);
+            
+            // Also notify broker Silvia
+            const BROKER_PHONE = "655882682";
+            if (agente.telefono !== BROKER_PHONE) {
+              const resumenBroker = `🔔 DERIVACIÓN A ${agente.nombre.toUpperCase()}\n\n👤 Cliente: ${conv.contacto || senderName}\n📱 Tel: +${phoneWith34}\n🏠 Propiedad: ${conv.referencia || "N/A"}\n💰 Precio: ${conv.precio || "N/A"}`;
+              await sendWhatsApp(BROKER_PHONE, resumenBroker);
+              console.log(`Summary sent to broker Silvia`);
+            }
+            
+            await supabase.from("conversaciones").update({ 
+              estado: "derivado",
+              agente_asignado: agente.nombre,
+              updated_at: new Date().toISOString()
+            }).eq("id", conv.id);
           }
 
           if (claudiaResponse.includes("[DERIVAR_BROKER]")) {
             claudiaResponse = claudiaResponse.replace("[DERIVAR_BROKER]", "").trim();
+            
+            // Notify broker about mortgage interest
+            const BROKER_PHONE = "655882682";
+            const resumenBroker = `🏦 LEAD HIPOTECARIO\n\n👤 Cliente: ${conv.contacto || senderName}\n📱 Tel: +${phoneWith34}\n🏠 Propiedad: ${conv.referencia || "N/A"}\n💰 Precio: ${conv.precio || "N/A"}\n📝 Contexto: Cliente interesado en precualificación hipotecaria`;
+            await sendWhatsApp(BROKER_PHONE, resumenBroker);
+            console.log(`Broker notification sent to Silvia`);
           }
 
           // Send response
