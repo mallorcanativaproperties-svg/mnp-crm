@@ -204,30 +204,34 @@ export async function POST(request) {
         const phoneWithout34 = phoneClean.startsWith("34") ? phoneClean.slice(2) : phoneClean;
         const phoneWith34 = phoneClean.startsWith("34") ? phoneClean : "34" + phoneClean;
 
-        // Find existing conversation - prioritize ones with referencia (Idealista leads)
+        // Find existing conversation - get ALL for this phone to handle duplicates
         let conv;
         console.log(`Looking for conversation with phone: ${phoneClean} | ${phoneWithout34} | ${phoneWith34}`);
         
-        // First try to find a conversation with referencia (Idealista lead)
-        const { data: idealConv } = await supabase
+        const { data: allConvs } = await supabase
           .from("conversaciones")
           .select("*")
           .or(`telefono.eq.${phoneClean},telefono.eq.${phoneWithout34},telefono.eq.${phoneWith34}`)
-          .not("referencia", "is", null)
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .single();
+          .order("created_at", { ascending: false });
         
-        // If no Idealista conv, try any conversation
-        const existingConv = idealConv || (await supabase
-          .from("conversaciones")
-          .select("*")
-          .or(`telefono.eq.${phoneClean},telefono.eq.${phoneWithout34},telefono.eq.${phoneWith34}`)
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .single()).data;
-
-        console.log(`Conv found: ${existingConv ? "YES" : "NO"}, canal: ${existingConv?.canal}, ref: ${existingConv?.referencia}`);
+        console.log(`Found ${allConvs?.length || 0} conversations for this phone`);
+        
+        // Pick the best conversation: prefer one with referencia
+        let existingConv = null;
+        if (allConvs && allConvs.length > 0) {
+          existingConv = allConvs.find(c => c.referencia) || allConvs[0];
+          console.log(`Using conv id=${existingConv.id}, canal=${existingConv.canal}, ref=${existingConv.referencia}`);
+          
+          // If there are duplicates without referencia, delete them to avoid future confusion
+          if (allConvs.length > 1) {
+            const duplicates = allConvs.filter(c => c.id !== existingConv.id && !c.referencia);
+            for (const dup of duplicates) {
+              console.log(`Removing duplicate conv id=${dup.id} (no referencia)`);
+              await supabase.from("mensajes").delete().eq("conversacion_id", dup.id);
+              await supabase.from("conversaciones").delete().eq("id", dup.id);
+            }
+          }
+        }
 
         if (existingConv) {
           const updateData = {
