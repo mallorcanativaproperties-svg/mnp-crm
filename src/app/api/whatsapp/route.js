@@ -88,6 +88,7 @@ PERSONALIDAD:
 - CERO emoticonos, CERO emojis. Ni uno
 - NUNCA te presentes como IA, asistente virtual ni nada similar. Eres Claudia
 - Nada de expresiones artificiales tipo "estoy aqui para ayudarte", "no dudes en preguntar"
+- NUNCA digas "segun la ficha", "segun los datos", "segun la informacion". Responde como si conocieras la propiedad de primera mano. Ejemplo correcto: "tiene 3 habitaciones". Ejemplo incorrecto: "segun la ficha, tiene 3 habitaciones"
 
 FILOSOFIA:
 - Aliada del comprador, le ayudas a encontrar su casa
@@ -293,6 +294,35 @@ export async function POST(request) {
 
           // Handle agent derivation
           const agente = conv.referencia ? AGENTES[conv.referencia.slice(0, 5)] : null;
+          
+          // Auto-detect derivation: if CLAUDIA mentions passing phone/contact but forgot tags
+          const mencionaDerivacion = claudiaResponse.includes("te paso el telefono") || 
+            claudiaResponse.includes("te paso el teléfono") ||
+            claudiaResponse.includes("coordineis") || 
+            claudiaResponse.includes("coordin") ||
+            claudiaResponse.includes("le paso tu contacto");
+          const tieneTags = claudiaResponse.includes("[DERIVAR_AGENTE]");
+          
+          // If she's clearly deriving but forgot tags, add them
+          if (mencionaDerivacion && !tieneTags && agente) {
+            claudiaResponse += `\n[DERIVAR_AGENTE]\n[RESUMEN_AGENTE]\nCliente derivado al agente\n[/RESUMEN_AGENTE]`;
+            console.log("Auto-added DERIVAR tags (CLAUDIA forgot them)");
+          }
+          
+          // If she said "te paso el telefono del agente" but didn't include the actual number, append it
+          if (mencionaDerivacion && agente && !claudiaResponse.includes(agente.telefono)) {
+            claudiaResponse = claudiaResponse.replace(
+              /te paso el tel[eé]fono del? (?:agente|${agente.nombre})[^.]*\./i,
+              `te paso el telefono de ${agente.nombre} ${agente.telefono} para que coordineis la visita.`
+            );
+            // If regex didn't match, just append
+            if (!claudiaResponse.includes(agente.telefono)) {
+              claudiaResponse = claudiaResponse.replace(/\[DERIVAR_AGENTE\]/, 
+                `\nTe paso el telefono de ${agente.nombre} ${agente.telefono} para que coordineis.\n[DERIVAR_AGENTE]`);
+            }
+            console.log("Auto-added agent phone number");
+          }
+
           console.log(`Derivation check: ref=${conv.referencia}, agente=${agente?.nombre}, hasDerivarTag=${claudiaResponse.includes("[DERIVAR_AGENTE]")}`);
 
           if (claudiaResponse.includes("[DERIVAR_AGENTE]") && agente) {
