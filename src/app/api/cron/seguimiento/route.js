@@ -32,7 +32,12 @@ async function sendWhatsApp(to, text) {
 
 export async function GET(request) {
   const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}` && !request.url.includes("force=true")) {
+  const { searchParams } = new URL(request.url);
+  const querySecret = searchParams.get("secret");
+  const cronSecret = process.env.CRON_SECRET;
+  
+  const isAuthorized = authHeader === `Bearer ${cronSecret}` || querySecret === cronSecret;
+  if (!isAuthorized) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
