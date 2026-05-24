@@ -203,13 +203,17 @@ export async function POST(request) {
 
         // Find existing conversation
         let conv;
-        const { data: existingConv } = await supabase
+        console.log(`Looking for conversation with phone: ${phoneClean} | ${phoneWithout34} | ${phoneWith34}`);
+        
+        const { data: existingConv, error: convError } = await supabase
           .from("conversaciones")
           .select("*")
           .or(`telefono.eq.${phoneClean},telefono.eq.${phoneWithout34},telefono.eq.${phoneWith34}`)
           .order("created_at", { ascending: false })
           .limit(1)
           .single();
+
+        console.log(`Conv found: ${existingConv ? "YES" : "NO"}, canal: ${existingConv?.canal}, ref: ${existingConv?.referencia}, error: ${convError?.message || "none"}`);
 
         if (existingConv) {
           const updateData = {
@@ -255,6 +259,7 @@ export async function POST(request) {
           .single() : { data: null };
         
         const usarClaudia = conv?.canal === "idealista" || conv?.referencia || prevClaudiaMsg;
+        console.log(`CLAUDIA decision: canal=${conv?.canal}, ref=${conv?.referencia}, prevMsg=${!!prevClaudiaMsg}, USE=${usarClaudia}`);
 
         if (usarClaudia) {
           // Get message history
