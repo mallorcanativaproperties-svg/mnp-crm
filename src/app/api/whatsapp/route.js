@@ -245,8 +245,18 @@ export async function POST(request) {
           });
         }
 
-        // If Idealista lead, use CLAUDIA AI
-        if (conv?.canal === "idealista" || conv?.referencia) {
+        // Use CLAUDIA AI if: Idealista lead, has referencia, OR has previous CLAUDIA messages
+        const { data: prevClaudiaMsg } = conv?.id ? await supabase
+          .from("mensajes")
+          .select("id")
+          .eq("conversacion_id", conv.id)
+          .eq("from_who", "claudia")
+          .limit(1)
+          .single() : { data: null };
+        
+        const usarClaudia = conv?.canal === "idealista" || conv?.referencia || prevClaudiaMsg;
+
+        if (usarClaudia) {
           // Get message history
           const { data: history } = await supabase
             .from("mensajes")
@@ -372,7 +382,7 @@ export async function POST(request) {
           }
         } else if (!existingConv) {
           // Generic welcome for non-Idealista
-          const welcome = "¡Hola! 👋 Gracias por contactar con Mallorca Nativa Properties. Un agente te atenderá en breve. ¿En qué podemos ayudarte?";
+          const welcome = "Hola, gracias por contactar con Mallorca Nativa Properties. Un agente te atenderá en breve.";
           await sendWhatsApp(from, welcome);
           if (conv?.id) {
             await supabase.from("mensajes").insert({

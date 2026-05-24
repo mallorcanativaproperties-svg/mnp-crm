@@ -163,14 +163,14 @@ export async function POST(request) {
     // Send WhatsApp - different message if retake
     let msg1, msg2;
     if (isRetake) {
-      msg1 = `Hola${nombre ? " " + nombre : ""}, hemos visto que te has vuelto a interesar por esta propiedad${idealistaUrl ? "\n" + idealistaUrl : ""} 🏠`;
-      msg2 = "¿Pudiste ver la información que te enviamos anteriormente o hubo algún problema?";
+      msg1 = `Hola${nombre ? " " + nombre : ""}, hemos visto que te has vuelto a interesar por esta propiedad${idealistaUrl ? "\n" + idealistaUrl : ""}`;
+      msg2 = "Pudiste ver la información que te enviamos anteriormente?";
     } else if (nombre) {
-      msg1 = `Hola ${nombre}, hemos recibido tu petición interesándote por la propiedad${idealistaUrl ? "\n" + idealistaUrl : ""} 🏠`;
-      msg2 = "¿Quieres agendar una visita o tienes alguna duda al respecto?";
+      msg1 = `Hola ${nombre}, hemos recibido tu petición interesándote por la propiedad${idealistaUrl ? "\n" + idealistaUrl : ""}`;
+      msg2 = "Quieres agendar una visita o tienes alguna duda?";
     } else {
-      msg1 = `Hola, hemos visto que has intentado contactarnos por la propiedad${idealistaUrl ? "\n" + idealistaUrl : ""} 🏠`;
-      msg2 = "¿Quieres agendar una visita o tienes alguna duda al respecto?";
+      msg1 = `Hola, hemos visto que has intentado contactarnos por la propiedad${idealistaUrl ? "\n" + idealistaUrl : ""}`;
+      msg2 = "Quieres agendar una visita o tienes alguna duda?";
     }
 
     const result1 = await sendWhatsApp(phoneClean, msg1);
