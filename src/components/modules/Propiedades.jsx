@@ -910,11 +910,46 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
   const [aiDesc, setAiDesc] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
+  const [editMode, setEditMode] = useState(false);
+  const [draft, setDraft] = useState({ ...p });
   const g2 = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 24px" };
   const g3 = { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px 24px" };
   const g4 = { display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "10px 24px" };
   const sep = { borderBottom: "1px solid #2A2926", margin: "18px 0" };
   const intBox = { background: "#1C1B18", border: "1px solid #D4545422", borderRadius: 3, padding: "16px 20px" };
+
+  const d = editMode ? draft : p;
+  const upd = (key, val) => setDraft(prev => ({ ...prev, [key]: val }));
+
+  function EFl({ label, field, pub, gold, type = "text", options }) {
+    if (!editMode) return <Fl label={label} value={type === "bool" ? (d[field] ? "Si" : "No") : (type === "number" ? String(d[field] || 0) : (d[field] || "-"))} pub={pub} gold={gold} />;
+    return (
+      <div style={{ marginBottom: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
+          {pub !== undefined && <Dot green={pub} />}
+          <span style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em" }}>{label}</span>
+        </div>
+        {type === "bool" ? (
+          <select value={d[field] ? "true" : "false"} onChange={e => upd(field, e.target.value === "true")}
+            style={{ width: "100%", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "6px 8px", fontSize: 13, fontFamily: "'Manrope', sans-serif" }}>
+            <option value="true">Si</option><option value="false">No</option>
+          </select>
+        ) : type === "select" ? (
+          <select value={d[field] || ""} onChange={e => upd(field, e.target.value)}
+            style={{ width: "100%", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "6px 8px", fontSize: 13, fontFamily: "'Manrope', sans-serif" }}>
+            <option value="">-</option>
+            {(options || []).map(o => <option key={o} value={o}>{o}</option>)}
+          </select>
+        ) : type === "textarea" ? (
+          <textarea value={d[field] || ""} onChange={e => upd(field, e.target.value)}
+            style={{ width: "100%", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "6px 8px", fontSize: 13, fontFamily: "'Manrope', sans-serif", minHeight: 80, resize: "vertical" }} />
+        ) : (
+          <input type={type === "number" ? "number" : "text"} value={d[field] ?? ""} onChange={e => upd(field, type === "number" ? Number(e.target.value) : e.target.value)}
+            style={{ width: "100%", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "6px 8px", fontSize: 13, fontFamily: "'Manrope', sans-serif" }} />
+        )}
+      </div>
+    );
+  }
 
   async function generarDescripcion() {
     setAiLoading(true);
@@ -1026,6 +1061,9 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)", display: "flex", justifyContent: "center", alignItems: "flex-start", padding: "30px 12px", zIndex: 1000, overflowY: "auto" }}>
       <div style={{ background: "#161513", border: "1px solid #2A2926", borderRadius: 4, width: "100%", maxWidth: 740, padding: "32px 36px", position: "relative" }}>
         <button onClick={onClose} style={{ position: "absolute", top: 16, right: 20, background: "none", border: "none", color: "#7A7870", fontSize: 20, cursor: "pointer" }}>X</button>
+        {!editMode && <button onClick={() => { setDraft({ ...p }); setEditMode(true); }} style={{ position: "absolute", top: 16, right: 120, background: "#C8A97E", border: "none", borderRadius: 3, color: "#111110", fontSize: 10, cursor: "pointer", padding: "5px 14px", fontWeight: 600, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.05em" }}>Editar</button>}
+        {editMode && <button onClick={() => { if (onUpdate) onUpdate(draft); setEditMode(false); }} style={{ position: "absolute", top: 16, right: 120, background: "#6AAF8D", border: "none", borderRadius: 3, color: "#111110", fontSize: 10, cursor: "pointer", padding: "5px 14px", fontWeight: 600, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.05em" }}>Guardar</button>}
+        {editMode && <button onClick={() => { setDraft({ ...p }); setEditMode(false); }} style={{ position: "absolute", top: 16, right: 190, background: "none", border: "1px solid #7A7870", borderRadius: 3, color: "#7A7870", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "'Manrope', sans-serif" }}>Cancelar</button>}
         <button onClick={() => { if (onDelete) onDelete(p); }} style={{ position: "absolute", top: 16, right: 56, background: "none", border: "1px solid #D4545433", borderRadius: 3, color: "#D45454", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "'Manrope', sans-serif" }}>Eliminar</button>
 
         {/* Header */}
@@ -1089,20 +1127,22 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
         {/* Localizacion */}
         <Sec title="Localizacion">
           <div style={g2}>
-            <Fl label="Direccion" value={p.dir + ", " + p.num} pub={true} />
-            <Fl label="Codigo postal" value={p.cp} pub={true} />
-            <Fl label="Municipio" value={p.municipio} pub={true} />
-            <Fl label="Zona" value={p.zona} pub={true} />
-            <Fl label="Orientacion" value={p.orient} pub={true} />
-            <Fl label="Distancia playa" value={p.distPlaya} pub={true} />
+            <EFl label="Direccion" field="dir" pub={true} />
+            <EFl label="Numero" field="num" pub={true} />
+            <EFl label="Codigo postal" field="cp" pub={true} />
+            <EFl label="Municipio" field="municipio" pub={true} />
+            <EFl label="Zona" field="zona" pub={true} />
+            <EFl label="Orientacion" field="orient" pub={true} options={["Norte","Sur","Este","Oeste","Noreste","Noroeste","Sureste","Suroeste"]} type={editMode ? "select" : "text"} />
+            <EFl label="Distancia playa" field="distPlaya" pub={true} />
+            <EFl label="Planta" field="planta" pub={true} />
           </div>
           <div style={{ ...g2, marginTop: 8 }}>
-            <Fl label="Latitud" value={p.latitud ? String(p.latitud) : "-"} pub={false} />
-            <Fl label="Longitud" value={p.longitud ? String(p.longitud) : "-"} pub={false} />
+            <EFl label="Latitud" field="latitud" pub={false} type="number" />
+            <EFl label="Longitud" field="longitud" pub={false} type="number" />
           </div>
           <div style={{ ...g2, marginTop: 8 }}>
-            <Fl label="Visibilidad direccion en portales" value={p.visDir} pub={false} />
-            <Fl label="Idealista ID" value={p.idealistaId || "-"} pub={false} />
+            <EFl label="Visibilidad direccion en portales" field="visDir" pub={false} options={["Direccion exacta","Solo calle","Solo zona"]} type={editMode ? "select" : "text"} />
+            <EFl label="Idealista ID" field="idealistaId" pub={false} />
           </div>
         </Sec>
         <div style={sep} />
@@ -1110,19 +1150,14 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
         {/* Datos de venta */}
         <Sec title="Datos de venta">
           <div style={g3}>
-            <Fl label="Precio de venta" value={fmtP(p.precioVenta)} pub={true} gold={true} />
-            <Fl label="Precio propietario" value={fmtP(p.precioProp)} pub={false} />
-            {p.precioAnt > 0 ? <Fl label="Precio anterior (bajada)" value={fmtP(p.precioAnt)} pub={true} /> : <div />}
+            <EFl label="Precio de venta" field="precioVenta" pub={true} gold={true} type="number" />
+            <EFl label="Precio propietario" field="precioProp" pub={false} type="number" />
+            <EFl label="Precio anterior (bajada)" field="precioAnt" pub={true} type="number" />
           </div>
-          {p.precioTraspaso > 0 && (
-            <div style={{ marginTop: 8 }}>
-              <Fl label="Precio traspaso" value={fmtP(p.precioTraspaso)} pub={true} />
-            </div>
-          )}
-          <div style={{ ...g3, marginTop: 12 }}>
-            <Fl label="Honorarios" value={p.honorariosTipo === "porcentaje" ? p.honorarios + "% = " + fmtP(hon.neto) : "Fijo = " + fmtP(hon.neto)} pub={false} />
-            <Fl label="IVA 21%" value={fmtP(hon.iva)} pub={false} />
-            <Fl label="Total honorarios" value={fmtP(hon.total)} pub={false} />
+          <div style={{ ...g3, marginTop: 8 }}>
+            <EFl label="Precio traspaso" field="precioTraspaso" pub={true} type="number" />
+            <EFl label="Honorarios %" field="honorarios" pub={false} type="number" />
+            <EFl label="IVA Hon %" field="ivaHon" pub={false} type="number" />
           </div>
           <div style={{ marginTop: 12, padding: "10px 14px", background: "#C8A97E08", borderRadius: 3, border: "1px solid #C8A97E15" }}>
             <span style={{ fontSize: 10, color: "#C8A97E", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}>Calculo automatico</span>
@@ -1150,27 +1185,26 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
         {/* Superficies */}
         <Sec title="Superficies y estancias">
           <div style={g4}>
-            <Fl label="m2 utiles" value={p.mUtil + " m2"} pub={true} />
-            <Fl label="m2 construidos" value={p.mConst + " m2"} pub={true} />
-            <Fl label="m2 parcela" value={p.mParcela ? p.mParcela + " m2" : "-"} pub={true} />
-            <Fl label="m2 terraza" value={p.mTerraza ? p.mTerraza + " m2" : "-"} pub={true} />
+            <EFl label="m2 utiles" field="mUtil" pub={true} type="number" />
+            <EFl label="m2 construidos" field="mConst" pub={true} type="number" />
+            <EFl label="m2 parcela" field="mParcela" pub={true} type="number" />
+            <EFl label="m2 terraza" field="mTerraza" pub={true} type="number" />
           </div>
           <div style={{ ...g4, marginTop: 8 }}>
-            <Fl label="m2 balcon" value={p.mBalcon ? p.mBalcon + " m2" : "-"} pub={true} />
-            <Fl label="m2 porche" value={p.mPorche ? p.mPorche + " m2" : "-"} pub={true} />
-            <Fl label="m2 jardin" value={p.mParcela ? p.mParcela + " m2" : "-"} pub={true} />
-            <div />
+            <EFl label="m2 balcon" field="mBalcon" pub={true} type="number" />
+            <EFl label="m2 porche" field="mPorche" pub={true} type="number" />
+            <div /><div />
           </div>
           <div style={{ ...g4, marginTop: 8 }}>
-            <Fl label="Hab. dobles" value={String(p.habDobles)} pub={true} />
-            <Fl label="Hab. simples" value={String(p.habSimples)} pub={true} />
-            <Fl label="Banos" value={String(p.banos)} pub={true} />
-            <Fl label="Aseos" value={String(p.aseos)} pub={true} />
+            <EFl label="Hab. dobles" field="habDobles" pub={true} type="number" />
+            <EFl label="Hab. simples" field="habSimples" pub={true} type="number" />
+            <EFl label="Banos" field="banos" pub={true} type="number" />
+            <EFl label="Aseos" field="aseos" pub={true} type="number" />
           </div>
           <div style={{ ...g3, marginTop: 8 }}>
-            <Fl label="Planta" value={p.planta || "-"} pub={true} />
-            <Fl label="Ano construccion" value={p.anoConstruc} pub={true} />
-            <Fl label="Conservacion" value={p.conserv} pub={true} />
+            <EFl label="Planta" field="planta" pub={true} />
+            <EFl label="Ano construccion" field="anoConstruc" pub={true} />
+            <EFl label="Conservacion" field="conserv" pub={true} options={["Buen estado","Reformado","A reformar","Obra nueva","En construccion"]} type={editMode ? "select" : "text"} />
           </div>
         </Sec>
         <div style={sep} />
@@ -1178,40 +1212,35 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
         {/* Caracteristicas */}
         <Sec title="Caracteristicas principales">
           <div style={g3}>
-            <Fl label="Cert. energetico" value={p.certEnerg} pub={true} />
-            <Fl label="IEE (Informe Evaluacion Edificio)" value={p.iee} pub={true} />
-            <Fl label="Venta con mobiliario" value={p.ventaMobiliario ? "Si" : "No"} pub={true} />
+            <EFl label="Cert. energetico" field="certEnerg" pub={true} options={["A","B","C","D","E","F","G","Exento","En tramite"]} type={editMode ? "select" : "text"} />
+            <EFl label="IEE" field="iee" pub={true} />
+            <EFl label="Venta con mobiliario" field="ventaMobiliario" pub={true} type="bool" />
           </div>
           <div style={{ ...g3, marginTop: 8 }}>
-            <Fl label="Suelos" value={p.suelos} pub={true} />
-            <Fl label="Carp. exterior (ventanas)" value={p.carpExt} pub={true} />
-            <Fl label="Carp. interior (puertas)" value={p.carpInt || "-"} pub={true} />
+            <EFl label="Suelos" field="suelos" pub={true} />
+            <EFl label="Carp. exterior" field="carpExt" pub={true} />
+            <EFl label="Carp. interior" field="carpInt" pub={true} />
           </div>
           <div style={{ ...g3, marginTop: 8 }}>
-            <Fl label="Persianas tipo" value={p.persianasTipo || "-"} pub={true} />
-            <Fl label="Persianas material" value={p.persianasMat || "-"} pub={true} />
-            <div />
-          </div>
-          <div style={{ ...g3, marginTop: 8 }}>
-            <Fl label="Climatizacion" value={p.clima || "-"} pub={true} />
-            <Fl label="Agua caliente" value={p.aguaCal || "-"} pub={true} />
+            <EFl label="Climatizacion" field="clima" pub={true} />
+            <EFl label="Agua caliente" field="aguaCal" pub={true} />
             <div />
           </div>
           <div style={{ ...g2, marginTop: 8 }}>
-            <Fl label="Parking" value={p.parking || "Sin parking"} pub={true} />
-            <Fl label="N plazas" value={p.nPlazas ? String(p.nPlazas) : "-"} pub={true} />
+            <EFl label="Parking" field="parking" pub={true} options={["Si","No","Comunitario","Opcional"]} type={editMode ? "select" : "text"} />
+            <EFl label="N plazas" field="nPlazas" pub={true} type="number" />
           </div>
           <div style={{ ...g4, marginTop: 12 }}>
-            <Fl label="Terraza" value={p.terraza ? "Si" : "No"} pub={true} />
-            <Fl label="Balcon" value={p.balcon ? "Si" : "No"} pub={true} />
-            <Fl label="Piscina" value={p.piscina ? "Si" : "No"} pub={true} />
-            <Fl label="Jardin" value={p.jardin ? "Si" : "No"} pub={true} />
+            <EFl label="Terraza" field="terraza" pub={true} type="bool" />
+            <EFl label="Balcon" field="balcon" pub={true} type="bool" />
+            <EFl label="Piscina" field="piscina" pub={true} type="bool" />
+            <EFl label="Jardin" field="jardin" pub={true} type="bool" />
           </div>
           <div style={{ ...g4, marginTop: 8 }}>
-            <Fl label="Ascensor" value={p.ascensor ? "Si" : "No"} pub={true} />
-            <Fl label="Aire acondicionado" value={p.aireAcond ? "Si" : "No"} pub={true} />
-            <Fl label="Armarios empotrados" value={p.armarios ? "Si" : "No"} pub={true} />
-            <Fl label="Trastero" value={p.trastero ? "Si" : "No"} pub={true} />
+            <EFl label="Ascensor" field="ascensor" pub={true} type="bool" />
+            <EFl label="Aire acondicionado" field="aireAcond" pub={true} type="bool" />
+            <EFl label="Armarios" field="armarios" pub={true} type="bool" />
+            <EFl label="Trastero" field="trastero" pub={true} type="bool" />
           </div>
         </Sec>
         <div style={sep} />
