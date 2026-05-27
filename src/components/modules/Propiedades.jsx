@@ -28,6 +28,11 @@ function mapDbToJs(row) {
     destinos: row.destinos || [], fotos: row.fotos || 0, videos: row.videos || 0, tour360: row.tour360 || false, planos: row.planos || 0,
     fechaCap: row.fecha_cap || "", visitas: row.visitas || 0,
     cualPos: row.cual_pos || [], cualNeg: row.cual_neg || [], cualMejoras: row.cual_mejoras || [],
+    latitud: row.latitud || null, longitud: row.longitud || null, idealistaId: row.idealista_id || "",
+    descEn: row.desc_en || "", descDe: row.desc_de || "",
+    terraza: row.terraza || false, piscina: row.piscina || false, ascensor: row.ascensor || false,
+    jardin: row.jardin || false, aireAcond: row.aire_acond || false, armarios: row.armarios || false,
+    trastero: row.trastero || false, balcon: row.balcon || false,
   };
 }
 
@@ -53,6 +58,11 @@ function mapJsToDb(p) {
     fotos: p.fotos, videos: p.videos, tour360: p.tour360, planos: p.planos,
     fecha_cap: p.fechaCap, visitas: p.visitas,
     cual_pos: p.cualPos, cual_neg: p.cualNeg, cual_mejoras: p.cualMejoras,
+    latitud: p.latitud, longitud: p.longitud, idealista_id: p.idealistaId,
+    desc_en: p.descEn, desc_de: p.descDe,
+    terraza: p.terraza, piscina: p.piscina, ascensor: p.ascensor,
+    jardin: p.jardin, aire_acond: p.aireAcond, armarios: p.armarios,
+    trastero: p.trastero, balcon: p.balcon,
     updated_at: new Date().toISOString(),
   };
 }
@@ -1086,8 +1096,13 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
             <Fl label="Orientacion" value={p.orient} pub={true} />
             <Fl label="Distancia playa" value={p.distPlaya} pub={true} />
           </div>
-          <div style={{ marginTop: 8 }}>
+          <div style={{ ...g2, marginTop: 8 }}>
+            <Fl label="Latitud" value={p.latitud ? String(p.latitud) : "-"} pub={false} />
+            <Fl label="Longitud" value={p.longitud ? String(p.longitud) : "-"} pub={false} />
+          </div>
+          <div style={{ ...g2, marginTop: 8 }}>
             <Fl label="Visibilidad direccion en portales" value={p.visDir} pub={false} />
+            <Fl label="Idealista ID" value={p.idealistaId || "-"} pub={false} />
           </div>
         </Sec>
         <div style={sep} />
@@ -1185,6 +1200,18 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
           <div style={{ ...g2, marginTop: 8 }}>
             <Fl label="Parking" value={p.parking || "Sin parking"} pub={true} />
             <Fl label="N plazas" value={p.nPlazas ? String(p.nPlazas) : "-"} pub={true} />
+          </div>
+          <div style={{ ...g4, marginTop: 12 }}>
+            <Fl label="Terraza" value={p.terraza ? "Si" : "No"} pub={true} />
+            <Fl label="Balcon" value={p.balcon ? "Si" : "No"} pub={true} />
+            <Fl label="Piscina" value={p.piscina ? "Si" : "No"} pub={true} />
+            <Fl label="Jardin" value={p.jardin ? "Si" : "No"} pub={true} />
+          </div>
+          <div style={{ ...g4, marginTop: 8 }}>
+            <Fl label="Ascensor" value={p.ascensor ? "Si" : "No"} pub={true} />
+            <Fl label="Aire acondicionado" value={p.aireAcond ? "Si" : "No"} pub={true} />
+            <Fl label="Armarios empotrados" value={p.armarios ? "Si" : "No"} pub={true} />
+            <Fl label="Trastero" value={p.trastero ? "Si" : "No"} pub={true} />
           </div>
         </Sec>
         <div style={sep} />
