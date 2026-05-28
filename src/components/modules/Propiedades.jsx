@@ -1198,22 +1198,22 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
         {/* Localizacion */}
         <Sec title="Localizacion">
           <div style={g2}>
-            <EFl label="Direccion" field="dir" pub={true} />
-            <EFl label="Numero" field="num" pub={true} />
-            <EFl label="Codigo postal" field="cp" pub={true} />
-            <EFl label="Municipio" field="municipio" pub={true} />
-            <EFl label="Zona" field="zona" pub={true} />
-            <EFl label="Orientacion" field="orient" pub={true} options={["Norte","Sur","Este","Oeste","Noreste","Noroeste","Sureste","Suroeste"]} type={editMode ? "select" : "text"} />
-            <EFl label="Distancia playa" field="distPlaya" pub={true} />
-            <EFl label="Planta" field="planta" pub={true} />
+            {EFl({label: "Direccion", field: "dir", pub: true})}
+            {EFl({label: "Numero", field: "num", pub: true})}
+            {EFl({label: "Codigo postal", field: "cp", pub: true})}
+            {EFl({label: "Municipio", field: "municipio", pub: true})}
+            {EFl({label: "Zona", field: "zona", pub: true})}
+            {EFl({label: "Orientacion", field: "orient", pub: true, options: ["Norte","Sur","Este","Oeste","Noreste","Noroeste","Sureste","Suroeste"], type: editMode ? "select" : "text"})}
+            {EFl({label: "Distancia playa", field: "distPlaya", pub: true})}
+            {EFl({label: "Planta", field: "planta", pub: true})}
           </div>
           <div style={{ ...g2, marginTop: 8 }}>
-            <EFl label="Latitud" field="latitud" pub={false} type="number" />
-            <EFl label="Longitud" field="longitud" pub={false} type="number" />
+            {EFl({label: "Latitud", field: "latitud", pub: false, type: "number"})}
+            {EFl({label: "Longitud", field: "longitud", pub: false, type: "number"})}
           </div>
           <div style={{ ...g2, marginTop: 8 }}>
-            <EFl label="Visibilidad direccion en portales" field="visDir" pub={false} options={["Direccion exacta","Solo calle","Solo zona"]} type={editMode ? "select" : "text"} />
-            <EFl label="Idealista ID" field="idealistaId" pub={false} />
+            {EFl({label: "Visibilidad direccion en portales", field: "visDir", pub: false, options: ["Direccion exacta","Solo calle","Solo zona"], type: editMode ? "select" : "text"})}
+            {EFl({label: "Idealista ID", field: "idealistaId", pub: false})}
           </div>
         </Sec>
         <div style={sep} />
@@ -1221,14 +1221,14 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
         {/* Datos de venta */}
         <Sec title="Datos de venta">
           <div style={g3}>
-            <EFl label="Precio de venta" field="precioVenta" pub={true} gold={true} type="number" />
-            <EFl label="Precio propietario" field="precioProp" pub={false} type="number" />
-            <EFl label="Precio anterior (bajada)" field="precioAnt" pub={true} type="number" />
+            {EFl({label: "Precio de venta", field: "precioVenta", pub: true, gold: true, type: "number"})}
+            {EFl({label: "Precio propietario", field: "precioProp", pub: false, type: "number"})}
+            {EFl({label: "Precio anterior (bajada)", field: "precioAnt", pub: true, type: "number"})}
           </div>
           <div style={{ ...g3, marginTop: 8 }}>
-            <EFl label="Precio traspaso" field="precioTraspaso" pub={true} type="number" />
-            <EFl label="Honorarios %" field="honorarios" pub={false} type="number" />
-            <EFl label="IVA Hon %" field="ivaHon" pub={false} type="number" />
+            {EFl({label: "Precio traspaso", field: "precioTraspaso", pub: true, type: "number"})}
+            {EFl({label: "Honorarios %", field: "honorarios", pub: false, type: "number"})}
+            {EFl({label: "IVA Hon %", field: "ivaHon", pub: false, type: "number"})}
           </div>
           <div style={{ marginTop: 12, padding: "10px 14px", background: "#C8A97E08", borderRadius: 3, border: "1px solid #C8A97E15" }}>
             <span style={{ fontSize: 10, color: "#C8A97E", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}>Calculo automatico</span>
@@ -1256,26 +1256,26 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
         {/* Superficies */}
         <Sec title="Superficies y estancias">
           <div style={g4}>
-            <EFl label="m2 utiles" field="mUtil" pub={true} type="number" />
-            <EFl label="m2 construidos" field="mConst" pub={true} type="number" />
-            <EFl label="m2 parcela" field="mParcela" pub={true} type="number" />
-            <EFl label="m2 terraza" field="mTerraza" pub={true} type="number" />
+            {EFl({label: "m2 utiles", field: "mUtil", pub: true, type: "number"})}
+            {EFl({label: "m2 construidos", field: "mConst", pub: true, type: "number"})}
+            {EFl({label: "m2 parcela", field: "mParcela", pub: true, type: "number"})}
+            {EFl({label: "m2 terraza", field: "mTerraza", pub: true, type: "number"})}
           </div>
           <div style={{ ...g4, marginTop: 8 }}>
-            <EFl label="m2 balcon" field="mBalcon" pub={true} type="number" />
-            <EFl label="m2 porche" field="mPorche" pub={true} type="number" />
+            {EFl({label: "m2 balcon", field: "mBalcon", pub: true, type: "number"})}
+            {EFl({label: "m2 porche", field: "mPorche", pub: true, type: "number"})}
             <div /><div />
           </div>
           <div style={{ ...g4, marginTop: 8 }}>
-            <EFl label="Hab. dobles" field="habDobles" pub={true} type="number" />
-            <EFl label="Hab. simples" field="habSimples" pub={true} type="number" />
-            <EFl label="Banos" field="banos" pub={true} type="number" />
-            <EFl label="Aseos" field="aseos" pub={true} type="number" />
+            {EFl({label: "Hab. dobles", field: "habDobles", pub: true, type: "number"})}
+            {EFl({label: "Hab. simples", field: "habSimples", pub: true, type: "number"})}
+            {EFl({label: "Banos", field: "banos", pub: true, type: "number"})}
+            {EFl({label: "Aseos", field: "aseos", pub: true, type: "number"})}
           </div>
           <div style={{ ...g3, marginTop: 8 }}>
-            <EFl label="Planta" field="planta" pub={true} />
-            <EFl label="Ano construccion" field="anoConstruc" pub={true} />
-            <EFl label="Conservacion" field="conserv" pub={true} options={["Buen estado","Reformado","A reformar","Obra nueva","En construccion"]} type={editMode ? "select" : "text"} />
+            {EFl({label: "Planta", field: "planta", pub: true})}
+            {EFl({label: "Ano construccion", field: "anoConstruc", pub: true})}
+            {EFl({label: "Conservacion", field: "conserv", pub: true, options: ["Buen estado","Reformado","A reformar","Obra nueva","En construccion"], type: editMode ? "select" : "text"})}
           </div>
         </Sec>
         <div style={sep} />
@@ -1283,35 +1283,35 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
         {/* Caracteristicas */}
         <Sec title="Caracteristicas principales">
           <div style={g3}>
-            <EFl label="Cert. energetico" field="certEnerg" pub={true} options={["A","B","C","D","E","F","G","Exento","En tramite"]} type={editMode ? "select" : "text"} />
-            <EFl label="IEE" field="iee" pub={true} />
-            <EFl label="Venta con mobiliario" field="ventaMobiliario" pub={true} type="bool" />
+            {EFl({label: "Cert. energetico", field: "certEnerg", pub: true, options: ["A","B","C","D","E","F","G","Exento","En tramite"], type: editMode ? "select" : "text"})}
+            {EFl({label: "IEE", field: "iee", pub: true})}
+            {EFl({label: "Venta con mobiliario", field: "ventaMobiliario", pub: true, type: "bool"})}
           </div>
           <div style={{ ...g3, marginTop: 8 }}>
-            <EFl label="Suelos" field="suelos" pub={true} />
-            <EFl label="Carp. exterior" field="carpExt" pub={true} />
-            <EFl label="Carp. interior" field="carpInt" pub={true} />
+            {EFl({label: "Suelos", field: "suelos", pub: true})}
+            {EFl({label: "Carp. exterior", field: "carpExt", pub: true})}
+            {EFl({label: "Carp. interior", field: "carpInt", pub: true})}
           </div>
           <div style={{ ...g3, marginTop: 8 }}>
-            <EFl label="Climatizacion" field="clima" pub={true} />
-            <EFl label="Agua caliente" field="aguaCal" pub={true} />
+            {EFl({label: "Climatizacion", field: "clima", pub: true})}
+            {EFl({label: "Agua caliente", field: "aguaCal", pub: true})}
             <div />
           </div>
           <div style={{ ...g2, marginTop: 8 }}>
-            <EFl label="Parking" field="parking" pub={true} options={["Si","No","Comunitario","Opcional"]} type={editMode ? "select" : "text"} />
-            <EFl label="N plazas" field="nPlazas" pub={true} type="number" />
+            {EFl({label: "Parking", field: "parking", pub: true, options: ["Si","No","Comunitario","Opcional"], type: editMode ? "select" : "text"})}
+            {EFl({label: "N plazas", field: "nPlazas", pub: true, type: "number"})}
           </div>
           <div style={{ ...g4, marginTop: 12 }}>
-            <EFl label="Terraza" field="terraza" pub={true} type="bool" />
-            <EFl label="Balcon" field="balcon" pub={true} type="bool" />
-            <EFl label="Piscina" field="piscina" pub={true} type="bool" />
-            <EFl label="Jardin" field="jardin" pub={true} type="bool" />
+            {EFl({label: "Terraza", field: "terraza", pub: true, type: "bool"})}
+            {EFl({label: "Balcon", field: "balcon", pub: true, type: "bool"})}
+            {EFl({label: "Piscina", field: "piscina", pub: true, type: "bool"})}
+            {EFl({label: "Jardin", field: "jardin", pub: true, type: "bool"})}
           </div>
           <div style={{ ...g4, marginTop: 8 }}>
-            <EFl label="Ascensor" field="ascensor" pub={true} type="bool" />
-            <EFl label="Aire acondicionado" field="aireAcond" pub={true} type="bool" />
-            <EFl label="Armarios" field="armarios" pub={true} type="bool" />
-            <EFl label="Trastero" field="trastero" pub={true} type="bool" />
+            {EFl({label: "Ascensor", field: "ascensor", pub: true, type: "bool"})}
+            {EFl({label: "Aire acondicionado", field: "aireAcond", pub: true, type: "bool"})}
+            {EFl({label: "Armarios", field: "armarios", pub: true, type: "bool"})}
+            {EFl({label: "Trastero", field: "trastero", pub: true, type: "bool"})}
           </div>
         </Sec>
         <div style={sep} />
