@@ -883,7 +883,7 @@ function PropCard({ p, onClick }) {
         {p.tour360 && <span>Tour 360</span>}
         {p.planos > 0 && <span>Planos: {p.planos}</span>}
         <span style={{ opacity: 0.3 }}>|</span>
-        <span>{p.visitas} visitas</span>
+        <span>{p.demandas || 0} demandas</span>
         <span style={{ opacity: 0.3 }}>|</span>
         <span>{p.agente}</span>
       </div>
@@ -1545,7 +1545,21 @@ export default function CRMPropiedades() {
     setLoading(true);
     const { data: rows, error } = await supabase.from("propiedades").select("*").order("created_at", { ascending: false });
     if (!error && rows) {
-      setData(rows.map(mapDbToJs));
+      // Count demandas from conversaciones for each property ref
+      const refs = rows.map(r => r.ref).filter(Boolean);
+      let demandasMap = {};
+      if (refs.length > 0) {
+        const { data: convs } = await supabase
+          .from("conversaciones")
+          .select("referencia")
+          .in("referencia", refs);
+        if (convs) {
+          convs.forEach(c => {
+            if (c.referencia) demandasMap[c.referencia] = (demandasMap[c.referencia] || 0) + 1;
+          });
+        }
+      }
+      setData(rows.map(r => ({ ...mapDbToJs(r), demandas: demandasMap[r.ref] || 0 })));
     }
     setLoading(false);
   }
