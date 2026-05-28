@@ -25,7 +25,7 @@ function mapDbToJs(row) {
     desc: row.desc_texto || "", notasPriv: row.notas_priv || "",
     propNombre: row.prop_nombre || "", propTel: row.prop_tel || "", propEmail: row.prop_email || "",
     agente: row.agente || "", estado: row.estado || "captada",
-    destinos: row.destinos || [], fotos: row.fotos || 0, videos: row.videos || 0, tour360: row.tour360 || false, planos: row.planos || 0,
+    destinos: row.destinos || [], fotos: row.fotos || 0, videos: row.videos || 0, tour360: row.tour360 || "", planos: row.planos || 0,
     fechaCap: row.fecha_cap || "", visitas: row.visitas || 0,
     cualPos: row.cual_pos || [], cualNeg: row.cual_neg || [], cualMejoras: row.cual_mejoras || [],
     puerta: row.puerta || "", latitud: row.latitud != null ? row.latitud : null, longitud: row.longitud != null ? row.longitud : null, idealistaId: row.idealista_id || "",
@@ -215,7 +215,7 @@ const SAMPLE = [
     notasPriv: "Propietario se muda al extranjero en septiembre.",
     propNombre: "Tomas Vidal", propTel: "609887766", propEmail: "tomas.vidal@outlook.com",
     agente: "Carlos M.", estado: "captada", destinos: [],
-    fotos: 8, videos: 1, tour360: false, planos: 0,
+    fotos: 8, videos: 1, tour360: "", planos: 0,
     fechaCap: "01/05/2026", visitas: 0,
     cualPos: ["Piscina privada", "Jardin grande", "Zona tranquila"],
     cualNeg: ["Cocina anticuada", "Certificado energetico bajo"],
@@ -880,7 +880,7 @@ function PropCard({ p, onClick }) {
       <div style={{ display: "flex", gap: 16, marginTop: 14, fontSize: 12, color: "#A09D93", flexWrap: "wrap" }}>
         <span>Fotos: {p.fotos}</span>
         {p.videos > 0 && <span>Videos: {p.videos}</span>}
-        {p.tour360 && <span>Tour 360</span>}
+        {p.tour360 && typeof p.tour360 === "string" && p.tour360.startsWith("http") && <span>Tour 360</span>}
         {p.planos > 0 && <span>Planos: {p.planos}</span>}
         <span style={{ opacity: 0.3 }}>|</span>
         <span>{p.demandas || 0} demandas</span>
@@ -1467,6 +1467,12 @@ REGLAS:
 
         {/* Multimedia */}
         <Sec title="Multimedia">
+          <div style={{ marginBottom: 16 }}>
+            {EFl({label: "Tour virtual (URL)", field: "tour360", pub: true})}
+            {d.tour360 && d.tour360.startsWith("http") && (
+              <a href={d.tour360} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: "#C8A97E", textDecoration: "underline" }}>Abrir tour virtual</a>
+            )}
+          </div>
           {p.id ? (
             <MediaSection propiedadId={p.id} propRef={p.ref} onCountUpdate={(counts) => { if (onUpdate) onUpdate({ ...p, fotos: counts.foto, videos: counts.video, planos: counts.plano, tour360: counts.tour360 > 0 }); }} />
           ) : (
@@ -1709,7 +1715,7 @@ export default function CRMPropiedades() {
                   ibi: 0, basuras: 0, comunidad: 0, extraComunidad: 0, otrosGastos: "",
                   desc: "", notasPriv: "", descEn: "", descDe: "",
                   propNombre: "", propTel: "", propEmail: "", fechaCap: new Date().toISOString().split("T")[0],
-                  agente: "", fotos: 0, videos: 0, planos: 0, tour360: false,
+                  agente: "", fotos: 0, videos: 0, planos: 0, tour360: "",
                   latitud: null, longitud: null, idealistaId: "",
                   cualPos: [], cualNeg: [], cualMejoras: [],
                   calidades: [], suministros: [], elecReformada: false, fontReformada: false, drenaje: "",
