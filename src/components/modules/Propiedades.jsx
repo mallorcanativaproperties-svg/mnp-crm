@@ -280,7 +280,6 @@ const MEDIA_TIPOS = [
   { key: "foto", label: "Fotos", icon: "📷", accept: "image/*", color: "#C8A97E" },
   { key: "video", label: "Videos", icon: "🎬", accept: "video/*", color: "#A89BC4" },
   { key: "plano", label: "Planos", icon: "📐", accept: "image/*,.pdf", color: "#6AAF8D" },
-  { key: "tour360", label: "Tour 360", icon: "🌐", accept: "image/*", color: "#D4956A" },
 ];
 
 function MediaSection({ propiedadId, propRef, onCountUpdate }) {
