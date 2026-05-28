@@ -1056,7 +1056,7 @@ Parrafo 7: Llamada a la accion breve y directa. Ejemplo: "Haz de este piso tu nu
 
 REGLAS:
 - Integra TODOS los puntos positivos del formulario interno en la narrativa
-- Maximo 3.500 caracteres
+- Maximo 3.700 caracteres
 - NUNCA incluyas datos del propietario, honorarios, precio ni informacion confidencial
 - NUNCA pongas titulos, subtitulos ni encabezados
 - Si algo necesita mejora, presentalo siempre como oportunidad positiva
@@ -1439,35 +1439,16 @@ REGLAS:
             </div>
           )}
 
-          {aiDesc && (
-            <div style={{ marginTop: 12 }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <span style={{ fontSize: 10, fontWeight: 600, color: "#6AAF8D", textTransform: "uppercase", letterSpacing: "0.1em" }}>Descripcion generada por IA</span>
-                  <Tag color="#6AAF8D">Nuevo</Tag>
-                </div>
-                <span style={{ fontSize: 10, color: aiDesc.length > 4000 ? "#D45454" : "#7A7870" }}>{aiDesc.length} / 4.000</span>
-              </div>
-              <div style={{ fontSize: 13, color: "#F0EDE6", lineHeight: 1.7, background: "#1C1B18", padding: "18px 22px", borderRadius: 3, border: "1px solid #6AAF8D33", whiteSpace: "pre-wrap" }}>
-                {aiDesc}
-              </div>
-            </div>
-          )}
-
           <div style={{ marginTop: 16 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 3 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                 <Dot green={true} />
-                <span style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em" }}>Descripcion actual</span>
+                <span style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em" }}>Descripcion</span>
               </div>
-              <span style={{ fontSize: 10, color: p.desc.length > 4000 ? "#D45454" : "#7A7870" }}>{p.desc.length} / 4.000</span>
+              <span style={{ fontSize: 10, color: (d.desc || "").length > 3700 ? "#D45454" : "#7A7870" }}>{(d.desc || "").length} / 3.700</span>
             </div>
-            {editMode ? (
-              <textarea value={d.desc || ""} onChange={e => upd("desc", e.target.value)}
-                style={{ width: "100%", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "14px 18px", fontSize: 13, fontFamily: "'Manrope', sans-serif", minHeight: 120, resize: "vertical", lineHeight: 1.6 }} />
-            ) : (
-              <div style={{ fontSize: 13, color: "#D0CDC4", lineHeight: 1.6, background: "#1C1B18", padding: "14px 18px", borderRadius: 3, whiteSpace: "pre-wrap" }}>{p.desc}</div>
-            )}
+            <textarea value={d.desc || ""} onChange={e => { if (e.target.value.length <= 3700) upd("desc", e.target.value); }}
+              style={{ width: "100%", background: "#1C1B18", border: "1px solid " + ((d.desc || "").length > 3700 ? "#D45454" : "#2A2926"), borderRadius: 3, color: "#D0CDC4", padding: "14px 18px", fontSize: 13, fontFamily: "'Manrope', sans-serif", minHeight: 200, resize: "vertical", lineHeight: 1.6 }} />
           </div>
         </Sec>
         <div style={sep} />
