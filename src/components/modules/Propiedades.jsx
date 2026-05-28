@@ -28,7 +28,7 @@ function mapDbToJs(row) {
     destinos: row.destinos || [], fotos: row.fotos || 0, videos: row.videos || 0, tour360: row.tour360 || false, planos: row.planos || 0,
     fechaCap: row.fecha_cap || "", visitas: row.visitas || 0,
     cualPos: row.cual_pos || [], cualNeg: row.cual_neg || [], cualMejoras: row.cual_mejoras || [],
-    latitud: row.latitud || null, longitud: row.longitud || null, idealistaId: row.idealista_id || "",
+    puerta: row.puerta || "", latitud: row.latitud || null, longitud: row.longitud || null, idealistaId: row.idealista_id || "",
     descEn: row.desc_en || "", descDe: row.desc_de || "",
     terraza: row.terraza || false, piscina: row.piscina || false, ascensor: row.ascensor || false,
     jardin: row.jardin || false, aireAcond: row.aire_acond || false, armarios: row.armarios || false,
@@ -58,7 +58,7 @@ function mapJsToDb(p) {
     fotos: p.fotos, videos: p.videos, tour360: p.tour360, planos: p.planos,
     fecha_cap: p.fechaCap, visitas: p.visitas,
     cual_pos: p.cualPos, cual_neg: p.cualNeg, cual_mejoras: p.cualMejoras,
-    latitud: p.latitud, longitud: p.longitud, idealista_id: p.idealistaId,
+    puerta: p.puerta, latitud: p.latitud, longitud: p.longitud, idealista_id: p.idealistaId,
     desc_en: p.descEn, desc_de: p.descDe,
     terraza: p.terraza, piscina: p.piscina, ascensor: p.ascensor,
     jardin: p.jardin, aire_acond: p.aireAcond, armarios: p.armarios,
@@ -911,14 +911,26 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
   const [editMode, setEditMode] = useState(!p.id);
-  const [draft, setDraft] = useState({ ...p });
+  const [draft, setDraft] = useState({ ...p, 
+    suministrosText: (p.suministros || []).join(", "),
+    cualPosText: (p.cualPos || []).join("\n"),
+    cualNegText: (p.cualNeg || []).join("\n"),
+    cualMejorasText: (p.cualMejoras || []).join("\n"),
+  });
   const g2 = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 24px" };
   const g3 = { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px 24px" };
   const g4 = { display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "10px 24px" };
   const sep = { borderBottom: "1px solid #2A2926", margin: "18px 0" };
   const intBox = { background: "#1C1B18", border: "1px solid #D4545422", borderRadius: 3, padding: "16px 20px" };
 
-  const d = editMode ? draft : p;
+  // Create text versions of arrays for editing
+  const pWithTexts = { ...p, 
+    suministrosText: (p.suministros || []).join(", "),
+    cualPosText: (p.cualPos || []).join("\n"),
+    cualNegText: (p.cualNeg || []).join("\n"),
+    cualMejorasText: (p.cualMejoras || []).join("\n"),
+  };
+  const d = editMode ? draft : pWithTexts;
   const upd = (key, val) => setDraft(prev => ({ ...prev, [key]: val }));
 
   function EFl({ label, field, pub, gold, type = "text", options }) {
@@ -944,7 +956,7 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
           <textarea value={d[field] || ""} onChange={e => upd(field, e.target.value)}
             style={{ width: "100%", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "6px 8px", fontSize: 13, fontFamily: "'Manrope', sans-serif", minHeight: 80, resize: "vertical" }} />
         ) : (
-          <input type={type === "number" ? "number" : "text"} value={d[field] ?? ""} onChange={e => upd(field, type === "number" ? Number(e.target.value) : e.target.value)}
+          <input type={type === "number" ? "number" : "text"} value={d[field] ?? ""} onChange={e => upd(field, type === "number" ? (e.target.value === "" ? 0 : Number(e.target.value)) : e.target.value)} onFocus={e => { if (type === "number" && e.target.value === "0") e.target.select(); }}
             style={{ width: "100%", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "6px 8px", fontSize: 13, fontFamily: "'Manrope', sans-serif" }} />
         )}
       </div>
@@ -1088,7 +1100,14 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
       <div style={{ background: "#161513", border: "1px solid #2A2926", borderRadius: 4, width: "100%", maxWidth: 740, padding: "32px 36px", position: "relative" }}>
         <button onClick={onClose} style={{ position: "absolute", top: 16, right: 20, background: "none", border: "none", color: "#7A7870", fontSize: 20, cursor: "pointer" }}>X</button>
         {!editMode && <button onClick={() => { setDraft({ ...p }); setEditMode(true); }} style={{ position: "absolute", top: 16, right: 120, background: "#C8A97E", border: "none", borderRadius: 3, color: "#111110", fontSize: 10, cursor: "pointer", padding: "5px 14px", fontWeight: 600, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.05em" }}>Editar</button>}
-        {editMode && <button onClick={() => { if (onUpdate) onUpdate(draft); setEditMode(false); }} style={{ position: "absolute", top: 16, right: 120, background: "#6AAF8D", border: "none", borderRadius: 3, color: "#111110", fontSize: 10, cursor: "pointer", padding: "5px 14px", fontWeight: 600, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.05em" }}>Guardar</button>}
+        {editMode && <button onClick={() => { 
+          const toSave = { ...draft,
+            suministros: (draft.suministrosText || "").split(",").map(s => s.trim()).filter(Boolean),
+            cualPos: (draft.cualPosText || "").split("\n").filter(Boolean),
+            cualNeg: (draft.cualNegText || "").split("\n").filter(Boolean),
+            cualMejoras: (draft.cualMejorasText || "").split("\n").filter(Boolean),
+          };
+          if (onUpdate) onUpdate(toSave); setEditMode(false); }} style={{ position: "absolute", top: 16, right: 120, background: "#6AAF8D", border: "none", borderRadius: 3, color: "#111110", fontSize: 10, cursor: "pointer", padding: "5px 14px", fontWeight: 600, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.05em" }}>Guardar</button>}
         {editMode && <button onClick={() => { setDraft({ ...p }); setEditMode(false); }} style={{ position: "absolute", top: 16, right: 190, background: "none", border: "1px solid #7A7870", borderRadius: 3, color: "#7A7870", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "'Manrope', sans-serif" }}>Cancelar</button>}
         <button onClick={() => { if (onDelete) onDelete(p); }} style={{ position: "absolute", top: 16, right: 56, background: "none", border: "1px solid #D4545433", borderRadius: 3, color: "#D45454", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "'Manrope', sans-serif" }}>Eliminar</button>
 
@@ -1116,19 +1135,8 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
                 style={{ width: "100%", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", padding: "8px 12px", fontSize: 18, fontFamily: "'Playfair Display', serif", marginBottom: 6 }} />
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                 <span style={{ fontSize: 11, color: "#7A7870" }}>Agente:</span>
-                <select value={d.agente || ""} onChange={async e => {
-                  const ag = e.target.value;
-                  upd("agente", ag);
-                  if (!d.ref && ag && AGENTE_PREFIX[ag]) {
-                    const newRef = await autoGenerateRef(ag);
-                    upd("ref", newRef);
-                    setDraft(prev => ({ ...prev, agente: ag, ref: newRef }));
-                  }
-                }}
-                  style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "4px 8px", fontSize: 11, fontFamily: "'Manrope', sans-serif" }}>
-                  <option value="">Seleccionar...</option>
-                  {AGENTES_LIST.map(a => <option key={a} value={a}>{a}</option>)}
-                </select>
+                <input type="text" value={d.agente || ""} onChange={e => upd("agente", e.target.value)} placeholder="Nombre agente"
+                  style={{ width: 120, background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "4px 8px", fontSize: 11, fontFamily: "'Manrope', sans-serif" }} />
               </div>
             </>
           ) : (
@@ -1208,13 +1216,14 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
             {EFl({label: "Orientacion", field: "orient", pub: true, options: ["Norte","Sur","Este","Oeste","Noreste","Noroeste","Sureste","Suroeste"], type: editMode ? "select" : "text"})}
             {EFl({label: "Distancia playa", field: "distPlaya", pub: true})}
             {EFl({label: "Planta", field: "planta", pub: true})}
+            {EFl({label: "Puerta", field: "puerta", pub: true})}
           </div>
           <div style={{ ...g2, marginTop: 8 }}>
             {EFl({label: "Latitud", field: "latitud", pub: false, type: "number"})}
             {EFl({label: "Longitud", field: "longitud", pub: false, type: "number"})}
           </div>
           <div style={{ ...g2, marginTop: 8 }}>
-            {EFl({label: "Visibilidad direccion en portales", field: "visDir", pub: false, options: ["Direccion exacta","Solo calle","Solo zona"], type: editMode ? "select" : "text"})}
+            {EFl({label: "Visibilidad direccion en portales", field: "visDir", pub: false})}
             {EFl({label: "Idealista ID", field: "idealistaId", pub: false})}
           </div>
         </Sec>
@@ -1244,13 +1253,13 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
         {/* Gastos */}
         <Sec title="Gastos asociados">
           <div style={g3}>
-            <Fl label="IBI anual" value={p.ibi ? fmtP(p.ibi) : "-"} pub={true} />
-            <Fl label="Tasa basuras" value={p.basuras ? fmtP(p.basuras) : "-"} pub={true} />
-            <Fl label="Comunidad /mes" value={p.comunidad ? fmtP(p.comunidad) : "Sin comunidad"} pub={true} />
+            {EFl({label: "IBI anual", field: "ibi", pub: true, type: "number"})}
+            {EFl({label: "Tasa basuras", field: "basuras", pub: true, type: "number"})}
+            {EFl({label: "Comunidad /mes", field: "comunidad", pub: true, type: "number"})}
           </div>
           <div style={{ ...g2, marginTop: 6 }}>
-            <Fl label="Extra comunidad (derramas)" value={p.extraComunidad ? fmtP(p.extraComunidad) : "-"} pub={true} />
-            {p.otrosGastos ? <Fl label="Otros gastos" value={p.otrosGastos} pub={true} /> : <div />}
+            {EFl({label: "Extra comunidad (derramas)", field: "extraComunidad", pub: true, type: "number"})}
+            {EFl({label: "Otros gastos", field: "otrosGastos", pub: true})}
           </div>
         </Sec>
         <div style={sep} />
@@ -1276,6 +1285,7 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
           </div>
           <div style={{ ...g3, marginTop: 8 }}>
             {EFl({label: "Planta", field: "planta", pub: true})}
+            {EFl({label: "Puerta", field: "puerta", pub: true})}
             {EFl({label: "Ano construccion", field: "anoConstruc", pub: true})}
             {EFl({label: "Conservacion", field: "conserv", pub: true, options: ["Buen estado","Reformado","A reformar","Obra nueva","En construccion"], type: editMode ? "select" : "text"})}
           </div>
@@ -1321,34 +1331,17 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
         {/* Instalaciones */}
         <Sec title="Instalaciones y suministros">
           <div style={g2}>
-            <Fl label="Suministros" value={p.suministros ? p.suministros.join(", ") : "-"} pub={true} />
-            <Fl label="Drenaje sanitario" value={p.drenaje || "-"} pub={true} />
+            {EFl({label: "Suministros", field: "suministrosText", pub: true})}
+            {EFl({label: "Drenaje sanitario", field: "drenaje", pub: true})}
           </div>
           <div style={{ ...g2, marginTop: 8 }}>
-            <Fl label="Electricidad reformada" value={p.elecReformada ? "Si" : "No"} pub={true} />
-            <Fl label="Fontaneria reformada" value={p.fontReformada ? "Si" : "No"} pub={true} />
+            {EFl({label: "Electricidad reformada", field: "elecReformada", pub: true, type: "bool"})}
+            {EFl({label: "Fontaneria reformada", field: "fontReformada", pub: true, type: "bool"})}
           </div>
         </Sec>
         <div style={sep} />
 
-        {/* Calidades */}
-        <Sec title="Calidades (Idealista)">
-          {CALIDADES.map((cat) => {
-            const active = cat.items.filter((c) => p.calidades.includes(c));
-            if (active.length === 0) return null;
-            return (
-              <div key={cat.cat} style={{ marginBottom: 10 }}>
-                <span style={{ fontSize: 10, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4, display: "block" }}>{cat.cat}</span>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-                  {active.map((c, i) => (
-                    <span key={i} style={{ fontSize: 11, padding: "4px 12px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E22" }}>{c}</span>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </Sec>
-        <div style={sep} />
+        
 
         {/* Publicacion */}
         <Sec title="Publicacion">
@@ -1408,7 +1401,12 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
               </div>
               <span style={{ fontSize: 10, color: p.desc.length > 4000 ? "#D45454" : "#7A7870" }}>{p.desc.length} / 4.000</span>
             </div>
-            <div style={{ fontSize: 13, color: "#D0CDC4", lineHeight: 1.6, background: "#1C1B18", padding: "14px 18px", borderRadius: 3 }}>{p.desc}</div>
+            {editMode ? (
+              <textarea value={d.desc || ""} onChange={e => upd("desc", e.target.value)}
+                style={{ width: "100%", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "14px 18px", fontSize: 13, fontFamily: "'Manrope', sans-serif", minHeight: 120, resize: "vertical", lineHeight: 1.6 }} />
+            ) : (
+              <div style={{ fontSize: 13, color: "#D0CDC4", lineHeight: 1.6, background: "#1C1B18", padding: "14px 18px", borderRadius: 3, whiteSpace: "pre-wrap" }}>{p.desc}</div>
+            )}
           </div>
         </Sec>
         <div style={sep} />
@@ -1451,12 +1449,12 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
               <span style={{ fontSize: 10, fontWeight: 600, color: "#D45454", textTransform: "uppercase", letterSpacing: "0.1em" }}>No se publica</span>
             </div>
             <div style={g2}>
-              <Fl label="Propietario" value={p.propNombre} pub={false} />
-              <Fl label="Telefono" value={p.propTel} pub={false} />
+              {EFl({label: "Propietario", field: "propNombre", pub: false})}
+              {EFl({label: "Telefono", field: "propTel", pub: false})}
             </div>
-            <Fl label="Email" value={p.propEmail} pub={false} />
+            {EFl({label: "Email", field: "propEmail", pub: false})}
             <div style={{ marginTop: 8 }}>
-              <Fl label="Notas privadas" value={p.notasPriv} pub={false} />
+              {EFl({label: "Notas privadas", field: "notasPriv", pub: false, type: "textarea"})}
             </div>
           </div>
         </Sec>
@@ -1469,30 +1467,9 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
               <Dot green={false} />
               <span style={{ fontSize: 10, fontWeight: 600, color: "#D45454", textTransform: "uppercase", letterSpacing: "0.1em" }}>Formulario interno</span>
             </div>
-            <div style={{ marginBottom: 14 }}>
-              <span style={{ fontSize: 10, fontWeight: 600, color: "#6AAF8D", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 6 }}>Puntos positivos</span>
-              {p.cualPos.map((c, i) => (
-                <div key={i} style={{ fontSize: 13, color: "#D0CDC4", padding: "3px 0", display: "flex", gap: 6 }}>
-                  <span style={{ color: "#6AAF8D" }}>+</span>{c}
-                </div>
-              ))}
-            </div>
-            <div style={{ marginBottom: 14 }}>
-              <span style={{ fontSize: 10, fontWeight: 600, color: "#D4956A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 6 }}>Puntos negativos</span>
-              {p.cualNeg.map((c, i) => (
-                <div key={i} style={{ fontSize: 13, color: "#D0CDC4", padding: "3px 0", display: "flex", gap: 6 }}>
-                  <span style={{ color: "#D4956A" }}>-</span>{c}
-                </div>
-              ))}
-            </div>
-            <div>
-              <span style={{ fontSize: 10, fontWeight: 600, color: "#A89BC4", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 6 }}>Que mejorar</span>
-              {p.cualMejoras.map((c, i) => (
-                <div key={i} style={{ fontSize: 13, color: "#D0CDC4", padding: "3px 0", display: "flex", gap: 6 }}>
-                  <span style={{ color: "#A89BC4" }}>^</span>{c}
-                </div>
-              ))}
-            </div>
+            {EFl({label: "Puntos positivos (uno por linea)", field: "cualPosText", pub: false, type: "textarea"})}
+            {EFl({label: "Puntos negativos (uno por linea)", field: "cualNegText", pub: false, type: "textarea"})}
+            {EFl({label: "Que mejorar (uno por linea)", field: "cualMejorasText", pub: false, type: "textarea"})}
           </div>
         </Sec>
 
@@ -1605,7 +1582,7 @@ export default function CRMPropiedades() {
               onClick={() => {
                 const newProp = {
                   id: null, ref: "", tipo: "Piso", op: "Compraventa", estado: "borrador", titulo: "",
-                  dir: "", num: "", cp: "", municipio: "", zona: "", orient: "", distPlaya: "", visDir: "Solo zona", planta: "",
+                  dir: "", num: "", cp: "", puerta: "", municipio: "", zona: "", orient: "", distPlaya: "", visDir: "Solo zona", planta: "",
                   precioVenta: 0, precioProp: 0, precioAnt: 0, precioTraspaso: 0,
                   honorarios: 5, honorariosTipo: "porcentaje", ivaHon: 21,
                   mConst: 0, mUtil: 0, mParcela: 0, mTerraza: 0, mBalcon: 0, mPorche: 0,
