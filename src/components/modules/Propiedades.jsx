@@ -1056,7 +1056,7 @@ Parrafo 7: Llamada a la accion breve y directa. Ejemplo: "Haz de este piso tu nu
 
 REGLAS:
 - Integra TODOS los puntos positivos del formulario interno en la narrativa
-- Maximo 3.700 caracteres ESTRICTO. Cuenta los caracteres y NO te pases. Si te acercas al limite, acorta el ultimo parrafo
+- El texto DEBE tener entre 3.000 y 3.600 caracteres. NUNCA superar 3.600. Es preferible quedarse corto que pasarse. Si llegas al parrafo 7 y vas largo, hazlo mas breve
 - NUNCA incluyas datos del propietario, honorarios, precio ni informacion confidencial
 - NUNCA pongas titulos, subtitulos ni encabezados
 - Si algo necesita mejora, presentalo siempre como oportunidad positiva
@@ -1068,7 +1068,7 @@ REGLAS:
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "claude-haiku-4-5-20251001",
-          max_tokens: 2000,
+          max_tokens: 1500,
           messages: [
             { role: "user", content: "Genera la descripcion para portal inmobiliario de esta propiedad:\n\n" + fichaTexto }
           ],
@@ -1093,8 +1093,7 @@ REGLAS:
         .map((item) => item.text)
         .join("\n");
       setAiDesc(text);
-      const truncated = text.length > 3700 ? text.substring(0, 3700) : text;
-      upd("desc", truncated);
+      upd("desc", text);
       if (!editMode) setEditMode(true);
     } catch (err) {
       setAiError("Error al generar: " + err.message);
@@ -1448,7 +1447,7 @@ REGLAS:
               </div>
               <span style={{ fontSize: 10, color: (d.desc || "").length > 3700 ? "#D45454" : "#7A7870" }}>{(d.desc || "").length} / 3.700</span>
             </div>
-            <textarea value={d.desc || ""} onChange={e => { if (e.target.value.length <= 3700) upd("desc", e.target.value); }}
+            <textarea value={d.desc || ""} onChange={e => upd("desc", e.target.value)}
               style={{ width: "100%", background: "#1C1B18", border: "1px solid " + ((d.desc || "").length > 3700 ? "#D45454" : "#2A2926"), borderRadius: 3, color: "#D0CDC4", padding: "14px 18px", fontSize: 13, fontFamily: "'Manrope', sans-serif", minHeight: 200, resize: "vertical", lineHeight: 1.6 }} />
           </div>
         </Sec>
