@@ -13,8 +13,6 @@ const TIPOS_POST = ["Post", "Reel", "Story", "Carousel", "Video", "Short"];
 const TABS = [
   { key: "silvia", label: "Silvia IA", icon: "🤖" },
   { key: "publicar", label: "Publicar", icon: "✎" },
-  { key: "inbox", label: "Inbox", icon: "✉" },
-  { key: "comentarios", label: "Comentarios", icon: "◎" },
   { key: "automations", label: "Automatizaciones", icon: "⚡" },
   { key: "cuentas", label: "Cuentas", icon: "◉" },
 ];
@@ -683,6 +681,7 @@ function TabSilvia() {
   const [reply, setReply] = useState("");
   const [sending, setSending] = useState(false);
   const [filter, setFilter] = useState("todos");
+  const [subTab, setSubTab] = useState("todos");
 
   useEffect(() => { loadConvs(); const interval = setInterval(loadConvs, 15000); return () => clearInterval(interval); }, []);
 
@@ -715,7 +714,14 @@ function TabSilvia() {
     setSending(false);
   }
 
-  const filtered = filter === "todos" ? convs : convs.filter(c => c.platform === filter);
+  const filtered = convs.filter(c => {
+    if (filter !== "todos" && c.platform !== filter) return false;
+    if (subTab === "inbox" && c.tipo !== "dm") return false;
+    if (subTab === "comentarios" && c.tipo !== "comentario") return false;
+    return true;
+  });
+  const countDMs = convs.filter(c => c.tipo === "dm").length;
+  const countComments = convs.filter(c => c.tipo === "comentario").length;
   const platformIcon = (p) => p === "instagram" ? "📸" : p === "messenger" ? "💬" : p === "facebook" ? "📘" : "💬";
   const tipoIcon = (t) => t === "dm" ? "✉" : "💬";
   const timeAgo = (ts) => {
@@ -733,8 +739,25 @@ function TabSilvia() {
     <div style={{ display: "flex", height: "calc(100vh - 240px)", border: "1px solid #2A2926", borderRadius: 4, overflow: "hidden" }}>
       {/* Left panel - Conversation list */}
       <div style={{ width: 320, borderRight: "1px solid #2A2926", display: "flex", flexDirection: "column", background: "#161513" }}>
-        {/* Filters */}
-        <div style={{ padding: "12px 14px", borderBottom: "1px solid #2A2926", display: "flex", gap: 4 }}>
+        {/* Sub-tabs */}
+        <div style={{ padding: "10px 14px", borderBottom: "1px solid #2A2926", display: "flex", gap: 0 }}>
+          {[
+            { key: "todos", label: "Todos", count: convs.length },
+            { key: "inbox", label: "✉ Inbox", count: countDMs },
+            { key: "comentarios", label: "💬 Comentarios", count: countComments },
+          ].map(t => (
+            <button key={t.key} onClick={() => setSubTab(t.key)} style={{
+              flex: 1, padding: "6px 4px", border: "none", fontSize: 10,
+              background: subTab === t.key ? "#C8A97E18" : "transparent",
+              borderBottom: subTab === t.key ? "2px solid #C8A97E" : "2px solid transparent",
+              color: subTab === t.key ? "#C8A97E" : "#7A7870",
+              cursor: "pointer", fontFamily: "'Manrope', sans-serif", letterSpacing: "0.04em",
+            }}>{t.label} ({t.count})</button>
+          ))}
+        </div>
+
+        {/* Platform filters */}
+        <div style={{ padding: "8px 14px", borderBottom: "1px solid #2A2926", display: "flex", gap: 4 }}>
           {["todos", "instagram", "facebook"].map(f => (
             <button key={f} onClick={() => setFilter(f)} style={{
               padding: "4px 10px", borderRadius: 3, border: "none", fontSize: 10,
@@ -880,8 +903,6 @@ export default function RedesSociales() {
         {/* Tab content */}
         {activeTab === "silvia" && <TabSilvia />}
         {activeTab === "publicar" && <TabPublicar />}
-        {activeTab === "inbox" && <TabInbox />}
-        {activeTab === "comentarios" && <TabComentarios />}
         {activeTab === "automations" && <TabAutomations />}
         {activeTab === "cuentas" && <TabCuentas />}
       </div>
