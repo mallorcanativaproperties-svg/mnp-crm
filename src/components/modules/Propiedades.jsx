@@ -1056,7 +1056,7 @@ Parrafo 7: Llamada a la accion breve y directa. Ejemplo: "Haz de este piso tu nu
 
 REGLAS:
 - Integra TODOS los puntos positivos del formulario interno en la narrativa
-- Maximo 3.700 caracteres
+- Maximo 3.700 caracteres ESTRICTO. Cuenta los caracteres y NO te pases. Si te acercas al limite, acorta el ultimo parrafo
 - NUNCA incluyas datos del propietario, honorarios, precio ni informacion confidencial
 - NUNCA pongas titulos, subtitulos ni encabezados
 - Si algo necesita mejora, presentalo siempre como oportunidad positiva
@@ -1093,7 +1093,8 @@ REGLAS:
         .map((item) => item.text)
         .join("\n");
       setAiDesc(text);
-      upd("desc", text);
+      const truncated = text.length > 3700 ? text.substring(0, 3700) : text;
+      upd("desc", truncated);
       if (!editMode) setEditMode(true);
     } catch (err) {
       setAiError("Error al generar: " + err.message);
