@@ -521,9 +521,9 @@ function AutoEditor({ onClose, onSaved }) {
   const [platforms, setPlatforms] = useState(["instagram"]);
   const [keyword, setKeyword] = useState("");
   const [postUrl, setPostUrl] = useState("");
-  const [reply1, setReply1] = useState("");
-  const [reply2, setReply2] = useState("");
-  const [reply3, setReply3] = useState("");
+  const [reply1, setReply1] = useState("Gracias por tu interes! No olvides seguirnos para no perderte nada y revisa tus DM, te hemos enviado toda la info 📩");
+  const [reply2, setReply2] = useState("Te acabamos de enviar un mensaje privado con todos los detalles! Siguenos para estar al dia de nuevas propiedades 🏠");
+  const [reply3, setReply3] = useState("Revisa tus mensajes directos, ahi tienes toda la informacion! Y si aun no nos sigues, dale a seguir para ver las novedades 😊");
   const [dmMessage, setDmMessage] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -623,15 +623,15 @@ function AutoEditor({ onClose, onSaved }) {
         {/* 3 comment replies */}
         <div style={{ marginBottom: 12 }}>
           <label style={S.label}>Respuesta 1 *</label>
-          <input value={reply1} onChange={e => setReply1(e.target.value)} placeholder="Gracias por tu interes! Te envio toda la info por DM 📩" style={S.input} />
+          <input value={reply1} onChange={e => setReply1(e.target.value)} placeholder="" style={S.input} />
         </div>
         <div style={{ marginBottom: 12 }}>
           <label style={S.label}>Respuesta 2</label>
-          <input value={reply2} onChange={e => setReply2(e.target.value)} placeholder="Te acabo de enviar un mensaje privado con todos los detalles!" style={S.input} />
+          <input value={reply2} onChange={e => setReply2(e.target.value)} placeholder="" style={S.input} />
         </div>
         <div style={{ marginBottom: 16 }}>
           <label style={S.label}>Respuesta 3</label>
-          <input value={reply3} onChange={e => setReply3(e.target.value)} placeholder="Mira tu DM, te he enviado la informacion completa 😊" style={S.input} />
+          <input value={reply3} onChange={e => setReply3(e.target.value)} placeholder="" style={S.input} />
         </div>
 
         <div style={{ borderBottom: "1px solid #2A2926", margin: "20px 0", paddingBottom: 4 }}>
