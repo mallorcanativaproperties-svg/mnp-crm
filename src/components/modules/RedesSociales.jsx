@@ -518,39 +518,120 @@ function TabAutomations() {
 /* ── AutoEditor Modal ── */
 function AutoEditor({ onClose, onSaved }) {
   const [nombre, setNombre] = useState("");
-  const [platform, setPlatform] = useState("instagram");
-  const [triggerType, setTriggerType] = useState("comment_keyword");
-  const [keywords, setKeywords] = useState("");
-  const [actionType, setActionType] = useState("send_dm");
-  const [actionMessage, setActionMessage] = useState("");
-  const [delay, setDelay] = useState(0);
+  const [platforms, setPlatforms] = useState(["instagram"]);
+  const [keyword, setKeyword] = useState("");
+  const [postUrl, setPostUrl] = useState("");
+  const [reply1, setReply1] = useState("");
+  const [reply2, setReply2] = useState("");
+  const [reply3, setReply3] = useState("");
+  const [dmMessage, setDmMessage] = useState("");
   const [saving, setSaving] = useState(false);
 
+  const togglePlatform = (p) => {
+    setPlatforms(prev => prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p]);
+  };
+
   const save = async () => {
-    if (!nombre) return; setSaving(true);
-    await supabase.from("social_automations").insert({ nombre, platform, trigger_type: triggerType, trigger_keywords: keywords.split(",").map((k) => k.trim()).filter(Boolean), action_type: actionType, action_message: actionMessage, action_delay_seconds: delay, activa: true });
+    if (!nombre || !keyword) return;
+    setSaving(true);
+    const commentReplies = [reply1, reply2, reply3].filter(Boolean);
+    await supabase.from("social_automations").insert({
+      nombre,
+      platform: platforms.join(","),
+      trigger_type: "comment_keyword",
+      trigger_keywords: keyword.split(",").map(k => k.trim()).filter(Boolean),
+      action_type: "comment_and_dm",
+      action_message: dmMessage,
+      comment_replies: commentReplies,
+      post_url: postUrl,
+      action_delay_seconds: 0,
+      activa: true,
+    });
     setSaving(false); onSaved(); onClose();
   };
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={onClose}>
-      <div style={{ ...S.card, maxWidth: 520, width: "95%", padding: "28px 32px" }} onClick={(e) => e.stopPropagation()}>
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 1000, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "30px 12px", overflowY: "auto" }} onClick={onClose}>
+      <div style={{ ...S.card, maxWidth: 600, width: "95%", padding: "28px 32px" }} onClick={(e) => e.stopPropagation()}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-          <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 400, margin: 0 }}>Nueva <em>automatización</em></h3>
+          <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 400, margin: 0 }}>Nueva <em>automatizacion</em></h3>
           <button onClick={onClose} style={{ background: "none", border: "none", color: "#7A7870", cursor: "pointer", fontSize: 18 }}>✕</button>
         </div>
-        <div style={{ marginBottom: 14 }}><label style={S.label}>Nombre</label><input value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Ej: Info pisos - DM automático" style={S.input} /></div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px", marginBottom: 14 }}>
-          <div><label style={S.label}>Red social</label><select value={platform} onChange={(e) => setPlatform(e.target.value)} style={S.input}><option value="all">Todas</option>{REDES.map((r) => <option key={r.key} value={r.key}>{r.label}</option>)}</select></div>
-          <div><label style={S.label}>Trigger</label><select value={triggerType} onChange={(e) => setTriggerType(e.target.value)} style={S.input}>{TRIGGER_TYPES.map((t) => <option key={t.key} value={t.key}>{t.label}</option>)}</select></div>
+
+        {/* Nombre = etiqueta del lead */}
+        <div style={{ marginBottom: 16 }}>
+          <label style={S.label}>Nombre / Etiqueta del lead</label>
+          <input value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Ej: Pisos Palma, Chalets, Reels Enero..." style={S.input} />
+          <div style={{ fontSize: 9, color: "#7A7870", marginTop: 3 }}>Los leads que entren por esta automatizacion se etiquetaran con este nombre</div>
         </div>
-        {(triggerType === "comment_keyword" || triggerType === "dm_keyword") && <div style={{ marginBottom: 14 }}><label style={S.label}>Keywords (separadas por coma)</label><input value={keywords} onChange={(e) => setKeywords(e.target.value)} placeholder="INFO, PRECIO, PISO, LINK" style={S.input} /><div style={{ fontSize: 9, color: "#7A787066", marginTop: 3 }}>Se activa cuando un comentario o DM contiene alguna keyword</div></div>}
-        <div style={{ marginBottom: 14 }}><label style={S.label}>Acción</label><select value={actionType} onChange={(e) => setActionType(e.target.value)} style={S.input}>{ACTION_TYPES.map((t) => <option key={t.key} value={t.key}>{t.label}</option>)}</select></div>
-        {(actionType === "send_dm" || actionType === "reply_comment") && <div style={{ marginBottom: 14 }}><label style={S.label}>Mensaje automático</label><textarea value={actionMessage} onChange={(e) => setActionMessage(e.target.value)} rows={3} placeholder="¡Hola! Gracias por tu interés..." style={{ ...S.input, resize: "vertical" }} /></div>}
-        <div style={{ marginBottom: 24 }}><label style={S.label}>Retraso (segundos)</label><input type="number" value={delay} onChange={(e) => setDelay(parseInt(e.target.value) || 0)} min={0} style={{ ...S.input, maxWidth: 120 }} /></div>
+
+        {/* Redes sociales - multi select */}
+        <div style={{ marginBottom: 16 }}>
+          <label style={S.label}>Redes sociales</label>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {REDES.filter(r => ["instagram", "facebook"].includes(r.key)).map(r => (
+              <button key={r.key} onClick={() => togglePlatform(r.key)} style={{
+                padding: "8px 16px", borderRadius: 3, cursor: "pointer", fontSize: 11,
+                border: platforms.includes(r.key) ? `2px solid ${r.color}` : "2px solid #2A2926",
+                background: platforms.includes(r.key) ? r.color + "18" : "transparent",
+                color: platforms.includes(r.key) ? r.color : "#7A7870",
+                fontFamily: "'Manrope', sans-serif",
+              }}>{r.icon} {r.label}</button>
+            ))}
+          </div>
+        </div>
+
+        {/* Keyword */}
+        <div style={{ marginBottom: 16 }}>
+          <label style={S.label}>Palabra clave (obligatoria para activar)</label>
+          <input value={keyword} onChange={e => setKeyword(e.target.value)} placeholder="INFO, PRECIO, QUIERO, ME INTERESA" style={S.input} />
+          <div style={{ fontSize: 9, color: "#7A7870", marginTop: 3 }}>Separar por comas. El cliente debe comentar alguna de estas palabras</div>
+        </div>
+
+        {/* Post/Reel URL */}
+        <div style={{ marginBottom: 16 }}>
+          <label style={S.label}>URL del reel/post (opcional, para limitar a un post concreto)</label>
+          <input value={postUrl} onChange={e => setPostUrl(e.target.value)} placeholder="https://www.instagram.com/reel/..." style={S.input} />
+        </div>
+
+        <div style={{ borderBottom: "1px solid #2A2926", margin: "20px 0", paddingBottom: 4 }}>
+          <span style={{ fontSize: 10, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 600 }}>Respuesta al comentario</span>
+          <div style={{ fontSize: 9, color: "#7A7870", marginTop: 2 }}>Se elige una al azar. Minimo 1, maximo 3</div>
+        </div>
+
+        {/* 3 comment replies */}
+        <div style={{ marginBottom: 12 }}>
+          <label style={S.label}>Respuesta 1 *</label>
+          <input value={reply1} onChange={e => setReply1(e.target.value)} placeholder="Gracias por tu interes! Te envio toda la info por DM 📩" style={S.input} />
+        </div>
+        <div style={{ marginBottom: 12 }}>
+          <label style={S.label}>Respuesta 2</label>
+          <input value={reply2} onChange={e => setReply2(e.target.value)} placeholder="Te acabo de enviar un mensaje privado con todos los detalles!" style={S.input} />
+        </div>
+        <div style={{ marginBottom: 16 }}>
+          <label style={S.label}>Respuesta 3</label>
+          <input value={reply3} onChange={e => setReply3(e.target.value)} placeholder="Mira tu DM, te he enviado la informacion completa 😊" style={S.input} />
+        </div>
+
+        <div style={{ borderBottom: "1px solid #2A2926", margin: "20px 0", paddingBottom: 4 }}>
+          <span style={{ fontSize: 10, color: "#6AAF8D", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 600 }}>Mensaje por DM</span>
+          <div style={{ fontSize: 9, color: "#7A7870", marginTop: 2 }}>Se envia automaticamente por privado al usuario que comento. Puedes incluir enlaces</div>
+        </div>
+
+        {/* DM message */}
+        <div style={{ marginBottom: 24 }}>
+          <label style={S.label}>Mensaje DM</label>
+          <textarea value={dmMessage} onChange={e => setDmMessage(e.target.value)} rows={5} 
+            placeholder={"Hola! 😊 Gracias por tu interes en esta propiedad.\n\nAqui tienes toda la informacion:\n📍 Zona: Palma\n💰 Precio: consultar\n📐 Superficie: 93m2\n\n👉 Mas info: https://...\n\nSi quieres agendar una visita, escribeme!"}
+            style={{ ...S.input, resize: "vertical", lineHeight: 1.6 }} />
+        </div>
+
         <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", borderTop: "1px solid #2A2926", paddingTop: 20 }}>
           <button onClick={onClose} style={S.btnSecondary}>Cancelar</button>
-          <button onClick={save} disabled={!nombre || saving} style={{ ...S.btnPrimary, opacity: (!nombre || saving) ? 0.5 : 1 }}>{saving ? "Guardando..." : "Crear"}</button>
+          <button onClick={save} disabled={!nombre || !keyword || !reply1 || !dmMessage || platforms.length === 0 || saving} 
+            style={{ ...S.btnPrimary, opacity: (!nombre || !keyword || !reply1 || !dmMessage || platforms.length === 0 || saving) ? 0.5 : 1 }}>
+            {saving ? "Guardando..." : "Crear automatizacion"}
+          </button>
         </div>
       </div>
     </div>
