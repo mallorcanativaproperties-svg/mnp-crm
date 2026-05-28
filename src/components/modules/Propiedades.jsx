@@ -8,12 +8,12 @@ function mapDbToJs(row) {
     titulo: row.titulo || "", dir: row.dir || "", num: row.num || "", cp: row.cp || "",
     municipio: row.municipio || "", zona: row.zona || "",
     visDir: row.vis_dir || "Solo zona", orient: row.orient || "", distPlaya: row.dist_playa || "",
-    precioVenta: row.precio_venta || 0, precioProp: row.precio_prop || 0, precioAnt: row.precio_ant || 0, precioTraspaso: row.precio_traspaso || 0,
-    honorariosTipo: row.honorarios_tipo || "porcentaje", honorarios: row.honorarios || 0, ivaHon: row.iva_hon || 21,
+    precioVenta: Number(row.precio_venta) || 0, precioProp: Number(row.precio_prop) || 0, precioAnt: Number(row.precio_ant) || 0, precioTraspaso: Number(row.precio_traspaso) || 0,
+    honorariosTipo: row.honorarios_tipo || "porcentaje", honorarios: Number(row.honorarios) || 0, ivaHon: Number(row.iva_hon) || 21,
     certEnerg: row.cert_energ || "", conserv: row.conserv || "", anoConstruc: row.ano_construc || "",
-    mUtil: row.m_util || 0, mConst: row.m_const || 0, mParcela: row.m_parcela || 0, mTerraza: row.m_terraza || 0, mBalcon: row.m_balcon || 0, mPorche: row.m_porche || 0,
-    habDobles: row.hab_dobles || 0, habSimples: row.hab_simples || 0, banos: row.banos || 0, aseos: row.aseos || 0, planta: row.planta || "",
-    parking: row.parking || "", nPlazas: row.n_plazas || 0,
+    mUtil: Number(row.m_util) || 0, mConst: Number(row.m_const) || 0, mParcela: Number(row.m_parcela) || 0, mTerraza: Number(row.m_terraza) || 0, mBalcon: Number(row.m_balcon) || 0, mPorche: Number(row.m_porche) || 0,
+    habDobles: Number(row.hab_dobles) || 0, habSimples: Number(row.hab_simples) || 0, banos: Number(row.banos) || 0, aseos: Number(row.aseos) || 0, planta: row.planta || "",
+    parking: row.parking || "", nPlazas: Number(row.n_plazas) || 0,
     suelos: row.suelos || "", carpExt: row.carp_ext || "", carpInt: row.carp_int || "",
     persianasTipo: row.persianas_tipo || "", persianasMat: row.persianas_mat || "",
     clima: row.clima || "", aguaCal: row.agua_cal || "", aireAcondTipo: row.aire_acond_tipo || "", calefaccion: row.calefaccion || "", ventanas: row.ventanas || "", emisionesEnerg: row.emisiones_energ || "",
@@ -21,12 +21,12 @@ function mapDbToJs(row) {
     elecReformada: row.elec_reformada || false, fontReformada: row.font_reformada || false,
     ventaMobiliario: row.venta_mobiliario || false, iee: row.iee || "",
     calidades: row.calidades || [],
-    ibi: row.ibi || 0, basuras: row.basuras || 0, comunidad: row.comunidad || 0, extraComunidad: row.extra_comunidad || 0, otrosGastos: row.otros_gastos || "",
+    ibi: Number(row.ibi) || 0, basuras: Number(row.basuras) || 0, comunidad: Number(row.comunidad) || 0, extraComunidad: Number(row.extra_comunidad) || 0, otrosGastos: row.otros_gastos || "",
     desc: row.desc_texto || "", notasPriv: row.notas_priv || "",
     propNombre: row.prop_nombre || "", propTel: row.prop_tel || "", propEmail: row.prop_email || "",
     agente: row.agente || "", estado: row.estado || "captada",
-    destinos: row.destinos || [], fotos: row.fotos || 0, videos: row.videos || 0, tour360: row.tour360 || "", planos: row.planos || 0,
-    fechaCap: row.fecha_cap || "", visitas: row.visitas || 0,
+    destinos: row.destinos || [], fotos: Number(row.fotos) || 0, videos: Number(row.videos) || 0, tour360: row.tour360 || "", planos: Number(row.planos) || 0,
+    fechaCap: row.fecha_cap || "", visitas: Number(row.visitas) || 0,
     cualPos: row.cual_pos || [], cualNeg: row.cual_neg || [], cualMejoras: row.cual_mejoras || [],
     puerta: row.puerta || "", latitud: row.latitud != null ? row.latitud : null, longitud: row.longitud != null ? row.longitud : null, idealistaId: row.idealista_id || "",
     descEn: row.desc_en || "", descDe: row.desc_de || "",
@@ -40,18 +40,18 @@ function mapJsToDb(p) {
   return {
     ref: p.ref, tipo: p.tipo, op: p.op, titulo: p.titulo, dir: p.dir, num: p.num, cp: p.cp,
     municipio: p.municipio, zona: p.zona, vis_dir: p.visDir, orient: p.orient, dist_playa: p.distPlaya,
-    precio_venta: p.precioVenta, precio_prop: p.precioProp, precio_ant: p.precioAnt, precio_traspaso: p.precioTraspaso,
-    honorarios_tipo: p.honorariosTipo, honorarios: p.honorarios, iva_hon: p.ivaHon,
+    precio_venta: Number(p.precioVenta) || 0, precio_prop: Number(p.precioProp) || 0, precio_ant: Number(p.precioAnt) || 0, precio_traspaso: Number(p.precioTraspaso) || 0,
+    honorarios_tipo: p.honorariosTipo, honorarios: Number(p.honorarios) || 0, iva_hon: Number(p.ivaHon) || 0,
     cert_energ: p.certEnerg, conserv: p.conserv, ano_construc: p.anoConstruc,
-    m_util: p.mUtil, m_const: p.mConst, m_parcela: p.mParcela, m_terraza: p.mTerraza, m_balcon: p.mBalcon, m_porche: p.mPorche,
-    hab_dobles: p.habDobles, hab_simples: p.habSimples, banos: p.banos, aseos: p.aseos, planta: p.planta,
-    parking: p.parking, n_plazas: p.nPlazas,
+    m_util: Number(p.mUtil) || 0, m_const: Number(p.mConst) || 0, m_parcela: Number(p.mParcela) || 0, m_terraza: Number(p.mTerraza) || 0, m_balcon: Number(p.mBalcon) || 0, m_porche: Number(p.mPorche) || 0,
+    hab_dobles: Number(p.habDobles) || 0, hab_simples: Number(p.habSimples) || 0, banos: Number(p.banos) || 0, aseos: Number(p.aseos) || 0, planta: p.planta,
+    parking: p.parking, n_plazas: Number(p.nPlazas) || 0,
     suelos: p.suelos, carp_ext: p.carpExt, carp_int: p.carpInt,
     persianas_tipo: p.persianasTipo, persianas_mat: p.persianasMat,
     clima: p.clima, agua_cal: p.aguaCal, aire_acond_tipo: p.aireAcondTipo, calefaccion: p.calefaccion, ventanas: p.ventanas, emisiones_energ: p.emisionesEnerg, suministros: p.suministros, drenaje: p.drenaje,
     elec_reformada: p.elecReformada, font_reformada: p.fontReformada, venta_mobiliario: p.ventaMobiliario,
     iee: p.iee, calidades: p.calidades,
-    ibi: p.ibi, basuras: p.basuras, comunidad: p.comunidad, extra_comunidad: p.extraComunidad, otros_gastos: p.otrosGastos,
+    ibi: Number(p.ibi) || 0, basuras: Number(p.basuras) || 0, comunidad: Number(p.comunidad) || 0, extra_comunidad: Number(p.extraComunidad) || 0, otros_gastos: p.otrosGastos,
     desc_texto: p.desc, notas_priv: p.notasPriv,
     prop_nombre: p.propNombre, prop_tel: p.propTel, prop_email: p.propEmail,
     agente: p.agente, estado: p.estado, destinos: p.destinos,
@@ -1454,7 +1454,7 @@ REGLAS:
               <span id="desc-counter" style={{ fontSize: 10, color: "#7A7870" }}>{(d.desc || "").length} / 4.000</span>
             </div>
             <textarea 
-              key="desc-textarea"
+              key={"desc-" + (aiDesc ? "ai" : "manual")}
               defaultValue={d.desc || ""} 
               onBlur={e => upd("desc", e.target.value)}
               onInput={e => {
@@ -1480,7 +1480,7 @@ REGLAS:
             )}
           </div>
           {p.id ? (
-            <MediaSection propiedadId={p.id} propRef={p.ref} onCountUpdate={(counts) => { if (onUpdate) onUpdate({ ...p, fotos: counts.foto, videos: counts.video, planos: counts.plano, tour360: counts.tour360 > 0 }); }} />
+            <MediaSection propiedadId={p.id} propRef={p.ref} onCountUpdate={(counts) => { if (onUpdate) onUpdate({ ...p, fotos: counts.foto, videos: counts.video, planos: counts.plano }); }} />
           ) : (
             <div style={{ padding: "20px", textAlign: "center", color: "#7A7870", fontSize: 12, background: "#1C1B18", borderRadius: 3 }}>
               Guarda la propiedad primero para poder subir fotos, videos y planos
@@ -1504,14 +1504,14 @@ REGLAS:
         {/* Exportar */}
         <Sec title="Exportar a portales">
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            {DESTINOS.map((d) => {
-              const on = p.destinos.includes(d);
+            {DESTINOS.map((dest) => {
+              const on = p.destinos.includes(dest);
               return (
-                <div key={d} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 3, border: "1px solid " + (on ? "#8FA88A44" : "#2A2926"), background: on ? "#8FA88A0D" : "transparent" }}>
+                <div key={dest} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 3, border: "1px solid " + (on ? "#8FA88A44" : "#2A2926"), background: on ? "#8FA88A0D" : "transparent" }}>
                   <div style={{ width: 14, height: 14, borderRadius: 2, border: "1px solid " + (on ? "#8FA88A" : "#7A7870"), background: on ? "#8FA88A" : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     {on && <span style={{ color: "#161513", fontSize: 10, fontWeight: 700 }}>v</span>}
                   </div>
-                  <span style={{ fontSize: 12, color: on ? "#8FA88A" : "#7A7870" }}>{d}</span>
+                  <span style={{ fontSize: 12, color: on ? "#8FA88A" : "#7A7870" }}>{dest}</span>
                 </div>
               );
             })}
