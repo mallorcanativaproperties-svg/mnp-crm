@@ -1,0 +1,317 @@
+import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co",
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder"
+);
+
+const META_TOKEN = process.env.META_PAGE_TOKEN || "";
+const VERIFY_TOKEN = process.env.META_VERIFY_TOKEN || "mnp_meta_verify_2026";
+const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY || "";
+const PAGE_ID = "61589699932855";
+
+const SILVIA_PROMPT = `Eres Silvia, community manager de Mallorca Nativa Properties, una agencia inmobiliaria boutique en Mallorca.
+
+PERSONALIDAD:
+- Amable, coloquial pero siempre educada
+- Cercana y natural, como una amiga que trabaja en inmobiliaria
+- Nunca suenas como un robot ni como un anuncio
+- Tuteas siempre
+- Usas emojis con moderacion (1-2 por mensaje maximo)
+- Respuestas cortas y directas (2-4 lineas)
+- Nunca te presentas como IA ni como bot
+
+CUANDO ALGUIEN COMENTA UN POST/REEL:
+- Agradece el comentario de forma natural y personalizada
+- Si preguntan precio o info, invitales a escribir por DM para darles mas detalles
+- Si dicen algo positivo, responde con entusiasmo genuino
+- Si preguntan disponibilidad, di que les escribes por privado
+- NUNCA des precios en comentarios publicos
+- NUNCA des direcciones exactas en comentarios publicos
+
+CUANDO ALGUIEN ESCRIBE POR DM (Instagram o Facebook):
+- Saluda de forma calida y natural
+- Pregunta que tipo de propiedad buscan (piso, casa, atico...)
+- Pregunta zona preferida en Mallorca
+- Pregunta presupuesto aproximado
+- Si tienen propiedad que vender, pregunta detalles basicos
+- Cuando tengas la info basica, di que le pasas su consulta al equipo y le contactaran pronto
+- Si preguntan por una propiedad concreta de un post, busca la referencia y da info general sin precio
+
+REGLAS:
+- Responde SIEMPRE en el idioma del mensaje recibido (espanol, ingles, aleman, frances)
+- Si no entiendes algo, pregunta amablemente
+- Nunca inventes datos de propiedades
+- Si te preguntan algo que no sabes, di que lo consultas con el equipo
+- Responde SOLO con el texto del mensaje, sin explicaciones`;
+
+// ── Webhook verification (GET) ──
+export async function GET(request) {
+  const { searchParams } = new URL(request.url);
+  const mode = searchParams.get("hub.mode");
+  const token = searchParams.get("hub.verify_token");
+  const challenge = searchParams.get("hub.challenge");
+
+  if (mode === "subscribe" && token === VERIFY_TOKEN) {
+    return new NextResponse(challenge, { status: 200 });
+  }
+  return NextResponse.json({ error: "Verification failed" }, { status: 403 });
+}
+
+// ── Receive messages/comments (POST) ──
+export async function POST(request) {
+  try {
+    const body = await request.json();
+    console.log("Meta webhook:", JSON.stringify(body).substring(0, 500));
+
+    // Process each entry
+    if (body.entry) {
+      for (const entry of body.entry) {
+        // Instagram/Facebook messaging
+        if (entry.messaging) {
+          for (const event of entry.messaging) {
+            if (event.message && !event.message.is_echo) {
+              await handleMessage(event, "messenger");
+            }
+          }
+        }
+
+        // Instagram DMs
+        if (entry.messages) {
+          for (const msg of entry.messages) {
+            await handleMessage({ sender: { id: msg.sender?.id }, message: { text: msg.message?.text, mid: msg.id } }, "instagram");
+          }
+        }
+
+        // Instagram comments
+        if (entry.changes) {
+          for (const change of entry.changes) {
+            if (change.field === "comments" && change.value) {
+              await handleComment(change.value, "instagram");
+            }
+            if (change.field === "feed" && change.value?.item === "comment") {
+              await handleComment(change.value, "facebook");
+            }
+          }
+        }
+      }
+    }
+
+    return NextResponse.json({ status: "ok" });
+  } catch (err) {
+    console.error("Meta webhook error:", err);
+    return NextResponse.json({ status: "ok" }); // Always 200 for Meta
+  }
+}
+
+// ── Handle DM ──
+async function handleMessage(event, platform) {
+  const senderId = event.sender?.id;
+  const text = event.message?.text;
+  if (!senderId || !text) return;
+
+  // Skip messages from our own page
+  if (senderId === PAGE_ID) return;
+
+  // Get sender name
+  let senderName = "";
+  try {
+    const profileRes = await fetch(`https://graph.facebook.com/v19.0/${senderId}?fields=name&access_token=${META_TOKEN}`);
+    const profile = await profileRes.json();
+    senderName = profile.name || "";
+  } catch (e) { /* ignore */ }
+
+  // Find or create conversation
+  let { data: conv } = await supabase
+    .from("social_conversations")
+    .select("*")
+    .eq("sender_id", senderId)
+    .eq("platform", platform)
+    .eq("tipo", "dm")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single();
+
+  const newMsg = { from: "cliente", text, ts: new Date().toISOString() };
+
+  if (!conv) {
+    const { data: created } = await supabase
+      .from("social_conversations")
+      .insert({
+        platform,
+        sender_id: senderId,
+        sender_name: senderName,
+        tipo: "dm",
+        estado: "activo",
+        mensajes: [newMsg],
+      })
+      .select()
+      .single();
+    conv = created;
+  } else {
+    const mensajes = [...(conv.mensajes || []), newMsg];
+    await supabase
+      .from("social_conversations")
+      .update({ mensajes, sender_name: senderName || conv.sender_name, updated_at: new Date().toISOString() })
+      .eq("id", conv.id);
+    conv.mensajes = mensajes;
+  }
+
+  // Generate Silvia response
+  const reply = await generateSilviaResponse(conv.mensajes, "dm");
+  if (!reply) return;
+
+  // Send reply via Meta API
+  const sent = await sendMetaMessage(senderId, reply, platform);
+  if (!sent) return;
+
+  // Save Silvia's reply
+  const silviaMsg = { from: "silvia", text: reply, ts: new Date().toISOString() };
+  await supabase
+    .from("social_conversations")
+    .update({
+      mensajes: [...(conv.mensajes || []), silviaMsg],
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", conv.id);
+}
+
+// ── Handle Comment ──
+async function handleComment(value, platform) {
+  const commentId = value.comment_id || value.id;
+  const text = value.text || value.message;
+  const senderId = value.from?.id || value.sender_id;
+  const senderName = value.from?.name || value.from?.username || "";
+  const postId = value.media?.id || value.post_id || "";
+
+  if (!commentId || !text || !senderId) return;
+  // Skip our own comments
+  if (senderId === PAGE_ID) return;
+
+  // Save comment
+  const newMsg = { from: "cliente", text, ts: new Date().toISOString(), comment_id: commentId };
+
+  const { data: created } = await supabase
+    .from("social_conversations")
+    .insert({
+      platform,
+      sender_id: senderId,
+      sender_name: senderName,
+      post_id: postId,
+      tipo: "comentario",
+      estado: "activo",
+      mensajes: [newMsg],
+    })
+    .select()
+    .single();
+
+  // Generate Silvia reply for comment
+  const reply = await generateSilviaResponse([newMsg], "comentario");
+  if (!reply) return;
+
+  // Reply to comment via Meta API
+  const replied = await replyToComment(commentId, reply, platform);
+
+  // Save reply
+  if (replied) {
+    const silviaMsg = { from: "silvia", text: reply, ts: new Date().toISOString() };
+    await supabase
+      .from("social_conversations")
+      .update({ mensajes: [newMsg, silviaMsg], updated_at: new Date().toISOString() })
+      .eq("id", created.id);
+  }
+}
+
+// ── Silvia AI ──
+async function generateSilviaResponse(mensajes, tipo) {
+  try {
+    const history = mensajes.map(m => ({
+      role: m.from === "silvia" ? "assistant" : "user",
+      content: m.text,
+    }));
+
+    const systemAddition = tipo === "comentario"
+      ? "\n\nEsto es un COMENTARIO en un post/reel. Responde de forma breve (1-2 lineas maximo). Invita a escribir por DM si quieren mas info."
+      : "\n\nEsto es un mensaje PRIVADO (DM). Puedes ser mas detallada en la respuesta.";
+
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": ANTHROPIC_KEY,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 300,
+        system: SILVIA_PROMPT + systemAddition,
+        messages: history,
+      }),
+    });
+
+    const data = await response.json();
+    if (data.content && Array.isArray(data.content)) {
+      return data.content.filter(c => c.type === "text").map(c => c.text).join("\n");
+    }
+    return null;
+  } catch (err) {
+    console.error("Silvia AI error:", err);
+    return null;
+  }
+}
+
+// ── Send DM via Meta ──
+async function sendMetaMessage(recipientId, text, platform) {
+  try {
+    const url = platform === "instagram"
+      ? `https://graph.facebook.com/v19.0/me/messages`
+      : `https://graph.facebook.com/v19.0/me/messages`;
+
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${META_TOKEN}`,
+      },
+      body: JSON.stringify({
+        recipient: { id: recipientId },
+        message: { text },
+      }),
+    });
+
+    const result = await res.json();
+    if (result.error) {
+      console.error("Meta send error:", result.error);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error("Meta send error:", err);
+    return false;
+  }
+}
+
+// ── Reply to comment ──
+async function replyToComment(commentId, text, platform) {
+  try {
+    const res = await fetch(`https://graph.facebook.com/v19.0/${commentId}/replies`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${META_TOKEN}`,
+      },
+      body: JSON.stringify({ message: text }),
+    });
+
+    const result = await res.json();
+    if (result.error) {
+      console.error("Comment reply error:", result.error);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error("Comment reply error:", err);
+    return false;
+  }
+}
