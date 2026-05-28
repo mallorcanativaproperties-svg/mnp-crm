@@ -1541,26 +1541,22 @@ export default function CRMPropiedades() {
     loadProps();
   }, []);
 
+  async function fetchPropsWithDemandas() {
+    const { data: rows, error } = await supabase.from("propiedades").select("*").order("created_at", { ascending: false });
+    if (error || !rows) return null;
+    const refs = rows.map(r => r.ref).filter(Boolean);
+    let demandasMap = {};
+    if (refs.length > 0) {
+      const { data: convs } = await supabase.from("conversaciones").select("referencia").in("referencia", refs);
+      if (convs) convs.forEach(c => { if (c.referencia) demandasMap[c.referencia] = (demandasMap[c.referencia] || 0) + 1; });
+    }
+    return rows.map(r => ({ ...mapDbToJs(r), demandas: demandasMap[r.ref] || 0 }));
+  }
+
   async function loadProps() {
     setLoading(true);
-    const { data: rows, error } = await supabase.from("propiedades").select("*").order("created_at", { ascending: false });
-    if (!error && rows) {
-      // Count demandas from conversaciones for each property ref
-      const refs = rows.map(r => r.ref).filter(Boolean);
-      let demandasMap = {};
-      if (refs.length > 0) {
-        const { data: convs } = await supabase
-          .from("conversaciones")
-          .select("referencia")
-          .in("referencia", refs);
-        if (convs) {
-          convs.forEach(c => {
-            if (c.referencia) demandasMap[c.referencia] = (demandasMap[c.referencia] || 0) + 1;
-          });
-        }
-      }
-      setData(rows.map(r => ({ ...mapDbToJs(r), demandas: demandasMap[r.ref] || 0 })));
-    }
+    const mapped = await fetchPropsWithDemandas();
+    if (mapped) setData(mapped);
     setLoading(false);
   }
 
@@ -1614,11 +1610,9 @@ export default function CRMPropiedades() {
         }
       }
       // Reload from Supabase and update sel with fresh data
-      const { data: rows } = await supabase.from("propiedades").select("*").order("created_at", { ascending: false });
-      if (rows) {
-        const mapped = rows.map(mapDbToJs);
+      const mapped = await fetchPropsWithDemandas();
+      if (mapped) {
         setData(mapped);
-        // Update sel with the fresh version
         if (prop.id) {
           const fresh = mapped.find(r => r.id === prop.id);
           if (fresh) setSel(fresh);
