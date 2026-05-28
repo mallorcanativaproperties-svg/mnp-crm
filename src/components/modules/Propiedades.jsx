@@ -944,7 +944,7 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
       <div style={{ marginBottom: 10 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
           {pub !== undefined && <Dot green={pub} />}
-          <span style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em" }}>{label}{req && <span style={{ color: "#D45454", marginLeft: 2 }}>*</span>}</span>
+          <span style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em" }}>{label}{req && <span style={{ color: "#D45454", marginLeft: 3, fontSize: 14, fontWeight: 700, lineHeight: "10px" }}>*</span>}</span>
         </div>
         {type === "bool" ? (
           <select value={d[field] ? "true" : "false"} onChange={e => upd(field, e.target.value === "true")}
@@ -1156,7 +1156,7 @@ REGLAS:
         }); setEditMode(false); }} style={{ position: "absolute", top: 16, right: 190, background: "none", border: "1px solid #7A7870", borderRadius: 3, color: "#7A7870", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "'Manrope', sans-serif" }}>Cancelar</button>}
         <button onClick={() => { if (onDelete) onDelete(p); }} style={{ position: "absolute", top: 16, right: 56, background: "none", border: "1px solid #D4545433", borderRadius: 3, color: "#D45454", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "'Manrope', sans-serif" }}>Eliminar</button>
         
-        <div style={{ position: "absolute", top: 18, left: 36, fontSize: 9, color: "#7A7870" }}><span style={{ color: "#D45454" }}>*</span> Obligatorio Idealista</div>
+        <div style={{ position: "absolute", top: 20, left: 36, fontSize: 11, color: "#7A7870" }}><span style={{ color: "#D45454", fontSize: 14, fontWeight: 700 }}>*</span> Obligatorio Idealista</div>
 
         {/* Header */}
         <div style={{ marginBottom: 16 }}>
@@ -1164,7 +1164,7 @@ REGLAS:
             <>
               <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8, flexWrap: "wrap" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <span style={{ fontSize: 10, color: "#7A7870" }}>REF<span style={{ color: "#D45454" }}>*</span>:</span>
+                  <span style={{ fontSize: 10, color: "#7A7870" }}>REF<span style={{ color: "#D45454", fontSize: 14, fontWeight: 700 }}>*</span>:</span>
                   <input type="text" value={d.ref || ""} onChange={e => upd("ref", e.target.value)}
                     style={{ width: 130, background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#C8A97E", padding: "4px 8px", fontSize: 11, fontFamily: "'Manrope', sans-serif" }} />
                 </div>
