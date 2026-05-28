@@ -11,6 +11,7 @@ const REDES = [
 ];
 const TIPOS_POST = ["Post", "Reel", "Story", "Carousel", "Video", "Short"];
 const TABS = [
+  { key: "silvia", label: "Silvia IA", icon: "🤖" },
   { key: "publicar", label: "Publicar", icon: "✎" },
   { key: "inbox", label: "Inbox", icon: "✉" },
   { key: "comentarios", label: "Comentarios", icon: "◎" },
@@ -673,10 +674,179 @@ function TabCuentas() {
 }
 
 /* ══════════════════════════════════
+   SILVIA IA - ManyChat Style
+   ══════════════════════════════════ */
+function TabSilvia() {
+  const [convs, setConvs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [sel, setSel] = useState(null);
+  const [reply, setReply] = useState("");
+  const [sending, setSending] = useState(false);
+  const [filter, setFilter] = useState("todos");
+
+  useEffect(() => { loadConvs(); const interval = setInterval(loadConvs, 15000); return () => clearInterval(interval); }, []);
+
+  async function loadConvs() {
+    const { data } = await supabase.from("social_conversations").select("*").order("updated_at", { ascending: false });
+    if (data) { setConvs(data); setLoading(false); }
+  }
+
+  async function sendReply() {
+    if (!reply.trim() || !sel) return;
+    setSending(true);
+    try {
+      const res = await fetch("/api/meta/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ recipientId: sel.sender_id, text: reply, platform: sel.platform, commentId: sel.tipo === "comentario" ? sel.mensajes?.[0]?.comment_id : null }),
+      });
+      const result = await res.json();
+      if (result.ok) {
+        const newMsg = { from: "silvia", text: reply, ts: new Date().toISOString(), manual: true };
+        const updated = [...(sel.mensajes || []), newMsg];
+        await supabase.from("social_conversations").update({ mensajes: updated, updated_at: new Date().toISOString() }).eq("id", sel.id);
+        setSel({ ...sel, mensajes: updated });
+        setReply("");
+        loadConvs();
+      } else {
+        alert("Error al enviar: " + (result.error || "desconocido"));
+      }
+    } catch (e) { alert("Error: " + e.message); }
+    setSending(false);
+  }
+
+  const filtered = filter === "todos" ? convs : convs.filter(c => c.platform === filter);
+  const platformIcon = (p) => p === "instagram" ? "📸" : p === "messenger" ? "💬" : p === "facebook" ? "📘" : "💬";
+  const tipoIcon = (t) => t === "dm" ? "✉" : "💬";
+  const timeAgo = (ts) => {
+    if (!ts) return "";
+    const diff = Date.now() - new Date(ts).getTime();
+    if (diff < 60000) return "ahora";
+    if (diff < 3600000) return Math.floor(diff / 60000) + "m";
+    if (diff < 86400000) return Math.floor(diff / 3600000) + "h";
+    return Math.floor(diff / 86400000) + "d";
+  };
+
+  if (loading) return <div style={{ textAlign: "center", padding: 40, color: "#7A7870" }}>Cargando conversaciones...</div>;
+
+  return (
+    <div style={{ display: "flex", height: "calc(100vh - 240px)", border: "1px solid #2A2926", borderRadius: 4, overflow: "hidden" }}>
+      {/* Left panel - Conversation list */}
+      <div style={{ width: 320, borderRight: "1px solid #2A2926", display: "flex", flexDirection: "column", background: "#161513" }}>
+        {/* Filters */}
+        <div style={{ padding: "12px 14px", borderBottom: "1px solid #2A2926", display: "flex", gap: 4 }}>
+          {["todos", "instagram", "facebook"].map(f => (
+            <button key={f} onClick={() => setFilter(f)} style={{
+              padding: "4px 10px", borderRadius: 3, border: "none", fontSize: 10,
+              background: filter === f ? "#C8A97E22" : "transparent",
+              color: filter === f ? "#C8A97E" : "#7A7870",
+              cursor: "pointer", fontFamily: "'Manrope', sans-serif", textTransform: "uppercase", letterSpacing: "0.06em",
+            }}>{f === "todos" ? "Todos" : f === "instagram" ? "📸 IG" : "📘 FB"}</button>
+          ))}
+          <div style={{ flex: 1 }} />
+          <span style={{ fontSize: 10, color: "#7A7870", alignSelf: "center" }}>{filtered.length}</span>
+        </div>
+
+        {/* Conversation list */}
+        <div style={{ flex: 1, overflowY: "auto" }}>
+          {filtered.length === 0 && <div style={{ padding: 20, textAlign: "center", color: "#7A7870", fontSize: 12 }}>No hay conversaciones</div>}
+          {filtered.map(c => {
+            const lastMsg = c.mensajes?.[c.mensajes.length - 1];
+            const isActive = sel?.id === c.id;
+            const unread = lastMsg?.from === "cliente";
+            return (
+              <div key={c.id} onClick={() => setSel(c)} style={{
+                padding: "14px 16px", borderBottom: "1px solid #1C1B18", cursor: "pointer",
+                background: isActive ? "#C8A97E11" : "transparent",
+                borderLeft: isActive ? "3px solid #C8A97E" : "3px solid transparent",
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ fontSize: 14 }}>{platformIcon(c.platform)}</span>
+                    <span style={{ fontSize: 12, fontWeight: unread ? 700 : 400, color: unread ? "#F0EDE6" : "#A09D93" }}>{c.sender_name || c.sender_id.substring(0, 12)}</span>
+                  </div>
+                  <span style={{ fontSize: 9, color: "#7A7870" }}>{timeAgo(c.updated_at)}</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <span style={{ fontSize: 10 }}>{tipoIcon(c.tipo)}</span>
+                  <span style={{ fontSize: 11, color: "#7A7870", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
+                    {lastMsg?.from === "silvia" ? "Silvia: " : ""}{lastMsg?.text?.substring(0, 50) || "..."}
+                  </span>
+                  {unread && <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#C8A97E", flexShrink: 0 }} />}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Right panel - Chat view */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "#111110" }}>
+        {!sel ? (
+          <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "#7A7870" }}>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: 48, marginBottom: 12 }}>🤖</div>
+              <div style={{ fontSize: 14, fontFamily: "'Playfair Display', serif" }}>Silvia IA</div>
+              <div style={{ fontSize: 11, marginTop: 6 }}>Selecciona una conversacion</div>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Chat header */}
+            <div style={{ padding: "14px 20px", borderBottom: "1px solid #2A2926", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 16 }}>{platformIcon(sel.platform)}</span>
+                  <span style={{ fontSize: 14, fontWeight: 600, color: "#F0EDE6" }}>{sel.sender_name || sel.sender_id}</span>
+                  <span style={{ fontSize: 9, padding: "2px 8px", borderRadius: 2, background: sel.tipo === "dm" ? "#C8A97E15" : "#6AAF8D15", color: sel.tipo === "dm" ? "#C8A97E" : "#6AAF8D" }}>{sel.tipo === "dm" ? "DM" : "Comentario"}</span>
+                </div>
+                <div style={{ fontSize: 10, color: "#7A7870", marginTop: 2 }}>{sel.platform} · {new Date(sel.created_at).toLocaleDateString("es-ES")}</div>
+              </div>
+              <button onClick={() => setSel(null)} style={{ background: "none", border: "none", color: "#7A7870", cursor: "pointer", fontSize: 16 }}>✕</button>
+            </div>
+
+            {/* Messages */}
+            <div style={{ flex: 1, overflowY: "auto", padding: "20px" }}>
+              {(sel.mensajes || []).map((m, i) => (
+                <div key={i} style={{ display: "flex", justifyContent: m.from === "silvia" ? "flex-end" : "flex-start", marginBottom: 12 }}>
+                  <div style={{
+                    maxWidth: "70%", padding: "10px 14px", borderRadius: 12,
+                    background: m.from === "silvia" ? "#C8A97E22" : "#1C1B18",
+                    border: m.from === "silvia" ? "1px solid #C8A97E33" : "1px solid #2A2926",
+                    borderBottomRightRadius: m.from === "silvia" ? 4 : 12,
+                    borderBottomLeftRadius: m.from === "silvia" ? 12 : 4,
+                  }}>
+                    <div style={{ fontSize: 12, color: "#F0EDE6", lineHeight: 1.5 }}>{m.text}</div>
+                    <div style={{ fontSize: 9, color: "#7A7870", marginTop: 4, textAlign: m.from === "silvia" ? "right" : "left" }}>
+                      {m.from === "silvia" ? (m.manual ? "Silvia (manual)" : "Silvia IA") : sel.sender_name || "Cliente"} · {m.ts ? new Date(m.ts).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) : ""}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Reply input */}
+            <div style={{ padding: "14px 20px", borderTop: "1px solid #2A2926", display: "flex", gap: 10 }}>
+              <input value={reply} onChange={e => setReply(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendReply(); }}}
+                placeholder="Responder como Silvia..." 
+                style={{ flex: 1, padding: "10px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 20, color: "#F0EDE6", fontSize: 12, fontFamily: "'Manrope', sans-serif", outline: "none" }} />
+              <button onClick={sendReply} disabled={!reply.trim() || sending}
+                style={{ padding: "10px 20px", borderRadius: 20, border: "none", background: reply.trim() ? "#C8A97E" : "#2A2926", color: reply.trim() ? "#111110" : "#7A7870", cursor: reply.trim() ? "pointer" : "default", fontSize: 11, fontWeight: 600, fontFamily: "'Manrope', sans-serif" }}>
+                {sending ? "..." : "Enviar"}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════
    MAIN EXPORT
    ══════════════════════════════════ */
 export default function RedesSociales() {
-  const [activeTab, setActiveTab] = useState("publicar");
+  const [activeTab, setActiveTab] = useState("silvia");
 
   const tabStyle = (active) => ({
     padding: "10px 20px", borderRadius: 3, border: "none",
@@ -708,6 +878,7 @@ export default function RedesSociales() {
         </div>
 
         {/* Tab content */}
+        {activeTab === "silvia" && <TabSilvia />}
         {activeTab === "publicar" && <TabPublicar />}
         {activeTab === "inbox" && <TabInbox />}
         {activeTab === "comentarios" && <TabComentarios />}
