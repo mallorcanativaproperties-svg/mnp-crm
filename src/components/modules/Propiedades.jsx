@@ -1057,6 +1057,32 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
     }
   }
 
+  const AGENTE_PREFIX = {
+    Suren: "MNSKB", Anabel: "MNAQA", Jaime: "MNJAC", Guim: "MNGET", Silvia: "MNSLA",
+  };
+  const AGENTES_LIST = ["Suren", "Anabel", "Jaime", "Guim", "Silvia"];
+  const TIPOS_LIST = ["Piso", "Estudio", "Atico", "Atico Duplex", "Duplex", "Planta baja", "Casa", "Chalet", "Adosado", "Villa", "Finca rustica", "Local comercial", "Oficina", "Parking", "Terreno", "Trastero", "Edificio"];
+  const OPS_LIST = ["Compraventa", "Alquiler", "Traspaso"];
+
+  async function autoGenerateRef(agenteName) {
+    const prefix = AGENTE_PREFIX[agenteName];
+    if (!prefix) return "";
+    const { data: existing } = await supabase
+      .from("propiedades")
+      .select("ref")
+      .like("ref", `${prefix}%`)
+      .order("ref", { ascending: false })
+      .limit(1);
+    if (existing && existing.length > 0) {
+      const lastRef = existing[0].ref;
+      const numPart = lastRef.replace(prefix, "");
+      const nextNum = parseInt(numPart || "0") + 1;
+      const padLen = Math.max(numPart.length, String(nextNum).length);
+      return prefix + String(nextNum).padStart(padLen, "0");
+    }
+    return prefix + "0001";
+  }
+
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)", display: "flex", justifyContent: "center", alignItems: "flex-start", padding: "30px 12px", zIndex: 1000, overflowY: "auto" }}>
       <div style={{ background: "#161513", border: "1px solid #2A2926", borderRadius: 4, width: "100%", maxWidth: 740, padding: "32px 36px", position: "relative" }}>
@@ -1068,14 +1094,59 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
 
         {/* Header */}
         <div style={{ marginBottom: 16 }}>
-          <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 10, color: "#7A7870", letterSpacing: "0.1em" }}>{p.ref}</span>
-            <Tag color={est.accent}>{est.label}</Tag>
-            <Tag color="#A89BC4">{p.op}</Tag>
-            <Tag>{p.tipo}</Tag>
-          </div>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 400, color: "#F0EDE6", margin: 0, lineHeight: 1.2 }}>{p.titulo}</h2>
-          <div style={{ fontSize: 12, color: "#7A7870", marginTop: 6 }}>Captada {p.fechaCap} - Agente: {p.agente}</div>
+          {editMode ? (
+            <>
+              <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8, flexWrap: "wrap" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <span style={{ fontSize: 10, color: "#7A7870" }}>REF:</span>
+                  <input type="text" value={d.ref || ""} onChange={e => upd("ref", e.target.value)}
+                    style={{ width: 130, background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#C8A97E", padding: "4px 8px", fontSize: 11, fontFamily: "'Manrope', sans-serif" }} />
+                </div>
+                <select value={d.estado || "borrador"} onChange={e => upd("estado", e.target.value)}
+                  style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "4px 8px", fontSize: 11, fontFamily: "'Manrope', sans-serif" }}>
+                  {ESTADOS.map(e => <option key={e.key} value={e.key}>{e.label}</option>)}
+                </select>
+                <select value={d.op || "Compraventa"} onChange={e => upd("op", e.target.value)}
+                  style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "4px 8px", fontSize: 11, fontFamily: "'Manrope', sans-serif" }}>
+                  {OPS_LIST.map(o => <option key={o} value={o}>{o}</option>)}
+                </select>
+                <select value={d.tipo || ""} onChange={e => upd("tipo", e.target.value)}
+                  style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "4px 8px", fontSize: 11, fontFamily: "'Manrope', sans-serif" }}>
+                  <option value="">Tipo...</option>
+                  {TIPOS_LIST.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+              <input type="text" value={d.titulo || ""} onChange={e => upd("titulo", e.target.value)} placeholder="Titulo de la propiedad"
+                style={{ width: "100%", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", padding: "8px 12px", fontSize: 18, fontFamily: "'Playfair Display', serif", marginBottom: 6 }} />
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <span style={{ fontSize: 11, color: "#7A7870" }}>Agente:</span>
+                <select value={d.agente || ""} onChange={async e => {
+                  const ag = e.target.value;
+                  upd("agente", ag);
+                  if (!d.ref && ag && AGENTE_PREFIX[ag]) {
+                    const newRef = await autoGenerateRef(ag);
+                    upd("ref", newRef);
+                    setDraft(prev => ({ ...prev, agente: ag, ref: newRef }));
+                  }
+                }}
+                  style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "4px 8px", fontSize: 11, fontFamily: "'Manrope', sans-serif" }}>
+                  <option value="">Seleccionar...</option>
+                  {AGENTES_LIST.map(a => <option key={a} value={a}>{a}</option>)}
+                </select>
+              </div>
+            </>
+          ) : (
+            <>
+              <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8, flexWrap: "wrap" }}>
+                <span style={{ fontSize: 10, color: "#7A7870", letterSpacing: "0.1em" }}>{p.ref}</span>
+                <Tag color={est.accent}>{est.label}</Tag>
+                <Tag color="#A89BC4">{p.op}</Tag>
+                <Tag>{p.tipo}</Tag>
+              </div>
+              <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 400, color: "#F0EDE6", margin: 0, lineHeight: 1.2 }}>{p.titulo}</h2>
+              <div style={{ fontSize: 12, color: "#7A7870", marginTop: 6 }}>Captada {p.fechaCap} - Agente: {p.agente}</div>
+            </>
+          )}
         </div>
 
         {/* Legend */}
