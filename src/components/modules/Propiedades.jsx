@@ -1102,10 +1102,6 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
                   <input type="text" value={d.ref || ""} onChange={e => upd("ref", e.target.value)}
                     style={{ width: 130, background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#C8A97E", padding: "4px 8px", fontSize: 11, fontFamily: "'Manrope', sans-serif" }} />
                 </div>
-                <select value={d.estado || "borrador"} onChange={e => upd("estado", e.target.value)}
-                  style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "4px 8px", fontSize: 11, fontFamily: "'Manrope', sans-serif" }}>
-                  {ESTADOS.map(e => <option key={e.key} value={e.key}>{e.label}</option>)}
-                </select>
                 <select value={d.op || "Compraventa"} onChange={e => upd("op", e.target.value)}
                   style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "4px 8px", fontSize: 11, fontFamily: "'Manrope', sans-serif" }}>
                   {OPS_LIST.map(o => <option key={o} value={o}>{o}</option>)}
@@ -1175,7 +1171,13 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
                 return (
                   <button
                     key={e.key}
-                    onClick={() => { if (onUpdate) onUpdate({ ...p, estado: e.key }); }}
+                    onClick={() => { 
+                      const updates = { ...p, estado: e.key };
+                      if (e.key === "publicada") {
+                        updates.destinos = [...DESTINOS];
+                      }
+                      if (onUpdate) onUpdate(updates); 
+                    }}
                     style={{
                       padding: "8px 18px", borderRadius: 3,
                       border: "1px solid " + (active ? e.accent : "#2A2926"),
