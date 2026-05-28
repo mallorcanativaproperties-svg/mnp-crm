@@ -137,19 +137,33 @@ export default function MotorCruce() {
   }, [PROPS, fMunicipio]);
   const operaciones = useMemo(() => [...new Set(PROPS.map((p) => p.op).filter(Boolean))].sort(), [PROPS]);
 
-  // Matching logic: presupuesto + municipio + operacion
+  // Matching logic: presupuesto (±30.000€) + municipio + operacion
   function isMatch(buyer, prop) {
-    // 1. Presupuesto: comprador puede pagar
-    if (prop.precioVenta > buyer.ppto) return false;
+    // 1. Presupuesto: rango ±30.000€ del precio de publicación
+    const precio = Number(prop.precioVenta) || 0;
+    const ppto = Number(buyer.ppto) || 0;
+    if (precio > ppto + 30000 || precio < ppto - 30000) return false;
 
-    // 2. Municipio: si el comprador tiene zonas deseadas, al menos una debe coincidir con el municipio
+    // 2. Zonas: si el comprador tiene zonas deseadas, al menos una debe coincidir con municipio o zona
     if (buyer.zd.length > 0) {
-      const municipioOk = buyer.zd.some((z) => {
-        const zl = z.toLowerCase().trim();
-        const ml = prop.municipio.toLowerCase();
-        return ml.includes(zl) || zl.includes(ml);
+      const ml = (prop.municipio || "").toLowerCase();
+      const zl = (prop.zona || "").toLowerCase();
+      const zonaOk = buyer.zd.some((z) => {
+        const bz = z.toLowerCase().trim();
+        return ml.includes(bz) || bz.includes(ml) || zl.includes(bz) || bz.includes(zl);
       });
-      if (!municipioOk) return false;
+      if (!zonaOk) return false;
+    }
+
+    // 2b. Zonas excluidas
+    if (buyer.ze && buyer.ze.length > 0) {
+      const ml = (prop.municipio || "").toLowerCase();
+      const zl = (prop.zona || "").toLowerCase();
+      const excluida = buyer.ze.some((z) => {
+        const bz = z.toLowerCase().trim();
+        return ml.includes(bz) || bz.includes(ml) || zl.includes(bz) || bz.includes(zl);
+      });
+      if (excluida) return false;
     }
 
     // 3. Operacion: finalidad del comprador debe coincidir con op de la propiedad
