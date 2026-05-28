@@ -1413,13 +1413,25 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
 
         {/* Multimedia */}
         <Sec title="Multimedia">
-          <MediaSection propiedadId={p.id} propRef={p.ref} onCountUpdate={(counts) => { if (onUpdate) onUpdate({ ...p, fotos: counts.foto, videos: counts.video, planos: counts.plano, tour360: counts.tour360 > 0 }); }} />
+          {p.id ? (
+            <MediaSection propiedadId={p.id} propRef={p.ref} onCountUpdate={(counts) => { if (onUpdate) onUpdate({ ...p, fotos: counts.foto, videos: counts.video, planos: counts.plano, tour360: counts.tour360 > 0 }); }} />
+          ) : (
+            <div style={{ padding: "20px", textAlign: "center", color: "#7A7870", fontSize: 12, background: "#1C1B18", borderRadius: 3 }}>
+              Guarda la propiedad primero para poder subir fotos, videos y planos
+            </div>
+          )}
         </Sec>
         <div style={sep} />
 
         {/* Documentos */}
         <Sec title="Documentos">
-          <DocsSection propiedadId={p.id} propRef={p.ref} />
+          {p.id ? (
+            <DocsSection propiedadId={p.id} propRef={p.ref} />
+          ) : (
+            <div style={{ padding: "20px", textAlign: "center", color: "#7A7870", fontSize: 12, background: "#1C1B18", borderRadius: 3 }}>
+              Guarda la propiedad primero para poder subir documentos
+            </div>
+          )}
         </Sec>
         <div style={sep} />
 
