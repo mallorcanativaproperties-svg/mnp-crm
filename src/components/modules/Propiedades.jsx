@@ -1588,7 +1588,6 @@ export default function CRMPropiedades() {
           alert("Error al guardar:\n\n" + error.message + (error.details ? "\n" + error.details : ""));
           return;
         }
-        alert("Propiedad guardada correctamente");
       } else {
         const { data: inserted, error } = await supabase.from("propiedades").insert(dbData).select();
         if (error) {
@@ -1600,7 +1599,17 @@ export default function CRMPropiedades() {
           alert("Propiedad creada correctamente. Ya puedes subir fotos y documentos.");
         }
       }
-      await loadProps();
+      // Reload from Supabase and update sel with fresh data
+      const { data: rows } = await supabase.from("propiedades").select("*").order("created_at", { ascending: false });
+      if (rows) {
+        const mapped = rows.map(mapDbToJs);
+        setData(mapped);
+        // Update sel with the fresh version
+        if (prop.id) {
+          const fresh = mapped.find(r => r.id === prop.id);
+          if (fresh) setSel(fresh);
+        }
+      }
     } catch (err) {
       alert("Error inesperado:\n\n" + err.message);
     }
@@ -1735,7 +1744,7 @@ export default function CRMPropiedades() {
           {list.length === 0 && <div style={{ textAlign: "center", padding: 60, color: "#7A7870", fontSize: 13, fontStyle: "italic" }}>Sin resultados</div>}
         </div>
 
-        {sel && <PropDetail p={sel} onClose={() => setSel(null)} onUpdate={(updated) => { saveProperty(updated); setSel(updated); }} onDelete={(prop) => { if (confirm("¿Eliminar esta propiedad y todos sus archivos? Esta accion no se puede deshacer.")) deleteProperty(prop); }} />}
+        {sel && <PropDetail p={sel} onClose={() => setSel(null)} onUpdate={(updated) => { saveProperty({...sel, ...updated}); }} onDelete={(prop) => { if (confirm("¿Eliminar esta propiedad y todos sus archivos? Esta accion no se puede deshacer.")) deleteProperty(prop); }} />}
       </div>
     </div>
   );
