@@ -1549,7 +1549,7 @@ export default function CRMPropiedades() {
                   latitud: null, longitud: null, idealistaId: "",
                   cualPos: [], cualNeg: [], cualMejoras: [],
                   calidades: [], suministros: [], elecReformada: false, fontReformada: false, drenaje: "",
-                  visitas: 0,
+                  visitas: 0, destinos: [],
                 };
                 setSel(newProp);
               }}
