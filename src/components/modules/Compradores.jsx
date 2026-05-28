@@ -324,7 +324,11 @@ export default function App() {
         {list.length === 0 && <div style={{ textAlign: "center", padding: 60, color: "#7A7870", fontSize: 13, fontStyle: "italic" }}>No se encontraron compradores con esos filtros</div>}
       </div>
 
-      {sel && <Detail b={sel} onClose={() => setSel(null)} onSave={u => { setData(d => d.map(b => b.id === u.id ? u : b)); setSel(null); }} onDelete={async (b) => { if (confirm("¿Eliminar este comprador? Esta accion no se puede deshacer.")) { await supabase.from("compradores").delete().eq("id", b.id); setSel(null); setData(d => d.filter(x => x.id !== b.id)); }}} />}
+      {sel && <Detail b={sel} onClose={() => setSel(null)} onSave={async u => { 
+        const { error } = await supabase.from("compradores").update(u).eq("id", u.id); 
+        if (error) { alert("Error al guardar: " + error.message); return; }
+        setData(d => d.map(b => b.id === u.id ? u : b)); setSel(u); 
+      }} onDelete={async (b) => { if (confirm("¿Eliminar este comprador? Esta accion no se puede deshacer.")) { await supabase.from("compradores").delete().eq("id", b.id); setSel(null); setData(d => d.filter(x => x.id !== b.id)); }}} />}
       {showNew && <NewBuyer onClose={() => setShowNew(false)} onAdd={n => setData(d => [n, ...d])} />}
     </div>
   </div>;
