@@ -1529,6 +1529,29 @@ export default function CRMPropiedades() {
               <p style={{ fontSize: 12, color: "#7A7870", margin: "10px 0 0", letterSpacing: "0.04em" }}>{data.length} inmuebles - {pub} publicados</p>
             </div>
             <button
+              onClick={() => {
+                const newProp = {
+                  id: null, ref: "", tipo: "", op: "Compraventa", estado: "borrador", titulo: "",
+                  dir: "", num: "", cp: "", municipio: "", zona: "", orient: "", distPlaya: "", visDir: "Solo zona", planta: "",
+                  precioVenta: 0, precioProp: 0, precioAnt: 0, precioTraspaso: 0,
+                  honorarios: 5, honorariosTipo: "porcentaje", ivaHon: 21,
+                  mConst: 0, mUtil: 0, mParcela: 0, mTerraza: 0, mBalcon: 0, mPorche: 0,
+                  habDobles: 0, habSimples: 0, banos: 0, aseos: 0,
+                  certEnerg: "", iee: "", conserv: "", anoConstruc: "",
+                  suelos: "", carpExt: "", carpInt: "", persianasTipo: "", persianasMat: "",
+                  clima: "", aguaCal: "", parking: "No", nPlazas: 0,
+                  ventaMobiliario: false, terraza: false, piscina: false, ascensor: false,
+                  jardin: false, aireAcond: false, armarios: false, trastero: false, balcon: false,
+                  ibi: 0, basuras: 0, comunidad: 0, extraComunidad: 0, otrosGastos: "",
+                  desc: "", notasPriv: "", descEn: "", descDe: "",
+                  propNombre: "", propTel: "", propEmail: "", fechaCap: new Date().toISOString().split("T")[0],
+                  agente: "", fotos: 0, videos: 0, planos: 0, tour360: false,
+                  latitud: null, longitud: null, idealistaId: "",
+                  cualPos: [], cualNeg: [], cualMejoras: [],
+                  suministros: [], elecReformada: false, fontReformada: false, drenaje: "",
+                };
+                setSel(newProp);
+              }}
               style={{ padding: "12px 28px", borderRadius: 3, border: "1px solid #C8A97E", background: "transparent", color: "#C8A97E", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "'Manrope', sans-serif", transition: "all 0.3s" }}
               onMouseEnter={(e) => { e.currentTarget.style.background = "#C8A97E"; e.currentTarget.style.color = "#111110"; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#C8A97E"; }}
