@@ -1445,10 +1445,22 @@ REGLAS:
                 <Dot green={true} />
                 <span style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em" }}>Descripcion</span>
               </div>
-              <span style={{ fontSize: 10, color: (d.desc || "").length > 3700 ? "#D45454" : "#7A7870" }}>{(d.desc || "").length} / 3.700</span>
+              <span id="desc-counter" style={{ fontSize: 10, color: "#7A7870" }}>{(d.desc || "").length} / 3.700</span>
             </div>
-            <textarea value={d.desc || ""} onChange={e => upd("desc", e.target.value)}
-              style={{ width: "100%", background: "#1C1B18", border: "1px solid " + ((d.desc || "").length > 3700 ? "#D45454" : "#2A2926"), borderRadius: 3, color: "#D0CDC4", padding: "14px 18px", fontSize: 13, fontFamily: "'Manrope', sans-serif", minHeight: 200, resize: "vertical", lineHeight: 1.6 }} />
+            <textarea 
+              key="desc-textarea"
+              defaultValue={d.desc || ""} 
+              onBlur={e => upd("desc", e.target.value)}
+              onInput={e => {
+                const counter = document.getElementById("desc-counter");
+                if (counter) {
+                  const len = e.target.value.length;
+                  counter.textContent = len + " / 3.700";
+                  counter.style.color = len > 3700 ? "#D45454" : "#7A7870";
+                }
+                draft.desc = e.target.value;
+              }}
+              style={{ width: "100%", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "14px 18px", fontSize: 13, fontFamily: "'Manrope', sans-serif", minHeight: 200, resize: "vertical", lineHeight: 1.6 }} />
           </div>
         </Sec>
         <div style={sep} />
