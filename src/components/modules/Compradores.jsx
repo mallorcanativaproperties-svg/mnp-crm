@@ -14,6 +14,17 @@ function mapBuyerDb(row) {
   };
 }
 
+function mapBuyerToDb(b) {
+  return {
+    nombre: b.nombre, email: b.email, telefono: b.tel,
+    presupuesto: Number(b.ppto) || 0, habitaciones: b.hab, financiacion: b.fin,
+    finalidad: b.finalidad, zona_deseada: b.zd, zona_excluida: b.ze,
+    altura_max: b.alt, requisitos: b.req, estado: b.st,
+    agente_asignado: b.ag, notas: b.notas,
+    updated_at: new Date().toISOString(),
+  };
+}
+
 const BUYERS = [
   { id: 1, ts: "15/02/2026", email: "riumarraco@gmail.com", nombre: "Andrea Marraco", tel: "686357021", fin: "Sí", ppto: 400000, finalidad: "Cambio de vivienda", hab: "3", zd: ["Rafal","Costa con comunicación"], ze: ["Son Gotleu"], alt: "Bajo", req: "Terraza al sur, vistas despejadas, parking, construcción reciente", st: "nuevo", ag: "" },
   { id: 2, ts: "15/02/2026", email: "maleenavillalonga@gmail.com", nombre: "Malena Villalonga", tel: "651442141", fin: "Sí", ppto: 350000, finalidad: "Primera vivienda", hab: "1-3", zd: ["Palma (buen barrio)"], ze: ["Corea","Son Gotleu"], alt: "Indiferente", req: "Buena inversión, 29 años", st: "nuevo", ag: "" },
@@ -325,11 +336,20 @@ export default function App() {
       </div>
 
       {sel && <Detail b={sel} onClose={() => setSel(null)} onSave={async u => { 
-        const { error } = await supabase.from("compradores").update(u).eq("id", u.id); 
+        const dbData = mapBuyerToDb(u);
+        const { error } = await supabase.from("compradores").update(dbData).eq("id", u.id); 
         if (error) { alert("Error al guardar: " + error.message); return; }
         setData(d => d.map(b => b.id === u.id ? u : b)); setSel(u); 
       }} onDelete={async (b) => { if (confirm("¿Eliminar este comprador? Esta accion no se puede deshacer.")) { await supabase.from("compradores").delete().eq("id", b.id); setSel(null); setData(d => d.filter(x => x.id !== b.id)); }}} />}
-      {showNew && <NewBuyer onClose={() => setShowNew(false)} onAdd={n => setData(d => [n, ...d])} />}
+      {showNew && <NewBuyer onClose={() => setShowNew(false)} onAdd={async n => {
+        const dbData = mapBuyerToDb(n);
+        const { data: inserted, error } = await supabase.from("compradores").insert(dbData).select();
+        if (error) { alert("Error al crear comprador: " + error.message); return; }
+        if (inserted && inserted[0]) {
+          setData(d => [mapBuyerDb(inserted[0]), ...d]);
+        }
+        setShowNew(false);
+      }} />}
     </div>
   </div>;
 }
