@@ -194,11 +194,25 @@ async function handleComment(value, platform) {
     .select("*")
     .eq("activa", true);
 
-  // Find matching automation (by platform)
+  // Find matching automation (by platform and post)
   const matchingAuto = (automations || []).find(a => {
     const platforms = (a.platform || "").split(",");
-    return platforms.includes(platform) || platforms.includes("all");
+    const platformOk = platforms.includes(platform) || platforms.includes("all");
+    if (!platformOk) return false;
+    
+    // Check post_url matching
+    if (a.post_url === "NEXT") return true; // Will lock to this post
+    if (a.post_url && a.post_url.length > 10 && !a.post_url.includes(postId)) return false;
+    return true;
   });
+
+  // If automation is "NEXT", lock it to this post
+  if (matchingAuto && matchingAuto.post_url === "NEXT" && postId) {
+    await supabase.from("social_automations")
+      .update({ post_url: postId })
+      .eq("id", matchingAuto.id);
+    matchingAuto.post_url = postId;
+  }
 
   // Check if keyword matches for tagging
   const textLower = text.toLowerCase();

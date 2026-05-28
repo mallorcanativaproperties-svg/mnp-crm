@@ -590,8 +590,29 @@ function AutoEditor({ onClose, onSaved }) {
 
         {/* Post/Reel URL */}
         <div style={{ marginBottom: 16 }}>
-          <label style={S.label}>URL del reel/post (opcional, para limitar a un post concreto)</label>
-          <input value={postUrl} onChange={e => setPostUrl(e.target.value)} placeholder="https://www.instagram.com/reel/..." style={S.input} />
+          <label style={S.label}>Aplicar a</label>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button onClick={() => setPostUrl("NEXT")} style={{
+              padding: "8px 16px", borderRadius: 3, cursor: "pointer", fontSize: 11,
+              border: postUrl === "NEXT" ? "2px solid #C8A97E" : "2px solid #2A2926",
+              background: postUrl === "NEXT" ? "#C8A97E18" : "transparent",
+              color: postUrl === "NEXT" ? "#C8A97E" : "#7A7870",
+              fontFamily: "'Manrope', sans-serif",
+            }}>Proxima publicacion</button>
+            <button onClick={() => setPostUrl("")} style={{
+              padding: "8px 16px", borderRadius: 3, cursor: "pointer", fontSize: 11,
+              border: postUrl !== "NEXT" ? "2px solid #C8A97E" : "2px solid #2A2926",
+              background: postUrl !== "NEXT" ? "#C8A97E18" : "transparent",
+              color: postUrl !== "NEXT" ? "#C8A97E" : "#7A7870",
+              fontFamily: "'Manrope', sans-serif",
+            }}>Reel concreto</button>
+          </div>
+          {postUrl !== "NEXT" && (
+            <input value={postUrl} onChange={e => setPostUrl(e.target.value)} placeholder="https://www.instagram.com/reel/..." style={{ ...S.input, marginTop: 8 }} />
+          )}
+          {postUrl === "NEXT" && (
+            <div style={{ fontSize: 9, color: "#6AAF8D", marginTop: 6 }}>Se activara automaticamente en la proxima publicacion y se desactivara despues</div>
+          )}
         </div>
 
         <div style={{ borderBottom: "1px solid #2A2926", margin: "20px 0", paddingBottom: 4 }}>
