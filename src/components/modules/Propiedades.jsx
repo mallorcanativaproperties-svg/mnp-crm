@@ -1451,6 +1451,20 @@ export default function CRMPropiedades() {
   }
 
   async function saveProperty(prop) {
+    // Validate required fields
+    const required = [];
+    if (!prop.ref) required.push("Referencia");
+    if (!prop.mConst || prop.mConst <= 0) required.push("m2 construidos");
+    if (!prop.precioVenta || prop.precioVenta <= 0) required.push("Precio de venta");
+    if (!prop.cp && !prop.latitud) required.push("Codigo postal o Coordenadas");
+    if (!prop.dir) required.push("Direccion");
+    if (!prop.municipio) required.push("Municipio");
+    
+    if (required.length > 0) {
+      alert("Campos obligatorios sin cumplimentar:\n\n- " + required.join("\n- "));
+      return;
+    }
+    
     const dbData = mapJsToDb(prop);
     if (prop.id && typeof prop.id === "string" && prop.id.length > 10) {
       await supabase.from("propiedades").update(dbData).eq("id", prop.id);
