@@ -968,54 +968,57 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
     setAiError("");
     setAiDesc("");
 
+    const src = editMode ? draft : p;
+    
+    // Build features list from booleans
+    const features = [];
+    if (src.terraza) features.push("Terraza");
+    if (src.balcon) features.push("Balcon");
+    if (src.piscina) features.push("Piscina");
+    if (src.jardin) features.push("Jardin");
+    if (src.ascensor) features.push("Ascensor");
+    if (src.aireAcond) features.push("Aire acondicionado");
+    if (src.armarios) features.push("Armarios empotrados");
+    if (src.trastero) features.push("Trastero");
+    if (src.ventaMobiliario) features.push("Se vende con mobiliario");
+
     const fichaTexto = [
       "DATOS DE LA PROPIEDAD:",
-      "Tipo: " + p.tipo,
-      "Operacion: " + p.op,
-      "Zona: " + p.zona + ", " + p.municipio,
-      "Orientacion: " + p.orient,
-      "Distancia playa: " + p.distPlaya,
-      "Precio venta: " + fmtP(p.precioVenta),
-      p.precioAnt > 0 ? "Precio anterior (bajada): " + fmtP(p.precioAnt) : "",
-      "m2 utiles: " + p.mUtil + " / m2 construidos: " + p.mConst,
-      p.mParcela ? "m2 parcela/jardin: " + p.mParcela : "",
-      p.mTerraza ? "m2 terraza: " + p.mTerraza : "",
-      p.mBalcon ? "m2 balcon: " + p.mBalcon : "",
-      p.mPorche ? "m2 porche: " + p.mPorche : "",
-      "Habitaciones dobles: " + p.habDobles + " / simples: " + p.habSimples,
-      "Banos: " + p.banos + " / Aseos: " + p.aseos,
-      p.planta ? "Planta: " + p.planta : "",
-      "Ano construccion: " + p.anoConstruc,
-      "Conservacion: " + p.conserv,
-      "Cert. energetico: " + p.certEnerg,
-      "IEE: " + p.iee,
-      "Suelos: " + p.suelos,
-      "Carpinteria exterior (ventanas): " + p.carpExt,
-      p.carpInt ? "Carpinteria interior (puertas): " + p.carpInt : "",
-      p.persianasTipo ? "Persianas: " + p.persianasTipo + " de " + p.persianasMat : "",
-      p.clima ? "Climatizacion: " + p.clima : "",
-      p.aguaCal ? "Agua caliente: " + p.aguaCal : "",
-      p.parking ? "Parking: " + p.parking + " (" + p.nPlazas + " plazas)" : "Sin parking",
-      "Suministros: " + (p.suministros ? p.suministros.join(", ") : "-"),
-      "Drenaje: " + (p.drenaje || "-"),
-      p.elecReformada ? "Electricidad reformada: Si" : "",
-      p.fontReformada ? "Fontaneria reformada: Si" : "",
-      p.ventaMobiliario ? "Se vende con mobiliario" : "",
-      "CALIDADES Y EQUIPAMIENTO (mencionar TODAS en la descripcion):",
-      p.calidades.map((c) => "- " + c).join("\n"),
+      "Tipo: " + (src.tipo || ""),
+      "Operacion: " + (src.op || ""),
+      "Zona: " + (src.zona || "") + ", " + (src.municipio || ""),
+      src.orient ? "Orientacion: " + src.orient : "",
+      src.distPlaya ? "Distancia playa: " + src.distPlaya : "",
+      "Precio venta: " + fmtP(src.precioVenta),
+      src.precioAnt > 0 ? "Precio anterior (bajada): " + fmtP(src.precioAnt) : "",
+      "m2 utiles: " + (src.mUtil || 0) + " / m2 construidos: " + (src.mConst || 0),
+      src.mParcela ? "m2 parcela/jardin: " + src.mParcela : "",
+      src.mTerraza ? "m2 terraza: " + src.mTerraza : "",
+      src.mBalcon ? "m2 balcon: " + src.mBalcon : "",
+      src.mPorche ? "m2 porche: " + src.mPorche : "",
+      "Habitaciones dobles: " + (src.habDobles || 0) + " / simples: " + (src.habSimples || 0),
+      "Banos: " + (src.banos || 0) + " / Aseos: " + (src.aseos || 0),
+      src.planta ? "Planta: " + src.planta : "",
+      src.anoConstruc ? "Ano construccion: " + src.anoConstruc : "",
+      src.conserv ? "Conservacion: " + src.conserv : "",
+      src.certEnerg ? "Cert. energetico: " + src.certEnerg : "",
+      src.suelos ? "Suelos: " + src.suelos : "",
+      src.carpExt ? "Carpinteria exterior (ventanas): " + src.carpExt : "",
+      src.carpInt ? "Carpinteria interior (puertas): " + src.carpInt : "",
+      src.clima ? "Climatizacion: " + src.clima : "",
+      src.aguaCal ? "Agua caliente: " + src.aguaCal : "",
+      src.parking && src.parking !== "No" ? "Parking: " + src.parking + (src.nPlazas ? " (" + src.nPlazas + " plazas)" : "") : "",
+      src.elecReformada ? "Electricidad reformada" : "",
+      src.fontReformada ? "Fontaneria reformada" : "",
+      features.length > 0 ? "EQUIPAMIENTO Y CALIDADES:\n" + features.map(f => "- " + f).join("\n") : "",
       "",
       "GASTOS:",
-      p.ibi ? "IBI: " + fmtP(p.ibi) : "",
-      p.basuras ? "Tasa basuras: " + fmtP(p.basuras) : "",
-      p.comunidad ? "Comunidad: " + fmtP(p.comunidad) + "/mes" : "",
-      p.extraComunidad ? "Extra comunidad/derramas: " + fmtP(p.extraComunidad) : "",
-      p.otrosGastos ? "Otros gastos: " + p.otrosGastos : "",
+      src.ibi ? "IBI: " + fmtP(src.ibi) : "",
+      src.basuras ? "Tasa basuras: " + fmtP(src.basuras) : "",
+      src.comunidad ? "Comunidad: " + fmtP(src.comunidad) + "/mes" : "",
       "",
-      "CUALIFICACION INTERNA (puntos positivos):",
-      p.cualPos.map((c, i) => (i + 1) + ". " + c).join("\n"),
-      "",
-      "QUE MEJORAR:",
-      p.cualMejoras.map((c, i) => (i + 1) + ". " + c).join("\n"),
+      (src.cualPos && src.cualPos.length > 0) ? "PUNTOS POSITIVOS:\n" + src.cualPos.map((c, i) => (i + 1) + ". " + c).join("\n") : "",
+      (src.cualMejoras && src.cualMejoras.length > 0) ? "OPORTUNIDADES DE MEJORA:\n" + src.cualMejoras.map((c, i) => (i + 1) + ". " + c).join("\n") : "",
     ].filter(Boolean).join("\n");
 
     const systemPrompt = `Como experto copywriter en el mercado inmobiliario de Palma de Mallorca con mas de 10 anos de experiencia redactando textos persuasivos para portales inmobiliarios y redes sociales, confecciona un texto con excelente posicionamiento SEO para portales inmobiliarios segun las siguientes instrucciones.
@@ -1041,15 +1044,15 @@ Parrafo 6: Breve descripcion de la ubicacion, servicios, accesos (cerca via cint
 
 Parrafo 7: Llamada a la accion. Ejemplo: Haz de este apartamento tu nuevo hogar! No pierdas la oportunidad de vivir en uno de los destinos mas codiciados de la isla. Contactanos ahora para mas informacion y programar una visita.
 
-IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion positiva y lo que se puede mejorar presentalo como oportunidad. OBLIGATORIO: menciona TODAS las calidades listadas en la ficha (piscina, terraza, ascensor, parking, trastero, jardin, etc.) distribuyendolas entre los parrafos 2, 3 y 4 segun corresponda. No omitas ninguna calidad. Maximo 3.500 caracteres. Responde SOLO con el texto de la descripcion, sin explicaciones ni comentarios adicionales.`;
+IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion positiva y lo que se puede mejorar presentalo como oportunidad. OBLIGATORIO: menciona TODOS los equipamientos y calidades listados en la ficha (piscina, terraza, ascensor, parking, trastero, jardin, aire acondicionado, armarios, etc.) distribuyendolos entre los parrafos 2, 3 y 4 segun corresponda. No omitas ninguno. No incluyas datos del propietario, honorarios, ni informacion confidencial. Maximo 3.500 caracteres. Responde SOLO con el texto de la descripcion, sin explicaciones ni comentarios adicionales.`;
 
     try {
       const response = await fetch("/api/claude", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
+          model: "claude-haiku-4-5-20251001",
+          max_tokens: 2000,
           messages: [
             { role: "user", content: "Genera la descripcion para portal inmobiliario de esta propiedad:\n\n" + fichaTexto }
           ],
