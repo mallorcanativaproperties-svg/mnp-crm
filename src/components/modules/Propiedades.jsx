@@ -910,7 +910,7 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
   const [aiDesc, setAiDesc] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
-  const [editMode, setEditMode] = useState(false);
+  const [editMode, setEditMode] = useState(!p.id);
   const [draft, setDraft] = useState({ ...p });
   const g2 = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 24px" };
   const g3 = { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px 24px" };
@@ -1531,7 +1531,7 @@ export default function CRMPropiedades() {
             <button
               onClick={() => {
                 const newProp = {
-                  id: null, ref: "", tipo: "", op: "Compraventa", estado: "borrador", titulo: "",
+                  id: null, ref: "", tipo: "Piso", op: "Compraventa", estado: "borrador", titulo: "",
                   dir: "", num: "", cp: "", municipio: "", zona: "", orient: "", distPlaya: "", visDir: "Solo zona", planta: "",
                   precioVenta: 0, precioProp: 0, precioAnt: 0, precioTraspaso: 0,
                   honorarios: 5, honorariosTipo: "porcentaje", ivaHon: 21,
@@ -1548,7 +1548,8 @@ export default function CRMPropiedades() {
                   agente: "", fotos: 0, videos: 0, planos: 0, tour360: false,
                   latitud: null, longitud: null, idealistaId: "",
                   cualPos: [], cualNeg: [], cualMejoras: [],
-                  suministros: [], elecReformada: false, fontReformada: false, drenaje: "",
+                  calidades: [], suministros: [], elecReformada: false, fontReformada: false, drenaje: "",
+                  visitas: 0,
                 };
                 setSel(newProp);
               }}
