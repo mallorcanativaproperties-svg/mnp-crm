@@ -7,7 +7,7 @@ function mapDbToJs(row) {
     id: row.id, ref: row.ref || "", tipo: row.tipo || "", op: row.op || "Compraventa",
     titulo: row.titulo || "", dir: row.dir || "", num: row.num || "", cp: row.cp || "",
     municipio: row.municipio || "", zona: row.zona || "",
-    visDir: row.vis_dir || "Direccion exacta", orient: row.orient || "", distPlaya: row.dist_playa || "",
+    visDir: row.vis_dir || "Solo zona", orient: row.orient || "", distPlaya: row.dist_playa || "",
     precioVenta: row.precio_venta || 0, precioProp: row.precio_prop || 0, precioAnt: row.precio_ant || 0, precioTraspaso: row.precio_traspaso || 0,
     honorariosTipo: row.honorarios_tipo || "porcentaje", honorarios: row.honorarios || 0, ivaHon: row.iva_hon || 21,
     certEnerg: row.cert_energ || "", conserv: row.conserv || "", anoConstruc: row.ano_construc || "",
@@ -28,7 +28,7 @@ function mapDbToJs(row) {
     destinos: row.destinos || [], fotos: row.fotos || 0, videos: row.videos || 0, tour360: row.tour360 || false, planos: row.planos || 0,
     fechaCap: row.fecha_cap || "", visitas: row.visitas || 0,
     cualPos: row.cual_pos || [], cualNeg: row.cual_neg || [], cualMejoras: row.cual_mejoras || [],
-    puerta: row.puerta || "", latitud: row.latitud || null, longitud: row.longitud || null, idealistaId: row.idealista_id || "",
+    puerta: row.puerta || "", latitud: row.latitud != null ? row.latitud : null, longitud: row.longitud != null ? row.longitud : null, idealistaId: row.idealista_id || "",
     descEn: row.desc_en || "", descDe: row.desc_de || "",
     terraza: row.terraza || false, piscina: row.piscina || false, ascensor: row.ascensor || false,
     jardin: row.jardin || false, aireAcond: row.aire_acond || false, armarios: row.armarios || false,
@@ -1119,7 +1119,12 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)", display: "flex", justifyContent: "center", alignItems: "flex-start", padding: "30px 12px", zIndex: 1000, overflowY: "auto" }}>
       <div style={{ background: "#161513", border: "1px solid #2A2926", borderRadius: 4, width: "100%", maxWidth: 740, padding: "32px 36px", position: "relative" }}>
         <button onClick={onClose} style={{ position: "absolute", top: 16, right: 20, background: "none", border: "none", color: "#7A7870", fontSize: 20, cursor: "pointer" }}>X</button>
-        {!editMode && <button onClick={() => { setDraft({ ...p }); setEditMode(true); }} style={{ position: "absolute", top: 16, right: 120, background: "#C8A97E", border: "none", borderRadius: 3, color: "#111110", fontSize: 10, cursor: "pointer", padding: "5px 14px", fontWeight: 600, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.05em" }}>Editar</button>}
+        {!editMode && <button onClick={() => { setDraft({ ...p, 
+          suministrosText: (p.suministros || []).join(", "),
+          cualPosText: (p.cualPos || []).join("\n"),
+          cualNegText: (p.cualNeg || []).join("\n"),
+          cualMejorasText: (p.cualMejoras || []).join("\n"),
+        }); setEditMode(true); }} style={{ position: "absolute", top: 16, right: 120, background: "#C8A97E", border: "none", borderRadius: 3, color: "#111110", fontSize: 10, cursor: "pointer", padding: "5px 14px", fontWeight: 600, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.05em" }}>Editar</button>}
         {editMode && <button onClick={() => { 
           const toSave = { ...draft,
             suministros: (draft.suministrosText || "").split(",").map(s => s.trim()).filter(Boolean),
@@ -1128,7 +1133,12 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
             cualMejoras: (draft.cualMejorasText || "").split("\n").filter(Boolean),
           };
           if (onUpdate) onUpdate(toSave); setEditMode(false); }} style={{ position: "absolute", top: 16, right: 120, background: "#6AAF8D", border: "none", borderRadius: 3, color: "#111110", fontSize: 10, cursor: "pointer", padding: "5px 14px", fontWeight: 600, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.05em" }}>Guardar</button>}
-        {editMode && <button onClick={() => { setDraft({ ...p }); setEditMode(false); }} style={{ position: "absolute", top: 16, right: 190, background: "none", border: "1px solid #7A7870", borderRadius: 3, color: "#7A7870", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "'Manrope', sans-serif" }}>Cancelar</button>}
+        {editMode && <button onClick={() => { setDraft({ ...p,
+          suministrosText: (p.suministros || []).join(", "),
+          cualPosText: (p.cualPos || []).join("\n"),
+          cualNegText: (p.cualNeg || []).join("\n"),
+          cualMejorasText: (p.cualMejoras || []).join("\n"),
+        }); setEditMode(false); }} style={{ position: "absolute", top: 16, right: 190, background: "none", border: "1px solid #7A7870", borderRadius: 3, color: "#7A7870", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "'Manrope', sans-serif" }}>Cancelar</button>}
         <button onClick={() => { if (onDelete) onDelete(p); }} style={{ position: "absolute", top: 16, right: 56, background: "none", border: "1px solid #D4545433", borderRadius: 3, color: "#D45454", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "'Manrope', sans-serif" }}>Eliminar</button>
 
         {/* Header */}
@@ -1752,7 +1762,7 @@ export default function CRMPropiedades() {
           {list.length === 0 && <div style={{ textAlign: "center", padding: 60, color: "#7A7870", fontSize: 13, fontStyle: "italic" }}>Sin resultados</div>}
         </div>
 
-        {sel && <PropDetail p={sel} onClose={() => setSel(null)} onUpdate={(updated) => { saveProperty({...sel, ...updated}); }} onDelete={(prop) => { if (confirm("¿Eliminar esta propiedad y todos sus archivos? Esta accion no se puede deshacer.")) deleteProperty(prop); }} />}
+        {sel && <PropDetail p={sel} onClose={() => setSel(null)} onUpdate={(updated) => { saveProperty(updated); }} onDelete={(prop) => { if (confirm("¿Eliminar esta propiedad y todos sus archivos? Esta accion no se puede deshacer.")) deleteProperty(prop); }} />}
       </div>
     </div>
   );
