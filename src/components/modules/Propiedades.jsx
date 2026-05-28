@@ -1238,7 +1238,25 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
           </div>
           <div style={{ ...g3, marginTop: 8 }}>
             {EFl({label: "Precio traspaso", field: "precioTraspaso", pub: true, type: "number"})}
-            {EFl({label: "Honorarios %", field: "honorarios", pub: false, type: "number"})}
+            {editMode ? (
+              <div style={{ marginBottom: 10 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
+                  <Dot green={false} />
+                  <span style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em" }}>Honorarios</span>
+                </div>
+                <div style={{ display: "flex", gap: 4 }}>
+                  <select value={d.honorariosTipo || "porcentaje"} onChange={e => upd("honorariosTipo", e.target.value)}
+                    style={{ width: 100, background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "6px 4px", fontSize: 11, fontFamily: "'Manrope', sans-serif" }}>
+                    <option value="porcentaje">%</option>
+                    <option value="fijo">Importe</option>
+                  </select>
+                  <input type="number" value={d.honorarios ?? 0} onChange={e => upd("honorarios", Number(e.target.value))} onFocus={e => { if (e.target.value === "0") e.target.select(); }}
+                    style={{ flex: 1, background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "6px 8px", fontSize: 13, fontFamily: "'Manrope', sans-serif" }} />
+                </div>
+              </div>
+            ) : (
+              <Fl label="Honorarios" value={p.honorariosTipo === "porcentaje" ? p.honorarios + "%" : fmtP(p.honorarios) + " (fijo)"} pub={false} />
+            )}
             {EFl({label: "IVA Hon %", field: "ivaHon", pub: false, type: "number"})}
           </div>
           <div style={{ marginTop: 12, padding: "10px 14px", background: "#C8A97E08", borderRadius: 3, border: "1px solid #C8A97E15" }}>
@@ -1526,15 +1544,39 @@ export default function CRMPropiedades() {
       alert("Campos obligatorios sin cumplimentar:\n\n- " + required.join("\n- "));
       return;
     }
+
+    // IEE warning for buildings >= 49 years old
+    if (prop.anoConstruc) {
+      const age = new Date().getFullYear() - parseInt(prop.anoConstruc);
+      if (age >= 49) {
+        alert("AVISO: Este inmueble tiene " + age + " anos. Es obligatorio solicitar el Informe de Evaluacion del Edificio (IEE).");
+      }
+    }
     
     const dbData = mapJsToDb(prop);
-    if (prop.id && typeof prop.id === "string" && prop.id.length > 10) {
-      await supabase.from("propiedades").update(dbData).eq("id", prop.id);
-    } else {
-      const { data: inserted } = await supabase.from("propiedades").insert(dbData).select();
-      if (inserted && inserted[0]) prop.id = inserted[0].id;
+    try {
+      if (prop.id && typeof prop.id === "string" && prop.id.length > 10) {
+        const { error } = await supabase.from("propiedades").update(dbData).eq("id", prop.id);
+        if (error) {
+          alert("Error al guardar:\n\n" + error.message + (error.details ? "\n" + error.details : ""));
+          return;
+        }
+        alert("Propiedad guardada correctamente");
+      } else {
+        const { data: inserted, error } = await supabase.from("propiedades").insert(dbData).select();
+        if (error) {
+          alert("Error al crear propiedad:\n\n" + error.message + (error.details ? "\n" + error.details : ""));
+          return;
+        }
+        if (inserted && inserted[0]) {
+          prop.id = inserted[0].id;
+          alert("Propiedad creada correctamente. Ya puedes subir fotos y documentos.");
+        }
+      }
+      await loadProps();
+    } catch (err) {
+      alert("Error inesperado:\n\n" + err.message);
     }
-    await loadProps();
   }
 
   async function deleteProperty(prop) {
