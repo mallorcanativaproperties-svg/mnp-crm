@@ -1060,6 +1060,18 @@ IMPORTANTE: No incluyas puntos negativos del inmueble. Usa solo informacion posi
         }),
       });
       const data = await response.json();
+      
+      if (data.error) {
+        setAiError("Error API: " + (data.error.message || JSON.stringify(data.error)));
+        return;
+      }
+      
+      if (!data.content || !Array.isArray(data.content)) {
+        setAiError("Respuesta inesperada de la API. Revisa la clave API en Vercel.");
+        console.error("API response:", JSON.stringify(data));
+        return;
+      }
+      
       const text = data.content
         .filter((item) => item.type === "text")
         .map((item) => item.text)
