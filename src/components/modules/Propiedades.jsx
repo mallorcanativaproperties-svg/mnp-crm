@@ -937,13 +937,14 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
   const d = editMode ? draft : pWithTexts;
   const upd = (key, val) => setDraft(prev => ({ ...prev, [key]: val }));
 
-  function EFl({ label, field, pub, gold, type = "text", options }) {
-    if (!editMode) return <Fl label={label} value={type === "bool" ? (d[field] ? "Si" : "No") : (type === "number" ? String(d[field] || 0) : (d[field] || "-"))} pub={pub} gold={gold} />;
+  function EFl({ label, field, pub, gold, type = "text", options, req }) {
+    const reqMark = req ? " *" : "";
+    if (!editMode) return <Fl label={label + reqMark} value={type === "bool" ? (d[field] ? "Si" : "No") : (type === "number" ? String(d[field] || 0) : (d[field] || "-"))} pub={pub} gold={gold} />;
     return (
       <div style={{ marginBottom: 10 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
           {pub !== undefined && <Dot green={pub} />}
-          <span style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em" }}>{label}</span>
+          <span style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em" }}>{label}{req && <span style={{ color: "#D45454", marginLeft: 2 }}>*</span>}</span>
         </div>
         {type === "bool" ? (
           <select value={d[field] ? "true" : "false"} onChange={e => upd(field, e.target.value === "true")}
@@ -1154,6 +1155,8 @@ REGLAS:
           cualMejorasText: (p.cualMejoras || []).join("\n"),
         }); setEditMode(false); }} style={{ position: "absolute", top: 16, right: 190, background: "none", border: "1px solid #7A7870", borderRadius: 3, color: "#7A7870", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "'Manrope', sans-serif" }}>Cancelar</button>}
         <button onClick={() => { if (onDelete) onDelete(p); }} style={{ position: "absolute", top: 16, right: 56, background: "none", border: "1px solid #D4545433", borderRadius: 3, color: "#D45454", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "'Manrope', sans-serif" }}>Eliminar</button>
+        
+        <div style={{ position: "absolute", top: 18, left: 36, fontSize: 9, color: "#7A7870" }}><span style={{ color: "#D45454" }}>*</span> Obligatorio Idealista</div>
 
         {/* Header */}
         <div style={{ marginBottom: 16 }}>
@@ -1161,7 +1164,7 @@ REGLAS:
             <>
               <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8, flexWrap: "wrap" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <span style={{ fontSize: 10, color: "#7A7870" }}>REF:</span>
+                  <span style={{ fontSize: 10, color: "#7A7870" }}>REF<span style={{ color: "#D45454" }}>*</span>:</span>
                   <input type="text" value={d.ref || ""} onChange={e => upd("ref", e.target.value)}
                     style={{ width: 130, background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#C8A97E", padding: "4px 8px", fontSize: 11, fontFamily: "'Manrope', sans-serif" }} />
                 </div>
@@ -1171,7 +1174,7 @@ REGLAS:
                 </select>
                 <select value={d.tipo || ""} onChange={e => upd("tipo", e.target.value)}
                   style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "4px 8px", fontSize: 11, fontFamily: "'Manrope', sans-serif" }}>
-                  <option value="">Tipo...</option>
+                  <option value="">Tipo *</option>
                   {TIPOS_LIST.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
               </div>
@@ -1252,10 +1255,10 @@ REGLAS:
         {/* Localizacion */}
         <Sec title="Localizacion">
           <div style={g2}>
-            {EFl({label: "Direccion", field: "dir", pub: true})}
+            {EFl({label: "Direccion", req: true, field: "dir", pub: true})}
             {EFl({label: "Numero", field: "num", pub: true})}
-            {EFl({label: "Codigo postal", field: "cp", pub: true})}
-            {EFl({label: "Municipio", field: "municipio", pub: true})}
+            {EFl({label: "Codigo postal", req: true, field: "cp", pub: true})}
+            {EFl({label: "Municipio", req: true, field: "municipio", pub: true})}
             {EFl({label: "Zona", field: "zona", pub: true})}
             {EFl({label: "Orientacion", field: "orient", pub: true, options: ["Norte","Sur","Este","Oeste","Noreste","Noroeste","Sureste","Suroeste"], type: editMode ? "select" : "text"})}
             {EFl({label: "Distancia playa", field: "distPlaya", pub: true})}
@@ -1276,7 +1279,7 @@ REGLAS:
         {/* Datos de venta */}
         <Sec title="Datos de venta">
           <div style={g3}>
-            {EFl({label: "Precio de venta", field: "precioVenta", pub: true, gold: true, type: "number"})}
+            {EFl({label: "Precio de venta", req: true, field: "precioVenta", pub: true, gold: true, type: "number"})}
             {EFl({label: "Precio propietario", field: "precioProp", pub: false, type: "number"})}
             {EFl({label: "Precio anterior (bajada)", field: "precioAnt", pub: true, type: "number"})}
           </div>
@@ -1330,7 +1333,7 @@ REGLAS:
         <Sec title="Superficies y estancias">
           <div style={g4}>
             {EFl({label: "m2 utiles", field: "mUtil", pub: true, type: "number"})}
-            {EFl({label: "m2 construidos", field: "mConst", pub: true, type: "number"})}
+            {EFl({label: "m2 construidos", req: true, field: "mConst", pub: true, type: "number"})}
             {EFl({label: "m2 parcela", field: "mParcela", pub: true, type: "number"})}
             {EFl({label: "m2 terraza", field: "mTerraza", pub: true, type: "number"})}
           </div>
@@ -1340,9 +1343,9 @@ REGLAS:
             <div /><div />
           </div>
           <div style={{ ...g4, marginTop: 8 }}>
-            {EFl({label: "Hab. dobles", field: "habDobles", pub: true, type: "number"})}
+            {EFl({label: "Hab. dobles", req: true, field: "habDobles", pub: true, type: "number"})}
             {EFl({label: "Hab. simples", field: "habSimples", pub: true, type: "number"})}
-            {EFl({label: "Banos", field: "banos", pub: true, type: "number"})}
+            {EFl({label: "Banos", req: true, field: "banos", pub: true, type: "number"})}
             {EFl({label: "Aseos", field: "aseos", pub: true, type: "number"})}
           </div>
           <div style={{ ...g3, marginTop: 8 }}>
@@ -1357,7 +1360,7 @@ REGLAS:
         {/* Caracteristicas */}
         <Sec title="Caracteristicas principales">
           <div style={g3}>
-            {EFl({label: "Cert. energetico", field: "certEnerg", pub: true, options: ["A","B","C","D","E","F","G","Exento","En tramite"], type: editMode ? "select" : "text"})}
+            {EFl({label: "Cert. energetico", req: true, field: "certEnerg", pub: true, options: ["A","B","C","D","E","F","G","Exento","En tramite"], type: editMode ? "select" : "text"})}
             {EFl({label: "IEE", field: "iee", pub: true})}
             {EFl({label: "Venta con mobiliario", field: "ventaMobiliario", pub: true, type: "bool"})}
           </div>
