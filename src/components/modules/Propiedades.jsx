@@ -1030,7 +1030,7 @@ INSTRUCCIONES GENERALES:
 INSTRUCCIONES CONCRETAS - DESTINO: Portal inmobiliario.
 Esta descripcion tiene que ser emocional (el comprador tiene que sentirse viviendo alli) y persuasiva (el comprador tiene que sentir que esta propiedad le aporta mas que todas las demas). El texto tiene que contener 3.500 caracteres. El texto debe ser continuo sin titulos ni encabezados, con esta estructura:
 
-Parrafo 1: (MALLORCA NATIVA presenta...) + Tipo de propiedad + Si tiene Parking o Trastero + Zona con alguna caracteristica destacable. Ejemplo: Mallorca Nativa presenta este increible chalet con vistas parciales al mar con aparcamiento y trastero en Son Bielo, Sa Rapita, a 300 metros del mar y a solo un paso de las mejores playas de Mallorca. Una propiedad disenada para quienes buscan disfrutar del estilo de vida mediterraneo en una de las zonas mas privilegiadas de Mallorca.
+Parrafo 1: (MALLORCA NATIVA presenta...) + Tipo de propiedad + Anejos (si tiene parking, trastero u otros anejos, OBLIGATORIO mencionarlos aqui) + Si NO tiene ascensor, es IMPRESCINDIBLE indicarlo en este primer parrafo (ejemplo: "sin ascensor") + Zona con alguna caracteristica destacable. Ejemplo: Mallorca Nativa presenta este increible chalet con vistas parciales al mar con aparcamiento y trastero en Son Bielo, Sa Rapita, a 300 metros del mar y a solo un paso de las mejores playas de Mallorca. Una propiedad disenada para quienes buscan disfrutar del estilo de vida mediterraneo en una de las zonas mas privilegiadas de Mallorca.
 
 Parrafo 2: Descripcion de la propiedad con caracteristicas principales descritas de forma emocional y persuasiva.
 
