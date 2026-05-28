@@ -85,9 +85,11 @@ function buildProperty(row, media) {
   };
 
   // Operation
+  const price = Number(row.precio_venta) || 0;
   const operation = { operationType: row.op === "Alquiler" ? "rent" : "sale" };
-  if (row.precio_venta > 0) operation.operationPrice = row.precio_venta;
-  if (row.comunidad > 0) operation.operationPriceCommunity = row.comunidad;
+  if (price > 0) operation.operationPrice = price;
+  const community = Number(row.comunidad) || 0;
+  if (community > 0) operation.operationPriceCommunity = community;
   property.propertyOperation = operation;
 
   // Contact
@@ -119,18 +121,25 @@ function buildProperty(row, media) {
   const features = { featuresType: tipo };
   
   // Common fields for all types
-  if (row.m_const > 0) features.featuresAreaConstructed = Number(row.m_const);
-  if (row.m_util > 0) features.featuresAreaUsable = Number(row.m_util);
+  const mConst = Number(row.m_const) || 0;
+  const mUtil = Number(row.m_util) || 0;
+  const mParcela = Number(row.m_parcela) || 0;
+  const banos = Number(row.banos) || 0;
+  const habDobles = Number(row.hab_dobles) || 0;
+  const habSimples = Number(row.hab_simples) || 0;
+  
+  if (mConst > 0) features.featuresAreaConstructed = mConst;
+  if (mUtil > 0) features.featuresAreaUsable = mUtil;
   
   // Plot area only for house, rustic, land
-  if ((isHouse || tipo === "land") && row.m_parcela > 0) {
-    features.featuresAreaPlot = Number(row.m_parcela);
+  if ((isHouse || tipo === "land") && mParcela > 0) {
+    features.featuresAreaPlot = mParcela;
   }
   
-  if (row.banos > 0) features.featuresBathroomNumber = Number(row.banos);
+  if (banos > 0) features.featuresBathroomNumber = banos;
   
-  const bedrooms = (row.hab_dobles || 0) + (row.hab_simples || 0);
-  if (bedrooms > 0) features.featuresBedroomNumber = Number(bedrooms);
+  const bedrooms = habDobles + habSimples;
+  if (bedrooms > 0) features.featuresBedroomNumber = bedrooms;
   
   if (row.ano_construc) {
     const year = parseInt(row.ano_construc);
@@ -216,9 +225,9 @@ function buildProperty(row, media) {
 // Validate that a property has minimum required fields
 function isValidForIdealista(row) {
   if (!row.ref) return false;
-  if (!row.precio_venta || row.precio_venta <= 0) return false;
-  if (!row.cp && !row.latitud) return false; // Need postal code or coordinates
-  if (!row.m_const || row.m_const <= 0) return false; // Need area
+  if (!Number(row.precio_venta) || Number(row.precio_venta) <= 0) return false;
+  if (!row.cp && !row.latitud) return false;
+  if (!Number(row.m_const) || Number(row.m_const) <= 0) return false;
   return true;
 }
 
