@@ -61,7 +61,7 @@ function mapJsToDb(p) {
     puerta: p.puerta, latitud: p.latitud, longitud: p.longitud, idealista_id: p.idealistaId,
     desc_en: p.descEn, desc_de: p.descDe,
     terraza: p.terraza, piscina: p.piscina, ascensor: p.ascensor,
-    jardin: p.jardin, aire_acond: p.aireAcond, armarios: p.armarios,
+    jardin: p.jardin, aire_acond: !!(p.aireAcondTipo && p.aireAcondTipo !== "No disponible"), armarios: p.armarios,
     trastero: p.trastero, balcon: p.balcon,
     updated_at: new Date().toISOString(),
   };
@@ -896,7 +896,7 @@ function PropCard({ p, onClick }) {
       <div style={{ display: "flex", gap: 5, marginTop: 8, flexWrap: "wrap" }}>
         {p.terraza && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E15" }}>Terraza</span>}
         {p.piscina && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E15" }}>Piscina</span>}
-        {p.aireAcond && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E15" }}>Aire acondicionado</span>}
+        {p.aireAcondTipo && p.aireAcondTipo !== "No disponible" && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E15" }}>AC {p.aireAcondTipo.toLowerCase()}</span>}
         {p.ascensor && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E15" }}>Ascensor</span>}
         {p.balcon && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E15" }}>Balcon</span>}
         {p.jardin && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E15" }}>Jardin</span>}
@@ -981,7 +981,8 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
     if (src.piscina) features.push("Piscina");
     if (src.jardin) features.push("Jardin");
     if (src.ascensor) features.push("Ascensor");
-    if (src.aireAcond) features.push("Aire acondicionado");
+    if (src.aireAcondTipo && src.aireAcondTipo !== "No disponible") features.push("Aire acondicionado " + src.aireAcondTipo.toLowerCase());
+    if (src.calefaccion && src.calefaccion !== "Sin calefaccion") features.push("Calefaccion " + src.calefaccion.toLowerCase());
     if (src.armarios) features.push("Armarios empotrados");
     if (src.trastero) features.push("Trastero");
     if (src.ventaMobiliario) features.push("Se vende con mobiliario");
@@ -1009,7 +1010,8 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
       src.suelos ? "Suelos: " + src.suelos : "",
       src.carpExt ? "Carpinteria exterior (ventanas): " + src.carpExt : "",
       src.carpInt ? "Carpinteria interior (puertas): " + src.carpInt : "",
-      src.clima ? "Climatizacion: " + src.clima : "",
+      src.aireAcondTipo ? "Aire acondicionado: " + src.aireAcondTipo : "",
+      src.calefaccion ? "Calefaccion: " + src.calefaccion : "",
       src.aguaCal ? "Agua caliente: " + src.aguaCal : "",
       src.parking && src.parking !== "No" ? "Parking: " + src.parking + (src.nPlazas ? " (" + src.nPlazas + " plazas)" : "") : "",
       src.elecReformada ? "Electricidad reformada" : "",
@@ -1365,7 +1367,7 @@ REGLAS:
             {EFl({label: "Carp. interior", field: "carpInt", pub: true})}
           </div>
           <div style={{ ...g3, marginTop: 8 }}>
-            {EFl({label: "Climatizacion", field: "clima", pub: true})}
+            
             {EFl({label: "Agua caliente", field: "aguaCal", pub: true})}
             {EFl({label: "Ventanas", field: "ventanas", pub: true, options: ["Interior","Exterior"], type: editMode ? "select" : "text"})}
           </div>
@@ -1386,7 +1388,7 @@ REGLAS:
           </div>
           <div style={{ ...g4, marginTop: 8 }}>
             {EFl({label: "Ascensor", field: "ascensor", pub: true, type: "bool"})}
-            {EFl({label: "Aire acondicionado", field: "aireAcond", pub: true, type: "bool"})}
+            
             {EFl({label: "Armarios", field: "armarios", pub: true, type: "bool"})}
             {EFl({label: "Trastero", field: "trastero", pub: true, type: "bool"})}
           </div>

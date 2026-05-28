@@ -147,7 +147,6 @@ function buildProperty(row, media) {
   }
   
   // Boolean features - only include if true
-  if (row.aire_acond === true) features.featuresConditionedAir = true;
   if (row.jardin === true) features.featuresGarden = true;
   if (row.ascensor === true) features.featuresLift = true;
   if (row.piscina === true) features.featuresPool = true;
