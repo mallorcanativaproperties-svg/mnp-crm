@@ -895,10 +895,15 @@ function PropCard({ p, onClick }) {
         </div>
       )}
       <div style={{ display: "flex", gap: 5, marginTop: 8, flexWrap: "wrap" }}>
-        {p.calidades.slice(0, 6).map((c, i) => (
-          <span key={i} style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E15" }}>{c}</span>
-        ))}
-        {p.calidades.length > 6 && <span style={{ fontSize: 10, color: "#7A7870" }}>+{p.calidades.length - 6}</span>}
+        {p.terraza && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E15" }}>Terraza</span>}
+        {p.piscina && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E15" }}>Piscina</span>}
+        {p.aireAcond && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E15" }}>Aire acondicionado</span>}
+        {p.ascensor && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E15" }}>Ascensor</span>}
+        {p.balcon && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E15" }}>Balcon</span>}
+        {p.jardin && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E15" }}>Jardin</span>}
+        {p.armarios && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E15" }}>Armarios empotrados</span>}
+        {p.trastero && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E15" }}>Trastero</span>}
+        {p.parking === "Si" && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E15" }}>Parking</span>}
       </div>
     </div>
   );
@@ -1569,6 +1574,13 @@ export default function CRMPropiedades() {
     }
     
     const dbData = mapJsToDb(prop);
+    
+    // Auto-set agente from ref prefix if not set
+    if (!dbData.agente && dbData.ref) {
+      const prefix = dbData.ref.slice(0, 5);
+      const prefixToAgent = { MNSKB: "Suren", MNAQA: "Anabel", MNJAC: "Jaime", MNGET: "Guim", MNSLA: "Silvia" };
+      if (prefixToAgent[prefix]) dbData.agente = prefixToAgent[prefix];
+    }
     try {
       if (prop.id && typeof prop.id === "string" && prop.id.length > 10) {
         const { error } = await supabase.from("propiedades").update(dbData).eq("id", prop.id);
