@@ -41,18 +41,6 @@ const CONSERV_MAP = {
   "En construccion": "new",
 };
 
-// Map CRM orientation to Idealista booleans
-function mapOrientation(orient) {
-  if (!orient) return {};
-  const o = orient.toLowerCase();
-  return {
-    featuresOrientationNorth: o.includes("norte") || o.includes("north"),
-    featuresOrientationSouth: o.includes("sur") || o.includes("south"),
-    featuresOrientationEast: o.includes("este") || o.includes("east"),
-    featuresOrientationWest: o.includes("oeste") || o.includes("west"),
-  };
-}
-
 // Map Idealista image tags
 const IMAGE_TAG_MAP = {
   LIVING_ROOM: "livingRoom",
@@ -110,6 +98,7 @@ function buildProperty(row, media) {
   if (row.planta) address.addressFloor = String(row.planta);
   if (row.cp) address.addressPostalCode = String(row.cp);
   if (row.municipio) address.addressTown = row.municipio;
+  if (row.puerta) address.addressDoor = String(row.puerta);
   if (row.latitud && row.longitud) {
     address.addressCoordinatesPrecision = "exact";
     address.addressCoordinatesLatitude = Number(row.latitud);
@@ -148,18 +137,20 @@ function buildProperty(row, media) {
   
   // Boolean features - only include if true
   if (row.jardin === true) features.featuresGarden = true;
-  if (row.ascensor === true) features.featuresLift = true;
+  if (row.ascensor === true) features.featuresLiftAvailable = true;
   if (row.piscina === true) features.featuresPool = true;
   if (row.trastero === true) features.featuresStorage = true;
   if (row.terraza === true) features.featuresTerrace = true;
   if (row.armarios === true) features.featuresWardrobes = true;
+  if (row.balcon === true) features.featuresBalcony = true;
   if (row.parking === "Si") features.featuresParkingAvailable = true;
+  if (row.venta_mobiliario === true) features.featuresEquippedWithFurniture = true;
   
   // Air conditioning type
   const AC_MAP = { "No disponible": "notAvailable", "Solo frio": "cold", "Frio/Calor": "cold/heat", "Preinstalacion": "preInstallation" };
-  if (row.aire_acond_tipo && AC_MAP[row.aire_acond_tipo]) {
+  if (row.aire_acond_tipo && AC_MAP[row.aire_acond_tipo] && row.aire_acond_tipo !== "No disponible") {
+    features.featuresConditionedAir = true;
     features.featuresConditionedAirType = AC_MAP[row.aire_acond_tipo];
-    if (row.aire_acond_tipo !== "No disponible") features.featuresConditionedAir = true;
   }
   
   // Heating type
