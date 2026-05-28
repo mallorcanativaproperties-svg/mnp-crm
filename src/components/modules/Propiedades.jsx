@@ -944,7 +944,7 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
       <div style={{ marginBottom: 10 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
           {pub !== undefined && <Dot green={pub} />}
-          <span style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em" }}>{label}{req && <span style={{ color: "#D45454", marginLeft: 3, fontSize: 14, fontWeight: 700, lineHeight: "10px" }}>*</span>}</span>
+          <span style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em" }}>{label}{req && <span style={{ color: "#D45454", marginLeft: 3, fontSize: 18, fontWeight: 900, lineHeight: "10px", verticalAlign: "middle" }}>*</span>}</span>
         </div>
         {type === "bool" ? (
           <select value={d[field] ? "true" : "false"} onChange={e => upd(field, e.target.value === "true")}
