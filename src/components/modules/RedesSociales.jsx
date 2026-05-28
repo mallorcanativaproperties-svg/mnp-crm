@@ -642,8 +642,8 @@ function TabCuentas() {
           Para recibir mensajes y comentarios en tiempo real, configura estos webhooks en Meta Developers:
         </div>
         <div style={{ marginTop: 10, padding: "12px 16px", background: "#111110", borderRadius: 3, fontFamily: "monospace", fontSize: 11, color: "#C8A97E", wordBreak: "break-all" }}>
-          URL: https://mnp-crm.vercel.app/api/social/webhook<br/>
-          Verify Token: mnp_social_verify_2026<br/>
+          URL: https://mnp-crm.vercel.app/api/meta/webhook<br/>
+          Verify Token: mnp_meta_verify_2026<br/>
           Suscripciones: messages, messaging_postbacks, feed, comments
         </div>
       </div>
