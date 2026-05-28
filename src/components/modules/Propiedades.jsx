@@ -1445,7 +1445,7 @@ REGLAS:
                 <Dot green={true} />
                 <span style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em" }}>Descripcion</span>
               </div>
-              <span id="desc-counter" style={{ fontSize: 10, color: "#7A7870" }}>{(d.desc || "").length} / 3.700</span>
+              <span id="desc-counter" style={{ fontSize: 10, color: "#7A7870" }}>{(d.desc || "").length} / 4.000</span>
             </div>
             <textarea 
               key="desc-textarea"
@@ -1455,8 +1455,8 @@ REGLAS:
                 const counter = document.getElementById("desc-counter");
                 if (counter) {
                   const len = e.target.value.length;
-                  counter.textContent = len + " / 3.700";
-                  counter.style.color = len > 3700 ? "#D45454" : "#7A7870";
+                  counter.textContent = len + " / 4.000";
+                  counter.style.color = len > 4000 ? "#D45454" : "#7A7870";
                 }
                 draft.desc = e.target.value;
               }}
