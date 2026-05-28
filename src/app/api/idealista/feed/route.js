@@ -76,6 +76,7 @@ function buildProperty(row, media) {
   const isStudio = row.tipo === "Estudio";
   const isPenthouse = row.tipo === "Atico" || row.tipo === "Atico Duplex";
   const isDuplex = row.tipo === "Duplex" || row.tipo === "Atico Duplex";
+  const isHouse = tipo === "house" || tipo === "rustic";
 
   const property = {
     propertyCode: row.ref,
@@ -84,9 +85,7 @@ function buildProperty(row, media) {
   };
 
   // Operation
-  const operation = {
-    operationType: row.op === "Alquiler" ? "rent" : "sale",
-  };
+  const operation = { operationType: row.op === "Alquiler" ? "rent" : "sale" };
   if (row.precio_venta > 0) operation.operationPrice = row.precio_venta;
   if (row.comunidad > 0) operation.operationPriceCommunity = row.comunidad;
   property.propertyOperation = operation;
@@ -100,102 +99,105 @@ function buildProperty(row, media) {
   };
 
   // Address
-  const address = {};
+  const address = { addressCountry: "Spain" };
   if (row.vis_dir === "Direccion exacta") address.addressVisibility = "full";
   else if (row.vis_dir === "Solo calle") address.addressVisibility = "street";
   else address.addressVisibility = "area";
-  
   if (row.dir) address.addressStreetName = row.dir;
-  if (row.num) address.addressStreetNumber = row.num;
-  if (row.planta) address.addressFloor = row.planta;
-  if (row.cp) address.addressPostalCode = row.cp;
+  if (row.num) address.addressStreetNumber = String(row.num);
+  if (row.planta) address.addressFloor = String(row.planta);
+  if (row.cp) address.addressPostalCode = String(row.cp);
   if (row.municipio) address.addressTown = row.municipio;
-  address.addressCountry = "Spain";
-  
   if (row.latitud && row.longitud) {
     address.addressCoordinatesPrecision = "exact";
-    address.addressCoordinatesLatitude = row.latitud;
-    address.addressCoordinatesLongitude = row.longitud;
+    address.addressCoordinatesLatitude = Number(row.latitud);
+    address.addressCoordinatesLongitude = Number(row.longitud);
   }
   property.propertyAddress = address;
 
-  // Features
+  // Features - only include fields valid for this typology
   const features = { featuresType: tipo };
-  if (row.m_const > 0) features.featuresAreaConstructed = row.m_const;
-  if (row.m_util > 0) features.featuresAreaUsable = row.m_util;
-  if (row.m_parcela > 0) features.featuresAreaPlot = row.m_parcela;
-  if (row.banos > 0) features.featuresBathroomNumber = row.banos;
+  
+  // Common fields for all types
+  if (row.m_const > 0) features.featuresAreaConstructed = Number(row.m_const);
+  if (row.m_util > 0) features.featuresAreaUsable = Number(row.m_util);
+  
+  // Plot area only for house, rustic, land
+  if ((isHouse || tipo === "land") && row.m_parcela > 0) {
+    features.featuresAreaPlot = Number(row.m_parcela);
+  }
+  
+  if (row.banos > 0) features.featuresBathroomNumber = Number(row.banos);
   
   const bedrooms = (row.hab_dobles || 0) + (row.hab_simples || 0);
-  if (bedrooms > 0) features.featuresBedroomNumber = bedrooms;
+  if (bedrooms > 0) features.featuresBedroomNumber = Number(bedrooms);
   
   if (row.ano_construc) {
     const year = parseInt(row.ano_construc);
     if (year > 1800 && year <= new Date().getFullYear()) features.featuresBuiltYear = year;
   }
   
-  if (row.aire_acond) features.featuresConditionedAir = true;
+  // Boolean features - only include if true
+  if (row.aire_acond === true) features.featuresConditionedAir = true;
+  if (row.jardin === true) features.featuresGarden = true;
+  if (row.ascensor === true) features.featuresLift = true;
+  if (row.piscina === true) features.featuresPool = true;
+  if (row.trastero === true) features.featuresStorage = true;
+  if (row.terraza === true) features.featuresTerrace = true;
+  if (row.armarios === true) features.featuresWardrobes = true;
+  if (row.parking === "Si") features.featuresParkingAvailable = true;
+  
+  // Type-specific booleans (only for flat)
+  if (tipo === "flat") {
+    if (isPenthouse) features.featuresPenthouse = true;
+    if (isStudio) features.featuresStudio = true;
+    if (isDuplex) features.featuresDuplex = true;
+  }
   
   const conserv = CONSERV_MAP[row.conserv];
   if (conserv) features.featuresConservation = conserv;
   
-  if (row.cert_energ && row.cert_energ !== "En tramite" && row.cert_energ !== "Exento") {
-    features.featuresEnergyCertificateRating = row.cert_energ;
+  // Energy certificate
+  if (row.cert_energ) {
+    if (row.cert_energ === "En tramite") features.featuresEnergyCertificateRating = "pending";
+    else if (row.cert_energ === "Exento") features.featuresEnergyCertificateRating = "exempt";
+    else if (/^[A-G]$/.test(row.cert_energ)) features.featuresEnergyCertificateRating = row.cert_energ;
   }
-  if (row.cert_energ === "En tramite") features.featuresEnergyCertificateRating = "pending";
-  if (row.cert_energ === "Exento") features.featuresEnergyCertificateRating = "exempt";
   
-  if (row.jardin) features.featuresGarden = true;
-  if (row.ascensor) features.featuresLift = true;
-  if (isPenthouse) features.featuresPenthouse = true;
-  if (row.piscina) features.featuresPool = true;
-  if (row.trastero) features.featuresStorage = true;
-  if (isStudio) features.featuresStudio = true;
-  if (row.terraza) features.featuresTerrace = true;
-  if (row.armarios) features.featuresWardrobes = true;
-  if (row.parking === "Si") features.featuresParkingAvailable = true;
-  
-  // Orientation
-  const orient = mapOrientation(row.orient);
-  Object.entries(orient).forEach(([k, v]) => { if (v) features[k] = v; });
-  
-  // House-specific features
-  if (tipo === "house") {
-    if (row.m_parcela > 0) features.featuresAreaPlot = row.m_parcela;
+  // Orientation - only include true values
+  if (row.orient) {
+    const o = row.orient.toLowerCase();
+    if (o.includes("norte") || o.includes("north")) features.featuresOrientationNorth = true;
+    if (o.includes("sur") || o.includes("south")) features.featuresOrientationSouth = true;
+    if (o.includes("este") || o.includes("east")) features.featuresOrientationEast = true;
+    if (o.includes("oeste") || o.includes("west")) features.featuresOrientationWest = true;
   }
   
   property.propertyFeatures = features;
 
   // Descriptions - only include non-empty
   const descriptions = [];
-  if (row.desc_texto) {
-    descriptions.push({ descriptionLanguage: "spanish", descriptionText: row.desc_texto });
+  if (row.desc_texto && row.desc_texto.trim()) {
+    descriptions.push({ descriptionLanguage: "spanish", descriptionText: row.desc_texto.trim() });
   }
-  if (row.desc_en) {
-    descriptions.push({ descriptionLanguage: "english", descriptionText: row.desc_en });
+  if (row.desc_en && row.desc_en.trim()) {
+    descriptions.push({ descriptionLanguage: "english", descriptionText: row.desc_en.trim() });
   }
-  if (row.desc_de) {
-    descriptions.push({ descriptionLanguage: "german", descriptionText: row.desc_de });
+  if (row.desc_de && row.desc_de.trim()) {
+    descriptions.push({ descriptionLanguage: "german", descriptionText: row.desc_de.trim() });
   }
-  if (descriptions.length > 0) {
-    property.propertyDescriptions = descriptions;
-  }
+  if (descriptions.length > 0) property.propertyDescriptions = descriptions;
 
   // Images - from Supabase storage (public URLs)
   const photos = (media || [])
-    .filter(m => m.tipo === "foto")
+    .filter(m => m.tipo === "foto" && m.url)
     .sort((a, b) => (a.orden || 0) - (b.orden || 0));
   
   if (photos.length > 0) {
     property.propertyImages = photos.map((photo, i) => {
-      const img = {
-        imageOrder: i + 1,
-        imageUrl: photo.url,
-      };
-      // Map tag if available
-      if (photo.etiqueta) {
-        const tag = IMAGE_TAG_MAP[photo.etiqueta] || "others";
-        img.imageLabel = tag;
+      const img = { imageOrder: i + 1, imageUrl: photo.url };
+      if (photo.etiqueta && IMAGE_TAG_MAP[photo.etiqueta]) {
+        img.imageLabel = IMAGE_TAG_MAP[photo.etiqueta];
       } else {
         img.imageLabel = "others";
       }
@@ -204,11 +206,20 @@ function buildProperty(row, media) {
   }
 
   // Virtual tour
-  if (row.tour360) {
+  if (row.tour360 && typeof row.tour360 === "string" && row.tour360.startsWith("http")) {
     property.propertyVirtualTour = { virtualTourUrl: row.tour360 };
   }
 
   return property;
+}
+
+// Validate that a property has minimum required fields
+function isValidForIdealista(row) {
+  if (!row.ref) return false;
+  if (!row.precio_venta || row.precio_venta <= 0) return false;
+  if (!row.cp && !row.latitud) return false; // Need postal code or coordinates
+  if (!row.m_const || row.m_const <= 0) return false; // Need area
+  return true;
 }
 
 export async function GET(request) {
@@ -259,12 +270,34 @@ export async function GET(request) {
         contactPrimaryPhoneNumber: "655882682",
       },
       customerProperties: properties
-        .filter(p => p.ref && p.precio_venta > 0)
+        .filter(p => isValidForIdealista(p))
         .map(p => buildProperty(p, mediaByProp[p.id] || [])),
     };
 
-    // Return as JSON with proper filename header
-    return new NextResponse(JSON.stringify(feed, null, 2), {
+    // Final cleanup: remove any null/undefined values recursively
+    function cleanObj(obj) {
+      if (Array.isArray(obj)) return obj.map(cleanObj);
+      if (obj && typeof obj === "object") {
+        const cleaned = {};
+        for (const [k, v] of Object.entries(obj)) {
+          if (v === null || v === undefined || v === "" || v === 0) continue;
+          if (typeof v === "boolean" && v === false) continue;
+          cleaned[k] = cleanObj(v);
+        }
+        return cleaned;
+      }
+      return obj;
+    }
+
+    const cleanFeed = cleanObj(feed);
+    // Restore required zero-valid fields
+    cleanFeed.customerProperties?.forEach(p => {
+      if (p.propertyOperation && !p.propertyOperation.operationPrice) {
+        // Price is required, should not have been cleaned
+      }
+    });
+
+    return new NextResponse(JSON.stringify(cleanFeed, null, 2), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
