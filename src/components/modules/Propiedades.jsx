@@ -1566,12 +1566,37 @@ export default function CRMPropiedades() {
     const { data: rows, error } = await supabase.from("propiedades").select("*").order("created_at", { ascending: false });
     if (error || !rows) return null;
     const refs = rows.map(r => r.ref).filter(Boolean);
+    const ids = rows.map(r => r.id).filter(Boolean);
+    
+    // Count demandas
     let demandasMap = {};
     if (refs.length > 0) {
       const { data: convs } = await supabase.from("conversaciones").select("referencia").in("referencia", refs);
       if (convs) convs.forEach(c => { if (c.referencia) demandasMap[c.referencia] = (demandasMap[c.referencia] || 0) + 1; });
     }
-    return rows.map(r => ({ ...mapDbToJs(r), demandas: demandasMap[r.ref] || 0 }));
+    
+    // Count real media from media_propiedades
+    let mediaMap = {};
+    if (ids.length > 0) {
+      const { data: allMedia } = await supabase.from("media_propiedades").select("propiedad_id, tipo").in("propiedad_id", ids);
+      if (allMedia) {
+        allMedia.forEach(m => {
+          if (!mediaMap[m.propiedad_id]) mediaMap[m.propiedad_id] = { foto: 0, video: 0, plano: 0 };
+          mediaMap[m.propiedad_id][m.tipo] = (mediaMap[m.propiedad_id][m.tipo] || 0) + 1;
+        });
+      }
+    }
+    
+    return rows.map(r => {
+      const mc = mediaMap[r.id] || {};
+      return { 
+        ...mapDbToJs(r), 
+        demandas: demandasMap[r.ref] || 0,
+        fotos: mc.foto || r.fotos || 0,
+        videos: mc.video || r.videos || 0,
+        planos: mc.plano || r.planos || 0,
+      };
+    });
   }
 
   async function loadProps() {
