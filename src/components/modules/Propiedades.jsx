@@ -1449,6 +1449,10 @@ REGLAS:
               <div style={{ fontSize: 13, color: "#F0EDE6", lineHeight: 1.7, background: "#1C1B18", padding: "18px 22px", borderRadius: 3, border: "1px solid #6AAF8D33", whiteSpace: "pre-wrap" }}>
                 {aiDesc}
               </div>
+              <button onClick={() => { upd("desc", aiDesc); setEditMode(true); }}
+                style={{ marginTop: 8, padding: "8px 20px", borderRadius: 3, border: "none", background: "#6AAF8D", color: "#111110", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", fontFamily: "'Manrope', sans-serif" }}>
+                Usar esta descripcion
+              </button>
             </div>
           )}
 
