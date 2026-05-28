@@ -186,12 +186,30 @@ async function handleComment(value, platform) {
   const postId = value.media?.id || value.post_id || "";
 
   if (!commentId || !text || !senderId) return;
-  // Skip our own comments
   if (senderId === PAGE_ID) return;
 
-  // Save comment
-  const newMsg = { from: "cliente", text, ts: new Date().toISOString(), comment_id: commentId };
+  // Check for active automations
+  const { data: automations } = await supabase
+    .from("social_automations")
+    .select("*")
+    .eq("activa", true);
 
+  // Find matching automation (by platform)
+  const matchingAuto = (automations || []).find(a => {
+    const platforms = (a.platform || "").split(",");
+    return platforms.includes(platform) || platforms.includes("all");
+  });
+
+  // Check if keyword matches for tagging
+  const textLower = text.toLowerCase();
+  let etiqueta = "";
+  if (matchingAuto && matchingAuto.trigger_keywords) {
+    const keywordMatch = matchingAuto.trigger_keywords.some(k => textLower.includes(k.toLowerCase()));
+    if (keywordMatch) etiqueta = matchingAuto.nombre;
+  }
+
+  // Save comment in social_conversations
+  const newMsg = { from: "cliente", text, ts: new Date().toISOString(), comment_id: commentId };
   const { data: created } = await supabase
     .from("social_conversations")
     .insert({
@@ -202,24 +220,60 @@ async function handleComment(value, platform) {
       tipo: "comentario",
       estado: "activo",
       mensajes: [newMsg],
+      agente: etiqueta,
     })
     .select()
     .single();
 
-  // Generate Silvia reply for comment
-  const reply = await generateSilviaResponse([newMsg], "comentario");
-  if (!reply) return;
+  // Reply to comment
+  let commentReply = "";
+  if (matchingAuto && matchingAuto.comment_replies && matchingAuto.comment_replies.length > 0) {
+    // Pick random reply from configured options
+    const replies = matchingAuto.comment_replies.filter(Boolean);
+    commentReply = replies[Math.floor(Math.random() * replies.length)];
+  } else {
+    // Fallback: Silvia AI generates reply
+    commentReply = await generateSilviaResponse([newMsg], "comentario");
+  }
 
-  // Reply to comment via Meta API
-  const replied = await replyToComment(commentId, reply, platform);
+  if (commentReply) {
+    await replyToComment(commentId, commentReply, platform);
+    const silviaReplyMsg = { from: "silvia", text: commentReply, ts: new Date().toISOString() };
+    const msgs = [newMsg, silviaReplyMsg];
 
-  // Save reply
-  if (replied) {
-    const silviaMsg = { from: "silvia", text: reply, ts: new Date().toISOString() };
-    await supabase
-      .from("social_conversations")
-      .update({ mensajes: [newMsg, silviaMsg], updated_at: new Date().toISOString() })
-      .eq("id", created.id);
+    // Send DM if automation has DM message
+    if (matchingAuto && matchingAuto.action_message) {
+      const dmSent = await sendMetaMessage(senderId, matchingAuto.action_message, platform);
+      if (dmSent) {
+        const dmMsg = { from: "silvia", text: matchingAuto.action_message, ts: new Date().toISOString(), tipo: "dm_auto" };
+        msgs.push(dmMsg);
+
+        // Also create a DM conversation for follow-up
+        await supabase.from("social_conversations").insert({
+          platform,
+          sender_id: senderId,
+          sender_name: senderName,
+          tipo: "dm",
+          estado: "activo",
+          mensajes: [{ from: "silvia", text: matchingAuto.action_message, ts: new Date().toISOString() }],
+          agente: etiqueta,
+        });
+      }
+    }
+
+    // Update comment conversation with all messages
+    if (created) {
+      await supabase.from("social_conversations")
+        .update({ mensajes: msgs, updated_at: new Date().toISOString() })
+        .eq("id", created.id);
+    }
+
+    // Increment automation counter
+    if (matchingAuto) {
+      await supabase.from("social_automations")
+        .update({ times_triggered: (matchingAuto.times_triggered || 0) + 1 })
+        .eq("id", matchingAuto.id);
+    }
   }
 }
 
