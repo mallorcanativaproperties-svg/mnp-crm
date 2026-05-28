@@ -569,7 +569,7 @@ function AutoEditor({ onClose, onSaved }) {
         <div style={{ marginBottom: 16 }}>
           <label style={S.label}>Redes sociales</label>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            {REDES.filter(r => ["instagram", "facebook"].includes(r.key)).map(r => (
+            {REDES.map(r => (
               <button key={r.key} onClick={() => togglePlatform(r.key)} style={{
                 padding: "8px 16px", borderRadius: 3, cursor: "pointer", fontSize: 11,
                 border: platforms.includes(r.key) ? `2px solid ${r.color}` : "2px solid #2A2926",
@@ -839,13 +839,13 @@ function TabSilvia() {
 
         {/* Platform filters */}
         <div style={{ padding: "8px 14px", borderBottom: "1px solid #2A2926", display: "flex", gap: 4 }}>
-          {["todos", "instagram", "facebook"].map(f => (
+          {["todos", "instagram", "facebook", "linkedin", "tiktok", "youtube"].map(f => (
             <button key={f} onClick={() => setFilter(f)} style={{
               padding: "4px 10px", borderRadius: 3, border: "none", fontSize: 10,
               background: filter === f ? "#C8A97E22" : "transparent",
               color: filter === f ? "#C8A97E" : "#7A7870",
               cursor: "pointer", fontFamily: "'Manrope', sans-serif", textTransform: "uppercase", letterSpacing: "0.06em",
-            }}>{f === "todos" ? "Todos" : f === "instagram" ? "📸 IG" : "📘 FB"}</button>
+            }}>{f === "todos" ? "Todos" : f === "instagram" ? "📸 IG" : f === "facebook" ? "📘 FB" : f === "linkedin" ? "💼 LI" : f === "tiktok" ? "🎵 TK" : "▶️ YT"}</button>
           ))}
           <div style={{ flex: 1 }} />
           <span style={{ fontSize: 10, color: "#7A7870", alignSelf: "center" }}>{filtered.length}</span>
