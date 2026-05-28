@@ -35,10 +35,10 @@ const TIPO_MAP = {
 // Map CRM conservation to Idealista
 const CONSERV_MAP = {
   "Buen estado": "good",
-  Reformado: "renew",
+  Reformado: "good",
   "A reformar": "toRestore",
-  "Obra nueva": "newdevelopment",
-  "En construccion": "newdevelopment",
+  "Obra nueva": "new",
+  "En construccion": "new",
 };
 
 // Map CRM orientation to Idealista booleans
@@ -102,7 +102,7 @@ function buildProperty(row, media) {
   const address = { addressCountry: "Spain" };
   if (row.vis_dir === "Direccion exacta") address.addressVisibility = "full";
   else if (row.vis_dir === "Solo calle") address.addressVisibility = "street";
-  else address.addressVisibility = "area";
+  else address.addressVisibility = "hidden";
   if (row.dir) address.addressStreetName = row.dir;
   if (row.num) address.addressStreetNumber = String(row.num);
   if (row.planta) address.addressFloor = String(row.planta);
@@ -159,7 +159,7 @@ function buildProperty(row, media) {
   
   // Energy certificate
   if (row.cert_energ) {
-    if (row.cert_energ === "En tramite") features.featuresEnergyCertificateRating = "pending";
+    if (row.cert_energ === "En tramite") features.featuresEnergyCertificateRating = "inProcess";
     else if (row.cert_energ === "Exento") features.featuresEnergyCertificateRating = "exempt";
     else if (/^[A-G]$/.test(row.cert_energ)) features.featuresEnergyCertificateRating = row.cert_energ;
   }
@@ -274,15 +274,24 @@ export async function GET(request) {
         .map(p => buildProperty(p, mediaByProp[p.id] || [])),
     };
 
-    // Final cleanup: remove any null/undefined values recursively
+    // Final cleanup: remove any null/undefined/empty values recursively
+    // But preserve required fields that can be 0
+    const PRESERVE_KEYS = new Set(["operationPrice", "featuresAreaConstructed", "featuresBedroomNumber", "featuresBathroomNumber", "imageOrder"]);
+    
     function cleanObj(obj) {
-      if (Array.isArray(obj)) return obj.map(cleanObj);
+      if (Array.isArray(obj)) return obj.map(cleanObj).filter(v => v !== null && v !== undefined);
       if (obj && typeof obj === "object") {
         const cleaned = {};
         for (const [k, v] of Object.entries(obj)) {
-          if (v === null || v === undefined || v === "" || v === 0) continue;
+          if (v === null || v === undefined) continue;
+          if (v === "" && !PRESERVE_KEYS.has(k)) continue;
+          if (v === 0 && !PRESERVE_KEYS.has(k)) continue;
           if (typeof v === "boolean" && v === false) continue;
-          cleaned[k] = cleanObj(v);
+          const cleanedVal = cleanObj(v);
+          // Don't include empty objects or arrays
+          if (typeof cleanedVal === "object" && !Array.isArray(cleanedVal) && Object.keys(cleanedVal).length === 0) continue;
+          if (Array.isArray(cleanedVal) && cleanedVal.length === 0) continue;
+          cleaned[k] = cleanedVal;
         }
         return cleaned;
       }
@@ -290,12 +299,6 @@ export async function GET(request) {
     }
 
     const cleanFeed = cleanObj(feed);
-    // Restore required zero-valid fields
-    cleanFeed.customerProperties?.forEach(p => {
-      if (p.propertyOperation && !p.propertyOperation.operationPrice) {
-        // Price is required, should not have been cleaned
-      }
-    });
 
     return new NextResponse(JSON.stringify(cleanFeed, null, 2), {
       status: 200,
