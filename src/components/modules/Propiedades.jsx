@@ -16,7 +16,7 @@ function mapDbToJs(row) {
     parking: row.parking || "", nPlazas: row.n_plazas || 0,
     suelos: row.suelos || "", carpExt: row.carp_ext || "", carpInt: row.carp_int || "",
     persianasTipo: row.persianas_tipo || "", persianasMat: row.persianas_mat || "",
-    clima: row.clima || "", aguaCal: row.agua_cal || "",
+    clima: row.clima || "", aguaCal: row.agua_cal || "", aireAcondTipo: row.aire_acond_tipo || "", calefaccion: row.calefaccion || "", ventanas: row.ventanas || "", emisionesEnerg: row.emisiones_energ || "",
     suministros: row.suministros || [], drenaje: row.drenaje || "",
     elecReformada: row.elec_reformada || false, fontReformada: row.font_reformada || false,
     ventaMobiliario: row.venta_mobiliario || false, iee: row.iee || "",
@@ -48,7 +48,7 @@ function mapJsToDb(p) {
     parking: p.parking, n_plazas: p.nPlazas,
     suelos: p.suelos, carp_ext: p.carpExt, carp_int: p.carpInt,
     persianas_tipo: p.persianasTipo, persianas_mat: p.persianasMat,
-    clima: p.clima, agua_cal: p.aguaCal, suministros: p.suministros, drenaje: p.drenaje,
+    clima: p.clima, agua_cal: p.aguaCal, aire_acond_tipo: p.aireAcondTipo, calefaccion: p.calefaccion, ventanas: p.ventanas, emisiones_energ: p.emisionesEnerg, suministros: p.suministros, drenaje: p.drenaje,
     elec_reformada: p.elecReformada, font_reformada: p.fontReformada, venta_mobiliario: p.ventaMobiliario,
     iee: p.iee, calidades: p.calidades,
     ibi: p.ibi, basuras: p.basuras, comunidad: p.comunidad, extra_comunidad: p.extraComunidad, otros_gastos: p.otrosGastos,
@@ -1367,7 +1367,12 @@ REGLAS:
           <div style={{ ...g3, marginTop: 8 }}>
             {EFl({label: "Climatizacion", field: "clima", pub: true})}
             {EFl({label: "Agua caliente", field: "aguaCal", pub: true})}
-            <div />
+            {EFl({label: "Ventanas", field: "ventanas", pub: true, options: ["Interior","Exterior"], type: editMode ? "select" : "text"})}
+          </div>
+          <div style={{ ...g3, marginTop: 8 }}>
+            {EFl({label: "Tipo aire acondicionado", field: "aireAcondTipo", pub: true, options: ["No disponible","Solo frio","Frio/Calor","Preinstalacion"], type: editMode ? "select" : "text"})}
+            {EFl({label: "Calefaccion", field: "calefaccion", pub: true, options: ["Gas central","Gasoleo central","Gas individual","Electrica individual","Bomba de calor","Sin calefaccion"], type: editMode ? "select" : "text"})}
+            {EFl({label: "Emisiones energeticas", field: "emisionesEnerg", pub: true, options: ["A","B","C","D","E","F","G"], type: editMode ? "select" : "text"})}
           </div>
           <div style={{ ...g2, marginTop: 8 }}>
             {EFl({label: "Parking", field: "parking", pub: true, options: ["Si","No","Comunitario","Opcional"], type: editMode ? "select" : "text"})}
@@ -1733,7 +1738,7 @@ export default function CRMPropiedades() {
                   habDobles: 0, habSimples: 0, banos: 0, aseos: 0,
                   certEnerg: "", iee: "", conserv: "", anoConstruc: "",
                   suelos: "", carpExt: "", carpInt: "", persianasTipo: "", persianasMat: "",
-                  clima: "", aguaCal: "", parking: "No", nPlazas: 0,
+                  clima: "", aguaCal: "", aireAcondTipo: "", calefaccion: "", ventanas: "", emisionesEnerg: "", parking: "No", nPlazas: 0,
                   ventaMobiliario: false, terraza: false, piscina: false, ascensor: false,
                   jardin: false, aireAcond: false, armarios: false, trastero: false, balcon: false,
                   ibi: 0, basuras: 0, comunidad: 0, extraComunidad: 0, otrosGastos: "",

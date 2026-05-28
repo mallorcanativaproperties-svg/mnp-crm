@@ -156,6 +156,25 @@ function buildProperty(row, media) {
   if (row.armarios === true) features.featuresWardrobes = true;
   if (row.parking === "Si") features.featuresParkingAvailable = true;
   
+  // Air conditioning type
+  const AC_MAP = { "No disponible": "notAvailable", "Solo frio": "cold", "Frio/Calor": "cold/heat", "Preinstalacion": "preInstallation" };
+  if (row.aire_acond_tipo && AC_MAP[row.aire_acond_tipo]) {
+    features.featuresConditionedAirType = AC_MAP[row.aire_acond_tipo];
+    if (row.aire_acond_tipo !== "No disponible") features.featuresConditionedAir = true;
+  }
+  
+  // Heating type
+  const HEAT_MAP = { "Gas central": "centralGas", "Gasoleo central": "centralFuelOil", "Gas individual": "individualGas", "Electrica individual": "individualElectric", "Bomba de calor": "individualAirConditioningHeatPump", "Sin calefaccion": "noHeating" };
+  if (row.calefaccion && HEAT_MAP[row.calefaccion]) {
+    features.featuresHeatingType = HEAT_MAP[row.calefaccion];
+  }
+  
+  // Windows location (Spain only)
+  const WIN_MAP = { "Interior": "interior", "Exterior": "exterior" };
+  if (row.ventanas && WIN_MAP[row.ventanas]) {
+    features.featuresWindowsLocation = WIN_MAP[row.ventanas];
+  }
+  
   // Type-specific booleans (only for flat)
   if (tipo === "flat") {
     if (isPenthouse) features.featuresPenthouse = true;
@@ -171,6 +190,11 @@ function buildProperty(row, media) {
     if (row.cert_energ === "En tramite") features.featuresEnergyCertificateRating = "inProcess";
     else if (row.cert_energ === "Exento") features.featuresEnergyCertificateRating = "exempt";
     else if (/^[A-G]$/.test(row.cert_energ)) features.featuresEnergyCertificateRating = row.cert_energ;
+  }
+  
+  // Energy emissions rating (Spain only)
+  if (row.emisiones_energ && /^[A-G]$/.test(row.emisiones_energ)) {
+    features.featuresEnergyCertificateEmissionsRating = row.emisiones_energ;
   }
   
   // Orientation - only include true values
