@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "../../lib/supabase";
 
 const REDES = [
@@ -515,6 +515,16 @@ function TabAutomations() {
   );
 }
 
+/* ── DmTextarea - standalone to avoid focus issues ── */
+function DmTextarea({ initialValue, onValueChange, placeholder }) {
+  const [val, setVal] = useState(initialValue || "");
+  return (
+    <textarea value={val} onChange={e => { setVal(e.target.value); onValueChange(e.target.value); }} rows={5}
+      placeholder={placeholder}
+      style={{ width: "100%", padding: "10px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 12, fontFamily: "'Manrope', sans-serif", boxSizing: "border-box", outline: "none", resize: "vertical", lineHeight: 1.6 }} />
+  );
+}
+
 /* ── AutoEditor Modal ── */
 function AutoEditor({ onClose, onSaved }) {
   const [nombre, setNombre] = useState("");
@@ -525,7 +535,6 @@ function AutoEditor({ onClose, onSaved }) {
   const [reply2, setReply2] = useState("Te acabamos de enviar un mensaje privado con todos los detalles! Siguenos para estar al dia de nuevas propiedades 🏠");
   const [reply3, setReply3] = useState("Revisa tus mensajes directos, ahi tienes toda la informacion! Y si aun no nos sigues, dale a seguir para ver las novedades 😊");
   const [dmMessage, setDmMessage] = useState("");
-  const dmRef = useRef("");
   const [saving, setSaving] = useState(false);
 
   const togglePlatform = (p) => {
@@ -533,7 +542,6 @@ function AutoEditor({ onClose, onSaved }) {
   };
 
   const save = async () => {
-    const dm = dmRef.current || dmMessage;
     if (!nombre || !keyword) return;
     setSaving(true);
     const commentReplies = [reply1, reply2, reply3].filter(Boolean);
@@ -543,7 +551,7 @@ function AutoEditor({ onClose, onSaved }) {
       trigger_type: "comment_keyword",
       trigger_keywords: keyword.split(",").map(k => k.trim()).filter(Boolean),
       action_type: "comment_and_dm",
-      action_message: dm,
+      action_message: dmMessage,
       comment_replies: commentReplies,
       post_url: postUrl,
       action_delay_seconds: 0,
@@ -644,9 +652,8 @@ function AutoEditor({ onClose, onSaved }) {
         {/* DM message */}
         <div style={{ marginBottom: 24 }}>
           <label style={S.label}>Mensaje DM</label>
-          <textarea defaultValue={dmMessage} onBlur={e => { setDmMessage(e.target.value); dmRef.current = e.target.value; }} onInput={e => { dmRef.current = e.target.value; }} rows={5} 
-            placeholder={"Hola! 😊 Gracias por tu interes en esta propiedad.\n\nAqui tienes toda la informacion:\n📍 Zona: Palma\n💰 Precio: consultar\n📐 Superficie: 93m2\n\n👉 Mas info: https://...\n\nSi quieres agendar una visita, escribeme!"}
-            style={{ ...S.input, resize: "vertical", lineHeight: 1.6 }} />
+          <DmTextarea initialValue="" onValueChange={v => setDmMessage(v)}
+            placeholder={"Hola! 😊 Gracias por tu interes en esta propiedad.\n\nAqui tienes toda la informacion:\n📍 Zona: Palma\n💰 Precio: consultar\n📐 Superficie: 93m2\n\n👉 Mas info: https://...\n\nSi quieres agendar una visita, escribeme!"} />
         </div>
 
         <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", borderTop: "1px solid #2A2926", paddingTop: 20 }}>
