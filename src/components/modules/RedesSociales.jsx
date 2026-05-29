@@ -642,9 +642,9 @@ function AutoEditor({ onClose, onSaved }) {
         {/* DM message */}
         <div style={{ marginBottom: 24 }}>
           <label style={S.label}>Mensaje DM</label>
-          <textarea id="dm-textarea-input" rows={5}
-            placeholder={"Hola! 😊 Gracias por tu interes en esta propiedad.\n\nAqui tienes toda la informacion:\n📍 Zona: Palma\n💰 Precio: consultar\n📐 Superficie: 93m2\n\n👉 Mas info: https://...\n\nSi quieres agendar una visita, escribeme!"}
-            style={{ width: "100%", padding: "10px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 12, fontFamily: "'Manrope', sans-serif", boxSizing: "border-box", outline: "none", resize: "vertical", lineHeight: 1.6 }} />
+          <textarea id="dm-textarea-input" rows={8}
+            placeholder="Escribe aqui el mensaje que se enviara por DM..."
+            style={{ width: "100%", padding: 10, background: "#222", border: "2px solid #C8A97E", borderRadius: 4, color: "white", fontSize: 14, resize: "vertical", minHeight: 150 }} />
         </div>
 
         <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", borderTop: "1px solid #2A2926", paddingTop: 20 }}>
