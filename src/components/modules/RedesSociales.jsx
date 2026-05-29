@@ -515,24 +515,12 @@ function TabAutomations() {
   );
 }
 
-/* ── DmTextarea - pure HTML, no React state ── */
-function DmTextarea({ placeholder }) {
-  return (
-    <textarea id="dm-textarea-input" rows={5}
-      placeholder={placeholder}
-      style={{ width: "100%", padding: "10px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 12, fontFamily: "'Manrope', sans-serif", boxSizing: "border-box", outline: "none", resize: "vertical", lineHeight: 1.6 }} />
-  );
-}
-
 /* ── AutoEditor Modal ── */
 function AutoEditor({ onClose, onSaved }) {
   const [nombre, setNombre] = useState("");
   const [platforms, setPlatforms] = useState(["instagram"]);
   const [keyword, setKeyword] = useState("");
   const [postUrl, setPostUrl] = useState("");
-  const [reply1, setReply1] = useState("Gracias por tu interes! No olvides seguirnos para no perderte nada y revisa tus DM, te hemos enviado toda la info 📩");
-  const [reply2, setReply2] = useState("Te acabamos de enviar un mensaje privado con todos los detalles! Siguenos para estar al dia de nuevas propiedades 🏠");
-  const [reply3, setReply3] = useState("Revisa tus mensajes directos, ahi tienes toda la informacion! Y si aun no nos sigues, dale a seguir para ver las novedades 😊");
   const [saving, setSaving] = useState(false);
 
   const togglePlatform = (p) => {
@@ -540,11 +528,13 @@ function AutoEditor({ onClose, onSaved }) {
   };
 
   const save = async () => {
-    const dmEl = document.getElementById("dm-textarea-input");
-    const dm = dmEl ? dmEl.value : "";
-    if (!nombre || !keyword) return;
+    const r1 = document.getElementById("auto-reply1")?.value || "";
+    const r2 = document.getElementById("auto-reply2")?.value || "";
+    const r3 = document.getElementById("auto-reply3")?.value || "";
+    const dm = document.getElementById("dm-textarea-input")?.value || "";
+    if (!nombre || !keyword || !r1) { alert("Nombre, palabra clave y respuesta 1 son obligatorios"); return; }
     setSaving(true);
-    const commentReplies = [reply1, reply2, reply3].filter(Boolean);
+    const commentReplies = [r1, r2, r3].filter(Boolean);
     await supabase.from("social_automations").insert({
       nombre,
       platform: platforms.join(","),
@@ -561,8 +551,8 @@ function AutoEditor({ onClose, onSaved }) {
   };
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 1000, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "30px 12px", overflowY: "auto" }} onClick={onClose}>
-      <div style={{ ...S.card, maxWidth: 600, width: "95%", padding: "28px 32px" }} onClick={(e) => e.stopPropagation()}>
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 1000, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "30px 12px", overflowY: "auto" }}>
+      <div style={{ ...S.card, maxWidth: 600, width: "95%", padding: "28px 32px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
           <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 400, margin: 0 }}>Nueva <em>automatizacion</em></h3>
           <button onClick={onClose} style={{ background: "none", border: "none", color: "#7A7870", cursor: "pointer", fontSize: 18 }}>✕</button>
@@ -633,15 +623,15 @@ function AutoEditor({ onClose, onSaved }) {
         {/* 3 comment replies */}
         <div style={{ marginBottom: 12 }}>
           <label style={S.label}>Respuesta 1 *</label>
-          <input value={reply1} onChange={e => setReply1(e.target.value)} placeholder="" style={S.input} />
+          <input id="auto-reply1" defaultValue="Gracias por tu interes! No olvides seguirnos para no perderte nada y revisa tus DM, te hemos enviado toda la info 📩" style={S.input} />
         </div>
         <div style={{ marginBottom: 12 }}>
           <label style={S.label}>Respuesta 2</label>
-          <input value={reply2} onChange={e => setReply2(e.target.value)} placeholder="" style={S.input} />
+          <input id="auto-reply2" defaultValue="Te acabamos de enviar un mensaje privado con todos los detalles! Siguenos para estar al dia de nuevas propiedades 🏠" style={S.input} />
         </div>
         <div style={{ marginBottom: 16 }}>
           <label style={S.label}>Respuesta 3</label>
-          <input value={reply3} onChange={e => setReply3(e.target.value)} placeholder="" style={S.input} />
+          <input id="auto-reply3" defaultValue="Revisa tus mensajes directos, ahi tienes toda la informacion! Y si aun no nos sigues, dale a seguir para ver las novedades 😊" style={S.input} />
         </div>
 
         <div style={{ borderBottom: "1px solid #2A2926", margin: "20px 0", paddingBottom: 4 }}>
@@ -652,13 +642,15 @@ function AutoEditor({ onClose, onSaved }) {
         {/* DM message */}
         <div style={{ marginBottom: 24 }}>
           <label style={S.label}>Mensaje DM</label>
-          <DmTextarea placeholder={"Hola! 😊 Gracias por tu interes en esta propiedad.\n\nAqui tienes toda la informacion:\n📍 Zona: Palma\n💰 Precio: consultar\n📐 Superficie: 93m2\n\n👉 Mas info: https://...\n\nSi quieres agendar una visita, escribeme!"} />
+          <textarea id="dm-textarea-input" rows={5}
+            placeholder={"Hola! 😊 Gracias por tu interes en esta propiedad.\n\nAqui tienes toda la informacion:\n📍 Zona: Palma\n💰 Precio: consultar\n📐 Superficie: 93m2\n\n👉 Mas info: https://...\n\nSi quieres agendar una visita, escribeme!"}
+            style={{ width: "100%", padding: "10px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 12, fontFamily: "'Manrope', sans-serif", boxSizing: "border-box", outline: "none", resize: "vertical", lineHeight: 1.6 }} />
         </div>
 
         <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", borderTop: "1px solid #2A2926", paddingTop: 20 }}>
           <button onClick={onClose} style={S.btnSecondary}>Cancelar</button>
-          <button onClick={save} disabled={!nombre || !keyword || !reply1 || platforms.length === 0 || saving} 
-            style={{ ...S.btnPrimary, opacity: (!nombre || !keyword || !reply1 || platforms.length === 0 || saving) ? 0.5 : 1 }}>
+          <button onClick={save} disabled={!nombre || !keyword || platforms.length === 0 || saving} 
+            style={{ ...S.btnPrimary, opacity: (!nombre || !keyword || platforms.length === 0 || saving) ? 0.5 : 1 }}>
             {saving ? "Guardando..." : "Crear automatizacion"}
           </button>
         </div>
