@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { supabase } from "../../lib/supabase";
 
 const REDES = [
@@ -525,6 +525,7 @@ function AutoEditor({ onClose, onSaved }) {
   const [reply2, setReply2] = useState("Te acabamos de enviar un mensaje privado con todos los detalles! Siguenos para estar al dia de nuevas propiedades 🏠");
   const [reply3, setReply3] = useState("Revisa tus mensajes directos, ahi tienes toda la informacion! Y si aun no nos sigues, dale a seguir para ver las novedades 😊");
   const [dmMessage, setDmMessage] = useState("");
+  const dmRef = useRef("");
   const [saving, setSaving] = useState(false);
 
   const togglePlatform = (p) => {
@@ -532,6 +533,7 @@ function AutoEditor({ onClose, onSaved }) {
   };
 
   const save = async () => {
+    const dm = dmRef.current || dmMessage;
     if (!nombre || !keyword) return;
     setSaving(true);
     const commentReplies = [reply1, reply2, reply3].filter(Boolean);
@@ -541,7 +543,7 @@ function AutoEditor({ onClose, onSaved }) {
       trigger_type: "comment_keyword",
       trigger_keywords: keyword.split(",").map(k => k.trim()).filter(Boolean),
       action_type: "comment_and_dm",
-      action_message: dmMessage,
+      action_message: dm,
       comment_replies: commentReplies,
       post_url: postUrl,
       action_delay_seconds: 0,
@@ -642,15 +644,15 @@ function AutoEditor({ onClose, onSaved }) {
         {/* DM message */}
         <div style={{ marginBottom: 24 }}>
           <label style={S.label}>Mensaje DM</label>
-          <textarea value={dmMessage} onChange={e => setDmMessage(e.target.value)} rows={5} 
+          <textarea defaultValue={dmMessage} onBlur={e => { setDmMessage(e.target.value); dmRef.current = e.target.value; }} onInput={e => { dmRef.current = e.target.value; }} rows={5} 
             placeholder={"Hola! 😊 Gracias por tu interes en esta propiedad.\n\nAqui tienes toda la informacion:\n📍 Zona: Palma\n💰 Precio: consultar\n📐 Superficie: 93m2\n\n👉 Mas info: https://...\n\nSi quieres agendar una visita, escribeme!"}
             style={{ ...S.input, resize: "vertical", lineHeight: 1.6 }} />
         </div>
 
         <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", borderTop: "1px solid #2A2926", paddingTop: 20 }}>
           <button onClick={onClose} style={S.btnSecondary}>Cancelar</button>
-          <button onClick={save} disabled={!nombre || !keyword || !reply1 || !dmMessage || platforms.length === 0 || saving} 
-            style={{ ...S.btnPrimary, opacity: (!nombre || !keyword || !reply1 || !dmMessage || platforms.length === 0 || saving) ? 0.5 : 1 }}>
+          <button onClick={save} disabled={!nombre || !keyword || !reply1 || platforms.length === 0 || saving} 
+            style={{ ...S.btnPrimary, opacity: (!nombre || !keyword || !reply1 || platforms.length === 0 || saving) ? 0.5 : 1 }}>
             {saving ? "Guardando..." : "Crear automatizacion"}
           </button>
         </div>
