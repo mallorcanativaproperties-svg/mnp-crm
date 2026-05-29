@@ -130,7 +130,7 @@ function buildProperty(row, media) {
     features.featuresAreaPlot = mParcela;
   }
   
-  if (banos > 0) features.featuresBathroomNumber = banos;
+  features.featuresBathroomNumber = banos;
   
   const bedrooms = habDobles + habSimples;
   features.featuresBedroomNumber = bedrooms;
