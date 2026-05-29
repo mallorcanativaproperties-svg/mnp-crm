@@ -43,12 +43,12 @@ const CONSERV_MAP = {
 
 // Map Idealista image tags
 const IMAGE_TAG_MAP = {
-  LIVING_ROOM: "livingRoom",
+  LIVING_ROOM: "living",
   BEDROOM: "bedroom",
   BATHROOM: "bathroom",
   KITCHEN: "kitchen",
   TERRACE: "terrace",
-  SWIMMING_POOL: "swimmingPool",
+  SWIMMING_POOL: "pool",
   GARDEN: "garden",
   CORRIDOR: "corridor",
   PLAN: "plan",
@@ -56,7 +56,12 @@ const IMAGE_TAG_MAP = {
   FACADE: "facade",
   GARAGE: "garage",
   STORAGE: "storage",
-  UNKNOWN: "others",
+  BALCONY: "balcony",
+  DINING: "dining_room",
+  HALL: "hall",
+  PATIO: "patio",
+  PORCH: "porch",
+  UNKNOWN: "unknown",
 };
 
 function buildProperty(row, media) {
@@ -128,7 +133,7 @@ function buildProperty(row, media) {
   if (banos > 0) features.featuresBathroomNumber = banos;
   
   const bedrooms = habDobles + habSimples;
-  if (bedrooms > 0) features.featuresBedroomNumber = bedrooms;
+  features.featuresBedroomNumber = bedrooms;
   
   if (row.ano_construc) {
     const year = parseInt(row.ano_construc);
@@ -222,7 +227,7 @@ function buildProperty(row, media) {
       if (photo.etiqueta && IMAGE_TAG_MAP[photo.etiqueta]) {
         img.imageLabel = IMAGE_TAG_MAP[photo.etiqueta];
       } else {
-        img.imageLabel = "others";
+        img.imageLabel = "unknown";
       }
       return img;
     });
@@ -299,7 +304,7 @@ export async function GET(request) {
 
     // Final cleanup: remove any null/undefined/empty values recursively
     // But preserve required fields that can be 0
-    const PRESERVE_KEYS = new Set(["operationPrice", "featuresAreaConstructed", "featuresBedroomNumber", "featuresBathroomNumber", "imageOrder"]);
+    const PRESERVE_KEYS = new Set(["operationPrice", "featuresAreaConstructed", "featuresBedroomNumber", "featuresBathroomNumber", "imageOrder", "featuresBuiltYear"]);
     
     function cleanObj(obj) {
       if (Array.isArray(obj)) return obj.map(cleanObj).filter(v => v !== null && v !== undefined);
