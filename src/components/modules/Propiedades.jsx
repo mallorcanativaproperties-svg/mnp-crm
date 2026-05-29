@@ -958,7 +958,7 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
             {(options || []).map(o => <option key={o} value={o}>{o}</option>)}
           </select>
         ) : type === "textarea" ? (
-          <textarea value={d[field] || ""} onChange={e => upd(field, e.target.value)}
+          <textarea key={field} defaultValue={d[field] || ""} onBlur={e => upd(field, e.target.value)} onInput={e => { draft[field] = e.target.value; }}
             style={{ width: "100%", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "6px 8px", fontSize: 13, fontFamily: "'Manrope', sans-serif", minHeight: 80, resize: "vertical" }} />
         ) : (
           <input type={type === "number" ? "number" : "text"} value={d[field] ?? ""} onChange={e => upd(field, type === "number" ? (e.target.value === "" ? 0 : Number(e.target.value)) : e.target.value)} onFocus={e => { if (type === "number" && e.target.value === "0") e.target.select(); }}
