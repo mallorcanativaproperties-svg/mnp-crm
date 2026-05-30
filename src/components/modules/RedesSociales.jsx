@@ -802,11 +802,77 @@ function TabSilvia() {
   const [filter, setFilter] = useState("todos");
   const [subTab, setSubTab] = useState("todos");
 
+  // Reels / comentarios Instagram
+  const [reels, setReels] = useState([]);
+  const [reelsLoading, setReelsLoading] = useState(false);
+  const [selReel, setSelReel] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const [markingDm, setMarkingDm] = useState(null);
+  const [reelsError, setReelsError] = useState("");
+
   useEffect(() => { loadConvs(); const interval = setInterval(loadConvs, 15000); return () => clearInterval(interval); }, []);
 
   async function loadConvs() {
     const { data } = await supabase.from("social_conversations").select("*").order("updated_at", { ascending: false });
     if (data) { setConvs(data); setLoading(false); }
+  }
+
+  // Cargar reels cuando se activa subTab reels
+  useEffect(() => {
+    if (subTab === "reels" && reels.length === 0 && !reelsLoading) {
+      loadReels();
+    }
+  }, [subTab]);
+
+  async function loadReels() {
+    setReelsLoading(true);
+    setReelsError("");
+    try {
+      const res = await fetch("/api/meta/inbox?action=reels");
+      const data = await res.json();
+      if (data.ok) setReels(data.reels || []);
+      else setReelsError(data.error || "Error al cargar reels");
+    } catch (e) { setReelsError(e.message); }
+    setReelsLoading(false);
+  }
+
+  async function loadComments(mediaId) {
+    setCommentsLoading(true);
+    setComments([]);
+    try {
+      const res = await fetch(`/api/meta/inbox?action=comments&mediaId=${mediaId}`);
+      const data = await res.json();
+      if (data.ok) setComments(data.comments || []);
+      else alert("Error: " + (data.error || "desconocido"));
+    } catch (e) { alert("Error: " + e.message); }
+    setCommentsLoading(false);
+  }
+
+  async function handleReelClick(reel) {
+    setSelReel(reel);
+    await loadComments(reel.id);
+  }
+
+  async function markDmSent(comment) {
+    setMarkingDm(comment.id);
+    try {
+      await fetch("/api/meta/inbox", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "mark_dm_sent",
+          username: comment.username,
+          mediaId: selReel?.id,
+          commentId: comment.id,
+          note: `DM enviado manualmente al usuario @${comment.username} que comentó: "${comment.text.substring(0, 80)}"`,
+        }),
+      });
+      // Actualizar estado local
+      setComments((prev) => prev.map((c) => c.id === comment.id ? { ...c, dm_sent: true } : c));
+      await loadConvs();
+    } catch (e) { alert("Error: " + e.message); }
+    setMarkingDm(null);
   }
 
   async function sendReply() {
@@ -843,7 +909,7 @@ function TabSilvia() {
   const countComments = convs.filter(c => c.tipo === "comentario").length;
   const platformIcon = (p) => p === "instagram" ? "📸" : p === "messenger" ? "💬" : p === "facebook" ? "📘" : "💬";
   const tipoIcon = (t) => t === "dm" ? "✉" : "💬";
-  const timeAgo = (ts) => {
+  const timeAgoLocal = (ts) => {
     if (!ts) return "";
     const diff = Date.now() - new Date(ts).getTime();
     if (diff < 60000) return "ahora";
@@ -854,36 +920,193 @@ function TabSilvia() {
 
   if (loading) return <div style={{ textAlign: "center", padding: 40, color: "#7A7870" }}>Cargando conversaciones...</div>;
 
+  // ── Sub-tab REELS ──────────────────────────────────────
+  if (subTab === "reels") {
+    return (
+      <div>
+        {/* Header con sub-tabs */}
+        <div style={{ display: "flex", gap: 0, marginBottom: 20, borderBottom: "1px solid #2A2926" }}>
+          {[
+            { key: "todos", label: "Todos", count: convs.length },
+            { key: "inbox", label: "✉ Inbox DMs", count: countDMs },
+            { key: "comentarios", label: "💬 Comentarios web", count: countComments },
+            { key: "reels", label: "🎬 Reels IG", count: reels.length },
+          ].map(t => (
+            <button key={t.key} onClick={() => { setSubTab(t.key); setSel(null); }} style={{
+              flex: 1, padding: "8px 4px", border: "none", fontSize: 10,
+              background: subTab === t.key ? "#C8A97E18" : "transparent",
+              borderBottom: subTab === t.key ? "2px solid #C8A97E" : "2px solid transparent",
+              color: subTab === t.key ? "#C8A97E" : "#7A7870",
+              cursor: "pointer", fontFamily: "'Manrope', sans-serif", letterSpacing: "0.04em",
+            }}>{t.label}</button>
+          ))}
+        </div>
+
+        {selReel ? (
+          /* ── Vista comentarios del reel ── */
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+              <button onClick={() => { setSelReel(null); setComments([]); }} style={{ background: "none", border: "1px solid #2A2926", borderRadius: 3, color: "#7A7870", cursor: "pointer", padding: "6px 12px", fontSize: 11, fontFamily: "'Manrope', sans-serif" }}>← Volver</button>
+              <div style={{ fontSize: 12, color: "#F0EDE6", fontWeight: 500, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {selReel.caption ? selReel.caption.substring(0, 80) + "..." : "Reel sin caption"}
+              </div>
+              <button onClick={() => loadComments(selReel.id)} style={{ ...S.btnSecondary, fontSize: 10, padding: "6px 12px" }}>↻ Actualizar</button>
+              <a href={selReel.permalink} target="_blank" rel="noopener noreferrer" style={{ ...S.btnGold, fontSize: 10, padding: "6px 12px", textDecoration: "none" }}>Ver en IG ↗</a>
+            </div>
+
+            {commentsLoading ? (
+              <div style={{ textAlign: "center", padding: 40, color: "#7A7870" }}>Cargando comentarios...</div>
+            ) : comments.length === 0 ? (
+              <EmptyState text="No hay comentarios en este reel" icon="💬" />
+            ) : (
+              <div>
+                <div style={{ fontSize: 11, color: "#7A7870", marginBottom: 12 }}>
+                  {comments.length} comentarios · {comments.filter(c => c.dm_sent).length} con DM enviado
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {comments.map(c => (
+                    <div key={c.id} style={{
+                      ...S.card,
+                      borderLeft: c.dm_sent ? "3px solid #6AAF8D" : "3px solid transparent",
+                      background: c.dm_sent ? "#6AAF8D08" : "#1C1B18",
+                    }}>
+                      <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                        <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#2A2926", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#C8A97E", flexShrink: 0 }}>
+                          {(c.username || "?")[0].toUpperCase()}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                            <span style={{ fontSize: 12, fontWeight: 600, color: "#F0EDE6" }}>@{c.username}</span>
+                            <span style={{ fontSize: 9, color: "#7A7870" }}>{c.timestamp ? new Date(c.timestamp).toLocaleString("es-ES", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : ""}</span>
+                            {c.dm_sent && <span style={{ fontSize: 9, padding: "2px 8px", borderRadius: 10, background: "#6AAF8D20", color: "#6AAF8D", fontWeight: 600 }}>✓ DM enviado</span>}
+                          </div>
+                          <div style={{ fontSize: 12, color: "#A09D93", lineHeight: 1.5, marginBottom: 8 }}>{c.text}</div>
+                          {c.replies?.length > 0 && (
+                            <div style={{ marginLeft: 0, paddingLeft: 10, borderLeft: "2px solid #2A2926", marginBottom: 8 }}>
+                              {c.replies.slice(0, 3).map(r => (
+                                <div key={r.id} style={{ fontSize: 11, color: "#7A7870", padding: "2px 0" }}>
+                                  <span style={{ color: "#C8A97E" }}>@{r.username}:</span> {r.text?.substring(0, 80)}{r.text?.length > 80 ? "…" : ""}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          <div style={{ display: "flex", gap: 6 }}>
+                            <a
+                              href={`https://www.instagram.com/direct/new/?usernames=${c.username}`}
+                              target="_blank" rel="noopener noreferrer"
+                              style={{ padding: "6px 12px", borderRadius: 3, border: "none", background: "linear-gradient(135deg, #C8A97E, #D4B896)", color: "#111110", cursor: "pointer", fontSize: 10, fontWeight: 600, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4 }}
+                            >
+                              📱 Abrir DM en Instagram
+                            </a>
+                            <button
+                              onClick={() => markDmSent(c)}
+                              disabled={markingDm === c.id || c.dm_sent}
+                              style={{
+                                padding: "6px 12px", borderRadius: 3,
+                                border: "1px solid " + (c.dm_sent ? "#6AAF8D66" : "#2A2926"),
+                                background: c.dm_sent ? "#6AAF8D18" : "transparent",
+                                color: c.dm_sent ? "#6AAF8D" : "#7A7870",
+                                cursor: c.dm_sent ? "default" : "pointer", fontSize: 10,
+                                fontFamily: "'Manrope', sans-serif",
+                              }}
+                            >
+                              {markingDm === c.id ? "..." : c.dm_sent ? "✓ DM registrado" : "Marcar DM enviado"}
+                            </button>
+                            <button
+                              onClick={() => navigator.clipboard.writeText("@" + c.username)}
+                              style={{ padding: "6px 10px", borderRadius: 3, border: "1px solid #2A2926", background: "transparent", color: "#7A7870", cursor: "pointer", fontSize: 10, fontFamily: "'Manrope', sans-serif" }}
+                              title="Copiar @usuario"
+                            >
+                              📋 @
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          /* ── Lista de reels ── */
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <div style={{ fontSize: 12, color: "#7A7870" }}>Últimos reels de @mallorcanativaproperties</div>
+              <button onClick={loadReels} style={{ ...S.btnSecondary, fontSize: 10, padding: "6px 12px" }}>↻ Actualizar</button>
+            </div>
+            {reelsLoading ? (
+              <div style={{ textAlign: "center", padding: 40, color: "#7A7870" }}>Cargando reels...</div>
+            ) : reelsError ? (
+              <div style={{ padding: 20, background: "#D4545418", borderRadius: 4, color: "#D45454", fontSize: 12 }}>
+                Error: {reelsError}<br /><span style={{ fontSize: 10, color: "#7A7870" }}>El token de Instagram puede haber caducado. Renuévalo en Meta Business Suite.</span>
+              </div>
+            ) : reels.length === 0 ? (
+              <EmptyState text="No se encontraron reels. Comprueba el token de Instagram." icon="🎬" />
+            ) : (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 12 }}>
+                {reels.map(reel => (
+                  <div key={reel.id} onClick={() => handleReelClick(reel)} style={{
+                    ...S.card, cursor: "pointer", padding: 0, overflow: "hidden",
+                    transition: "border-color 0.15s",
+                  }}
+                    onMouseEnter={e => e.currentTarget.style.borderColor = "#C8A97E55"}
+                    onMouseLeave={e => e.currentTarget.style.borderColor = "#2A2926"}
+                  >
+                    <div style={{ height: 120, background: "#2A2926", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32 }}>
+                      🎬
+                    </div>
+                    <div style={{ padding: "10px 12px" }}>
+                      <div style={{ fontSize: 11, color: "#A09D93", lineHeight: 1.4, marginBottom: 6, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
+                        {reel.caption ? reel.caption.substring(0, 80) : "Sin caption"}
+                      </div>
+                      <div style={{ fontSize: 9, color: "#7A7870" }}>
+                        {reel.timestamp ? new Date(reel.timestamp).toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric" }) : ""}
+                      </div>
+                      <div style={{ marginTop: 8, fontSize: 10, color: "#C8A97E" }}>Ver comentarios →</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ── Sub-tabs TODOS / INBOX / COMENTARIOS ──────────────
   return (
     <div style={{ display: "flex", height: "calc(100vh - 240px)", border: "1px solid #2A2926", borderRadius: 4, overflow: "hidden" }}>
-      {/* Left panel - Conversation list */}
+      {/* Left panel */}
       <div style={{ width: 320, borderRight: "1px solid #2A2926", display: "flex", flexDirection: "column", background: "#161513" }}>
         {/* Sub-tabs */}
         <div style={{ padding: "10px 14px", borderBottom: "1px solid #2A2926", display: "flex", gap: 0 }}>
           {[
             { key: "todos", label: "Todos", count: convs.length },
-            { key: "inbox", label: "✉ Inbox", count: countDMs },
-            { key: "comentarios", label: "💬 Comentarios", count: countComments },
+            { key: "inbox", label: "✉ DMs", count: countDMs },
+            { key: "comentarios", label: "💬 Web", count: countComments },
+            { key: "reels", label: "🎬 Reels" },
           ].map(t => (
-            <button key={t.key} onClick={() => setSubTab(t.key)} style={{
-              flex: 1, padding: "6px 4px", border: "none", fontSize: 10,
+            <button key={t.key} onClick={() => { setSubTab(t.key); setSel(null); }} style={{
+              flex: 1, padding: "6px 2px", border: "none", fontSize: 9,
               background: subTab === t.key ? "#C8A97E18" : "transparent",
               borderBottom: subTab === t.key ? "2px solid #C8A97E" : "2px solid transparent",
               color: subTab === t.key ? "#C8A97E" : "#7A7870",
-              cursor: "pointer", fontFamily: "'Manrope', sans-serif", letterSpacing: "0.04em",
-            }}>{t.label} ({t.count})</button>
+              cursor: "pointer", fontFamily: "'Manrope', sans-serif", letterSpacing: "0.03em",
+            }}>{t.label}{t.count !== undefined ? ` (${t.count})` : ""}</button>
           ))}
         </div>
 
         {/* Platform filters */}
-        <div style={{ padding: "8px 14px", borderBottom: "1px solid #2A2926", display: "flex", gap: 4 }}>
-          {["todos", "instagram", "facebook", "linkedin", "tiktok", "youtube"].map(f => (
+        <div style={{ padding: "8px 14px", borderBottom: "1px solid #2A2926", display: "flex", gap: 4, flexWrap: "wrap" }}>
+          {["todos", "instagram", "facebook"].map(f => (
             <button key={f} onClick={() => setFilter(f)} style={{
               padding: "4px 10px", borderRadius: 3, border: "none", fontSize: 10,
               background: filter === f ? "#C8A97E22" : "transparent",
               color: filter === f ? "#C8A97E" : "#7A7870",
               cursor: "pointer", fontFamily: "'Manrope', sans-serif", textTransform: "uppercase", letterSpacing: "0.06em",
-            }}>{f === "todos" ? "Todos" : f === "instagram" ? "📸 IG" : f === "facebook" ? "📘 FB" : f === "linkedin" ? "💼 LI" : f === "tiktok" ? "🎵 TK" : "▶️ YT"}</button>
+            }}>{f === "todos" ? "Todos" : f === "instagram" ? "📸 IG" : "📘 FB"}</button>
           ))}
           <div style={{ flex: 1 }} />
           <span style={{ fontSize: 10, color: "#7A7870", alignSelf: "center" }}>{filtered.length}</span>
@@ -905,9 +1128,9 @@ function TabSilvia() {
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                     <span style={{ fontSize: 14 }}>{platformIcon(c.platform)}</span>
-                    <span style={{ fontSize: 12, fontWeight: unread ? 700 : 400, color: unread ? "#F0EDE6" : "#A09D93" }}>{c.sender_name || c.sender_id.substring(0, 12)}</span>
+                    <span style={{ fontSize: 12, fontWeight: unread ? 700 : 400, color: unread ? "#F0EDE6" : "#A09D93" }}>{c.sender_name || c.sender_id?.substring(0, 12)}</span>
                   </div>
-                  <span style={{ fontSize: 9, color: "#7A7870" }}>{timeAgo(c.updated_at)}</span>
+                  <span style={{ fontSize: 9, color: "#7A7870" }}>{timeAgoLocal(c.updated_at)}</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                   <span style={{ fontSize: 10 }}>{tipoIcon(c.tipo)}</span>
@@ -922,19 +1145,21 @@ function TabSilvia() {
         </div>
       </div>
 
-      {/* Right panel - Chat view */}
+      {/* Right panel */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "#111110" }}>
         {!sel ? (
           <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "#7A7870" }}>
             <div style={{ textAlign: "center" }}>
               <div style={{ fontSize: 48, marginBottom: 12 }}>🤖</div>
               <div style={{ fontSize: 14, fontFamily: "'Playfair Display', serif" }}>Silvia IA</div>
-              <div style={{ fontSize: 11, marginTop: 6 }}>Selecciona una conversacion</div>
+              <div style={{ fontSize: 11, marginTop: 6 }}>Selecciona una conversación</div>
+              <div style={{ fontSize: 10, marginTop: 12, color: "#C8A97E", cursor: "pointer" }} onClick={() => setSubTab("reels")}>
+                → Ver comentarios de reels de Instagram
+              </div>
             </div>
           </div>
         ) : (
           <>
-            {/* Chat header */}
             <div style={{ padding: "14px 20px", borderBottom: "1px solid #2A2926", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -947,7 +1172,6 @@ function TabSilvia() {
               <button onClick={() => setSel(null)} style={{ background: "none", border: "none", color: "#7A7870", cursor: "pointer", fontSize: 16 }}>✕</button>
             </div>
 
-            {/* Messages */}
             <div style={{ flex: 1, overflowY: "auto", padding: "20px" }}>
               {(sel.mensajes || []).map((m, i) => (
                 <div key={i} style={{ display: "flex", justifyContent: m.from === "silvia" ? "flex-end" : "flex-start", marginBottom: 12 }}>
@@ -967,10 +1191,9 @@ function TabSilvia() {
               ))}
             </div>
 
-            {/* Reply input */}
             <div style={{ padding: "14px 20px", borderTop: "1px solid #2A2926", display: "flex", gap: 10 }}>
-              <input value={reply} onChange={e => setReply(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendReply(); }}}
-                placeholder="Responder como Silvia..." 
+              <input value={reply} onChange={e => setReply(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendReply(); } }}
+                placeholder="Responder como Silvia..."
                 style={{ flex: 1, padding: "10px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 20, color: "#F0EDE6", fontSize: 12, fontFamily: "'Manrope', sans-serif", outline: "none" }} />
               <button onClick={sendReply} disabled={!reply.trim() || sending}
                 style={{ padding: "10px 20px", borderRadius: 20, border: "none", background: reply.trim() ? "#C8A97E" : "#2A2926", color: reply.trim() ? "#111110" : "#7A7870", cursor: reply.trim() ? "pointer" : "default", fontSize: 11, fontWeight: 600, fontFamily: "'Manrope', sans-serif" }}>
@@ -983,6 +1206,7 @@ function TabSilvia() {
     </div>
   );
 }
+
 
 /* ══════════════════════════════════
    MAIN EXPORT
