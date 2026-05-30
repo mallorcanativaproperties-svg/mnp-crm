@@ -12,6 +12,23 @@ const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY || "";
 const PAGE_ID = "114253063560446";
 const IG_USER_ID = "17841470283557761";
 
+// Cache page token
+let pageToken = null;
+async function getPageToken() {
+  if (pageToken) return pageToken;
+  try {
+    const res = await fetch(`https://graph.facebook.com/v19.0/me/accounts?access_token=${await getPageToken()}`);
+    const data = await res.json();
+    const page = data.data?.find(p => p.id === PAGE_ID);
+    if (page?.access_token) {
+      pageToken = page.access_token;
+      console.log("Got page token for:", page.name);
+      return pageToken;
+    }
+  } catch (e) { console.error("Failed to get page token:", e); }
+  return META_TOKEN; // fallback
+}
+
 const SILVIA_PROMPT = `Eres Silvia, community manager de Mallorca Nativa Properties, una agencia inmobiliaria boutique en Mallorca.
 
 PERSONALIDAD:
@@ -112,7 +129,7 @@ async function handleMessage(event, platform) {
   // Get sender name
   let senderName = "";
   try {
-    const profileRes = await fetch(`https://graph.facebook.com/v19.0/${senderId}?fields=name&access_token=${META_TOKEN}`);
+    const profileRes = await fetch(`https://graph.facebook.com/v19.0/${senderId}?fields=name&access_token=${await getPageToken()}`);
     const profile = await profileRes.json();
     senderName = profile.name || "";
   } catch (e) { /* ignore */ }
@@ -357,11 +374,11 @@ async function generateSilviaResponse(mensajes, tipo) {
 // ── Send DM via Meta ──
 async function sendMetaMessage(recipientId, text, platform) {
   try {
-    // For Instagram DMs, use the Instagram user ID as sender
+    const token = await getPageToken();
     const senderId = platform === "instagram" ? IG_USER_ID : "me";
     const res = await fetch(`https://graph.facebook.com/v19.0/${senderId}/messages`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${META_TOKEN}` },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify({
         recipient: { id: recipientId },
         message: { text },
@@ -381,11 +398,12 @@ async function sendMetaMessage(recipientId, text, platform) {
 
 // ── Reply to comment ──
 async function replyToComment(commentId, text, platform) {
+  const token = await getPageToken();
   try {
     // Try replies endpoint first
     let res = await fetch(`https://graph.facebook.com/v19.0/${commentId}/replies`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${META_TOKEN}` },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify({ message: text }),
     });
     let result = await res.json();
@@ -395,7 +413,7 @@ async function replyToComment(commentId, text, platform) {
       console.error("Comment reply error (trying alternative):", result.error.message);
       res = await fetch(`https://graph.facebook.com/v19.0/${commentId}/comments`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${META_TOKEN}` },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ message: text }),
       });
       result = await res.json();
