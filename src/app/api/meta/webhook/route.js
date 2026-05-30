@@ -9,7 +9,7 @@ const supabase = createClient(
 const META_TOKEN = process.env.META_PAGE_TOKEN || "";
 const VERIFY_TOKEN = process.env.META_VERIFY_TOKEN || "mnp_meta_verify_2026";
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY || "";
-const PAGE_ID = "61589699932855";
+const PAGE_ID = "114253063560446";
 
 const SILVIA_PROMPT = `Eres Silvia, community manager de Mallorca Nativa Properties, una agencia inmobiliaria boutique en Mallorca.
 

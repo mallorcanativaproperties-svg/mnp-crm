@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 const META_TOKEN = process.env.META_PAGE_TOKEN || "";
-const PAGE_ID = "61589699932855";
+const PAGE_ID = "114253063560446";
 const IG_USER_ID = "17841470283557761";
 
 export async function GET(request) {
