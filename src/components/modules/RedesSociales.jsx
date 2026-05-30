@@ -448,6 +448,7 @@ function TabAutomations() {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showNew, setShowNew] = useState(false);
+  const [editAuto, setEditAuto] = useState(null);
   const [showLogs, setShowLogs] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
@@ -502,7 +503,10 @@ function TabAutomations() {
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
                   <div style={{ fontSize: 10, color: "#7A7870" }}>{a.times_triggered || 0}x</div>
-                  <button onClick={() => setDeleteTarget(a.id)} style={{ ...S.btnSecondary, fontSize: 9, padding: "4px 10px", borderColor: "#D4545433", color: "#D45454" }}>✕</button>
+                  <div style={{ display: "flex", gap: 4 }}>
+                    <button onClick={() => setEditAuto(a)} style={{ ...S.btnSecondary, fontSize: 9, padding: "4px 10px" }}>Editar</button>
+                    <button onClick={() => setDeleteTarget(a.id)} style={{ ...S.btnSecondary, fontSize: 9, padding: "4px 10px", borderColor: "#D4545433", color: "#D45454" }}>✕</button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -510,18 +514,26 @@ function TabAutomations() {
         </div>
       )}
       {showNew && <AutoEditor onClose={() => setShowNew(false)} onSaved={load} />}
+      {editAuto && <AutoEditor existing={editAuto} onClose={() => setEditAuto(null)} onSaved={load} />}
       {deleteTarget && <ConfirmModal text="¿Eliminar automatización?" onConfirm={del} onCancel={() => setDeleteTarget(null)} />}
     </div>
   );
 }
 
 /* ── AutoEditor Modal ── */
-function AutoEditor({ onClose, onSaved }) {
-  const [nombre, setNombre] = useState("");
-  const [platforms, setPlatforms] = useState(["instagram"]);
-  const [keyword, setKeyword] = useState("");
-  const [postUrl, setPostUrl] = useState("");
+function AutoEditor({ onClose, onSaved, existing }) {
+  const e = existing || {};
+  const [nombre, setNombre] = useState(e.nombre || "");
+  const [platforms, setPlatforms] = useState(e.platform ? e.platform.split(",") : ["instagram"]);
+  const [keyword, setKeyword] = useState(e.trigger_keywords ? e.trigger_keywords.join(", ") : "");
+  const [postUrl, setPostUrl] = useState(e.post_url || "");
   const [saving, setSaving] = useState(false);
+
+  const existingReplies = e.comment_replies || [];
+  const initReply1 = existingReplies[0] || "Gracias por tu interes! No olvides seguirnos para no perderte nada y revisa tus DM, te hemos enviado toda la info 📩";
+  const initReply2 = existingReplies[1] || "Te acabamos de enviar un mensaje privado con todos los detalles! Siguenos para estar al dia de nuevas propiedades 🏠";
+  const initReply3 = existingReplies[2] || "Revisa tus mensajes directos, ahi tienes toda la informacion! Y si aun no nos sigues, dale a seguir para ver las novedades 😊";
+  const initDm = e.action_message || "";
 
   const togglePlatform = (p) => {
     setPlatforms(prev => prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p]);
@@ -535,7 +547,7 @@ function AutoEditor({ onClose, onSaved }) {
     if (!nombre || !keyword || !r1) { alert("Nombre, palabra clave y respuesta 1 son obligatorios"); return; }
     setSaving(true);
     const commentReplies = [r1, r2, r3].filter(Boolean);
-    await supabase.from("social_automations").insert({
+    const data = {
       nombre,
       platform: platforms.join(","),
       trigger_type: "comment_keyword",
@@ -546,7 +558,12 @@ function AutoEditor({ onClose, onSaved }) {
       post_url: postUrl,
       action_delay_seconds: 0,
       activa: true,
-    });
+    };
+    if (existing) {
+      await supabase.from("social_automations").update(data).eq("id", existing.id);
+    } else {
+      await supabase.from("social_automations").insert(data);
+    }
     setSaving(false); onSaved(); onClose();
   };
 
@@ -554,7 +571,7 @@ function AutoEditor({ onClose, onSaved }) {
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 1000, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "30px 12px", overflowY: "auto" }}>
       <div style={{ ...S.card, maxWidth: 600, width: "95%", padding: "28px 32px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-          <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 400, margin: 0 }}>Nueva <em>automatizacion</em></h3>
+          <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 400, margin: 0 }}>{existing ? "Editar" : "Nueva"} <em>automatizacion</em></h3>
           <button onClick={onClose} style={{ background: "none", border: "none", color: "#7A7870", cursor: "pointer", fontSize: 18 }}>✕</button>
         </div>
 
@@ -623,15 +640,15 @@ function AutoEditor({ onClose, onSaved }) {
         {/* 3 comment replies */}
         <div style={{ marginBottom: 12 }}>
           <label style={S.label}>Respuesta 1 *</label>
-          <input id="auto-reply1" defaultValue="Gracias por tu interes! No olvides seguirnos para no perderte nada y revisa tus DM, te hemos enviado toda la info 📩" style={S.input} />
+          <input id="auto-reply1" defaultValue={initReply1} style={S.input} />
         </div>
         <div style={{ marginBottom: 12 }}>
           <label style={S.label}>Respuesta 2</label>
-          <input id="auto-reply2" defaultValue="Te acabamos de enviar un mensaje privado con todos los detalles! Siguenos para estar al dia de nuevas propiedades 🏠" style={S.input} />
+          <input id="auto-reply2" defaultValue={initReply2} style={S.input} />
         </div>
         <div style={{ marginBottom: 16 }}>
           <label style={S.label}>Respuesta 3</label>
-          <input id="auto-reply3" defaultValue="Revisa tus mensajes directos, ahi tienes toda la informacion! Y si aun no nos sigues, dale a seguir para ver las novedades 😊" style={S.input} />
+          <input id="auto-reply3" defaultValue={initReply3} style={S.input} />
         </div>
 
         <div style={{ borderBottom: "1px solid #2A2926", margin: "20px 0", paddingBottom: 4 }}>
@@ -642,7 +659,7 @@ function AutoEditor({ onClose, onSaved }) {
         {/* DM message */}
         <div style={{ marginBottom: 24 }}>
           <label style={S.label}>Mensaje DM</label>
-          <textarea id="dm-textarea-input" rows={8}
+          <textarea id="dm-textarea-input" rows={8} defaultValue={initDm}
             placeholder="Escribe aqui el mensaje que se enviara por DM..."
             style={{ width: "100%", padding: 10, background: "#222", border: "2px solid #C8A97E", borderRadius: 4, color: "white", fontSize: 14, resize: "vertical", minHeight: 150 }} />
         </div>
@@ -651,7 +668,7 @@ function AutoEditor({ onClose, onSaved }) {
           <button onClick={onClose} style={S.btnSecondary}>Cancelar</button>
           <button onClick={save} disabled={!nombre || !keyword || platforms.length === 0 || saving} 
             style={{ ...S.btnPrimary, opacity: (!nombre || !keyword || platforms.length === 0 || saving) ? 0.5 : 1 }}>
-            {saving ? "Guardando..." : "Crear automatizacion"}
+            {saving ? "Guardando..." : existing ? "Guardar cambios" : "Crear automatizacion"}
           </button>
         </div>
       </div>
