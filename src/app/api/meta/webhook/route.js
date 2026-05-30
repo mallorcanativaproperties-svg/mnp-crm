@@ -12,21 +12,9 @@ const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY || "";
 const PAGE_ID = "114253063560446";
 const IG_USER_ID = "17841470283557761";
 
-// Cache page token
-let pageToken = null;
-async function getPageToken() {
-  if (pageToken) return pageToken;
-  try {
-    const res = await fetch(`https://graph.facebook.com/v19.0/me/accounts?access_token=${META_TOKEN}`);
-    const data = await res.json();
-    const page = data.data?.find(p => p.id === PAGE_ID);
-    if (page?.access_token) {
-      pageToken = page.access_token;
-      console.log("Got page token for:", page.name);
-      return pageToken;
-    }
-  } catch (e) { console.error("Failed to get page token:", e); }
-  return META_TOKEN; // fallback
+// Use the system user token for all API calls
+async function getToken() {
+  return META_TOKEN;
 }
 
 const SILVIA_PROMPT = `Eres Silvia, community manager de Mallorca Nativa Properties, una agencia inmobiliaria boutique en Mallorca.
@@ -129,7 +117,7 @@ async function handleMessage(event, platform) {
   // Get sender name
   let senderName = "";
   try {
-    const profileRes = await fetch(`https://graph.facebook.com/v19.0/${senderId}?fields=name&access_token=${await getPageToken()}`);
+    const profileRes = await fetch(`https://graph.facebook.com/v19.0/${senderId}?fields=name&access_token=${await getToken()}`);
     const profile = await profileRes.json();
     senderName = profile.name || "";
   } catch (e) { /* ignore */ }
@@ -374,7 +362,7 @@ async function generateSilviaResponse(mensajes, tipo) {
 // ── Send DM via Meta ──
 async function sendMetaMessage(recipientId, text, platform) {
   try {
-    const token = await getPageToken();
+    const token = await getToken();
     const senderId = platform === "instagram" ? IG_USER_ID : "me";
     const res = await fetch(`https://graph.facebook.com/v19.0/${senderId}/messages`, {
       method: "POST",
@@ -398,7 +386,7 @@ async function sendMetaMessage(recipientId, text, platform) {
 
 // ── Reply to comment ──
 async function replyToComment(commentId, text, platform) {
-  const token = await getPageToken();
+  const token = await getToken();
   try {
     // Try replies endpoint first
     let res = await fetch(`https://graph.facebook.com/v19.0/${commentId}/replies`, {
