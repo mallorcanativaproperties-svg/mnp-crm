@@ -60,60 +60,37 @@ export async function GET(request) {
   return NextResponse.json({ error: "Verification failed" }, { status: 403 });
 }
 
-// Track processed events to prevent duplicates
-const processedEvents = new Set();
-
 // ── Receive messages/comments (POST) ──
 export async function POST(request) {
   try {
     const body = await request.json();
-    const bodyStr = JSON.stringify(body).substring(0, 500);
-    console.log("Meta webhook:", bodyStr);
+    console.log("Meta webhook:", JSON.stringify(body).substring(0, 300));
 
-    // Process each entry
     if (body.entry) {
       for (const entry of body.entry) {
-        // Facebook Messenger messaging
         if (entry.messaging) {
           for (const event of entry.messaging) {
             if (event.message && !event.message.is_echo) {
-              const eventId = event.message.mid;
-              if (eventId && processedEvents.has(eventId)) continue;
-              if (eventId) processedEvents.add(eventId);
               await handleMessage(event, "messenger");
             }
           }
         }
 
-        // Instagram changes (comments, messages, etc.)
         if (entry.changes) {
           for (const change of entry.changes) {
             const value = change.value;
             if (!value) continue;
             
-            const eventId = value.id || value.comment_id || value.mid;
-            if (eventId && processedEvents.has(eventId)) continue;
-            if (eventId) processedEvents.add(eventId);
-            
             if (change.field === "comments") {
               await handleComment(value, "instagram");
             } else if (change.field === "feed" && value.item === "comment") {
               await handleComment(value, "facebook");
-            } else if (change.field === "messages") {
-              // Instagram DM
-              if (value.sender && value.message) {
-                await handleMessage({ sender: value.sender, message: { text: value.message?.text, mid: value.id } }, "instagram");
-              }
+            } else if (change.field === "messages" && value.sender && value.message) {
+              await handleMessage({ sender: value.sender, message: { text: value.message?.text, mid: value.id } }, "instagram");
             }
           }
         }
       }
-    }
-
-    // Cleanup old processed events (keep last 1000)
-    if (processedEvents.size > 1000) {
-      const arr = [...processedEvents];
-      arr.splice(0, arr.length - 500).forEach(id => processedEvents.delete(id));
     }
 
     return NextResponse.json({ status: "ok" });
@@ -168,6 +145,18 @@ async function handleMessage(event, platform) {
       .single();
     conv = created;
   } else {
+    // Check if last message was from Silvia less than 30 seconds ago (prevent loop)
+    const lastMsg = conv.mensajes?.[conv.mensajes.length - 1];
+    if (lastMsg?.from === "silvia") {
+      const lastTs = new Date(lastMsg.ts).getTime();
+      if (Date.now() - lastTs < 30000) {
+        console.log(`Skipping DM from ${senderId}, Silvia responded ${Math.floor((Date.now() - lastTs) / 1000)}s ago`);
+        // Just save the new message without responding
+        const mensajes = [...(conv.mensajes || []), newMsg];
+        await supabase.from("social_conversations").update({ mensajes, updated_at: new Date().toISOString() }).eq("id", conv.id);
+        return;
+      }
+    }
     const mensajes = [...(conv.mensajes || []), newMsg];
     await supabase
       .from("social_conversations")
@@ -205,6 +194,20 @@ async function handleComment(value, platform) {
 
   if (!commentId || !text || !senderId) return;
   if (senderId === PAGE_ID || senderId === IG_USER_ID) return;
+
+  // CHECK: Have we already responded to this sender on this post?
+  const { data: existing } = await supabase
+    .from("social_conversations")
+    .select("id")
+    .eq("sender_id", senderId)
+    .eq("post_id", postId)
+    .eq("tipo", "comentario")
+    .limit(1);
+  
+  if (existing && existing.length > 0) {
+    console.log(`Already responded to ${senderId} on post ${postId}, skipping`);
+    return;
+  }
 
   // Check for active automations
   const { data: automations } = await supabase
