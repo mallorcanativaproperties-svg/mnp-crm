@@ -17,7 +17,7 @@ let pageToken = null;
 async function getPageToken() {
   if (pageToken) return pageToken;
   try {
-    const res = await fetch(`https://graph.facebook.com/v19.0/me/accounts?access_token=${await getPageToken()}`);
+    const res = await fetch(`https://graph.facebook.com/v19.0/me/accounts?access_token=${META_TOKEN}`);
     const data = await res.json();
     const page = data.data?.find(p => p.id === PAGE_ID);
     if (page?.access_token) {
