@@ -10,6 +10,7 @@ const META_TOKEN = process.env.META_PAGE_TOKEN || "";
 const VERIFY_TOKEN = process.env.META_VERIFY_TOKEN || "mnp_meta_verify_2026";
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY || "";
 const PAGE_ID = "114253063560446";
+const IG_USER_ID = "17841470283557761";
 
 const SILVIA_PROMPT = `Eres Silvia, community manager de Mallorca Nativa Properties, una agencia inmobiliaria boutique en Mallorca.
 
@@ -59,49 +60,66 @@ export async function GET(request) {
   return NextResponse.json({ error: "Verification failed" }, { status: 403 });
 }
 
+// Track processed events to prevent duplicates
+const processedEvents = new Set();
+
 // ── Receive messages/comments (POST) ──
 export async function POST(request) {
   try {
     const body = await request.json();
-    console.log("Meta webhook:", JSON.stringify(body).substring(0, 500));
+    const bodyStr = JSON.stringify(body).substring(0, 500);
+    console.log("Meta webhook:", bodyStr);
 
     // Process each entry
     if (body.entry) {
       for (const entry of body.entry) {
-        // Instagram/Facebook messaging
+        // Facebook Messenger messaging
         if (entry.messaging) {
           for (const event of entry.messaging) {
             if (event.message && !event.message.is_echo) {
+              const eventId = event.message.mid;
+              if (eventId && processedEvents.has(eventId)) continue;
+              if (eventId) processedEvents.add(eventId);
               await handleMessage(event, "messenger");
             }
           }
         }
 
-        // Instagram DMs
-        if (entry.messages) {
-          for (const msg of entry.messages) {
-            await handleMessage({ sender: { id: msg.sender?.id }, message: { text: msg.message?.text, mid: msg.id } }, "instagram");
-          }
-        }
-
-        // Instagram comments
+        // Instagram changes (comments, messages, etc.)
         if (entry.changes) {
           for (const change of entry.changes) {
-            if (change.field === "comments" && change.value) {
-              await handleComment(change.value, "instagram");
-            }
-            if (change.field === "feed" && change.value?.item === "comment") {
-              await handleComment(change.value, "facebook");
+            const value = change.value;
+            if (!value) continue;
+            
+            const eventId = value.id || value.comment_id || value.mid;
+            if (eventId && processedEvents.has(eventId)) continue;
+            if (eventId) processedEvents.add(eventId);
+            
+            if (change.field === "comments") {
+              await handleComment(value, "instagram");
+            } else if (change.field === "feed" && value.item === "comment") {
+              await handleComment(value, "facebook");
+            } else if (change.field === "messages") {
+              // Instagram DM
+              if (value.sender && value.message) {
+                await handleMessage({ sender: value.sender, message: { text: value.message?.text, mid: value.id } }, "instagram");
+              }
             }
           }
         }
       }
     }
 
+    // Cleanup old processed events (keep last 1000)
+    if (processedEvents.size > 1000) {
+      const arr = [...processedEvents];
+      arr.splice(0, arr.length - 500).forEach(id => processedEvents.delete(id));
+    }
+
     return NextResponse.json({ status: "ok" });
   } catch (err) {
     console.error("Meta webhook error:", err);
-    return NextResponse.json({ status: "ok" }); // Always 200 for Meta
+    return NextResponse.json({ status: "ok" });
   }
 }
 
@@ -111,8 +129,8 @@ async function handleMessage(event, platform) {
   const text = event.message?.text;
   if (!senderId || !text) return;
 
-  // Skip messages from our own page
-  if (senderId === PAGE_ID) return;
+  // Skip messages from our own page or Instagram account
+  if (senderId === PAGE_ID || senderId === IG_USER_ID) return;
 
   // Get sender name
   let senderName = "";
@@ -186,7 +204,7 @@ async function handleComment(value, platform) {
   const postId = value.media?.id || value.post_id || "";
 
   if (!commentId || !text || !senderId) return;
-  if (senderId === PAGE_ID) return;
+  if (senderId === PAGE_ID || senderId === IG_USER_ID) return;
 
   // Check for active automations
   const { data: automations } = await supabase
@@ -332,22 +350,16 @@ async function generateSilviaResponse(mensajes, tipo) {
 // ── Send DM via Meta ──
 async function sendMetaMessage(recipientId, text, platform) {
   try {
-    const url = platform === "instagram"
-      ? `https://graph.facebook.com/v19.0/me/messages`
-      : `https://graph.facebook.com/v19.0/me/messages`;
-
-    const res = await fetch(url, {
+    // For Instagram DMs, use the Instagram user ID as sender
+    const senderId = platform === "instagram" ? IG_USER_ID : "me";
+    const res = await fetch(`https://graph.facebook.com/v19.0/${senderId}/messages`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${META_TOKEN}`,
-      },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${META_TOKEN}` },
       body: JSON.stringify({
         recipient: { id: recipientId },
         message: { text },
       }),
     });
-
     const result = await res.json();
     if (result.error) {
       console.error("Meta send error:", result.error);
@@ -363,18 +375,27 @@ async function sendMetaMessage(recipientId, text, platform) {
 // ── Reply to comment ──
 async function replyToComment(commentId, text, platform) {
   try {
-    const res = await fetch(`https://graph.facebook.com/v19.0/${commentId}/replies`, {
+    // Try replies endpoint first
+    let res = await fetch(`https://graph.facebook.com/v19.0/${commentId}/replies`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${META_TOKEN}`,
-      },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${META_TOKEN}` },
       body: JSON.stringify({ message: text }),
     });
-
-    const result = await res.json();
+    let result = await res.json();
+    
+    // If replies endpoint fails, try comments endpoint (some IG comment IDs need this)
     if (result.error) {
-      console.error("Comment reply error:", result.error);
+      console.error("Comment reply error (trying alternative):", result.error.message);
+      res = await fetch(`https://graph.facebook.com/v19.0/${commentId}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${META_TOKEN}` },
+        body: JSON.stringify({ message: text }),
+      });
+      result = await res.json();
+    }
+    
+    if (result.error) {
+      console.error("Comment reply final error:", result.error);
       return false;
     }
     return true;
