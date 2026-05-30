@@ -8,18 +8,11 @@ export async function GET(request) {
   const results = {};
 
   try {
-    // 1. Subscribe Page to app webhooks (messages, feed, etc.)
-    const pageRes = await fetch(
-      `https://graph.facebook.com/v19.0/${PAGE_ID}/subscribed_apps`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${META_TOKEN}` },
-        body: JSON.stringify({
-          subscribed_fields: ["messages", "messaging_postbacks", "feed", "comments"],
-        }),
-      }
+    // 1. Find all pages accessible with this token
+    const pagesRes = await fetch(
+      `https://graph.facebook.com/v19.0/me/accounts?access_token=${META_TOKEN}`
     );
-    results.page_subscription = await pageRes.json();
+    results.my_pages = await pagesRes.json();
 
     // 2. Get Instagram account info
     const igRes = await fetch(
@@ -27,17 +20,41 @@ export async function GET(request) {
     );
     results.instagram_info = await igRes.json();
 
-    // 3. Check current page subscriptions
-    const checkRes = await fetch(
-      `https://graph.facebook.com/v19.0/${PAGE_ID}/subscribed_apps?access_token=${META_TOKEN}`
+    // 3. Try to find page linked to Instagram
+    const igPageRes = await fetch(
+      `https://graph.facebook.com/v19.0/${IG_USER_ID}?fields=id,username,name&access_token=${META_TOKEN}`
     );
-    results.current_subscriptions = await checkRes.json();
+    results.ig_details = await igPageRes.json();
 
-    // 4. Get page info to verify token works
-    const pageInfoRes = await fetch(
-      `https://graph.facebook.com/v19.0/${PAGE_ID}?fields=name,id,instagram_business_account&access_token=${META_TOKEN}`
-    );
-    results.page_info = await pageInfoRes.json();
+    // 4. If we found pages, try to subscribe the first one
+    const pages = results.my_pages?.data || [];
+    if (pages.length > 0) {
+      const pageId = pages[0].id;
+      const pageToken = pages[0].access_token;
+      results.found_page_id = pageId;
+      results.found_page_name = pages[0].name;
+      
+      const subRes = await fetch(
+        `https://graph.facebook.com/v19.0/${pageId}/subscribed_apps`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            subscribed_fields: ["messages", "messaging_postbacks", "feed"],
+            access_token: pageToken,
+          }),
+        }
+      );
+      results.page_subscription = await subRes.json();
+      
+      // Check subscriptions
+      const checkRes = await fetch(
+        `https://graph.facebook.com/v19.0/${pageId}/subscribed_apps?access_token=${pageToken}`
+      );
+      results.current_subscriptions = await checkRes.json();
+    } else {
+      results.page_subscription = { error: "No pages found with this token" };
+    }
 
     return NextResponse.json({ ok: true, results });
   } catch (err) {
