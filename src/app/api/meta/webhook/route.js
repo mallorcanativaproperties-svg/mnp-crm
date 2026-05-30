@@ -186,14 +186,18 @@ async function handleMessage(event, platform) {
 
 // ── Handle Comment ──
 async function handleComment(value, platform) {
+  console.log("handleComment called:", JSON.stringify(value).substring(0, 300));
+  
   const commentId = value.comment_id || value.id;
   const text = value.text || value.message;
   const senderId = value.from?.id || value.sender_id;
   const senderName = value.from?.name || value.from?.username || "";
   const postId = value.media?.id || value.post_id || "";
 
-  if (!commentId || !text || !senderId) return;
-  if (senderId === PAGE_ID || senderId === IG_USER_ID) return;
+  console.log(`Comment: id=${commentId} sender=${senderId} text="${text?.substring(0, 50)}" post=${postId}`);
+
+  if (!commentId || !text || !senderId) { console.log("Missing data, skipping"); return; }
+  if (senderId === PAGE_ID || senderId === IG_USER_ID) { console.log("Own comment, skipping"); return; }
 
   // CHECK: Have we already responded to this sender on this post?
   const { data: existing } = await supabase
