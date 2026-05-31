@@ -45,6 +45,30 @@ async function markAsRead(messageId) {
   });
 }
 
+async function sendWhatsAppTemplate(to, templateName, variables = []) {
+  let phone = to.replace(/\D/g, "");
+  if (!phone.startsWith("34") && phone.length === 9) phone = "34" + phone;
+  const components = variables.length > 0 ? [{
+    type: "body",
+    parameters: variables.map(v => ({ type: "text", text: String(v) }))
+  }] : [];
+  const res = await fetch(GRAPH_URL, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${WHATSAPP_TOKEN}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      messaging_product: "whatsapp",
+      to: phone,
+      type: "template",
+      template: { name: templateName, language: { code: "es_ES" }, components },
+    }),
+  });
+  const data = await res.json();
+  console.log(`Template ${templateName} to ${phone}:`, JSON.stringify(data));
+  return data;
+}
+
+
+
 // Get property info from Supabase
 async function getPropertyInfo(referencia) {
   if (!referencia) return null;
@@ -412,6 +436,9 @@ export async function POST(request) {
             // Build compact message for the agent
             const msgAgente = `🔔 NUEVO LEAD\n\n👤 ${conv.contacto || senderName}\n📱 +${phoneWith34}\n🏠 ${conv.referencia || "N/A"}\n🔗 ${conv.idealista_url || conv.enlace || ""}\n\n${resumenCorto}`;
             
+            // Plantilla para abrir conversación + mensaje con detalles
+            await sendWhatsAppTemplate(agente.telefono, "mnp_notificacion_agente");
+            await new Promise(r => setTimeout(r, 1500));
             const agenteResult = await sendWhatsApp(agente.telefono, msgAgente);
             console.log(`Summary sent to agent ${agente.nombre} (${agente.telefono})`);
             
@@ -456,6 +483,8 @@ export async function POST(request) {
             const BROKER_PHONE = "655882682";
             if (agente.telefono !== BROKER_PHONE) {
               const msgBroker = `🔔 DERIVACIÓN A ${agente.nombre.toUpperCase()}\n\n👤 ${conv.contacto || senderName} · +${phoneWith34}\n🏠 ${conv.referencia || "N/A"}\n\n${resumenCorto}`;
+              await sendWhatsAppTemplate(BROKER_PHONE, "mnp_notificacion_agente");
+              await new Promise(r => setTimeout(r, 1500));
               await sendWhatsApp(BROKER_PHONE, msgBroker);
               console.log(`Summary sent to broker Silvia`);
             }
