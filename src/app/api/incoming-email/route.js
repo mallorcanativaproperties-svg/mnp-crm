@@ -34,6 +34,30 @@ async function sendWhatsApp(to, text) {
   return data;
 }
 
+async function sendWhatsAppTemplate(to, templateName, variables = []) {
+  let phone = to.replace(/\D/g, "");
+  if (!phone.startsWith("34") && phone.length === 9) phone = "34" + phone;
+  const components = variables.length > 0 ? [{
+    type: "body",
+    parameters: variables.map(v => ({ type: "text", text: String(v) }))
+  }] : [];
+  const res = await fetch(GRAPH_URL, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${WHATSAPP_TOKEN}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      messaging_product: "whatsapp",
+      to: phone,
+      type: "template",
+      template: { name: templateName, language: { code: "es_ES" }, components },
+    }),
+  });
+  const data = await res.json();
+  console.log(`Template ${templateName} to ${phone}:`, JSON.stringify(data));
+  return data;
+}
+
+
+
 function getAgente(referencia) {
   if (!referencia) return null;
   const prefix = referencia.slice(0, 5);
@@ -207,8 +231,10 @@ export async function POST(request) {
       msg2 = "Quieres agendar una visita o tienes alguna duda?";
     }
 
-    const result1 = await sendWhatsApp(phoneClean, msg1);
+    // Primer mensaje: plantilla para abrir conversación con números nuevos
+    const result1 = await sendWhatsAppTemplate(phoneClean, "mnp_lead_bienvenida", [nombre || "cliente"]);
     await new Promise((r) => setTimeout(r, 2000));
+    // Segundo mensaje: texto libre con más detalles
     const result2 = await sendWhatsApp(phoneClean, msg2);
 
     // Save outgoing messages
@@ -233,3 +259,4 @@ export async function POST(request) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+
