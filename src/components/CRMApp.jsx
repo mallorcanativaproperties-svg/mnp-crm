@@ -1,5 +1,5 @@
 "use client";
-import { useState, lazy, Suspense } from "react";
+import { useState, lazy, Suspense, useEffect } from "react";
 import dynamic from "next/dynamic";
 
 const Dashboard = dynamic(() => import("./modules/Dashboard"), { ssr: false });
@@ -85,6 +85,28 @@ export default function CRMApp() {
   const [currentUser, setCurrentUser] = useState(null);
   const [activeModule, setActiveModule] = useState("propiedades");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [healthAlerts, setHealthAlerts] = useState([]);
+
+  // Health check cada 30 minutos
+  useEffect(() => {
+    if (!currentUser || currentUser.role !== "director") return;
+    const check = async () => {
+      try {
+        const res = await fetch("/api/health");
+        const data = await res.json();
+        if (!data.ok) {
+          setHealthAlerts(data.checks.filter(c => c.status === "error"));
+        } else {
+          setHealthAlerts([]);
+        }
+      } catch (e) {
+        setHealthAlerts([{ service: "Sistema", message: "No se puede conectar con el servidor" }]);
+      }
+    };
+    check();
+    const interval = setInterval(check, 30 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [currentUser]);
 
   if (!currentUser) {
     return <LoginScreen onLogin={setCurrentUser} />;
@@ -186,6 +208,20 @@ export default function CRMApp() {
 
       {/* Main content */}
       <div style={{ marginLeft: sidebarOpen ? 220 : 56, flex: 1, transition: "margin-left 0.2s", minHeight: "100vh" }}>
+        {/* Health alerts banner */}
+        {healthAlerts.length > 0 && (
+          <div style={{ background: "#D4545418", borderBottom: "1px solid #D4545433", padding: "10px 24px", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+            <span style={{ fontSize: 14 }}>⚠️</span>
+            <div style={{ flex: 1 }}>
+              {healthAlerts.map((a, i) => (
+                <span key={i} style={{ fontSize: 11, color: "#D45454", marginRight: 16 }}>
+                  <strong>{a.service}:</strong> {a.message}
+                </span>
+              ))}
+            </div>
+            <button onClick={() => setHealthAlerts([])} style={{ background: "none", border: "none", color: "#D45454", cursor: "pointer", fontSize: 16, padding: 0 }}>✕</button>
+          </div>
+        )}
         <Suspense fallback={<LoadingModule />}>
           {renderModule()}
         </Suspense>
