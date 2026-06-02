@@ -12,12 +12,32 @@ export async function GET() {
     );
     const data = await res.json();
     if (data.error) {
-      checks.push({
-        service: "WhatsApp (Claudia)",
-        status: "error",
-        message: data.error.message,
-        code: data.error.code,
-      });
+      // Token inválido — intentar renovación automática
+      console.log("WhatsApp token inválido, intentando renovación automática...");
+      try {
+        const renewRes = await fetch(, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ force: false }),
+        });
+        const renewData = await renewRes.json();
+        checks.push({
+          service: "WhatsApp (Claudia)",
+          status: "warning",
+          message: renewData.ok
+            ? "Token renovado automáticamente — reiniciando en 1 min"
+            : ,
+          code: data.error.code,
+          renewed: renewData.ok,
+        });
+      } catch (renewErr) {
+        checks.push({
+          service: "WhatsApp (Claudia)",
+          status: "error",
+          message: data.error.message,
+          code: data.error.code,
+        });
+      }
     } else {
       checks.push({
         service: "WhatsApp (Claudia)",
