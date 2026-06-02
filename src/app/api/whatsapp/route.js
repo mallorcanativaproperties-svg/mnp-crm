@@ -340,6 +340,21 @@ export async function POST(request) {
           return NextResponse.json({ status: "ok" });
         }
 
+        // Si la conversación está en modo manual, no responder automáticamente
+        if (conv?.estado === "manual") {
+          console.log(`Conversacion ${conv?.id} en modo manual — Claudia no responde`);
+          if (conv?.id) {
+            await supabase.from("mensajes").insert({
+              conversacion_id: conv.id,
+              from_who: "cliente",
+              texto: text,
+              timestamp: new Date().toISOString(),
+              wamid: message.id,
+            });
+          }
+          return NextResponse.json({ status: "ok", manual: true });
+        }
+
         // Use CLAUDIA AI if: Idealista lead, has referencia, OR has previous CLAUDIA messages
         const { data: prevClaudiaMsg } = conv?.id ? await supabase
           .from("mensajes")
