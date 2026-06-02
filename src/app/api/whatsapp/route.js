@@ -368,6 +368,27 @@ export async function POST(request) {
         console.log(`CLAUDIA decision: canal=${conv?.canal}, ref=${conv?.referencia}, prevMsg=${!!prevClaudiaMsg}, USE=${usarClaudia}`);
 
         if (usarClaudia) {
+          // Si hay bienvenida pendiente, enviar mensaje con enlace antes de Claudia
+          if (conv?.pendiente_bienvenida) {
+            const idealistaUrl = conv?.idealista_url || conv?.enlace || null;
+            const msg2 = conv?.isRetake
+              ? `Hemos visto que te has vuelto a interesar por esta propiedad${idealistaUrl ? "\n" + idealistaUrl : ""}`
+              : `Hemos recibido tu petición interesándote por la propiedad${idealistaUrl ? "\n" + idealistaUrl : ""}`;
+            const msg3 = "¿Quieres agendar una visita o tienes alguna duda?";
+            
+            await sendWhatsApp(phoneWith34, msg2);
+            await new Promise(r => setTimeout(r, 1500));
+            await sendWhatsApp(phoneWith34, msg3);
+            
+            // Guardar mensajes y desactivar pendiente_bienvenida
+            await supabase.from("mensajes").insert([
+              { conversacion_id: conv.id, from_who: "claudia", texto: msg2, timestamp: new Date().toISOString(), sent_by: "CLAUDIA" },
+              { conversacion_id: conv.id, from_who: "claudia", texto: msg3, timestamp: new Date().toISOString(), sent_by: "CLAUDIA" },
+            ]);
+            await supabase.from("conversaciones").update({ pendiente_bienvenida: false }).eq("id", conv.id);
+            return NextResponse.json({ status: "ok", bienvenida: true });
+          }
+
           // Get message history
           const { data: history } = await supabase
             .from("mensajes")
