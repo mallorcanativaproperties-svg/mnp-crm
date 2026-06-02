@@ -15,7 +15,8 @@ export async function GET() {
       // Token inválido — intentar renovación automática
       console.log("WhatsApp token inválido, intentando renovación automática...");
       try {
-        const renewRes = await fetch(, {
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://mnp-crm.vercel.app";
+        const renewRes = await fetch(`${appUrl}/api/token-refresh`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ force: false }),
@@ -26,7 +27,7 @@ export async function GET() {
           status: "warning",
           message: renewData.ok
             ? "Token renovado automáticamente — reiniciando en 1 min"
-            : ,
+            : `Token inválido: ${data.error.message}`,
           code: data.error.code,
           renewed: renewData.ok,
         });
