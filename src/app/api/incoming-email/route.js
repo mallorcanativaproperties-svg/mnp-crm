@@ -218,29 +218,24 @@ export async function POST(request) {
       conv = newConv;
     }
 
-    // Send WhatsApp - different message if retake
-    let msg1, msg2;
-    if (isRetake) {
-      msg1 = `Hola${nombre ? " " + nombre : ""}, hemos visto que te has vuelto a interesar por esta propiedad${idealistaUrl ? "\n" + idealistaUrl : ""}`;
-      msg2 = "Pudiste ver la información que te enviamos anteriormente?";
-    } else if (nombre) {
-      msg1 = `Hola ${nombre}, hemos recibido tu petición interesándote por la propiedad${idealistaUrl ? "\n" + idealistaUrl : ""}`;
-      msg2 = "Quieres agendar una visita o tienes alguna duda?";
-    } else {
-      msg1 = `Hola, hemos visto que has intentado contactarnos por la propiedad${idealistaUrl ? "\n" + idealistaUrl : ""}`;
-      msg2 = "Quieres agendar una visita o tienes alguna duda?";
-    }
-
-    // Primer mensaje: plantilla para abrir conversación con números nuevos
+    // Mensaje 1: plantilla aprobada por Meta (abre conversación)
     const result1 = await sendWhatsAppTemplate(phoneClean, "mnp_lead_bienvenida", [nombre || "cliente"]);
     await new Promise((r) => setTimeout(r, 2000));
-    // Segundo mensaje: texto libre con más detalles
+
+    // Mensaje 2: enlace de Idealista + pregunta de Claudia
+    let msg2;
+    if (isRetake) {
+      msg2 = `${idealistaUrl ? idealistaUrl + "\n\n" : ""}¿Pudiste ver la información que te enviamos anteriormente?`;
+    } else {
+      msg2 = `${idealistaUrl ? idealistaUrl + "\n\n" : ""}¿Quieres agendar una visita o tienes alguna duda?`;
+    }
     const result2 = await sendWhatsApp(phoneClean, msg2);
 
     // Save outgoing messages
+    const templateText = `Hola ${nombre || "cliente"}, hemos recibido tu consulta sobre la propiedad. ¿Tienes alguna duda o quieres agendar una visita?`;
     if (conv?.id) {
       await supabase.from("mensajes").insert([
-        { conversacion_id: conv.id, from_who: "claudia", texto: msg1, timestamp: new Date().toISOString(), sent_by: "CLAUDIA" },
+        { conversacion_id: conv.id, from_who: "claudia", texto: templateText, timestamp: new Date().toISOString(), sent_by: "CLAUDIA" },
         { conversacion_id: conv.id, from_who: "claudia", texto: msg2, timestamp: new Date().toISOString(), sent_by: "CLAUDIA" },
       ]);
     }
