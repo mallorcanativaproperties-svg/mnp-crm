@@ -296,15 +296,73 @@ function ClientCard({ conv, selected, onClick, isAna }) {
 function ChatPanel({ conv, onSendMessage, isAna }) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [modoManual, setModoManual] = useState(conv.estado === "manual");
+  const [sendingManual, setSendingManual] = useState(false);
   const chatRef = useRef(null);
   const int = INTERES.find((i) => i.key === conv.interes) || INTERES[2];
   const obj = isAna ? OBJETIVOS_ANA.find((o) => o.key === conv.objetivo) : null;
   const pers = isAna && conv.personalidad ? PERSONALIDAD_CLIENTE.find((p) => p.key === conv.personalidad) : null;
+  const agenteName = isAna ? "Ana" : "Claudia";
 
   useEffect(() => {
     if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
   }, [conv.mensajes]);
 
+  // Activar/desactivar modo manual — actualiza estado en Supabase
+  const toggleModoManual = async () => {
+    const nuevoEstado = !modoManual;
+    setModoManual(nuevoEstado);
+    try {
+      await fetch("/api/conversacion-estado", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          conversacion_id: conv.id,
+          estado: nuevoEstado ? "manual" : "activo",
+          telefono: conv.telefono,
+        }),
+      });
+      onSendMessage(conv.id, nuevoEstado
+        ? `[Modo manual activado — ${agenteName} no responderá automáticamente]`
+        : `[Modo IA reactivado — ${agenteName} vuelve a responder automáticamente]`,
+        "sistema"
+      );
+    } catch (e) {
+      console.error("Error toggling modo manual:", e);
+    }
+  };
+
+  // Envío manual — envía WhatsApp real + guarda en Supabase
+  const handleManualSend = async () => {
+    if (!input.trim() || sendingManual) return;
+    const texto = input.trim();
+    setInput("");
+    setSendingManual(true);
+    try {
+      const res = await fetch("/api/manual-reply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          conversacion_id: conv.id,
+          telefono: conv.telefono,
+          texto,
+          agente: agenteName,
+        }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        onSendMessage(conv.id, texto, "agente_manual");
+      } else {
+        onSendMessage(conv.id, `[Error enviando: ${data.error}]`, "sistema");
+      }
+    } catch (e) {
+      onSendMessage(conv.id, `[Error: ${e.message}]`, "sistema");
+    } finally {
+      setSendingManual(false);
+    }
+  };
+
+  // Envío simulación IA (modo test)
   const handleSend = async () => {
     if (!input.trim() || loading) return;
     const texto = input.trim();
@@ -322,7 +380,7 @@ function ChatPanel({ conv, onSendMessage, isAna }) {
       const response = await fetch("/api/claude", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000, system: prompt + ctx, messages: historial }),
+        body: JSON.stringify({ model: "claude-haiku-4-5-20251001", max_tokens: 1000, system: prompt + ctx, messages: historial }),
       });
       const data = await response.json();
       const text = data.content.filter((i) => i.type === "text").map((i) => i.text).join("\n");
@@ -351,30 +409,76 @@ function ChatPanel({ conv, onSendMessage, isAna }) {
             <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, color: "#F0EDE6" }}>{conv.contacto}</div>
             <div style={{ fontSize: 11, color: "#7A7870", marginTop: 2 }}>{conv.telefono} - {conv.propiedad}</div>
           </div>
-          <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: 10, color: "#7A7870" }}>Seguimiento</div>
-            <div style={{ fontSize: 12, color: "#C8A97E" }}>{conv.seguimiento}</div>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ fontSize: 10, color: "#7A7870" }}>Seguimiento</div>
+              <div style={{ fontSize: 12, color: "#C8A97E" }}>{conv.seguimiento}</div>
+            </div>
+            {/* Toggle Manual/IA */}
+            <button onClick={toggleModoManual} style={{
+              padding: "5px 12px", borderRadius: 3, border: "1px solid " + (modoManual ? "#D4545466" : "#6AAF8D66"),
+              background: modoManual ? "#D4545415" : "#6AAF8D15",
+              color: modoManual ? "#D45454" : "#6AAF8D",
+              cursor: "pointer", fontSize: 10, fontWeight: 600,
+              fontFamily: "'Manrope', sans-serif", letterSpacing: "0.05em",
+            }}>
+              {modoManual ? "⏸ MANUAL ACTIVO" : `🤖 ${agenteName.toUpperCase()} ACTIVA`}
+            </button>
           </div>
         </div>
-        {conv.alertas.length > 0 && conv.alertas.map((a, i) => (
+        {modoManual && (
+          <div style={{ marginTop: 8, padding: "8px 12px", background: "#D4545412", border: "1px solid #D4545433", borderRadius: 3, fontSize: 11, color: "#D45454" }}>
+            ⚠️ {agenteName} está en pausa. Los mensajes que escribas se enviarán directamente al cliente por WhatsApp.
+          </div>
+        )}
+        {conv.alertas && conv.alertas.length > 0 && conv.alertas.map((a, i) => (
           <div key={i} style={{ marginTop: 8, padding: "8px 12px", background: "#D4545412", border: "1px solid #D4545433", borderRadius: 3, fontSize: 11, color: "#D45454" }}>{a}</div>
         ))}
       </div>
 
       <div ref={chatRef} style={{ flex: 1, overflowY: "auto", padding: "16px 20px" }}>
-        {conv.mensajes.map((m, i) => <ChatBubble key={i} msg={m} isAgent={m.from !== "cliente"} />)}
-        {loading && (
+        {conv.mensajes.map((m, i) => {
+          const isSistema = m.from === "sistema";
+          if (isSistema) return (
+            <div key={i} style={{ textAlign: "center", margin: "8px 0" }}>
+              <span style={{ fontSize: 10, color: "#7A7870", padding: "3px 10px", background: "#2A2926", borderRadius: 10 }}>{m.text}</span>
+            </div>
+          );
+          const isManual = m.from === "agente_manual";
+          return <ChatBubble key={i} msg={{ ...m, from: isManual ? "agente" : m.from }} isAgent={m.from !== "cliente"} label={isManual ? "Manual" : null} />;
+        })}
+        {(loading || sendingManual) && (
           <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 6 }}>
             <div style={{ padding: "10px 14px", borderRadius: 12, background: "#C8A97E22", border: "1px solid #C8A97E33" }}>
-              <div style={{ fontSize: 12, color: "#C8A97E" }}>escribiendo...</div>
+              <div style={{ fontSize: 12, color: "#C8A97E" }}>{sendingManual ? "enviando..." : "escribiendo..."}</div>
             </div>
           </div>
         )}
       </div>
 
-      <div style={{ padding: "12px 20px", borderTop: "1px solid #2A2926", display: "flex", gap: 8, flexShrink: 0 }}>
-        <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") handleSend(); }} placeholder="Simular mensaje del cliente..." style={{ flex: 1, padding: "10px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 13, fontFamily: "'Manrope', sans-serif", outline: "none", boxSizing: "border-box" }} />
-        <button onClick={handleSend} disabled={loading || !input.trim()} style={{ padding: "10px 20px", borderRadius: 3, border: "none", background: input.trim() && !loading ? "#C8A97E" : "#2A2926", color: input.trim() && !loading ? "#111110" : "#7A7870", cursor: input.trim() && !loading ? "pointer" : "default", fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "'Manrope', sans-serif" }}>Enviar</button>
+      <div style={{ padding: "12px 20px", borderTop: "1px solid #2A2926", flexShrink: 0 }}>
+        {modoManual ? (
+          <div style={{ display: "flex", gap: 8 }}>
+            <input value={input} onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleManualSend(); } }}
+              placeholder={`Escribe como agente — se enviará por WhatsApp al cliente...`}
+              style={{ flex: 1, padding: "10px 14px", background: "#1C1B18", border: "1px solid #D4545444", borderRadius: 3, color: "#F0EDE6", fontSize: 13, fontFamily: "'Manrope', sans-serif", outline: "none", boxSizing: "border-box" }} />
+            <button onClick={handleManualSend} disabled={sendingManual || !input.trim()} style={{
+              padding: "10px 20px", borderRadius: 3, border: "none",
+              background: input.trim() && !sendingManual ? "#D45454" : "#2A2926",
+              color: input.trim() && !sendingManual ? "#fff" : "#7A7870",
+              cursor: input.trim() && !sendingManual ? "pointer" : "default",
+              fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "'Manrope', sans-serif"
+            }}>{sendingManual ? "..." : "Enviar"}</button>
+          </div>
+        ) : (
+          <div style={{ display: "flex", gap: 8 }}>
+            <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") handleSend(); }}
+              placeholder={`Simular mensaje del cliente para probar ${agenteName}...`}
+              style={{ flex: 1, padding: "10px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 13, fontFamily: "'Manrope', sans-serif", outline: "none", boxSizing: "border-box" }} />
+            <button onClick={handleSend} disabled={loading || !input.trim()} style={{ padding: "10px 20px", borderRadius: 3, border: "none", background: input.trim() && !loading ? "#C8A97E" : "#2A2926", color: input.trim() && !loading ? "#111110" : "#7A7870", cursor: input.trim() && !loading ? "pointer" : "default", fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "'Manrope', sans-serif" }}>Probar</button>
+          </div>
+        )}
       </div>
     </div>
   );
