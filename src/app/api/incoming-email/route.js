@@ -218,27 +218,29 @@ export async function POST(request) {
       conv = newConv;
     }
 
-    // Mensaje 1: saludo con nombre
-    const msg1 = nombre
-      ? `Hola ${nombre}, hemos recibido tu consulta sobre la propiedad. ¿Tienes alguna duda o quieres agendar una visita?`
-      : `Hola, hemos recibido tu consulta sobre la propiedad. ¿Tienes alguna duda o quieres agendar una visita?`;
-    const result1 = await sendWhatsApp(phoneClean, msg1);
+    // Mensaje 1: plantilla "Hola" — abre conversación
+    const result1 = await sendWhatsAppTemplate(phoneClean, "mnp_captacion_inicio");
     await new Promise((r) => setTimeout(r, 2000));
 
-    // Mensaje 2: enlace de Idealista + pregunta
-    let msg2;
-    if (isRetake) {
-      msg2 = `${idealistaUrl ? idealistaUrl + "\n\n" : ""}¿Pudiste ver la información que te enviamos anteriormente?`;
-    } else {
-      msg2 = `${idealistaUrl ? idealistaUrl + "\n\n" : ""}¿En qué podemos ayudarte?`;
-    }
+    // Mensaje 2: hemos recibido tu petición + enlace
+    const msg2 = isRetake
+      ? `Hemos visto que te has vuelto a interesar por esta propiedad${idealistaUrl ? "\n" + idealistaUrl : ""}`
+      : `Hemos recibido tu petición interesándote por la propiedad${idealistaUrl ? "\n" + idealistaUrl : ""}`;
     const result2 = await sendWhatsApp(phoneClean, msg2);
+    await new Promise((r) => setTimeout(r, 1500));
+
+    // Mensaje 3: pregunta
+    const msg3 = isRetake
+      ? "¿Pudiste ver la información que te enviamos anteriormente?"
+      : "¿Quieres agendar una visita o tienes alguna duda?";
+    const result3 = await sendWhatsApp(phoneClean, msg3);
 
     // Save outgoing messages
     if (conv?.id) {
       await supabase.from("mensajes").insert([
-        { conversacion_id: conv.id, from_who: "claudia", texto: msg1, timestamp: new Date().toISOString(), sent_by: "CLAUDIA" },
+        { conversacion_id: conv.id, from_who: "claudia", texto: "Hola", timestamp: new Date().toISOString(), sent_by: "CLAUDIA" },
         { conversacion_id: conv.id, from_who: "claudia", texto: msg2, timestamp: new Date().toISOString(), sent_by: "CLAUDIA" },
+        { conversacion_id: conv.id, from_who: "claudia", texto: msg3, timestamp: new Date().toISOString(), sent_by: "CLAUDIA" },
       ]);
     }
 
@@ -249,7 +251,7 @@ export async function POST(request) {
       referencia,
       codigoAnuncio,
       agente: agente?.nombre,
-      whatsapp: { msg1: result1, msg2: result2 },
+      whatsapp: { msg1: result1, msg2: result2, msg3: result3 },
     });
   } catch (err) {
     console.error("Incoming email error:", err);
