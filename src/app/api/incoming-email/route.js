@@ -218,30 +218,21 @@ export async function POST(request) {
       conv = newConv;
     }
 
-    // Mensaje 1: plantilla "Hola" — abre conversación
+    // Solo plantilla — abre conversación sin textos libres
+    // Los textos libres se envían cuando el cliente responde (webhook)
     const result1 = await sendWhatsAppTemplate(phoneClean, "mnp_captacion_inicio");
-    await new Promise((r) => setTimeout(r, 2000));
+    console.log("Template sent:", JSON.stringify(result1));
 
-    // Mensaje 2: hemos recibido tu petición + enlace
-    const msg2 = isRetake
-      ? `Hemos visto que te has vuelto a interesar por esta propiedad${idealistaUrl ? "\n" + idealistaUrl : ""}`
-      : `Hemos recibido tu petición interesándote por la propiedad${idealistaUrl ? "\n" + idealistaUrl : ""}`;
-    const result2 = await sendWhatsApp(phoneClean, msg2);
-    await new Promise((r) => setTimeout(r, 1500));
-
-    // Mensaje 3: pregunta
-    const msg3 = isRetake
-      ? "¿Pudiste ver la información que te enviamos anteriormente?"
-      : "¿Quieres agendar una visita o tienes alguna duda?";
-    const result3 = await sendWhatsApp(phoneClean, msg3);
-
-    // Save outgoing messages
+    // Guardar contexto en Supabase para que Claudia sepa qué decir cuando responda
     if (conv?.id) {
       await supabase.from("mensajes").insert([
         { conversacion_id: conv.id, from_who: "claudia", texto: "Hola", timestamp: new Date().toISOString(), sent_by: "CLAUDIA" },
-        { conversacion_id: conv.id, from_who: "claudia", texto: msg2, timestamp: new Date().toISOString(), sent_by: "CLAUDIA" },
-        { conversacion_id: conv.id, from_who: "claudia", texto: msg3, timestamp: new Date().toISOString(), sent_by: "CLAUDIA" },
       ]);
+      // Guardar URL y contexto para el siguiente mensaje
+      await supabase.from("conversaciones").update({
+        idealista_url: idealistaUrl,
+        pendiente_bienvenida: true,
+      }).eq("id", conv.id);
     }
 
     return NextResponse.json({
@@ -251,7 +242,7 @@ export async function POST(request) {
       referencia,
       codigoAnuncio,
       agente: agente?.nombre,
-      whatsapp: { msg1: result1, msg2: result2, msg3: result3 },
+      whatsapp: { msg1: result1 },
     });
   } catch (err) {
     console.error("Incoming email error:", err);
