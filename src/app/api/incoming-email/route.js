@@ -48,7 +48,7 @@ async function sendWhatsAppTemplate(to, templateName, variables = []) {
       messaging_product: "whatsapp",
       to: phone,
       type: "template",
-      template: { name: templateName, language: { code: "es" }, components },
+      template: { name: templateName, language: { code: "es_ES" }, components },
     }),
   });
   const data = await res.json();
