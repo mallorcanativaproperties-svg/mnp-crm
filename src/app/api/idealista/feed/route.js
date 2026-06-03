@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
+// Forzar ejecución dinámica — nunca cachear este endpoint
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co",
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder"
@@ -363,6 +367,9 @@ export async function GET(request) {
       headers: {
         "Content-Type": "application/json",
         "Content-Disposition": `attachment; filename="${CUSTOMER_CODE}.json"`,
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        "Pragma": "no-cache",
+        "Expires": "0",
       },
     });
   } catch (err) {
