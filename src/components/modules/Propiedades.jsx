@@ -319,13 +319,82 @@ function MediaSection({ propiedadId, propRef, onCountUpdate }) {
     if (onCountUpdate) onCountUpdate(counts);
   }
 
+  // Comprime vídeo en el navegador usando MediaRecorder si supera el límite de Supabase (50MB)
+  async function compressVideo(file) {
+    return new Promise((resolve) => {
+      const MAX_MB = 45;
+      if (file.size <= MAX_MB * 1024 * 1024) { resolve(file); return; }
+
+      const url = URL.createObjectURL(file);
+      const video = document.createElement("video");
+      video.src = url;
+      video.muted = true;
+
+      video.onloadedmetadata = () => {
+        const canvas = document.createElement("canvas");
+        // Escalar resolución para reducir tamaño — máx 1280px de ancho
+        const scale = Math.min(1, 1280 / video.videoWidth);
+        canvas.width = Math.round(video.videoWidth * scale);
+        canvas.height = Math.round(video.videoHeight * scale);
+        const ctx = canvas.getContext("2d");
+
+        const stream = canvas.captureStream(25);
+        // Añadir pista de audio si el vídeo tiene audio
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const src = audioCtx.createMediaElementSource(video);
+        const dest = audioCtx.createMediaStreamDestination();
+        src.connect(dest);
+        dest.stream.getAudioTracks().forEach(t => stream.addTrack(t));
+
+        const mimeType = MediaRecorder.isTypeSupported("video/webm;codecs=vp9,opus")
+          ? "video/webm;codecs=vp9,opus"
+          : "video/webm";
+        const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 1_500_000 });
+        const chunks = [];
+        recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+        recorder.onstop = () => {
+          URL.revokeObjectURL(url);
+          const blob = new Blob(chunks, { type: mimeType });
+          const compressed = new File([blob], file.name.replace(/\.[^.]+$/, ".webm"), { type: mimeType });
+          resolve(compressed);
+        };
+
+        video.play();
+        recorder.start();
+        const drawFrame = () => {
+          if (video.ended || video.paused) { recorder.stop(); return; }
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          requestAnimationFrame(drawFrame);
+        };
+        video.onplay = drawFrame;
+        video.onended = () => recorder.stop();
+      };
+    });
+  }
+
   async function handleUpload(files, tipo) {
     if (!files || files.length === 0) return;
     setUploading(true);
     const total = files.length;
     let uploaded = 0;
+    const MAX_SIZE = 50 * 1024 * 1024; // 50MB límite Supabase free tier
 
-    for (const file of files) {
+    for (let file of files) {
+      // Vídeos grandes: comprimir antes de subir
+      if (tipo === "video" && file.size > MAX_SIZE) {
+        setUploadProgress(`Comprimiendo vídeo ${uploaded + 1} de ${total}... (${(file.size / 1024 / 1024).toFixed(0)}MB → puede tardar unos segundos)`);
+        file = await compressVideo(file);
+        if (file.size > MAX_SIZE) {
+          alert(`El vídeo "${file.name}" sigue siendo demasiado grande tras comprimir (${(file.size/1024/1024).toFixed(0)}MB). Comprime el vídeo manualmente antes de subirlo.`);
+          uploaded++;
+          continue;
+        }
+      } else if (file.size > MAX_SIZE) {
+        alert(`El archivo "${file.name}" supera el límite de 50MB (${(file.size/1024/1024).toFixed(0)}MB).`);
+        uploaded++;
+        continue;
+      }
+
       setUploadProgress(`Subiendo ${uploaded + 1} de ${total}...`);
       const ext = file.name.split(".").pop();
       const path = `${propRef || propiedadId}/${tipo}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
@@ -336,6 +405,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate }) {
 
       if (uploadError) {
         console.error("Upload error:", uploadError);
+        alert(`Error al subir "${file.name}": ${uploadError.message}`);
         continue;
       }
 
