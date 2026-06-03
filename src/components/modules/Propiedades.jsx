@@ -937,33 +937,76 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
   const d = editMode ? draft : pWithTexts;
   const upd = (key, val) => setDraft(prev => ({ ...prev, [key]: val }));
 
+  // Calcula en tiempo real qué campos de Idealista faltan en el draft actual
+  const idealistaFieldErrors = useMemo(() => {
+    const errs = new Set();
+    const src = draft;
+    const TIPO_MAP_LOCAL = {
+      Piso:"flat", Estudio:"flat", Atico:"flat", "Atico Duplex":"flat", Duplex:"flat", "Planta baja":"flat",
+      Casa:"house", Chalet:"house", Adosado:"house", Villa:"house",
+      "Finca rustica":"rustic", Finca:"rustic",
+      "Local comercial":"premises_commercial", Local:"premises_commercial",
+      Oficina:"office", Parking:"garage", Garaje:"garage",
+      Terreno:"land", Trastero:"storage", Edificio:"building",
+    };
+    const featuresType = TIPO_MAP_LOCAL[src.tipo] || "flat";
+    const residencial = ["flat","house","rustic"].includes(featuresType);
+    const needsBaths = ["flat","house","rustic","premises_commercial","office"].includes(featuresType);
+
+    if (!src.ref) errs.add("ref");
+    if (!src.tipo) errs.add("tipo");
+    if (!src.op) errs.add("op");
+    if (!src.dir) errs.add("dir");
+    if (!src.municipio) errs.add("municipio");
+    if (!src.cp && !(src.latitud && src.longitud)) errs.add("cp");
+    if (!Number(src.precioVenta) || Number(src.precioVenta) <= 0) errs.add("precioVenta");
+    if (!Number(src.mConst) || Number(src.mConst) <= 0) errs.add("mConst");
+    if (!src.desc || !src.desc.trim()) errs.add("desc");
+    if (needsBaths && (!Number(src.banos) || Number(src.banos) <= 0)) errs.add("banos");
+    if (residencial) {
+      const CERT_VALIDOS = ["A","B","C","D","E","F","G","Exento","En tramite"];
+      if (!src.certEnerg || !CERT_VALIDOS.includes(src.certEnerg)) errs.add("certEnerg");
+    }
+    if (src.anoConstruc) {
+      const y = parseInt(src.anoConstruc);
+      if (isNaN(y) || y < 1800 || y > new Date().getFullYear()) errs.add("anoConstruc");
+    }
+    return errs;
+  }, [draft]);
+
+  const idealistaReady = idealistaFieldErrors.size === 0;
+
   function EFl({ label, field, pub, gold, type = "text", options, req }) {
     const reqMark = req ? " *" : "";
+    const hasErr = editMode && idealistaFieldErrors.has(field);
+    const borderColor = hasErr ? "#D45454" : "#2A2926";
+    const inputStyle = { width: "100%", background: "#1C1B18", border: "1px solid " + borderColor, borderRadius: 3, color: "#D0CDC4", padding: "6px 8px", fontSize: 13, fontFamily: "'Manrope', sans-serif" };
     if (!editMode) return <Fl label={label + reqMark} value={type === "bool" ? (d[field] ? "Si" : "No") : (type === "number" ? String(d[field] || 0) : (d[field] || "-"))} pub={pub} gold={gold} />;
     return (
       <div style={{ marginBottom: 10 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
           {pub !== undefined && <Dot green={pub} />}
-          <span style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em" }}>{label}{req && <span style={{ color: "#C8A97E", marginLeft: 3, fontSize: 18, fontWeight: 400, lineHeight: "10px", verticalAlign: "middle" }}>*</span>}</span>
+          <span style={{ fontSize: 10, fontWeight: 600, color: hasErr ? "#D45454" : "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+            {label}{req && <span style={{ color: hasErr ? "#D45454" : "#C8A97E", marginLeft: 3, fontSize: 18, fontWeight: 400, lineHeight: "10px", verticalAlign: "middle" }}>*</span>}
+          </span>
         </div>
         {type === "bool" ? (
-          <select value={d[field] ? "true" : "false"} onChange={e => upd(field, e.target.value === "true")}
-            style={{ width: "100%", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "6px 8px", fontSize: 13, fontFamily: "'Manrope', sans-serif" }}>
+          <select value={d[field] ? "true" : "false"} onChange={e => upd(field, e.target.value === "true")} style={inputStyle}>
             <option value="true">Si</option><option value="false">No</option>
           </select>
         ) : type === "select" ? (
-          <select value={d[field] || ""} onChange={e => upd(field, e.target.value)}
-            style={{ width: "100%", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "6px 8px", fontSize: 13, fontFamily: "'Manrope', sans-serif" }}>
+          <select value={d[field] || ""} onChange={e => upd(field, e.target.value)} style={inputStyle}>
             <option value="">-</option>
             {(options || []).map(o => <option key={o} value={o}>{o}</option>)}
           </select>
         ) : type === "textarea" ? (
           <textarea key={field} defaultValue={d[field] || ""} onBlur={e => upd(field, e.target.value)} onInput={e => { draft[field] = e.target.value; }}
-            style={{ width: "100%", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "6px 8px", fontSize: 13, fontFamily: "'Manrope', sans-serif", minHeight: 80, resize: "vertical" }} />
+            style={{ ...inputStyle, minHeight: 80, resize: "vertical" }} />
         ) : (
           <input type={type === "number" ? "number" : "text"} value={d[field] ?? ""} onChange={e => upd(field, type === "number" ? (e.target.value === "" ? 0 : Number(e.target.value)) : e.target.value)} onFocus={e => { if (type === "number" && e.target.value === "0") e.target.select(); }}
-            style={{ width: "100%", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "6px 8px", fontSize: 13, fontFamily: "'Manrope', sans-serif" }} />
+            style={inputStyle} />
         )}
+        {hasErr && <div style={{ fontSize: 10, color: "#D45454", marginTop: 3 }}>Requerido para Idealista</div>}
       </div>
     );
   }
@@ -1147,7 +1190,18 @@ REGLAS:
             cualNeg: (draft.cualNegText || "").split("\n").filter(Boolean),
             cualMejoras: (draft.cualMejorasText || "").split("\n").filter(Boolean),
           };
-          if (onUpdate) onUpdate(toSave); setEditMode(false); }} style={{ position: "absolute", top: 16, right: 120, background: "#6AAF8D", border: "none", borderRadius: 3, color: "#111110", fontSize: 10, cursor: "pointer", padding: "5px 14px", fontWeight: 600, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.05em" }}>Guardar</button>}
+          if (!idealistaReady) {
+            alert("No se puede guardar. Faltan " + idealistaFieldErrors.size + " campo(s) obligatorio(s) para Idealista:\n\n" + 
+              [...idealistaFieldErrors].map(f => "• " + f).join("\n") + 
+              "\n\nCompleta todos los campos marcados en rojo antes de guardar.");
+            return;
+          }
+          if (onUpdate) onUpdate(toSave); setEditMode(false); }} 
+          disabled={!idealistaReady}
+          title={!idealistaReady ? "Faltan " + idealistaFieldErrors.size + " campo(s) obligatorio(s) para Idealista" : ""}
+          style={{ position: "absolute", top: 16, right: 120, background: idealistaReady ? "#6AAF8D" : "#3A3A38", border: "none", borderRadius: 3, color: idealistaReady ? "#111110" : "#5A584F", fontSize: 10, cursor: idealistaReady ? "pointer" : "not-allowed", padding: "5px 14px", fontWeight: 600, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.05em", transition: "all 0.2s" }}>
+          {idealistaReady ? "Guardar" : "Guardar (" + idealistaFieldErrors.size + " ⚠)"}
+        </button>}
         {editMode && <button onClick={() => { setDraft({ ...p,
           suministrosText: (p.suministros || []).join(", "),
           cualPosText: (p.cualPos || []).join("\n"),
@@ -1157,6 +1211,17 @@ REGLAS:
         <button onClick={() => { if (onDelete) onDelete(p); }} style={{ position: "absolute", top: 16, right: 56, background: "none", border: "1px solid #D4545433", borderRadius: 3, color: "#D45454", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "'Manrope', sans-serif" }}>Eliminar</button>
         
         <div style={{ position: "absolute", top: 20, left: 36, fontSize: 11, color: "#7A7870" }}><span style={{ color: "#C8A97E", fontSize: 18, fontWeight: 400 }}>*</span> Obligatorio Idealista</div>
+        {/* Banner estado Idealista — solo visible en modo edición */}
+        {editMode && (
+          <div style={{ marginTop: 48, marginBottom: -8, padding: "10px 16px", borderRadius: 3, background: idealistaReady ? "#6AAF8D11" : "#D4545411", border: "1px solid " + (idealistaReady ? "#6AAF8D44" : "#D4545444"), display: "flex", alignItems: "center", gap: 10 }}>
+            <span style={{ fontSize: 16 }}>{idealistaReady ? "✅" : "⚠️"}</span>
+            <span style={{ fontSize: 11, color: idealistaReady ? "#6AAF8D" : "#D45454", fontWeight: 600, fontFamily: "'Manrope', sans-serif" }}>
+              {idealistaReady
+                ? "Propiedad lista para Idealista — todos los campos requeridos están completos"
+                : idealistaFieldErrors.size + " campo(s) requerido(s) para Idealista sin completar"}
+            </span>
+          </div>
+        )}
 
         {/* Header */}
         <div style={{ marginBottom: 16 }}>
@@ -1166,14 +1231,14 @@ REGLAS:
                 <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                   <span style={{ fontSize: 10, color: "#7A7870" }}>REF<span style={{ color: "#C8A97E", fontSize: 18, fontWeight: 400 }}>*</span>:</span>
                   <input type="text" value={d.ref || ""} onChange={e => upd("ref", e.target.value)}
-                    style={{ width: 130, background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#C8A97E", padding: "4px 8px", fontSize: 11, fontFamily: "'Manrope', sans-serif" }} />
+                    style={{ width: 130, background: "#1C1B18", border: "1px solid " + (idealistaFieldErrors.has("ref") ? "#D45454" : "#2A2926"), borderRadius: 3, color: "#C8A97E", padding: "4px 8px", fontSize: 11, fontFamily: "'Manrope', sans-serif" }} />
                 </div>
                 <select value={d.op || "Compraventa"} onChange={e => upd("op", e.target.value)}
                   style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "4px 8px", fontSize: 11, fontFamily: "'Manrope', sans-serif" }}>
                   {OPS_LIST.map(o => <option key={o} value={o}>{o}</option>)}
                 </select>
                 <select value={d.tipo || ""} onChange={e => upd("tipo", e.target.value)}
-                  style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "4px 8px", fontSize: 11, fontFamily: "'Manrope', sans-serif" }}>
+                  style={{ background: "#1C1B18", border: "1px solid " + (idealistaFieldErrors.has("tipo") ? "#D45454" : "#2A2926"), borderRadius: 3, color: "#D0CDC4", padding: "4px 8px", fontSize: 11, fontFamily: "'Manrope', sans-serif" }}>
                   <option value="">Tipo *</option>
                   {TIPOS_LIST.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
@@ -1452,7 +1517,9 @@ REGLAS:
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 3 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                 <Dot green={true} />
-                <span style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em" }}>Descripcion</span>
+                <span style={{ fontSize: 10, fontWeight: 600, color: idealistaFieldErrors.has("desc") ? "#D45454" : "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                  Descripcion{<span style={{ color: idealistaFieldErrors.has("desc") ? "#D45454" : "#C8A97E", marginLeft: 3, fontSize: 18, fontWeight: 400, lineHeight: "10px", verticalAlign: "middle" }}>*</span>}
+                </span>
               </div>
               <span id="desc-counter" style={{ fontSize: 10, color: "#7A7870" }}>{(d.desc || "").length} / 4.000</span>
             </div>
@@ -1469,7 +1536,8 @@ REGLAS:
                 }
                 draft.desc = e.target.value;
               }}
-              style={{ width: "100%", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "14px 18px", fontSize: 13, fontFamily: "'Manrope', sans-serif", minHeight: 200, resize: "vertical", lineHeight: 1.6 }} />
+              style={{ width: "100%", background: "#1C1B18", border: "1px solid " + (idealistaFieldErrors.has("desc") ? "#D45454" : "#2A2926"), borderRadius: 3, color: "#D0CDC4", padding: "14px 18px", fontSize: 13, fontFamily: "'Manrope', sans-serif", minHeight: 200, resize: "vertical", lineHeight: 1.6 }} />
+            {idealistaFieldErrors.has("desc") && <div style={{ fontSize: 10, color: "#D45454", marginTop: 3 }}>Requerido para Idealista</div>}
           </div>
         </Sec>
         <div style={sep} />
@@ -1618,121 +1686,7 @@ export default function CRMPropiedades() {
 
   // Validación de reglas Idealista (instrucciones de António Lopes)
   // Solo aplica si la propiedad tiene "Idealista" en destinos y estado = publicada
-  function validateIdealista(prop) {
-    const errores = [];
-
-    // Campos obligatorios universales para Idealista
-    if (!prop.ref) errores.push("Referencia obligatoria");
-    if (!prop.tipo) errores.push("Tipo de inmueble obligatorio");
-    if (!prop.municipio) errores.push("Municipio obligatorio");
-    if (!prop.cp && !(prop.latitud && prop.longitud)) errores.push("Código postal o coordenadas obligatorio");
-    if (!prop.dir) errores.push("Dirección obligatoria");
-
-    // Precio — no puede ser 0 ni vacío
-    const precio = Number(prop.precioVenta);
-    if (!precio || precio <= 0) errores.push("Precio de venta obligatorio y mayor que 0");
-
-    // Metros construidos — obligatorio, no puede ser 0
-    const mConst = Number(prop.mConst);
-    if (!mConst || mConst <= 0) errores.push("m² construidos obligatorio y mayor que 0");
-
-    // Bathrooms — obligatorio para flat/house/rustic (no para land/garage/storage/building)
-    const TIPO_MAP_LOCAL = {
-      Piso:"flat", Estudio:"flat", Atico:"flat", "Atico Duplex":"flat", Duplex:"flat", "Planta baja":"flat",
-      Casa:"house", Chalet:"house", Adosado:"house", Villa:"house",
-      "Finca rustica":"rustic", Finca:"rustic",
-      "Local comercial":"premises_commercial", Local:"premises_commercial",
-      Oficina:"office", Parking:"garage", Garaje:"garage",
-      Terreno:"land", Trastero:"storage", Edificio:"building",
-    };
-    const featuresType = TIPO_MAP_LOCAL[prop.tipo] || "flat";
-    const needsBedsBaths = ["flat","house","rustic","premises_commercial","office"].includes(featuresType);
-    if (needsBedsBaths) {
-      if (Number(prop.banos) <= 0) errores.push("Número de baños obligatorio (mayor que 0)");
-    }
-
-    // Certificado energético — obligatorio para residencial
-    const residencial = ["flat","house","rustic"].includes(featuresType);
-    if (residencial) {
-      const CERT_VALIDOS = ["A","B","C","D","E","F","G","inProcess","exempt"];
-      const certMap = { "En tramite":"inProcess", "Exento":"exempt" };
-      const cert = certMap[prop.certEnerg] || prop.certEnerg;
-      if (!cert || !CERT_VALIDOS.includes(cert)) {
-        errores.push("Certificado energético obligatorio para inmuebles residenciales (A-G, En tramite o Exento)");
-      }
-    }
-
-    // Descripción en español — obligatoria
-    if (!prop.desc || !prop.desc.trim()) errores.push("Descripción en español obligatoria");
-
-    // Al menos 1 foto
-    if (!prop.fotos || Number(prop.fotos) <= 0) errores.push("Al menos 1 foto obligatoria para Idealista");
-
-    // Campos que no pueden ser null/vacíos si están presentes: tipo de operación
-    if (!prop.op) errores.push("Tipo de operación obligatorio (Compraventa o Alquiler)");
-
-    // Año de construcción: si existe, debe ser un año válido
-    if (prop.anoConstruc) {
-      const year = parseInt(prop.anoConstruc);
-      if (isNaN(year) || year < 1800 || year > new Date().getFullYear()) {
-        errores.push("Año de construcción inválido (debe ser entre 1800 y " + new Date().getFullYear() + ")");
-      }
-    }
-
-    // Coordenadas: si una existe, deben existir las dos
-    if ((prop.latitud && !prop.longitud) || (!prop.latitud && prop.longitud)) {
-      errores.push("Si introduces coordenadas, debes indicar latitud Y longitud");
-    }
-
-    // Campos de tipología land no deben tener habitaciones/baños
-    if (featuresType === "land") {
-      if (Number(prop.habDobles) > 0 || Number(prop.habSimples) > 0) {
-        errores.push("Los terrenos no deben incluir habitaciones (no válido para esta tipología en Idealista)");
-      }
-    }
-
-    return errores;
-  }
-
   async function saveProperty(prop) {
-    // Validate required fields (CRM básico)
-    const required = [];
-    if (!prop.ref) required.push("Referencia");
-    if (!prop.mConst || prop.mConst <= 0) required.push("m2 construidos");
-    if (!prop.precioVenta || prop.precioVenta <= 0) required.push("Precio de venta");
-    if (!prop.cp && !prop.latitud) required.push("Codigo postal o Coordenadas");
-    if (!prop.dir) required.push("Direccion");
-    if (!prop.municipio) required.push("Municipio");
-    
-    if (required.length > 0) {
-      alert("Campos obligatorios sin cumplimentar:\n\n- " + required.join("\n- "));
-      return;
-    }
-
-    // Validación adicional si va a Idealista
-    const vaAIdealista = Array.isArray(prop.destinos) && prop.destinos.includes("Idealista");
-    const estaPublicada = prop.estado === "publicada";
-    if (vaAIdealista && estaPublicada) {
-      const erroresIdealista = validateIdealista(prop);
-      if (erroresIdealista.length > 0) {
-        const continuar = window.confirm(
-          "⚠️ ATENCIÓN — Esta propiedad está marcada para Idealista pero tiene " + erroresIdealista.length + " problema(s) que impedirán su publicación:\n\n" +
-          erroresIdealista.map(e => "• " + e).join("\n") +
-          "\n\n¿Guardar igualmente? (La propiedad NO aparecerá en el feed de Idealista hasta corregirlos)"
-        );
-        if (!continuar) return;
-      }
-    } else if (vaAIdealista && !estaPublicada) {
-      // Aviso preventivo: va a Idealista pero aún no publicada — validar igual para avisar
-      const erroresIdealista = validateIdealista(prop);
-      if (erroresIdealista.length > 0) {
-        alert(
-          "ℹ️ AVISO PREVIO — Esta propiedad está marcada para Idealista. Cuando la publiques deberá cumplir estos requisitos:\n\n" +
-          erroresIdealista.map(e => "• " + e).join("\n")
-        );
-      }
-    }
-
     // IEE warning for buildings >= 49 years old
     if (prop.anoConstruc) {
       const age = new Date().getFullYear() - parseInt(prop.anoConstruc);
