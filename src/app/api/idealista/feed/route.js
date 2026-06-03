@@ -41,27 +41,26 @@ const CONSERV_MAP = {
   "En construccion": "new",
 };
 
-// Map Idealista image tags
+// Map Idealista image tags — valores válidos según especificación Idealista
 const IMAGE_TAG_MAP = {
-  LIVING_ROOM: "living",
-  BEDROOM: "bedroom",
+  LIVING_ROOM: "living_room",
+  BEDROOM: "room",
   BATHROOM: "bathroom",
   KITCHEN: "kitchen",
   TERRACE: "terrace",
   SWIMMING_POOL: "pool",
   GARDEN: "garden",
-  CORRIDOR: "corridor",
+  CORRIDOR: "hallway",
   PLAN: "plan",
-  VIEWS: "views",
+  VIEWS: "view",
   FACADE: "facade",
   GARAGE: "garage",
   STORAGE: "storage",
-  BALCONY: "balcony",
-  DINING: "dining_room",
-  HALL: "hall",
-  PATIO: "patio",
-  PORCH: "porch",
-  UNKNOWN: "unknown",
+  BALCONY: "terrace",
+  DINING: "living_room",
+  HALL: "hallway",
+  PATIO: "garden",
+  PORCH: "terrace",
 };
 
 function buildProperty(row, media) {
@@ -224,11 +223,11 @@ function buildProperty(row, media) {
   if (photos.length > 0) {
     property.propertyImages = photos.map((photo, i) => {
       const img = { imageOrder: i + 1, imageUrl: photo.url };
+      // Solo incluir imageLabel si hay un valor válido en la enumeración de Idealista
       if (photo.etiqueta && IMAGE_TAG_MAP[photo.etiqueta]) {
         img.imageLabel = IMAGE_TAG_MAP[photo.etiqueta];
-      } else {
-        img.imageLabel = "unknown";
       }
+      // Si no hay etiqueta válida, omitir el campo (Idealista rechaza "unknown")
       return img;
     });
   }
