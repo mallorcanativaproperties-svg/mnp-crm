@@ -1616,8 +1616,86 @@ export default function CRMPropiedades() {
     setLoading(false);
   }
 
+  // Validación de reglas Idealista (instrucciones de António Lopes)
+  // Solo aplica si la propiedad tiene "Idealista" en destinos y estado = publicada
+  function validateIdealista(prop) {
+    const errores = [];
+
+    // Campos obligatorios universales para Idealista
+    if (!prop.ref) errores.push("Referencia obligatoria");
+    if (!prop.tipo) errores.push("Tipo de inmueble obligatorio");
+    if (!prop.municipio) errores.push("Municipio obligatorio");
+    if (!prop.cp && !(prop.latitud && prop.longitud)) errores.push("Código postal o coordenadas obligatorio");
+    if (!prop.dir) errores.push("Dirección obligatoria");
+
+    // Precio — no puede ser 0 ni vacío
+    const precio = Number(prop.precioVenta);
+    if (!precio || precio <= 0) errores.push("Precio de venta obligatorio y mayor que 0");
+
+    // Metros construidos — obligatorio, no puede ser 0
+    const mConst = Number(prop.mConst);
+    if (!mConst || mConst <= 0) errores.push("m² construidos obligatorio y mayor que 0");
+
+    // Bathrooms — obligatorio para flat/house/rustic (no para land/garage/storage/building)
+    const TIPO_MAP_LOCAL = {
+      Piso:"flat", Estudio:"flat", Atico:"flat", "Atico Duplex":"flat", Duplex:"flat", "Planta baja":"flat",
+      Casa:"house", Chalet:"house", Adosado:"house", Villa:"house",
+      "Finca rustica":"rustic", Finca:"rustic",
+      "Local comercial":"premises_commercial", Local:"premises_commercial",
+      Oficina:"office", Parking:"garage", Garaje:"garage",
+      Terreno:"land", Trastero:"storage", Edificio:"building",
+    };
+    const featuresType = TIPO_MAP_LOCAL[prop.tipo] || "flat";
+    const needsBedsBaths = ["flat","house","rustic","premises_commercial","office"].includes(featuresType);
+    if (needsBedsBaths) {
+      if (Number(prop.banos) <= 0) errores.push("Número de baños obligatorio (mayor que 0)");
+    }
+
+    // Certificado energético — obligatorio para residencial
+    const residencial = ["flat","house","rustic"].includes(featuresType);
+    if (residencial) {
+      const CERT_VALIDOS = ["A","B","C","D","E","F","G","inProcess","exempt"];
+      const certMap = { "En tramite":"inProcess", "Exento":"exempt" };
+      const cert = certMap[prop.certEnerg] || prop.certEnerg;
+      if (!cert || !CERT_VALIDOS.includes(cert)) {
+        errores.push("Certificado energético obligatorio para inmuebles residenciales (A-G, En tramite o Exento)");
+      }
+    }
+
+    // Descripción en español — obligatoria
+    if (!prop.desc || !prop.desc.trim()) errores.push("Descripción en español obligatoria");
+
+    // Al menos 1 foto
+    if (!prop.fotos || Number(prop.fotos) <= 0) errores.push("Al menos 1 foto obligatoria para Idealista");
+
+    // Campos que no pueden ser null/vacíos si están presentes: tipo de operación
+    if (!prop.op) errores.push("Tipo de operación obligatorio (Compraventa o Alquiler)");
+
+    // Año de construcción: si existe, debe ser un año válido
+    if (prop.anoConstruc) {
+      const year = parseInt(prop.anoConstruc);
+      if (isNaN(year) || year < 1800 || year > new Date().getFullYear()) {
+        errores.push("Año de construcción inválido (debe ser entre 1800 y " + new Date().getFullYear() + ")");
+      }
+    }
+
+    // Coordenadas: si una existe, deben existir las dos
+    if ((prop.latitud && !prop.longitud) || (!prop.latitud && prop.longitud)) {
+      errores.push("Si introduces coordenadas, debes indicar latitud Y longitud");
+    }
+
+    // Campos de tipología land no deben tener habitaciones/baños
+    if (featuresType === "land") {
+      if (Number(prop.habDobles) > 0 || Number(prop.habSimples) > 0) {
+        errores.push("Los terrenos no deben incluir habitaciones (no válido para esta tipología en Idealista)");
+      }
+    }
+
+    return errores;
+  }
+
   async function saveProperty(prop) {
-    // Validate required fields
+    // Validate required fields (CRM básico)
     const required = [];
     if (!prop.ref) required.push("Referencia");
     if (!prop.mConst || prop.mConst <= 0) required.push("m2 construidos");
@@ -1629,6 +1707,30 @@ export default function CRMPropiedades() {
     if (required.length > 0) {
       alert("Campos obligatorios sin cumplimentar:\n\n- " + required.join("\n- "));
       return;
+    }
+
+    // Validación adicional si va a Idealista
+    const vaAIdealista = Array.isArray(prop.destinos) && prop.destinos.includes("Idealista");
+    const estaPublicada = prop.estado === "publicada";
+    if (vaAIdealista && estaPublicada) {
+      const erroresIdealista = validateIdealista(prop);
+      if (erroresIdealista.length > 0) {
+        const continuar = window.confirm(
+          "⚠️ ATENCIÓN — Esta propiedad está marcada para Idealista pero tiene " + erroresIdealista.length + " problema(s) que impedirán su publicación:\n\n" +
+          erroresIdealista.map(e => "• " + e).join("\n") +
+          "\n\n¿Guardar igualmente? (La propiedad NO aparecerá en el feed de Idealista hasta corregirlos)"
+        );
+        if (!continuar) return;
+      }
+    } else if (vaAIdealista && !estaPublicada) {
+      // Aviso preventivo: va a Idealista pero aún no publicada — validar igual para avisar
+      const erroresIdealista = validateIdealista(prop);
+      if (erroresIdealista.length > 0) {
+        alert(
+          "ℹ️ AVISO PREVIO — Esta propiedad está marcada para Idealista. Cuando la publiques deberá cumplir estos requisitos:\n\n" +
+          erroresIdealista.map(e => "• " + e).join("\n")
+        );
+      }
     }
 
     // IEE warning for buildings >= 49 years old

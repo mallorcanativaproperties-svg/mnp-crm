@@ -241,11 +241,42 @@ function buildProperty(row, media) {
 }
 
 // Validate that a property has minimum required fields
+// Validación completa según reglas de António Lopes (Idealista datafeed)
+// Una propiedad solo entra en el feed si cumple TODOS los requisitos
 function isValidForIdealista(row) {
   if (!row.ref) return false;
+  if (!row.tipo) return false;
+  if (!row.municipio) return false;
+  if (!row.dir) return false;
+  if (!row.cp && !(row.latitud && row.longitud)) return false;
   if (!Number(row.precio_venta) || Number(row.precio_venta) <= 0) return false;
-  if (!row.cp && !row.latitud) return false;
   if (!Number(row.m_const) || Number(row.m_const) <= 0) return false;
+  if (!row.op) return false;
+  if (!row.desc_texto || !row.desc_texto.trim()) return false;
+
+  const featuresType = TIPO_MAP[row.tipo];
+  if (!featuresType) return false;
+
+  const needsBaths = ["flat","house","rustic","premises_commercial","office"].includes(featuresType);
+  if (needsBaths && (!Number(row.banos) || Number(row.banos) <= 0)) return false;
+
+  const residencial = ["flat","house","rustic"].includes(featuresType);
+  if (residencial) {
+    const certMap = { "En tramite":"inProcess", "Exento":"exempt" };
+    const cert = certMap[row.cert_energ] || row.cert_energ;
+    const CERT_VALIDOS = ["A","B","C","D","E","F","G","inProcess","exempt"];
+    if (!cert || !CERT_VALIDOS.includes(cert)) return false;
+  }
+
+  if (row.ano_construc) {
+    const year = parseInt(row.ano_construc);
+    if (isNaN(year) || year < 1800 || year > new Date().getFullYear()) return false;
+  }
+
+  if ((row.latitud && !row.longitud) || (!row.latitud && row.longitud)) return false;
+
+  if (!Array.isArray(row.destinos) || !row.destinos.includes("Idealista")) return false;
+
   return true;
 }
 
