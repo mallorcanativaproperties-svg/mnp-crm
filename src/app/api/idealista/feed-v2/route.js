@@ -103,7 +103,24 @@ function buildProperty(row, media) {
   else address.addressVisibility = "hidden";
   if (row.dir) address.addressStreetName = row.dir;
   if (row.num) address.addressStreetNumber = String(row.num);
-  if (row.planta) address.addressFloor = String(row.planta);
+  // addressFloor: Idealista solo acepta "groundFloor", "mezzanine", o número "1"-"20"
+  if (row.planta) {
+    const FLOOR_MAP = {
+      "Bajo": "groundFloor", "Planta baja": "groundFloor", "PB": "groundFloor", "0": "groundFloor",
+      "Entreplanta": "mezzanine", "Entresuelo": "mezzanine",
+    };
+    const floorVal = String(row.planta).trim();
+    if (FLOOR_MAP[floorVal]) {
+      address.addressFloor = FLOOR_MAP[floorVal];
+    } else {
+      // Si es numérico entre 1 y 20, válido directamente
+      const num = parseInt(floorVal);
+      if (!isNaN(num) && num >= 1 && num <= 20) {
+        address.addressFloor = String(num);
+      }
+      // Si no encaja en ningún formato válido, omitir el campo
+    }
+  }
   if (row.cp) address.addressPostalCode = String(row.cp);
   if (row.municipio) address.addressTown = row.municipio;
   if (row.puerta) address.addressDoor = String(row.puerta);
@@ -154,11 +171,9 @@ function buildProperty(row, media) {
   if (row.parking === "Si") features.featuresParkingAvailable = true;
   if (row.venta_mobiliario === true) features.featuresEquippedWithFurniture = true;
   
-  // Air conditioning type
-  const AC_MAP = { "No disponible": "notAvailable", "Solo frio": "cold", "Frio/Calor": "cold/heat", "Preinstalacion": "preInstallation" };
-  if (row.aire_acond_tipo && AC_MAP[row.aire_acond_tipo] && row.aire_acond_tipo !== "No disponible") {
+  // Aire acondicionado — solo boolean, Idealista no admite featuresConditionedAirType
+  if (row.aire_acond_tipo && row.aire_acond_tipo !== "No disponible") {
     features.featuresConditionedAir = true;
-    features.featuresConditionedAirType = AC_MAP[row.aire_acond_tipo];
   }
   
   // Heating type
