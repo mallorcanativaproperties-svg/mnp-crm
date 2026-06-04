@@ -234,19 +234,22 @@ function buildProperty(row, media) {
   }
   if (descriptions.length > 0) property.propertyDescriptions = descriptions;
 
-  // Images - from Supabase storage (public URLs)
+  // Imágenes — rutas RELATIVAS para FTP (Idealista no acepta URLs)
+  // URL Supabase: https://xxx.supabase.co/storage/v1/object/public/propiedades-media/REF/foto/archivo.jpg
+  // Path relativo FTP:  REF/foto/archivo.jpg
   const photos = (media || [])
     .filter(m => m.tipo === "foto" && m.url)
     .sort((a, b) => (a.orden || 0) - (b.orden || 0));
   
   if (photos.length > 0) {
     property.propertyImages = photos.map((photo, i) => {
-      const img = { imageOrder: i + 1, imageUrl: photo.url };
-      // Solo incluir imageLabel si hay un valor válido en la enumeración de Idealista
+      const url = photo.url || "";
+      const match = url.match(/propiedades-media\/(.+)$/);
+      const relativePath = match ? match[1] : url;
+      const img = { imageOrder: i + 1, imageUrl: relativePath };
       if (photo.etiqueta && IMAGE_TAG_MAP[photo.etiqueta]) {
         img.imageLabel = IMAGE_TAG_MAP[photo.etiqueta];
       }
-      // Si no hay etiqueta válida, omitir el campo (Idealista rechaza "unknown")
       return img;
     });
   }
