@@ -235,17 +235,21 @@ function buildProperty(row, media) {
   if (descriptions.length > 0) property.propertyDescriptions = descriptions;
 
   // Imágenes — rutas RELATIVAS para FTP (Idealista no acepta URLs)
-  // URL Supabase: https://xxx.supabase.co/storage/v1/object/public/propiedades-media/REF/foto/archivo.jpg
-  // Path relativo FTP:  REF/foto/archivo.jpg
   const photos = (media || [])
     .filter(m => m.tipo === "foto" && m.url)
     .sort((a, b) => (a.orden || 0) - (b.orden || 0));
   
   if (photos.length > 0) {
     property.propertyImages = photos.map((photo, i) => {
-      const url = photo.url || "";
-      const match = url.match(/propiedades-media\/(.+)$/);
-      const relativePath = match ? match[1] : url;
+      const url = String(photo.url || "");
+      // Extraer ruta relativa eliminando todo hasta propiedades-media/
+      // Ejemplo: https://xxx.supabase.co/storage/v1/object/public/propiedades-media/REF/foto/arch.jpg → REF/foto/arch.jpg
+      let relativePath = url;
+      const marker = "propiedades-media/";
+      const idx = url.indexOf(marker);
+      if (idx !== -1) {
+        relativePath = url.substring(idx + marker.length);
+      }
       const img = { imageOrder: i + 1, imageUrl: relativePath };
       if (photo.etiqueta && IMAGE_TAG_MAP[photo.etiqueta]) {
         img.imageLabel = IMAGE_TAG_MAP[photo.etiqueta];
