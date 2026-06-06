@@ -1658,6 +1658,7 @@ REGLAS:
             })}
           </div>
         </Sec>
+        <IdealistaJsonButton supabase={supabase} />
         <div style={sep} />
 
         {/* Datos internos */}
@@ -1693,6 +1694,153 @@ REGLAS:
         </Sec>
 
       </div>
+    </div>
+  );
+}
+
+// ─── Componente: Botón descarga JSON Idealista ────────────────────────────────
+function IdealistaJsonButton({ supabase }) {
+  const [loading, setLoading] = React.useState(false);
+  const [status, setStatus] = React.useState(null);
+  const [msg, setMsg] = React.useState("");
+
+  const CUSTOMER_CODE = "ilc499e07c0814d8c79fcfe3b09eaad505d8b54e164";
+  const TIPO_MAP = { Piso:"flat",Estudio:"flat",Atico:"flat","Atico Duplex":"flat",Duplex:"flat","Planta baja":"flat",Casa:"house",Chalet:"house",Adosado:"house",Villa:"house","Finca rustica":"rustic",Finca:"rustic","Local comercial":"premises_commercial",Local:"premises_commercial",Oficina:"office",Parking:"garage",Garaje:"garage",Terreno:"land",Trastero:"storage",Edificio:"building" };
+  const CONSERV_MAP = { "Buen estado":"good",Reformado:"good","A reformar":"toRestore","Obra nueva":"new","En construccion":"new" };
+  const HEAT_MAP = { "Gas central":"centralGas","Gasoleo central":"centralFuelOil","Gas individual":"individualGas","Electrica individual":"individualElectric","Bomba de calor":"individualAirConditioningHeatPump","Sin calefaccion":"noHeating" };
+  const IMAGE_TAG_MAP = { LIVING_ROOM:"living_room",BEDROOM:"room",BATHROOM:"bathroom",KITCHEN:"kitchen",TERRACE:"terrace",SWIMMING_POOL:"pool",GARDEN:"garden",CORRIDOR:"hallway",PLAN:"plan",VIEWS:"view",FACADE:"facade",GARAGE:"garage",STORAGE:"storage",BALCONY:"terrace",DINING:"living_room",HALL:"hallway",PATIO:"garden",PORCH:"terrace" };
+  const FLOOR_MAP = { "Bajo":"groundFloor","Planta baja":"groundFloor","PB":"groundFloor","0":"groundFloor","Entreplanta":"mezzanine","Entresuelo":"mezzanine" };
+  const VALID_CERT = ["A","B","C","D","E","F","G","En tramite","Exento"];
+
+  function isValid(row) {
+    if (!row.ref||!row.tipo||!row.municipio||!row.dir) return false;
+    if (!row.cp&&!(row.latitud&&row.longitud)) return false;
+    if (!Number(row.precio_venta)||Number(row.precio_venta)<=0) return false;
+    if (!Number(row.m_const)||Number(row.m_const)<=0) return false;
+    if (!row.op||!row.desc_texto?.trim()) return false;
+    const tipo=TIPO_MAP[row.tipo]; if(!tipo) return false;
+    const needsBaths=["flat","house","rustic","premises_commercial","office"].includes(tipo);
+    if(needsBaths&&(Number(row.banos)||0)+(Number(row.aseo)||0)<=0) return false;
+    const residencial=["flat","house","rustic"].includes(tipo);
+    if(residencial&&(!row.cert_energ||!VALID_CERT.includes(row.cert_energ))) return false;
+    if(!Array.isArray(row.destinos)||!row.destinos.includes("Idealista")) return false;
+    return true;
+  }
+
+  function buildProperty(row, media) {
+    const tipo=TIPO_MAP[row.tipo]||"flat";
+    const isHouse=tipo==="house"||tipo==="rustic";
+    const isDuplex=row.tipo==="Duplex"||row.tipo==="Atico Duplex";
+    const isPenthouse=row.tipo==="Atico"||row.tipo==="Atico Duplex";
+    const isStudio=row.tipo==="Estudio";
+    const property={propertyCode:row.ref,propertyReference:row.ref,propertyVisibility:"idealista"};
+    const price=Number(row.precio_venta)||0;
+    const op={operationType:row.op==="Alquiler"?"rent":"sale"};
+    if(price>0) op.operationPrice=price;
+    const community=Number(row.comunidad)||0; if(community>0) op.operationPriceCommunity=community;
+    property.propertyOperation=op;
+    property.propertyContact={contactName:"Mallorca Nativa Properties",contactEmail:"mallorcanativaproperties@gmail.com",contactPrimaryPhonePrefix:"34",contactPrimaryPhoneNumber:"655882682"};
+    const addr={addressCountry:"Spain"};
+    if(row.vis_dir==="Direccion exacta") addr.addressVisibility="full";
+    else if(row.vis_dir==="Solo calle") addr.addressVisibility="street";
+    else addr.addressVisibility="hidden";
+    if(row.dir) addr.addressStreetName=row.dir;
+    if(row.num) addr.addressStreetNumber=String(row.num);
+    if(row.planta){const fv=String(row.planta).trim();if(FLOOR_MAP[fv]) addr.addressFloor=FLOOR_MAP[fv];else{const n=parseInt(fv);if(!isNaN(n)&&n>=1&&n<=20) addr.addressFloor=String(n);}}
+    if(row.puerta) addr.addressDoor=String(row.puerta);
+    if(row.cp) addr.addressPostalCode=String(row.cp);
+    if(row.municipio) addr.addressTown=row.municipio;
+    if(row.latitud&&row.longitud){addr.addressCoordinatesPrecision="exact";addr.addressCoordinatesLatitude=Number(row.latitud);addr.addressCoordinatesLongitude=Number(row.longitud);}
+    property.propertyAddress=addr;
+    const feat={featuresType:tipo};
+    const mConst=Number(row.m_const)||0; if(mConst>0) feat.featuresAreaConstructed=mConst;
+    const mUtil=Number(row.m_util)||0; if(mUtil>0) feat.featuresAreaUsable=mUtil;
+    const mParcela=Number(row.m_parcela)||0; if((isHouse||tipo==="land")&&mParcela>0) feat.featuresAreaPlot=mParcela;
+    const banos=(Number(row.banos)||0)+(Number(row.aseo)||0); if(banos>0) feat.featuresBathroomNumber=banos;
+    const bedrooms=(Number(row.hab_dobles)||0)+(Number(row.hab_simples)||0); if(bedrooms>0) feat.featuresBedroomNumber=bedrooms;
+    if(row.ano_construc){const y=parseInt(row.ano_construc);if(y>1800&&y<=new Date().getFullYear()) feat.featuresBuiltYear=y;}
+    if(row.jardin===true) feat.featuresGarden=true;
+    if(row.ascensor===true) feat.featuresLiftAvailable=true;
+    if(row.piscina===true) feat.featuresPool=true;
+    if(row.trastero===true) feat.featuresStorage=true;
+    if(row.terraza===true) feat.featuresTerrace=true;
+    if(row.armarios===true) feat.featuresWardrobes=true;
+    if(row.balcon===true) feat.featuresBalcony=true;
+    if(row.parking==="Si") feat.featuresParkingAvailable=true;
+    if(row.venta_mobiliario===true) feat.featuresEquippedWithFurniture=true;
+    if(row.aire_acond_tipo&&row.aire_acond_tipo!=="No disponible") feat.featuresConditionedAir=true;
+    if(row.calefaccion&&HEAT_MAP[row.calefaccion]) feat.featuresHeatingType=HEAT_MAP[row.calefaccion];
+    if(row.vent_ext===true) feat.featuresWindowsLocation="exterior";
+    if(isStudio) feat.featuresStudio=true;
+    if(isPenthouse) feat.featuresPenthouse=true;
+    if(isDuplex) feat.featuresDuplex=true;
+    const conserv=CONSERV_MAP[row.conserv]; if(conserv) feat.featuresConservation=conserv;
+    if(row.cert_energ){if(row.cert_energ==="En tramite") feat.featuresEnergyCertificateRating="inProcess";else if(row.cert_energ==="Exento") feat.featuresEnergyCertificateRating="exempt";else if(/^[A-G]$/.test(row.cert_energ)) feat.featuresEnergyCertificateRating=row.cert_energ;}
+    if(row.emisiones_energ&&/^[A-G]$/.test(row.emisiones_energ)) feat.featuresEnergyCertificateEmissionsRating=row.emisiones_energ;
+    if(row.orient){const o=row.orient.toLowerCase();if(o.includes("norte")||o.includes("north")) feat.featuresOrientationNorth=true;if(o.includes("sur")||o.includes("south")) feat.featuresOrientationSouth=true;if(o.includes("este")||o.includes("east")) feat.featuresOrientationEast=true;if(o.includes("oeste")||o.includes("west")) feat.featuresOrientationWest=true;}
+    property.propertyFeatures=feat;
+    const descs=[];
+    if(row.desc_texto?.trim()) descs.push({descriptionLanguage:"spanish",descriptionText:row.desc_texto.trim()});
+    if(row.desc_en?.trim()) descs.push({descriptionLanguage:"english",descriptionText:row.desc_en.trim()});
+    if(row.desc_de?.trim()) descs.push({descriptionLanguage:"german",descriptionText:row.desc_de.trim()});
+    if(descs.length>0) property.propertyDescriptions=descs;
+    const photos=(media||[]).filter(m=>m.tipo==="foto"&&m.url).sort((a,b)=>(a.orden||0)-(b.orden||0));
+    if(photos.length>0){
+      property.propertyImages=photos.map((photo,i)=>{
+        const url=String(photo.url||"");
+        const marker="propiedades-media/";
+        const idx=url.indexOf(marker);
+        const relativePath=idx!==-1?url.substring(idx+marker.length):url;
+        const img={imageOrder:i+1,imageUrl:relativePath};
+        if(photo.etiqueta&&IMAGE_TAG_MAP[photo.etiqueta]) img.imageLabel=IMAGE_TAG_MAP[photo.etiqueta];
+        return img;
+      });
+    }
+    if(row.tour360?.startsWith("http")) property.propertyVirtualTour={virtualTourUrl:row.tour360};
+    return property;
+  }
+
+  function cleanObj(obj) {
+    if(Array.isArray(obj)) return obj.map(cleanObj).filter(v=>v!==null&&v!==undefined);
+    if(obj&&typeof obj==="object") return Object.fromEntries(Object.entries(obj).filter(([,v])=>v!==null&&v!==undefined&&v!=="").map(([k,v])=>[k,cleanObj(v)]));
+    return obj;
+  }
+
+  async function generarJSON() {
+    setLoading(true); setStatus(null); setMsg("Leyendo propiedades...");
+    try {
+      const {data:propiedades,error:e1}=await supabase.from("propiedades").select("*").eq("estado","publicada");
+      if(e1) throw e1;
+      setMsg("Leyendo fotos...");
+      const {data:mediaAll,error:e2}=await supabase.from("media_propiedades").select("*");
+      if(e2) throw e2;
+      const validas=(propiedades||[]).filter(isValid);
+      if(validas.length===0){setStatus("error");setMsg("No hay propiedades publicadas que cumplan los requisitos de Idealista.");setLoading(false);return;}
+      const now=new Date();
+      const sendDate=`${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,"0")}/${String(now.getDate()).padStart(2,"0")} ${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}:${String(now.getSeconds()).padStart(2,"0")}`;
+      const feed={customerCountry:"Spain",customerCode:CUSTOMER_CODE,customerReference:"Mallorca Nativa Properties CRM",customerSendDate:sendDate,customerContact:{contactName:"Mallorca Nativa Properties",contactEmail:"mallorcanativaproperties@gmail.com",contactPrimaryPhonePrefix:"34",contactPrimaryPhoneNumber:"655882682"},customerProperties:validas.map(row=>{const media=(mediaAll||[]).filter(m=>m.ref_propiedad===row.ref);return buildProperty(row,media);})};
+      const clean=cleanObj(feed);
+      const blob=new Blob([JSON.stringify(clean,null,2)],{type:"application/json"});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement("a");a.href=url;a.download=`${CUSTOMER_CODE}.json`;a.click();
+      URL.revokeObjectURL(url);
+      setStatus("ok");setMsg(`✅ JSON generado con ${validas.length} propiedad(es) — descarga iniciada.`);
+    } catch(err){setStatus("error");setMsg("Error: "+err.message);}
+    setLoading(false);
+  }
+
+  return (
+    <div style={{marginTop:16,padding:"16px",background:"#1A1915",border:"1px solid #2A2926",borderRadius:4}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:16}}>
+        <div>
+          <div style={{fontSize:11,fontWeight:700,color:"#C8A97E",textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:4}}>JSON Idealista</div>
+          <div style={{fontSize:11,color:"#7A7870"}}>Genera y descarga el fichero para enviar a António</div>
+        </div>
+        <button onClick={generarJSON} disabled={loading} style={{background:loading?"#2A2926":"#C8A97E",border:"none",borderRadius:3,color:loading?"#7A7870":"#111110",fontSize:11,fontWeight:700,cursor:loading?"not-allowed":"pointer",padding:"8px 18px",fontFamily:"'Manrope', sans-serif",letterSpacing:"0.05em",whiteSpace:"nowrap"}}>
+          {loading?"Generando...":"⬇ Descargar JSON"}
+        </button>
+      </div>
+      {(status||loading)&&<div style={{fontSize:11,color:status==="ok"?"#6AAF8D":status==="error"?"#D45454":"#7A7870",marginTop:10,padding:"8px 12px",background:status==="ok"?"#6AAF8D11":status==="error"?"#D4545411":"#2A292611",borderRadius:3,border:"1px solid "+(status==="ok"?"#6AAF8D44":status==="error"?"#D4545444":"#2A2926")}}>{msg}</div>}
     </div>
   );
 }
