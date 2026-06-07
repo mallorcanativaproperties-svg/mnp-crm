@@ -985,7 +985,6 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
   const [editMode, setEditMode] = useState(!p.id);
-  const [destinosEdit, setDestinosEdit] = useState(null); // null = no editando destinos
   const [draft, setDraft] = useState({ ...p, 
     suministrosText: (p.suministros || []).join(", "),
     cualPosText: (p.cualPos || []).join("\n"),
@@ -1260,10 +1259,9 @@ REGLAS:
             cualPos: (draft.cualPosText || "").split("\n").filter(Boolean),
             cualNeg: (draft.cualNegText || "").split("\n").filter(Boolean),
             cualMejoras: (draft.cualMejorasText || "").split("\n").filter(Boolean),
-            destinos: destinosEdit !== null ? destinosEdit : draft.destinos,
+            destinos: draft.destinos || [],
           };
           if (onUpdate) onUpdate(toSave);
-          setDestinosEdit(null);
           setEditMode(false);
         }} 
           style={{ position: "absolute", top: 16, right: 120, background: "#6AAF8D", border: "none", borderRadius: 3, color: "#111110", fontSize: 10, cursor: "pointer", padding: "5px 14px", fontWeight: 600, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.05em", transition: "all 0.2s" }}>
@@ -1360,15 +1358,15 @@ REGLAS:
                     key={e.key}
                     onClick={() => {
                       if (e.key === "publicada") {
-                        setDraft(prev => ({ ...prev, estado: "publicada" }));
-                        setDestinosEdit([]); // reset destinos independiente del draft
-                        setEditMode(true);
+                        setDraft(prev => ({ ...prev, estado: "publicada", destinos: [] }));
+                        if (!editMode) setEditMode(true);
                         setTimeout(() => {
                           const el = document.getElementById("seccion-exportar-portales");
                           if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
                         }, 100);
                       } else {
-                        setDraft(prev => ({ ...prev, estado: e.key }));
+                        // Al cambiar a otro estado, limpiar destinos
+                        setDraft(prev => ({ ...prev, estado: e.key, destinos: [] }));
                       }
                     }}
                     style={{
@@ -1648,29 +1646,33 @@ REGLAS:
         {/* Exportar */}
         <div id="seccion-exportar-portales" />
         <Sec title="Exportar a portales">
+          {/* Solo se pueden marcar portales si el estado es "publicada" */}
+          {d.estado !== "publicada" && editMode && (
+            <div style={{ fontSize: 11, color: "#7A7870", marginBottom: 10 }}>Marca el estado como <strong style={{color:"#C8A97E"}}>Publicada</strong> para seleccionar portales.</div>
+          )}
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             {DESTINOS.map((dest) => {
-              const currentDestinos = editMode ? (destinosEdit !== null ? destinosEdit : (d.destinos || [])) : p.destinos;
-              const on = currentDestinos.includes(dest);
+              const activaDests = editMode ? (draft.destinos || []) : (p.destinos || []);
+              const on = activaDests.includes(dest);
+              const canEdit = editMode && d.estado === "publicada";
               return (
                 <div key={dest}
                   onClick={() => {
-                    if (!editMode) return;
-                    const current = destinosEdit !== null ? destinosEdit : (d.destinos || []);
+                    if (!canEdit) return;
+                    const current = draft.destinos || [];
                     const next = on ? current.filter(x => x !== dest) : [...current, dest];
-                    setDestinosEdit(next);
                     upd("destinos", next);
                   }}
-                  style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 3, border: "1px solid " + (on ? "#8FA88A44" : "#2A2926"), background: on ? "#8FA88A0D" : "transparent", cursor: editMode ? "pointer" : "default", transition: "all 0.15s" }}>
+                  style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 3, border: "1px solid " + (on ? "#8FA88A44" : "#2A2926"), background: on ? "#8FA88A0D" : "transparent", cursor: canEdit ? "pointer" : "default", opacity: editMode && !canEdit ? 0.4 : 1, transition: "all 0.15s" }}>
                   <div style={{ width: 14, height: 14, borderRadius: 2, border: "1px solid " + (on ? "#8FA88A" : "#7A7870"), background: on ? "#8FA88A" : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    {on && <span style={{ color: "#161513", fontSize: 10, fontWeight: 700 }}>v</span>}
+                    {on && <span style={{ color: "#161513", fontSize: 10, fontWeight: 700 }}>✓</span>}
                   </div>
                   <span style={{ fontSize: 12, color: on ? "#8FA88A" : "#7A7870" }}>{dest}</span>
                 </div>
               );
             })}
           </div>
-          {editMode && <div style={{ fontSize: 10, color: "#7A7870", marginTop: 8 }}>Haz clic en cada portal para activar o desactivar</div>}
+          {editMode && d.estado === "publicada" && <div style={{ fontSize: 10, color: "#7A7870", marginTop: 8 }}>Haz clic para activar o desactivar cada portal</div>}
         </Sec>
         <div style={sep} />
 
