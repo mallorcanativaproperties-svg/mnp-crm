@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 
 const META_TOKEN = process.env.META_PAGE_TOKEN || "";

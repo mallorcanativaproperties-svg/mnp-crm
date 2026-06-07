@@ -1,10 +1,13 @@
+export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
-);
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+  );
+}
 
 export async function POST(request) {
   try {
@@ -13,7 +16,7 @@ export async function POST(request) {
       return NextResponse.json({ ok: false, error: "conversacion_id o telefono requerido" }, { status: 400 });
     }
 
-    let query = supabase.from("conversaciones").update({
+    let query = getSupabase().from("conversaciones").update({
       estado,
       updated_at: new Date().toISOString(),
     });

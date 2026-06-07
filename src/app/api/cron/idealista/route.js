@@ -6,10 +6,12 @@ import { Readable } from "stream";
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // 5 min — necesario para descargar+subir fotos
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+  );
+}
 
 const CUSTOMER_CODE = "ilc499e07c0814d8c79fcfe3b09eaad505d8b54e164";
 
@@ -182,7 +184,7 @@ function buildProperty(row, media) {
   if (photos.length > 0) {
     property.propertyImages = photos.map((photo, i) => {
       // Extraer solo el path relativo desde la URL de Supabase
-      // URL: https://xxx.supabase.co/storage/v1/object/public/propiedades-media/REF/foto/archivo.jpg
+      // URL: https://xxx.getSupabase().co/storage/v1/object/public/propiedades-media/REF/foto/archivo.jpg
       // Path relativo FTP: REF/foto/archivo.jpg
       const url = photo.url || "";
       const match = url.match(/propiedades-media\/(.+)$/);

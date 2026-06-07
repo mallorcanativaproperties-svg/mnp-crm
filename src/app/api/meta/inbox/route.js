@@ -1,10 +1,13 @@
+export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
-);
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+  );
+}
 
 const IG_TOKEN = process.env.META_INSTAGRAM_TOKEN || "";
 const PAGE_TOKEN = process.env.META_PAGE_TOKEN || "";
@@ -113,7 +116,7 @@ export async function POST(request) {
         .limit(1);
 
       if (!existing || existing.length === 0) {
-        await supabase.from("social_conversations").insert({
+        await getSupabase().from("social_conversations").insert({
           platform: "instagram",
           sender_id: username,
           sender_name: username,

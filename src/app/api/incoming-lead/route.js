@@ -1,10 +1,13 @@
+export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
-);
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+  );
+}
 
 const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN;
 const PHONE_ID = process.env.WHATSAPP_PHONE_ID;
@@ -182,7 +185,7 @@ export async function POST(request) {
         agenteAsignado = AGENTES[prefix]?.nombre || null;
       }
 
-      const { data: newConv } = await supabase.from("conversaciones").insert({
+      const { data: newConv } = await getSupabase().from("conversaciones").insert({
         contacto: lead.nombre || `Lead ${phone}`,
         telefono: phone,
         canal: "lystos",
@@ -208,7 +211,7 @@ export async function POST(request) {
 
     // Guardar mensajes en Supabase
     if (conv?.id) {
-      await supabase.from("mensajes").insert([
+      await getSupabase().from("mensajes").insert([
         {
           conversacion_id: conv.id,
           from_who: "ana",
@@ -218,7 +221,7 @@ export async function POST(request) {
         },
       ]);
 
-      await supabase.from("conversaciones").update({
+      await getSupabase().from("conversaciones").update({
         updated_at: new Date().toISOString(),
         estado: "activo",
       }).eq("id", conv.id);

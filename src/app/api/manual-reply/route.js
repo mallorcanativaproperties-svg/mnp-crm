@@ -1,10 +1,13 @@
+export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
-);
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+  );
+}
 
 const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN;
 const PHONE_ID = process.env.WHATSAPP_PHONE_ID;
@@ -39,7 +42,7 @@ export async function POST(request) {
 
     // Guardar en Supabase
     if (conversacion_id) {
-      await supabase.from("mensajes").insert({
+      await getSupabase().from("mensajes").insert({
         conversacion_id,
         from_who: "agente_manual",
         texto,
@@ -48,7 +51,7 @@ export async function POST(request) {
         wamid: waData.messages?.[0]?.id || null,
       });
 
-      await supabase.from("conversaciones").update({
+      await getSupabase().from("conversaciones").update({
         updated_at: new Date().toISOString(),
       }).eq("id", conversacion_id);
     }
