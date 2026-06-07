@@ -1351,7 +1351,7 @@ REGLAS:
             </div>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               {ESTADOS.map((e) => {
-                const active = p.estado === e.key;
+                const active = (editMode ? draft.estado : p.estado) === e.key;
                 return (
                   <button
                     key={e.key}
