@@ -1714,7 +1714,7 @@ function IdealistaJsonButton({ supabase }) {
     if (!row.op||!row.desc_texto?.trim()) return false;
     const tipo=TIPO_MAP[row.tipo]; if(!tipo) return false;
     const needsBaths=["flat","house","rustic","premises_commercial","office"].includes(tipo);
-    if(needsBaths&&(Number(row.banos)||0)+(Number(row.aseo)||0)<=0) return false;
+    if(needsBaths&&(Number(row.banos)||0)+(Number(row.aseos)||0)<=0) return false;
     const residencial=["flat","house","rustic"].includes(tipo);
     if(residencial&&(!row.cert_energ||!VALID_CERT.includes(row.cert_energ))) return false;
     if(!Array.isArray(row.destinos)||!row.destinos.includes("Idealista")) return false;
@@ -1750,7 +1750,7 @@ function IdealistaJsonButton({ supabase }) {
     const mConst=Number(row.m_const)||0; if(mConst>0) feat.featuresAreaConstructed=mConst;
     const mUtil=Number(row.m_util)||0; if(mUtil>0) feat.featuresAreaUsable=mUtil;
     const mParcela=Number(row.m_parcela)||0; if((isHouse||tipo==="land")&&mParcela>0) feat.featuresAreaPlot=mParcela;
-    const banos=(Number(row.banos)||0)+(Number(row.aseo)||0); if(banos>0) feat.featuresBathroomNumber=banos;
+    const banos=(Number(row.banos)||0)+(Number(row.aseos)||0); if(banos>0) feat.featuresBathroomNumber=banos;
     const bedrooms=(Number(row.hab_dobles)||0)+(Number(row.hab_simples)||0); if(bedrooms>0) feat.featuresBedroomNumber=bedrooms;
     if(row.ano_construc){const y=parseInt(row.ano_construc);if(y>1800&&y<=new Date().getFullYear()) feat.featuresBuiltYear=y;}
     if(row.jardin===true) feat.featuresGarden=true;
