@@ -956,7 +956,7 @@ function PropCard({ p, onClick }) {
         <span style={{ opacity: 0.3 }}>|</span>
         <span>{p.agente}</span>
       </div>
-      {p.destinos.length > 0 && (
+      {p.estado === "publicada" && p.destinos.length > 0 && (
         <div style={{ display: "flex", gap: 5, marginTop: 10, flexWrap: "wrap" }}>
           {p.destinos.map((d, i) => (
             <span key={i} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 2, background: "#8FA88A0D", color: "#8FA88A", border: "1px solid #8FA88A22" }}>{d}</span>
