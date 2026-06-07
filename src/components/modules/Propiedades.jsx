@@ -1356,15 +1356,16 @@ REGLAS:
                   <button
                     key={e.key}
                     onClick={() => {
-                      upd("estado", e.key);
-                      // Si se marca publicada, entrar en modo edición, resetear destinos y hacer scroll
                       if (e.key === "publicada") {
-                        upd("destinos", []);
+                        // Un solo setDraft para evitar batching de React
+                        setDraft(prev => ({ ...prev, estado: "publicada", destinos: [] }));
                         if (!editMode) setEditMode(true);
                         setTimeout(() => {
                           const el = document.getElementById("seccion-exportar-portales");
                           if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
                         }, 150);
+                      } else {
+                        setDraft(prev => ({ ...prev, estado: e.key }));
                       }
                     }}
                     style={{
