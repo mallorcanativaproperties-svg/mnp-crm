@@ -1717,9 +1717,9 @@ REGLAS:
 
 // ─── Componente: Botón descarga JSON Idealista ────────────────────────────────
 function IdealistaJsonButton({ supabase }) {
-  const [loading, setLoading] = React.useState(false);
-  const [status, setStatus] = React.useState(null);
-  const [msg, setMsg] = React.useState("");
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState(null);
+  const [msg, setMsg] = useState("");
 
   const CUSTOMER_CODE = "ilc499e07c0814d8c79fcfe3b09eaad505d8b54e164";
   const TIPO_MAP = { Piso:"flat",Estudio:"flat",Atico:"flat","Atico Duplex":"flat",Duplex:"flat","Planta baja":"flat",Casa:"house",Chalet:"house",Adosado:"house",Villa:"house","Finca rustica":"rustic",Finca:"rustic","Local comercial":"premises_commercial",Local:"premises_commercial",Oficina:"office",Parking:"garage",Garaje:"garage",Terreno:"land",Trastero:"storage",Edificio:"building" };
