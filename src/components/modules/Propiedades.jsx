@@ -1355,12 +1355,18 @@ REGLAS:
                 return (
                   <button
                     key={e.key}
-                    onClick={() => { 
-                      const updates = { ...p, estado: e.key };
+                    onClick={() => {
+                      // Actualizar el draft con el nuevo estado
+                      draft.estado = e.key;
+                      upd("estado", e.key);
+                      // Si se marca publicada, entrar en modo edición y hacer scroll a destinos
                       if (e.key === "publicada") {
-                        updates.destinos = [...DESTINOS];
+                        if (!editMode) setEditMode(true);
+                        setTimeout(() => {
+                          const el = document.getElementById("seccion-exportar-portales");
+                          if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                        }, 150);
                       }
-                      if (onUpdate) onUpdate(updates); 
                     }}
                     style={{
                       padding: "8px 18px", borderRadius: 3,
@@ -1637,12 +1643,20 @@ REGLAS:
         <div style={sep} />
 
         {/* Exportar */}
+        <div id="seccion-exportar-portales" />
         <Sec title="Exportar a portales">
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             {DESTINOS.map((dest) => {
-              const on = p.destinos.includes(dest);
+              const on = editMode ? (d.destinos || []).includes(dest) : p.destinos.includes(dest);
               return (
-                <div key={dest} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 3, border: "1px solid " + (on ? "#8FA88A44" : "#2A2926"), background: on ? "#8FA88A0D" : "transparent" }}>
+                <div key={dest}
+                  onClick={() => {
+                    if (!editMode) return;
+                    const current = d.destinos || [];
+                    const next = on ? current.filter(x => x !== dest) : [...current, dest];
+                    upd("destinos", next);
+                  }}
+                  style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 3, border: "1px solid " + (on ? "#8FA88A44" : "#2A2926"), background: on ? "#8FA88A0D" : "transparent", cursor: editMode ? "pointer" : "default", transition: "all 0.15s" }}>
                   <div style={{ width: 14, height: 14, borderRadius: 2, border: "1px solid " + (on ? "#8FA88A" : "#7A7870"), background: on ? "#8FA88A" : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     {on && <span style={{ color: "#161513", fontSize: 10, fontWeight: 700 }}>v</span>}
                   </div>
@@ -1651,6 +1665,7 @@ REGLAS:
               );
             })}
           </div>
+          {editMode && <div style={{ fontSize: 10, color: "#7A7870", marginTop: 8 }}>Haz clic en cada portal para activar o desactivar</div>}
         </Sec>
         <IdealistaJsonButton supabase={supabase} />
         <div style={sep} />
