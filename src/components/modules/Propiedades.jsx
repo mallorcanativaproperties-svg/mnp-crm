@@ -1171,7 +1171,7 @@ Parrafo 7: Llamada a la accion breve y directa. Ejemplo: "Haz de este piso tu nu
 
 REGLAS:
 - Integra TODOS los puntos positivos del formulario interno en la narrativa
-- El texto DEBE tener entre 2.800 y 3.500 caracteres. NUNCA superar 3.500. Es preferible quedarse corto que pasarse. Si llegas al parrafo 7 y vas largo, hazlo mas breve
+- El texto DEBE tener entre 2.500 y 3.200 caracteres. NUNCA superar 3.200. Cada parrafo debe ser conciso y denso en informacion, sin frases de relleno. Si un parrafo va largo, condensalo
 - NUNCA incluyas datos del propietario, honorarios, precio ni informacion confidencial
 - NUNCA pongas titulos, subtitulos ni encabezados
 - Si algo necesita mejora, presentalo siempre como oportunidad positiva
@@ -1183,7 +1183,7 @@ REGLAS:
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "claude-haiku-4-5-20251001",
-          max_tokens: 1500,
+          max_tokens: 1300,
           messages: [
             { role: "user", content: "Genera la descripcion para portal inmobiliario de esta propiedad:\n\n" + fichaTexto }
           ],
@@ -1203,16 +1203,10 @@ REGLAS:
         return;
       }
       
-      let text = data.content
+      const text = data.content
         .filter((item) => item.type === "text")
         .map((item) => item.text)
         .join("\n");
-      // Truncar a 3.800 caracteres máximo — límite Idealista es 4.000
-      // Cortar en el último punto antes de 3.800 para no dejar frase a medias
-      if (text.length > 3800) {
-        const cutoff = text.lastIndexOf(".", 3800);
-        text = cutoff > 3000 ? text.substring(0, cutoff + 1) : text.substring(0, 3800);
-      }
       setAiDesc(text);
       upd("desc", text);
       if (!editMode) setEditMode(true);
