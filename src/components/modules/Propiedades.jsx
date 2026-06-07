@@ -1357,13 +1357,13 @@ REGLAS:
                     key={e.key}
                     onClick={() => {
                       if (e.key === "publicada") {
-                        // Un solo setDraft para evitar batching de React
-                        setDraft(prev => ({ ...prev, estado: "publicada", destinos: [] }));
-                        if (!editMode) setEditMode(true);
+                        setEditMode(true);
+                        // Usar setTimeout para aplicar el reset DESPUÉS de que editMode se active
                         setTimeout(() => {
+                          setDraft(prev => ({ ...prev, estado: "publicada", destinos: [] }));
                           const el = document.getElementById("seccion-exportar-portales");
                           if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-                        }, 150);
+                        }, 50);
                       } else {
                         setDraft(prev => ({ ...prev, estado: e.key }));
                       }
