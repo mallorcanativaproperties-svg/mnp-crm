@@ -20,11 +20,5 @@
         }
       ]
     }
-  ],
-  "crons": [
-    {
-      "path": "/api/cron/idealista",
-      "schedule": "*/15 * * * *"
-    }
   ]
 }
