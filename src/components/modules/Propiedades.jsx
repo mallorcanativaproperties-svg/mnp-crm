@@ -1667,7 +1667,6 @@ REGLAS:
           </div>
           {editMode && <div style={{ fontSize: 10, color: "#7A7870", marginTop: 8 }}>Haz clic en cada portal para activar o desactivar</div>}
         </Sec>
-        <IdealistaJsonButton supabase={supabase} />
         <div style={sep} />
 
         {/* Datos internos */}
@@ -1839,17 +1838,14 @@ function IdealistaJsonButton({ supabase }) {
   }
 
   return (
-    <div style={{marginTop:16,padding:"16px",background:"#1A1915",border:"1px solid #2A2926",borderRadius:4}}>
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:16}}>
-        <div>
-          <div style={{fontSize:11,fontWeight:700,color:"#C8A97E",textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:4}}>JSON Idealista</div>
-          <div style={{fontSize:11,color:"#7A7870"}}>Genera y descarga el fichero para enviar a António</div>
-        </div>
-        <button onClick={generarJSON} disabled={loading} style={{background:loading?"#2A2926":"#C8A97E",border:"none",borderRadius:3,color:loading?"#7A7870":"#111110",fontSize:11,fontWeight:700,cursor:loading?"not-allowed":"pointer",padding:"8px 18px",fontFamily:"'Manrope', sans-serif",letterSpacing:"0.05em",whiteSpace:"nowrap"}}>
-          {loading?"Generando...":"⬇ Descargar JSON"}
-        </button>
-      </div>
-      {(status||loading)&&<div style={{fontSize:11,color:status==="ok"?"#6AAF8D":status==="error"?"#D45454":"#7A7870",marginTop:10,padding:"8px 12px",background:status==="ok"?"#6AAF8D11":status==="error"?"#D4545411":"#2A292611",borderRadius:3,border:"1px solid "+(status==="ok"?"#6AAF8D44":status==="error"?"#D4545444":"#2A2926")}}>{msg}</div>}
+    <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:6}}>
+      <button onClick={generarJSON} disabled={loading}
+        style={{background:loading?"#2A2926":"transparent",border:"1px solid "+(loading?"#3A3A38":"#8FA88A"),borderRadius:3,color:loading?"#7A7870":"#8FA88A",fontSize:11,fontWeight:600,cursor:loading?"not-allowed":"pointer",padding:"12px 20px",fontFamily:"'Manrope', sans-serif",letterSpacing:"0.1em",whiteSpace:"nowrap",textTransform:"uppercase",transition:"all 0.3s"}}
+        onMouseEnter={e=>{if(!loading){e.currentTarget.style.background="#8FA88A";e.currentTarget.style.color="#111110";}}}
+        onMouseLeave={e=>{if(!loading){e.currentTarget.style.background="transparent";e.currentTarget.style.color="#8FA88A";}}}>
+        {loading?"Generando...":"⬇ JSON Idealista"}
+      </button>
+      {(status||loading)&&<div style={{fontSize:10,color:status==="ok"?"#6AAF8D":status==="error"?"#D45454":"#7A7870",textAlign:"right"}}>{msg}</div>}
     </div>
   );
 }
@@ -2015,6 +2011,7 @@ export default function CRMPropiedades() {
               </h1>
               <p style={{ fontSize: 12, color: "#7A7870", margin: "10px 0 0", letterSpacing: "0.04em" }}>{data.length} inmuebles - {pub} publicados</p>
             </div>
+            <IdealistaJsonButton supabase={supabase} />
             <button
               onClick={() => {
                 const newProp = {
