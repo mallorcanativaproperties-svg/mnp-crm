@@ -1652,7 +1652,9 @@ REGLAS:
           )}
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             {DESTINOS.map((dest) => {
-              const activaDests = editMode ? (draft.destinos || []) : (p.destinos || []);
+              // Solo mostrar portales marcados si el estado es "publicada"
+              const estadoActual = editMode ? draft.estado : p.estado;
+              const activaDests = estadoActual === "publicada" ? (editMode ? (draft.destinos || []) : (p.destinos || [])) : [];
               const on = activaDests.includes(dest);
               const canEdit = editMode && d.estado === "publicada";
               return (
