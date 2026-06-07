@@ -1260,17 +1260,11 @@ REGLAS:
             cualNeg: (draft.cualNegText || "").split("\n").filter(Boolean),
             cualMejoras: (draft.cualMejorasText || "").split("\n").filter(Boolean),
           };
-          if (!idealistaReady) {
-            alert("No se puede guardar. Faltan " + idealistaFieldErrors.size + " campo(s) obligatorio(s) para Idealista:\n\n" + 
-              [...idealistaFieldErrors].map(f => "• " + f).join("\n") + 
-              "\n\nCompleta todos los campos marcados en rojo antes de guardar.");
-            return;
-          }
-          if (onUpdate) onUpdate(toSave); setEditMode(false); }} 
-          disabled={!idealistaReady}
-          title={!idealistaReady ? "Faltan " + idealistaFieldErrors.size + " campo(s) obligatorio(s) para Idealista" : ""}
-          style={{ position: "absolute", top: 16, right: 120, background: idealistaReady ? "#6AAF8D" : "#3A3A38", border: "none", borderRadius: 3, color: idealistaReady ? "#111110" : "#5A584F", fontSize: 10, cursor: idealistaReady ? "pointer" : "not-allowed", padding: "5px 14px", fontWeight: 600, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.05em", transition: "all 0.2s" }}>
-          {idealistaReady ? "Guardar" : "Guardar (" + idealistaFieldErrors.size + " ⚠)"}
+          if (onUpdate) onUpdate(toSave);
+          setEditMode(false);
+        }} 
+          style={{ position: "absolute", top: 16, right: 120, background: "#6AAF8D", border: "none", borderRadius: 3, color: "#111110", fontSize: 10, cursor: "pointer", padding: "5px 14px", fontWeight: 600, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.05em", transition: "all 0.2s" }}>
+          Guardar
         </button>}
         {editMode && <button onClick={() => { setDraft({ ...p,
           suministrosText: (p.suministros || []).join(", "),
