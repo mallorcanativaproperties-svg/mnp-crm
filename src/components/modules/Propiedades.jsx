@@ -54,7 +54,7 @@ function mapJsToDb(p) {
     ibi: Number(p.ibi) || 0, basuras: Number(p.basuras) || 0, comunidad: Number(p.comunidad) || 0, extra_comunidad: Number(p.extraComunidad) || 0, otros_gastos: p.otrosGastos,
     desc_texto: p.desc, notas_priv: p.notasPriv,
     prop_nombre: p.propNombre, prop_tel: p.propTel, prop_email: p.propEmail,
-    agente: p.agente, estado: p.estado, destinos: p.destinos,
+    agente: p.agente, estado: p.estado, destinos: p.estado === "publicada" ? (p.destinos || []) : [],
     fotos: p.fotos, videos: p.videos, tour360: p.tour360, planos: p.planos,
     fecha_cap: p.fechaCap, visitas: p.visitas,
     cual_pos: p.cualPos, cual_neg: p.cualNeg, cual_mejoras: p.cualMejoras,
