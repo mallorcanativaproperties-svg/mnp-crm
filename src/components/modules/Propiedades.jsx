@@ -985,6 +985,7 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
   const [editMode, setEditMode] = useState(!p.id);
+  const [destinosEdit, setDestinosEdit] = useState(null); // null = no editando destinos
   const [draft, setDraft] = useState({ ...p, 
     suministrosText: (p.suministros || []).join(", "),
     cualPosText: (p.cualPos || []).join("\n"),
@@ -1259,8 +1260,10 @@ REGLAS:
             cualPos: (draft.cualPosText || "").split("\n").filter(Boolean),
             cualNeg: (draft.cualNegText || "").split("\n").filter(Boolean),
             cualMejoras: (draft.cualMejorasText || "").split("\n").filter(Boolean),
+            destinos: destinosEdit !== null ? destinosEdit : draft.destinos,
           };
           if (onUpdate) onUpdate(toSave);
+          setDestinosEdit(null);
           setEditMode(false);
         }} 
           style={{ position: "absolute", top: 16, right: 120, background: "#6AAF8D", border: "none", borderRadius: 3, color: "#111110", fontSize: 10, cursor: "pointer", padding: "5px 14px", fontWeight: 600, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.05em", transition: "all 0.2s" }}>
@@ -1357,13 +1360,13 @@ REGLAS:
                     key={e.key}
                     onClick={() => {
                       if (e.key === "publicada") {
+                        setDraft(prev => ({ ...prev, estado: "publicada" }));
+                        setDestinosEdit([]); // reset destinos independiente del draft
                         setEditMode(true);
-                        // Usar setTimeout para aplicar el reset DESPUÉS de que editMode se active
                         setTimeout(() => {
-                          setDraft(prev => ({ ...prev, estado: "publicada", destinos: [] }));
                           const el = document.getElementById("seccion-exportar-portales");
                           if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-                        }, 50);
+                        }, 100);
                       } else {
                         setDraft(prev => ({ ...prev, estado: e.key }));
                       }
@@ -1647,13 +1650,15 @@ REGLAS:
         <Sec title="Exportar a portales">
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             {DESTINOS.map((dest) => {
-              const on = editMode ? (d.destinos || []).includes(dest) : p.destinos.includes(dest);
+              const currentDestinos = editMode ? (destinosEdit !== null ? destinosEdit : (d.destinos || [])) : p.destinos;
+              const on = currentDestinos.includes(dest);
               return (
                 <div key={dest}
                   onClick={() => {
                     if (!editMode) return;
-                    const current = d.destinos || [];
+                    const current = destinosEdit !== null ? destinosEdit : (d.destinos || []);
                     const next = on ? current.filter(x => x !== dest) : [...current, dest];
+                    setDestinosEdit(next);
                     upd("destinos", next);
                   }}
                   style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 3, border: "1px solid " + (on ? "#8FA88A44" : "#2A2926"), background: on ? "#8FA88A0D" : "transparent", cursor: editMode ? "pointer" : "default", transition: "all 0.15s" }}>
