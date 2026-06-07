@@ -1356,11 +1356,10 @@ REGLAS:
                   <button
                     key={e.key}
                     onClick={() => {
-                      // Actualizar el draft con el nuevo estado
-                      draft.estado = e.key;
                       upd("estado", e.key);
-                      // Si se marca publicada, entrar en modo edición y hacer scroll a destinos
+                      // Si se marca publicada, entrar en modo edición, resetear destinos y hacer scroll
                       if (e.key === "publicada") {
+                        upd("destinos", []);
                         if (!editMode) setEditMode(true);
                         setTimeout(() => {
                           const el = document.getElementById("seccion-exportar-portales");
