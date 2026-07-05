@@ -262,7 +262,6 @@ export default function FormularioCaptacion() {
   // Venta
   const [precioVenta, setPrecioVenta] = useState("");
   const [precioProp, setPrecioProp] = useState("");
-  const [precioAnt, setPrecioAnt] = useState("");
   const [precioTraspaso, setPrecioTraspaso] = useState("");
   const [honTipo, setHonTipo] = useState("porcentaje");
   const [honVal, setHonVal] = useState("");
@@ -333,7 +332,6 @@ export default function FormularioCaptacion() {
 
   // Cualificacion
   const [cualPos, setCualPos] = useState(["", "", "", "", "", ""]);
-  const [cualMejoras, setCualMejoras] = useState(["", "", "", "", "", ""]);
 
   const g2 = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 20px" };
   const g3 = { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0 20px" };
@@ -355,7 +353,6 @@ export default function FormularioCaptacion() {
         planta: planta || null, puerta: null,
         precio_venta: Number(precioVenta) || 0,
         precio_prop: Number(precioProp) || 0,
-        precio_ant: Number(precioAnt) || 0,
         precio_traspaso: Number(precioTraspaso) || 0,
         honorarios: Number(honVal) || 5,
         honorarios_tipo: honTipo,
@@ -403,7 +400,6 @@ export default function FormularioCaptacion() {
         prop_tel: propTel || null,
         prop_email: propEmail || null,
         cual_pos: cualPos.filter(Boolean),
-        cual_mejoras: cualMejoras.filter(Boolean),
         visitas: 0,
         fotos: 0, videos: 0, planos: 0,
       };
@@ -604,7 +600,6 @@ export default function FormularioCaptacion() {
         <Sec title="Datos de venta">
           <div style={g2}>
             <Input label="Precio de venta" value={precioVenta} onChange={setPrecioVenta} type="number" placeholder="399000" required />
-            <Input label="Precio anterior (si bajada)" value={precioAnt} onChange={setPrecioAnt} type="number" placeholder="" />
           </div>
           {op === "Traspaso" && (
             <Input label="Precio traspaso" value={precioTraspaso} onChange={setPrecioTraspaso} type="number" />
@@ -659,7 +654,7 @@ export default function FormularioCaptacion() {
             </div>
             <div>
               <span style={{ fontSize: 10, fontWeight: 600, color: "#A89BC4", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 8 }}>Que mejorarias</span>
-              <QualRow items={cualMejoras} onChange={setCualMejoras} color="#A89BC4" symbol="^" />
+
             </div>
           </div>
         </Sec>
