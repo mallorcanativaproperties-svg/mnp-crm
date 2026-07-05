@@ -257,7 +257,7 @@ export default function FormularioCaptacion() {
   const [zona, setZona] = useState("");
   const [orient, setOrient] = useState("");
   const [distPlaya, setDistPlaya] = useState("");
-  const [visDir, setVisDir] = useState("Direccion exacta");
+  const [visDir, setVisDir] = useState("Ocultar direccion");
 
   // Venta
   const [precioVenta, setPrecioVenta] = useState("");

@@ -7,7 +7,7 @@ function mapDbToJs(row) {
     id: row.id, ref: row.ref || "", tipo: row.tipo || "", op: row.op || "Compraventa",
     titulo: row.titulo || "", dir: row.dir || "", num: row.num || "", cp: row.cp || "",
     municipio: row.municipio || "", zona: row.zona || "",
-    visDir: row.vis_dir || "Solo zona", orient: row.orient || "", distPlaya: row.dist_playa || "",
+    visDir: row.vis_dir || "Ocultar direccion", orient: row.orient || "", distPlaya: row.dist_playa || "",
     precioVenta: Number(row.precio_venta) || 0, precioProp: Number(row.precio_prop) || 0, precioAnt: Number(row.precio_ant) || 0, precioTraspaso: Number(row.precio_traspaso) || 0,
     honorariosTipo: row.honorarios_tipo || "porcentaje", honorarios: Number(row.honorarios) || 0, ivaHon: Number(row.iva_hon) || 21,
     certEnerg: row.cert_energ || "", conserv: row.conserv || "", anoConstruc: row.ano_construc || "",
@@ -2204,7 +2204,7 @@ export default function CRMPropiedades() {
               onClick={() => {
                 const newProp = {
                   id: null, ref: "", tipo: "Piso", op: "Compraventa", estado: "borrador", titulo: "",
-                  dir: "", num: "", cp: "", puerta: "", municipio: "", zona: "", orient: "", distPlaya: "", visDir: "Solo zona", planta: "",
+                  dir: "", num: "", cp: "", puerta: "", municipio: "", zona: "", orient: "", distPlaya: "", visDir: "Ocultar direccion", planta: "",
                   precioVenta: 0, precioProp: 0, precioAnt: 0, precioTraspaso: 0,
                   honorarios: 5, honorariosTipo: "porcentaje", ivaHon: 21,
                   mConst: 0, mUtil: 0, mParcela: 0, mTerraza: 0, mBalcon: 0, mPorche: 0,
