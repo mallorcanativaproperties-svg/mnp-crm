@@ -16,18 +16,13 @@ const CONSERVACION = ["Buen estado","Reformado","A reformar","Obra nueva","En co
 const ORIENTACIONES = ["Norte","Sur","Este","Oeste","Noreste","Noroeste","Sureste","Suroeste"];
 const CERT_ENERG = ["A","B","C","D","E","F","G","En tramite","Exento"];
 const VIS_DIR = ["Direccion exacta", "Solo calle", "Ocultar direccion"];
-const SUELOS = ["Gres","Gres porcelanico","Marmol","Terrazo","Tarima flotante","Parquet","Laminado","Madera maciza","Vinilo","Microcemento","Ceramica","Piedra natural","Hormigon pulido","Barro cocido"];
-const CARP_EXT = ["Aluminio","Aluminio con RPT","PVC","Madera","Climalit","Doble cristal","Triple cristal","Hierro/Forja"];
-const CARP_INT = ["Lacado blanco","Roble","Cerezo","Haya","Pino","Wengue","Nogal","DM lacado","Cristal","Corredera","Block"];
-const PERSIANAS_TIPO = ["Enrollables", "Mallorquinas", "Venecianas", "No tiene"];
-const PERSIANAS_MAT = ["PVC", "Aluminio", "Madera", "Otro"];
-const CLIMATIZACION = ["AC central","AC por splits","AC por conductos","Bomba frio y calor","Calefaccion","Calefaccion central","Chimenea","Preinstalacion AC","Suelo radiante","Aerotermia","Radiadores electricos"];
+// Opciones alineadas con ficha de propiedad
+const AIRE_ACOND_OPTS = ["No disponible","Solo frio","Frio/Calor","Preinstalacion"];
+const CALEFACCION_OPTS = ["Gas central","Gasoleo central","Gas individual","Electrica individual","Bomba de calor","Sin calefaccion"];
 const AGUA_CALIENTE = ["Aerotermia","Biomasa","Bomba de calor","Calentador Butano","Central","Central con contador individual","Gas Ciudad","Gas Natural","Gas Propano","Gasoil","Geotermia","No Tiene","Pellets","Placas Solares","Termo Electrico"];
-const PARKING_OPTS = ["Plaza garaje incluida","Plaza garaje opcional","Parking comunitario","Garaje privado","Sin parking"];
 const DRENAJE_OPTS = ["Alcantarillado", "Fosa septica"];
 const SUMINISTROS_OPTS = ["Luz", "Placas solares", "Agua comunitaria", "Agua individual", "Pozo"];
 const IEE_OPTS = ["Favorable", "Desfavorable", "Pendiente", "No aplica"];
-const DESTINOS = ["Web propia", "Idealista", "Marketplace Facebook", "Catalogo WhatsApp"];
 
 const CALIDADES = [
   { cat: "Exterior", items: ["Terraza","Terraza acristalada","Balcon","Jardin","Patio","Pergola","Piscina propia","Piscina comunitaria","Barbacoa","Vistas al mar","Vistas montana","Vistas despejadas"] },
@@ -300,15 +295,9 @@ export default function FormularioCaptacion() {
   const [certE, setCertE] = useState("");
   const [iee, setIee] = useState("");
   const [ventaMob, setVentaMob] = useState(false);
-  const [suelos, setSuelos] = useState("");
-  const [carpE, setCarpE] = useState("");
-  const [carpI, setCarpI] = useState("");
-  const [persTipo, setPersTipo] = useState("");
-  const [persMat, setPersMat] = useState("");
-  const [clima, setClima] = useState("");
+  const [aireAcondTipo, setAireAcondTipo] = useState("");
+  const [calefaccion, setCalefaccion] = useState("");
   const [aguaCal, setAguaCal] = useState("");
-  const [parkOpt, setParkOpt] = useState("");
-  const [nPlazas, setNPlazas] = useState("");
 
   // Instalaciones
   const [suministros, setSuministros] = useState([]);
@@ -322,7 +311,6 @@ export default function FormularioCaptacion() {
   // Publicacion
   const [titulo, setTitulo] = useState("");
   const [desc, setDesc] = useState("");
-  const [destinos, setDestinos] = useState([]);
 
   // Propietario
   const [propNom, setPropNom] = useState("");
@@ -377,15 +365,9 @@ export default function FormularioCaptacion() {
         cert_energ: certE || null,
         iee: iee || null,
         venta_mobiliario: ventaMob,
-        suelos: suelos || null,
-        carp_ext: carpE || null,
-        carp_int: carpI || null,
-        persianas_tipo: persTipo || null,
-        persianas_mat: persMat || null,
-        clima: clima || null,
+        aire_acond_tipo: aireAcondTipo || null,
+        calefaccion: calefaccion || null,
         agua_cal: aguaCal || null,
-        parking: parkOpt || "No",
-        n_plazas: Number(nPlazas) || 0,
         suministros: suministros.length > 0 ? suministros : [],
         drenaje: drenaje || null,
         elec_reformada: elecRef,
@@ -547,22 +529,9 @@ export default function FormularioCaptacion() {
             <Toggle label="Venta con mobiliario" value={ventaMob} onChange={setVentaMob} />
           </div>
           <div style={g3}>
-            <Select label="Suelos" value={suelos} onChange={setSuelos} options={SUELOS} />
-            <Select label="Carp. exterior (ventanas)" value={carpE} onChange={setCarpE} options={CARP_EXT} />
-            <Select label="Carp. interior (puertas)" value={carpI} onChange={setCarpI} options={CARP_INT} />
-          </div>
-          <div style={g2}>
-            <Select label="Persianas tipo" value={persTipo} onChange={setPersTipo} options={PERSIANAS_TIPO} />
-            <Select label="Persianas material" value={persMat} onChange={setPersMat} options={PERSIANAS_MAT} />
-          </div>
-          <div style={g3}>
-            <Select label="Climatizacion" value={clima} onChange={setClima} options={CLIMATIZACION} />
+            <Select label="Tipo aire acondicionado" value={aireAcondTipo} onChange={setAireAcondTipo} options={AIRE_ACOND_OPTS} />
+            <Select label="Calefaccion" value={calefaccion} onChange={setCalefaccion} options={CALEFACCION_OPTS} />
             <Select label="Agua caliente" value={aguaCal} onChange={setAguaCal} options={AGUA_CALIENTE} />
-            <div />
-          </div>
-          <div style={g2}>
-            <Select label="Parking" value={parkOpt} onChange={setParkOpt} options={PARKING_OPTS} />
-            <Input label="N plazas" value={nPlazas} onChange={setNPlazas} type="number" />
           </div>
         </Sec>
 
@@ -593,7 +562,6 @@ export default function FormularioCaptacion() {
         <Sec title="Publicacion">
           <Input label="Titulo del anuncio" value={titulo} onChange={setTitulo} placeholder="Piso reformado con terraza en Pere Garau" />
           <Textarea label="Descripcion" value={desc} onChange={setDesc} maxLength={4000} rows={6} />
-          <CheckGroup label="Exportar a" options={DESTINOS} selected={destinos} onChange={setDestinos} />
         </Sec>
 
         {/* 10. Datos de venta */}
