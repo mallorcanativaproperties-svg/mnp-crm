@@ -201,6 +201,73 @@ function QualRow({ items, onChange, color, symbol }) {
   );
 }
 
+function CatastroImportCuestionario({ setDir, setNum, setPlanta, setPuerta, setCp, setMunicipio, setMConst, setAnoCon }) {
+  const [refCat, setRefCat] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState(null);
+
+  const TIPO_VIA = { CL:"Calle", AV:"Avenida", PZ:"Plaza", CM:"Camino", CR:"Carretera", PS:"Paseo", RD:"Ronda", GL:"Glorieta", RB:"Rambla", TR:"Travesia", UR:"Urbanizacion" };
+  const LABELS = { dir:"Dirección", num:"Número", planta:"Planta", puerta:"Puerta", cp:"CP", municipio:"Municipio", mConst:"m² construidos", anoCon:"Año construcción" };
+  const SETTERS = { dir: setDir, num: setNum, planta: setPlanta, puerta: setPuerta, cp: setCp, municipio: setMunicipio, mConst: (v) => setMConst(String(v)), anoCon: setAnoCon };
+
+  async function importar() {
+    const ref = refCat.trim().replace(/\s/g, "").toUpperCase();
+    if (!ref || ref.length < 14) { setMsg({ type: "error", text: "Referencia catastral no válida (mínimo 14 caracteres)" }); return; }
+    setLoading(true); setMsg(null);
+    try {
+      const url = `https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/COVCCallejero.svc/json/Consulta_DNPRC?RefCat=${ref}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Error al conectar con el Catastro");
+      const data = await res.json();
+      const rc = data?.consulta_dnprcResult;
+      if (!rc || rc.control?.cudnp === "0") throw new Error("Referencia catastral no encontrada");
+      const biRaw = rc.bico?.bi;
+      const inmueble = Array.isArray(biRaw) ? biRaw[0] : biRaw;
+      if (!inmueble) throw new Error("No se encontraron datos del inmueble");
+      const dt = inmueble.dt;
+      const ds = inmueble.ds;
+      const lourb = dt?.locs?.lous?.lourb;
+      const loint = lourb?.loint;
+      const campos = {};
+      if (lourb?.dir?.tv && lourb?.dir?.nv) campos.dir = `${TIPO_VIA[lourb.dir.tv] || lourb.dir.tv} ${lourb.dir.nv}`.trim();
+      if (lourb?.dir?.pnp) campos.num = String(lourb.dir.pnp);
+      if (loint?.pt) campos.planta = String(loint.pt);
+      if (loint?.pu) campos.puerta = String(loint.pu);
+      if (lourb?.dp) campos.cp = String(lourb.dp).padStart(5, "0");
+      if (lourb?.nm) campos.municipio = lourb.nm;
+      if (ds?.sfc) { const m2 = parseFloat(String(ds.sfc).replace(",", ".")); if (m2 > 0) campos.mConst = m2; }
+      if (!campos.mConst && inmueble?.debi?.sfc) { const m2 = parseFloat(String(inmueble.debi.sfc).replace(",", ".")); if (m2 > 0) campos.mConst = m2; }
+      if (ds?.ant) { const ano = parseInt(ds.ant); if (ano > 1800 && ano <= new Date().getFullYear()) campos.anoCon = String(ano); }
+      const aplicados = [];
+      Object.entries(campos).forEach(([k, v]) => { if (v !== undefined && v !== null && v !== "" && SETTERS[k]) { SETTERS[k](v); aplicados.push(LABELS[k] || k); } });
+      const noImportados = Object.keys(LABELS).filter(k => !campos[k]).map(k => LABELS[k]);
+      if (aplicados.length === 0) setMsg({ type: "error", text: "⚠️ Referencia encontrada pero sin datos disponibles. Completa manualmente." });
+      else if (noImportados.length > 0) setMsg({ type: "warn", text: `✅ Importados: ${aplicados.join(", ")}. ⚠️ Sin datos: ${noImportados.join(", ")} — completa manualmente.` });
+      else setMsg({ type: "ok", text: `✅ Todos los datos importados: ${aplicados.join(", ")}` });
+    } catch (err) {
+      setMsg({ type: "error", text: `⚠️ ${err.message}. Comprueba la referencia e inténtalo de nuevo.` });
+    }
+    setLoading(false);
+  }
+
+  const iSt = { flex: 1, padding: "10px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 13, fontFamily: "'Manrope', sans-serif", outline: "none" };
+
+  return (
+    <div style={{ marginBottom: 20, padding: "14px 16px", background: "#1A1915", border: "1px solid #2A2926", borderRadius: 4 }}>
+      <div style={{ fontSize: 10, fontWeight: 700, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>Importar del Catastro</div>
+      <div style={{ display: "flex", gap: 8 }}>
+        <input type="text" value={refCat} onChange={e => setRefCat(e.target.value.toUpperCase())} onKeyDown={e => e.key === "Enter" && importar()} placeholder="Ej: 9872023VH5797S0001WX" style={iSt} />
+        <button onClick={importar} disabled={loading || !refCat.trim()}
+          style={{ background: loading || !refCat.trim() ? "#2A2926" : "#C8A97E", border: "none", borderRadius: 3, color: loading || !refCat.trim() ? "#5A584F" : "#111110", fontSize: 11, fontWeight: 700, cursor: loading || !refCat.trim() ? "not-allowed" : "pointer", padding: "0 16px", fontFamily: "'Manrope', sans-serif", whiteSpace: "nowrap" }}>
+          {loading ? "Consultando..." : "Importar"}
+        </button>
+      </div>
+      {msg && <div style={{ fontSize: 11, marginTop: 8, padding: "6px 10px", borderRadius: 3, color: msg.type === "ok" ? "#6AAF8D" : msg.type === "warn" ? "#C8A97E" : "#D45454", background: msg.type === "ok" ? "#6AAF8D11" : msg.type === "warn" ? "#C8A97E11" : "#D4545411", border: "1px solid " + (msg.type === "ok" ? "#6AAF8D44" : msg.type === "warn" ? "#C8A97E44" : "#D4545444") }}>{msg.text}</div>}
+      <div style={{ fontSize: 10, color: "#5A584F", marginTop: 8 }}>Autocumplimenta: dirección, número, planta, puerta, CP, municipio, m² y año construcción</div>
+    </div>
+  );
+}
+
 export default function FormularioCaptacion() {
   const [submitted, setSubmitted] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -465,6 +532,10 @@ export default function FormularioCaptacion() {
 
         {/* 2. Localizacion */}
         <Sec title="Localizacion">
+          <CatastroImportCuestionario
+            setDir={setDir} setNum={setNum} setPlanta={setPlanta} setPuerta={setPuerta}
+            setCp={setCp} setMunicipio={setMunicipio} setMConst={setMConst} setAnoCon={setAnoCon}
+          />
           <div style={g2}>
             <Input label="Direccion (calle/via)" value={dir} onChange={setDir} required placeholder="C/ Ejemplo" />
             <Input label="Numero" value={num} onChange={setNum} placeholder="12" />

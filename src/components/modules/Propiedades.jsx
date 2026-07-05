@@ -1929,75 +1929,84 @@ function CatastroImport({ draft, upd, editMode }) {
     setLoading(true);
     setMsg(null);
     try {
-      // API pública del Catastro español (CORS-friendly via proxy)
       const url = `https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/COVCCallejero.svc/json/Consulta_DNPRC?RefCat=${ref}`;
       const res = await fetch(url);
       if (!res.ok) throw new Error("Error al conectar con el Catastro");
       const data = await res.json();
 
       const rc = data?.consulta_dnprcResult;
-      if (!rc || rc.control?.cudnp === "0") {
-        throw new Error("Referencia catastral no encontrada");
-      }
+      if (!rc || rc.control?.cudnp === "0") throw new Error("Referencia catastral no encontrada en el Catastro");
 
-      const inmueble = rc.bico?.bi;
+      // El Catastro puede devolver un solo inmueble (bi) o una lista (bi es array)
+      const biRaw = rc.bico?.bi;
+      const inmueble = Array.isArray(biRaw) ? biRaw[0] : biRaw;
       if (!inmueble) throw new Error("No se encontraron datos del inmueble");
 
-      const dt = inmueble.dt; // datos del terreno/localización
-      const ls = dt?.locs?.lous?.lourb?.loint; // localización urbana interior
-      const lp = dt?.locs?.lous?.lourb; // localización urbana
-      const ds = inmueble.ds; // datos descriptivos
+      const dt = inmueble.dt;
+      const ds = inmueble.ds;
+
+      // Localización — puede estar en lourb (urbano) o louot (rústico)
+      const lourb = dt?.locs?.lous?.lourb;
+      const loint = lourb?.loint; // interior del inmueble (planta, puerta)
 
       const campos = {};
+      const TIPO_VIA = { CL:"Calle", AV:"Avenida", PZ:"Plaza", CM:"Camino", CR:"Carretera", PS:"Paseo", RD:"Ronda", GL:"Glorieta", RB:"Rambla", TR:"Travesia", UR:"Urbanizacion" };
 
       // Dirección
-      if (lp?.dir?.tv) {
-        const tipoVia = lp.dir.tv === "CL" ? "Calle" : lp.dir.tv === "AV" ? "Avenida" : lp.dir.tv === "PZ" ? "Plaza" : lp.dir.tv === "CM" ? "Camino" : lp.dir.tv === "CR" ? "Carretera" : lp.dir.tv;
-        const nombreVia = lp.dir.nv || "";
-        campos.dir = `${tipoVia} ${nombreVia}`.trim();
+      if (lourb?.dir?.tv && lourb?.dir?.nv) {
+        const tv = TIPO_VIA[lourb.dir.tv] || lourb.dir.tv;
+        campos.dir = `${tv} ${lourb.dir.nv}`.trim();
       }
-      if (lp?.dir?.pnp) campos.num = String(lp.dir.pnp);
-      if (ls?.pt) campos.planta = String(ls.pt);
-      if (ls?.pu) campos.puerta = String(ls.pu);
-      if (lp?.dp) campos.cp = String(lp.dp);
-      if (lp?.nm) campos.municipio = lp.nm;
+      if (lourb?.dir?.pnp) campos.num = String(lourb.dir.pnp);
 
-      // Metros cuadrados
+      // Planta y puerta — pueden estar en loint o directamente
+      const planta = loint?.pt || lourb?.loint?.pt;
+      const puerta = loint?.pu || lourb?.loint?.pu;
+      if (planta) campos.planta = String(planta);
+      if (puerta) campos.puerta = String(puerta);
+
+      // CP y municipio
+      if (lourb?.dp) campos.cp = String(lourb.dp).padStart(5, "0");
+      if (lourb?.nm) campos.municipio = lourb.nm;
+
+      // m² construidos — puede estar en sfc o en debi
       if (ds?.sfc) {
-        const m2 = parseFloat(ds.sfc);
+        const m2 = parseFloat(String(ds.sfc).replace(",", "."));
+        if (m2 > 0) campos.mConst = m2;
+      }
+      // También buscar en superficie de la parte de inmueble
+      if (!campos.mConst && inmueble?.debi?.sfc) {
+        const m2 = parseFloat(String(inmueble.debi.sfc).replace(",", "."));
         if (m2 > 0) campos.mConst = m2;
       }
 
-      // Año de construcción
+      // Año construcción
       if (ds?.ant) {
         const ano = parseInt(ds.ant);
         if (ano > 1800 && ano <= new Date().getFullYear()) campos.anoConstruc = String(ano);
       }
 
-      // Aplicar campos al draft
-      let aplicados = [];
+      // Aplicar campos
+      const aplicados = [];
+      const LABELS = { dir:"Dirección", num:"Número", planta:"Planta", puerta:"Puerta", cp:"CP", municipio:"Municipio", mConst:"m² construidos", anoConstruc:"Año construcción" };
       Object.entries(campos).forEach(([k, v]) => {
-        if (v) { upd(k, v); aplicados.push(k); }
+        if (v !== undefined && v !== null && v !== "") {
+          upd(k, v);
+          aplicados.push(LABELS[k] || k);
+        }
       });
 
+      const noImportados = Object.keys(LABELS).filter(k => !campos[k]).map(k => LABELS[k]);
+
       if (aplicados.length === 0) {
-        setMsg({ type: "error", text: "Se encontró la referencia pero no hay datos suficientes" });
+        setMsg({ type: "error", text: "⚠️ Referencia encontrada pero el Catastro no devuelve datos de dirección para este inmueble. Completa los campos manualmente." });
+      } else if (noImportados.length > 0) {
+        setMsg({ type: "warn", text: `✅ Importados: ${aplicados.join(", ")}. ⚠️ Sin datos: ${noImportados.join(", ")} — completa manualmente.` });
       } else {
-        setMsg({ type: "ok", text: `✅ Importados: ${aplicados.join(", ")}` });
+        setMsg({ type: "ok", text: `✅ Todos los datos importados: ${aplicados.join(", ")}` });
       }
     } catch (err) {
-      // Intentar con API alternativa de Catastro
-      try {
-        const urlAlt = `https://ovc.catastro.meh.es/OVCServWeb/OVCWcfLibres/OVCFotoFachada.svc/fcoordenadas_por_Referencia_Catastral?ReferenciaCatastral=${refCat.trim()}`;
-        const resAlt = await fetch(urlAlt);
-        if (resAlt.ok) {
-          setMsg({ type: "error", text: "Referencia encontrada pero sin datos de dirección disponibles. Introduce los datos manualmente." });
-        } else {
-          setMsg({ type: "error", text: err.message || "Error al consultar el Catastro" });
-        }
-      } catch {
-        setMsg({ type: "error", text: err.message || "Error al consultar el Catastro" });
-      }
+      setMsg({ type: "error", text: `⚠️ ${err.message || "Error al consultar el Catastro"}. Comprueba la referencia e inténtalo de nuevo.` });
     }
     setLoading(false);
   }
@@ -2027,7 +2036,7 @@ function CatastroImport({ draft, upd, editMode }) {
         </button>
       </div>
       {msg && (
-        <div style={{ fontSize: 11, color: msg.type === "ok" ? "#6AAF8D" : "#D45454", marginTop: 8, padding: "6px 10px", background: msg.type === "ok" ? "#6AAF8D11" : "#D4545411", borderRadius: 3, border: "1px solid " + (msg.type === "ok" ? "#6AAF8D44" : "#D4545444") }}>
+        <div style={{ fontSize: 11, color: msg.type === "ok" ? "#6AAF8D" : msg.type === "warn" ? "#C8A97E" : "#D45454", marginTop: 8, padding: "6px 10px", background: msg.type === "ok" ? "#6AAF8D11" : msg.type === "warn" ? "#C8A97E11" : "#D4545411", borderRadius: 3, border: "1px solid " + (msg.type === "ok" ? "#6AAF8D44" : msg.type === "warn" ? "#C8A97E44" : "#D4545444") }}>
           {msg.text}
         </div>
       )}
