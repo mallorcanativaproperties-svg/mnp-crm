@@ -1,15 +1,18 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
+// Tipos alineados con Propiedades.jsx y schema de Idealista
 const TIPO_GROUPS = [
-  { label: "Piso", items: ["Apartamento","Atico","Atico Duplex","Duplex","Estudio","Loft","Piso","Planta baja"] },
-  { label: "Casa/Chalet", items: ["Adosado","Bungalow","Casa","Casa Tipo Duplex","Chalet","Pareado","Villa","Villa de Lujo"] },
-  { label: "Local o Nave", items: ["Almacen","Local comercial","Nave industrial","Negocio"] },
-  { label: "Terreno", items: ["Parcela","Solar","Terreno industrial","Terreno rural","Terreno rustico","Terreno urbanizable","Terreno urbano"] },
-  { label: "Otros", items: ["Finca rustica","Oficina","Edificio","Parking","Garaje"] },
+  { label: "Piso", items: ["Piso","Estudio","Atico","Atico Duplex","Duplex","Planta baja"] },
+  { label: "Casa/Chalet", items: ["Casa","Chalet","Adosado","Villa"] },
+  { label: "Finca", items: ["Finca rustica","Finca"] },
+  { label: "Local/Oficina", items: ["Local comercial","Local","Oficina"] },
+  { label: "Otros", items: ["Parking","Garaje","Terreno","Trastero","Edificio"] },
 ];
 const OPERACIONES = ["Compraventa", "Traspaso"];
-const CONSERVACION = ["Ninguno","Para reformar","De origen","Reformar Parcialmente","Entrar a vivir","Buen estado","Semireformado","Reformado","Seminuevo","Nuevo","Obra Nueva","En construccion","En proyecto"];
+// Valores alineados con mapeo Idealista en Propiedades.jsx
+const CONSERVACION = ["Buen estado","Reformado","A reformar","Obra nueva","En construccion"];
 const ORIENTACIONES = ["Norte","Sur","Este","Oeste","Noreste","Noroeste","Sureste","Suroeste"];
 const CERT_ENERG = ["A","B","C","D","E","F","G","En tramite","Exento"];
 const VIS_DIR = ["Direccion exacta", "Solo calle", "Ocultar direccion"];
@@ -214,6 +217,31 @@ function QualRow({ items, onChange, color, symbol }) {
 
 export default function FormularioCaptacion() {
   const [submitted, setSubmitted] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [agentesDB, setAgentesDB] = useState([]);
+
+  // Cargar agentes dinámicamente desde Supabase
+  useEffect(() => {
+    supabase.from("usuarios").select("nombre,agente_codigo").eq("activo", true).not("agente_codigo", "is", null)
+      .then(({ data }) => { if (data) setAgentesDB(data); });
+  }, []);
+
+  // Generar referencia automática igual que en Propiedades.jsx
+  async function generarRef(agenteName) {
+    const found = agentesDB.find(a => a.nombre === agenteName);
+    const prefix = found?.agente_codigo;
+    if (!prefix) return;
+    const { data: existing } = await supabase.from("propiedades").select("ref").like("ref", `${prefix}%`).order("ref", { ascending: false }).limit(1);
+    if (existing && existing.length > 0) {
+      const lastRef = existing[0].ref;
+      const numPart = lastRef.replace(prefix, "");
+      const nextNum = parseInt(numPart || "0") + 1;
+      const padLen = Math.max(numPart.length, String(nextNum).length);
+      setRef(prefix + String(nextNum).padStart(padLen, "0"));
+    } else {
+      setRef(prefix + "0001");
+    }
+  }
 
   // Resumen
   const [ref, setRef] = useState("");
@@ -311,12 +339,91 @@ export default function FormularioCaptacion() {
   const g3 = { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0 20px" };
   const g4 = { display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "0 20px" };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!ref || !tipo || !dir || !municipio) {
       alert("Completa al menos: Referencia, Tipo, Direccion y Municipio");
       return;
     }
-    setSubmitted(true);
+    setSaving(true);
+    try {
+      // Mapear campos del formulario a la estructura de Supabase (alineado con mapJsToDb de Propiedades.jsx)
+      const dbData = {
+        ref, tipo, op, agente,
+        titulo: titulo || `${tipo} en ${municipio}`,
+        dir, num: num || null, cp: cp || null, municipio, zona: zona || null,
+        orient: orient || null, dist_playa: distPlaya || null, vis_dir: visDir,
+        planta: planta || null, puerta: null,
+        precio_venta: Number(precioVenta) || 0,
+        precio_prop: Number(precioProp) || 0,
+        precio_ant: Number(precioAnt) || 0,
+        precio_traspaso: Number(precioTraspaso) || 0,
+        honorarios: Number(honVal) || 5,
+        honorarios_tipo: honTipo,
+        iva_hon: 21,
+        ibi: Number(ibi) || 0,
+        basuras: Number(basuras) || 0,
+        comunidad: Number(comunidad) || 0,
+        extra_comunidad: Number(extraCom) || 0,
+        otros_gastos: otrosGastos || null,
+        m_util: Number(mUtil) || 0,
+        m_const: Number(mConst) || 0,
+        m_parcela: Number(mParcela) || 0,
+        m_terraza: Number(mTerraza) || 0,
+        m_balcon: Number(mBalcon) || 0,
+        m_porche: Number(mPorche) || 0,
+        hab_dobles: Number(habDob) || 0,
+        hab_simples: Number(habSim) || 0,
+        banos: Number(banos) || 0,
+        aseos: Number(aseos) || 0,
+        conserv: conserv || null,
+        ano_construc: anoCon || null,
+        cert_energ: certE || null,
+        iee: iee || null,
+        venta_mobiliario: ventaMob,
+        suelos: suelos || null,
+        carp_ext: carpE || null,
+        carp_int: carpI || null,
+        persianas_tipo: persTipo || null,
+        persianas_mat: persMat || null,
+        clima: clima || null,
+        agua_cal: aguaCal || null,
+        parking: parkOpt || "No",
+        n_plazas: Number(nPlazas) || 0,
+        suministros: suministros.length > 0 ? suministros : [],
+        drenaje: drenaje || null,
+        elec_reformada: elecRef,
+        font_reformada: fontRef,
+        calidades: calidades.length > 0 ? calidades : [],
+        desc_texto: desc || null,
+        notas_priv: notasPriv || null,
+        destinos: [],
+        estado: "captada",
+        fecha_cap: new Date().toISOString().split("T")[0],
+        prop_nombre: propNom || null,
+        prop_tel: propTel || null,
+        prop_email: propEmail || null,
+        cual_pos: cualPos.filter(Boolean),
+        cual_mejoras: cualMejoras.filter(Boolean),
+        visitas: 0,
+        fotos: 0, videos: 0, planos: 0,
+      };
+
+      // Eliminar campos null para no violar constraints de Supabase
+      Object.keys(dbData).forEach(k => {
+        if (dbData[k] === null || dbData[k] === "") delete dbData[k];
+      });
+
+      const { error } = await supabase.from("propiedades").insert(dbData);
+      if (error) {
+        alert("Error al guardar: " + error.message);
+        setSaving(false);
+        return;
+      }
+      setSubmitted(true);
+    } catch (e) {
+      alert("Error inesperado: " + e.message);
+    }
+    setSaving(false);
   };
 
   if (submitted) {
@@ -357,11 +464,26 @@ export default function FormularioCaptacion() {
         {/* 1. Resumen */}
         <Sec title="Resumen de la propiedad">
           <div style={g3}>
-            <Input label="Referencia" value={ref} onChange={setRef} required placeholder="MNP-005" />
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
+                Agente que gestiona<span style={{ color: "#D4956A", marginLeft: 3 }}>*</span>
+              </label>
+              <select value={agente} onChange={async e => { setAgente(e.target.value); if (e.target.value) await generarRef(e.target.value); }}
+                style={{ width: "100%", padding: "10px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 13, fontFamily: "'Manrope', sans-serif", boxSizing: "border-box" }}>
+                <option value="">Seleccionar agente...</option>
+                {agentesDB.map(a => <option key={a.nombre} value={a.nombre}>{a.nombre} ({a.agente_codigo})</option>)}
+              </select>
+            </div>
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
+                Referencia<span style={{ color: "#D4956A", marginLeft: 3 }}>*</span>
+              </label>
+              <input value={ref} onChange={e => setRef(e.target.value)} placeholder="Se genera al elegir agente"
+                style={{ width: "100%", padding: "10px 14px", background: "#1C1B18", border: "1px solid " + (ref ? "#6AAF8D44" : "#2A2926"), borderRadius: 3, color: ref ? "#6AAF8D" : "#F0EDE6", fontSize: 13, fontFamily: "'Manrope', sans-serif", boxSizing: "border-box" }} />
+            </div>
             <Select label="Tipo de operacion" value={op} onChange={setOp} options={OPERACIONES} required />
-            <Select label="Tipo de propiedad" value={tipo} onChange={setTipo} groups={TIPO_GROUPS} required />
           </div>
-          <Input label="Agente que gestiona" value={agente} onChange={setAgente} placeholder="Nombre del agente" />
+          <Select label="Tipo de propiedad" value={tipo} onChange={setTipo} groups={TIPO_GROUPS} required />
         </Sec>
 
         {/* 2. Localizacion */}
@@ -546,15 +668,16 @@ export default function FormularioCaptacion() {
         <div style={{ borderTop: "1px solid #2A2926", paddingTop: 28, marginTop: 12, display: "flex", justifyContent: "flex-end", gap: 12 }}>
           <button
             onClick={handleSubmit}
+            disabled={saving}
             style={{
               padding: "14px 36px", borderRadius: 3, border: "none",
-              background: "linear-gradient(135deg, #C8A97E, #D4B896)",
-              color: "#111110", cursor: "pointer", fontSize: 12, fontWeight: 700,
+              background: saving ? "#2A2926" : "linear-gradient(135deg, #C8A97E, #D4B896)",
+              color: saving ? "#7A7870" : "#111110", cursor: saving ? "not-allowed" : "pointer", fontSize: 12, fontWeight: 700,
               letterSpacing: "0.1em", textTransform: "uppercase",
               fontFamily: "'Manrope', sans-serif", transition: "all 0.3s",
             }}
           >
-            Crear ficha de propiedad
+            {saving ? "Creando ficha..." : "Crear ficha de propiedad"}
           </button>
         </div>
 
