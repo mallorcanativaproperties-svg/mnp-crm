@@ -1967,22 +1967,28 @@ function CatastroImport({ draft, upd, editMode }) {
 
       // CP y municipio
       if (lourb?.dp) campos.cp = String(lourb.dp).padStart(5, "0");
-      if (lourb?.nm) campos.municipio = lourb.nm;
+      // Municipio — puede estar en nm, mc+nm, o en locs.lous.lourb.nm
+      const municipioNombre = lourb?.nm || lourb?.npa || dt?.locs?.lous?.lourb?.nm || rc?.bico?.bi?.dt?.locs?.lous?.lourb?.nm;
+      if (municipioNombre) campos.municipio = municipioNombre;
 
-      // m² construidos — puede estar en sfc o en debi
+      // m² construidos — puede estar en sfc, debi.sfc, o superficie construida
       if (ds?.sfc) {
         const m2 = parseFloat(String(ds.sfc).replace(",", "."));
         if (m2 > 0) campos.mConst = m2;
       }
-      // También buscar en superficie de la parte de inmueble
       if (!campos.mConst && inmueble?.debi?.sfc) {
         const m2 = parseFloat(String(inmueble.debi.sfc).replace(",", "."));
         if (m2 > 0) campos.mConst = m2;
       }
+      if (!campos.mConst && ds?.stl) {
+        const m2 = parseFloat(String(ds.stl).replace(",", "."));
+        if (m2 > 0) campos.mConst = m2;
+      }
 
-      // Año construcción
-      if (ds?.ant) {
-        const ano = parseInt(ds.ant);
+      // Año construcción — puede estar en ds.ant, debi.ant, o en el edificio
+      const antRaw = ds?.ant || inmueble?.debi?.ant || dt?.crop?.ant || rc?.bico?.bi?.ds?.ant;
+      if (antRaw) {
+        const ano = parseInt(String(antRaw).trim());
         if (ano > 1800 && ano <= new Date().getFullYear()) campos.anoConstruc = String(ano);
       }
 

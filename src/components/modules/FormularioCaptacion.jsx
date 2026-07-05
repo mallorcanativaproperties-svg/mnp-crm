@@ -234,10 +234,13 @@ function CatastroImportCuestionario({ setDir, setNum, setPlanta, setPuerta, setC
       if (loint?.pt) campos.planta = String(loint.pt);
       if (loint?.pu) campos.puerta = String(loint.pu);
       if (lourb?.dp) campos.cp = String(lourb.dp).padStart(5, "0");
-      if (lourb?.nm) campos.municipio = lourb.nm;
+      const municipioNombre = lourb?.nm || lourb?.npa || dt?.locs?.lous?.lourb?.nm;
+      if (municipioNombre) campos.municipio = municipioNombre;
       if (ds?.sfc) { const m2 = parseFloat(String(ds.sfc).replace(",", ".")); if (m2 > 0) campos.mConst = m2; }
       if (!campos.mConst && inmueble?.debi?.sfc) { const m2 = parseFloat(String(inmueble.debi.sfc).replace(",", ".")); if (m2 > 0) campos.mConst = m2; }
-      if (ds?.ant) { const ano = parseInt(ds.ant); if (ano > 1800 && ano <= new Date().getFullYear()) campos.anoCon = String(ano); }
+      if (!campos.mConst && ds?.stl) { const m2 = parseFloat(String(ds.stl).replace(",", ".")); if (m2 > 0) campos.mConst = m2; }
+      const antRaw = ds?.ant || inmueble?.debi?.ant || dt?.crop?.ant;
+      if (antRaw) { const ano = parseInt(String(antRaw).trim()); if (ano > 1800 && ano <= new Date().getFullYear()) campos.anoCon = String(ano); }
       const aplicados = [];
       Object.entries(campos).forEach(([k, v]) => { if (v !== undefined && v !== null && v !== "" && SETTERS[k]) { SETTERS[k](v); aplicados.push(LABELS[k] || k); } });
       const noImportados = Object.keys(LABELS).filter(k => !campos[k]).map(k => LABELS[k]);
