@@ -1217,10 +1217,13 @@ REGLAS:
     }
   }
 
-  const AGENTE_PREFIX = {
-    Suren: "MNSKB", Anabel: "MNAQA", Jaime: "MNJAC", Guim: "MNGET", Silvia: "MNSLA",
-  };
-  const AGENTES_LIST = ["Suren", "Anabel", "Jaime", "Guim", "Silvia"];
+  const [agentesDB, setAgentesDB] = useState([]);
+  useEffect(() => {
+    supabase.from("usuarios").select("nombre,agente_codigo,agente_telefono").eq("activo", true).not("agente_codigo", "is", null)
+      .then(({ data }) => { if (data) setAgentesDB(data); });
+  }, []);
+  const AGENTE_PREFIX = Object.fromEntries((agentesDB || []).map(a => [a.nombre, a.agente_codigo]));
+  const AGENTES_LIST = (agentesDB || []).map(a => a.nombre);
   const TIPOS_LIST = ["Piso", "Estudio", "Atico", "Atico Duplex", "Duplex", "Planta baja", "Casa", "Chalet", "Adosado", "Villa", "Finca rustica", "Local comercial", "Oficina", "Parking", "Terreno", "Trastero", "Edificio"];
   const OPS_LIST = ["Compraventa", "Alquiler", "Traspaso"];
 

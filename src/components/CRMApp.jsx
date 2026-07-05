@@ -1,6 +1,7 @@
 "use client";
-import { useState, lazy, Suspense, useEffect } from "react";
+import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
+import { supabase } from "@/lib/supabase";
 
 const Dashboard = dynamic(() => import("./modules/Dashboard"), { ssr: false });
 const Propiedades = dynamic(() => import("./modules/Propiedades"), { ssr: false });
@@ -10,26 +11,18 @@ const MotorCruce = dynamic(() => import("./modules/MotorCruce"), { ssr: false })
 const RedesSociales = dynamic(() => import("./modules/RedesSociales"), { ssr: false });
 const AgentesIA = dynamic(() => import("./modules/AgentesIA"), { ssr: false });
 const FirmaElectronica = dynamic(() => import("./modules/FirmaElectronica"), { ssr: false });
-
-const USERS = [
-  { user: "director", pass: "mnp2026", nombre: "Silvia Lopez", role: "director" },
-  { user: "carlos", pass: "carlos2026", nombre: "Carlos M.", role: "agente" },
-  { user: "ana", pass: "ana2026", nombre: "Ana R.", role: "agente" },
-  { user: "suren", pass: "suren2026", nombre: "Suren", role: "agente" },
-  { user: "anabel", pass: "anabel2026", nombre: "Anabel", role: "agente" },
-  { user: "jaime", pass: "jaime2026", nombre: "Jaime", role: "agente" },
-  { user: "guim", pass: "guim2026", nombre: "Guim", role: "agente" },
-];
+const Usuarios = dynamic(() => import("./modules/Usuarios"), { ssr: false });
 
 const MODULES = [
-  { key: "propiedades", label: "Propiedades", icon: "⌂", color: "#8FA88A", roles: ["director", "agente"] },
-  { key: "captacion", label: "Captacion", icon: "✎", color: "#D4956A", roles: ["director", "agente"] },
-  { key: "compradores", label: "Compradores", icon: "◎", color: "#A89BC4", roles: ["director", "agente"] },
-  { key: "cruce", label: "Motor Cruce", icon: "⇌", color: "#6AAF8D", roles: ["director", "agente"] },
+  { key: "propiedades", label: "Propiedades", icon: "⌂", color: "#8FA88A", roles: ["director", "agente", "broker"] },
+  { key: "captacion", label: "Captacion", icon: "✎", color: "#D4956A", roles: ["director", "agente", "broker"] },
+  { key: "compradores", label: "Compradores", icon: "◎", color: "#A89BC4", roles: ["director", "agente", "broker"] },
+  { key: "cruce", label: "Motor Cruce", icon: "⇌", color: "#6AAF8D", roles: ["director", "agente", "broker"] },
   { key: "redes", label: "Redes Sociales", icon: "◉", color: "#E1306C", roles: ["director", "agente"] },
   { key: "agentes", label: "Agentes IA", icon: "◈", color: "#D4956A", roles: ["director"] },
-  { key: "firma", label: "Firma Electronica", icon: "✍", color: "#6AAF8D", roles: ["director", "agente"] },
+  { key: "firma", label: "Firma Electronica", icon: "✍", color: "#6AAF8D", roles: ["director", "agente", "broker"] },
   { key: "dashboard", label: "Dashboard", icon: "◆", color: "#C8A97E", roles: ["director", "agente"] },
+  { key: "usuarios", label: "Usuarios", icon: "◎", color: "#C8A97E", roles: ["director"] },
 ];
 
 function LoginScreen({ onLogin }) {
@@ -37,10 +30,25 @@ function LoginScreen({ onLogin }) {
   const [pass, setPass] = useState("");
   const [error, setError] = useState("");
 
-  const handleLogin = () => {
-    const found = USERS.find((u) => u.user === user.toLowerCase().trim() && u.pass === pass);
-    if (found) onLogin(found);
-    else setError("Usuario o contrasena incorrectos");
+  const handleLogin = async () => {
+    setError("");
+    if (!user.trim() || !pass.trim()) { setError("Introduce usuario y contraseña"); return; }
+    try {
+      const { data, error } = await supabase
+        .from("usuarios")
+        .select("*")
+        .eq("user_login", user.toLowerCase().trim())
+        .eq("pass_hash", pass.trim())
+        .eq("activo", true)
+        .single();
+      if (error || !data) {
+        setError("Usuario o contraseña incorrectos");
+      } else {
+        onLogin({ user_login: data.user_login, nombre: data.nombre, role: data.role, agente_codigo: data.agente_codigo, agente_telefono: data.agente_telefono });
+      }
+    } catch (e) {
+      setError("Error al conectar. Inténtalo de nuevo.");
+    }
   };
 
   const iSt = { width: "100%", padding: "12px 16px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 14, fontFamily: "'Manrope', sans-serif", boxSizing: "border-box", outline: "none" };
@@ -118,6 +126,7 @@ export default function CRMApp() {
   const renderModule = () => {
     switch (activeModule) {
       case "dashboard": return <Dashboard />;
+      case "usuarios": return <Usuarios currentUser={currentUser} />;
       case "propiedades": return <Propiedades />;
       case "captacion": return <FormularioCaptacion />;
       case "compradores": return <Compradores />;
