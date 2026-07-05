@@ -1801,15 +1801,22 @@ function IdealistaJsonButton({ supabase }) {
     if(row.desc_en?.trim()) descs.push({descriptionLanguage:"english",descriptionText:row.desc_en.trim()});
     if(row.desc_de?.trim()) descs.push({descriptionLanguage:"german",descriptionText:row.desc_de.trim()});
     if(descs.length>0) property.propertyDescriptions=descs;
-    const photos=(media||[]).filter(m=>m.tipo==="foto"&&m.url).sort((a,b)=>(a.orden||0)-(b.orden||0));
-    if(photos.length>0){
-      property.propertyImages=photos.map((photo,i)=>{
-        const url=String(photo.url||"");
+    // Fotos + planos (planos van con imageLabel "plan")
+    const fotos=(media||[]).filter(m=>m.tipo==="foto"&&m.url).sort((a,b)=>(a.orden||0)-(b.orden||0));
+    const planos=(media||[]).filter(m=>m.tipo==="plano"&&m.url).sort((a,b)=>(a.orden||0)-(b.orden||0));
+    const allImgs=[...fotos,...planos];
+    if(allImgs.length>0){
+      property.propertyImages=allImgs.map((item,i)=>{
+        const url=String(item.url||"");
         const marker="propiedades-media/";
         const idx=url.indexOf(marker);
         const relativePath=idx!==-1?url.substring(idx+marker.length):url;
         const img={imageOrder:i+1,imageUrl:relativePath};
-        if(photo.etiqueta&&IMAGE_TAG_MAP[photo.etiqueta]) img.imageLabel=IMAGE_TAG_MAP[photo.etiqueta];
+        if(item.tipo==="plano"){
+          img.imageLabel="plan";
+        } else if(item.etiqueta&&IMAGE_TAG_MAP[item.etiqueta]){
+          img.imageLabel=IMAGE_TAG_MAP[item.etiqueta];
+        }
         return img;
       });
     }
@@ -1835,7 +1842,7 @@ function IdealistaJsonButton({ supabase }) {
       if(validas.length===0){setStatus("error");setMsg("No hay propiedades publicadas que cumplan los requisitos de Idealista.");setLoading(false);return;}
       const now=new Date();
       const sendDate=`${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,"0")}/${String(now.getDate()).padStart(2,"0")} ${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}:${String(now.getSeconds()).padStart(2,"0")}`;
-      const feed={customerCountry:"Spain",customerCode:CUSTOMER_CODE,customerReference:"Mallorca Nativa Properties CRM",customerSendDate:sendDate,customerContact:{contactName:"Mallorca Nativa Properties",contactEmail:"mallorcanativaproperties@gmail.com",contactPrimaryPhonePrefix:"34",contactPrimaryPhoneNumber:"655882682"},customerProperties:validas.map(row=>{const media=(mediaAll||[]).filter(m=>m.ref_propiedad===row.ref);return buildProperty(row,media);})};
+      const feed={customerCountry:"Spain",customerCode:CUSTOMER_CODE,customerReference:"Mallorca Nativa Properties CRM",customerSendDate:sendDate,customerContact:{contactName:"Mallorca Nativa Properties",contactEmail:"mallorcanativaproperties@gmail.com",contactPrimaryPhonePrefix:"34",contactPrimaryPhoneNumber:"655882682"},customerProperties:validas.map(row=>{const media=(mediaAll||[]).filter(m=>m.propiedad_id===row.id);return buildProperty(row,media);})};
       const clean=cleanObj(feed);
       const blob=new Blob([JSON.stringify(clean,null,2)],{type:"application/json"});
       const url=URL.createObjectURL(blob);
