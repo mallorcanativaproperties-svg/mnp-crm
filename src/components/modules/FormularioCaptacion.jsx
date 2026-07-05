@@ -24,15 +24,6 @@ const DRENAJE_OPTS = ["Alcantarillado", "Fosa septica"];
 const SUMINISTROS_OPTS = ["Luz", "Placas solares", "Agua comunitaria", "Agua individual", "Pozo"];
 const IEE_OPTS = ["Favorable", "Desfavorable", "Pendiente", "No aplica"];
 
-const CALIDADES = [
-  { cat: "Exterior", items: ["Terraza","Terraza acristalada","Balcon","Jardin","Patio","Pergola","Piscina propia","Piscina comunitaria","Barbacoa","Vistas al mar","Vistas montana","Vistas despejadas"] },
-  { cat: "Interior", items: ["Ascensor","Armarios empotrados","Cocina equipada","Despensa","Lavadero","Bano en suite","Vestidor","Techos altos","Domotica","Descalcificador","Osmosis","Luminoso","Chimenea"] },
-  { cat: "Parking/Almacen", items: ["Plaza garaje incluida","Plaza garaje opcional","Parking comunitario","Trastero","Garaje privado"] },
-  { cat: "Seguridad", items: ["Puerta blindada","Videoportero","Alarma","Vigilancia 24h","Conserje"] },
-  { cat: "Zonas comunes", items: ["Zonas ajardinadas","Gimnasio","Padel","Parque infantil","Sauna","Spa","Salon multiusos","Acceso discapacitados"] },
-  { cat: "Ubicacion", items: ["Primera linea","Centrico","Cerca transporte","Cerca colegios"] },
-  { cat: "Extras", items: ["Amueblado","Reforma reciente","Obra nueva"] },
-];
 
 const ZONAS_MAP = {
   "Palma": ["Casco Antiguo","Santa Catalina","El Terreno","Son Espanyolet","Son Cotoner","Son Dameto","La Bonanova","Genova","Cala Major","Son Rapinya","La Vileta","Pere Garau","Foners","Plaza de Toros","Son Gotleu","La Soledad","Vivero","Son Oliva","Rafal","Son Cladera","Son Ferriol","Sant Jordi","Can Pastilla","Coll den Rabassa","Nou Llevant","SIndioteria","SAranjassa","Es Pilari","Amanecer"],
@@ -305,8 +296,6 @@ export default function FormularioCaptacion() {
   const [elecRef, setElecRef] = useState(false);
   const [fontRef, setFontRef] = useState(false);
 
-  // Calidades
-  const [calidades, setCalidades] = useState([]);
 
   // Publicacion
   const [titulo, setTitulo] = useState("");
@@ -372,7 +361,6 @@ export default function FormularioCaptacion() {
         drenaje: drenaje || null,
         elec_reformada: elecRef,
         font_reformada: fontRef,
-        calidades: calidades.length > 0 ? calidades : [],
         desc_texto: desc || null,
         notas_priv: notasPriv || null,
         destinos: [],
@@ -543,19 +531,6 @@ export default function FormularioCaptacion() {
             <Toggle label="Electricidad reformada" value={elecRef} onChange={setElecRef} />
             <Toggle label="Fontaneria reformada" value={fontRef} onChange={setFontRef} />
           </div>
-        </Sec>
-
-        {/* 8. Calidades */}
-        <Sec title="Calidades (Idealista)">
-          {CALIDADES.map((cat) => (
-            <CheckGroup
-              key={cat.cat}
-              label={cat.cat}
-              options={cat.items}
-              selected={calidades}
-              onChange={setCalidades}
-            />
-          ))}
         </Sec>
 
         {/* 9. Publicacion */}
