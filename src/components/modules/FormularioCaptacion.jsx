@@ -286,6 +286,17 @@ export default function FormularioCaptacion() {
   const [certE, setCertE] = useState("");
   const [iee, setIee] = useState("");
   const [ventaMob, setVentaMob] = useState(false);
+  const [terraza, setTerraza] = useState(false);
+  const [balcon, setBalcon] = useState(false);
+  const [jardin, setJardin] = useState(false);
+  const [piscina, setPiscina] = useState(false);
+  const [ascensor, setAscensor] = useState(false);
+  const [armarios, setArmarios] = useState(false);
+  const [trastero, setTrastero] = useState(false);
+  const [parking, setParking] = useState("No");
+  const [nPlazas, setNPlazas] = useState("");
+  const [ventanas, setVentanas] = useState("");
+  const [cualNeg, setCualNeg] = useState(["", "", "", "", "", ""]);
   const [aireAcondTipo, setAireAcondTipo] = useState("");
   const [calefaccion, setCalefaccion] = useState("");
   const [aguaCal, setAguaCal] = useState("");
@@ -351,6 +362,11 @@ export default function FormularioCaptacion() {
         cert_energ: certE || null,
         iee: iee || null,
         venta_mobiliario: ventaMob,
+        terraza, balcon, jardin, piscina, ascensor, armarios, trastero,
+        parking: parking || "No",
+        n_plazas: Number(nPlazas) || 0,
+        ventanas: ventanas || null,
+        cual_neg: cualNeg.filter(Boolean),
         aire_acond_tipo: aireAcondTipo || null,
         calefaccion: calefaccion || null,
         agua_cal: aguaCal || null,
@@ -518,6 +534,24 @@ export default function FormularioCaptacion() {
           </div>
         </Sec>
 
+        {/* 6b. Extras y dotaciones */}
+        <Sec title="Extras y dotaciones">
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "0 40px" }}>
+            <Toggle label="Terraza" value={terraza} onChange={setTerraza} />
+            <Toggle label="Balcon" value={balcon} onChange={setBalcon} />
+            <Toggle label="Jardin" value={jardin} onChange={setJardin} />
+            <Toggle label="Piscina" value={piscina} onChange={setPiscina} />
+            <Toggle label="Ascensor" value={ascensor} onChange={setAscensor} />
+            <Toggle label="Armarios empotrados" value={armarios} onChange={setArmarios} />
+            <Toggle label="Trastero" value={trastero} onChange={setTrastero} />
+          </div>
+          <div style={g3}>
+            <Select label="Parking" value={parking} onChange={setParking} options={["Si","No","Comunitario","Opcional"]} />
+            <Input label="N plazas" value={nPlazas} onChange={setNPlazas} type="number" />
+            <Select label="Ventanas" value={ventanas} onChange={setVentanas} options={["Interior","Exterior"]} />
+          </div>
+        </Sec>
+
         {/* 7. Instalaciones */}
         <Sec title="Instalaciones y suministros">
           <CheckGroup label="Suministros" options={SUMINISTROS_OPTS} selected={suministros} onChange={setSuministros} />
@@ -583,6 +617,8 @@ export default function FormularioCaptacion() {
             <div style={{ marginBottom: 16 }}>
               <span style={{ fontSize: 10, fontWeight: 600, color: "#6AAF8D", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 8 }}>Puntos positivos del inmueble</span>
               <QualRow items={cualPos} onChange={setCualPos} color="#6AAF8D" symbol="+" />
+              <span style={{ fontSize: 10, fontWeight: 600, color: "#D45454", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", margin: "16px 0 8px" }}>Puntos negativos o limitaciones</span>
+              <QualRow items={cualNeg} onChange={setCualNeg} color="#D45454" symbol="-" />
             </div>
             <div>
               <span style={{ fontSize: 10, fontWeight: 600, color: "#A89BC4", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 8 }}>Que mejorarias</span>
