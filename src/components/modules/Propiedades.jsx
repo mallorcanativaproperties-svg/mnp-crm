@@ -1312,8 +1312,19 @@ REGLAS:
                 style={{ width: "100%", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", padding: "8px 12px", fontSize: 18, fontFamily: "'Playfair Display', serif", marginBottom: 6 }} />
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                 <span style={{ fontSize: 11, color: "#7A7870" }}>Agente:</span>
-                <input type="text" value={d.agente || ""} onChange={e => upd("agente", e.target.value)} placeholder="Nombre agente"
-                  style={{ width: 120, background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "4px 8px", fontSize: 11, fontFamily: "'Manrope', sans-serif" }} />
+                <select value={d.agente || ""} onChange={async e => {
+                  const agente = e.target.value;
+                  upd("agente", agente);
+                  // Si es propiedad nueva (sin ref) y hay agente, generar referencia automática
+                  if (!d.ref && agente) {
+                    const refGenerada = await autoGenerateRef(agente);
+                    if (refGenerada) upd("ref", refGenerada);
+                  }
+                }}
+                  style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "4px 8px", fontSize: 11, fontFamily: "'Manrope', sans-serif" }}>
+                  <option value="">Seleccionar agente</option>
+                  {AGENTES_LIST.map(a => <option key={a} value={a}>{a}</option>)}
+                </select>
               </div>
             </>
           ) : (
