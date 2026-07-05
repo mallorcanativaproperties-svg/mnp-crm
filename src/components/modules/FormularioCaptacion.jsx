@@ -346,6 +346,7 @@ export default function FormularioCaptacion() {
   const [banos, setBanos] = useState("0");
   const [aseos, setAseos] = useState("0");
   const [planta, setPlanta] = useState("");
+  const [puerta, setPuerta] = useState("");
   const [anoCon, setAnoCon] = useState("");
   const [conserv, setConserv] = useState("");
 
@@ -402,7 +403,7 @@ export default function FormularioCaptacion() {
         ref, tipo, op, agente,
         dir, num: num || null, cp: cp || null, municipio, zona: zona || null,
         orient: orient || null, dist_playa: distPlaya || null, vis_dir: visDir,
-        planta: planta || null, puerta: null,
+        planta: planta || null, puerta: puerta || null,
         precio_venta: Number(precioVenta) || 0,
         precio_prop: Number(precioProp) || 0,
         precio_traspaso: Number(precioTraspaso) || 0,
