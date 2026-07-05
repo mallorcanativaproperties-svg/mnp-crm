@@ -1390,6 +1390,8 @@ REGLAS:
 
         {/* Localizacion */}
         <Sec title="Localizacion">
+          {/* Importar del Catastro */}
+          <CatastroImport draft={draft} upd={upd} editMode={editMode} />
           <div style={g2}>
             {EFl({label: "Direccion", req: true, field: "dir", pub: true})}
             {EFl({label: "Numero", field: "num", pub: true})}
@@ -1862,6 +1864,132 @@ function IdealistaJsonButton({ supabase }) {
         {loading?"Generando...":"⬇ JSON Idealista"}
       </button>
       {(status||loading)&&<div style={{fontSize:10,color:status==="ok"?"#6AAF8D":status==="error"?"#D45454":"#7A7870",textAlign:"right"}}>{msg}</div>}
+    </div>
+  );
+}
+
+// ─── Componente: Importar datos del Catastro ──────────────────────────────────
+function CatastroImport({ draft, upd, editMode }) {
+  const [refCat, setRefCat] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState(null); // { type: "ok"|"error", text }
+
+  if (!editMode) return null;
+
+  async function importarCatastro() {
+    const ref = refCat.trim().replace(/\s/g, "").toUpperCase();
+    if (!ref || ref.length < 14) {
+      setMsg({ type: "error", text: "Introduce una referencia catastral válida (14-20 caracteres)" });
+      return;
+    }
+    setLoading(true);
+    setMsg(null);
+    try {
+      // API pública del Catastro español (CORS-friendly via proxy)
+      const url = `https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/COVCCallejero.svc/json/Consulta_DNPRC?RefCat=${ref}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Error al conectar con el Catastro");
+      const data = await res.json();
+
+      const rc = data?.consulta_dnprcResult;
+      if (!rc || rc.control?.cudnp === "0") {
+        throw new Error("Referencia catastral no encontrada");
+      }
+
+      const inmueble = rc.bico?.bi;
+      if (!inmueble) throw new Error("No se encontraron datos del inmueble");
+
+      const dt = inmueble.dt; // datos del terreno/localización
+      const ls = dt?.locs?.lous?.lourb?.loint; // localización urbana interior
+      const lp = dt?.locs?.lous?.lourb; // localización urbana
+      const ds = inmueble.ds; // datos descriptivos
+
+      const campos = {};
+
+      // Dirección
+      if (lp?.dir?.tv) {
+        const tipoVia = lp.dir.tv === "CL" ? "Calle" : lp.dir.tv === "AV" ? "Avenida" : lp.dir.tv === "PZ" ? "Plaza" : lp.dir.tv === "CM" ? "Camino" : lp.dir.tv === "CR" ? "Carretera" : lp.dir.tv;
+        const nombreVia = lp.dir.nv || "";
+        campos.dir = `${tipoVia} ${nombreVia}`.trim();
+      }
+      if (lp?.dir?.pnp) campos.num = String(lp.dir.pnp);
+      if (ls?.pt) campos.planta = String(ls.pt);
+      if (ls?.pu) campos.puerta = String(ls.pu);
+      if (lp?.dp) campos.cp = String(lp.dp);
+      if (lp?.nm) campos.municipio = lp.nm;
+
+      // Metros cuadrados
+      if (ds?.sfc) {
+        const m2 = parseFloat(ds.sfc);
+        if (m2 > 0) campos.mConst = m2;
+      }
+
+      // Año de construcción
+      if (ds?.ant) {
+        const ano = parseInt(ds.ant);
+        if (ano > 1800 && ano <= new Date().getFullYear()) campos.anoConstruc = String(ano);
+      }
+
+      // Aplicar campos al draft
+      let aplicados = [];
+      Object.entries(campos).forEach(([k, v]) => {
+        if (v) { upd(k, v); aplicados.push(k); }
+      });
+
+      if (aplicados.length === 0) {
+        setMsg({ type: "error", text: "Se encontró la referencia pero no hay datos suficientes" });
+      } else {
+        setMsg({ type: "ok", text: `✅ Importados: ${aplicados.join(", ")}` });
+      }
+    } catch (err) {
+      // Intentar con API alternativa de Catastro
+      try {
+        const urlAlt = `https://ovc.catastro.meh.es/OVCServWeb/OVCWcfLibres/OVCFotoFachada.svc/fcoordenadas_por_Referencia_Catastral?ReferenciaCatastral=${refCat.trim()}`;
+        const resAlt = await fetch(urlAlt);
+        if (resAlt.ok) {
+          setMsg({ type: "error", text: "Referencia encontrada pero sin datos de dirección disponibles. Introduce los datos manualmente." });
+        } else {
+          setMsg({ type: "error", text: err.message || "Error al consultar el Catastro" });
+        }
+      } catch {
+        setMsg({ type: "error", text: err.message || "Error al consultar el Catastro" });
+      }
+    }
+    setLoading(false);
+  }
+
+  return (
+    <div style={{ marginBottom: 16, padding: "14px 16px", background: "#1A1915", border: "1px solid #2A2926", borderRadius: 4 }}>
+      <div style={{ fontSize: 10, fontWeight: 700, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>
+        Importar del Catastro
+      </div>
+      <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 10, color: "#7A7870", marginBottom: 4 }}>Referencia catastral</div>
+          <input
+            type="text"
+            value={refCat}
+            onChange={e => setRefCat(e.target.value.toUpperCase())}
+            onKeyDown={e => e.key === "Enter" && importarCatastro()}
+            placeholder="Ej: 9872023VH5797S0001WX"
+            style={{ width: "100%", background: "#111110", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "7px 10px", fontSize: 12, fontFamily: "'Manrope', sans-serif", boxSizing: "border-box" }}
+          />
+        </div>
+        <button
+          onClick={importarCatastro}
+          disabled={loading || !refCat.trim()}
+          style={{ background: loading || !refCat.trim() ? "#2A2926" : "#C8A97E", border: "none", borderRadius: 3, color: loading || !refCat.trim() ? "#5A584F" : "#111110", fontSize: 11, fontWeight: 700, cursor: loading || !refCat.trim() ? "not-allowed" : "pointer", padding: "7px 16px", fontFamily: "'Manrope', sans-serif", whiteSpace: "nowrap" }}>
+          {loading ? "Consultando..." : "Importar"}
+        </button>
+      </div>
+      {msg && (
+        <div style={{ fontSize: 11, color: msg.type === "ok" ? "#6AAF8D" : "#D45454", marginTop: 8, padding: "6px 10px", background: msg.type === "ok" ? "#6AAF8D11" : "#D4545411", borderRadius: 3, border: "1px solid " + (msg.type === "ok" ? "#6AAF8D44" : "#D4545444") }}>
+          {msg.text}
+        </div>
+      )}
+      <div style={{ fontSize: 10, color: "#5A584F", marginTop: 8 }}>
+        Rellena dirección, número, piso, puerta, CP, municipio, m² y año de construcción automáticamente
+      </div>
     </div>
   );
 }
