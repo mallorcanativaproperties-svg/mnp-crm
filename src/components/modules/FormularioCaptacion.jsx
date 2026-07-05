@@ -319,13 +319,12 @@ export default function FormularioCaptacion() {
   const [precioVenta, setPrecioVenta] = useState("");
   const [precioProp, setPrecioProp] = useState("");
   const [precioTraspaso, setPrecioTraspaso] = useState("");
-  const [honTipo, setHonTipo] = useState("porcentaje");
-  const [honVal, setHonVal] = useState("");
+  const [honorariosTipo, setHonorariosTipo] = useState("porcentaje");
   const ivaRate = 21;
 
   // Calculated
   const pv = Number(precioVenta) || 0;
-  const honNeto = honTipo === "porcentaje" ? pv * ((Number(honVal) || 0) / 100) : (Number(honVal) || 0);
+  const honNeto = honorariosTipo === "porcentaje" ? pv * ((Number(honorarios) || 0) / 100) : (Number(honorarios) || 0);
   const honIva = honNeto * (ivaRate / 100);
   const honTotal = honNeto + honIva;
   const netoProp = pv - honTotal;
@@ -410,9 +409,9 @@ export default function FormularioCaptacion() {
         precio_venta: Number(precioVenta) || 0,
         precio_prop: Number(precioProp) || 0,
         precio_traspaso: Number(precioTraspaso) || 0,
-        honorarios: Number(honVal) || 5,
-        honorarios_tipo: honTipo,
-        iva_hon: 21,
+        honorarios: Number(honorarios) || 5,
+        honorarios_tipo: honorariosTipo,
+        iva_hon: Number(ivaHon) || 21,
         ibi: Number(ibi) || 0,
         basuras: Number(basuras) || 0,
         comunidad: Number(comunidad) || 0,
@@ -646,14 +645,15 @@ export default function FormularioCaptacion() {
             <Input label="Precio traspaso" value={precioTraspaso} onChange={setPrecioTraspaso} type="number" />
           )}
           <div style={g3}>
-            <Select label="Tipo honorarios" value={honTipo} onChange={setHonTipo} options={["porcentaje", "fijo"]} />
-            <Input label={honTipo === "porcentaje" ? "Honorarios (%)" : "Honorarios (EUR)"} value={honVal} onChange={setHonVal} type="number" placeholder={honTipo === "porcentaje" ? "5" : "15000"} />
+            <Select label="Tipo honorarios" value={honorariosTipo} onChange={setHonorariosTipo} options={["porcentaje", "fijo"]} />
+            <Input label={honorariosTipo === "porcentaje" ? "Honorarios (%)" : "Honorarios (EUR)"} value={honorarios} onChange={setHonorarios} type="number" placeholder={honorariosTipo === "porcentaje" ? "5" : "15000"} />
+            <Input label="IVA honorarios (%)" value={ivaHon} onChange={setIvaHon} type="number" placeholder="21" />
             <div style={{ marginBottom: 14 }}>
               <label style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>IVA</label>
               <div style={{ padding: "10px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#7A7870", fontSize: 13 }}>21%</div>
             </div>
           </div>
-          {pv > 0 && Number(honVal) > 0 && (
+          {pv > 0 && Number(honorarios) > 0 && (
             <div style={{ padding: "12px 16px", background: "#C8A97E08", borderRadius: 3, border: "1px solid #C8A97E15", marginBottom: 14 }}>
               <span style={{ fontSize: 10, color: "#C8A97E", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}>Calculo automatico</span>
               <div style={{ fontSize: 12, color: "#A09D93", marginTop: 6, lineHeight: 1.8 }}>
