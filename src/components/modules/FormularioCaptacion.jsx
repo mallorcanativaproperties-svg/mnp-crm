@@ -320,12 +320,13 @@ export default function FormularioCaptacion() {
   const [precioProp, setPrecioProp] = useState("");
   const [precioTraspaso, setPrecioTraspaso] = useState("");
   const [honorariosTipo, setHonorariosTipo] = useState("porcentaje");
-  const ivaRate = 21;
+  const [honorarios, setHonorarios] = useState("5");
+  const [ivaHon, setIvaHon] = useState("21");
 
   // Calculated
   const pv = Number(precioVenta) || 0;
   const honNeto = honorariosTipo === "porcentaje" ? pv * ((Number(honorarios) || 0) / 100) : (Number(honorarios) || 0);
-  const honIva = honNeto * (ivaRate / 100);
+  const honIva = honNeto * ((Number(ivaHon) || 21) / 100);
   const honTotal = honNeto + honIva;
   const netoProp = pv - honTotal;
 
