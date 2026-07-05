@@ -298,8 +298,6 @@ export default function FormularioCaptacion() {
 
 
   // Publicacion
-  const [titulo, setTitulo] = useState("");
-  const [desc, setDesc] = useState("");
 
   // Propietario
   const [propNom, setPropNom] = useState("");
@@ -324,7 +322,6 @@ export default function FormularioCaptacion() {
       // Mapear campos del formulario a la estructura de Supabase (alineado con mapJsToDb de Propiedades.jsx)
       const dbData = {
         ref, tipo, op, agente,
-        titulo: titulo || `${tipo} en ${municipio}`,
         dir, num: num || null, cp: cp || null, municipio, zona: zona || null,
         orient: orient || null, dist_playa: distPlaya || null, vis_dir: visDir,
         planta: planta || null, puerta: null,
@@ -361,9 +358,7 @@ export default function FormularioCaptacion() {
         drenaje: drenaje || null,
         elec_reformada: elecRef,
         font_reformada: fontRef,
-        desc_texto: desc || null,
         notas_priv: notasPriv || null,
-        destinos: [],
         estado: "captada",
         fecha_cap: new Date().toISOString().split("T")[0],
         prop_nombre: propNom || null,
@@ -531,12 +526,6 @@ export default function FormularioCaptacion() {
             <Toggle label="Electricidad reformada" value={elecRef} onChange={setElecRef} />
             <Toggle label="Fontaneria reformada" value={fontRef} onChange={setFontRef} />
           </div>
-        </Sec>
-
-        {/* 9. Publicacion */}
-        <Sec title="Publicacion">
-          <Input label="Titulo del anuncio" value={titulo} onChange={setTitulo} placeholder="Piso reformado con terraza en Pere Garau" />
-          <Textarea label="Descripcion" value={desc} onChange={setDesc} maxLength={4000} rows={6} />
         </Sec>
 
         {/* 10. Datos de venta */}
