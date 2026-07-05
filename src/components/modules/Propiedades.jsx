@@ -985,6 +985,7 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
   const [editMode, setEditMode] = useState(!p.id);
+  const [autoSaveStatus, setAutoSaveStatus] = useState(null); // null | "saving" | "saved" | "error"
   const [draft, setDraft] = useState({ ...p, 
     suministrosText: (p.suministros || []).join(", "),
     cualPosText: (p.cualPos || []).join("\n"),
@@ -1006,6 +1007,27 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
   };
   const d = editMode ? draft : pWithTexts;
   const upd = (key, val) => setDraft(prev => ({ ...prev, [key]: val }));
+
+  // Autoguardado al salir de cualquier campo (onBlur) — solo propiedades existentes
+  async function autoSave(currentDraft) {
+    if (!currentDraft.id || !editMode) return;
+    setAutoSaveStatus("saving");
+    try {
+      const toSave = { ...currentDraft,
+        suministros: (currentDraft.suministrosText || "").split(",").map(s => s.trim()).filter(Boolean),
+        cualPos: (currentDraft.cualPosText || "").split("\n").filter(Boolean),
+        cualNeg: (currentDraft.cualNegText || "").split("\n").filter(Boolean),
+        cualMejoras: (currentDraft.cualMejorasText || "").split("\n").filter(Boolean),
+        destinos: currentDraft.estado === "publicada" ? (currentDraft.destinos || []) : [],
+      };
+      if (onUpdate) await onUpdate(toSave);
+      setAutoSaveStatus("saved");
+      setTimeout(() => setAutoSaveStatus(null), 2000);
+    } catch (e) {
+      setAutoSaveStatus("error");
+      setTimeout(() => setAutoSaveStatus(null), 3000);
+    }
+  }
 
   // Calcula en tiempo real qué campos de Idealista faltan en el draft actual
   const idealistaFieldErrors = useMemo(() => {
@@ -1061,19 +1083,19 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
           </span>
         </div>
         {type === "bool" ? (
-          <select value={d[field] ? "true" : "false"} onChange={e => upd(field, e.target.value === "true")} style={inputStyle}>
+          <select value={d[field] ? "true" : "false"} onChange={e => upd(field, e.target.value === "true")} onBlur={() => autoSave(draft)} style={inputStyle}>
             <option value="true">Si</option><option value="false">No</option>
           </select>
         ) : type === "select" ? (
-          <select value={d[field] || ""} onChange={e => upd(field, e.target.value)} style={inputStyle}>
+          <select value={d[field] || ""} onChange={e => upd(field, e.target.value)} onBlur={() => autoSave(draft)} style={inputStyle}>
             <option value="">-</option>
             {(options || []).map(o => <option key={o} value={o}>{o}</option>)}
           </select>
         ) : type === "textarea" ? (
-          <textarea key={field} defaultValue={d[field] || ""} onBlur={e => upd(field, e.target.value)} onInput={e => { draft[field] = e.target.value; }}
+          <textarea key={field} defaultValue={d[field] || ""} onBlur={e => { upd(field, e.target.value); draft[field] = e.target.value; autoSave({...draft, [field]: e.target.value}); }} onInput={e => { draft[field] = e.target.value; }}
             style={{ ...inputStyle, minHeight: 80, resize: "vertical" }} />
         ) : (
-          <input type={type === "number" ? "number" : "text"} value={d[field] ?? ""} onChange={e => upd(field, type === "number" ? (e.target.value === "" ? 0 : Number(e.target.value)) : e.target.value)} onFocus={e => { if (type === "number" && e.target.value === "0") e.target.select(); }}
+          <input type={type === "number" ? "number" : "text"} value={d[field] ?? ""} onChange={e => upd(field, type === "number" ? (e.target.value === "" ? 0 : Number(e.target.value)) : e.target.value)} onFocus={e => { if (type === "number" && e.target.value === "0") e.target.select(); }} onBlur={() => autoSave(draft)}
             style={inputStyle} />
         )}
         {hasErr && <div style={{ fontSize: 10, color: "#D45454", marginTop: 3 }}>Requerido para Idealista</div>}
@@ -1279,6 +1301,14 @@ REGLAS:
         <button onClick={() => { if (onDelete) onDelete(p); }} style={{ position: "absolute", top: 16, right: 56, background: "none", border: "1px solid #D4545433", borderRadius: 3, color: "#D45454", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "'Manrope', sans-serif" }}>Eliminar</button>
         
         <div style={{ position: "absolute", top: 20, left: 36, fontSize: 11, color: "#7A7870" }}><span style={{ color: "#C8A97E", fontSize: 18, fontWeight: 400 }}>*</span> Obligatorio Idealista</div>
+        {/* Indicador autoguardado */}
+        {editMode && autoSaveStatus && (
+          <div style={{ position: "absolute", top: 22, left: 220, fontSize: 10, color: autoSaveStatus === "saved" ? "#6AAF8D" : autoSaveStatus === "error" ? "#D45454" : "#7A7870", display: "flex", alignItems: "center", gap: 4 }}>
+            {autoSaveStatus === "saving" && <span>⏳ Guardando...</span>}
+            {autoSaveStatus === "saved" && <span>✓ Guardado</span>}
+            {autoSaveStatus === "error" && <span>✗ Error al guardar</span>}
+          </div>
+        )}
         {/* Banner estado Idealista — solo visible en modo edición */}
         {editMode && (
           <div style={{ marginTop: 48, marginBottom: -8, padding: "10px 16px", borderRadius: 3, background: idealistaReady ? "#6AAF8D11" : "#D4545411", border: "1px solid " + (idealistaReady ? "#6AAF8D44" : "#D4545444"), display: "flex", alignItems: "center", gap: 10 }}>
