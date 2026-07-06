@@ -114,7 +114,7 @@ function buildProperty(row, media) {
   const mConst = Number(row.m_const) || 0;
   const mUtil = Number(row.m_util) || 0;
   const mParcela = Number(row.m_parcela) || 0;
-  const banos = (Number(row.banos) || 0) + (Number(row.aseo) || 0);
+  const banos = (Number(row.banos) || 0) + (Number(row.aseos) || 0);
   const habDobles = Number(row.hab_dobles) || 0;
   const habSimples = Number(row.hab_simples) || 0;
 
@@ -217,7 +217,7 @@ function isValid(row) {
   const tipo = TIPO_MAP[row.tipo];
   if (!tipo) return false;
   const needsBaths = ["flat","house","rustic","premises_commercial","office"].includes(tipo);
-  if (needsBaths && Number(row.banos) <= 0) return false;
+  if (needsBaths && (Number(row.banos) || 0) + (Number(row.aseos) || 0) <= 0) return false;
   const residencial = ["flat","house","rustic"].includes(tipo);
   if (residencial) {
     const cert = row.cert_energ;
