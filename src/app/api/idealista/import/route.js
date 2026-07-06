@@ -167,6 +167,7 @@ export async function POST(request) {
 
       const dbData = {
         ref: ref || null,
+        titulo: [tipo, zona || municipio].filter(Boolean).join(' en '),
         tipo, op: 'Compraventa', estado: 'captada',
         destinos: ['Idealista'],
         dir: streetName || null,
