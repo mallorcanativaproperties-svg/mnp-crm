@@ -2053,6 +2053,46 @@ function CatastroImport({ draft, upd, editMode }) {
   );
 }
 
+// ─── Componente: Importar propiedades desde XML de Idealista ──────────────────
+function IdealistaImportButton() {
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+
+  async function handleFile(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setLoading(true); setResult(null);
+    try {
+      const xmlContent = await file.text();
+      const res = await fetch('/api/idealista/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ xmlContent }),
+      });
+      const data = await res.json();
+      setResult(data);
+    } catch (err) {
+      setResult({ error: err.message });
+    }
+    setLoading(false);
+    e.target.value = '';
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+      <label style={{ background: 'transparent', border: '1px solid #A89BC4', borderRadius: 3, color: '#A89BC4', fontSize: 11, fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer', padding: '12px 20px', fontFamily: "'Manrope', sans-serif", letterSpacing: '0.1em', textTransform: 'uppercase', opacity: loading ? 0.5 : 1 }}>
+        {loading ? 'Importando...' : '⬆ XML Idealista'}
+        <input type="file" accept=".xml" onChange={handleFile} style={{ display: 'none' }} disabled={loading} />
+      </label>
+      {result && (
+        <div style={{ fontSize: 10, textAlign: 'right', color: result.error ? '#D45454' : '#6AAF8D' }}>
+          {result.error ? `Error: ${result.error}` : `✅ ${result.imported} importadas · ${result.skipped} ya existían · ${result.errors} errores`}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function CRMPropiedades() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -2215,6 +2255,7 @@ export default function CRMPropiedades() {
               <p style={{ fontSize: 12, color: "#7A7870", margin: "10px 0 0", letterSpacing: "0.04em" }}>{data.length} inmuebles - {pub} publicados</p>
             </div>
             <IdealistaJsonButton supabase={supabase} />
+            <IdealistaImportButton />
             <button
               onClick={() => {
                 const newProp = {
