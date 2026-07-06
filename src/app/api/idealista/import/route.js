@@ -30,10 +30,35 @@ const TAG_MAP = {
 
 async function downloadAndUpload(url, supabase, ref, tipo, position, tag) {
   try {
-    const res = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" } });
-    if (!res.ok) return null;
-    const buffer = await res.arrayBuffer();
-    const ext = url.split('.').pop().split('?')[0] || 'jpg';
+    // Intentar con URL limpia (sin blur) primero, luego con original
+    const cleanUrl = url.replace(/\/blur\/[^/]+\/\d+\//, '/');
+    const urls = [cleanUrl, url];
+    let buffer = null;
+    let ext = url.split('.').pop().split('?')[0] || 'jpg';
+    
+    for (const tryUrl of urls) {
+      try {
+        const res = await fetch(tryUrl, {
+          headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "Referer": "https://www.idealista.com/",
+            "Accept": "image/webp,image/apng,image/*,*/*;q=0.8",
+          },
+          signal: AbortSignal.timeout(15000)
+        });
+        if (res.ok) {
+          buffer = await res.arrayBuffer();
+          const contentType = res.headers.get('content-type') || '';
+          if (contentType.includes('webp')) ext = 'webp';
+          else if (contentType.includes('png')) ext = 'png';
+          else ext = 'jpg';
+          break;
+        }
+      } catch { continue; }
+    }
+    
+    if (!buffer || buffer.byteLength < 1000) return null;
+    
     const filename = `${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
     const path = `${ref}/${tipo}/${filename}`;
     const { error } = await supabase.storage.from('propiedades-media').upload(path, buffer, {
@@ -160,12 +185,12 @@ export async function POST(request) {
         banos: baths,
         ano_construc: year || null,
         ascensor, terraza, jardin, piscina, armarios, balcon,
-        aire_acond_tipo: ac ? 'Frio/Calor' : null,
+        aire_acond_tipo: ac ? 'Solo frio' : null, // Idealista no especifica tipo exacto
         parking: parkingBool ? 'Si' : 'No',
         cert_energ: certEnerg,
-        emisiones_energ: emisiones,
+        emisiones_energ: emisiones || null,
         desc_texto: desc,
-        tour360: tour360?.startsWith('http') ? tour360 : null,
+        tour360: (tour360 && tour360.startsWith('http')) ? tour360 : null,
         idealista_id: idealista_id || null,
         vis_dir: 'Ocultar direccion',
         fotos: 0, videos: 0, planos: 0, visitas: 0,
