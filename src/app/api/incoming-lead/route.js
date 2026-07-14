@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
+import { sendLeadEvent } from "@/lib/metaCapi";
 import { createClient } from "@supabase/supabase-js";
 
 function getSupabase() {
@@ -199,6 +200,10 @@ export async function POST(request) {
 
       conv = newConv;
       console.log("New conv created:", conv?.id);
+      // Enviar evento Lead a Meta CAPI
+      if (newConv) {
+        await sendLeadEvent({ email: lead.email || null, phone: phone, origin: lead.canal || 'CRM' });
+      }
     }
 
     // Llamar a Ana para generar el primer mensaje

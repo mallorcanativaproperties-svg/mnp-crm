@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
+import { sendLeadEvent } from "@/lib/metaCapi";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -217,6 +218,10 @@ export async function POST(request) {
 
       console.log("Conv insert:", newConv ? "OK" : "FAIL", convErr?.message || "");
       conv = newConv;
+      // Enviar evento Lead a Meta CAPI — solo para leads nuevos
+      if (newConv && !convErr) {
+        await sendLeadEvent({ email: email || null, phone: phoneClean, origin: 'Idealista' });
+      }
     }
 
     // Solo plantilla — abre conversación sin textos libres
