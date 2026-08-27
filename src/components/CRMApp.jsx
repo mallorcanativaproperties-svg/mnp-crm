@@ -12,6 +12,7 @@ const RedesSociales = dynamic(() => import("./modules/RedesSociales"), { ssr: fa
 const AgentesIA = dynamic(() => import("./modules/AgentesIA"), { ssr: false });
 const FirmaElectronica = dynamic(() => import("./modules/FirmaElectronica"), { ssr: false });
 const Usuarios = dynamic(() => import("./modules/Usuarios"), { ssr: false });
+const SimuladorClaudia = dynamic(() => import("./modules/SimuladorClaudia"), { ssr: false });
 
 const MODULES = [
   { key: "propiedades", label: "Propiedades", icon: "⌂", color: "#8FA88A", roles: ["director", "agente", "broker"] },
@@ -23,6 +24,7 @@ const MODULES = [
   { key: "firma", label: "Firma Electronica", icon: "✍", color: "#6AAF8D", roles: ["director", "agente", "broker"] },
   { key: "dashboard", label: "Dashboard", icon: "◆", color: "#C8A97E", roles: ["director", "agente"] },
   { key: "usuarios", label: "Usuarios", icon: "◎", color: "#C8A97E", roles: ["director"] },
+  { key: "simulador", label: "Simulador Claudia", icon: "◈", color: "#A89BC4", roles: ["director"] },
 ];
 
 function LoginScreen({ onLogin }) {
@@ -127,6 +129,7 @@ export default function CRMApp() {
     switch (activeModule) {
       case "dashboard": return <Dashboard />;
       case "usuarios": return <Usuarios currentUser={currentUser} />;
+      case "simulador": return <SimuladorClaudia />;
       case "propiedades": return <Propiedades />;
       case "captacion": return <FormularioCaptacion />;
       case "compradores": return <Compradores />;
