@@ -49,13 +49,13 @@ const BUYERS = [
 ];
 
 const ESTADOS = [
-  { key: "nuevo", label: "Nuevo", accent: "#C8A97E" },
-  { key: "contactado", label: "Contactado", accent: "#8FA88A" },
-  { key: "cualificado", label: "Cualificado", accent: "#D4956A" },
-  { key: "visita", label: "En visitas", accent: "#A89BC4" },
+  { key: "nuevo", label: "Nuevo", accent: "#AC8A54" },
+  { key: "contactado", label: "Contactado", accent: "#2C6E52" },
+  { key: "cualificado", label: "Cualificado", accent: "#9C6E1B" },
+  { key: "visita", label: "En visitas", accent: "#3D577E" },
   { key: "negociacion", label: "Negociación", accent: "#C4A55A" },
-  { key: "cerrado", label: "Cerrado", accent: "#6AAF8D" },
-  { key: "descartado", label: "Descartado", accent: "#7A7870" },
+  { key: "cerrado", label: "Cerrado", accent: "#2C6E52" },
+  { key: "descartado", label: "Descartado", accent: "#9A968A" },
 ];
 
 const FINALIDADES = ["Primera vivienda", "Inversión", "Cambio de vivienda", "Segunda residencia"];
@@ -76,18 +76,18 @@ function fmt(n) { return n ? n.toLocaleString("es-ES") + " €" : "—"; }
 function Badge({ children, color, hollow }) {
   return <span style={{
     display: "inline-block", fontSize: 10, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase",
-    padding: "4px 12px", borderRadius: 2,
-    background: hollow ? "transparent" : (color || "#C8A97E") + "18",
-    color: color || "#C8A97E",
-    border: hollow ? `1px solid ${color || "#C8A97E"}44` : "none",
+    padding: "4px 12px", borderRadius: 0,
+    background: hollow ? "transparent" : (color || "#AC8A54") + "18",
+    color: color || "#AC8A54",
+    border: hollow ? `1px solid ${color || "#AC8A54"}44` : "none",
   }}>{children}</span>;
 }
 
 function ScoreBar({ value }) {
-  const c = value >= 75 ? "#6AAF8D" : value >= 50 ? "#C8A97E" : value >= 25 ? "#D4956A" : "#7A7870";
+  const c = value >= 75 ? "#2C6E52" : value >= 50 ? "#AC8A54" : value >= 25 ? "#9C6E1B" : "#9A968A";
   return <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-    <div style={{ width: 60, height: 3, background: "#2A2926", borderRadius: 2, overflow: "hidden" }}>
-      <div style={{ width: `${value}%`, height: "100%", background: c, borderRadius: 2, transition: "width 0.5s" }} />
+    <div style={{ width: 60, height: 3, background: "#E7E1D4", borderRadius: 0, overflow: "hidden" }}>
+      <div style={{ width: `${value}%`, height: "100%", background: c, borderRadius: 0, transition: "width 0.5s" }} />
     </div>
     <span style={{ fontSize: 11, color: c, fontWeight: 500, fontVariantNumeric: "tabular-nums" }}>{value}</span>
   </div>;
@@ -97,25 +97,25 @@ function Card({ b, onClick }) {
   const s = score(b);
   const est = ESTADOS.find(e => e.key === b.st) || ESTADOS[0];
   return <div onClick={onClick} style={{
-    background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, padding: "22px 26px",
+    background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "22px 26px",
     cursor: "pointer", transition: "all 0.3s ease", position: "relative", overflow: "hidden",
   }}
   onMouseEnter={e => { e.currentTarget.style.borderColor = "#C8A97E55"; e.currentTarget.style.background = "#1F1E1B"; }}
-  onMouseLeave={e => { e.currentTarget.style.borderColor = "#2A2926"; e.currentTarget.style.background = "#1C1B18"; }}
+  onMouseLeave={e => { e.currentTarget.style.borderColor = "#E7E1D4"; e.currentTarget.style.background = "#FFFFFF"; }}
   >
     <div style={{ position: "absolute", top: 0, left: 0, width: 3, height: "100%", background: est.accent, opacity: 0.6 }} />
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
       <div style={{ minWidth: 0 }}>
-        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 400, color: "#F0EDE6", letterSpacing: "0.01em" }}>{b.nombre}</div>
-        <div style={{ fontSize: 12, color: "#7A7870", marginTop: 4, fontFamily: "'Manrope', sans-serif" }}>{b.tel} <span style={{ margin: "0 6px", opacity: 0.3 }}>·</span> {b.email}</div>
+        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 400, color: "#22262E", letterSpacing: "0.01em" }}>{b.nombre}</div>
+        <div style={{ fontSize: 12, color: "#9A968A", marginTop: 4, fontFamily: "Inter, sans-serif" }}>{b.tel} <span style={{ margin: "0 6px", opacity: 0.3 }}>·</span> {b.email}</div>
       </div>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0 }}>
         <Badge color={est.accent}>{est.label}</Badge>
         <ScoreBar value={s} />
       </div>
     </div>
-    <div style={{ display: "flex", gap: 20, marginTop: 16, fontFamily: "'Manrope', sans-serif", fontSize: 13, color: "#A09D93", flexWrap: "wrap", alignItems: "center" }}>
-      <span style={{ color: "#C8A97E", fontWeight: 600, fontSize: 15, fontVariantNumeric: "tabular-nums" }}>{fmt(b.ppto)}</span>
+    <div style={{ display: "flex", gap: 20, marginTop: 16, fontFamily: "Inter, sans-serif", fontSize: 13, color: "#A09D93", flexWrap: "wrap", alignItems: "center" }}>
+      <span style={{ color: "#AC8A54", fontWeight: 600, fontSize: 15, fontVariantNumeric: "tabular-nums" }}>{fmt(b.ppto)}</span>
       <span style={{ opacity: 0.3 }}>|</span>
       <span>{b.hab} hab</span>
       <span style={{ opacity: 0.3 }}>|</span>
@@ -124,10 +124,10 @@ function Card({ b, onClick }) {
       <span>{b.fin === "Sí" ? "Financiación ✓" : b.fin === "No" ? "Sin financiación" : "Abierto a mejorar"}</span>
     </div>
     <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 12 }}>
-      {b.zd.map((z, i) => <span key={i} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 2, fontFamily: "'Manrope', sans-serif", background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E22", letterSpacing: "0.03em" }}>{z}</span>)}
-      {b.ze.map((z, i) => <span key={"e" + i} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 2, fontFamily: "'Manrope', sans-serif", background: "#D4956A0D", color: "#D4956A", border: "1px solid #D4956A22", letterSpacing: "0.03em" }}>✕ {z}</span>)}
+      {b.zd.map((z, i) => <span key={i} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 0, fontFamily: "Inter, sans-serif", background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E22", letterSpacing: "0.03em" }}>{z}</span>)}
+      {b.ze.map((z, i) => <span key={"e" + i} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 0, fontFamily: "Inter, sans-serif", background: "#D4956A0D", color: "#9C6E1B", border: "1px solid #D4956A22", letterSpacing: "0.03em" }}>✕ {z}</span>)}
     </div>
-    {b.ag && <div style={{ marginTop: 10, fontSize: 11, color: "#A89BC4", fontFamily: "'Manrope', sans-serif", fontWeight: 500 }}>Agente: {b.ag}</div>}
+    {b.ag && <div style={{ marginTop: 10, fontSize: 11, color: "#3D577E", fontFamily: "Inter, sans-serif", fontWeight: 500 }}>Agente: {b.ag}</div>}
   </div>;
 }
 
@@ -153,45 +153,45 @@ function Detail({ b, onClose, onSave, onDelete }) {
   }
   const autoBlur = (updatedF) => autoSave(updatedF);
 
-  const iSt = { width: "100%", padding: "10px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 13, fontFamily: "'Manrope', sans-serif", boxSizing: "border-box", outline: "none", transition: "border 0.2s" };
-  const L = ({ children }) => <div style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 6, fontFamily: "'Manrope', sans-serif" }}>{children}</div>;
+  const iSt = { width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box", outline: "none", transition: "border 0.2s" };
+  const L = ({ children }) => <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 6, fontFamily: "Inter, sans-serif" }}>{children}</div>;
 
   return <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", display: "flex", justifyContent: "center", alignItems: "flex-start", padding: "40px 16px", zIndex: 1000, overflowY: "auto" }}>
-    <div style={{ background: "#161513", border: "1px solid #2A2926", borderRadius: 4, width: "100%", maxWidth: 620, padding: "36px 40px", position: "relative" }}>
-      <button onClick={onClose} style={{ position: "absolute", top: 20, right: 24, background: "none", border: "none", color: "#7A7870", fontSize: 20, cursor: "pointer", fontFamily: "'Manrope', sans-serif" }}>✕</button>
-      <button onClick={() => { if (onDelete) onDelete(b); }} style={{ position: "absolute", top: 22, right: 60, background: "none", border: "1px solid #D4545433", borderRadius: 3, color: "#D45454", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "'Manrope', sans-serif" }}>Eliminar</button>
-      {ed && autoSaveStatus && <div style={{ position: "absolute", top: 24, left: 40, fontSize: 10, color: autoSaveStatus === "saved" ? "#6AAF8D" : autoSaveStatus === "error" ? "#D45454" : "#7A7870" }}>{autoSaveStatus === "saving" ? "⏳ Guardando..." : autoSaveStatus === "saved" ? "✓ Guardado" : "✗ Error"}</div>}
+    <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, width: "100%", maxWidth: 620, padding: "36px 40px", position: "relative" }}>
+      <button onClick={onClose} style={{ position: "absolute", top: 20, right: 24, background: "none", border: "none", color: "#9A968A", fontSize: 20, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>✕</button>
+      <button onClick={() => { if (onDelete) onDelete(b); }} style={{ position: "absolute", top: 22, right: 60, background: "none", border: "1px solid #D4545433", borderRadius: 0, color: "#A23A3A", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "Inter, sans-serif" }}>Eliminar</button>
+      {ed && autoSaveStatus && <div style={{ position: "absolute", top: 24, left: 40, fontSize: 10, color: autoSaveStatus === "saved" ? "#2C6E52" : autoSaveStatus === "error" ? "#A23A3A" : "#9A968A" }}>{autoSaveStatus === "saving" ? "⏳ Guardando..." : autoSaveStatus === "saved" ? "✓ Guardado" : "✗ Error"}</div>}
       <div style={{ borderBottom: "1px solid #2A2926", paddingBottom: 24, marginBottom: 28 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
           <div>
-            <div style={{ fontSize: 10, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.15em", fontFamily: "'Manrope', sans-serif", marginBottom: 8 }}>Ficha de comprador</div>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 400, color: "#F0EDE6", margin: 0, lineHeight: 1.2 }}>{b.nombre}</h2>
-            <div style={{ fontSize: 12, color: "#7A7870", marginTop: 8, fontFamily: "'Manrope', sans-serif" }}>Registrado el {b.ts}</div>
+            <div style={{ fontSize: 10, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.15em", fontFamily: "Inter, sans-serif", marginBottom: 8 }}>Ficha de comprador</div>
+            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 400, color: "#22262E", margin: 0, lineHeight: 1.2 }}>{b.nombre}</h2>
+            <div style={{ fontSize: 12, color: "#9A968A", marginTop: 8, fontFamily: "Inter, sans-serif" }}>Registrado el {b.ts}</div>
           </div>
           <div style={{ textAlign: "right" }}><Badge color={est.accent}>{est.label}</Badge><div style={{ marginTop: 10 }}><ScoreBar value={s} /></div></div>
         </div>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px 28px", marginBottom: 28 }}>
-        <div><L>Email</L><div style={{ fontSize: 13, color: "#D0CDC4", fontFamily: "'Manrope', sans-serif" }}>{b.email}</div></div>
-        <div><L>Teléfono</L><div style={{ fontSize: 13, color: "#D0CDC4", fontFamily: "'Manrope', sans-serif" }}>{b.tel}</div></div>
-        <div><L>Presupuesto</L>{ed ? <input type="number" value={f.ppto} onChange={e => setF({ ...f, ppto: +e.target.value })} style={iSt} onFocus={e => e.target.style.borderColor = "#C8A97E44"} onBlur={e => { e.target.style.borderColor = "#2A2926"; autoBlur({...f, ppto: +e.target.value}); }} /> : <div style={{ fontSize: 18, color: "#C8A97E", fontFamily: "'Playfair Display', serif" }}>{fmt(b.ppto)}</div>}</div>
-        <div><L>Habitaciones</L>{ed ? <input value={f.hab} onChange={e => setF({ ...f, hab: e.target.value })} onBlur={e => autoBlur({...f, hab: e.target.value})} style={iSt} /> : <div style={{ fontSize: 13, color: "#D0CDC4", fontFamily: "'Manrope', sans-serif" }}>{b.hab}</div>}</div>
-        <div><L>Finalidad de compra</L>{ed ? <select value={f.finalidad} onChange={e => setF({ ...f, finalidad: e.target.value })} style={iSt}>{FINALIDADES.map(x => <option key={x}>{x}</option>)}</select> : <div style={{ fontSize: 13, color: "#D0CDC4", fontFamily: "'Manrope', sans-serif", fontStyle: "italic" }}>{b.finalidad}</div>}</div>
-        <div><L>Financiación</L>{ed ? <select value={f.fin} onChange={e => setF({ ...f, fin: e.target.value })} style={iSt}>{["Sí","No","Abierto"].map(x => <option key={x}>{x}</option>)}</select> : <div style={{ fontSize: 13, color: "#D0CDC4", fontFamily: "'Manrope', sans-serif" }}>{b.fin === "Sí" ? "Sí, necesita" : b.fin === "No" ? "No necesita" : "Abierto a mejorar condiciones"}</div>}</div>
-        <div><L>Altura máx. sin ascensor</L>{ed ? <input value={f.alt} onChange={e => setF({ ...f, alt: e.target.value })} style={iSt} /> : <div style={{ fontSize: 13, color: "#D0CDC4", fontFamily: "'Manrope', sans-serif" }}>{b.alt}</div>}</div>
+        <div><L>Email</L><div style={{ fontSize: 13, color: "#22262E", fontFamily: "Inter, sans-serif" }}>{b.email}</div></div>
+        <div><L>Teléfono</L><div style={{ fontSize: 13, color: "#22262E", fontFamily: "Inter, sans-serif" }}>{b.tel}</div></div>
+        <div><L>Presupuesto</L>{ed ? <input type="number" value={f.ppto} onChange={e => setF({ ...f, ppto: +e.target.value })} style={iSt} onFocus={e => e.target.style.borderColor = "#C8A97E44"} onBlur={e => { e.target.style.borderColor = "#E7E1D4"; autoBlur({...f, ppto: +e.target.value}); }} /> : <div style={{ fontSize: 18, color: "#AC8A54", fontFamily: "'Playfair Display', serif" }}>{fmt(b.ppto)}</div>}</div>
+        <div><L>Habitaciones</L>{ed ? <input value={f.hab} onChange={e => setF({ ...f, hab: e.target.value })} onBlur={e => autoBlur({...f, hab: e.target.value})} style={iSt} /> : <div style={{ fontSize: 13, color: "#22262E", fontFamily: "Inter, sans-serif" }}>{b.hab}</div>}</div>
+        <div><L>Finalidad de compra</L>{ed ? <select value={f.finalidad} onChange={e => setF({ ...f, finalidad: e.target.value })} style={iSt}>{FINALIDADES.map(x => <option key={x}>{x}</option>)}</select> : <div style={{ fontSize: 13, color: "#22262E", fontFamily: "Inter, sans-serif", fontStyle: "italic" }}>{b.finalidad}</div>}</div>
+        <div><L>Financiación</L>{ed ? <select value={f.fin} onChange={e => setF({ ...f, fin: e.target.value })} style={iSt}>{["Sí","No","Abierto"].map(x => <option key={x}>{x}</option>)}</select> : <div style={{ fontSize: 13, color: "#22262E", fontFamily: "Inter, sans-serif" }}>{b.fin === "Sí" ? "Sí, necesita" : b.fin === "No" ? "No necesita" : "Abierto a mejorar condiciones"}</div>}</div>
+        <div><L>Altura máx. sin ascensor</L>{ed ? <input value={f.alt} onChange={e => setF({ ...f, alt: e.target.value })} style={iSt} /> : <div style={{ fontSize: 13, color: "#22262E", fontFamily: "Inter, sans-serif" }}>{b.alt}</div>}</div>
         <div><L>Estado</L>{ed ? <select value={f.st} onChange={e => setF({ ...f, st: e.target.value })} style={iSt}>{ESTADOS.map(x => <option key={x.key} value={x.key}>{x.label}</option>)}</select> : <Badge color={est.accent}>{est.label}</Badge>}</div>
       </div>
-      <div style={{ marginBottom: 20 }}><L>Zonas deseadas</L><div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>{b.zd.map((z, i) => <span key={i} style={{ fontSize: 11, padding: "4px 12px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E22" }}>{z}</span>)}</div></div>
-      {b.ze.length > 0 && <div style={{ marginBottom: 20 }}><L>Zonas excluidas</L><div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>{b.ze.map((z, i) => <span key={i} style={{ fontSize: 11, padding: "4px 12px", borderRadius: 2, background: "#D4956A0D", color: "#D4956A", border: "1px solid #D4956A22" }}>✕ {z}</span>)}</div></div>}
-      <div style={{ marginBottom: 20 }}><L>Requisitos especiales</L>{ed ? <textarea value={f.req} onChange={e => setF({ ...f, req: e.target.value })} onBlur={e => autoBlur({...f, req: e.target.value})} style={{ ...iSt, minHeight: 80, resize: "vertical" }} /> : <div style={{ fontSize: 13, color: "#D0CDC4", fontFamily: "'Manrope', sans-serif", lineHeight: 1.6, background: "#1C1B18", padding: "14px 18px", borderRadius: 3 }}>{b.req || "—"}</div>}</div>
-      <div style={{ marginBottom: 28 }}><L>Agente asignado</L>{ed ? <input value={f.ag} onChange={e => setF({ ...f, ag: e.target.value })} onBlur={e => autoBlur({...f, ag: e.target.value})} style={iSt} placeholder="Nombre del agente" /> : <div style={{ fontSize: 13, color: b.ag ? "#A89BC4" : "#7A7870", fontFamily: "'Manrope', sans-serif" }}>{b.ag || "Sin asignar"}</div>}</div>
+      <div style={{ marginBottom: 20 }}><L>Zonas deseadas</L><div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>{b.zd.map((z, i) => <span key={i} style={{ fontSize: 11, padding: "4px 12px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E22" }}>{z}</span>)}</div></div>
+      {b.ze.length > 0 && <div style={{ marginBottom: 20 }}><L>Zonas excluidas</L><div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>{b.ze.map((z, i) => <span key={i} style={{ fontSize: 11, padding: "4px 12px", borderRadius: 0, background: "#D4956A0D", color: "#9C6E1B", border: "1px solid #D4956A22" }}>✕ {z}</span>)}</div></div>}
+      <div style={{ marginBottom: 20 }}><L>Requisitos especiales</L>{ed ? <textarea value={f.req} onChange={e => setF({ ...f, req: e.target.value })} onBlur={e => autoBlur({...f, req: e.target.value})} style={{ ...iSt, minHeight: 80, resize: "vertical" }} /> : <div style={{ fontSize: 13, color: "#22262E", fontFamily: "Inter, sans-serif", lineHeight: 1.6, background: "#FFFFFF", padding: "14px 18px", borderRadius: 0 }}>{b.req || "—"}</div>}</div>
+      <div style={{ marginBottom: 28 }}><L>Agente asignado</L>{ed ? <input value={f.ag} onChange={e => setF({ ...f, ag: e.target.value })} onBlur={e => autoBlur({...f, ag: e.target.value})} style={iSt} placeholder="Nombre del agente" /> : <div style={{ fontSize: 13, color: b.ag ? "#3D577E" : "#9A968A", fontFamily: "Inter, sans-serif" }}>{b.ag || "Sin asignar"}</div>}</div>
       <div style={{ display: "flex", gap: 12, justifyContent: "flex-end", borderTop: "1px solid #2A2926", paddingTop: 20 }}>
         {ed ? <>
-          <button onClick={() => setEd(false)} style={{ padding: "10px 24px", borderRadius: 3, border: "1px solid #2A2926", background: "none", color: "#A09D93", cursor: "pointer", fontSize: 12, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.06em", textTransform: "uppercase" }}>Cancelar</button>
-          <button onClick={save} style={{ padding: "10px 24px", borderRadius: 3, border: "none", background: "#C8A97E", color: "#161513", cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.06em", textTransform: "uppercase" }}>Guardar</button>
-        </> : <button onClick={() => setEd(true)} style={{ padding: "10px 24px", borderRadius: 3, border: "1px solid #C8A97E44", background: "transparent", color: "#C8A97E", cursor: "pointer", fontSize: 12, fontWeight: 500, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.06em", textTransform: "uppercase", transition: "all 0.2s" }}
-          onMouseEnter={e => { e.currentTarget.style.background = "#C8A97E"; e.currentTarget.style.color = "#161513"; }}
-          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#C8A97E"; }}
+          <button onClick={() => setEd(false)} style={{ padding: "10px 24px", borderRadius: 0, border: "1px solid #2A2926", background: "none", color: "#A09D93", cursor: "pointer", fontSize: 12, fontFamily: "Inter, sans-serif", letterSpacing: "0.06em", textTransform: "uppercase" }}>Cancelar</button>
+          <button onClick={save} style={{ padding: "10px 24px", borderRadius: 0, border: "none", background: "#AC8A54", color: "#FFFFFF", cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: "Inter, sans-serif", letterSpacing: "0.06em", textTransform: "uppercase" }}>Guardar</button>
+        </> : <button onClick={() => setEd(true)} style={{ padding: "10px 24px", borderRadius: 0, border: "1px solid #C8A97E44", background: "transparent", color: "#AC8A54", cursor: "pointer", fontSize: 12, fontWeight: 500, fontFamily: "Inter, sans-serif", letterSpacing: "0.06em", textTransform: "uppercase", transition: "all 0.2s" }}
+          onMouseEnter={e => { e.currentTarget.style.background = "#AC8A54"; e.currentTarget.style.color = "#FFFFFF"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#AC8A54"; }}
         >Editar ficha</button>}
       </div>
     </div>
@@ -201,14 +201,14 @@ function Detail({ b, onClose, onSave, onDelete }) {
 function NewBuyer({ onClose, onAdd }) {
   const [f, setF] = useState({ nombre: "", email: "", tel: "", fin: "Sí", ppto: "", finalidad: "Primera vivienda", hab: "", zd: "", ze: "", alt: "", req: "", ag: "" });
   const add = () => { onAdd({ ...f, id: Date.now(), ts: new Date().toLocaleDateString("es-ES"), ppto: +f.ppto || 0, zd: f.zd.split(",").map(z => z.trim()).filter(Boolean), ze: f.ze.split(",").map(z => z.trim()).filter(Boolean), st: "nuevo" }); onClose(); };
-  const iSt = { width: "100%", padding: "10px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 13, fontFamily: "'Manrope', sans-serif", boxSizing: "border-box", outline: "none" };
-  const L = ({ children }) => <div style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 6, fontFamily: "'Manrope', sans-serif" }}>{children}</div>;
+  const iSt = { width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box", outline: "none" };
+  const L = ({ children }) => <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 6, fontFamily: "Inter, sans-serif" }}>{children}</div>;
 
   return <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", display: "flex", justifyContent: "center", alignItems: "flex-start", padding: "40px 16px", zIndex: 1000, overflowY: "auto" }}>
-    <div style={{ background: "#161513", border: "1px solid #2A2926", borderRadius: 4, width: "100%", maxWidth: 560, padding: "36px 40px", position: "relative" }}>
-      <button onClick={onClose} style={{ position: "absolute", top: 20, right: 24, background: "none", border: "none", color: "#7A7870", fontSize: 20, cursor: "pointer" }}>✕</button>
-      <div style={{ fontSize: 10, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.15em", fontFamily: "'Manrope', sans-serif", marginBottom: 8 }}>Nuevo registro</div>
-      <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 400, color: "#F0EDE6", margin: "0 0 28px" }}>Añadir <em>comprador</em></h2>
+    <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, width: "100%", maxWidth: 560, padding: "36px 40px", position: "relative" }}>
+      <button onClick={onClose} style={{ position: "absolute", top: 20, right: 24, background: "none", border: "none", color: "#9A968A", fontSize: 20, cursor: "pointer" }}>✕</button>
+      <div style={{ fontSize: 10, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.15em", fontFamily: "Inter, sans-serif", marginBottom: 8 }}>Nuevo registro</div>
+      <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 400, color: "#22262E", margin: "0 0 28px" }}>Añadir <em>comprador</em></h2>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px 24px" }}>
         <div style={{ gridColumn: "span 2" }}><L>Nombre y apellidos</L><input value={f.nombre} onChange={e => setF({ ...f, nombre: e.target.value })} style={iSt} /></div>
         <div><L>Email</L><input value={f.email} onChange={e => setF({ ...f, email: e.target.value })} style={iSt} /></div>
@@ -224,8 +224,8 @@ function NewBuyer({ onClose, onAdd }) {
         <div style={{ gridColumn: "span 2" }}><L>Requisitos</L><textarea value={f.req} onChange={e => setF({ ...f, req: e.target.value })} style={{ ...iSt, minHeight: 60, resize: "vertical" }} /></div>
       </div>
       <div style={{ display: "flex", gap: 12, justifyContent: "flex-end", marginTop: 28, borderTop: "1px solid #2A2926", paddingTop: 20 }}>
-        <button onClick={onClose} style={{ padding: "10px 24px", borderRadius: 3, border: "1px solid #2A2926", background: "none", color: "#A09D93", cursor: "pointer", fontSize: 12, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.06em", textTransform: "uppercase" }}>Cancelar</button>
-        <button onClick={add} disabled={!f.nombre} style={{ padding: "10px 24px", borderRadius: 3, border: "none", background: f.nombre ? "#C8A97E" : "#2A2926", color: f.nombre ? "#161513" : "#7A7870", cursor: f.nombre ? "pointer" : "default", fontSize: 12, fontWeight: 600, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.06em", textTransform: "uppercase" }}>Añadir</button>
+        <button onClick={onClose} style={{ padding: "10px 24px", borderRadius: 0, border: "1px solid #2A2926", background: "none", color: "#A09D93", cursor: "pointer", fontSize: 12, fontFamily: "Inter, sans-serif", letterSpacing: "0.06em", textTransform: "uppercase" }}>Cancelar</button>
+        <button onClick={add} disabled={!f.nombre} style={{ padding: "10px 24px", borderRadius: 0, border: "none", background: f.nombre ? "#AC8A54" : "#E7E1D4", color: f.nombre ? "#FFFFFF" : "#9A968A", cursor: f.nombre ? "pointer" : "default", fontSize: 12, fontWeight: 600, fontFamily: "Inter, sans-serif", letterSpacing: "0.06em", textTransform: "uppercase" }}>Añadir</button>
       </div>
     </div>
   </div>;
@@ -279,45 +279,45 @@ export default function App() {
     setSyncing(false);
   }
 
-  const selSt = { padding: "8px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#A09D93", fontSize: 11, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.04em", cursor: "pointer", appearance: "auto" };
+  const selSt = { padding: "8px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#A09D93", fontSize: 11, fontFamily: "Inter, sans-serif", letterSpacing: "0.04em", cursor: "pointer", appearance: "auto" };
 
-  return <div style={{ fontFamily: "'Manrope', sans-serif", background: "#111110", minHeight: "100vh", color: "#F0EDE6", padding: "40px 24px" }}>
+  return <div style={{ fontFamily: "Inter, sans-serif", background: "#F8F6F1", minHeight: "100vh", color: "#22262E", padding: "40px 24px" }}>
     <div style={{ maxWidth: 920, margin: "0 auto" }}>
 
       <div style={{ marginBottom: 40, borderBottom: "1px solid #2A2926", paddingBottom: 32 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 16 }}>
           <div>
-            <div style={{ fontSize: 10, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Mallorca Nativa Properties</div>
+            <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Mallorca Nativa Properties</div>
             <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 400, margin: 0, lineHeight: 1.1 }}>Base de <em style={{ fontStyle: "italic" }}>Compradores</em></h1>
-            <p style={{ fontSize: 12, color: "#7A7870", margin: "10px 0 0", letterSpacing: "0.04em" }}>Formulario Instagram · Mallorca · {data.length} registros</p>
+            <p style={{ fontSize: 12, color: "#9A968A", margin: "10px 0 0", letterSpacing: "0.04em" }}>Formulario Instagram · Mallorca · {data.length} registros</p>
           </div>
           <div style={{ display: "flex", gap: 10 }}>
-            <button onClick={syncFromSheet} disabled={syncing} style={{ padding: "12px 20px", borderRadius: 3, border: "1px solid #6AAF8D", background: "transparent", color: syncing ? "#7A7870" : "#6AAF8D", cursor: syncing ? "wait" : "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "'Manrope', sans-serif", transition: "all 0.3s" }}>
+            <button onClick={syncFromSheet} disabled={syncing} style={{ padding: "12px 20px", borderRadius: 0, border: "1px solid #6AAF8D", background: "transparent", color: syncing ? "#9A968A" : "#2C6E52", cursor: syncing ? "wait" : "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", transition: "all 0.3s" }}>
               {syncing ? "Sincronizando..." : "↻ Sync Google Sheet"}
             </button>
-            <button onClick={() => setShowNew(true)} style={{ padding: "12px 28px", borderRadius: 3, border: "1px solid #C8A97E", background: "transparent", color: "#C8A97E", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "'Manrope', sans-serif", transition: "all 0.3s" }}
-              onMouseEnter={e => { e.currentTarget.style.background = "#C8A97E"; e.currentTarget.style.color = "#111110"; }}
-              onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#C8A97E"; }}
+            <button onClick={() => setShowNew(true)} style={{ padding: "12px 28px", borderRadius: 0, border: "1px solid #C8A97E", background: "transparent", color: "#AC8A54", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", transition: "all 0.3s" }}
+              onMouseEnter={e => { e.currentTarget.style.background = "#AC8A54"; e.currentTarget.style.color = "#F8F6F1"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#AC8A54"; }}
             >+ Nuevo comprador</button>
           </div>
         </div>
       </div>
 
       {syncResult && (
-        <div style={{ background: syncResult.error ? "#D4545418" : "#6AAF8D18", border: "1px solid " + (syncResult.error ? "#D4545444" : "#6AAF8D44"), borderRadius: 3, padding: "14px 20px", marginBottom: 20, fontSize: 12 }}>
+        <div style={{ background: syncResult.error ? "#D4545418" : "#6AAF8D18", border: "1px solid " + (syncResult.error ? "#D4545444" : "#6AAF8D44"), borderRadius: 0, padding: "14px 20px", marginBottom: 20, fontSize: 12 }}>
           {syncResult.error ? (
-            <span style={{ color: "#D45454" }}>Error: {syncResult.error}</span>
+            <span style={{ color: "#A23A3A" }}>Error: {syncResult.error}</span>
           ) : (
             <div>
-              <span style={{ color: "#6AAF8D" }}>
+              <span style={{ color: "#2C6E52" }}>
                 Sincronización completada: <strong>{syncResult.synced}</strong> nuevos importados, {syncResult.skipped} ya existían, {syncResult.errors} errores. Total en Sheet: {syncResult.total_sheet}.
               </span>
               {syncResult.duplicados && syncResult.duplicados.length > 0 && (
                 <div style={{ marginTop: 12, borderTop: "1px solid #2A2926", paddingTop: 10 }}>
-                  <div style={{ fontSize: 10, color: "#D4956A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8, fontWeight: 600 }}>Duplicados detectados (ya existen en el CRM)</div>
+                  <div style={{ fontSize: 10, color: "#9C6E1B", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8, fontWeight: 600 }}>Duplicados detectados (ya existen en el CRM)</div>
                   {syncResult.duplicados.map((d, i) => (
                     <div key={i} style={{ fontSize: 11, color: "#A09D93", padding: "4px 0", borderBottom: "1px solid #1C1B18" }}>
-                      <strong style={{ color: "#D0CDC4" }}>{d.nombre}</strong> — {d.email || "-"} — {d.telefono || "-"} — <span style={{ color: "#D4956A" }}>{d.motivo}</span>
+                      <strong style={{ color: "#22262E" }}>{d.nombre}</strong> — {d.email || "-"} — {d.telefono || "-"} — <span style={{ color: "#9C6E1B" }}>{d.motivo}</span>
                     </div>
                   ))}
                 </div>
@@ -328,27 +328,27 @@ export default function App() {
       )}
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 16, marginBottom: 36 }}>
-        {[{ n: data.length, l: "Compradores" }, { n: fmt(avg), l: "Presupuesto medio" }, { n: Math.round(withFin / data.length * 100) + "%", l: "Con financiación" }].map((s, i) => <div key={i} style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, padding: "20px 24px", textAlign: "center" }}>
-          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: "#F0EDE6", fontWeight: 400 }}>{s.n}</div>
-          <div style={{ fontSize: 10, color: "#7A7870", marginTop: 6, textTransform: "uppercase", letterSpacing: "0.1em" }}>{s.l}</div>
+        {[{ n: data.length, l: "Compradores" }, { n: fmt(avg), l: "Presupuesto medio" }, { n: Math.round(withFin / data.length * 100) + "%", l: "Con financiación" }].map((s, i) => <div key={i} style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "20px 24px", textAlign: "center" }}>
+          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: "#22262E", fontWeight: 400 }}>{s.n}</div>
+          <div style={{ fontSize: 10, color: "#9A968A", marginTop: 6, textTransform: "uppercase", letterSpacing: "0.1em" }}>{s.l}</div>
         </div>)}
-        <div style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, padding: "14px 18px", display: "flex", flexWrap: "wrap", gap: 5, alignItems: "center", justifyContent: "center" }}>
+        <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "14px 18px", display: "flex", flexWrap: "wrap", gap: 5, alignItems: "center", justifyContent: "center" }}>
           {bySt.map(s => <Badge key={s.key} color={s.accent} hollow>{s.n} {s.label.toLowerCase()}</Badge>)}
         </div>
       </div>
 
       <div style={{ display: "flex", gap: 10, marginBottom: 24, flexWrap: "wrap", alignItems: "center" }}>
-        <input type="text" placeholder="Buscar nombre, zona, teléfono..." value={q} onChange={e => setQ(e.target.value)} style={{ flex: 1, minWidth: 200, padding: "10px 16px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 12, fontFamily: "'Manrope', sans-serif", outline: "none", letterSpacing: "0.02em" }} />
+        <input type="text" placeholder="Buscar nombre, zona, teléfono..." value={q} onChange={e => setQ(e.target.value)} style={{ flex: 1, minWidth: 200, padding: "10px 16px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 12, fontFamily: "Inter, sans-serif", outline: "none", letterSpacing: "0.02em" }} />
         <select value={fEst} onChange={e => setFEst(e.target.value)} style={selSt}><option value="todos">Todos los estados</option>{ESTADOS.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}</select>
         <select value={fFin} onChange={e => setFFin(e.target.value)} style={selSt}><option value="todas">Toda finalidad</option>{FINALIDADES.map(f => <option key={f} value={f}>{f}</option>)}</select>
         <select value={sort} onChange={e => setSort(e.target.value)} style={selSt}><option value="fecha">Más recientes</option><option value="presupuesto">Mayor presupuesto</option><option value="score">Mayor scoring</option><option value="nombre">Nombre A-Z</option></select>
       </div>
 
-      <div style={{ fontSize: 11, color: "#7A7870", marginBottom: 12, letterSpacing: "0.06em" }}>{list.length} de {data.length} compradores</div>
+      <div style={{ fontSize: 11, color: "#9A968A", marginBottom: 12, letterSpacing: "0.06em" }}>{list.length} de {data.length} compradores</div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {list.map(b => <Card key={b.id} b={b} onClick={() => setSel(b)} />)}
-        {list.length === 0 && <div style={{ textAlign: "center", padding: 60, color: "#7A7870", fontSize: 13, fontStyle: "italic" }}>No se encontraron compradores con esos filtros</div>}
+        {list.length === 0 && <div style={{ textAlign: "center", padding: 60, color: "#9A968A", fontSize: 13, fontStyle: "italic" }}>No se encontraron compradores con esos filtros</div>}
       </div>
 
       {sel && <Detail b={sel} onClose={() => setSel(null)} onSave={async u => { 

@@ -1,9 +1,9 @@
 "use client";
 
 export function Tag({ children, color }) {
-  const c = color || "#C8A97E";
+  const c = color || "#AC8A54";
   return (
-    <span style={{ display: "inline-block", fontSize: 9, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", padding: "3px 10px", borderRadius: 2, background: c + "18", color: c }}>
+    <span style={{ display: "inline-block", fontSize: 9, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", padding: "3px 10px", borderRadius: 0, background: c + "18", color: c }}>
       {children}
     </span>
   );
@@ -11,7 +11,7 @@ export function Tag({ children, color }) {
 
 export function Dot({ green }) {
   return (
-    <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: green ? "#6AAF8D" : "#D45454", marginRight: 6, flexShrink: 0 }} />
+    <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: green ? "#2C6E52" : "#A23A3A", marginRight: 6, flexShrink: 0 }} />
   );
 }
 
@@ -20,8 +20,8 @@ export function Sec({ title, children, startOpen }) {
   return (
     <div style={{ marginBottom: 22 }}>
       <div onClick={() => setOpen(!open)} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", marginBottom: open ? 12 : 0 }}>
-        <span style={{ fontSize: 9, color: "#C8A97E", transform: open ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s", display: "inline-block" }}>{">"}</span>
-        <span style={{ fontSize: 11, fontWeight: 600, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.12em" }}>{title}</span>
+        <span style={{ fontSize: 9, color: "#AC8A54", transform: open ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s", display: "inline-block" }}>{">"}</span>
+        <span style={{ fontSize: 11, fontWeight: 600, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.12em" }}>{title}</span>
       </div>
       {open && children}
     </div>

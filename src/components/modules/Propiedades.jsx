@@ -76,11 +76,11 @@ const TIPO_GROUPS = [
 ];
 
 const ESTADOS = [
-  { key: "captada", label: "Captada", accent: "#C8A97E" },
-  { key: "publicada", label: "Publicada", accent: "#8FA88A" },
-  { key: "reservada", label: "Reservada", accent: "#D4956A" },
-  { key: "vendida", label: "Vendida", accent: "#6AAF8D" },
-  { key: "retirada", label: "Retirada", accent: "#7A7870" },
+  { key: "captada", label: "Captada", accent: "#AC8A54" },
+  { key: "publicada", label: "Publicada", accent: "#2C6E52" },
+  { key: "reservada", label: "Reservada", accent: "#9C6E1B" },
+  { key: "vendida", label: "Vendida", accent: "#2C6E52" },
+  { key: "retirada", label: "Retirada", accent: "#9A968A" },
 ];
 
 const DESTINOS = ["Web propia", "Idealista", "Marketplace Facebook", "Catalogo WhatsApp"];
@@ -236,14 +236,14 @@ function calcHon(p) {
 
 function Dot({ green }) {
   return (
-    <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: green ? "#6AAF8D" : "#D45454", marginRight: 6, flexShrink: 0 }} />
+    <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: green ? "#2C6E52" : "#A23A3A", marginRight: 6, flexShrink: 0 }} />
   );
 }
 
 function Tag({ children, color }) {
-  const c = color || "#C8A97E";
+  const c = color || "#AC8A54";
   return (
-    <span style={{ display: "inline-block", fontSize: 10, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", padding: "4px 12px", borderRadius: 2, background: c + "18", color: c }}>
+    <span style={{ display: "inline-block", fontSize: 10, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", padding: "4px 12px", borderRadius: 0, background: c + "18", color: c }}>
       {children}
     </span>
   );
@@ -254,8 +254,8 @@ function Sec({ title, children, startOpen }) {
   return (
     <div style={{ marginBottom: 22 }}>
       <div onClick={() => setOpen(!open)} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", marginBottom: open ? 12 : 0 }}>
-        <span style={{ fontSize: 9, color: "#C8A97E", transform: open ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s", display: "inline-block" }}>{">"}</span>
-        <span style={{ fontSize: 11, fontWeight: 600, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.12em" }}>{title}</span>
+        <span style={{ fontSize: 9, color: "#AC8A54", transform: open ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s", display: "inline-block" }}>{">"}</span>
+        <span style={{ fontSize: 11, fontWeight: 600, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.12em" }}>{title}</span>
       </div>
       {open && children}
     </div>
@@ -267,9 +267,9 @@ function Fl({ label, value, pub, gold }) {
     <div style={{ marginBottom: 10 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
         {pub !== undefined && <Dot green={pub} />}
-        <span style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em" }}>{label}</span>
+        <span style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>{label}</span>
       </div>
-      <div style={{ fontSize: gold ? 16 : 13, color: gold ? "#C8A97E" : "#D0CDC4", fontFamily: gold ? "'Playfair Display', serif" : "'Manrope', sans-serif" }}>
+      <div style={{ fontSize: gold ? 16 : 13, color: gold ? "#AC8A54" : "#22262E", fontFamily: gold ? "'Playfair Display', serif" : "Inter, sans-serif" }}>
         {value || "-"}
       </div>
     </div>
@@ -277,9 +277,9 @@ function Fl({ label, value, pub, gold }) {
 }
 
 const MEDIA_TIPOS = [
-  { key: "foto", label: "Fotos", icon: "📷", accept: "image/*", color: "#C8A97E" },
-  { key: "video", label: "Videos", icon: "🎬", accept: "video/*", color: "#A89BC4" },
-  { key: "plano", label: "Planos", icon: "📐", accept: "image/*,.pdf", color: "#6AAF8D" },
+  { key: "foto", label: "Fotos", icon: "📷", accept: "image/*", color: "#AC8A54" },
+  { key: "video", label: "Videos", icon: "🎬", accept: "video/*", color: "#3D577E" },
+  { key: "plano", label: "Planos", icon: "📐", accept: "image/*,.pdf", color: "#2C6E52" },
 ];
 
 function MediaSection({ propiedadId, propRef, onCountUpdate }) {
@@ -519,7 +519,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate }) {
   MEDIA_TIPOS.forEach((t) => { counts[t.key] = media.filter((m) => m.tipo === t.key).length; });
   const currentTipo = MEDIA_TIPOS.find((t) => t.key === activeTab);
 
-  const btnBase = { padding: "6px 14px", borderRadius: 3, border: "1px solid #2A2926", background: "transparent", color: "#7A7870", cursor: "pointer", fontSize: 11, fontWeight: 500, letterSpacing: "0.04em", fontFamily: "'Manrope', sans-serif", transition: "all 0.2s", display: "flex", alignItems: "center", gap: 6 };
+  const btnBase = { padding: "6px 14px", borderRadius: 0, border: "1px solid #2A2926", background: "transparent", color: "#9A968A", cursor: "pointer", fontSize: 11, fontWeight: 500, letterSpacing: "0.04em", fontFamily: "Inter, sans-serif", transition: "all 0.2s", display: "flex", alignItems: "center", gap: 6 };
 
   return (
     <div>
@@ -528,7 +528,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate }) {
         {MEDIA_TIPOS.map((t) => (
           <div key={t.key} style={{ textAlign: "center", minWidth: 60 }}>
             <div style={{ fontSize: 24, color: t.color, fontFamily: "'Playfair Display', serif" }}>{counts[t.key]}</div>
-            <div style={{ fontSize: 10, color: "#7A7870", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.08em" }}>{t.label}</div>
+            <div style={{ fontSize: 10, color: "#9A968A", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.08em" }}>{t.label}</div>
           </div>
         ))}
       </div>
@@ -540,9 +540,9 @@ function MediaSection({ propiedadId, propRef, onCountUpdate }) {
           return (
             <button key={t.key} onClick={() => setActiveTab(t.key)} style={{
               padding: "10px 18px", border: "none", borderBottom: active ? `2px solid ${t.color}` : "2px solid transparent",
-              background: "transparent", color: active ? t.color : "#7A7870", cursor: "pointer",
+              background: "transparent", color: active ? t.color : "#9A968A", cursor: "pointer",
               fontSize: 11, fontWeight: active ? 600 : 400, letterSpacing: "0.06em", textTransform: "uppercase",
-              fontFamily: "'Manrope', sans-serif", transition: "all 0.2s",
+              fontFamily: "Inter, sans-serif", transition: "all 0.2s",
             }}>
               {t.icon} {t.label} ({counts[t.key]})
             </button>
@@ -552,7 +552,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate }) {
 
       {/* Drag hint */}
       {filteredMedia.length > 1 && (
-        <div style={{ fontSize: 10, color: "#5A584F", marginBottom: 10, fontStyle: "italic" }}>
+        <div style={{ fontSize: 10, color: "#C8BFB0", marginBottom: 10, fontStyle: "italic" }}>
           Arrastra las imagenes para reordenar. La primera sera la principal en portales.
         </div>
       )}
@@ -563,8 +563,8 @@ function MediaSection({ propiedadId, propRef, onCountUpdate }) {
         onDragOver={onFileDragOver}
         onDragLeave={() => setDropZoneOver(false)}
         style={{
-          border: `2px dashed ${dropZoneOver ? currentTipo.color : "#2A2926"}`,
-          borderRadius: 4, padding: "24px 20px", textAlign: "center",
+          border: `2px dashed ${dropZoneOver ? currentTipo.color : "#E7E1D4"}`,
+          borderRadius: 0, padding: "24px 20px", textAlign: "center",
           background: dropZoneOver ? currentTipo.color + "0A" : "#1C1B1800",
           transition: "all 0.2s", marginBottom: 16, cursor: "pointer", position: "relative",
         }}
@@ -579,27 +579,27 @@ function MediaSection({ propiedadId, propRef, onCountUpdate }) {
           onChange={(e) => handleUpload(Array.from(e.target.files), activeTab)}
         />
         <div style={{ fontSize: 28, marginBottom: 8, opacity: 0.5 }}>{currentTipo.icon}</div>
-        <div style={{ fontSize: 12, color: dropZoneOver ? currentTipo.color : "#7A7870", fontWeight: 500 }}>
+        <div style={{ fontSize: 12, color: dropZoneOver ? currentTipo.color : "#9A968A", fontWeight: 500 }}>
           {uploading ? uploadProgress : `Arrastra ${currentTipo.label.toLowerCase()} aqui o haz clic para subir`}
         </div>
-        <div style={{ fontSize: 10, color: "#5A584F", marginTop: 6 }}>
+        <div style={{ fontSize: 10, color: "#C8BFB0", marginTop: 6 }}>
           {activeTab === "foto" && "JPG, PNG, WebP — max 10MB por archivo"}
           {activeTab === "video" && "MP4, MOV — max 100MB por archivo"}
           {activeTab === "plano" && "JPG, PNG, PDF — max 10MB por archivo"}
           {activeTab === "tour360" && "JPG, PNG (equirectangular) — max 20MB"}
         </div>
         {uploading && (
-          <div style={{ marginTop: 12, height: 3, background: "#2A2926", borderRadius: 2, overflow: "hidden" }}>
-            <div style={{ height: "100%", background: currentTipo.color, borderRadius: 2, animation: "pulse 1.5s infinite", width: "60%" }} />
+          <div style={{ marginTop: 12, height: 3, background: "#E7E1D4", borderRadius: 0, overflow: "hidden" }}>
+            <div style={{ height: "100%", background: currentTipo.color, borderRadius: 0, animation: "pulse 1.5s infinite", width: "60%" }} />
           </div>
         )}
       </div>
 
       {/* Gallery grid */}
       {loading ? (
-        <div style={{ textAlign: "center", padding: 30, color: "#7A7870", fontSize: 12 }}>Cargando archivos...</div>
+        <div style={{ textAlign: "center", padding: 30, color: "#9A968A", fontSize: 12 }}>Cargando archivos...</div>
       ) : filteredMedia.length === 0 ? (
-        <div style={{ textAlign: "center", padding: 30, color: "#5A584F", fontSize: 12, fontStyle: "italic" }}>
+        <div style={{ textAlign: "center", padding: 30, color: "#C8BFB0", fontSize: 12, fontStyle: "italic" }}>
           No hay {currentTipo.label.toLowerCase()} subidos
         </div>
       ) : (
@@ -618,10 +618,10 @@ function MediaSection({ propiedadId, propRef, onCountUpdate }) {
               onDrop={(e) => onItemDrop(e, item)}
               onDragEnd={onItemDragEnd}
               style={{
-                position: "relative", borderRadius: 3, overflow: "hidden",
+                position: "relative", borderRadius: 0, overflow: "hidden",
                 border: dragOverItem === item.id ? "2px solid " + currentTipo.color :
                         item.es_portada ? "2px solid #C8A97E" : "1px solid #2A2926",
-                background: dragOverItem === item.id ? currentTipo.color + "0A" : "#1C1B18",
+                background: dragOverItem === item.id ? currentTipo.color + "0A" : "#FFFFFF",
                 transition: "all 0.15s",
                 opacity: dragItem && dragItem.id === item.id ? 0.4 : 1,
                 cursor: "grab",
@@ -630,7 +630,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate }) {
               {/* Order number */}
               <div style={{
                 position: "absolute", top: 6, right: 6, zIndex: 2,
-                background: "#111110CC", color: "#7A7870", fontSize: 10, fontWeight: 700,
+                background: "#111110CC", color: "#9A968A", fontSize: 10, fontWeight: 700,
                 width: 22, height: 22, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
               }}>
                 {idx + 1}
@@ -640,8 +640,8 @@ function MediaSection({ propiedadId, propRef, onCountUpdate }) {
               {item.es_portada && (
                 <div style={{
                   position: "absolute", top: 6, left: 6, zIndex: 2,
-                  background: "#C8A97E", color: "#111110", fontSize: 9, fontWeight: 700,
-                  padding: "2px 8px", borderRadius: 2, letterSpacing: "0.08em", textTransform: "uppercase",
+                  background: "#AC8A54", color: "#F8F6F1", fontSize: 9, fontWeight: 700,
+                  padding: "2px 8px", borderRadius: 0, letterSpacing: "0.08em", textTransform: "uppercase",
                 }}>
                   Portada
                 </div>
@@ -659,7 +659,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate }) {
                   style={{ width: "100%", height: 140, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "#1A1917" }}
                 >
                   <span style={{ fontSize: 32, marginBottom: 4 }}>📄</span>
-                  <span style={{ fontSize: 10, color: "#7A7870" }}>PDF</span>
+                  <span style={{ fontSize: 10, color: "#9A968A" }}>PDF</span>
                 </div>
               ) : (
                 <img
@@ -672,7 +672,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate }) {
 
               {/* Info + actions bar */}
               <div style={{ padding: "6px 8px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: 10, color: "#7A7870", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "50%" }}>
+                <span style={{ fontSize: 10, color: "#9A968A", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "50%" }}>
                   {item.nombre || `${activeTab}-${idx + 1}`}
                 </span>
                 <div style={{ display: "flex", gap: 4 }}>
@@ -680,10 +680,10 @@ function MediaSection({ propiedadId, propRef, onCountUpdate }) {
                   <button onClick={(e) => { e.stopPropagation(); setLightbox(item); }} style={{ ...btnBase, padding: "2px 5px", fontSize: 10 }} title="Ver">👁</button>
                   {/* Set as portada (only photos) */}
                   {activeTab === "foto" && !item.es_portada && (
-                    <button onClick={(e) => { e.stopPropagation(); handleSetPortada(item); }} style={{ ...btnBase, padding: "2px 5px", fontSize: 10, color: "#C8A97E", borderColor: "#C8A97E33" }} title="Hacer portada">★</button>
+                    <button onClick={(e) => { e.stopPropagation(); handleSetPortada(item); }} style={{ ...btnBase, padding: "2px 5px", fontSize: 10, color: "#AC8A54", borderColor: "#C8A97E33" }} title="Hacer portada">★</button>
                   )}
                   {/* Delete */}
-                  <button onClick={(e) => { e.stopPropagation(); if (confirm("Eliminar este archivo?")) handleDelete(item); }} style={{ ...btnBase, padding: "2px 5px", fontSize: 10, color: "#D45454", borderColor: "#D4545433" }} title="Eliminar">✕</button>
+                  <button onClick={(e) => { e.stopPropagation(); if (confirm("Eliminar este archivo?")) handleDelete(item); }} style={{ ...btnBase, padding: "2px 5px", fontSize: 10, color: "#A23A3A", borderColor: "#A23A3A44" }} title="Eliminar">✕</button>
                 </div>
               </div>
             </div>
@@ -701,13 +701,13 @@ function MediaSection({ propiedadId, propRef, onCountUpdate }) {
           }}
         >
           <div onClick={(e) => e.stopPropagation()} style={{ position: "relative", maxWidth: "90vw", maxHeight: "90vh" }}>
-            <button onClick={() => setLightbox(null)} style={{ position: "absolute", top: -30, right: 0, background: "none", border: "none", color: "#F0EDE6", fontSize: 18, cursor: "pointer" }}>✕</button>
+            <button onClick={() => setLightbox(null)} style={{ position: "absolute", top: -30, right: 0, background: "none", border: "none", color: "#22262E", fontSize: 18, cursor: "pointer" }}>✕</button>
             {lightbox.tipo === "video" ? (
-              <video src={lightbox.url} controls autoPlay style={{ maxWidth: "90vw", maxHeight: "85vh", borderRadius: 4 }} />
+              <video src={lightbox.url} controls autoPlay style={{ maxWidth: "90vw", maxHeight: "85vh", borderRadius: 0 }} />
             ) : (
-              <img src={lightbox.url} alt={lightbox.nombre} style={{ maxWidth: "90vw", maxHeight: "85vh", borderRadius: 4, objectFit: "contain" }} />
+              <img src={lightbox.url} alt={lightbox.nombre} style={{ maxWidth: "90vw", maxHeight: "85vh", borderRadius: 0, objectFit: "contain" }} />
             )}
-            <div style={{ textAlign: "center", marginTop: 8, fontSize: 11, color: "#7A7870" }}>{lightbox.nombre}</div>
+            <div style={{ textAlign: "center", marginTop: 8, fontSize: 11, color: "#9A968A" }}>{lightbox.nombre}</div>
           </div>
         </div>
       )}
@@ -813,30 +813,30 @@ function DocsSection({ propiedadId, propRef }) {
   const tiposConDocs = DOC_TIPOS.filter((t) => groupedDocs[t.key].length > 0);
   const tiposSinDocs = DOC_TIPOS.filter((t) => groupedDocs[t.key].length === 0);
 
-  const ss = { padding: "8px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#A09D93", fontSize: 11, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.04em", cursor: "pointer" };
-  const btnDel = { background: "none", border: "1px solid #D4545433", borderRadius: 3, color: "#D45454", cursor: "pointer", fontSize: 10, padding: "2px 6px", fontFamily: "'Manrope', sans-serif" };
+  const ss = { padding: "8px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#A09D93", fontSize: 11, fontFamily: "Inter, sans-serif", letterSpacing: "0.04em", cursor: "pointer" };
+  const btnDel = { background: "none", border: "1px solid #D4545433", borderRadius: 0, color: "#A23A3A", cursor: "pointer", fontSize: 10, padding: "2px 6px", fontFamily: "Inter, sans-serif" };
 
   return (
     <div>
       {/* Resumen */}
       <div style={{ display: "flex", gap: 16, marginBottom: 18, flexWrap: "wrap", alignItems: "center" }}>
         <div style={{ textAlign: "center", minWidth: 60 }}>
-          <div style={{ fontSize: 24, color: "#C8A97E", fontFamily: "'Playfair Display', serif" }}>{docs.length}</div>
-          <div style={{ fontSize: 10, color: "#7A7870", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.08em" }}>Total</div>
+          <div style={{ fontSize: 24, color: "#AC8A54", fontFamily: "'Playfair Display', serif" }}>{docs.length}</div>
+          <div style={{ fontSize: 10, color: "#9A968A", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.08em" }}>Total</div>
         </div>
         <div style={{ textAlign: "center", minWidth: 60 }}>
-          <div style={{ fontSize: 24, color: "#6AAF8D", fontFamily: "'Playfair Display', serif" }}>{tiposConDocs.length}</div>
-          <div style={{ fontSize: 10, color: "#7A7870", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.08em" }}>Tipos</div>
+          <div style={{ fontSize: 24, color: "#2C6E52", fontFamily: "'Playfair Display', serif" }}>{tiposConDocs.length}</div>
+          <div style={{ fontSize: 10, color: "#9A968A", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.08em" }}>Tipos</div>
         </div>
         <div style={{ textAlign: "center", minWidth: 60 }}>
-          <div style={{ fontSize: 24, color: tiposSinDocs.length > 0 ? "#D4956A" : "#6AAF8D", fontFamily: "'Playfair Display', serif" }}>{tiposSinDocs.length}</div>
-          <div style={{ fontSize: 10, color: "#7A7870", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.08em" }}>Pendientes</div>
+          <div style={{ fontSize: 24, color: tiposSinDocs.length > 0 ? "#9C6E1B" : "#2C6E52", fontFamily: "'Playfair Display', serif" }}>{tiposSinDocs.length}</div>
+          <div style={{ fontSize: 10, color: "#9A968A", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.08em" }}>Pendientes</div>
         </div>
       </div>
 
       {/* Upload */}
-      <div style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, padding: "16px 20px", marginBottom: 18 }}>
-        <div style={{ fontSize: 10, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12, fontWeight: 600 }}>Subir documento</div>
+      <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "16px 20px", marginBottom: 18 }}>
+        <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12, fontWeight: 600 }}>Subir documento</div>
         <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
           <select value={selectedTipo} onChange={(e) => setSelectedTipo(e.target.value)} style={ss}>
             {DOC_TIPOS.map((t) => (
@@ -844,9 +844,9 @@ function DocsSection({ propiedadId, propRef }) {
             ))}
           </select>
           <label style={{
-            padding: "8px 18px", borderRadius: 3, border: "1px solid #C8A97E", background: "transparent",
-            color: "#C8A97E", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.08em",
-            textTransform: "uppercase", fontFamily: "'Manrope', sans-serif", transition: "all 0.2s",
+            padding: "8px 18px", borderRadius: 0, border: "1px solid #C8A97E", background: "transparent",
+            color: "#AC8A54", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.08em",
+            textTransform: "uppercase", fontFamily: "Inter, sans-serif", transition: "all 0.2s",
             display: "inline-flex", alignItems: "center", gap: 6,
           }}>
             {uploading ? "Subiendo..." : "Seleccionar archivo"}
@@ -859,39 +859,39 @@ function DocsSection({ propiedadId, propRef }) {
             />
           </label>
         </div>
-        <div style={{ fontSize: 10, color: "#5A584F", marginTop: 8 }}>PDF, Word, Excel, imagenes — max 10MB por archivo</div>
+        <div style={{ fontSize: 10, color: "#C8BFB0", marginTop: 8 }}>PDF, Word, Excel, imagenes — max 10MB por archivo</div>
       </div>
 
       {/* Documents list grouped by tipo */}
       {loading ? (
-        <div style={{ textAlign: "center", padding: 20, color: "#7A7870", fontSize: 12 }}>Cargando documentos...</div>
+        <div style={{ textAlign: "center", padding: 20, color: "#9A968A", fontSize: 12 }}>Cargando documentos...</div>
       ) : docs.length === 0 ? (
-        <div style={{ textAlign: "center", padding: 30, color: "#5A584F", fontSize: 12, fontStyle: "italic" }}>
+        <div style={{ textAlign: "center", padding: 30, color: "#C8BFB0", fontSize: 12, fontStyle: "italic" }}>
           No hay documentos subidos para esta propiedad
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {tiposConDocs.map((tipo) => (
             <div key={tipo.key}>
-              <div style={{ fontSize: 10, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8, fontWeight: 600 }}>
+              <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8, fontWeight: 600 }}>
                 {tipo.icon} {tipo.label}
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                 {groupedDocs[tipo.key].map((doc) => (
                   <div key={doc.id} style={{
                     display: "flex", alignItems: "center", gap: 10, padding: "10px 14px",
-                    background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3,
+                    background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0,
                     transition: "all 0.2s",
                   }}>
                     <span style={{ fontSize: 20, flexShrink: 0 }}>{getIcon(doc.mime_type, doc.nombre)}</span>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 12, color: "#D0CDC4", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{doc.nombre}</div>
-                      <div style={{ fontSize: 10, color: "#5A584F", marginTop: 2 }}>
+                      <div style={{ fontSize: 12, color: "#22262E", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{doc.nombre}</div>
+                      <div style={{ fontSize: 10, color: "#C8BFB0", marginTop: 2 }}>
                         {formatSize(doc.tamano)} — {new Date(doc.created_at).toLocaleDateString("es-ES")}
                       </div>
                     </div>
                     <a href={doc.url} target="_blank" rel="noopener noreferrer"
-                      style={{ fontSize: 10, color: "#8FA88A", textDecoration: "none", padding: "4px 10px", border: "1px solid #8FA88A33", borderRadius: 3 }}>
+                      style={{ fontSize: 10, color: "#2C6E52", textDecoration: "none", padding: "4px 10px", border: "1px solid #8FA88A33", borderRadius: 0 }}>
                       Abrir
                     </a>
                     <button onClick={() => { if (confirm("Eliminar " + doc.nombre + "?")) handleDelete(doc); }} style={btnDel}>✕</button>
@@ -905,11 +905,11 @@ function DocsSection({ propiedadId, propRef }) {
 
       {/* Checklist de documentos pendientes */}
       {tiposSinDocs.length > 0 && docs.length > 0 && (
-        <div style={{ marginTop: 16, padding: "14px 18px", background: "#1C1B1800", border: "1px dashed #2A2926", borderRadius: 3 }}>
-          <div style={{ fontSize: 10, color: "#D4956A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8, fontWeight: 600 }}>Documentos pendientes</div>
+        <div style={{ marginTop: 16, padding: "14px 18px", background: "#1C1B1800", border: "1px dashed #2A2926", borderRadius: 0 }}>
+          <div style={{ fontSize: 10, color: "#9C6E1B", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8, fontWeight: 600 }}>Documentos pendientes</div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             {tiposSinDocs.map((t) => (
-              <span key={t.key} style={{ fontSize: 10, padding: "4px 10px", borderRadius: 2, background: "#D4956A0D", color: "#D4956A", border: "1px solid #D4956A15" }}>
+              <span key={t.key} style={{ fontSize: 10, padding: "4px 10px", borderRadius: 0, background: "#D4956A0D", color: "#9C6E1B", border: "1px solid #D4956A15" }}>
                 {t.icon} {t.label}
               </span>
             ))}
@@ -925,25 +925,25 @@ function PropCard({ p, onClick }) {
   return (
     <div
       onClick={onClick}
-      style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, padding: "22px 26px", cursor: "pointer", transition: "all 0.3s", position: "relative", overflow: "hidden" }}
+      style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "22px 26px", cursor: "pointer", transition: "all 0.3s", position: "relative", overflow: "hidden" }}
       onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#C8A97E55"; e.currentTarget.style.background = "#1F1E1B"; }}
-      onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#2A2926"; e.currentTarget.style.background = "#1C1B18"; }}
+      onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#E7E1D4"; e.currentTarget.style.background = "#FFFFFF"; }}
     >
       <div style={{ position: "absolute", top: 0, left: 0, width: 3, height: "100%", background: est.accent, opacity: 0.6 }} />
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
         <div style={{ minWidth: 0, flex: 1 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 10, color: "#7A7870", letterSpacing: "0.08em" }}>{p.ref}</span>
+            <span style={{ fontSize: 10, color: "#9A968A", letterSpacing: "0.08em" }}>{p.ref}</span>
             <Tag color={est.accent}>{est.label}</Tag>
             <Tag>{p.op}</Tag>
           </div>
-          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 400, color: "#F0EDE6", lineHeight: 1.3 }}>{p.ref} – {p.titulo}</div>
-          <div style={{ fontSize: 12, color: "#7A7870", marginTop: 4 }}>{p.zona}, {p.municipio} - {p.tipo}</div>
+          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 400, color: "#22262E", lineHeight: 1.3 }}>{p.ref} – {p.titulo}</div>
+          <div style={{ fontSize: 12, color: "#9A968A", marginTop: 4 }}>{p.zona}, {p.municipio} - {p.tipo}</div>
         </div>
         <div style={{ textAlign: "right", flexShrink: 0 }}>
-          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, color: "#C8A97E" }}>{fmtP(p.precioVenta)}</div>
-          {p.precioAnt > 0 && <div style={{ fontSize: 11, color: "#D4956A", textDecoration: "line-through" }}>{fmtP(p.precioAnt)}</div>}
-          <div style={{ fontSize: 11, color: "#7A7870", marginTop: 2 }}>{p.mConst} m2 - {p.habDobles + p.habSimples} hab - {(p.banos || 0) + (p.aseos || 0)} ban.</div>
+          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, color: "#AC8A54" }}>{fmtP(p.precioVenta)}</div>
+          {p.precioAnt > 0 && <div style={{ fontSize: 11, color: "#9C6E1B", textDecoration: "line-through" }}>{fmtP(p.precioAnt)}</div>}
+          <div style={{ fontSize: 11, color: "#9A968A", marginTop: 2 }}>{p.mConst} m2 - {p.habDobles + p.habSimples} hab - {(p.banos || 0) + (p.aseos || 0)} ban.</div>
         </div>
       </div>
       <div style={{ display: "flex", gap: 16, marginTop: 14, fontSize: 12, color: "#A09D93", flexWrap: "wrap" }}>
@@ -959,20 +959,20 @@ function PropCard({ p, onClick }) {
       {p.estado === "publicada" && p.destinos.length > 0 && (
         <div style={{ display: "flex", gap: 5, marginTop: 10, flexWrap: "wrap" }}>
           {p.destinos.map((d, i) => (
-            <span key={i} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 2, background: "#8FA88A0D", color: "#8FA88A", border: "1px solid #8FA88A22" }}>{d}</span>
+            <span key={i} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 0, background: "#8FA88A0D", color: "#2C6E52", border: "1px solid #8FA88A22" }}>{d}</span>
           ))}
         </div>
       )}
       <div style={{ display: "flex", gap: 5, marginTop: 8, flexWrap: "wrap" }}>
-        {p.terraza && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E15" }}>Terraza</span>}
-        {p.piscina && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E15" }}>Piscina</span>}
-        {p.aireAcondTipo && p.aireAcondTipo !== "No disponible" && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E15" }}>AC {p.aireAcondTipo.toLowerCase()}</span>}
-        {p.ascensor && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E15" }}>Ascensor</span>}
-        {p.balcon && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E15" }}>Balcon</span>}
-        {p.jardin && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E15" }}>Jardin</span>}
-        {p.armarios && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E15" }}>Armarios empotrados</span>}
-        {p.trastero && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E15" }}>Trastero</span>}
-        {p.parking === "Si" && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E15" }}>Parking</span>}
+        {p.terraza && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E15" }}>Terraza</span>}
+        {p.piscina && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E15" }}>Piscina</span>}
+        {p.aireAcondTipo && p.aireAcondTipo !== "No disponible" && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E15" }}>AC {p.aireAcondTipo.toLowerCase()}</span>}
+        {p.ascensor && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E15" }}>Ascensor</span>}
+        {p.balcon && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E15" }}>Balcon</span>}
+        {p.jardin && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E15" }}>Jardin</span>}
+        {p.armarios && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E15" }}>Armarios empotrados</span>}
+        {p.trastero && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E15" }}>Trastero</span>}
+        {p.parking === "Si" && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E15" }}>Parking</span>}
       </div>
     </div>
   );
@@ -996,7 +996,7 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
   const g3 = { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px 24px" };
   const g4 = { display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "10px 24px" };
   const sep = { borderBottom: "1px solid #2A2926", margin: "18px 0" };
-  const intBox = { background: "#1C1B18", border: "1px solid #D4545422", borderRadius: 3, padding: "16px 20px" };
+  const intBox = { background: "#FFFFFF", border: "1px solid #D4545422", borderRadius: 0, padding: "16px 20px" };
 
   // Create text versions of arrays for editing
   const pWithTexts = { ...p, 
@@ -1071,15 +1071,15 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
   function EFl({ label, field, pub, gold, type = "text", options, req }) {
     const reqMark = req ? " *" : "";
     const hasErr = editMode && idealistaFieldErrors.has(field);
-    const borderColor = hasErr ? "#D45454" : "#2A2926";
-    const inputStyle = { width: "100%", background: "#1C1B18", border: "1px solid " + borderColor, borderRadius: 3, color: "#D0CDC4", padding: "6px 8px", fontSize: 13, fontFamily: "'Manrope', sans-serif" };
+    const borderColor = hasErr ? "#A23A3A" : "#E7E1D4";
+    const inputStyle = { width: "100%", background: "#FFFFFF", border: "1px solid " + borderColor, borderRadius: 0, color: "#22262E", padding: "6px 8px", fontSize: 13, fontFamily: "Inter, sans-serif" };
     if (!editMode) return <Fl label={label + reqMark} value={type === "bool" ? (d[field] ? "Si" : "No") : (type === "number" ? String(d[field] || 0) : (d[field] || "-"))} pub={pub} gold={gold} />;
     return (
       <div style={{ marginBottom: 10 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
           {pub !== undefined && <Dot green={pub} />}
-          <span style={{ fontSize: 10, fontWeight: 600, color: hasErr ? "#D45454" : "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em" }}>
-            {label}{req && <span style={{ color: hasErr ? "#D45454" : "#C8A97E", marginLeft: 3, fontSize: 18, fontWeight: 400, lineHeight: "10px", verticalAlign: "middle" }}>*</span>}
+          <span style={{ fontSize: 10, fontWeight: 600, color: hasErr ? "#A23A3A" : "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+            {label}{req && <span style={{ color: hasErr ? "#A23A3A" : "#AC8A54", marginLeft: 3, fontSize: 18, fontWeight: 400, lineHeight: "10px", verticalAlign: "middle" }}>*</span>}
           </span>
         </div>
         {type === "bool" ? (
@@ -1098,7 +1098,7 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
           <input type={type === "number" ? "number" : "text"} value={d[field] ?? ""} onChange={e => upd(field, type === "number" ? (e.target.value === "" ? 0 : Number(e.target.value)) : e.target.value)} onFocus={e => { if (type === "number" && e.target.value === "0") e.target.select(); }} onBlur={() => autoSave(draft)}
             style={inputStyle} />
         )}
-        {hasErr && <div style={{ fontSize: 10, color: "#D45454", marginTop: 3 }}>Requerido para Idealista</div>}
+        {hasErr && <div style={{ fontSize: 10, color: "#A23A3A", marginTop: 3 }}>Requerido para Idealista</div>}
       </div>
     );
   }
@@ -1270,14 +1270,14 @@ REGLAS:
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)", display: "flex", justifyContent: "center", alignItems: "flex-start", padding: "30px 12px", zIndex: 1000, overflowY: "auto" }}>
-      <div style={{ background: "#161513", border: "1px solid #2A2926", borderRadius: 4, width: "100%", maxWidth: 740, padding: "32px 36px", position: "relative" }}>
-        <button onClick={onClose} style={{ position: "absolute", top: 16, right: 20, background: "none", border: "none", color: "#7A7870", fontSize: 20, cursor: "pointer" }}>X</button>
+      <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, width: "100%", maxWidth: 740, padding: "32px 36px", position: "relative" }}>
+        <button onClick={onClose} style={{ position: "absolute", top: 16, right: 20, background: "none", border: "none", color: "#9A968A", fontSize: 20, cursor: "pointer" }}>X</button>
         {!editMode && <button onClick={() => { setDraft({ ...p, 
           suministrosText: (p.suministros || []).join(", "),
           cualPosText: (p.cualPos || []).join("\n"),
           cualNegText: (p.cualNeg || []).join("\n"),
           cualMejorasText: (p.cualMejoras || []).join("\n"),
-        }); setEditMode(true); }} style={{ position: "absolute", top: 16, right: 120, background: "#C8A97E", border: "none", borderRadius: 3, color: "#111110", fontSize: 10, cursor: "pointer", padding: "5px 14px", fontWeight: 600, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.05em" }}>Editar</button>}
+        }); setEditMode(true); }} style={{ position: "absolute", top: 16, right: 120, background: "#AC8A54", border: "none", borderRadius: 0, color: "#F8F6F1", fontSize: 10, cursor: "pointer", padding: "5px 14px", fontWeight: 600, fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>Editar</button>}
         {editMode && <button onClick={() => { 
           const toSave = { ...draft,
             suministros: (draft.suministrosText || "").split(",").map(s => s.trim()).filter(Boolean),
@@ -1289,7 +1289,7 @@ REGLAS:
           if (onUpdate) onUpdate(toSave);
           setEditMode(false);
         }} 
-          style={{ position: "absolute", top: 16, right: 120, background: "#6AAF8D", border: "none", borderRadius: 3, color: "#111110", fontSize: 10, cursor: "pointer", padding: "5px 14px", fontWeight: 600, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.05em", transition: "all 0.2s" }}>
+          style={{ position: "absolute", top: 16, right: 120, background: "#2C6E52", border: "none", borderRadius: 0, color: "#F8F6F1", fontSize: 10, cursor: "pointer", padding: "5px 14px", fontWeight: 600, fontFamily: "Inter, sans-serif", letterSpacing: "0.05em", transition: "all 0.2s" }}>
           Guardar
         </button>}
         {editMode && <button onClick={() => { setDraft({ ...p,
@@ -1297,13 +1297,13 @@ REGLAS:
           cualPosText: (p.cualPos || []).join("\n"),
           cualNegText: (p.cualNeg || []).join("\n"),
           cualMejorasText: (p.cualMejoras || []).join("\n"),
-        }); setEditMode(false); }} style={{ position: "absolute", top: 16, right: 190, background: "none", border: "1px solid #7A7870", borderRadius: 3, color: "#7A7870", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "'Manrope', sans-serif" }}>Cancelar</button>}
-        <button onClick={() => { if (onDelete) onDelete(p); }} style={{ position: "absolute", top: 16, right: 56, background: "none", border: "1px solid #D4545433", borderRadius: 3, color: "#D45454", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "'Manrope', sans-serif" }}>Eliminar</button>
+        }); setEditMode(false); }} style={{ position: "absolute", top: 16, right: 190, background: "none", border: "1px solid #7A7870", borderRadius: 0, color: "#9A968A", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "Inter, sans-serif" }}>Cancelar</button>}
+        <button onClick={() => { if (onDelete) onDelete(p); }} style={{ position: "absolute", top: 16, right: 56, background: "none", border: "1px solid #D4545433", borderRadius: 0, color: "#A23A3A", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "Inter, sans-serif" }}>Eliminar</button>
         
-        <div style={{ position: "absolute", top: 20, left: 36, fontSize: 11, color: "#7A7870" }}><span style={{ color: "#C8A97E", fontSize: 18, fontWeight: 400 }}>*</span> Obligatorio Idealista</div>
+        <div style={{ position: "absolute", top: 20, left: 36, fontSize: 11, color: "#9A968A" }}><span style={{ color: "#AC8A54", fontSize: 18, fontWeight: 400 }}>*</span> Obligatorio Idealista</div>
         {/* Indicador autoguardado */}
         {editMode && autoSaveStatus && (
-          <div style={{ position: "absolute", top: 22, left: 220, fontSize: 10, color: autoSaveStatus === "saved" ? "#6AAF8D" : autoSaveStatus === "error" ? "#D45454" : "#7A7870", display: "flex", alignItems: "center", gap: 4 }}>
+          <div style={{ position: "absolute", top: 22, left: 220, fontSize: 10, color: autoSaveStatus === "saved" ? "#2C6E52" : autoSaveStatus === "error" ? "#A23A3A" : "#9A968A", display: "flex", alignItems: "center", gap: 4 }}>
             {autoSaveStatus === "saving" && <span>⏳ Guardando...</span>}
             {autoSaveStatus === "saved" && <span>✓ Guardado</span>}
             {autoSaveStatus === "error" && <span>✗ Error al guardar</span>}
@@ -1311,9 +1311,9 @@ REGLAS:
         )}
         {/* Banner estado Idealista — solo visible en modo edición */}
         {editMode && (
-          <div style={{ marginTop: 48, marginBottom: -8, padding: "10px 16px", borderRadius: 3, background: idealistaReady ? "#6AAF8D11" : "#D4545411", border: "1px solid " + (idealistaReady ? "#6AAF8D44" : "#D4545444"), display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ marginTop: 48, marginBottom: -8, padding: "10px 16px", borderRadius: 0, background: idealistaReady ? "#6AAF8D11" : "#F6E7E5", border: "1px solid " + (idealistaReady ? "#6AAF8D44" : "#D4545444"), display: "flex", alignItems: "center", gap: 10 }}>
             <span style={{ fontSize: 16 }}>{idealistaReady ? "✅" : "⚠️"}</span>
-            <span style={{ fontSize: 11, color: idealistaReady ? "#6AAF8D" : "#D45454", fontWeight: 600, fontFamily: "'Manrope', sans-serif" }}>
+            <span style={{ fontSize: 11, color: idealistaReady ? "#2C6E52" : "#A23A3A", fontWeight: 600, fontFamily: "Inter, sans-serif" }}>
               {idealistaReady
                 ? "Propiedad lista para Idealista — todos los campos requeridos están completos"
                 : idealistaFieldErrors.size + " campo(s) requerido(s) para Idealista sin completar"}
@@ -1327,24 +1327,24 @@ REGLAS:
             <>
               <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8, flexWrap: "wrap" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <span style={{ fontSize: 10, color: "#7A7870" }}>REF<span style={{ color: "#C8A97E", fontSize: 18, fontWeight: 400 }}>*</span>:</span>
+                  <span style={{ fontSize: 10, color: "#9A968A" }}>REF<span style={{ color: "#AC8A54", fontSize: 18, fontWeight: 400 }}>*</span>:</span>
                   <input type="text" value={d.ref || ""} onChange={e => upd("ref", e.target.value)}
-                    style={{ width: 130, background: "#1C1B18", border: "1px solid " + (idealistaFieldErrors.has("ref") ? "#D45454" : "#2A2926"), borderRadius: 3, color: "#C8A97E", padding: "4px 8px", fontSize: 11, fontFamily: "'Manrope', sans-serif" }} />
+                    style={{ width: 130, background: "#FFFFFF", border: "1px solid " + (idealistaFieldErrors.has("ref") ? "#A23A3A" : "#E7E1D4"), borderRadius: 0, color: "#AC8A54", padding: "4px 8px", fontSize: 11, fontFamily: "Inter, sans-serif" }} />
                 </div>
                 <select value={d.op || "Compraventa"} onChange={e => upd("op", e.target.value)}
-                  style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "4px 8px", fontSize: 11, fontFamily: "'Manrope', sans-serif" }}>
+                  style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "4px 8px", fontSize: 11, fontFamily: "Inter, sans-serif" }}>
                   {OPS_LIST.map(o => <option key={o} value={o}>{o}</option>)}
                 </select>
                 <select value={d.tipo || ""} onChange={e => upd("tipo", e.target.value)}
-                  style={{ background: "#1C1B18", border: "1px solid " + (idealistaFieldErrors.has("tipo") ? "#D45454" : "#2A2926"), borderRadius: 3, color: "#D0CDC4", padding: "4px 8px", fontSize: 11, fontFamily: "'Manrope', sans-serif" }}>
+                  style={{ background: "#FFFFFF", border: "1px solid " + (idealistaFieldErrors.has("tipo") ? "#A23A3A" : "#E7E1D4"), borderRadius: 0, color: "#22262E", padding: "4px 8px", fontSize: 11, fontFamily: "Inter, sans-serif" }}>
                   <option value="">Tipo *</option>
                   {TIPOS_LIST.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
               </div>
               <input type="text" value={d.titulo || ""} onChange={e => upd("titulo", e.target.value)} placeholder="Titulo de la propiedad"
-                style={{ width: "100%", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", padding: "8px 12px", fontSize: 18, fontFamily: "'Playfair Display', serif", marginBottom: 6 }} />
+                style={{ width: "100%", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "8px 12px", fontSize: 18, fontFamily: "'Playfair Display', serif", marginBottom: 6 }} />
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                <span style={{ fontSize: 11, color: "#7A7870" }}>Agente:</span>
+                <span style={{ fontSize: 11, color: "#9A968A" }}>Agente:</span>
                 <select value={d.agente || ""} onChange={async e => {
                   const agente = e.target.value;
                   upd("agente", agente);
@@ -1354,7 +1354,7 @@ REGLAS:
                     if (refGenerada) upd("ref", refGenerada);
                   }
                 }}
-                  style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "4px 8px", fontSize: 11, fontFamily: "'Manrope', sans-serif" }}>
+                  style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "4px 8px", fontSize: 11, fontFamily: "Inter, sans-serif" }}>
                   <option value="">Seleccionar agente</option>
                   {AGENTES_LIST.map(a => <option key={a} value={a}>{a}</option>)}
                 </select>
@@ -1363,19 +1363,19 @@ REGLAS:
           ) : (
             <>
               <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8, flexWrap: "wrap" }}>
-                <span style={{ fontSize: 10, color: "#7A7870", letterSpacing: "0.1em" }}>{p.ref}</span>
+                <span style={{ fontSize: 10, color: "#9A968A", letterSpacing: "0.1em" }}>{p.ref}</span>
                 <Tag color={est.accent}>{est.label}</Tag>
-                <Tag color="#A89BC4">{p.op}</Tag>
+                <Tag color="#3D577E">{p.op}</Tag>
                 <Tag>{p.tipo}</Tag>
               </div>
-              <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 400, color: "#F0EDE6", margin: 0, lineHeight: 1.2 }}>{p.titulo}</h2>
-              <div style={{ fontSize: 12, color: "#7A7870", marginTop: 6 }}>Captada {p.fechaCap} - Agente: {p.agente}</div>
+              <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 400, color: "#22262E", margin: 0, lineHeight: 1.2 }}>{p.titulo}</h2>
+              <div style={{ fontSize: 12, color: "#9A968A", marginTop: 6 }}>Captada {p.fechaCap} - Agente: {p.agente}</div>
             </>
           )}
         </div>
 
         {/* Legend */}
-        <div style={{ display: "flex", gap: 16, marginBottom: 16, fontSize: 10, color: "#7A7870", background: "#1C1B18", padding: "8px 14px", borderRadius: 3 }}>
+        <div style={{ display: "flex", gap: 16, marginBottom: 16, fontSize: 10, color: "#9A968A", background: "#FFFFFF", padding: "8px 14px", borderRadius: 0 }}>
           <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Dot green={true} />Se publica</span>
           <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Dot green={false} />Dato interno</span>
         </div>
@@ -1392,7 +1392,7 @@ REGLAS:
           <div style={{ marginTop: 10 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 5 }}>
               <Dot green={false} />
-              <span style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em" }}>Estado de la propiedad</span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>Estado de la propiedad</span>
             </div>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               {ESTADOS.map((e) => {
@@ -1414,13 +1414,13 @@ REGLAS:
                       }
                     }}
                     style={{
-                      padding: "8px 18px", borderRadius: 3,
-                      border: "1px solid " + (active ? e.accent : "#2A2926"),
+                      padding: "8px 18px", borderRadius: 0,
+                      border: "1px solid " + (active ? e.accent : "#E7E1D4"),
                       background: active ? e.accent + "22" : "transparent",
-                      color: active ? e.accent : "#7A7870",
+                      color: active ? e.accent : "#9A968A",
                       cursor: "pointer", fontSize: 11, fontWeight: active ? 600 : 400,
                       letterSpacing: "0.06em", textTransform: "uppercase",
-                      fontFamily: "'Manrope', sans-serif", transition: "all 0.2s",
+                      fontFamily: "Inter, sans-serif", transition: "all 0.2s",
                     }}
                   >
                     {e.label}
@@ -1471,16 +1471,16 @@ REGLAS:
               <div style={{ marginBottom: 10 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
                   <Dot green={false} />
-                  <span style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em" }}>Honorarios</span>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>Honorarios</span>
                 </div>
                 <div style={{ display: "flex", gap: 4 }}>
                   <select value={d.honorariosTipo || "porcentaje"} onChange={e => upd("honorariosTipo", e.target.value)}
-                    style={{ width: 100, background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "6px 4px", fontSize: 11, fontFamily: "'Manrope', sans-serif" }}>
+                    style={{ width: 100, background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "6px 4px", fontSize: 11, fontFamily: "Inter, sans-serif" }}>
                     <option value="porcentaje">%</option>
                     <option value="fijo">Importe</option>
                   </select>
                   <input type="number" value={d.honorarios ?? 0} onChange={e => upd("honorarios", Number(e.target.value))} onFocus={e => { if (e.target.value === "0") e.target.select(); }}
-                    style={{ flex: 1, background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "6px 8px", fontSize: 13, fontFamily: "'Manrope', sans-serif" }} />
+                    style={{ flex: 1, background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "6px 8px", fontSize: 13, fontFamily: "Inter, sans-serif" }} />
                 </div>
               </div>
             ) : (
@@ -1488,8 +1488,8 @@ REGLAS:
             )}
             {EFl({label: "IVA Hon %", field: "ivaHon", pub: false, type: "number"})}
           </div>
-          <div style={{ marginTop: 12, padding: "10px 14px", background: "#C8A97E08", borderRadius: 3, border: "1px solid #C8A97E15" }}>
-            <span style={{ fontSize: 10, color: "#C8A97E", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}>Calculo automatico</span>
+          <div style={{ marginTop: 12, padding: "10px 14px", background: "#C8A97E08", borderRadius: 0, border: "1px solid #C8A97E15" }}>
+            <span style={{ fontSize: 10, color: "#AC8A54", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}>Calculo automatico</span>
             <div style={{ fontSize: 12, color: "#A09D93", marginTop: 4, lineHeight: 1.6 }}>
               Precio venta: {fmtP(p.precioVenta)} - Hon. total (neto+IVA): {fmtP(hon.total)} = Neto propietario: {fmtP(p.precioVenta - hon.total)}
             </div>
@@ -1603,12 +1603,12 @@ REGLAS:
               onClick={generarDescripcion}
               disabled={aiLoading}
               style={{
-                padding: "10px 24px", borderRadius: 3, border: "none",
-                background: aiLoading ? "#2A2926" : "linear-gradient(135deg, #C8A97E, #D4B896)",
-                color: aiLoading ? "#7A7870" : "#111110",
+                padding: "10px 24px", borderRadius: 0, border: "none",
+                background: aiLoading ? "#E7E1D4" : "linear-gradient(135deg, #C8A97E, #D4B896)",
+                color: aiLoading ? "#9A968A" : "#F8F6F1",
                 cursor: aiLoading ? "default" : "pointer",
                 fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase",
-                fontFamily: "'Manrope', sans-serif", transition: "all 0.3s",
+                fontFamily: "Inter, sans-serif", transition: "all 0.3s",
                 display: "flex", alignItems: "center", gap: 8,
               }}
             >
@@ -1625,7 +1625,7 @@ REGLAS:
           </div>
 
           {aiError && (
-            <div style={{ marginTop: 10, padding: "10px 14px", background: "#D4545418", borderRadius: 3, border: "1px solid #D4545433", fontSize: 12, color: "#D45454" }}>
+            <div style={{ marginTop: 10, padding: "10px 14px", background: "#D4545418", borderRadius: 0, border: "1px solid #D4545433", fontSize: 12, color: "#A23A3A" }}>
               {aiError}
             </div>
           )}
@@ -1634,11 +1634,11 @@ REGLAS:
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 3 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                 <Dot green={true} />
-                <span style={{ fontSize: 10, fontWeight: 600, color: idealistaFieldErrors.has("desc") ? "#D45454" : "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em" }}>
-                  Descripcion{<span style={{ color: idealistaFieldErrors.has("desc") ? "#D45454" : "#C8A97E", marginLeft: 3, fontSize: 18, fontWeight: 400, lineHeight: "10px", verticalAlign: "middle" }}>*</span>}
+                <span style={{ fontSize: 10, fontWeight: 600, color: idealistaFieldErrors.has("desc") ? "#A23A3A" : "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                  Descripcion{<span style={{ color: idealistaFieldErrors.has("desc") ? "#A23A3A" : "#AC8A54", marginLeft: 3, fontSize: 18, fontWeight: 400, lineHeight: "10px", verticalAlign: "middle" }}>*</span>}
                 </span>
               </div>
-              <span id="desc-counter" style={{ fontSize: 10, color: "#7A7870" }}>{(d.desc || "").length} / 4.000</span>
+              <span id="desc-counter" style={{ fontSize: 10, color: "#9A968A" }}>{(d.desc || "").length} / 4.000</span>
             </div>
             <textarea 
               key={"desc-" + (aiDesc ? "ai" : "manual")}
@@ -1649,12 +1649,12 @@ REGLAS:
                 if (counter) {
                   const len = e.target.value.length;
                   counter.textContent = len + " / 4.000";
-                  counter.style.color = len > 4000 ? "#D45454" : "#7A7870";
+                  counter.style.color = len > 4000 ? "#A23A3A" : "#9A968A";
                 }
                 draft.desc = e.target.value;
               }}
-              style={{ width: "100%", background: "#1C1B18", border: "1px solid " + (idealistaFieldErrors.has("desc") ? "#D45454" : "#2A2926"), borderRadius: 3, color: "#D0CDC4", padding: "14px 18px", fontSize: 13, fontFamily: "'Manrope', sans-serif", minHeight: 200, resize: "vertical", lineHeight: 1.6 }} />
-            {idealistaFieldErrors.has("desc") && <div style={{ fontSize: 10, color: "#D45454", marginTop: 3 }}>Requerido para Idealista</div>}
+              style={{ width: "100%", background: "#FFFFFF", border: "1px solid " + (idealistaFieldErrors.has("desc") ? "#A23A3A" : "#E7E1D4"), borderRadius: 0, color: "#22262E", padding: "14px 18px", fontSize: 13, fontFamily: "Inter, sans-serif", minHeight: 200, resize: "vertical", lineHeight: 1.6 }} />
+            {idealistaFieldErrors.has("desc") && <div style={{ fontSize: 10, color: "#A23A3A", marginTop: 3 }}>Requerido para Idealista</div>}
           </div>
         </Sec>
         <div style={sep} />
@@ -1664,13 +1664,13 @@ REGLAS:
           <div style={{ marginBottom: 16 }}>
             {EFl({label: "Tour virtual (URL)", field: "tour360", pub: true})}
             {d.tour360 && d.tour360.startsWith("http") && (
-              <a href={d.tour360} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: "#C8A97E", textDecoration: "underline" }}>Abrir tour virtual</a>
+              <a href={d.tour360} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: "#AC8A54", textDecoration: "underline" }}>Abrir tour virtual</a>
             )}
           </div>
           {p.id ? (
             <MediaSection propiedadId={p.id} propRef={p.ref} onCountUpdate={(counts) => { if (onUpdate) onUpdate({ ...p, fotos: counts.foto, videos: counts.video, planos: counts.plano }); }} />
           ) : (
-            <div style={{ padding: "20px", textAlign: "center", color: "#7A7870", fontSize: 12, background: "#1C1B18", borderRadius: 3 }}>
+            <div style={{ padding: "20px", textAlign: "center", color: "#9A968A", fontSize: 12, background: "#FFFFFF", borderRadius: 0 }}>
               Guarda la propiedad primero para poder subir fotos, videos y planos
             </div>
           )}
@@ -1682,7 +1682,7 @@ REGLAS:
           {p.id ? (
             <DocsSection propiedadId={p.id} propRef={p.ref} />
           ) : (
-            <div style={{ padding: "20px", textAlign: "center", color: "#7A7870", fontSize: 12, background: "#1C1B18", borderRadius: 3 }}>
+            <div style={{ padding: "20px", textAlign: "center", color: "#9A968A", fontSize: 12, background: "#FFFFFF", borderRadius: 0 }}>
               Guarda la propiedad primero para poder subir documentos
             </div>
           )}
@@ -1694,7 +1694,7 @@ REGLAS:
         <Sec title="Exportar a portales">
           {/* Solo se pueden marcar portales si el estado es "publicada" */}
           {d.estado !== "publicada" && editMode && (
-            <div style={{ fontSize: 11, color: "#7A7870", marginBottom: 10 }}>Marca el estado como <strong style={{color:"#C8A97E"}}>Publicada</strong> para seleccionar portales.</div>
+            <div style={{ fontSize: 11, color: "#9A968A", marginBottom: 10 }}>Marca el estado como <strong style={{color:"#AC8A54"}}>Publicada</strong> para seleccionar portales.</div>
           )}
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             {DESTINOS.map((dest) => {
@@ -1711,16 +1711,16 @@ REGLAS:
                     const next = on ? current.filter(x => x !== dest) : [...current, dest];
                     upd("destinos", next);
                   }}
-                  style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 3, border: "1px solid " + (on ? "#8FA88A44" : "#2A2926"), background: on ? "#8FA88A0D" : "transparent", cursor: canEdit ? "pointer" : "default", opacity: editMode && !canEdit ? 0.4 : 1, transition: "all 0.15s" }}>
-                  <div style={{ width: 14, height: 14, borderRadius: 2, border: "1px solid " + (on ? "#8FA88A" : "#7A7870"), background: on ? "#8FA88A" : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    {on && <span style={{ color: "#161513", fontSize: 10, fontWeight: 700 }}>✓</span>}
+                  style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 0, border: "1px solid " + (on ? "#8FA88A44" : "#E7E1D4"), background: on ? "#8FA88A0D" : "transparent", cursor: canEdit ? "pointer" : "default", opacity: editMode && !canEdit ? 0.4 : 1, transition: "all 0.15s" }}>
+                  <div style={{ width: 14, height: 14, borderRadius: 0, border: "1px solid " + (on ? "#2C6E52" : "#9A968A"), background: on ? "#2C6E52" : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    {on && <span style={{ color: "#FFFFFF", fontSize: 10, fontWeight: 700 }}>✓</span>}
                   </div>
-                  <span style={{ fontSize: 12, color: on ? "#8FA88A" : "#7A7870" }}>{dest}</span>
+                  <span style={{ fontSize: 12, color: on ? "#2C6E52" : "#9A968A" }}>{dest}</span>
                 </div>
               );
             })}
           </div>
-          {editMode && d.estado === "publicada" && <div style={{ fontSize: 10, color: "#7A7870", marginTop: 8 }}>Haz clic para activar o desactivar cada portal</div>}
+          {editMode && d.estado === "publicada" && <div style={{ fontSize: 10, color: "#9A968A", marginTop: 8 }}>Haz clic para activar o desactivar cada portal</div>}
         </Sec>
         <div style={sep} />
 
@@ -1729,7 +1729,7 @@ REGLAS:
           <div style={intBox}>
             <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 12 }}>
               <Dot green={false} />
-              <span style={{ fontSize: 10, fontWeight: 600, color: "#D45454", textTransform: "uppercase", letterSpacing: "0.1em" }}>No se publica</span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "#A23A3A", textTransform: "uppercase", letterSpacing: "0.1em" }}>No se publica</span>
             </div>
             <div style={g2}>
               {EFl({label: "Propietario", field: "propNombre", pub: false})}
@@ -1748,7 +1748,7 @@ REGLAS:
           <div style={intBox}>
             <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 14 }}>
               <Dot green={false} />
-              <span style={{ fontSize: 10, fontWeight: 600, color: "#D45454", textTransform: "uppercase", letterSpacing: "0.1em" }}>Formulario interno</span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "#A23A3A", textTransform: "uppercase", letterSpacing: "0.1em" }}>Formulario interno</span>
             </div>
             {EFl({label: "Puntos positivos (uno por linea)", field: "cualPosText", pub: false, type: "textarea"})}
             {EFl({label: "Puntos negativos (uno por linea)", field: "cualNegText", pub: false, type: "textarea"})}
@@ -1902,12 +1902,12 @@ function IdealistaJsonButton({ supabase }) {
   return (
     <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:6}}>
       <button onClick={generarJSON} disabled={loading}
-        style={{background:loading?"#2A2926":"transparent",border:"1px solid "+(loading?"#3A3A38":"#8FA88A"),borderRadius:3,color:loading?"#7A7870":"#8FA88A",fontSize:11,fontWeight:600,cursor:loading?"not-allowed":"pointer",padding:"12px 20px",fontFamily:"'Manrope', sans-serif",letterSpacing:"0.1em",whiteSpace:"nowrap",textTransform:"uppercase",transition:"all 0.3s"}}
-        onMouseEnter={e=>{if(!loading){e.currentTarget.style.background="#8FA88A";e.currentTarget.style.color="#111110";}}}
-        onMouseLeave={e=>{if(!loading){e.currentTarget.style.background="transparent";e.currentTarget.style.color="#8FA88A";}}}>
+        style={{background:loading?"#E7E1D4":"transparent",border:"1px solid "+(loading?"#3A3A38":"#2C6E52"),borderRadius:3,color:loading?"#9A968A":"#2C6E52",fontSize:11,fontWeight:600,cursor:loading?"not-allowed":"pointer",padding:"12px 20px",fontFamily:"Inter, sans-serif",letterSpacing:"0.1em",whiteSpace:"nowrap",textTransform:"uppercase",transition:"all 0.3s"}}
+        onMouseEnter={e=>{if(!loading){e.currentTarget.style.background="#2C6E52";e.currentTarget.style.color="#F8F6F1";}}}
+        onMouseLeave={e=>{if(!loading){e.currentTarget.style.background="transparent";e.currentTarget.style.color="#2C6E52";}}}>
         {loading?"Generando...":"⬇ JSON Idealista"}
       </button>
-      {(status||loading)&&<div style={{fontSize:10,color:status==="ok"?"#6AAF8D":status==="error"?"#D45454":"#7A7870",textAlign:"right"}}>{msg}</div>}
+      {(status||loading)&&<div style={{fontSize:10,color:status==="ok"?"#2C6E52":status==="error"?"#A23A3A":"#9A968A",textAlign:"right"}}>{msg}</div>}
     </div>
   );
 }
@@ -2018,35 +2018,35 @@ function CatastroImport({ draft, upd, editMode }) {
   }
 
   return (
-    <div style={{ marginBottom: 16, padding: "14px 16px", background: "#1A1915", border: "1px solid #2A2926", borderRadius: 4 }}>
-      <div style={{ fontSize: 10, fontWeight: 700, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>
+    <div style={{ marginBottom: 16, padding: "14px 16px", background: "#F4EEE0", border: "1px solid #2A2926", borderRadius: 0 }}>
+      <div style={{ fontSize: 10, fontWeight: 700, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>
         Importar del Catastro
       </div>
       <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 10, color: "#7A7870", marginBottom: 4 }}>Referencia catastral</div>
+          <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 4 }}>Referencia catastral</div>
           <input
             type="text"
             value={refCat}
             onChange={e => setRefCat(e.target.value.toUpperCase())}
             onKeyDown={e => e.key === "Enter" && importarCatastro()}
             placeholder="Ej: 9872023VH5797S0001WX"
-            style={{ width: "100%", background: "#111110", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "7px 10px", fontSize: 12, fontFamily: "'Manrope', sans-serif", boxSizing: "border-box" }}
+            style={{ width: "100%", background: "#F8F6F1", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "7px 10px", fontSize: 12, fontFamily: "Inter, sans-serif", boxSizing: "border-box" }}
           />
         </div>
         <button
           onClick={importarCatastro}
           disabled={loading || !refCat.trim()}
-          style={{ background: loading || !refCat.trim() ? "#2A2926" : "#C8A97E", border: "none", borderRadius: 3, color: loading || !refCat.trim() ? "#5A584F" : "#111110", fontSize: 11, fontWeight: 700, cursor: loading || !refCat.trim() ? "not-allowed" : "pointer", padding: "7px 16px", fontFamily: "'Manrope', sans-serif", whiteSpace: "nowrap" }}>
+          style={{ background: loading || !refCat.trim() ? "#E7E1D4" : "#AC8A54", border: "none", borderRadius: 0, color: loading || !refCat.trim() ? "#C8BFB0" : "#F8F6F1", fontSize: 11, fontWeight: 700, cursor: loading || !refCat.trim() ? "not-allowed" : "pointer", padding: "7px 16px", fontFamily: "Inter, sans-serif", whiteSpace: "nowrap" }}>
           {loading ? "Consultando..." : "Importar"}
         </button>
       </div>
       {msg && (
-        <div style={{ fontSize: 11, color: msg.type === "ok" ? "#6AAF8D" : msg.type === "warn" ? "#C8A97E" : "#D45454", marginTop: 8, padding: "6px 10px", background: msg.type === "ok" ? "#6AAF8D11" : msg.type === "warn" ? "#C8A97E11" : "#D4545411", borderRadius: 3, border: "1px solid " + (msg.type === "ok" ? "#6AAF8D44" : msg.type === "warn" ? "#C8A97E44" : "#D4545444") }}>
+        <div style={{ fontSize: 11, color: msg.type === "ok" ? "#2C6E52" : msg.type === "warn" ? "#AC8A54" : "#A23A3A", marginTop: 8, padding: "6px 10px", background: msg.type === "ok" ? "#6AAF8D11" : msg.type === "warn" ? "#C8A97E11" : "#F6E7E5", borderRadius: 0, border: "1px solid " + (msg.type === "ok" ? "#6AAF8D44" : msg.type === "warn" ? "#C8A97E44" : "#D4545444") }}>
           {msg.text}
         </div>
       )}
-      <div style={{ fontSize: 10, color: "#5A584F", marginTop: 8 }}>
+      <div style={{ fontSize: 10, color: "#C8BFB0", marginTop: 8 }}>
         Rellena dirección, número, piso, puerta, CP, municipio, m² y año de construcción automáticamente
       </div>
     </div>
@@ -2080,7 +2080,7 @@ function IdealistaImportButton() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
-      <label style={{ background: 'transparent', border: '1px solid #A89BC4', borderRadius: 3, color: '#A89BC4', fontSize: 11, fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer', padding: '12px 20px', fontFamily: "'Manrope', sans-serif", letterSpacing: '0.1em', textTransform: 'uppercase', opacity: loading ? 0.5 : 1 }}>
+      <label style={{ background: 'transparent', border: '1px solid #A89BC4', borderRadius: 0, color: '#A89BC4', fontSize: 11, fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer', padding: '12px 20px', fontFamily: "Inter, sans-serif", letterSpacing: '0.1em', textTransform: 'uppercase', opacity: loading ? 0.5 : 1 }}>
         {loading ? 'Importando...' : '⬆ XML Idealista'}
         <input type="file" accept=".xml" onChange={handleFile} style={{ display: 'none' }} disabled={loading} />
       </label>
@@ -2228,31 +2228,31 @@ export default function CRMPropiedades() {
   const avg = Math.round(data.reduce((s, p) => s + p.precioVenta, 0) / data.length);
   const pub = data.filter((p) => p.estado === "publicada").length;
   const vis = data.reduce((s, p) => s + p.visitas, 0);
-  const ss = { padding: "8px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#A09D93", fontSize: 11, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.04em", cursor: "pointer" };
+  const ss = { padding: "8px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#A09D93", fontSize: 11, fontFamily: "Inter, sans-serif", letterSpacing: "0.04em", cursor: "pointer" };
 
   if (loading) {
     return (
-      <div style={{ fontFamily: "'Manrope', sans-serif", background: "#111110", minHeight: "100vh", color: "#F0EDE6", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ fontFamily: "Inter, sans-serif", background: "#F8F6F1", minHeight: "100vh", color: "#22262E", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 12, color: "#7A7870", letterSpacing: "0.1em", textTransform: "uppercase" }}>Cargando propiedades...</div>
+          <div style={{ fontSize: 12, color: "#9A968A", letterSpacing: "0.1em", textTransform: "uppercase" }}>Cargando propiedades...</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ fontFamily: "'Manrope', sans-serif", background: "#111110", minHeight: "100vh", color: "#F0EDE6", padding: "40px 24px" }}>
+    <div style={{ fontFamily: "Inter, sans-serif", background: "#F8F6F1", minHeight: "100vh", color: "#22262E", padding: "40px 24px" }}>
       <div style={{ maxWidth: 920, margin: "0 auto" }}>
 
         {/* Header */}
         <div style={{ marginBottom: 40, borderBottom: "1px solid #2A2926", paddingBottom: 32 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 16 }}>
             <div>
-              <div style={{ fontSize: 10, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Mallorca Nativa Properties</div>
+              <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Mallorca Nativa Properties</div>
               <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 400, margin: 0, lineHeight: 1.1 }}>
                 Cartera de <em>Propiedades</em>
               </h1>
-              <p style={{ fontSize: 12, color: "#7A7870", margin: "10px 0 0", letterSpacing: "0.04em" }}>{data.length} inmuebles - {pub} publicados</p>
+              <p style={{ fontSize: 12, color: "#9A968A", margin: "10px 0 0", letterSpacing: "0.04em" }}>{data.length} inmuebles - {pub} publicados</p>
             </div>
             <IdealistaJsonButton supabase={supabase} />
             <IdealistaImportButton />
@@ -2281,9 +2281,9 @@ export default function CRMPropiedades() {
                 };
                 setSel(newProp);
               }}
-              style={{ padding: "12px 28px", borderRadius: 3, border: "1px solid #C8A97E", background: "transparent", color: "#C8A97E", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "'Manrope', sans-serif", transition: "all 0.3s" }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "#C8A97E"; e.currentTarget.style.color = "#111110"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#C8A97E"; }}
+              style={{ padding: "12px 28px", borderRadius: 0, border: "1px solid #C8A97E", background: "transparent", color: "#AC8A54", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", transition: "all 0.3s" }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "#AC8A54"; e.currentTarget.style.color = "#F8F6F1"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#AC8A54"; }}
             >
               + Nueva propiedad
             </button>
@@ -2293,9 +2293,9 @@ export default function CRMPropiedades() {
         {/* Stats */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 16, marginBottom: 36 }}>
           {[{ n: data.length, l: "Inmuebles" }, { n: fmtP(avg), l: "Precio medio" }, { n: pub, l: "Publicadas" }, { n: vis, l: "Visitas totales" }].map((s, i) => (
-            <div key={i} style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, padding: "20px 24px", textAlign: "center" }}>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: "#F0EDE6", fontWeight: 400 }}>{s.n}</div>
-              <div style={{ fontSize: 10, color: "#7A7870", marginTop: 6, textTransform: "uppercase", letterSpacing: "0.1em" }}>{s.l}</div>
+            <div key={i} style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "20px 24px", textAlign: "center" }}>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: "#22262E", fontWeight: 400 }}>{s.n}</div>
+              <div style={{ fontSize: 10, color: "#9A968A", marginTop: 6, textTransform: "uppercase", letterSpacing: "0.1em" }}>{s.l}</div>
             </div>
           ))}
         </div>
@@ -2303,7 +2303,7 @@ export default function CRMPropiedades() {
         {/* Filters */}
         <div style={{ display: "flex", gap: 10, marginBottom: 24, flexWrap: "wrap", alignItems: "center" }}>
           <input type="text" placeholder="Buscar ref, titulo, zona..." value={q} onChange={(e) => setQ(e.target.value)}
-            style={{ flex: 1, minWidth: 200, padding: "10px 16px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 12, fontFamily: "'Manrope', sans-serif", outline: "none" }} />
+            style={{ flex: 1, minWidth: 200, padding: "10px 16px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 12, fontFamily: "Inter, sans-serif", outline: "none" }} />
           <select value={fEst} onChange={(e) => setFEst(e.target.value)} style={ss}>
             <option value="todos">Todos estados</option>
             {ESTADOS.map((s) => (<option key={s.key} value={s.key}>{s.label}</option>))}
@@ -2324,12 +2324,12 @@ export default function CRMPropiedades() {
           </select>
         </div>
 
-        <div style={{ fontSize: 11, color: "#7A7870", marginBottom: 12, letterSpacing: "0.06em" }}>{list.length} de {data.length} propiedades</div>
+        <div style={{ fontSize: 11, color: "#9A968A", marginBottom: 12, letterSpacing: "0.06em" }}>{list.length} de {data.length} propiedades</div>
 
         {/* List */}
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {list.map((p) => (<PropCard key={p.id} p={p} onClick={() => setSel(p)} />))}
-          {list.length === 0 && <div style={{ textAlign: "center", padding: 60, color: "#7A7870", fontSize: 13, fontStyle: "italic" }}>Sin resultados</div>}
+          {list.length === 0 && <div style={{ textAlign: "center", padding: 60, color: "#9A968A", fontSize: 13, fontStyle: "italic" }}>Sin resultados</div>}
         </div>
 
         {sel && <PropDetail p={sel} onClose={() => setSel(null)} onUpdate={(updated) => { saveProperty(updated); }} onDelete={(prop) => { if (confirm("¿Eliminar esta propiedad y todos sus archivos? Esta accion no se puede deshacer.")) deleteProperty(prop); }} />}

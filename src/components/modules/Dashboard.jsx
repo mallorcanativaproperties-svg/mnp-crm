@@ -2,11 +2,11 @@
 import { useState, useMemo } from "react";
 
 const COLS = [
-  { key: "captada", label: "Captada", accent: "#C8A97E" },
-  { key: "publicada", label: "Publicada", accent: "#8FA88A" },
-  { key: "reservada", label: "Reservada", accent: "#D4956A" },
-  { key: "vendida", label: "Vendida", accent: "#6AAF8D" },
-  { key: "retirada", label: "Retirada", accent: "#7A7870" },
+  { key: "captada", label: "Captada", accent: "#AC8A54" },
+  { key: "publicada", label: "Publicada", accent: "#2C6E52" },
+  { key: "reservada", label: "Reservada", accent: "#9C6E1B" },
+  { key: "vendida", label: "Vendida", accent: "#2C6E52" },
+  { key: "retirada", label: "Retirada", accent: "#9A968A" },
 ];
 
 const INIT_PROPS = [
@@ -23,14 +23,14 @@ const INIT_PROPS = [
 ];
 
 const ALL_ACTIVITY = [
-  { text:"Nueva captacion: Finca rustica Alaro", agent:"Carlos M.", date:"05/05/2026", color:"#C8A97E" },
-  { text:"Nueva captacion: Casa Sa Cabaneta", agent:"Carlos M.", date:"01/05/2026", color:"#C8A97E" },
-  { text:"MNP-005 pasa a Reservada", agent:"Carlos M.", date:"28/04/2026", color:"#D4956A" },
-  { text:"3 visitas programadas esta semana", agent:"Ana R.", date:"27/04/2026", color:"#A89BC4" },
-  { text:"MNP-007 publicada en Idealista", agent:"Carlos M.", date:"20/04/2026", color:"#8FA88A" },
-  { text:"MNP-006 vendida - Santa Catalina", agent:"Ana R.", date:"15/04/2026", color:"#6AAF8D" },
-  { text:"MNP-008 vendida - Portals Nous", agent:"Ana R.", date:"10/03/2026", color:"#6AAF8D" },
-  { text:"12 nuevos matches comprador-propiedad", agent:"Sistema", date:"09/05/2026", color:"#C8A97E" },
+  { text:"Nueva captacion: Finca rustica Alaro", agent:"Carlos M.", date:"05/05/2026", color:"#AC8A54" },
+  { text:"Nueva captacion: Casa Sa Cabaneta", agent:"Carlos M.", date:"01/05/2026", color:"#AC8A54" },
+  { text:"MNP-005 pasa a Reservada", agent:"Carlos M.", date:"28/04/2026", color:"#9C6E1B" },
+  { text:"3 visitas programadas esta semana", agent:"Ana R.", date:"27/04/2026", color:"#3D577E" },
+  { text:"MNP-007 publicada en Idealista", agent:"Carlos M.", date:"20/04/2026", color:"#2C6E52" },
+  { text:"MNP-006 vendida - Santa Catalina", agent:"Ana R.", date:"15/04/2026", color:"#2C6E52" },
+  { text:"MNP-008 vendida - Portals Nous", agent:"Ana R.", date:"10/03/2026", color:"#2C6E52" },
+  { text:"12 nuevos matches comprador-propiedad", agent:"Sistema", date:"09/05/2026", color:"#AC8A54" },
 ];
 
 function fmtP(n) {
@@ -45,9 +45,9 @@ function fmtShort(n) {
 }
 
 function Tag({ children, color }) {
-  const c = color || "#C8A97E";
+  const c = color || "#AC8A54";
   return (
-    <span style={{ display: "inline-block", fontSize: 9, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", padding: "3px 10px", borderRadius: 2, background: c + "18", color: c }}>
+    <span style={{ display: "inline-block", fontSize: 9, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", padding: "3px 10px", borderRadius: 0, background: c + "18", color: c }}>
       {children}
     </span>
   );
@@ -78,25 +78,25 @@ function LoginScreen({ users, onLogin }) {
   };
 
   const inputStyle = {
-    width: "100%", padding: "12px 16px", background: "#1C1B18", border: "1px solid #2A2926",
-    borderRadius: 3, color: "#F0EDE6", fontSize: 14, fontFamily: "'Manrope', sans-serif",
+    width: "100%", padding: "12px 16px", background: "#FFFFFF", border: "1px solid #2A2926",
+    borderRadius: 0, color: "#22262E", fontSize: 14, fontFamily: "Inter, sans-serif",
     boxSizing: "border-box", outline: "none",
   };
 
   return (
-    <div style={{ fontFamily: "'Manrope', sans-serif", background: "#111110", minHeight: "100vh", color: "#F0EDE6", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
+    <div style={{ fontFamily: "Inter, sans-serif", background: "#F8F6F1", minHeight: "100vh", color: "#22262E", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
       <div style={{ width: "100%", maxWidth: 380 }}>
         <div style={{ textAlign: "center", marginBottom: 40 }}>
-          <div style={{ fontSize: 10, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.25em", marginBottom: 12, fontWeight: 500 }}>Mallorca Nativa Properties</div>
+          <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.25em", marginBottom: 12, fontWeight: 500 }}>Mallorca Nativa Properties</div>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 400, margin: 0, lineHeight: 1.2 }}>
             <em>CRM</em>
           </h1>
-          <p style={{ fontSize: 12, color: "#7A7870", marginTop: 8 }}>Accede a tu panel de control</p>
+          <p style={{ fontSize: 12, color: "#9A968A", marginTop: 8 }}>Accede a tu panel de control</p>
         </div>
 
-        <div style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 4, padding: "32px 28px" }}>
+        <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "32px 28px" }}>
           <div style={{ marginBottom: 18 }}>
-            <label style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 6 }}>Usuario</label>
+            <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 6 }}>Usuario</label>
             <input
               type="text"
               value={user}
@@ -105,11 +105,11 @@ function LoginScreen({ users, onLogin }) {
               placeholder="tu usuario"
               style={inputStyle}
               onFocus={(e) => { e.target.style.borderColor = "#C8A97E44"; }}
-              onBlur={(e) => { e.target.style.borderColor = "#2A2926"; }}
+              onBlur={(e) => { e.target.style.borderColor = "#E7E1D4"; }}
             />
           </div>
           <div style={{ marginBottom: 24 }}>
-            <label style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 6 }}>Contrasena</label>
+            <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 6 }}>Contrasena</label>
             <input
               type="password"
               value={pass}
@@ -118,12 +118,12 @@ function LoginScreen({ users, onLogin }) {
               placeholder="tu contrasena"
               style={inputStyle}
               onFocus={(e) => { e.target.style.borderColor = "#C8A97E44"; }}
-              onBlur={(e) => { e.target.style.borderColor = "#2A2926"; }}
+              onBlur={(e) => { e.target.style.borderColor = "#E7E1D4"; }}
             />
           </div>
 
           {error && (
-            <div style={{ marginBottom: 16, padding: "10px 14px", background: "#D4545412", borderRadius: 3, border: "1px solid #D4545433", fontSize: 12, color: "#D45454", textAlign: "center" }}>
+            <div style={{ marginBottom: 16, padding: "10px 14px", background: "#D4545412", borderRadius: 0, border: "1px solid #D4545433", fontSize: 12, color: "#A23A3A", textAlign: "center" }}>
               {error}
             </div>
           )}
@@ -131,11 +131,11 @@ function LoginScreen({ users, onLogin }) {
           <button
             onClick={handleLogin}
             style={{
-              width: "100%", padding: "14px", borderRadius: 3, border: "none",
+              width: "100%", padding: "14px", borderRadius: 0, border: "none",
               background: "linear-gradient(135deg, #C8A97E, #D4B896)",
-              color: "#111110", cursor: "pointer", fontSize: 12, fontWeight: 700,
+              color: "#F8F6F1", cursor: "pointer", fontSize: 12, fontWeight: 700,
               letterSpacing: "0.1em", textTransform: "uppercase",
-              fontFamily: "'Manrope', sans-serif",
+              fontFamily: "Inter, sans-serif",
             }}
           >
             Acceder
@@ -157,23 +157,23 @@ function KanbanCard({ prop }) {
       draggable
       onDragStart={(e) => { e.dataTransfer.setData("text/plain", String(prop.id)); }}
       style={{
-        background: "#161513", border: "1px solid #2A292600", borderRadius: 3, padding: "12px 14px",
+        background: "#FFFFFF", border: "1px solid #2A292600", borderRadius: 0, padding: "12px 14px",
         cursor: "grab", transition: "all 0.15s", marginBottom: 6,
       }}
-      onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#C8A97E33"; e.currentTarget.style.background = "#1C1B18"; }}
-      onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#2A292600"; e.currentTarget.style.background = "#161513"; }}
+      onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#C8A97E33"; e.currentTarget.style.background = "#FFFFFF"; }}
+      onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#2A292600"; e.currentTarget.style.background = "#FFFFFF"; }}
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
-        <span style={{ fontSize: 9, color: "#7A7870", letterSpacing: "0.08em" }}>{prop.ref}</span>
-        <span style={{ fontSize: 12, color: "#C8A97E", fontWeight: 500 }}>{fmtShort(prop.precio)}</span>
+        <span style={{ fontSize: 9, color: "#9A968A", letterSpacing: "0.08em" }}>{prop.ref}</span>
+        <span style={{ fontSize: 12, color: "#AC8A54", fontWeight: 500 }}>{fmtShort(prop.precio)}</span>
       </div>
-      <div style={{ fontSize: 12, color: "#F0EDE6", lineHeight: 1.3, marginBottom: 6 }}>{prop.titulo}</div>
+      <div style={{ fontSize: 12, color: "#22262E", lineHeight: 1.3, marginBottom: 6 }}>{prop.titulo}</div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <span style={{ fontSize: 10, color: "#7A7870" }}>{prop.zona}</span>
-        <span style={{ fontSize: 10, color: "#7A7870" }}>{prop.agente}</span>
+        <span style={{ fontSize: 10, color: "#9A968A" }}>{prop.zona}</span>
+        <span style={{ fontSize: 10, color: "#9A968A" }}>{prop.agente}</span>
       </div>
       {prop.visitas > 0 && (
-        <div style={{ fontSize: 10, color: "#A89BC4", marginTop: 4 }}>{prop.visitas} visitas</div>
+        <div style={{ fontSize: 10, color: "#3D577E", marginTop: 4 }}>{prop.visitas} visitas</div>
       )}
     </div>
   );
@@ -195,15 +195,15 @@ function KanbanCol({ col, props, onDrop, showValue }) {
         onDrop(id, col.key);
       }}
       style={{
-        flex: 1, minWidth: 155, background: dragOver ? "#1C1B18" : "#111110",
-        borderRadius: 4, border: "1px solid " + (dragOver ? col.accent + "44" : "#2A2926"),
+        flex: 1, minWidth: 155, background: dragOver ? "#FFFFFF" : "#F8F6F1",
+        borderRadius: 0, border: "1px solid " + (dragOver ? col.accent + "44" : "#E7E1D4"),
         padding: "12px 10px", transition: "all 0.2s",
       }}
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, paddingBottom: 8, borderBottom: "2px solid " + col.accent + "33" }}>
         <div>
           <div style={{ fontSize: 11, fontWeight: 600, color: col.accent, textTransform: "uppercase", letterSpacing: "0.1em" }}>{col.label}</div>
-          {showValue && <div style={{ fontSize: 10, color: "#7A7870", marginTop: 2 }}>{fmtShort(total)}</div>}
+          {showValue && <div style={{ fontSize: 10, color: "#9A968A", marginTop: 2 }}>{fmtShort(total)}</div>}
         </div>
         <div style={{ width: 24, height: 24, borderRadius: "50%", background: col.accent + "18", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <span style={{ fontSize: 11, color: col.accent, fontWeight: 600 }}>{props.length}</span>
@@ -261,50 +261,50 @@ function DashboardContent({ currentUser, onLogout, users, setUsers }) {
 
   // KPIs for director vs agent
   const kpis = isDirector ? [
-    { n: stats.activas, l: "En cartera", color: "#C8A97E" },
-    { n: stats.vendidas, l: "Vendidas", color: "#6AAF8D" },
-    { n: fmtShort(stats.valorPipeline) + " EUR", l: "Valor pipeline", color: "#C8A97E" },
-    { n: fmtShort(stats.valorVendido) + " EUR", l: "Valor vendido", color: "#6AAF8D" },
-    { n: fmtP(stats.avgPrecio), l: "Precio medio", color: "#D0CDC4" },
-    { n: stats.totalVisitas, l: "Visitas totales", color: "#A89BC4" },
+    { n: stats.activas, l: "En cartera", color: "#AC8A54" },
+    { n: stats.vendidas, l: "Vendidas", color: "#2C6E52" },
+    { n: fmtShort(stats.valorPipeline) + " EUR", l: "Valor pipeline", color: "#AC8A54" },
+    { n: fmtShort(stats.valorVendido) + " EUR", l: "Valor vendido", color: "#2C6E52" },
+    { n: fmtP(stats.avgPrecio), l: "Precio medio", color: "#22262E" },
+    { n: stats.totalVisitas, l: "Visitas totales", color: "#3D577E" },
   ] : [
-    { n: stats.activas, l: "Mis propiedades activas", color: "#C8A97E" },
-    { n: stats.vendidas, l: "Mis vendidas", color: "#6AAF8D" },
-    { n: stats.totalVisitas, l: "Mis visitas", color: "#A89BC4" },
-    { n: stats.total, l: "Total asignadas", color: "#D0CDC4" },
+    { n: stats.activas, l: "Mis propiedades activas", color: "#AC8A54" },
+    { n: stats.vendidas, l: "Mis vendidas", color: "#2C6E52" },
+    { n: stats.totalVisitas, l: "Mis visitas", color: "#3D577E" },
+    { n: stats.total, l: "Total asignadas", color: "#22262E" },
   ];
 
   return (
-    <div style={{ fontFamily: "'Manrope', sans-serif", background: "#111110", minHeight: "100vh", color: "#F0EDE6", padding: "40px 24px" }}>
+    <div style={{ fontFamily: "Inter, sans-serif", background: "#F8F6F1", minHeight: "100vh", color: "#22262E", padding: "40px 24px" }}>
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
 
         {/* Header */}
         <div style={{ marginBottom: 36, borderBottom: "1px solid #2A2926", paddingBottom: 28 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
             <div>
-              <div style={{ fontSize: 10, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Mallorca Nativa Properties</div>
+              <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Mallorca Nativa Properties</div>
               <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 400, margin: 0, lineHeight: 1.1 }}>
                 {isDirector ? <span><em>Dashboard</em> General</span> : <span>Mi <em>Dashboard</em></span>}
               </h1>
-              <p style={{ fontSize: 12, color: "#7A7870", margin: "10px 0 0", letterSpacing: "0.04em" }}>
+              <p style={{ fontSize: 12, color: "#9A968A", margin: "10px 0 0", letterSpacing: "0.04em" }}>
                 {isDirector ? "Vista completa del negocio" : "Bienvenido, " + currentUser.nombre}
               </p>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <div style={{ textAlign: "right" }}>
-                <div style={{ fontSize: 12, color: "#D0CDC4" }}>{currentUser.nombre}</div>
-                <div style={{ fontSize: 10, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.08em" }}>{isDirector ? "Director" : "Agente"}</div>
+                <div style={{ fontSize: 12, color: "#22262E" }}>{currentUser.nombre}</div>
+                <div style={{ fontSize: 10, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.08em" }}>{isDirector ? "Director" : "Agente"}</div>
               </div>
               <button
                 onClick={onLogout}
                 style={{
-                  padding: "8px 16px", borderRadius: 3, border: "1px solid #2A2926",
-                  background: "transparent", color: "#7A7870", cursor: "pointer",
+                  padding: "8px 16px", borderRadius: 0, border: "1px solid #2A2926",
+                  background: "transparent", color: "#9A968A", cursor: "pointer",
                   fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase",
-                  fontFamily: "'Manrope', sans-serif", transition: "all 0.2s",
+                  fontFamily: "Inter, sans-serif", transition: "all 0.2s",
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#D4545444"; e.currentTarget.style.color = "#D45454"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#2A2926"; e.currentTarget.style.color = "#7A7870"; }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#D4545444"; e.currentTarget.style.color = "#A23A3A"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#E7E1D4"; e.currentTarget.style.color = "#9A968A"; }}
               >
                 Salir
               </button>
@@ -315,16 +315,16 @@ function DashboardContent({ currentUser, onLogout, users, setUsers }) {
         {/* KPIs */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12, marginBottom: 32 }}>
           {kpis.map((s, i) => (
-            <div key={i} style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, padding: "18px 16px", textAlign: "center" }}>
+            <div key={i} style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "18px 16px", textAlign: "center" }}>
               <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, color: s.color, fontWeight: 400 }}>{s.n}</div>
-              <div style={{ fontSize: 9, color: "#7A7870", marginTop: 5, textTransform: "uppercase", letterSpacing: "0.1em" }}>{s.l}</div>
+              <div style={{ fontSize: 9, color: "#9A968A", marginTop: 5, textTransform: "uppercase", letterSpacing: "0.1em" }}>{s.l}</div>
             </div>
           ))}
         </div>
 
         {/* Kanban */}
         <div style={{ marginBottom: 36 }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 14 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 14 }}>
             {isDirector ? "Pipeline global" : "Mi pipeline"}
           </div>
           <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 8 }}>
@@ -338,7 +338,7 @@ function DashboardContent({ currentUser, onLogout, users, setUsers }) {
               />
             ))}
           </div>
-          <div style={{ fontSize: 10, color: "#7A7870", marginTop: 8, fontStyle: "italic" }}>Arrastra las propiedades entre columnas para cambiar su estado</div>
+          <div style={{ fontSize: 10, color: "#9A968A", marginTop: 8, fontStyle: "italic" }}>Arrastra las propiedades entre columnas para cambiar su estado</div>
         </div>
 
         {/* Bottom row */}
@@ -347,13 +347,13 @@ function DashboardContent({ currentUser, onLogout, users, setUsers }) {
           {/* Agents - only director */}
           {isDirector && (
             <div>
-              <div style={{ fontSize: 11, fontWeight: 600, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 14 }}>Rendimiento por agente</div>
+              <div style={{ fontSize: 11, fontWeight: 600, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 14 }}>Rendimiento por agente</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {agentes.map((ag) => (
-                  <div key={ag.name} style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, padding: "16px 20px" }}>
+                  <div key={ag.name} style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "16px 20px" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                      <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: "#F0EDE6" }}>{ag.name}</div>
-                      <Tag color="#6AAF8D">{ag.vendidas} vendida{ag.vendidas !== 1 ? "s" : ""}</Tag>
+                      <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: "#22262E" }}>{ag.name}</div>
+                      <Tag color="#2C6E52">{ag.vendidas} vendida{ag.vendidas !== 1 ? "s" : ""}</Tag>
                     </div>
                     <div style={{ display: "flex", gap: 20, fontSize: 12, color: "#A09D93" }}>
                       <span>{ag.activas} activas</span>
@@ -363,15 +363,15 @@ function DashboardContent({ currentUser, onLogout, users, setUsers }) {
                       <span>{ag.visitas} visitas</span>
                     </div>
                     <div style={{ marginTop: 10, display: "flex", gap: 4, height: 6 }}>
-                      {ag.activas > 0 && <div style={{ flex: ag.activas, background: "#C8A97E", borderRadius: 3 }} />}
-                      {ag.vendidas > 0 && <div style={{ flex: ag.vendidas, background: "#6AAF8D", borderRadius: 3 }} />}
+                      {ag.activas > 0 && <div style={{ flex: ag.activas, background: "#AC8A54", borderRadius: 0 }} />}
+                      {ag.vendidas > 0 && <div style={{ flex: ag.vendidas, background: "#2C6E52", borderRadius: 0 }} />}
                     </div>
-                    <div style={{ display: "flex", gap: 12, marginTop: 6, fontSize: 9, color: "#7A7870" }}>
+                    <div style={{ display: "flex", gap: 12, marginTop: 6, fontSize: 9, color: "#9A968A" }}>
                       <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                        <span style={{ width: 8, height: 8, borderRadius: 2, background: "#C8A97E", display: "inline-block" }} /> Activas
+                        <span style={{ width: 8, height: 8, borderRadius: 0, background: "#AC8A54", display: "inline-block" }} /> Activas
                       </span>
                       <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                        <span style={{ width: 8, height: 8, borderRadius: 2, background: "#6AAF8D", display: "inline-block" }} /> Vendidas
+                        <span style={{ width: 8, height: 8, borderRadius: 0, background: "#2C6E52", display: "inline-block" }} /> Vendidas
                       </span>
                     </div>
                   </div>
@@ -382,16 +382,16 @@ function DashboardContent({ currentUser, onLogout, users, setUsers }) {
 
           {/* Activity */}
           <div>
-            <div style={{ fontSize: 11, fontWeight: 600, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 14 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 14 }}>
               {isDirector ? "Actividad reciente" : "Mi actividad reciente"}
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {myActivity.map((a, i) => (
-                <div key={i} style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, padding: "12px 16px", display: "flex", gap: 12, alignItems: "flex-start" }}>
+                <div key={i} style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "12px 16px", display: "flex", gap: 12, alignItems: "flex-start" }}>
                   <div style={{ width: 8, height: 8, borderRadius: "50%", background: a.color, marginTop: 4, flexShrink: 0 }} />
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 12, color: "#D0CDC4", lineHeight: 1.4 }}>{a.text}</div>
-                    <div style={{ fontSize: 10, color: "#7A7870", marginTop: 3 }}>{a.agent} - {a.date}</div>
+                    <div style={{ fontSize: 12, color: "#22262E", lineHeight: 1.4 }}>{a.text}</div>
+                    <div style={{ fontSize: 10, color: "#9A968A", marginTop: 3 }}>{a.agent} - {a.date}</div>
                   </div>
                 </div>
               ))}
@@ -407,32 +407,32 @@ function DashboardContent({ currentUser, onLogout, users, setUsers }) {
               onClick={() => setShowUserMgmt(!showUserMgmt)}
               style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", marginBottom: showUserMgmt ? 16 : 0 }}
             >
-              <span style={{ fontSize: 9, color: "#C8A97E", transform: showUserMgmt ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s", display: "inline-block" }}>{">"}</span>
-              <span style={{ fontSize: 11, fontWeight: 600, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.12em" }}>Gestion de usuarios</span>
-              <span style={{ fontSize: 10, color: "#7A7870", marginLeft: 4 }}>({users.length})</span>
+              <span style={{ fontSize: 9, color: "#AC8A54", transform: showUserMgmt ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s", display: "inline-block" }}>{">"}</span>
+              <span style={{ fontSize: 11, fontWeight: 600, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.12em" }}>Gestion de usuarios</span>
+              <span style={{ fontSize: 10, color: "#9A968A", marginLeft: 4 }}>({users.length})</span>
             </div>
 
             {showUserMgmt && (
               <div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
                   {users.map((u, idx) => (
-                    <div key={u.user} style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, padding: "14px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, opacity: u.activo ? 1 : 0.5 }}>
+                    <div key={u.user} style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "14px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12, opacity: u.activo ? 1 : 0.5 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                        <div style={{ width: 36, height: 36, borderRadius: "50%", background: u.activo ? (u.role === "director" ? "#C8A97E22" : "#8FA88A22") : "#2A2926", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                          <span style={{ fontSize: 14, color: u.activo ? (u.role === "director" ? "#C8A97E" : "#8FA88A") : "#7A7870", fontWeight: 600 }}>{u.nombre.charAt(0)}</span>
+                        <div style={{ width: 36, height: 36, borderRadius: "50%", background: u.activo ? (u.role === "director" ? "#C8A97E22" : "#8FA88A22") : "#E7E1D4", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <span style={{ fontSize: 14, color: u.activo ? (u.role === "director" ? "#AC8A54" : "#2C6E52") : "#9A968A", fontWeight: 600 }}>{u.nombre.charAt(0)}</span>
                         </div>
                         <div>
-                          <div style={{ fontSize: 14, color: "#F0EDE6", fontWeight: 500 }}>{u.nombre}</div>
-                          <div style={{ fontSize: 11, color: "#7A7870", marginTop: 2 }}>
+                          <div style={{ fontSize: 14, color: "#22262E", fontWeight: 500 }}>{u.nombre}</div>
+                          <div style={{ fontSize: 11, color: "#9A968A", marginTop: 2 }}>
                             @{u.user} - {u.role === "director" ? "Director" : "Agente"}
-                            {!u.activo && <span style={{ color: "#D45454", marginLeft: 8 }}>DESACTIVADO</span>}
+                            {!u.activo && <span style={{ color: "#A23A3A", marginLeft: 8 }}>DESACTIVADO</span>}
                           </div>
                         </div>
                       </div>
                       {u.role !== "director" && (
                         <button
                           onClick={() => { setUsers((prev) => prev.map((x, i) => i === idx ? { ...x, activo: !x.activo } : x)); }}
-                          style={{ padding: "6px 14px", borderRadius: 3, border: "1px solid " + (u.activo ? "#D4545433" : "#6AAF8D33"), background: "transparent", color: u.activo ? "#D45454" : "#6AAF8D", cursor: "pointer", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "'Manrope', sans-serif" }}
+                          style={{ padding: "6px 14px", borderRadius: 0, border: "1px solid " + (u.activo ? "#A23A3A44" : "#6AAF8D33"), background: "transparent", color: u.activo ? "#A23A3A" : "#2C6E52", cursor: "pointer", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}
                         >
                           {u.activo ? "Desactivar" : "Activar"}
                         </button>
@@ -441,24 +441,24 @@ function DashboardContent({ currentUser, onLogout, users, setUsers }) {
                   ))}
                 </div>
 
-                <div style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, padding: "20px 24px" }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 14 }}>Crear nuevo usuario</div>
+                <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "20px 24px" }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 14 }}>Crear nuevo usuario</div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 16px" }}>
                     <div>
-                      <label style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>Nombre completo</label>
-                      <input value={newUser.nombre} onChange={(e) => setNewUser({ ...newUser, nombre: e.target.value })} placeholder="Nombre Apellido" style={{ width: "100%", padding: "9px 12px", background: "#161513", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 12, fontFamily: "'Manrope', sans-serif", boxSizing: "border-box", outline: "none" }} />
+                      <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>Nombre completo</label>
+                      <input value={newUser.nombre} onChange={(e) => setNewUser({ ...newUser, nombre: e.target.value })} placeholder="Nombre Apellido" style={{ width: "100%", padding: "9px 12px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 12, fontFamily: "Inter, sans-serif", boxSizing: "border-box", outline: "none" }} />
                     </div>
                     <div>
-                      <label style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>Usuario (login)</label>
-                      <input value={newUser.user} onChange={(e) => setNewUser({ ...newUser, user: e.target.value.toLowerCase().replace(/\s/g, "") })} placeholder="nombre_usuario" style={{ width: "100%", padding: "9px 12px", background: "#161513", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 12, fontFamily: "'Manrope', sans-serif", boxSizing: "border-box", outline: "none" }} />
+                      <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>Usuario (login)</label>
+                      <input value={newUser.user} onChange={(e) => setNewUser({ ...newUser, user: e.target.value.toLowerCase().replace(/\s/g, "") })} placeholder="nombre_usuario" style={{ width: "100%", padding: "9px 12px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 12, fontFamily: "Inter, sans-serif", boxSizing: "border-box", outline: "none" }} />
                     </div>
                     <div>
-                      <label style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>Contrasena</label>
-                      <input value={newUser.pass} onChange={(e) => setNewUser({ ...newUser, pass: e.target.value })} placeholder="contrasena segura" style={{ width: "100%", padding: "9px 12px", background: "#161513", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 12, fontFamily: "'Manrope', sans-serif", boxSizing: "border-box", outline: "none" }} />
+                      <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>Contrasena</label>
+                      <input value={newUser.pass} onChange={(e) => setNewUser({ ...newUser, pass: e.target.value })} placeholder="contrasena segura" style={{ width: "100%", padding: "9px 12px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 12, fontFamily: "Inter, sans-serif", boxSizing: "border-box", outline: "none" }} />
                     </div>
                     <div>
-                      <label style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>Rol</label>
-                      <select value={newUser.role} onChange={(e) => setNewUser({ ...newUser, role: e.target.value })} style={{ width: "100%", padding: "9px 12px", background: "#161513", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 12, fontFamily: "'Manrope', sans-serif", boxSizing: "border-box" }}>
+                      <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>Rol</label>
+                      <select value={newUser.role} onChange={(e) => setNewUser({ ...newUser, role: e.target.value })} style={{ width: "100%", padding: "9px 12px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 12, fontFamily: "Inter, sans-serif", boxSizing: "border-box" }}>
                         <option value="agente">Agente</option>
                         <option value="director">Director</option>
                       </select>
@@ -474,11 +474,11 @@ function DashboardContent({ currentUser, onLogout, users, setUsers }) {
                       }}
                       disabled={!newUser.nombre || !newUser.user || !newUser.pass}
                       style={{
-                        padding: "10px 24px", borderRadius: 3, border: "none",
-                        background: (newUser.nombre && newUser.user && newUser.pass) ? "linear-gradient(135deg, #C8A97E, #D4B896)" : "#2A2926",
-                        color: (newUser.nombre && newUser.user && newUser.pass) ? "#111110" : "#7A7870",
+                        padding: "10px 24px", borderRadius: 0, border: "none",
+                        background: (newUser.nombre && newUser.user && newUser.pass) ? "linear-gradient(135deg, #C8A97E, #D4B896)" : "#E7E1D4",
+                        color: (newUser.nombre && newUser.user && newUser.pass) ? "#F8F6F1" : "#9A968A",
                         cursor: (newUser.nombre && newUser.user && newUser.pass) ? "pointer" : "default",
-                        fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "'Manrope', sans-serif",
+                        fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "Inter, sans-serif",
                       }}
                     >
                       Crear usuario

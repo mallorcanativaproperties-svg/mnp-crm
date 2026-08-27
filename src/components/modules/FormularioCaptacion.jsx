@@ -62,8 +62,8 @@ function Sec({ title, children, startOpen }) {
   return (
     <div style={{ marginBottom: 24 }}>
       <div onClick={() => setOpen(!open)} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", marginBottom: open ? 14 : 0, padding: "8px 0", borderBottom: open ? "1px solid #2A2926" : "none" }}>
-        <span style={{ fontSize: 9, color: "#C8A97E", transform: open ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s", display: "inline-block" }}>{">"}</span>
-        <span style={{ fontSize: 11, fontWeight: 600, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.12em" }}>{title}</span>
+        <span style={{ fontSize: 9, color: "#AC8A54", transform: open ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s", display: "inline-block" }}>{">"}</span>
+        <span style={{ fontSize: 11, fontWeight: 600, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.12em" }}>{title}</span>
       </div>
       {open && <div style={{ paddingTop: 8 }}>{children}</div>}
     </div>
@@ -73,8 +73,8 @@ function Sec({ title, children, startOpen }) {
 function Input({ label, value, onChange, type, placeholder, required, maxLength }) {
   return (
     <div style={{ marginBottom: 14 }}>
-      <label style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
-        {label}{required && <span style={{ color: "#D4956A", marginLeft: 3 }}>*</span>}
+      <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
+        {label}{required && <span style={{ color: "#9C6E1B", marginLeft: 3 }}>*</span>}
       </label>
       <input
         type={type || "text"}
@@ -82,9 +82,9 @@ function Input({ label, value, onChange, type, placeholder, required, maxLength 
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder || ""}
         maxLength={maxLength}
-        style={{ width: "100%", padding: "10px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 13, fontFamily: "'Manrope', sans-serif", boxSizing: "border-box", outline: "none" }}
+        style={{ width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box", outline: "none" }}
         onFocus={(e) => { e.target.style.borderColor = "#C8A97E44"; }}
-        onBlur={(e) => { e.target.style.borderColor = "#2A2926"; }}
+        onBlur={(e) => { e.target.style.borderColor = "#E7E1D4"; }}
       />
     </div>
   );
@@ -93,13 +93,13 @@ function Input({ label, value, onChange, type, placeholder, required, maxLength 
 function Select({ label, value, onChange, options, groups, required }) {
   return (
     <div style={{ marginBottom: 14 }}>
-      <label style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
-        {label}{required && <span style={{ color: "#D4956A", marginLeft: 3 }}>*</span>}
+      <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
+        {label}{required && <span style={{ color: "#9C6E1B", marginLeft: 3 }}>*</span>}
       </label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        style={{ width: "100%", padding: "10px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 13, fontFamily: "'Manrope', sans-serif", boxSizing: "border-box" }}
+        style={{ width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" }}
       >
         <option value="">Seleccionar...</option>
         {groups ? groups.map((g) => (
@@ -116,17 +116,17 @@ function Textarea({ label, value, onChange, maxLength, rows }) {
   return (
     <div style={{ marginBottom: 14 }}>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-        <label style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em" }}>{label}</label>
-        {maxLength && <span style={{ fontSize: 10, color: (value || "").length > maxLength ? "#D45454" : "#7A7870" }}>{(value || "").length} / {maxLength.toLocaleString()}</span>}
+        <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>{label}</label>
+        {maxLength && <span style={{ fontSize: 10, color: (value || "").length > maxLength ? "#A23A3A" : "#9A968A" }}>{(value || "").length} / {maxLength.toLocaleString()}</span>}
       </div>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
         maxLength={maxLength}
         rows={rows || 4}
-        style={{ width: "100%", padding: "10px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 13, fontFamily: "'Manrope', sans-serif", boxSizing: "border-box", outline: "none", resize: "vertical" }}
+        style={{ width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box", outline: "none", resize: "vertical" }}
         onFocus={(e) => { e.target.style.borderColor = "#C8A97E44"; }}
-        onBlur={(e) => { e.target.style.borderColor = "#2A2926"; }}
+        onBlur={(e) => { e.target.style.borderColor = "#E7E1D4"; }}
       />
     </div>
   );
@@ -137,11 +137,11 @@ function Toggle({ label, value, onChange }) {
     <div style={{ marginBottom: 14, display: "flex", alignItems: "center", gap: 10 }}>
       <div
         onClick={() => onChange(!value)}
-        style={{ width: 36, height: 20, borderRadius: 10, background: value ? "#6AAF8D" : "#2A2926", cursor: "pointer", position: "relative", transition: "background 0.2s" }}
+        style={{ width: 36, height: 20, borderRadius: 10, background: value ? "#2C6E52" : "#E7E1D4", cursor: "pointer", position: "relative", transition: "background 0.2s" }}
       >
-        <div style={{ width: 16, height: 16, borderRadius: "50%", background: "#F0EDE6", position: "absolute", top: 2, left: value ? 18 : 2, transition: "left 0.2s" }} />
+        <div style={{ width: 16, height: 16, borderRadius: "50%", background: "#22262E", position: "absolute", top: 2, left: value ? 18 : 2, transition: "left 0.2s" }} />
       </div>
-      <span style={{ fontSize: 12, color: "#D0CDC4" }}>{label}</span>
+      <span style={{ fontSize: 12, color: "#22262E" }}>{label}</span>
     </div>
   );
 }
@@ -156,7 +156,7 @@ function CheckGroup({ label, options, selected, onChange }) {
   };
   return (
     <div style={{ marginBottom: 14 }}>
-      <label style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 8 }}>{label}</label>
+      <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 8 }}>{label}</label>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
         {options.map((opt) => {
           const on = selected.includes(opt);
@@ -164,12 +164,12 @@ function CheckGroup({ label, options, selected, onChange }) {
             <div
               key={opt}
               onClick={() => toggle(opt)}
-              style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 3, border: "1px solid " + (on ? "#C8A97E44" : "#2A2926"), background: on ? "#C8A97E0D" : "transparent", cursor: "pointer", transition: "all 0.15s" }}
+              style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 0, border: "1px solid " + (on ? "#C8A97E44" : "#E7E1D4"), background: on ? "#C8A97E0D" : "transparent", cursor: "pointer", transition: "all 0.15s" }}
             >
-              <div style={{ width: 12, height: 12, borderRadius: 2, border: "1px solid " + (on ? "#C8A97E" : "#7A7870"), background: on ? "#C8A97E" : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                {on && <span style={{ color: "#111110", fontSize: 9, fontWeight: 700 }}>v</span>}
+              <div style={{ width: 12, height: 12, borderRadius: 0, border: "1px solid " + (on ? "#AC8A54" : "#9A968A"), background: on ? "#AC8A54" : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {on && <span style={{ color: "#F8F6F1", fontSize: 9, fontWeight: 700 }}>v</span>}
               </div>
-              <span style={{ fontSize: 11, color: on ? "#C8A97E" : "#A09D93" }}>{opt}</span>
+              <span style={{ fontSize: 11, color: on ? "#AC8A54" : "#A09D93" }}>{opt}</span>
             </div>
           );
         })}
@@ -193,7 +193,7 @@ function QualRow({ items, onChange, color, symbol }) {
             value={item}
             onChange={(e) => update(i, e.target.value)}
             placeholder={"Punto " + (i + 1)}
-            style={{ flex: 1, padding: "8px 12px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 12, fontFamily: "'Manrope', sans-serif", outline: "none", boxSizing: "border-box" }}
+            style={{ flex: 1, padding: "8px 12px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 12, fontFamily: "Inter, sans-serif", outline: "none", boxSizing: "border-box" }}
           />
         </div>
       ))}
@@ -253,20 +253,20 @@ function CatastroImportCuestionario({ setDir, setNum, setPlanta, setPuerta, setC
     setLoading(false);
   }
 
-  const iSt = { flex: 1, padding: "10px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 13, fontFamily: "'Manrope', sans-serif", outline: "none" };
+  const iSt = { flex: 1, padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", outline: "none" };
 
   return (
-    <div style={{ marginBottom: 20, padding: "14px 16px", background: "#1A1915", border: "1px solid #2A2926", borderRadius: 4 }}>
-      <div style={{ fontSize: 10, fontWeight: 700, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>Importar del Catastro</div>
+    <div style={{ marginBottom: 20, padding: "14px 16px", background: "#F4EEE0", border: "1px solid #2A2926", borderRadius: 0 }}>
+      <div style={{ fontSize: 10, fontWeight: 700, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>Importar del Catastro</div>
       <div style={{ display: "flex", gap: 8 }}>
         <input type="text" value={refCat} onChange={e => setRefCat(e.target.value.toUpperCase())} onKeyDown={e => e.key === "Enter" && importar()} placeholder="Ej: 9872023VH5797S0001WX" style={iSt} />
         <button onClick={importar} disabled={loading || !refCat.trim()}
-          style={{ background: loading || !refCat.trim() ? "#2A2926" : "#C8A97E", border: "none", borderRadius: 3, color: loading || !refCat.trim() ? "#5A584F" : "#111110", fontSize: 11, fontWeight: 700, cursor: loading || !refCat.trim() ? "not-allowed" : "pointer", padding: "0 16px", fontFamily: "'Manrope', sans-serif", whiteSpace: "nowrap" }}>
+          style={{ background: loading || !refCat.trim() ? "#E7E1D4" : "#AC8A54", border: "none", borderRadius: 0, color: loading || !refCat.trim() ? "#C8BFB0" : "#F8F6F1", fontSize: 11, fontWeight: 700, cursor: loading || !refCat.trim() ? "not-allowed" : "pointer", padding: "0 16px", fontFamily: "Inter, sans-serif", whiteSpace: "nowrap" }}>
           {loading ? "Consultando..." : "Importar"}
         </button>
       </div>
-      {msg && <div style={{ fontSize: 11, marginTop: 8, padding: "6px 10px", borderRadius: 3, color: msg.type === "ok" ? "#6AAF8D" : msg.type === "warn" ? "#C8A97E" : "#D45454", background: msg.type === "ok" ? "#6AAF8D11" : msg.type === "warn" ? "#C8A97E11" : "#D4545411", border: "1px solid " + (msg.type === "ok" ? "#6AAF8D44" : msg.type === "warn" ? "#C8A97E44" : "#D4545444") }}>{msg.text}</div>}
-      <div style={{ fontSize: 10, color: "#5A584F", marginTop: 8 }}>Autocumplimenta: dirección, número, planta, puerta, CP, municipio, m² y año construcción</div>
+      {msg && <div style={{ fontSize: 11, marginTop: 8, padding: "6px 10px", borderRadius: 0, color: msg.type === "ok" ? "#2C6E52" : msg.type === "warn" ? "#AC8A54" : "#A23A3A", background: msg.type === "ok" ? "#6AAF8D11" : msg.type === "warn" ? "#C8A97E11" : "#F6E7E5", border: "1px solid " + (msg.type === "ok" ? "#6AAF8D44" : msg.type === "warn" ? "#C8A97E44" : "#D4545444") }}>{msg.text}</div>}
+      <div style={{ fontSize: 10, color: "#C8BFB0", marginTop: 8 }}>Autocumplimenta: dirección, número, planta, puerta, CP, municipio, m² y año construcción</div>
     </div>
   );
 }
@@ -476,18 +476,18 @@ export default function FormularioCaptacion() {
 
   if (submitted) {
     return (
-      <div style={{ fontFamily: "'Manrope', sans-serif", background: "#111110", minHeight: "100vh", color: "#F0EDE6", padding: "80px 24px", textAlign: "center" }}>
+      <div style={{ fontFamily: "Inter, sans-serif", background: "#F8F6F1", minHeight: "100vh", color: "#22262E", padding: "80px 24px", textAlign: "center" }}>
         <div style={{ maxWidth: 500, margin: "0 auto" }}>
           <div style={{ width: 60, height: 60, borderRadius: "50%", background: "#6AAF8D22", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
-            <span style={{ fontSize: 28, color: "#6AAF8D" }}>v</span>
+            <span style={{ fontSize: 28, color: "#2C6E52" }}>v</span>
           </div>
           <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 400, marginBottom: 12 }}>Propiedad <em>registrada</em></h2>
-          <p style={{ color: "#7A7870", fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
+          <p style={{ color: "#9A968A", fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
             La ficha {ref} se ha creado en la cartera de propiedades con estado "Captada". Puedes completar los campos restantes desde el CRM.
           </p>
           <button
             onClick={() => { setSubmitted(false); }}
-            style={{ padding: "12px 28px", borderRadius: 3, border: "1px solid #C8A97E", background: "transparent", color: "#C8A97E", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}
+            style={{ padding: "12px 28px", borderRadius: 0, border: "1px solid #C8A97E", background: "transparent", color: "#AC8A54", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}
           >
             Nuevo formulario
           </button>
@@ -497,37 +497,37 @@ export default function FormularioCaptacion() {
   }
 
   return (
-    <div style={{ fontFamily: "'Manrope', sans-serif", background: "#111110", minHeight: "100vh", color: "#F0EDE6", padding: "40px 24px" }}>
+    <div style={{ fontFamily: "Inter, sans-serif", background: "#F8F6F1", minHeight: "100vh", color: "#22262E", padding: "40px 24px" }}>
       <div style={{ maxWidth: 720, margin: "0 auto" }}>
 
         {/* Header */}
         <div style={{ marginBottom: 36, borderBottom: "1px solid #2A2926", paddingBottom: 28 }}>
-          <div style={{ fontSize: 10, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Mallorca Nativa Properties</div>
+          <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Mallorca Nativa Properties</div>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 400, margin: 0, lineHeight: 1.1 }}>
             Formulario de <em>Captacion</em>
           </h1>
-          <p style={{ fontSize: 12, color: "#7A7870", margin: "10px 0 0", letterSpacing: "0.04em" }}>El agente cumplimenta este formulario delante del propietario. Al enviar se crea la ficha en el CRM.</p>
+          <p style={{ fontSize: 12, color: "#9A968A", margin: "10px 0 0", letterSpacing: "0.04em" }}>El agente cumplimenta este formulario delante del propietario. Al enviar se crea la ficha en el CRM.</p>
         </div>
 
         {/* 1. Resumen */}
         <Sec title="Resumen de la propiedad">
           <div style={g3}>
             <div style={{ marginBottom: 14 }}>
-              <label style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
-                Agente que gestiona<span style={{ color: "#D4956A", marginLeft: 3 }}>*</span>
+              <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
+                Agente que gestiona<span style={{ color: "#9C6E1B", marginLeft: 3 }}>*</span>
               </label>
               <select value={agente} onChange={async e => { setAgente(e.target.value); if (e.target.value) await generarRef(e.target.value); }}
-                style={{ width: "100%", padding: "10px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 13, fontFamily: "'Manrope', sans-serif", boxSizing: "border-box" }}>
+                style={{ width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" }}>
                 <option value="">Seleccionar agente...</option>
                 {agentesDB.map(a => <option key={a.nombre} value={a.nombre}>{a.nombre} ({a.agente_codigo})</option>)}
               </select>
             </div>
             <div style={{ marginBottom: 14 }}>
-              <label style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
-                Referencia<span style={{ color: "#D4956A", marginLeft: 3 }}>*</span>
+              <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
+                Referencia<span style={{ color: "#9C6E1B", marginLeft: 3 }}>*</span>
               </label>
               <input value={ref} onChange={e => setRef(e.target.value)} placeholder="Se genera al elegir agente"
-                style={{ width: "100%", padding: "10px 14px", background: "#1C1B18", border: "1px solid " + (ref ? "#6AAF8D44" : "#2A2926"), borderRadius: 3, color: ref ? "#6AAF8D" : "#F0EDE6", fontSize: 13, fontFamily: "'Manrope', sans-serif", boxSizing: "border-box" }} />
+                style={{ width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid " + (ref ? "#6AAF8D44" : "#E7E1D4"), borderRadius: 0, color: ref ? "#2C6E52" : "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" }} />
             </div>
             <Select label="Tipo de operacion" value={op} onChange={setOp} options={OPERACIONES} required />
           </div>
@@ -650,18 +650,18 @@ export default function FormularioCaptacion() {
             <Input label={honorariosTipo === "porcentaje" ? "Honorarios (%)" : "Honorarios (EUR)"} value={honorarios} onChange={setHonorarios} type="number" placeholder={honorariosTipo === "porcentaje" ? "5" : "15000"} />
             <Input label="IVA honorarios (%)" value={ivaHon} onChange={setIvaHon} type="number" placeholder="21" />
             <div style={{ marginBottom: 14 }}>
-              <label style={{ fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>IVA</label>
-              <div style={{ padding: "10px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#7A7870", fontSize: 13 }}>21%</div>
+              <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>IVA</label>
+              <div style={{ padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#9A968A", fontSize: 13 }}>21%</div>
             </div>
           </div>
           {pv > 0 && Number(honorarios) > 0 && (
-            <div style={{ padding: "12px 16px", background: "#C8A97E08", borderRadius: 3, border: "1px solid #C8A97E15", marginBottom: 14 }}>
-              <span style={{ fontSize: 10, color: "#C8A97E", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}>Calculo automatico</span>
+            <div style={{ padding: "12px 16px", background: "#C8A97E08", borderRadius: 0, border: "1px solid #C8A97E15", marginBottom: 14 }}>
+              <span style={{ fontSize: 10, color: "#AC8A54", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}>Calculo automatico</span>
               <div style={{ fontSize: 12, color: "#A09D93", marginTop: 6, lineHeight: 1.8 }}>
                 <div>Hon. neto: {fmtP(Math.round(honNeto))}</div>
                 <div>IVA 21%: {fmtP(Math.round(honIva))}</div>
                 <div>Hon. total: {fmtP(Math.round(honTotal))}</div>
-                <div style={{ color: "#C8A97E", fontWeight: 600, marginTop: 4 }}>Neto propietario: {fmtP(Math.round(netoProp))}</div>
+                <div style={{ color: "#AC8A54", fontWeight: 600, marginTop: 4 }}>Neto propietario: {fmtP(Math.round(netoProp))}</div>
               </div>
             </div>
           )}
@@ -669,10 +669,10 @@ export default function FormularioCaptacion() {
 
         {/* 11. Datos propietario */}
         <Sec title="Datos del propietario (interno)">
-          <div style={{ background: "#1C1B18", border: "1px solid #D4545422", borderRadius: 3, padding: "16px 20px" }}>
+          <div style={{ background: "#FFFFFF", border: "1px solid #D4545422", borderRadius: 0, padding: "16px 20px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 14 }}>
-              <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#D45454" }} />
-              <span style={{ fontSize: 10, fontWeight: 600, color: "#D45454", textTransform: "uppercase", letterSpacing: "0.1em" }}>Datos internos - no se publican</span>
+              <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#A23A3A" }} />
+              <span style={{ fontSize: 10, fontWeight: 600, color: "#A23A3A", textTransform: "uppercase", letterSpacing: "0.1em" }}>Datos internos - no se publican</span>
             </div>
             <div style={g2}>
               <Input label="Nombre propietario" value={propNom} onChange={setPropNom} />
@@ -685,19 +685,19 @@ export default function FormularioCaptacion() {
 
         {/* 11. Cualificacion */}
         <Sec title="Cualificacion del inmueble (interno)">
-          <div style={{ background: "#1C1B18", border: "1px solid #D4545422", borderRadius: 3, padding: "16px 20px" }}>
+          <div style={{ background: "#FFFFFF", border: "1px solid #D4545422", borderRadius: 0, padding: "16px 20px" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 14 }}>
-              <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#D45454" }} />
-              <span style={{ fontSize: 10, fontWeight: 600, color: "#D45454", textTransform: "uppercase", letterSpacing: "0.1em" }}>Formulario interno</span>
+              <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#A23A3A" }} />
+              <span style={{ fontSize: 10, fontWeight: 600, color: "#A23A3A", textTransform: "uppercase", letterSpacing: "0.1em" }}>Formulario interno</span>
             </div>
             <div style={{ marginBottom: 16 }}>
-              <span style={{ fontSize: 10, fontWeight: 600, color: "#6AAF8D", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 8 }}>Puntos positivos del inmueble</span>
-              <QualRow items={cualPos} onChange={setCualPos} color="#6AAF8D" symbol="+" />
-              <span style={{ fontSize: 10, fontWeight: 600, color: "#D45454", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", margin: "16px 0 8px" }}>Puntos negativos o limitaciones</span>
-              <QualRow items={cualNeg} onChange={setCualNeg} color="#D45454" symbol="-" />
+              <span style={{ fontSize: 10, fontWeight: 600, color: "#2C6E52", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 8 }}>Puntos positivos del inmueble</span>
+              <QualRow items={cualPos} onChange={setCualPos} color="#2C6E52" symbol="+" />
+              <span style={{ fontSize: 10, fontWeight: 600, color: "#A23A3A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", margin: "16px 0 8px" }}>Puntos negativos o limitaciones</span>
+              <QualRow items={cualNeg} onChange={setCualNeg} color="#A23A3A" symbol="-" />
             </div>
             <div>
-              <span style={{ fontSize: 10, fontWeight: 600, color: "#A89BC4", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 8 }}>Que mejorarias</span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "#3D577E", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 8 }}>Que mejorarias</span>
 
             </div>
           </div>
@@ -709,11 +709,11 @@ export default function FormularioCaptacion() {
             onClick={handleSubmit}
             disabled={saving}
             style={{
-              padding: "14px 36px", borderRadius: 3, border: "none",
-              background: saving ? "#2A2926" : "linear-gradient(135deg, #C8A97E, #D4B896)",
-              color: saving ? "#7A7870" : "#111110", cursor: saving ? "not-allowed" : "pointer", fontSize: 12, fontWeight: 700,
+              padding: "14px 36px", borderRadius: 0, border: "none",
+              background: saving ? "#E7E1D4" : "linear-gradient(135deg, #C8A97E, #D4B896)",
+              color: saving ? "#9A968A" : "#F8F6F1", cursor: saving ? "not-allowed" : "pointer", fontSize: 12, fontWeight: 700,
               letterSpacing: "0.1em", textTransform: "uppercase",
-              fontFamily: "'Manrope', sans-serif", transition: "all 0.3s",
+              fontFamily: "Inter, sans-serif", transition: "all 0.3s",
             }}
           >
             {saving ? "Creando ficha..." : "Crear ficha de propiedad"}

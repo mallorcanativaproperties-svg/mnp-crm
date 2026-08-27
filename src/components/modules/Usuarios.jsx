@@ -75,30 +75,30 @@ export default function Usuarios({ currentUser }) {
     fetchUsuarios();
   }
 
-  const iSt = { width: "100%", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#D0CDC4", padding: "8px 10px", fontSize: 13, fontFamily: "'Manrope', sans-serif", boxSizing: "border-box" };
-  const lSt = { fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 4 };
+  const iSt = { width: "100%", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "8px 10px", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" };
+  const lSt = { fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 4 };
 
   return (
     <div style={{ padding: "40px 48px", maxWidth: 900, margin: "0 auto" }}>
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 40 }}>
         <div>
-          <div style={{ fontSize: 10, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.3em", marginBottom: 8 }}>Mallorca Nativa Properties</div>
+          <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.3em", marginBottom: 8 }}>Mallorca Nativa Properties</div>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 400, margin: 0 }}>Gestión de <em>Usuarios</em></h1>
-          <p style={{ fontSize: 12, color: "#7A7870", margin: "8px 0 0" }}>{usuarios.filter(u => u.activo).length} activos · {usuarios.length} total</p>
+          <p style={{ fontSize: 12, color: "#9A968A", margin: "8px 0 0" }}>{usuarios.filter(u => u.activo).length} activos · {usuarios.length} total</p>
         </div>
-        <button onClick={abrirNuevo} style={{ padding: "12px 24px", borderRadius: 3, border: "1px solid #C8A97E", background: "transparent", color: "#C8A97E", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "'Manrope', sans-serif" }}>
+        <button onClick={abrirNuevo} style={{ padding: "12px 24px", borderRadius: 0, border: "1px solid #C8A97E", background: "transparent", color: "#AC8A54", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}>
           + Nuevo usuario
         </button>
       </div>
 
       {/* Lista */}
       {loading ? (
-        <div style={{ color: "#7A7870", fontSize: 13 }}>Cargando...</div>
+        <div style={{ color: "#9A968A", fontSize: 13 }}>Cargando...</div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {usuarios.map(u => (
-            <div key={u.id} style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 4, padding: "16px 20px", display: "flex", alignItems: "center", gap: 16, opacity: u.activo ? 1 : 0.5 }}>
+            <div key={u.id} style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "16px 20px", display: "flex", alignItems: "center", gap: 16, opacity: u.activo ? 1 : 0.5 }}>
               {/* Avatar */}
               <div style={{ width: 40, height: 40, borderRadius: "50%", background: u.role === "director" ? "#C8A97E22" : "#8FA88A22", border: "1px solid " + (u.role === "director" ? "#C8A97E44" : "#8FA88A44"), display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>
                 {u.role === "director" ? "◆" : u.role === "broker" ? "◈" : "◎"}
@@ -106,21 +106,21 @@ export default function Usuarios({ currentUser }) {
               {/* Info */}
               <div style={{ flex: 1 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 14, fontWeight: 600, color: "#F0EDE6" }}>{u.nombre}</span>
-                  <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: u.role === "director" ? "#C8A97E22" : "#8FA88A22", color: u.role === "director" ? "#C8A97E" : "#8FA88A", textTransform: "uppercase", letterSpacing: "0.05em" }}>{u.role}</span>
-                  {!u.activo && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#D4545422", color: "#D45454" }}>Inactivo</span>}
+                  <span style={{ fontSize: 14, fontWeight: 600, color: "#22262E" }}>{u.nombre}</span>
+                  <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: u.role === "director" ? "#C8A97E22" : "#8FA88A22", color: u.role === "director" ? "#AC8A54" : "#2C6E52", textTransform: "uppercase", letterSpacing: "0.05em" }}>{u.role}</span>
+                  {!u.activo && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#D4545422", color: "#A23A3A" }}>Inactivo</span>}
                 </div>
-                <div style={{ fontSize: 11, color: "#7A7870", marginTop: 3 }}>
+                <div style={{ fontSize: 11, color: "#9A968A", marginTop: 3 }}>
                   @{u.user_login}
-                  {u.agente_codigo && <span style={{ marginLeft: 10, color: "#A89BC4" }}>{u.agente_codigo}</span>}
+                  {u.agente_codigo && <span style={{ marginLeft: 10, color: "#3D577E" }}>{u.agente_codigo}</span>}
                   {u.agente_telefono && <span style={{ marginLeft: 10 }}>📱 {u.agente_telefono}</span>}
                 </div>
               </div>
               {/* Acciones */}
               <div style={{ display: "flex", gap: 8 }}>
-                <button onClick={() => abrirEditar(u)} style={{ background: "transparent", border: "1px solid #2A2926", borderRadius: 3, color: "#7A7870", fontSize: 11, cursor: "pointer", padding: "6px 14px", fontFamily: "'Manrope', sans-serif" }}>Editar</button>
+                <button onClick={() => abrirEditar(u)} style={{ background: "transparent", border: "1px solid #2A2926", borderRadius: 0, color: "#9A968A", fontSize: 11, cursor: "pointer", padding: "6px 14px", fontFamily: "Inter, sans-serif" }}>Editar</button>
                 {u.user_login !== currentUser.user_login && (
-                  <button onClick={() => toggleActivo(u)} style={{ background: "transparent", border: "1px solid " + (u.activo ? "#D4545433" : "#6AAF8D33"), borderRadius: 3, color: u.activo ? "#D45454" : "#6AAF8D", fontSize: 11, cursor: "pointer", padding: "6px 14px", fontFamily: "'Manrope', sans-serif" }}>
+                  <button onClick={() => toggleActivo(u)} style={{ background: "transparent", border: "1px solid " + (u.activo ? "#A23A3A44" : "#6AAF8D33"), borderRadius: 0, color: u.activo ? "#A23A3A" : "#2C6E52", fontSize: 11, cursor: "pointer", padding: "6px 14px", fontFamily: "Inter, sans-serif" }}>
                     {u.activo ? "Desactivar" : "Activar"}
                   </button>
                 )}
@@ -133,7 +133,7 @@ export default function Usuarios({ currentUser }) {
       {/* Modal */}
       {modal && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: 24 }}>
-          <div style={{ background: "#161513", border: "1px solid #2A2926", borderRadius: 4, width: "100%", maxWidth: 480, padding: "32px 36px" }}>
+          <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, width: "100%", maxWidth: 480, padding: "32px 36px" }}>
             <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 400, margin: "0 0 24px" }}>
               {modal === "nuevo" ? "Nuevo usuario" : "Editar usuario"}
             </h2>
@@ -175,16 +175,16 @@ export default function Usuarios({ currentUser }) {
               {modal !== "nuevo" && (
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <input type="checkbox" checked={form.activo ?? true} onChange={e => setForm(f => ({ ...f, activo: e.target.checked }))} id="activo" />
-                  <label htmlFor="activo" style={{ fontSize: 13, color: "#D0CDC4", cursor: "pointer" }}>Usuario activo</label>
+                  <label htmlFor="activo" style={{ fontSize: 13, color: "#22262E", cursor: "pointer" }}>Usuario activo</label>
                 </div>
               )}
             </div>
 
-            {msg && <div style={{ marginTop: 16, fontSize: 12, color: msg.type === "ok" ? "#6AAF8D" : "#D45454", padding: "8px 12px", background: msg.type === "ok" ? "#6AAF8D11" : "#D4545411", borderRadius: 3 }}>{msg.text}</div>}
+            {msg && <div style={{ marginTop: 16, fontSize: 12, color: msg.type === "ok" ? "#2C6E52" : "#A23A3A", padding: "8px 12px", background: msg.type === "ok" ? "#6AAF8D11" : "#F6E7E5", borderRadius: 0 }}>{msg.text}</div>}
 
             <div style={{ display: "flex", gap: 10, marginTop: 24, justifyContent: "flex-end" }}>
-              <button onClick={() => setModal(null)} style={{ background: "transparent", border: "1px solid #2A2926", borderRadius: 3, color: "#7A7870", fontSize: 11, cursor: "pointer", padding: "10px 20px", fontFamily: "'Manrope', sans-serif" }}>Cancelar</button>
-              <button onClick={guardar} disabled={saving} style={{ background: saving ? "#2A2926" : "#C8A97E", border: "none", borderRadius: 3, color: saving ? "#7A7870" : "#111110", fontSize: 11, fontWeight: 700, cursor: saving ? "not-allowed" : "pointer", padding: "10px 24px", fontFamily: "'Manrope', sans-serif" }}>
+              <button onClick={() => setModal(null)} style={{ background: "transparent", border: "1px solid #2A2926", borderRadius: 0, color: "#9A968A", fontSize: 11, cursor: "pointer", padding: "10px 20px", fontFamily: "Inter, sans-serif" }}>Cancelar</button>
+              <button onClick={guardar} disabled={saving} style={{ background: saving ? "#E7E1D4" : "#AC8A54", border: "none", borderRadius: 0, color: saving ? "#9A968A" : "#F8F6F1", fontSize: 11, fontWeight: 700, cursor: saving ? "not-allowed" : "pointer", padding: "10px 24px", fontFamily: "Inter, sans-serif" }}>
                 {saving ? "Guardando..." : "Guardar"}
               </button>
             </div>

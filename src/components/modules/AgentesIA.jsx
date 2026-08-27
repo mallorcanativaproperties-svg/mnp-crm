@@ -134,25 +134,25 @@ IMPORTANTE: Respuestas cortas tipo WhatsApp. 1-2 lineas maximo. NUNCA mentir.`;
 
 /* ── INTEREST LEVELS ── */
 const INTERES = [
-  { key: "caliente", label: "Caliente", color: "#D45454", desc: "Muy interesado, responde rapido" },
-  { key: "tibio", label: "Tibio", color: "#C8A97E", desc: "Interesado pero con dudas" },
+  { key: "caliente", label: "Caliente", color: "#A23A3A", desc: "Muy interesado, responde rapido" },
+  { key: "tibio", label: "Tibio", color: "#AC8A54", desc: "Interesado pero con dudas" },
   { key: "frio", label: "Frio", color: "#3B8BD4", desc: "Poco interes, necesita seguimiento" },
-  { key: "perdido", label: "Perdido", color: "#7A7870", desc: "No responde, dejado en visto" },
+  { key: "perdido", label: "Perdido", color: "#9A968A", desc: "No responde, dejado en visto" },
 ];
 
 /* ── ANA OBJECTIVES ── */
 const OBJETIVOS_ANA = [
   { key: "reels", label: "Reels", color: "#E1306C" },
-  { key: "valoracion", label: "Valoracion", color: "#C8A97E" },
-  { key: "compradores", label: "Compradores", color: "#6AAF8D" },
-  { key: "tasacion", label: "Tasacion", color: "#D4956A" },
-  { key: "iee", label: "IEE", color: "#A89BC4" },
+  { key: "valoracion", label: "Valoracion", color: "#AC8A54" },
+  { key: "compradores", label: "Compradores", color: "#2C6E52" },
+  { key: "tasacion", label: "Tasacion", color: "#9C6E1B" },
+  { key: "iee", label: "IEE", color: "#3D577E" },
 ];
 
 const PERSONALIDAD_CLIENTE = [
-  { key: "amable", label: "Amable", color: "#6AAF8D" },
-  { key: "correcto", label: "Correcto", color: "#C8A97E" },
-  { key: "borde", label: "Borde", color: "#D45454" },
+  { key: "amable", label: "Amable", color: "#2C6E52" },
+  { key: "correcto", label: "Correcto", color: "#AC8A54" },
+  { key: "borde", label: "Borde", color: "#A23A3A" },
 ];
 const ANA_CONVS = [
   { id: 1, contacto: "Jose - Rafal Vell", telefono: "634112233", estructura: "Vecino comprador", estado: "en_curso", interes: "tibio", objetivo: "compradores", personalidad: "correcto", propiedad: "Piso Rafal Vell - 370.000", enlace: "idealista.com/inmueble/111352068", seguimiento: "2026-05-14", mensajes: [
@@ -252,16 +252,16 @@ const CLAUDIA_CONVS = [
 
 /* ── COMPONENTS ── */
 function Tag({ children, color }) {
-  const c = color || "#C8A97E";
-  return <span style={{ display: "inline-block", fontSize: 9, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", padding: "3px 10px", borderRadius: 2, background: c + "18", color: c }}>{children}</span>;
+  const c = color || "#AC8A54";
+  return <span style={{ display: "inline-block", fontSize: 9, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", padding: "3px 10px", borderRadius: 0, background: c + "18", color: c }}>{children}</span>;
 }
 
 function ChatBubble({ msg, isAgent }) {
   return (
     <div style={{ display: "flex", justifyContent: isAgent ? "flex-end" : "flex-start", marginBottom: 6 }}>
-      <div style={{ maxWidth: "75%", padding: "10px 14px", borderRadius: isAgent ? "12px 12px 2px 12px" : "12px 12px 12px 2px", background: isAgent ? "#C8A97E22" : "#1C1B18", border: "1px solid " + (isAgent ? "#C8A97E33" : "#2A2926") }}>
-        <div style={{ fontSize: 12, color: "#F0EDE6", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>{msg.text}</div>
-        <div style={{ fontSize: 9, color: "#7A7870", marginTop: 4, textAlign: isAgent ? "right" : "left" }}>{msg.ts}</div>
+      <div style={{ maxWidth: "75%", padding: "10px 14px", borderRadius: isAgent ? "12px 12px 2px 12px" : "12px 12px 12px 2px", background: isAgent ? "#C8A97E22" : "#FFFFFF", border: "1px solid " + (isAgent ? "#C8A97E33" : "#E7E1D4") }}>
+        <div style={{ fontSize: 12, color: "#22262E", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>{msg.text}</div>
+        <div style={{ fontSize: 9, color: "#9A968A", marginTop: 4, textAlign: isAgent ? "right" : "left" }}>{msg.ts}</div>
       </div>
     </div>
   );
@@ -274,7 +274,7 @@ function ClientCard({ conv, selected, onClick, isAna }) {
   const lastMsg = conv.mensajes[conv.mensajes.length - 1];
 
   return (
-    <div onClick={onClick} style={{ padding: "12px 16px", cursor: "pointer", background: selected ? "#1C1B18" : "transparent", borderLeft: selected ? "3px solid " + int.color : "3px solid transparent", borderBottom: "1px solid #2A292633", transition: "all 0.1s" }}
+    <div onClick={onClick} style={{ padding: "12px 16px", cursor: "pointer", background: selected ? "#FFFFFF" : "transparent", borderLeft: selected ? "3px solid " + int.color : "3px solid transparent", borderBottom: "1px solid #2A292633", transition: "all 0.1s" }}
       onMouseEnter={(e) => { if (!selected) e.currentTarget.style.background = "#1C1B1866"; }}
       onMouseLeave={(e) => { if (!selected) e.currentTarget.style.background = "transparent"; }}
     >
@@ -284,10 +284,10 @@ function ClientCard({ conv, selected, onClick, isAna }) {
           {obj && <Tag color={obj.color}>{obj.label}</Tag>}
           {pers && <Tag color={pers.color}>{pers.label}</Tag>}
         </div>
-        {conv.alertas.length > 0 && <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#D45454" }} />}
+        {conv.alertas.length > 0 && <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#A23A3A" }} />}
       </div>
-      <div style={{ fontSize: 13, color: "#F0EDE6", fontWeight: 500 }}>{conv.contacto}</div>
-      <div style={{ fontSize: 10, color: "#7A7870", marginTop: 2 }}>{conv.propiedad}</div>
+      <div style={{ fontSize: 13, color: "#22262E", fontWeight: 500 }}>{conv.contacto}</div>
+      <div style={{ fontSize: 10, color: "#9A968A", marginTop: 2 }}>{conv.propiedad}</div>
       {lastMsg && <div style={{ fontSize: 10, color: "#7A787088", marginTop: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{lastMsg.from === "cliente" ? lastMsg.text : "Tu: " + lastMsg.text}</div>}
     </div>
   );
@@ -406,33 +406,33 @@ function ChatPanel({ conv, onSendMessage, isAna }) {
               {pers && <Tag color={pers.color}>{pers.label}</Tag>}
               <Tag>{conv.estructura}</Tag>
             </div>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, color: "#F0EDE6" }}>{conv.contacto}</div>
-            <div style={{ fontSize: 11, color: "#7A7870", marginTop: 2 }}>{conv.telefono} - {conv.propiedad}</div>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, color: "#22262E" }}>{conv.contacto}</div>
+            <div style={{ fontSize: 11, color: "#9A968A", marginTop: 2 }}>{conv.telefono} - {conv.propiedad}</div>
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
             <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: 10, color: "#7A7870" }}>Seguimiento</div>
-              <div style={{ fontSize: 12, color: "#C8A97E" }}>{conv.seguimiento}</div>
+              <div style={{ fontSize: 10, color: "#9A968A" }}>Seguimiento</div>
+              <div style={{ fontSize: 12, color: "#AC8A54" }}>{conv.seguimiento}</div>
             </div>
             {/* Toggle Manual/IA */}
             <button onClick={toggleModoManual} style={{
-              padding: "5px 12px", borderRadius: 3, border: "1px solid " + (modoManual ? "#D4545466" : "#6AAF8D66"),
+              padding: "5px 12px", borderRadius: 0, border: "1px solid " + (modoManual ? "#D4545466" : "#6AAF8D66"),
               background: modoManual ? "#D4545415" : "#6AAF8D15",
-              color: modoManual ? "#D45454" : "#6AAF8D",
+              color: modoManual ? "#A23A3A" : "#2C6E52",
               cursor: "pointer", fontSize: 10, fontWeight: 600,
-              fontFamily: "'Manrope', sans-serif", letterSpacing: "0.05em",
+              fontFamily: "Inter, sans-serif", letterSpacing: "0.05em",
             }}>
               {modoManual ? "⏸ MANUAL ACTIVO" : `🤖 ${agenteName.toUpperCase()} ACTIVA`}
             </button>
           </div>
         </div>
         {modoManual && (
-          <div style={{ marginTop: 8, padding: "8px 12px", background: "#D4545412", border: "1px solid #D4545433", borderRadius: 3, fontSize: 11, color: "#D45454" }}>
+          <div style={{ marginTop: 8, padding: "8px 12px", background: "#D4545412", border: "1px solid #D4545433", borderRadius: 0, fontSize: 11, color: "#A23A3A" }}>
             ⚠️ {agenteName} está en pausa. Los mensajes que escribas se enviarán directamente al cliente por WhatsApp.
           </div>
         )}
         {conv.alertas && conv.alertas.length > 0 && conv.alertas.map((a, i) => (
-          <div key={i} style={{ marginTop: 8, padding: "8px 12px", background: "#D4545412", border: "1px solid #D4545433", borderRadius: 3, fontSize: 11, color: "#D45454" }}>{a}</div>
+          <div key={i} style={{ marginTop: 8, padding: "8px 12px", background: "#D4545412", border: "1px solid #D4545433", borderRadius: 0, fontSize: 11, color: "#A23A3A" }}>{a}</div>
         ))}
       </div>
 
@@ -441,7 +441,7 @@ function ChatPanel({ conv, onSendMessage, isAna }) {
           const isSistema = m.from === "sistema";
           if (isSistema) return (
             <div key={i} style={{ textAlign: "center", margin: "8px 0" }}>
-              <span style={{ fontSize: 10, color: "#7A7870", padding: "3px 10px", background: "#2A2926", borderRadius: 10 }}>{m.text}</span>
+              <span style={{ fontSize: 10, color: "#9A968A", padding: "3px 10px", background: "#E7E1D4", borderRadius: 10 }}>{m.text}</span>
             </div>
           );
           const isManual = m.from === "agente_manual";
@@ -450,7 +450,7 @@ function ChatPanel({ conv, onSendMessage, isAna }) {
         {(loading || sendingManual) && (
           <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 6 }}>
             <div style={{ padding: "10px 14px", borderRadius: 12, background: "#C8A97E22", border: "1px solid #C8A97E33" }}>
-              <div style={{ fontSize: 12, color: "#C8A97E" }}>{sendingManual ? "enviando..." : "escribiendo..."}</div>
+              <div style={{ fontSize: 12, color: "#AC8A54" }}>{sendingManual ? "enviando..." : "escribiendo..."}</div>
             </div>
           </div>
         )}
@@ -462,21 +462,21 @@ function ChatPanel({ conv, onSendMessage, isAna }) {
             <input value={input} onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleManualSend(); } }}
               placeholder={`Escribe como agente — se enviará por WhatsApp al cliente...`}
-              style={{ flex: 1, padding: "10px 14px", background: "#1C1B18", border: "1px solid #D4545444", borderRadius: 3, color: "#F0EDE6", fontSize: 13, fontFamily: "'Manrope', sans-serif", outline: "none", boxSizing: "border-box" }} />
+              style={{ flex: 1, padding: "10px 14px", background: "#FFFFFF", border: "1px solid #D4545444", borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", outline: "none", boxSizing: "border-box" }} />
             <button onClick={handleManualSend} disabled={sendingManual || !input.trim()} style={{
-              padding: "10px 20px", borderRadius: 3, border: "none",
-              background: input.trim() && !sendingManual ? "#D45454" : "#2A2926",
-              color: input.trim() && !sendingManual ? "#fff" : "#7A7870",
+              padding: "10px 20px", borderRadius: 0, border: "none",
+              background: input.trim() && !sendingManual ? "#A23A3A" : "#E7E1D4",
+              color: input.trim() && !sendingManual ? "#fff" : "#9A968A",
               cursor: input.trim() && !sendingManual ? "pointer" : "default",
-              fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "'Manrope', sans-serif"
+              fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "Inter, sans-serif"
             }}>{sendingManual ? "..." : "Enviar"}</button>
           </div>
         ) : (
           <div style={{ display: "flex", gap: 8 }}>
             <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") handleSend(); }}
               placeholder={`Simular mensaje del cliente para probar ${agenteName}...`}
-              style={{ flex: 1, padding: "10px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 13, fontFamily: "'Manrope', sans-serif", outline: "none", boxSizing: "border-box" }} />
-            <button onClick={handleSend} disabled={loading || !input.trim()} style={{ padding: "10px 20px", borderRadius: 3, border: "none", background: input.trim() && !loading ? "#C8A97E" : "#2A2926", color: input.trim() && !loading ? "#111110" : "#7A7870", cursor: input.trim() && !loading ? "pointer" : "default", fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "'Manrope', sans-serif" }}>Probar</button>
+              style={{ flex: 1, padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", outline: "none", boxSizing: "border-box" }} />
+            <button onClick={handleSend} disabled={loading || !input.trim()} style={{ padding: "10px 20px", borderRadius: 0, border: "none", background: input.trim() && !loading ? "#AC8A54" : "#E7E1D4", color: input.trim() && !loading ? "#F8F6F1" : "#9A968A", cursor: input.trim() && !loading ? "pointer" : "default", fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}>Probar</button>
           </div>
         )}
       </div>
@@ -490,14 +490,14 @@ function PromptEditor({ agente, onClose }) {
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)", display: "flex", justifyContent: "center", alignItems: "flex-start", padding: "30px 16px", zIndex: 1000, overflowY: "auto" }}>
-      <div style={{ background: "#161513", border: "1px solid #2A2926", borderRadius: 4, width: "100%", maxWidth: 700, padding: "28px 32px", position: "relative" }}>
-        <button onClick={onClose} style={{ position: "absolute", top: 16, right: 20, background: "none", border: "none", color: "#7A7870", fontSize: 20, cursor: "pointer" }}>X</button>
-        <div style={{ fontSize: 10, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 8 }}>Editar instrucciones</div>
-        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 400, color: "#F0EDE6", margin: "0 0 20px" }}>Prompt de <em>{agente === "ana" ? "Ana" : "Claudia"}</em></h2>
-        <textarea value={prompt} onChange={(e) => { setPrompt(e.target.value); setSaved(false); }} rows={20} style={{ width: "100%", padding: "14px 16px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 11, fontFamily: "'Manrope', sans-serif", boxSizing: "border-box", outline: "none", resize: "vertical", lineHeight: 1.6 }} />
+      <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, width: "100%", maxWidth: 700, padding: "28px 32px", position: "relative" }}>
+        <button onClick={onClose} style={{ position: "absolute", top: 16, right: 20, background: "none", border: "none", color: "#9A968A", fontSize: 20, cursor: "pointer" }}>X</button>
+        <div style={{ fontSize: 10, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 8 }}>Editar instrucciones</div>
+        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 400, color: "#22262E", margin: "0 0 20px" }}>Prompt de <em>{agente === "ana" ? "Ana" : "Claudia"}</em></h2>
+        <textarea value={prompt} onChange={(e) => { setPrompt(e.target.value); setSaved(false); }} rows={20} style={{ width: "100%", padding: "14px 16px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 11, fontFamily: "Inter, sans-serif", boxSizing: "border-box", outline: "none", resize: "vertical", lineHeight: 1.6 }} />
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 14 }}>
-          {saved && <span style={{ fontSize: 11, color: "#6AAF8D", alignSelf: "center" }}>Guardado</span>}
-          <button onClick={() => setSaved(true)} style={{ padding: "10px 24px", borderRadius: 3, border: "none", background: "#C8A97E", color: "#111110", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "'Manrope', sans-serif" }}>Guardar cambios</button>
+          {saved && <span style={{ fontSize: 11, color: "#2C6E52", alignSelf: "center" }}>Guardado</span>}
+          <button onClick={() => setSaved(true)} style={{ padding: "10px 24px", borderRadius: 0, border: "none", background: "#AC8A54", color: "#F8F6F1", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}>Guardar cambios</button>
         </div>
       </div>
     </div>
@@ -542,7 +542,7 @@ function AgentPanel({ convs, setConvs, isAna, selectedId, setSelectedId }) {
     }));
   };
 
-  const fSt = (a) => ({ padding: "5px 12px", borderRadius: 3, border: "none", background: a ? "#C8A97E18" : "transparent", color: a ? "#C8A97E" : "#7A7870", cursor: "pointer", fontSize: 9, fontWeight: 500, letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "'Manrope', sans-serif" });
+  const fSt = (a) => ({ padding: "5px 12px", borderRadius: 0, border: "none", background: a ? "#C8A97E18" : "transparent", color: a ? "#AC8A54" : "#9A968A", cursor: "pointer", fontSize: 9, fontWeight: 500, letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "Inter, sans-serif" });
 
   return (
     <div style={{ display: "flex", height: "calc(100vh - 145px)" }}>
@@ -554,11 +554,11 @@ function AgentPanel({ convs, setConvs, isAna, selectedId, setSelectedId }) {
                 : a.key === "sin_asignar" ? convs.filter(c => !c.agente_asignado && !c.agente).length
                 : convs.filter(c => c.agente_asignado === a.key || c.agente === a.key).length;
               return <button key={a.key} onClick={() => setFilterAgente(a.key)} style={{
-                padding: "4px 8px", borderRadius: 3, border: "none",
+                padding: "4px 8px", borderRadius: 0, border: "none",
                 background: filterAgente === a.key ? "#A89BC418" : "transparent",
-                color: filterAgente === a.key ? "#A89BC4" : "#7A7870",
+                color: filterAgente === a.key ? "#3D577E" : "#9A968A",
                 cursor: "pointer", fontSize: 9, fontWeight: filterAgente === a.key ? 600 : 400,
-                letterSpacing: "0.04em", fontFamily: "'Manrope', sans-serif",
+                letterSpacing: "0.04em", fontFamily: "Inter, sans-serif",
               }}>{a.label} ({count})</button>;
             })}
           </div>
@@ -572,14 +572,14 @@ function AgentPanel({ convs, setConvs, isAna, selectedId, setSelectedId }) {
         </div>
         <div style={{ flex: 1, overflowY: "auto" }}>
           {filtered.map((c) => <ClientCard key={c.id} conv={c} selected={c.id === selectedId} onClick={() => setSelectedId(c.id)} isAna={isAna} />)}
-          {filtered.length === 0 && <div style={{ padding: 30, textAlign: "center", color: "#7A7870", fontSize: 12, fontStyle: "italic" }}>Sin clientes</div>}
+          {filtered.length === 0 && <div style={{ padding: 30, textAlign: "center", color: "#9A968A", fontSize: 12, fontStyle: "italic" }}>Sin clientes</div>}
         </div>
       </div>
       <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
         {selectedConv ? (
           <ChatPanel conv={selectedConv} onSendMessage={handleSendMessage} isAna={isAna} />
         ) : (
-          <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "#7A7870", fontSize: 13 }}>Selecciona un cliente</div>
+          <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "#9A968A", fontSize: 13 }}>Selecciona un cliente</div>
         )}
       </div>
     </div>
@@ -617,29 +617,29 @@ function ScanEmailsButton() {
   };
 
   const S = {
-    input: { width: "100%", padding: "10px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#F0EDE6", fontSize: 12, fontFamily: "'Manrope', sans-serif", boxSizing: "border-box", outline: "none" },
-    label: { fontSize: 10, fontWeight: 600, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 },
+    input: { width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 12, fontFamily: "Inter, sans-serif", boxSizing: "border-box", outline: "none" },
+    label: { fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 },
   };
 
   return (
     <div>
       <button onClick={() => setShowModal(true)} style={{
-        padding: "8px 16px", borderRadius: 3,
+        padding: "8px 16px", borderRadius: 0,
         border: "1px solid #6AAF8D33", background: "transparent",
-        color: "#6AAF8D", cursor: "pointer",
+        color: "#2C6E52", cursor: "pointer",
         fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase",
-        fontFamily: "'Manrope', sans-serif",
+        fontFamily: "Inter, sans-serif",
       }}>
         📧 Lead Idealista
       </button>
       {showModal && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => setShowModal(false)}>
-          <div style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, padding: "28px 32px", maxWidth: 600, width: "95%" }} onClick={(e) => e.stopPropagation()}>
+          <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "28px 32px", maxWidth: 600, width: "95%" }} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
               <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 400, margin: 0 }}>Procesar email <em>Idealista</em></h3>
-              <button onClick={() => setShowModal(false)} style={{ background: "none", border: "none", color: "#7A7870", cursor: "pointer", fontSize: 18 }}>✕</button>
+              <button onClick={() => setShowModal(false)} style={{ background: "none", border: "none", color: "#9A968A", cursor: "pointer", fontSize: 18 }}>✕</button>
             </div>
-            <p style={{ fontSize: 11, color: "#7A7870", marginBottom: 16 }}>Pega el contenido del email de Idealista. CLAUDIA extraerá los datos y enviará WhatsApp al cliente automáticamente.</p>
+            <p style={{ fontSize: 11, color: "#9A968A", marginBottom: 16 }}>Pega el contenido del email de Idealista. CLAUDIA extraerá los datos y enviará WhatsApp al cliente automáticamente.</p>
             <div style={{ marginBottom: 14 }}>
               <label style={S.label}>Asunto del email</label>
               <input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Nuevo mensaje / Llamada no contestada..." style={S.input} />
@@ -649,26 +649,26 @@ function ScanEmailsButton() {
               <textarea value={emailText} onChange={(e) => setEmailText(e.target.value)} rows={10} placeholder={"Pega aquí el contenido completo del email de Idealista...\n\nEjemplo:\nBara\n602 39 80 54\nbaradiop856@gmail.com\n\nHola, me interesa este piso...\n\nRef. MNAQA00031\nCódigo del anuncio: 110979381\n320.000 €"} style={{ ...S.input, resize: "vertical", lineHeight: 1.5 }} />
             </div>
             {result && (
-              <div style={{ marginBottom: 16, padding: "12px 16px", borderRadius: 3, background: result.success ? "#6AAF8D12" : "#D4545412", border: "1px solid " + (result.success ? "#6AAF8D33" : "#D4545433") }}>
+              <div style={{ marginBottom: 16, padding: "12px 16px", borderRadius: 0, background: result.success ? "#6AAF8D12" : "#D4545412", border: "1px solid " + (result.success ? "#6AAF8D33" : "#A23A3A44") }}>
                 {result.success ? (
                   <div>
-                    <div style={{ fontSize: 12, color: "#6AAF8D", fontWeight: 500, marginBottom: 4 }}>✓ Lead procesado correctamente</div>
+                    <div style={{ fontSize: 12, color: "#2C6E52", fontWeight: 500, marginBottom: 4 }}>✓ Lead procesado correctamente</div>
                     <div style={{ fontSize: 11, color: "#A09D93" }}>
                       {result.nombre && <span>Cliente: {result.nombre} · </span>}
                       Tel: {result.phone} · Ref: {result.referencia || "N/A"} · Agente: {result.agente || "N/A"}
                     </div>
-                    <div style={{ fontSize: 10, color: "#C8A97E", marginTop: 4 }}>WhatsApp enviado al cliente</div>
+                    <div style={{ fontSize: 10, color: "#AC8A54", marginTop: 4 }}>WhatsApp enviado al cliente</div>
                   </div>
                 ) : (
-                  <div style={{ fontSize: 12, color: "#D45454" }}>
+                  <div style={{ fontSize: 12, color: "#A23A3A" }}>
                     {result.reason === "duplicate" ? "⚠ Este lead ya fue procesado antes" : `Error: ${result.error || "Desconocido"}`}
                   </div>
                 )}
               </div>
             )}
             <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-              <button onClick={() => setShowModal(false)} style={{ padding: "10px 20px", borderRadius: 3, border: "1px solid #2A2926", background: "transparent", color: "#7A7870", cursor: "pointer", fontSize: 11, fontFamily: "'Manrope', sans-serif" }}>Cancelar</button>
-              <button onClick={process} disabled={!emailText.trim() || sending} style={{ padding: "10px 24px", borderRadius: 3, border: "none", background: "linear-gradient(135deg, #C8A97E, #D4B896)", color: "#111110", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "'Manrope', sans-serif", opacity: (!emailText.trim() || sending) ? 0.5 : 1 }}>
+              <button onClick={() => setShowModal(false)} style={{ padding: "10px 20px", borderRadius: 0, border: "1px solid #2A2926", background: "transparent", color: "#9A968A", cursor: "pointer", fontSize: 11, fontFamily: "Inter, sans-serif" }}>Cancelar</button>
+              <button onClick={process} disabled={!emailText.trim() || sending} style={{ padding: "10px 24px", borderRadius: 0, border: "none", background: "linear-gradient(135deg, #C8A97E, #D4B896)", color: "#F8F6F1", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", opacity: (!emailText.trim() || sending) ? 0.5 : 1 }}>
                 {sending ? "Procesando..." : "Enviar WhatsApp"}
               </button>
             </div>
@@ -742,44 +742,44 @@ export default function AgentesIA() {
   const claudiaAlertas = claudiaConvs.reduce((s, c) => s + (c.alertas?.length || 0), 0);
 
   const tabSt = (active, color) => ({
-    padding: "10px 24px", borderRadius: "3px 3px 0 0", border: "1px solid " + (active ? color + "44" : "#2A2926"),
+    padding: "10px 24px", borderRadius: "3px 3px 0 0", border: "1px solid " + (active ? color + "44" : "#E7E1D4"),
     borderBottom: active ? "2px solid " + color : "1px solid #2A2926",
     background: active ? color + "0D" : "transparent",
-    color: active ? color : "#7A7870",
+    color: active ? color : "#9A968A",
     cursor: "pointer", fontSize: 12, fontWeight: active ? 600 : 400, letterSpacing: "0.06em",
-    textTransform: "uppercase", fontFamily: "'Manrope', sans-serif", transition: "all 0.15s",
+    textTransform: "uppercase", fontFamily: "Inter, sans-serif", transition: "all 0.15s",
     position: "relative",
   });
 
   return (
-    <div style={{ fontFamily: "'Manrope', sans-serif", background: "#111110", minHeight: "100vh", color: "#F0EDE6" }}>
+    <div style={{ fontFamily: "Inter, sans-serif", background: "#F8F6F1", minHeight: "100vh", color: "#22262E" }}>
 
       {/* Top bar */}
       <div style={{ padding: "16px 24px", borderBottom: "1px solid #2A2926" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
           <div>
-            <div style={{ fontSize: 10, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.2em", fontWeight: 500 }}>Mallorca Nativa Properties</div>
+            <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", fontWeight: 500 }}>Mallorca Nativa Properties</div>
             <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 400, margin: "4px 0 0" }}>Agentes <em>IA</em></h1>
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <ScanEmailsButton />
-            <button onClick={() => setEditPrompt("ana")} style={{ padding: "8px 16px", borderRadius: 3, border: "1px solid #D4956A33", background: "transparent", color: "#D4956A", cursor: "pointer", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "'Manrope', sans-serif" }}>Editar Ana</button>
-            <button onClick={() => setEditPrompt("claudia")} style={{ padding: "8px 16px", borderRadius: 3, border: "1px solid #A89BC433", background: "transparent", color: "#A89BC4", cursor: "pointer", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "'Manrope', sans-serif" }}>Editar Claudia</button>
+            <button onClick={() => setEditPrompt("ana")} style={{ padding: "8px 16px", borderRadius: 0, border: "1px solid #D4956A33", background: "transparent", color: "#9C6E1B", cursor: "pointer", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}>Editar Ana</button>
+            <button onClick={() => setEditPrompt("claudia")} style={{ padding: "8px 16px", borderRadius: 0, border: "1px solid #A89BC433", background: "transparent", color: "#3D577E", cursor: "pointer", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}>Editar Claudia</button>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
       <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", gap: 4, paddingTop: 12, paddingLeft: 24 }}>
-        <button onClick={() => setTab("ana")} style={tabSt(tab === "ana", "#D4956A")}>
+        <button onClick={() => setTab("ana")} style={tabSt(tab === "ana", "#9C6E1B")}>
           Ana - Prospector
           <span style={{ marginLeft: 8, fontSize: 10 }}>({anaConvs.length})</span>
-          {anaAlertas > 0 && <span style={{ marginLeft: 6, width: 16, height: 16, borderRadius: "50%", background: "#D45454", color: "#fff", fontSize: 9, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>{anaAlertas}</span>}
+          {anaAlertas > 0 && <span style={{ marginLeft: 6, width: 16, height: 16, borderRadius: "50%", background: "#A23A3A", color: "#fff", fontSize: 9, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>{anaAlertas}</span>}
         </button>
-        <button onClick={() => setTab("claudia")} style={tabSt(tab === "claudia", "#A89BC4")}>
+        <button onClick={() => setTab("claudia")} style={tabSt(tab === "claudia", "#3D577E")}>
           Claudia - Cualificador
           <span style={{ marginLeft: 8, fontSize: 10 }}>({claudiaConvs.length})</span>
-          {claudiaAlertas > 0 && <span style={{ marginLeft: 6, width: 16, height: 16, borderRadius: "50%", background: "#D45454", color: "#fff", fontSize: 9, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>{claudiaAlertas}</span>}
+          {claudiaAlertas > 0 && <span style={{ marginLeft: 6, width: 16, height: 16, borderRadius: "50%", background: "#A23A3A", color: "#fff", fontSize: 9, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>{claudiaAlertas}</span>}
         </button>
       </div>
 

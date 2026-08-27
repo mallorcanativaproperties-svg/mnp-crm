@@ -2,8 +2,8 @@
 import { useState, useMemo, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 
-const EST_COLORS = { nuevo:"#C8A97E", contactado:"#8FA88A", cualificado:"#D4956A", visita:"#A89BC4", negociacion:"#C4A55A", cerrado:"#6AAF8D", descartado:"#7A7870" };
-const PROP_EST_COLORS = { captada:"#C8A97E", publicada:"#8FA88A", reservada:"#D4956A", vendida:"#6AAF8D", retirada:"#7A7870" };
+const EST_COLORS = { nuevo:"#AC8A54", contactado:"#2C6E52", cualificado:"#9C6E1B", visita:"#3D577E", negociacion:"#C4A55A", cerrado:"#2C6E52", descartado:"#9A968A" };
+const PROP_EST_COLORS = { captada:"#AC8A54", publicada:"#2C6E52", reservada:"#9C6E1B", vendida:"#2C6E52", retirada:"#9A968A" };
 
 function fmtP(n) {
   if (!n) return "-";
@@ -11,9 +11,9 @@ function fmtP(n) {
 }
 
 function Tag({ children, color }) {
-  const c = color || "#C8A97E";
+  const c = color || "#AC8A54";
   return (
-    <span style={{ display: "inline-block", fontSize: 10, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", padding: "4px 12px", borderRadius: 2, background: c + "18", color: c }}>
+    <span style={{ display: "inline-block", fontSize: 10, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", padding: "4px 12px", borderRadius: 0, background: c + "18", color: c }}>
       {children}
     </span>
   );
@@ -28,58 +28,58 @@ function MatchCard({ buyer, prop, view }) {
   });
 
   return (
-    <div style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, padding: "16px 20px", transition: "all 0.2s" }}
+    <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "16px 20px", transition: "all 0.2s" }}
       onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#C8A97E33"; }}
-      onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#2A2926"; }}
+      onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#E7E1D4"; }}
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
         <div style={{ flex: 1, minWidth: 200 }}>
           {view === "prop" ? (
             <>
               <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4, flexWrap: "wrap" }}>
-                <Tag color={EST_COLORS[buyer.st] || "#C8A97E"}>{buyer.st}</Tag>
-                <span style={{ fontSize: 10, color: "#7A7870" }}>{buyer.fin}</span>
-                {zonaMatch && <Tag color="#6AAF8D">Zona OK</Tag>}
+                <Tag color={EST_COLORS[buyer.st] || "#AC8A54"}>{buyer.st}</Tag>
+                <span style={{ fontSize: 10, color: "#9A968A" }}>{buyer.fin}</span>
+                {zonaMatch && <Tag color="#2C6E52">Zona OK</Tag>}
               </div>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: "#F0EDE6", marginBottom: 4 }}>{buyer.nombre}</div>
-              <div style={{ fontSize: 12, color: "#7A7870" }}>{buyer.tel}</div>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: "#22262E", marginBottom: 4 }}>{buyer.nombre}</div>
+              <div style={{ fontSize: 12, color: "#9A968A" }}>{buyer.tel}</div>
               <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 8 }}>
                 {buyer.zd.slice(0, 4).map((z, i) => (
-                  <span key={i} style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E15" }}>{z}</span>
+                  <span key={i} style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E15" }}>{z}</span>
                 ))}
-                {buyer.zd.length > 4 && <span style={{ fontSize: 10, color: "#7A7870" }}>+{buyer.zd.length - 4}</span>}
+                {buyer.zd.length > 4 && <span style={{ fontSize: 10, color: "#9A968A" }}>+{buyer.zd.length - 4}</span>}
               </div>
             </>
           ) : (
             <>
               <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4, flexWrap: "wrap" }}>
-                <span style={{ fontSize: 10, color: "#7A7870", letterSpacing: "0.08em" }}>{prop.ref}</span>
-                <Tag color={PROP_EST_COLORS[prop.estado] || "#C8A97E"}>{prop.estado}</Tag>
-                <Tag color="#A89BC4">{prop.op}</Tag>
-                {zonaMatch && <Tag color="#6AAF8D">Zona OK</Tag>}
+                <span style={{ fontSize: 10, color: "#9A968A", letterSpacing: "0.08em" }}>{prop.ref}</span>
+                <Tag color={PROP_EST_COLORS[prop.estado] || "#AC8A54"}>{prop.estado}</Tag>
+                <Tag color="#3D577E">{prop.op}</Tag>
+                {zonaMatch && <Tag color="#2C6E52">Zona OK</Tag>}
               </div>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: "#F0EDE6", marginBottom: 4 }}>{prop.titulo}</div>
-              <div style={{ fontSize: 12, color: "#7A7870" }}>{prop.zona}, {prop.municipio} - {prop.tipo}</div>
-              <div style={{ fontSize: 12, color: "#7A7870", marginTop: 2 }}>{prop.mConst} m2 - {prop.habDobles + prop.habSimples} hab - {prop.banos} ban.</div>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: "#22262E", marginBottom: 4 }}>{prop.titulo}</div>
+              <div style={{ fontSize: 12, color: "#9A968A" }}>{prop.zona}, {prop.municipio} - {prop.tipo}</div>
+              <div style={{ fontSize: 12, color: "#9A968A", marginTop: 2 }}>{prop.mConst} m2 - {prop.habDobles + prop.habSimples} hab - {prop.banos} ban.</div>
             </>
           )}
         </div>
 
         <div style={{ textAlign: "right", flexShrink: 0, minWidth: 160 }}>
-          <div style={{ fontSize: 10, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>Presupuesto comprador</div>
-          <div style={{ fontSize: 15, color: "#D0CDC4", fontFamily: "'Playfair Display', serif" }}>{fmtP(buyer.ppto)}</div>
-          <div style={{ fontSize: 10, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.08em", marginTop: 8, marginBottom: 4 }}>Precio propiedad</div>
-          <div style={{ fontSize: 15, color: "#C8A97E", fontFamily: "'Playfair Display', serif" }}>{fmtP(prop.precioVenta)}</div>
-          <div style={{ marginTop: 10, padding: "6px 12px", borderRadius: 3, background: margin > 0 ? "#6AAF8D12" : "#D4956A12", display: "inline-block" }}>
-            <span style={{ fontSize: 11, color: margin > 0 ? "#6AAF8D" : "#D4956A", fontWeight: 500 }}>
+          <div style={{ fontSize: 10, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>Presupuesto comprador</div>
+          <div style={{ fontSize: 15, color: "#22262E", fontFamily: "'Playfair Display', serif" }}>{fmtP(buyer.ppto)}</div>
+          <div style={{ fontSize: 10, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.08em", marginTop: 8, marginBottom: 4 }}>Precio propiedad</div>
+          <div style={{ fontSize: 15, color: "#AC8A54", fontFamily: "'Playfair Display', serif" }}>{fmtP(prop.precioVenta)}</div>
+          <div style={{ marginTop: 10, padding: "6px 12px", borderRadius: 0, background: margin > 0 ? "#6AAF8D12" : "#D4956A12", display: "inline-block" }}>
+            <span style={{ fontSize: 11, color: margin > 0 ? "#2C6E52" : "#9C6E1B", fontWeight: 500 }}>
               {margin > 0 ? "Margen: " + fmtP(margin) : "Justo al limite"}
             </span>
           </div>
           <div style={{ marginTop: 6 }}>
-            <div style={{ width: 120, height: 4, background: "#2A2926", borderRadius: 2, overflow: "hidden", display: "inline-block" }}>
-              <div style={{ width: Math.min(pct, 100) + "%", height: "100%", background: pct > 95 ? "#D4956A" : pct > 80 ? "#C8A97E" : "#6AAF8D", borderRadius: 2 }} />
+            <div style={{ width: 120, height: 4, background: "#E7E1D4", borderRadius: 0, overflow: "hidden", display: "inline-block" }}>
+              <div style={{ width: Math.min(pct, 100) + "%", height: "100%", background: pct > 95 ? "#9C6E1B" : pct > 80 ? "#AC8A54" : "#2C6E52", borderRadius: 0 }} />
             </div>
-            <span style={{ fontSize: 10, color: "#7A7870", marginLeft: 6 }}>{pct}% del ppto</span>
+            <span style={{ fontSize: 10, color: "#9A968A", marginLeft: 6 }}>{pct}% del ppto</span>
           </div>
         </div>
       </div>
@@ -245,19 +245,19 @@ export default function MotorCruce() {
   }, [matchesByProp, filteredProps]);
 
   const tabStyle = (active) => ({
-    padding: "10px 24px", borderRadius: 3, border: "1px solid " + (active ? "#C8A97E" : "#2A2926"),
-    background: active ? "#C8A97E18" : "transparent", color: active ? "#C8A97E" : "#7A7870",
+    padding: "10px 24px", borderRadius: 0, border: "1px solid " + (active ? "#AC8A54" : "#E7E1D4"),
+    background: active ? "#C8A97E18" : "transparent", color: active ? "#AC8A54" : "#9A968A",
     cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase",
-    fontFamily: "'Manrope', sans-serif", transition: "all 0.2s",
+    fontFamily: "Inter, sans-serif", transition: "all 0.2s",
   });
 
-  const ss = { padding: "8px 14px", background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, color: "#A09D93", fontSize: 11, fontFamily: "'Manrope', sans-serif", letterSpacing: "0.04em", cursor: "pointer" };
+  const ss = { padding: "8px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#A09D93", fontSize: 11, fontFamily: "Inter, sans-serif", letterSpacing: "0.04em", cursor: "pointer" };
   const inputS = { ...ss, cursor: "text", width: 120 };
 
   if (loading) {
     return (
-      <div style={{ fontFamily: "'Manrope', sans-serif", background: "#111110", minHeight: "100vh", color: "#F0EDE6", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div style={{ fontSize: 12, color: "#7A7870", letterSpacing: "0.1em", textTransform: "uppercase" }}>Cargando motor de cruce...</div>
+      <div style={{ fontFamily: "Inter, sans-serif", background: "#F8F6F1", minHeight: "100vh", color: "#22262E", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ fontSize: 12, color: "#9A968A", letterSpacing: "0.1em", textTransform: "uppercase" }}>Cargando motor de cruce...</div>
       </div>
     );
   }
@@ -265,16 +265,16 @@ export default function MotorCruce() {
   const hasFilters = fMunicipio !== "todos" || fZona !== "todos" || fOp !== "todos" || fPptoMin || fPptoMax || fQuery;
 
   return (
-    <div style={{ fontFamily: "'Manrope', sans-serif", background: "#111110", minHeight: "100vh", color: "#F0EDE6", padding: "40px 24px" }}>
+    <div style={{ fontFamily: "Inter, sans-serif", background: "#F8F6F1", minHeight: "100vh", color: "#22262E", padding: "40px 24px" }}>
       <div style={{ maxWidth: 920, margin: "0 auto" }}>
 
         {/* Header */}
         <div style={{ marginBottom: 40, borderBottom: "1px solid #2A2926", paddingBottom: 32 }}>
-          <div style={{ fontSize: 10, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Mallorca Nativa Properties</div>
+          <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Mallorca Nativa Properties</div>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 400, margin: 0, lineHeight: 1.1 }}>
             Motor de <em>Cruce</em>
           </h1>
-          <p style={{ fontSize: 12, color: "#7A7870", margin: "10px 0 0", letterSpacing: "0.04em" }}>
+          <p style={{ fontSize: 12, color: "#9A968A", margin: "10px 0 0", letterSpacing: "0.04em" }}>
             Cruce automatico comprador - propiedad por presupuesto, zona y operacion
           </p>
         </div>
@@ -287,16 +287,16 @@ export default function MotorCruce() {
             { n: filteredBuyers.length, l: "Compradores" },
             { n: propWithMost ? (matchesByProp[propWithMost.id] || []).length : 0, l: "Max matches/prop" },
           ].map((s, i) => (
-            <div key={i} style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, padding: "20px 24px", textAlign: "center" }}>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: "#F0EDE6", fontWeight: 400 }}>{s.n}</div>
-              <div style={{ fontSize: 10, color: "#7A7870", marginTop: 6, textTransform: "uppercase", letterSpacing: "0.1em" }}>{s.l}</div>
+            <div key={i} style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "20px 24px", textAlign: "center" }}>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: "#22262E", fontWeight: 400 }}>{s.n}</div>
+              <div style={{ fontSize: 10, color: "#9A968A", marginTop: 6, textTransform: "uppercase", letterSpacing: "0.1em" }}>{s.l}</div>
             </div>
           ))}
         </div>
 
         {/* Filters */}
-        <div style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, padding: "18px 22px", marginBottom: 28 }}>
-          <div style={{ fontSize: 10, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 14, fontWeight: 600 }}>Filtros de cruce</div>
+        <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "18px 22px", marginBottom: 28 }}>
+          <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 14, fontWeight: 600 }}>Filtros de cruce</div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
             <input type="text" placeholder="Buscar ref, nombre, zona..." value={fQuery} onChange={(e) => setFQuery(e.target.value)}
               style={{ ...inputS, flex: 1, minWidth: 180, width: "auto" }} />
@@ -321,7 +321,7 @@ export default function MotorCruce() {
 
             {hasFilters && (
               <button onClick={() => { setFMunicipio("todos"); setFZona("todos"); setFOp("todos"); setFPptoMin(""); setFPptoMax(""); setFQuery(""); }}
-                style={{ ...ss, color: "#D45454", borderColor: "#D4545433", cursor: "pointer" }}>
+                style={{ ...ss, color: "#A23A3A", borderColor: "#A23A3A44", cursor: "pointer" }}>
                 Limpiar filtros
               </button>
             )}
@@ -343,7 +343,7 @@ export default function MotorCruce() {
           <div>
             {selectedProp === null ? (
               <div>
-                <div style={{ fontSize: 11, color: "#7A7870", marginBottom: 12, letterSpacing: "0.06em" }}>
+                <div style={{ fontSize: 11, color: "#9A968A", marginBottom: 12, letterSpacing: "0.06em" }}>
                   {filteredProps.length} propiedades {hasFilters ? "(filtradas)" : ""}
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -353,37 +353,37 @@ export default function MotorCruce() {
                       <div
                         key={prop.id}
                         onClick={() => setSelectedProp(prop.id)}
-                        style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, padding: "20px 24px", cursor: "pointer", transition: "all 0.2s", position: "relative", overflow: "hidden" }}
+                        style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "20px 24px", cursor: "pointer", transition: "all 0.2s", position: "relative", overflow: "hidden" }}
                         onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#C8A97E33"; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#2A2926"; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#E7E1D4"; }}
                       >
-                        <div style={{ position: "absolute", top: 0, left: 0, width: 3, height: "100%", background: PROP_EST_COLORS[prop.estado] || "#C8A97E", opacity: 0.6 }} />
+                        <div style={{ position: "absolute", top: 0, left: 0, width: 3, height: "100%", background: PROP_EST_COLORS[prop.estado] || "#AC8A54", opacity: 0.6 }} />
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
                           <div>
                             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
-                              <span style={{ fontSize: 10, color: "#7A7870", letterSpacing: "0.08em" }}>{prop.ref}</span>
+                              <span style={{ fontSize: 10, color: "#9A968A", letterSpacing: "0.08em" }}>{prop.ref}</span>
                               <Tag color={PROP_EST_COLORS[prop.estado]}>{prop.estado}</Tag>
-                              <Tag color="#A89BC4">{prop.op}</Tag>
+                              <Tag color="#3D577E">{prop.op}</Tag>
                             </div>
-                            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, color: "#F0EDE6" }}>{prop.titulo}</div>
-                            <div style={{ fontSize: 12, color: "#7A7870", marginTop: 4 }}>{prop.zona}, {prop.municipio} - {fmtP(prop.precioVenta)}</div>
+                            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, color: "#22262E" }}>{prop.titulo}</div>
+                            <div style={{ fontSize: 12, color: "#9A968A", marginTop: 4 }}>{prop.zona}, {prop.municipio} - {fmtP(prop.precioVenta)}</div>
                           </div>
                           <div style={{ textAlign: "center" }}>
-                            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, color: matches.length > 0 ? "#6AAF8D" : "#7A7870" }}>{matches.length}</div>
-                            <div style={{ fontSize: 10, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.08em" }}>matches</div>
+                            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, color: matches.length > 0 ? "#2C6E52" : "#9A968A" }}>{matches.length}</div>
+                            <div style={{ fontSize: 10, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.08em" }}>matches</div>
                           </div>
                         </div>
                       </div>
                     );
                   })}
                   {filteredProps.length === 0 && (
-                    <div style={{ textAlign: "center", padding: 60, color: "#7A7870", fontSize: 13, fontStyle: "italic" }}>Sin resultados con estos filtros</div>
+                    <div style={{ textAlign: "center", padding: 60, color: "#9A968A", fontSize: 13, fontStyle: "italic" }}>Sin resultados con estos filtros</div>
                   )}
                 </div>
               </div>
             ) : (
               <div>
-                <button onClick={() => setSelectedProp(null)} style={{ background: "none", border: "none", color: "#C8A97E", cursor: "pointer", fontSize: 12, marginBottom: 16, padding: 0, fontFamily: "'Manrope', sans-serif" }}>
+                <button onClick={() => setSelectedProp(null)} style={{ background: "none", border: "none", color: "#AC8A54", cursor: "pointer", fontSize: 12, marginBottom: 16, padding: 0, fontFamily: "Inter, sans-serif" }}>
                   {"<"} Volver a propiedades
                 </button>
                 {(() => {
@@ -392,22 +392,22 @@ export default function MotorCruce() {
                   if (!prop) return null;
                   return (
                     <div>
-                      <div style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, padding: "20px 24px", marginBottom: 20 }}>
+                      <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "20px 24px", marginBottom: 20 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, flexWrap: "wrap" }}>
-                          <span style={{ fontSize: 10, color: "#7A7870" }}>{prop.ref}</span>
+                          <span style={{ fontSize: 10, color: "#9A968A" }}>{prop.ref}</span>
                           <Tag color={PROP_EST_COLORS[prop.estado]}>{prop.estado}</Tag>
-                          <Tag color="#A89BC4">{prop.op}</Tag>
+                          <Tag color="#3D577E">{prop.op}</Tag>
                         </div>
-                        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: "#F0EDE6" }}>{prop.titulo}</div>
-                        <div style={{ fontSize: 13, color: "#7A7870", marginTop: 4 }}>{prop.zona}, {prop.municipio} - {prop.mConst} m2 - {fmtP(prop.precioVenta)}</div>
+                        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: "#22262E" }}>{prop.titulo}</div>
+                        <div style={{ fontSize: 13, color: "#9A968A", marginTop: 4 }}>{prop.zona}, {prop.municipio} - {prop.mConst} m2 - {fmtP(prop.precioVenta)}</div>
                         <div style={{ display: "flex", gap: 5, marginTop: 10, flexWrap: "wrap" }}>
                           {prop.calidades.slice(0, 8).map((c, i) => (
-                            <span key={i} style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E15" }}>{c}</span>
+                            <span key={i} style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E15" }}>{c}</span>
                           ))}
                         </div>
                       </div>
 
-                      <div style={{ fontSize: 11, color: "#7A7870", marginBottom: 12, letterSpacing: "0.06em" }}>
+                      <div style={{ fontSize: 11, color: "#9A968A", marginBottom: 12, letterSpacing: "0.06em" }}>
                         {matches.length} compradores compatibles (presupuesto + zona)
                       </div>
 
@@ -418,7 +418,7 @@ export default function MotorCruce() {
                             <MatchCard key={buyer.id} buyer={buyer} prop={prop} view="prop" />
                           ))}
                         {matches.length === 0 && (
-                          <div style={{ textAlign: "center", padding: 40, color: "#7A7870", fontSize: 13, fontStyle: "italic" }}>
+                          <div style={{ textAlign: "center", padding: 40, color: "#9A968A", fontSize: 13, fontStyle: "italic" }}>
                             Ningun comprador compatible con esta propiedad
                           </div>
                         )}
@@ -436,7 +436,7 @@ export default function MotorCruce() {
           <div>
             {selectedBuyer === null ? (
               <div>
-                <div style={{ fontSize: 11, color: "#7A7870", marginBottom: 12, letterSpacing: "0.06em" }}>
+                <div style={{ fontSize: 11, color: "#9A968A", marginBottom: 12, letterSpacing: "0.06em" }}>
                   {filteredBuyers.length} compradores {hasFilters ? "(filtrados)" : ""}
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -446,42 +446,42 @@ export default function MotorCruce() {
                       <div
                         key={buyer.id}
                         onClick={() => setSelectedBuyer(buyer.id)}
-                        style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, padding: "16px 20px", cursor: "pointer", transition: "all 0.2s", position: "relative", overflow: "hidden" }}
+                        style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "16px 20px", cursor: "pointer", transition: "all 0.2s", position: "relative", overflow: "hidden" }}
                         onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#C8A97E33"; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#2A2926"; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#E7E1D4"; }}
                       >
-                        <div style={{ position: "absolute", top: 0, left: 0, width: 3, height: "100%", background: EST_COLORS[buyer.st] || "#C8A97E", opacity: 0.6 }} />
+                        <div style={{ position: "absolute", top: 0, left: 0, width: 3, height: "100%", background: EST_COLORS[buyer.st] || "#AC8A54", opacity: 0.6 }} />
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
                           <div>
                             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
                               <Tag color={EST_COLORS[buyer.st]}>{buyer.st}</Tag>
-                              <span style={{ fontSize: 10, color: "#7A7870" }}>{buyer.fin}</span>
+                              <span style={{ fontSize: 10, color: "#9A968A" }}>{buyer.fin}</span>
                             </div>
-                            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: "#F0EDE6" }}>{buyer.nombre}</div>
-                            <div style={{ fontSize: 12, color: "#C8A97E", marginTop: 4 }}>Presupuesto: {fmtP(buyer.ppto)}</div>
+                            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 16, color: "#22262E" }}>{buyer.nombre}</div>
+                            <div style={{ fontSize: 12, color: "#AC8A54", marginTop: 4 }}>Presupuesto: {fmtP(buyer.ppto)}</div>
                             <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 6 }}>
                               {buyer.zd.slice(0, 3).map((z, i) => (
-                                <span key={i} style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E15" }}>{z}</span>
+                                <span key={i} style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E15" }}>{z}</span>
                               ))}
-                              {buyer.zd.length > 3 && <span style={{ fontSize: 10, color: "#7A7870" }}>+{buyer.zd.length - 3}</span>}
+                              {buyer.zd.length > 3 && <span style={{ fontSize: 10, color: "#9A968A" }}>+{buyer.zd.length - 3}</span>}
                             </div>
                           </div>
                           <div style={{ textAlign: "center" }}>
-                            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, color: matches.length > 0 ? "#6AAF8D" : "#7A7870" }}>{matches.length}</div>
-                            <div style={{ fontSize: 10, color: "#7A7870", textTransform: "uppercase", letterSpacing: "0.08em" }}>propiedades</div>
+                            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, color: matches.length > 0 ? "#2C6E52" : "#9A968A" }}>{matches.length}</div>
+                            <div style={{ fontSize: 10, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.08em" }}>propiedades</div>
                           </div>
                         </div>
                       </div>
                     );
                   })}
                   {filteredBuyers.length === 0 && (
-                    <div style={{ textAlign: "center", padding: 60, color: "#7A7870", fontSize: 13, fontStyle: "italic" }}>Sin resultados con estos filtros</div>
+                    <div style={{ textAlign: "center", padding: 60, color: "#9A968A", fontSize: 13, fontStyle: "italic" }}>Sin resultados con estos filtros</div>
                   )}
                 </div>
               </div>
             ) : (
               <div>
-                <button onClick={() => setSelectedBuyer(null)} style={{ background: "none", border: "none", color: "#C8A97E", cursor: "pointer", fontSize: 12, marginBottom: 16, padding: 0, fontFamily: "'Manrope', sans-serif" }}>
+                <button onClick={() => setSelectedBuyer(null)} style={{ background: "none", border: "none", color: "#AC8A54", cursor: "pointer", fontSize: 12, marginBottom: 16, padding: 0, fontFamily: "Inter, sans-serif" }}>
                   {"<"} Volver a compradores
                 </button>
                 {(() => {
@@ -490,30 +490,30 @@ export default function MotorCruce() {
                   if (!buyer) return null;
                   return (
                     <div>
-                      <div style={{ background: "#1C1B18", border: "1px solid #2A2926", borderRadius: 3, padding: "20px 24px", marginBottom: 20 }}>
+                      <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "20px 24px", marginBottom: 20 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
                           <Tag color={EST_COLORS[buyer.st]}>{buyer.st}</Tag>
-                          <span style={{ fontSize: 10, color: "#7A7870" }}>{buyer.fin}</span>
+                          <span style={{ fontSize: 10, color: "#9A968A" }}>{buyer.fin}</span>
                         </div>
-                        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: "#F0EDE6" }}>{buyer.nombre}</div>
-                        <div style={{ fontSize: 13, color: "#7A7870", marginTop: 4 }}>{buyer.tel} - Busca: {buyer.hab} hab</div>
-                        <div style={{ fontSize: 15, color: "#C8A97E", marginTop: 6, fontFamily: "'Playfair Display', serif" }}>Presupuesto: {fmtP(buyer.ppto)}</div>
+                        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: "#22262E" }}>{buyer.nombre}</div>
+                        <div style={{ fontSize: 13, color: "#9A968A", marginTop: 4 }}>{buyer.tel} - Busca: {buyer.hab} hab</div>
+                        <div style={{ fontSize: 15, color: "#AC8A54", marginTop: 6, fontFamily: "'Playfair Display', serif" }}>Presupuesto: {fmtP(buyer.ppto)}</div>
                         <div style={{ display: "flex", gap: 5, marginTop: 10, flexWrap: "wrap" }}>
                           {buyer.zd.map((z, i) => (
-                            <span key={i} style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#C8A97E0D", color: "#C8A97E", border: "1px solid #C8A97E15" }}>{z}</span>
+                            <span key={i} style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E15" }}>{z}</span>
                           ))}
                         </div>
                         {buyer.ze && buyer.ze.length > 0 && (
                           <div style={{ display: "flex", gap: 5, marginTop: 6, flexWrap: "wrap" }}>
-                            <span style={{ fontSize: 10, color: "#D45454", marginRight: 4 }}>Excluye:</span>
+                            <span style={{ fontSize: 10, color: "#A23A3A", marginRight: 4 }}>Excluye:</span>
                             {buyer.ze.map((z, i) => (
-                              <span key={i} style={{ fontSize: 10, padding: "2px 8px", borderRadius: 2, background: "#D454540D", color: "#D45454", border: "1px solid #D4545415" }}>{z}</span>
+                              <span key={i} style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#D454540D", color: "#A23A3A", border: "1px solid #D4545415" }}>{z}</span>
                             ))}
                           </div>
                         )}
                       </div>
 
-                      <div style={{ fontSize: 11, color: "#7A7870", marginBottom: 12, letterSpacing: "0.06em" }}>
+                      <div style={{ fontSize: 11, color: "#9A968A", marginBottom: 12, letterSpacing: "0.06em" }}>
                         {matches.length} propiedades compatibles (presupuesto + zona)
                       </div>
 
@@ -524,7 +524,7 @@ export default function MotorCruce() {
                             <MatchCard key={prop.id} buyer={buyer} prop={prop} view="buyer" />
                           ))}
                         {matches.length === 0 && (
-                          <div style={{ textAlign: "center", padding: 40, color: "#7A7870", fontSize: 13, fontStyle: "italic" }}>
+                          <div style={{ textAlign: "center", padding: 40, color: "#9A968A", fontSize: 13, fontStyle: "italic" }}>
                             Ninguna propiedad compatible con este comprador
                           </div>
                         )}
