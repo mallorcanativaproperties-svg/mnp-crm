@@ -30,7 +30,7 @@ function MatchCard({ buyer, prop, view }) {
   return (
     <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "16px 20px", transition: "all 0.2s" }}
       onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#C8A97E33"; }}
-      onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#E7E1D4"; }}
+      onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#E7E1D4"; e.currentTarget.style.boxShadow = "none"; }}
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16, flexWrap: "wrap" }}>
         <div style={{ flex: 1, minWidth: 200 }}>
@@ -355,7 +355,7 @@ export default function MotorCruce() {
                         onClick={() => setSelectedProp(prop.id)}
                         style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "20px 24px", cursor: "pointer", transition: "all 0.2s", position: "relative", overflow: "hidden" }}
                         onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#C8A97E33"; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#E7E1D4"; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#E7E1D4"; e.currentTarget.style.boxShadow = "none"; }}
                       >
                         <div style={{ position: "absolute", top: 0, left: 0, width: 3, height: "100%", background: PROP_EST_COLORS[prop.estado] || "#AC8A54", opacity: 0.6 }} />
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
@@ -448,7 +448,7 @@ export default function MotorCruce() {
                         onClick={() => setSelectedBuyer(buyer.id)}
                         style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "16px 20px", cursor: "pointer", transition: "all 0.2s", position: "relative", overflow: "hidden" }}
                         onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#C8A97E33"; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#E7E1D4"; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#E7E1D4"; e.currentTarget.style.boxShadow = "none"; }}
                       >
                         <div style={{ position: "absolute", top: 0, left: 0, width: 3, height: "100%", background: EST_COLORS[buyer.st] || "#AC8A54", opacity: 0.6 }} />
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>

@@ -304,7 +304,7 @@ function DashboardContent({ currentUser, onLogout, users, setUsers }) {
                   fontFamily: "Inter, sans-serif", transition: "all 0.2s",
                 }}
                 onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#D4545444"; e.currentTarget.style.color = "#A23A3A"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#E7E1D4"; e.currentTarget.style.color = "#9A968A"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#E7E1D4"; e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.color = "#9A968A"; }}
               >
                 Salir
               </button>

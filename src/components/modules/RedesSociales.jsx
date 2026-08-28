@@ -240,7 +240,7 @@ function TabPublicar() {
           {filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).map((p) => {
             const ec = p.estado === "publicado" ? "#2C6E52" : p.estado === "programado" ? "#AC8A54" : p.estado === "error" ? "#A23A3A" : "#9A968A";
             return (
-              <div key={p.id} style={S.card} onMouseEnter={(e) => e.currentTarget.style.borderColor = "#C8A97E33"} onMouseLeave={(e) => e.currentTarget.style.borderColor = "#E7E1D4"}>
+              <div key={p.id} style={S.card} onMouseEnter={(e) => e.currentTarget.style.borderColor = "#C8A97E33"} onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#E7E1D4"; e.currentTarget.style.boxShadow = "none"; }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, flexWrap: "wrap" }}>
                   <div style={{ flex: 1, minWidth: 200 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6, flexWrap: "wrap" }}>
@@ -1050,8 +1050,8 @@ function TabSilvia() {
                     ...S.card, cursor: "pointer", padding: 0, overflow: "hidden",
                     transition: "border-color 0.15s",
                   }}
-                    onMouseEnter={e => e.currentTarget.style.borderColor = "#C8A97E55"}
-                    onMouseLeave={e => e.currentTarget.style.borderColor = "#E7E1D4"}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = "#AC8A54"; e.currentTarget.style.boxShadow = "0 0 0 2px #AC8A54"; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = "#E7E1D4"; e.currentTarget.style.boxShadow = "none"; }}
                   >
                     <div style={{ height: 120, background: "#E7E1D4", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32 }}>
                       🎬

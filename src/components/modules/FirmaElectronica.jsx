@@ -505,7 +505,7 @@ export default function FirmaElectronica() {
                   onClick={() => loadDetail(firma.id)}
                   style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "20px 24px", cursor: "pointer", transition: "all 0.2s", position: "relative", overflow: "hidden" }}
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#C8A97E33"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#E7E1D4"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#E7E1D4"; e.currentTarget.style.boxShadow = "none"; }}
                 >
                   <div style={{ position: "absolute", top: 0, left: 0, width: 3, height: "100%", background: EST_COLORS[firma.estado] || "#AC8A54", opacity: 0.6 }} />
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
