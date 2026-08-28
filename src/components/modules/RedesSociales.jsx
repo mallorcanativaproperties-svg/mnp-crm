@@ -1050,7 +1050,7 @@ function TabSilvia() {
                     ...S.card, cursor: "pointer", padding: 0, overflow: "hidden",
                     transition: "border-color 0.15s",
                   }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = "#AC8A54"; e.currentTarget.style.boxShadow = "0 0 0 2px #AC8A54"; }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = "#AC8A54"; e.currentTarget.style.boxShadow = "0 0 0 2px #AC8A54, 0 0 8px 2px rgba(172,138,84,0.5), 0 0 20px 6px rgba(172,138,84,0.2), 0 0 40px 12px rgba(172,138,84,0.08)"; }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = "#E7E1D4"; e.currentTarget.style.boxShadow = "none"; }}
                   >
                     <div style={{ height: 120, background: "#E7E1D4", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32 }}>

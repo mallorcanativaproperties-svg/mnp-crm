@@ -100,7 +100,7 @@ function Card({ b, onClick }) {
     background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "22px 26px",
     cursor: "pointer", transition: "all 0.3s ease", position: "relative", overflow: "hidden",
   }}
-  onMouseEnter={e => { e.currentTarget.style.borderColor = "#AC8A54"; e.currentTarget.style.boxShadow = "0 0 0 2px #AC8A54"; e.currentTarget.style.background = "#FFFFFF"; }}
+  onMouseEnter={e => { e.currentTarget.style.borderColor = "#AC8A54"; e.currentTarget.style.boxShadow = "0 0 0 2px #AC8A54, 0 0 8px 2px rgba(172,138,84,0.5), 0 0 20px 6px rgba(172,138,84,0.2), 0 0 40px 12px rgba(172,138,84,0.08)"; e.currentTarget.style.background = "#FFFFFF"; }}
   onMouseLeave={e => { e.currentTarget.style.borderColor = "#E7E1D4"; e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.background = "#FFFFFF"; }}
   >
     <div style={{ position: "absolute", top: 0, left: 0, width: 3, height: "100%", background: est.accent, opacity: 0.6 }} />
