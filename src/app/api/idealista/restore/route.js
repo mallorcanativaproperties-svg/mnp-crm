@@ -2,7 +2,6 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import ftp from "basic-ftp";
 import { Writable } from "stream";
 
 function getSupabase() {
@@ -26,6 +25,7 @@ export async function GET() {
     const supabase = getSupabase();
 
     // 1. Descargar XML desde FTP
+    const ftp = await import("basic-ftp");
     const client = new ftp.Client(60000);
     let xmlContent = "";
     try {
