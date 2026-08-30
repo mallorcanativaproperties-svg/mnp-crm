@@ -973,7 +973,7 @@ function PropCard({ p, onClick }) {
 
 function PropDetail({ p, currentUser, onClose, onUpdate, onDelete }) {
   // Permisos: editable solo por director o el agente que captó la propiedad
-  const isDirector = currentUser?.role === "director";
+  const isDirector = currentUser?.role?.toLowerCase() === "director";
   const esAgentePropietario = currentUser?.nombre === p.agente || currentUser?.agente_codigo === p.agente;
   const puedeEditar = isDirector || esAgentePropietario;
   const est = ESTADOS.find((e) => e.key === p.estado) || ESTADOS[0];
