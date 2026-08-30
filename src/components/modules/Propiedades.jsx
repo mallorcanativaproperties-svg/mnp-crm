@@ -231,11 +231,7 @@ function calcHon(p) {
   return { neto: Math.round(neto), iva: Math.round(iva), total: Math.round(neto + iva) };
 }
 
-function Dot({ green }) {
-  return (
-    <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: green ? "#2C6E52" : "#A23A3A", marginRight: 6, flexShrink: 0 }} />
-  );
-}
+
 
 function Tag({ children, color }) {
   const c = color || "#AC8A54";
@@ -249,22 +245,23 @@ function Tag({ children, color }) {
 function Sec({ title, children, startOpen }) {
   const [open, setOpen] = useState(startOpen !== false);
   return (
-    <div style={{ marginBottom: 22 }}>
-      <div onClick={() => setOpen(!open)} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", marginBottom: open ? 12 : 0 }}>
-        <span style={{ fontSize: 9, color: "#AC8A54", transform: open ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s", display: "inline-block" }}>{">"}</span>
-        <span style={{ fontSize: 11, fontWeight: 600, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.12em" }}>{title}</span>
+    <div style={{ marginBottom: 0 }}>
+      <div onClick={() => setOpen(!open)} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", padding: "10px 0", borderBottom: open ? "none" : "1px solid #E7E1D4", marginBottom: open ? 12 : 0 }}>
+        <span style={{ fontSize: 9, color: "#AC8A54", transform: open ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s", display: "inline-block" }}>▶</span>
+        <span style={{ fontSize: 10.5, fontWeight: 600, color: "#8C6E3F", textTransform: "uppercase", letterSpacing: "0.12em" }}>{title}</span>
       </div>
-      {open && children}
+      {open && <div style={{ paddingBottom: 16, borderBottom: "1px solid #E7E1D4", marginBottom: 4 }}>{children}</div>}
     </div>
   );
 }
 
-function Fl({ label, value, pub, gold }) {
+function Fl({ label, value, pub, gold, req }) {
   return (
     <div style={{ marginBottom: 10 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
-        {pub !== undefined && <Dot green={pub} />}
-        <span style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>{label}</span>
+        <span style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+          {label}{(pub || req) && <span style={{ color: "#A23A3A", marginLeft: 3, fontSize: 14, fontWeight: 700, verticalAlign: "middle" }}>*</span>}
+        </span>
       </div>
       <div style={{ fontSize: gold ? 16 : 13, color: gold ? "#AC8A54" : "#22262E", fontFamily: gold ? "'Playfair Display', serif" : "Inter, sans-serif" }}>
         {value || "-"}
@@ -1072,9 +1069,8 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
     return (
       <div style={{ marginBottom: 10 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
-          {pub !== undefined && <Dot green={pub} />}
           <span style={{ fontSize: 10, fontWeight: 600, color: hasErr ? "#A23A3A" : "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>
-            {label}{req && <span style={{ color: "#A23A3A", marginLeft: 3, fontSize: 16, fontWeight: 700, lineHeight: "10px", verticalAlign: "middle" }}>*</span>}
+            {label}{(pub || req) && <span style={{ color: "#A23A3A", marginLeft: 3, fontSize: 14, fontWeight: 700, verticalAlign: "middle" }}>*</span>}
           </span>
         </div>
         {type === "bool" ? (
@@ -1265,12 +1261,12 @@ REGLAS:
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)", display: "flex", justifyContent: "center", alignItems: "flex-start", padding: "30px 12px", zIndex: 1000, overflowY: "auto" }}>
-      <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, width: "100%", maxWidth: 740, padding: "32px 36px", position: "relative" }}>
+      <div style={{ background: "#FFFFFF", border: "1px solid #E7E1D4", boxShadow: "0 12px 32px rgba(22,41,74,.16)", borderRadius: 0, width: "100%", maxWidth: 760, padding: "32px 36px", position: "relative" }}>
         <button onClick={() => {
           if (editMode && idealistaFieldErrors.size > 0) {
             const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético"};
-            const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join(", ");
-            if (!confirm("⚠️ Faltan campos obligatorios para Idealista:\n\n" + faltantes + "\n\n¿Cerrar sin guardar igualmente?")) return;
+            const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join("\n• ");
+            if (!confirm("⚠️ Campos con * obligatorios sin completar:\n\n• " + faltantes + "\n\n¿Cerrar sin guardar igualmente?")) return;
           }
           onClose();
         }} style={{ position: "absolute", top: 16, right: 20, background: "none", border: "none", color: "#9A968A", fontSize: 20, cursor: "pointer" }}>✕</button>
@@ -1286,11 +1282,19 @@ REGLAS:
             cualNeg: (draft.cualNegText || "").split("\n").filter(Boolean),
             destinos: draft.destinos || [],
           };
-          // Validar campos obligatorios antes de guardar
+          // Validar campos obligatorios — comportamiento según estado
           if (idealistaFieldErrors.size > 0) {
             const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético"};
             const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join("\n• ");
-            alert("⚠️ Campos obligatorios incompletos:\n\n• " + faltantes + "\n\nCompleta estos campos para poder publicar en Idealista.");
+            const esPublicada = (draft.estado || p.estado) === "publicada";
+            if (esPublicada) {
+              // Publicada: NO deja guardar
+              alert("🚫 Esta propiedad está PUBLICADA.\n\nNo se puede guardar sin completar los campos obligatorios (*):\n\n• " + faltantes + "\n\nCompleta estos campos o cambia el estado a \'Captada\'.");
+              return;
+            } else {
+              // Captada: avisa pero deja guardar
+              if (!confirm("⚠️ Hay campos obligatorios (*) sin completar:\n\n• " + faltantes + "\n\nSi guardas así, la propiedad NO podrá publicarse en Idealista.\n\n¿Guardar igualmente?")) return;
+            }
           }
           if (onUpdate) onUpdate(toSave);
           setEditMode(false);
@@ -1381,8 +1385,7 @@ REGLAS:
 
         {/* Legend */}
         <div style={{ display: "flex", gap: 16, marginBottom: 16, fontSize: 10, color: "#9A968A", background: "#FFFFFF", padding: "8px 14px", borderRadius: 0 }}>
-          <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Dot green={true} />Se publica</span>
-          <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Dot green={false} />Dato interno</span>
+          <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ color: "#A23A3A", fontSize: 14, fontWeight: 700 }}>*</span> Sincronizado con Idealista</span>
         </div>
 
         <div style={sep} />
@@ -1396,7 +1399,7 @@ REGLAS:
           </div>
           <div style={{ marginTop: 10 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 5 }}>
-              <Dot green={false} />
+              
               <span style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>Estado de la propiedad</span>
             </div>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -1489,7 +1492,7 @@ REGLAS:
             {editMode ? (
               <div style={{ marginBottom: 10 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
-                  <Dot green={false} />
+                  
                   <span style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>Honorarios</span>
                 </div>
                 <div style={{ display: "flex", gap: 4 }}>
@@ -1504,7 +1507,7 @@ REGLAS:
               {/* Hon. neto: editable si fijo, calculado si porcentaje */}
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
-                  <Dot green={false} />
+                  
                   <span style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>Hon. neto</span>
                 </div>
                 {d.honorariosTipo === "fijo" ? (
@@ -1720,7 +1723,7 @@ REGLAS:
           <div style={{ marginTop: 16 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 3 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                <Dot green={true} />
+                
                 <span style={{ fontSize: 10, fontWeight: 600, color: idealistaFieldErrors.has("desc") ? "#A23A3A" : "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>
                   Descripcion{<span style={{ color: idealistaFieldErrors.has("desc") ? "#A23A3A" : "#AC8A54", marginLeft: 3, fontSize: 18, fontWeight: 400, lineHeight: "10px", verticalAlign: "middle" }}>*</span>}
                 </span>
@@ -1815,7 +1818,7 @@ REGLAS:
         <Sec title="Datos internos">
           <div style={intBox}>
             <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 12 }}>
-              <Dot green={false} />
+              
               <span style={{ fontSize: 10, fontWeight: 600, color: "#A23A3A", textTransform: "uppercase", letterSpacing: "0.1em" }}>No se publica</span>
             </div>
             <div style={g2}>
@@ -1834,7 +1837,7 @@ REGLAS:
         <Sec title="Cualificacion del inmueble" startOpen={false}>
           <div style={intBox}>
             <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 14 }}>
-              <Dot green={false} />
+              
               <span style={{ fontSize: 10, fontWeight: 600, color: "#A23A3A", textTransform: "uppercase", letterSpacing: "0.1em" }}>Formulario interno</span>
             </div>
             {EFl({label: "Puntos positivos (uno por linea)", field: "cualPosText", pub: false, type: "textarea"})}
