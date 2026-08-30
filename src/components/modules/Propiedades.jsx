@@ -1305,16 +1305,9 @@ REGLAS:
   }
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)", display: "flex", justifyContent: "center", alignItems: "flex-start", padding: "30px 12px", zIndex: 1000, overflowY: "auto" }}>
-      <div style={{ background: "#FFFFFF", border: "1px solid #E7E1D4", boxShadow: "0 12px 32px rgba(22,41,74,.16)", borderRadius: 0, width: "100%", maxWidth: 760, padding: "32px 36px", position: "relative" }}>
-        <button onClick={() => {
-          if (editMode && idealistaFieldErrors.size > 0) {
-            const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético"};
-            const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join("\n• ");
-            if (!confirm("⚠️ Campos con * obligatorios sin completar:\n\n• " + faltantes + "\n\n¿Cerrar sin guardar igualmente?")) return;
-          }
-          onClose();
-        }} style={{ position: "absolute", top: 16, right: 20, background: "none", border: "none", color: "#9A968A", fontSize: 20, cursor: "pointer" }}>✕</button>
+    <div style={{ fontFamily: "Inter, sans-serif", background: "#F8F6F1", minHeight: "100vh", color: "#22262E", padding: "40px 24px" }}>
+      <div style={{ maxWidth: 760, margin: "0 auto" }}>
+
         
         {puedeEditar && <button onClick={() => { 
           const toSave = { ...draft,
@@ -1338,19 +1331,64 @@ REGLAS:
             }
           }
           if (onUpdate) onUpdate(toSave);
-        }} 
-          style={{ position: "absolute", top: 16, right: 120, background: "#2C6E52", border: "none", borderRadius: 0, color: "#F8F6F1", fontSize: 10, cursor: "pointer", padding: "5px 14px", fontWeight: 600, fontFamily: "Inter, sans-serif", letterSpacing: "0.05em", transition: "all 0.2s" }}>
-          Guardar
-        </button>}
-        
-        {isDirector && <button onClick={() => { if (onDelete) onDelete(p); }} style={{ position: "absolute", top: 16, right: 56, background: "none", border: "1px solid #D4545433", borderRadius: 0, color: "#A23A3A", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "Inter, sans-serif" }}>Eliminar</button>}
-        <button onClick={() => { if (onDuplicate) onDuplicate(p); }} style={{ position: "absolute", top: 16, right: 116, background: "none", border: "1px solid #AC8A5444", borderRadius: 0, color: "#AC8A54", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "Inter, sans-serif" }}>Duplicar</button>
-        
-        <div style={{ position: "absolute", top: 20, left: 36, fontSize: 11, color: "#9A968A" }}>
-          {puedeEditar
-            ? <><span style={{ color: "#A23A3A", fontSize: 14, fontWeight: 700 }}>*</span> Sincronizado con Idealista</>
-            : <span style={{ color: "#A23A3A", fontWeight: 600 }}>🔒 Solo lectura</span>
-          }
+        }}
+          style={{ display: "none" }}>Guardar</button>}
+
+        {/* Header pantalla completa — estilo cuestionario */}
+        <div style={{ marginBottom: 36, borderBottom: "1px solid #E7E1D4", paddingBottom: 28, display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
+          <div>
+            <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Mallorca Nativa Properties</div>
+            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.1 }}>
+              Ficha de <em>Propiedad</em>
+            </h1>
+            <div style={{ fontSize: 11, color: "#9A968A", marginTop: 8 }}>
+              {puedeEditar
+                ? <><span style={{ color: "#A23A3A", fontSize: 13, fontWeight: 700 }}>*</span> Sincronizado con Idealista</>
+                : <span style={{ color: "#A23A3A", fontWeight: 600 }}>🔒 Solo lectura — no eres el agente de esta propiedad</span>
+              }
+            </div>
+          </div>
+          {/* Botones de acción en header */}
+          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+            <button onClick={() => {
+              if (idealistaFieldErrors.size > 0) {
+                const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético"};
+                const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join("\n• ");
+                if (!confirm("⚠️ Campos con * sin completar:\n\n• " + faltantes + "\n\n¿Volver sin guardar igualmente?")) return;
+              }
+              onClose();
+            }} style={{ padding: "8px 20px", borderRadius: 0, border: "1px solid #E7E1D4", background: "transparent", color: "#9A968A", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
+              ← Volver
+            </button>
+            {puedeEditar && <button onClick={() => { if (onDuplicate) onDuplicate(p); }} style={{ padding: "8px 20px", borderRadius: 0, border: "1px solid #AC8A5444", background: "transparent", color: "#AC8A54", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
+              Duplicar
+            </button>}
+            {isDirector && <button onClick={() => { if (onDelete) onDelete(p); }} style={{ padding: "8px 20px", borderRadius: 0, border: "1px solid #D4545433", background: "transparent", color: "#A23A3A", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
+              Eliminar
+            </button>}
+            {puedeEditar && <button onClick={() => {
+              const toSave = { ...draft,
+                suministros: (draft.suministrosText || "").split(",").map(s => s.trim()).filter(Boolean),
+                cualPos: (draft.cualPosText || "").split("\n").filter(Boolean),
+                cualNeg: (draft.cualNegText || "").split("\n").filter(Boolean),
+                destinos: draft.destinos || [],
+              };
+              if (idealistaFieldErrors.size > 0) {
+                const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético"};
+                const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join("\n• ");
+                const esPublicada = (draft.estado || p.estado) === "publicada";
+                if (esPublicada) {
+                  alert("🚫 Esta propiedad está PUBLICADA.\n\nNo se puede guardar sin completar los campos obligatorios (*):\n\n• " + faltantes + "\n\nCompleta estos campos o cambia el estado a 'Captada'.");
+                  return;
+                } else {
+                  if (!confirm("⚠️ Hay campos obligatorios (*) sin completar:\n\n• " + faltantes + "\n\nSi guardas así, la propiedad NO podrá publicarse en Idealista.\n\n¿Guardar igualmente?")) return;
+                }
+              }
+              if (onUpdate) onUpdate(toSave);
+            }} style={{ padding: "8px 24px", borderRadius: 0, border: "none", background: "linear-gradient(135deg, #C8A97E, #D4B896)", color: "#F8F6F1", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
+              Guardar
+            </button>}
+          </div>
         </div>
         {/* Indicador autoguardado */}
         {editMode && autoSaveStatus && (
@@ -1916,6 +1954,35 @@ REGLAS:
           </div>
         </Sec>
 
+        {/* Barra de acciones inferior */}
+        <div style={{ borderTop: "1px solid #E7E1D4", paddingTop: 28, marginTop: 12, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+          <button onClick={() => onClose()} style={{ padding: "12px 24px", borderRadius: 0, border: "1px solid #E7E1D4", background: "transparent", color: "#9A968A", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
+            ← Volver a propiedades
+          </button>
+          <div style={{ display: "flex", gap: 8 }}>
+            {puedeEditar && <button onClick={() => { if (onDuplicate) onDuplicate(p); }} style={{ padding: "12px 20px", borderRadius: 0, border: "1px solid #AC8A5444", background: "transparent", color: "#AC8A54", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>Duplicar</button>}
+            {isDirector && <button onClick={() => { if (onDelete) onDelete(p); }} style={{ padding: "12px 20px", borderRadius: 0, border: "1px solid #D4545433", background: "transparent", color: "#A23A3A", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>Eliminar</button>}
+            {puedeEditar && <button onClick={() => {
+              const toSave = { ...draft,
+                suministros: (draft.suministrosText || "").split(",").map(s => s.trim()).filter(Boolean),
+                cualPos: (draft.cualPosText || "").split("\n").filter(Boolean),
+                cualNeg: (draft.cualNegText || "").split("\n").filter(Boolean),
+                destinos: draft.destinos || [],
+              };
+              if (idealistaFieldErrors.size > 0) {
+                const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético"};
+                const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join("\n• ");
+                const esPublicada = (draft.estado || p.estado) === "publicada";
+                if (esPublicada) { alert("🚫 Propiedad PUBLICADA. Completa los campos * antes de guardar."); return; }
+                else { if (!confirm("⚠️ Campos * sin completar:\n\n• " + faltantes + "\n\n¿Guardar igualmente?")) return; }
+              }
+              if (onUpdate) onUpdate(toSave);
+            }} style={{ padding: "12px 28px", borderRadius: 0, border: "none", background: "linear-gradient(135deg, #C8A97E, #D4B896)", color: "#F8F6F1", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
+              Guardar ficha
+            </button>}
+          </div>
+        </div>
+
       </div>
     </div>
   );
@@ -2475,6 +2542,11 @@ export default function CRMPropiedades({ currentUser }) {
     );
   }
 
+  // Si hay ficha seleccionada, mostrar en pantalla completa
+  if (sel) {
+    return <PropDetail p={sel} currentUser={currentUser} onClose={() => setSel(null)} onUpdate={(updated) => { saveProperty(updated); }} onDelete={(prop) => { if (confirm("¿Eliminar esta propiedad y todos sus archivos? Esta accion no se puede deshacer.")) deleteProperty(prop); }} onDuplicate={(prop) => duplicateProperty(prop)} />;
+  }
+
   return (
     <div style={{ fontFamily: "Inter, sans-serif", background: "#F8F6F1", minHeight: "100vh", color: "#22262E", padding: "40px 24px" }}>
       <div style={{ maxWidth: 920, margin: "0 auto" }}>
@@ -2568,7 +2640,6 @@ export default function CRMPropiedades({ currentUser }) {
           {list.length === 0 && <div style={{ textAlign: "center", padding: 60, color: "#9A968A", fontSize: 13, fontStyle: "italic" }}>Sin resultados</div>}
         </div>
 
-        {sel && <PropDetail p={sel} currentUser={currentUser} onClose={() => setSel(null)} onUpdate={(updated) => { saveProperty(updated); }} onDelete={(prop) => { if (confirm("¿Eliminar esta propiedad y todos sus archivos? Esta accion no se puede deshacer.")) deleteProperty(prop); }} onDuplicate={(prop) => duplicateProperty(prop)} />}
       </div>
     </div>
   );
