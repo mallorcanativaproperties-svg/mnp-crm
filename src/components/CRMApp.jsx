@@ -22,7 +22,7 @@ const MODULES = [
   { key: "redes", label: "Redes Sociales", icon: "◉", color: "#E1306C", roles: ["director", "agente"] },
   { key: "agentes", label: "Agentes IA", icon: "◈", color: "#9C6E1B", roles: ["director"] },
   { key: "firma", label: "Firma Electronica", icon: "✍", color: "#2C6E52", roles: ["director", "agente", "broker"] },
-  { key: "dashboard", label: "Dashboard", icon: "◆", color: "#AC8A54", roles: ["director", "agente"] },
+  { key: "dashboard", label: "Dashboard", icon: "◆", color: "#AC8A54", roles: ["director"] },
   { key: "usuarios", label: "Usuarios", icon: "◎", color: "#AC8A54", roles: ["director"] },
   { key: "simulador", label: "Simulador Claudia", icon: "◈", color: "#3D577E", roles: ["director"] },
 ];
