@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 
 // Tipos alineados con Propiedades.jsx y schema de Idealista
@@ -276,12 +276,50 @@ export default function FormularioCaptacion() {
   const [submitted, setSubmitted] = useState(false);
   const [saving, setSaving] = useState(false);
   const [agentesDB, setAgentesDB] = useState([]);
+  const [fichaId, setFichaId] = useState(null); // ID de la ficha ya creada
+  const [autoSaveStatus, setAutoSaveStatus] = useState(null); // null | "saving" | "saved" | "error"
 
   // Cargar agentes dinámicamente desde Supabase
   useEffect(() => {
     supabase.from("usuarios").select("nombre,agente_codigo").eq("activo", true).not("agente_codigo", "is", null)
       .then(({ data }) => { if (data) setAgentesDB(data); });
   }, []);
+
+  // Autoguardado reactivo — se dispara cuando cambia cualquier campo
+  const autoSaveRef = useRef(null);
+  useEffect(() => {
+    if (!ref || !tipo || !op) return;
+    if (autoSaveRef.current) clearTimeout(autoSaveRef.current);
+    autoSaveRef.current = setTimeout(async () => {
+      setAutoSaveStatus("saving");
+      try {
+        const data = buildDbData();
+        if (fichaId) {
+          const { error } = await supabase.from("propiedades").update(data).eq("id", fichaId);
+          if (error) throw error;
+        } else {
+          const { data: inserted, error } = await supabase.from("propiedades").insert(data).select().single();
+          if (error) throw error;
+          setFichaId(inserted.id);
+        }
+        setAutoSaveStatus("saved");
+        setTimeout(() => setAutoSaveStatus(null), 2000);
+      } catch (e) {
+        setAutoSaveStatus("error");
+        setTimeout(() => setAutoSaveStatus(null), 3000);
+      }
+    }, 1500);
+    return () => { if (autoSaveRef.current) clearTimeout(autoSaveRef.current); };
+  }, [ref, tipo, op, agente, dir, num, cp, municipio, zona, orient, distPlaya, visDir,
+      planta, puerta, precioVenta, precioProp, precioTraspaso, precioAlquiler,
+      fianzaMeses, duracionMinMeses, mascotas, honorarios, honNetoManual,
+      honorariosTipo, ivaHon, ibi, basuras, comunidad, extraCom, otrosGastos,
+      mUtil, mConst, mParcela, mTerraza, mBalcon, mPorche,
+      habDob, habSim, totalHab, banos, aseos, conserv, anoCon, certE, iee,
+      ventaMob, terraza, balcon, jardin, piscina, ascensor, armarios, trastero,
+      parking, nPlazas, ventanas, aireAcondTipo, suelos, carpExt, carpInt,
+      emisionesEnerg, calefaccion, aguaCal, suministros, drenaje,
+      elecRef, fontRef, notasPriv, propNom, propTel, propEmail, cualPos, cualNeg]);
 
   // Generar referencia automática — 4 dígitos fijos, máximo real por agente
   async function generarRef(agenteName) {
@@ -453,6 +491,75 @@ export default function FormularioCaptacion() {
   const g3 = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "0 20px" };
   const g4 = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "0 20px" };
 
+  // Construir objeto dbData desde el estado actual
+  function buildDbData() {
+    const data = {
+      ref, tipo, op, agente,
+      dir, num: num || null, cp: cp || null, municipio, zona: zona || null,
+      orient: orient || null, dist_playa: distPlaya || null, vis_dir: visDir,
+      planta: planta || null, puerta: puerta || null,
+      precio_venta: Number(precioVenta) || 0,
+      precio_prop: Number(precioProp) || 0,
+      precio_traspaso: Number(precioTraspaso) || 0,
+      precio_alquiler: Number(precioAlquiler) || 0,
+      fianza_meses: Number(fianzaMeses) || 1,
+      duracion_min_meses: Number(duracionMinMeses) || 11,
+      mascotas: mascotas,
+      honorarios: Number(honorarios) || 5,
+      hon_neto_manual: Number(honNetoManual) || 0,
+      honorarios_tipo: honorariosTipo,
+      iva_hon: Number(ivaHon) || 21,
+      ibi: Number(ibi) || 0,
+      basuras: Number(basuras) || 0,
+      comunidad: Number(comunidad) || 0,
+      extra_comunidad: Number(extraCom) || 0,
+      otros_gastos: otrosGastos || null,
+      m_util: Number(mUtil) || 0,
+      m_const: Number(mConst) || 0,
+      m_parcela: Number(mParcela) || 0,
+      m_terraza: Number(mTerraza) || 0,
+      m_balcon: Number(mBalcon) || 0,
+      m_porche: Number(mPorche) || 0,
+      hab_dobles: Number(habDob) || 0,
+      total_hab: Number(totalHab) || (Number(habDob)||0) + (Number(habSim)||0),
+      hab_simples: Number(habSim) || 0,
+      banos: Number(banos) || 0,
+      aseos: Number(aseos) || 0,
+      conserv: conserv || null,
+      ano_construc: anoCon || null,
+      cert_energ: certE || null,
+      iee: iee || null,
+      venta_mobiliario: ventaMob,
+      terraza, balcon, jardin, piscina, ascensor, armarios, trastero,
+      parking: parking || "No",
+      n_plazas: Number(nPlazas) || 0,
+      ventanas: ventanas || null,
+      cual_neg: cualNeg.filter(Boolean),
+      aire_acond_tipo: aireAcondTipo || null,
+      suelos: suelos || null,
+      carp_ext: carpExt || null,
+      carp_int: carpInt || null,
+      emisiones_energ: emisionesEnerg || null,
+      calefaccion: calefaccion || null,
+      agua_cal: aguaCal || null,
+      suministros: suministros.length > 0 ? suministros : [],
+      drenaje: drenaje || null,
+      elec_reformada: elecRef,
+      font_reformada: fontRef,
+      notas_priv: notasPriv || null,
+      estado: "captada",
+      fecha_cap: new Date().toISOString().split("T")[0],
+      prop_nombre: propNom || null,
+      prop_tel: propTel || null,
+      prop_email: propEmail || null,
+      cual_pos: cualPos.filter(Boolean),
+      visitas: 0,
+      fotos: 0, videos: 0, planos: 0,
+    };
+    Object.keys(data).forEach(k => { if (data[k] === null || data[k] === "") delete data[k]; });
+    return data;
+  }
+
   const handleSubmit = async () => {
     // Validar campos obligatorios Idealista
     const errores = [];
@@ -474,77 +581,16 @@ export default function FormularioCaptacion() {
     }
     setSaving(true);
     try {
-      // Mapear campos del formulario a la estructura de Supabase (alineado con mapJsToDb de Propiedades.jsx)
-      const dbData = {
-        ref, tipo, op, agente,
-        dir, num: num || null, cp: cp || null, municipio, zona: zona || null,
-        orient: orient || null, dist_playa: distPlaya || null, vis_dir: visDir,
-        planta: planta || null, puerta: puerta || null,
-        precio_venta: Number(precioVenta) || 0,
-        precio_prop: Number(precioProp) || 0,
-        precio_traspaso: Number(precioTraspaso) || 0,
-        precio_alquiler: Number(precioAlquiler) || 0,
-        fianza_meses: Number(fianzaMeses) || 1,
-        duracion_min_meses: Number(duracionMinMeses) || 11,
-        mascotas: mascotas,
-        honorarios: Number(honorarios) || 5,
-        hon_neto_manual: Number(honNetoManual) || 0,
-        honorarios_tipo: honorariosTipo,
-        iva_hon: Number(ivaHon) || 21,
-        ibi: Number(ibi) || 0,
-        basuras: Number(basuras) || 0,
-        comunidad: Number(comunidad) || 0,
-        extra_comunidad: Number(extraCom) || 0,
-        otros_gastos: otrosGastos || null,
-        m_util: Number(mUtil) || 0,
-        m_const: Number(mConst) || 0,
-        m_parcela: Number(mParcela) || 0,
-        m_terraza: Number(mTerraza) || 0,
-        m_balcon: Number(mBalcon) || 0,
-        m_porche: Number(mPorche) || 0,
-        hab_dobles: Number(habDob) || 0,
-        total_hab: Number(totalHab) || (Number(habDob)||0) + (Number(habSim)||0),
-        hab_simples: Number(habSim) || 0,
-        banos: Number(banos) || 0,
-        aseos: Number(aseos) || 0,
-        conserv: conserv || null,
-        ano_construc: anoCon || null,
-        cert_energ: certE || null,
-        iee: iee || null,
-        venta_mobiliario: ventaMob,
-        terraza, balcon, jardin, piscina, ascensor, armarios, trastero,
-        parking: parking || "No",
-        n_plazas: Number(nPlazas) || 0,
-        ventanas: ventanas || null,
-        cual_neg: cualNeg.filter(Boolean),
-        aire_acond_tipo: aireAcondTipo || null,
-        suelos: suelos || null,
-        carp_ext: carpExt || null,
-        carp_int: carpInt || null,
-        emisiones_energ: emisionesEnerg || null,
-        calefaccion: calefaccion || null,
-        agua_cal: aguaCal || null,
-        suministros: suministros.length > 0 ? suministros : [],
-        drenaje: drenaje || null,
-        elec_reformada: elecRef,
-        font_reformada: fontRef,
-        notas_priv: notasPriv || null,
-        estado: "captada",
-        fecha_cap: new Date().toISOString().split("T")[0],
-        prop_nombre: propNom || null,
-        prop_tel: propTel || null,
-        prop_email: propEmail || null,
-        cual_pos: cualPos.filter(Boolean),
-        visitas: 0,
-        fotos: 0, videos: 0, planos: 0,
-      };
+      const dbData = buildDbData();
 
-      // Eliminar campos null para no violar constraints de Supabase
-      Object.keys(dbData).forEach(k => {
-        if (dbData[k] === null || dbData[k] === "") delete dbData[k];
-      });
-
-      const { error } = await supabase.from("propiedades").insert(dbData);
+      let error;
+      if (fichaId) {
+        // Ficha ya existe — actualizar
+        ({ error } = await supabase.from("propiedades").update(dbData).eq("id", fichaId));
+      } else {
+        // Crear nueva
+        ({ error } = await supabase.from("propiedades").insert(dbData));
+      }
       if (error) {
         alert("Error al guardar: " + error.message);
         setSaving(false);
@@ -586,9 +632,15 @@ export default function FormularioCaptacion() {
         {/* Header */}
         <div style={{ marginBottom: 36, borderBottom: "1px solid #2A2926", paddingBottom: 28 }}>
           <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Mallorca Nativa Properties</div>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 400, margin: 0, lineHeight: 1.1 }}>
-            Formulario de <em>Captacion</em>
-          </h1>
+          <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 400, margin: 0, lineHeight: 1.1 }}>
+              Formulario de <em>Captacion</em>
+            </h1>
+            {autoSaveStatus === "saving" && <span style={{ fontSize: 11, color: "#AC8A54", fontFamily: "Inter, sans-serif" }}>⏳ Guardando...</span>}
+            {autoSaveStatus === "saved" && <span style={{ fontSize: 11, color: "#2C6E52", fontFamily: "Inter, sans-serif" }}>✓ Guardado automáticamente</span>}
+            {autoSaveStatus === "error" && <span style={{ fontSize: 11, color: "#A23A3A", fontFamily: "Inter, sans-serif" }}>⚠️ Error al guardar</span>}
+            {fichaId && !autoSaveStatus && <span style={{ fontSize: 10, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>📋 Ficha creada</span>}
+          </div>
           <p style={{ fontSize: 12, color: "#9A968A", margin: "10px 0 0", letterSpacing: "0.04em" }}>El agente cumplimenta este formulario delante del propietario. Al enviar se crea la ficha en el CRM.</p>
         </div>
 
@@ -859,7 +911,7 @@ export default function FormularioCaptacion() {
               fontFamily: "Inter, sans-serif", transition: "all 0.3s",
             }}
           >
-            {saving ? "Creando ficha..." : "Crear ficha de propiedad"}
+            {saving ? "Guardando..." : fichaId ? "Ficha guardada ✓" : "Crear ficha de propiedad"}
           </button>
         </div>
 
