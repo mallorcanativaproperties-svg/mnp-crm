@@ -2224,35 +2224,6 @@ export default function CRMPropiedades({ currentUser }) {
   const [fTipo, setFTipo] = useState("todos");
   const [sort, setSort] = useState("fecha");
   const [sel, setSel] = useState(null);
-  // Helper de tipo para condicionalidad — después de todos los hooks
-  const tipoActual = draft.tipo || p.tipo || "";
-  const TIPO_MAP_COND = {
-    Piso:"flat", Estudio:"flat", Atico:"flat", "Atico Duplex":"flat", Duplex:"flat", "Planta baja":"flat",
-    Casa:"house", Chalet:"house", Adosado:"house", Villa:"house",
-    "Finca rustica":"rustic", Finca:"rustic",
-    "Local comercial":"premises_commercial", Local:"premises_commercial",
-    Oficina:"office", Parking:"garage", Garaje:"garage",
-    Terreno:"land", Trastero:"storage", Edificio:"building",
-  };
-  const ft = TIPO_MAP_COND[tipoActual] || "flat";
-  const esResidencial = ["flat","house","rustic"].includes(ft);
-  const esComercial = ["premises_commercial","office"].includes(ft);
-  const esGaraje = ["garage","storage"].includes(ft);
-  const esTerreno = ft === "land";
-  const esEdificio = ft === "building";
-  const tieneHab = ["flat","house","rustic"].includes(ft);
-  const tieneCert = ["flat","house","rustic"].includes(ft);
-  const tieneComunidad = ["flat","house","premises_commercial","office","garage","storage"].includes(ft);
-  const tieneBasuras = true;
-  const tieneIBI = true;
-  const tieneDerrama = ["flat","house"].includes(ft);
-  const tieneInstalaciones = ["flat","house","rustic","premises_commercial","office","building"].includes(ft);
-  const tieneElecFont = ["flat","house","rustic","premises_commercial","office"].includes(ft);
-  const tieneExtras = ["flat","house","rustic"].includes(ft);
-  const tieneAireCalef = ["flat","house","rustic","premises_commercial","office"].includes(ft);
-  const tieneVideos = ["flat","house","rustic","premises_commercial","office","building"].includes(ft);
-  const tienePlanos = ["flat","house","rustic","premises_commercial","office","building","land"].includes(ft);
-  const tieneTour = ["flat","house","rustic","premises_commercial","office","building"].includes(ft);
 
   useEffect(() => {
     loadProps();
