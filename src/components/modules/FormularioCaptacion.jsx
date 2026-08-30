@@ -324,40 +324,11 @@ export default function FormularioCaptacion() {
   const [mascotas, setMascotas] = useState(false);
   const [honorariosTipo, setHonorariosTipo] = useState("porcentaje");
   const [honNetoManual, setHonNetoManual] = useState("");
+  const [calcDesde, setCalcDesde] = useState("venta");
   const [honorarios, setHonorarios] = useState("5");
   const [ivaHon, setIvaHon] = useState("21");
 
   // Motor de cálculo — puede calcularse desde precio venta O desde precio propietario
-  const [calcDesde, setCalcDesde] = useState("venta");
-  const pv = op === "Alquiler" ? (Number(precioAlquiler)||0) : (Number(precioVenta) || 0);
-  const pp = Number(precioProp) || 0;
-
-  const ivaRate = (Number(ivaHon)||21) / 100;
-  const pct = (Number(honorarios)||0) / 100;
-
-  let honNeto, honIva, honTotal, netoProp, precioCalc;
-  if (calcDesde === "propietario" && pp > 0 && op !== "Alquiler") {
-    // Desde precio propietario → precio venta = pp / (1 - pct*(1+ivaRate))
-    if (honorariosTipo === "porcentaje") {
-      precioCalc = pp / (1 - pct * (1 + ivaRate));
-      honNeto = precioCalc * pct;
-    } else {
-      // Fijo: hon neto es el que introduce el agente manualmente
-      honNeto = Number(honNetoManual) || 0;
-      precioCalc = pp + honNeto + honNeto * ivaRate;
-    }
-  } else {
-    precioCalc = pv;
-    if (honorariosTipo === "porcentaje") {
-      honNeto = precioCalc * pct;
-    } else {
-      honNeto = Number(honNetoManual) || 0;
-    }
-  }
-  honIva = honNeto * ivaRate;
-  honTotal = honNeto + honIva;
-  netoProp = (calcDesde === "propietario" && pp > 0 && op !== "Alquiler") ? pp : precioCalc - honTotal;
-
   // Gastos
   const [ibi, setIbi] = useState("");
   const [basuras, setBasuras] = useState("");
@@ -422,6 +393,33 @@ export default function FormularioCaptacion() {
 
   // Cualificacion
   const [cualPos, setCualPos] = useState(["", "", "", "", "", ""]);
+  const pv = op === "Alquiler" ? (Number(precioAlquiler)||0) : (Number(precioVenta) || 0);
+  const pp = Number(precioProp) || 0;
+
+  const ivaRate = (Number(ivaHon)||21) / 100;
+  const pct = (Number(honorarios)||0) / 100;
+
+  let honNeto, honIva, honTotal, netoProp, precioCalc;
+  if (calcDesde === "propietario" && pp > 0 && op !== "Alquiler") {
+    if (honorariosTipo === "porcentaje") {
+      precioCalc = pp / (1 - pct * (1 + ivaRate));
+      honNeto = precioCalc * pct;
+    } else {
+      honNeto = Number(honNetoManual) || 0;
+      precioCalc = pp + honNeto + honNeto * ivaRate;
+    }
+  } else {
+    precioCalc = pv;
+    if (honorariosTipo === "porcentaje") {
+      honNeto = precioCalc * pct;
+    } else {
+      honNeto = Number(honNetoManual) || 0;
+    }
+  }
+  honIva = honNeto * ivaRate;
+  honTotal = honNeto + honIva;
+  netoProp = (calcDesde === "propietario" && pp > 0 && op !== "Alquiler") ? pp : precioCalc - honTotal;
+
   // Helper condicionalidad por tipo — después de todos los hooks
   const TIPO_MAP_COND = {
     Piso:"flat", Estudio:"flat", Atico:"flat", "Atico Duplex":"flat", Duplex:"flat", "Planta baja":"flat",
