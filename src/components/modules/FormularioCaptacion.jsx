@@ -329,6 +329,8 @@ export default function FormularioCaptacion() {
 
   // Motor de cálculo — puede calcularse desde precio venta O desde precio propietario
   const [calcDesde, setCalcDesde] = useState("venta");
+  const pv = op === "Alquiler" ? (Number(precioAlquiler)||0) : (Number(precioVenta) || 0);
+  const pp = Number(precioProp) || 0;
 
   const ivaRate = (Number(ivaHon)||21) / 100;
   const pct = (Number(honorarios)||0) / 100;
@@ -864,8 +866,4 @@ export default function FormularioCaptacion() {
       </div>
     </div>
   );
-} // "venta" | "propietario"
-  const pv = op === "Alquiler" ? (Number(precioAlquiler)||0) : (Number(precioVenta) || 0);
-  const pp = Number(precioProp) || 0;
-
-
+}
