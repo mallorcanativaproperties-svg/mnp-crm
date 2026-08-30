@@ -332,6 +332,30 @@ export default function FormularioCaptacion() {
   const [calcDesde, setCalcDesde] = useState("venta"); // "venta" | "propietario"
   const pv = op === "Alquiler" ? (Number(precioAlquiler)||0) : (Number(precioVenta) || 0);
   const pp = Number(precioProp) || 0;
+
+  // Helper condicionalidad por tipo — mismo sistema que ficha
+  const TIPO_MAP_COND = {
+    Piso:"flat", Estudio:"flat", Atico:"flat", "Atico Duplex":"flat", Duplex:"flat", "Planta baja":"flat",
+    Casa:"house", Chalet:"house", Adosado:"house", Villa:"house",
+    "Finca rustica":"rustic", Finca:"rustic",
+    "Local comercial":"premises_commercial", Local:"premises_commercial",
+    Oficina:"office", Parking:"garage", Garaje:"garage",
+    Terreno:"land", Trastero:"storage", Edificio:"building",
+  };
+  const ft = TIPO_MAP_COND[tipo] || "flat";
+  const esResidencial = ["flat","house","rustic"].includes(ft);
+  const esComercial = ["premises_commercial","office"].includes(ft);
+  const esGaraje = ["garage","storage"].includes(ft);
+  const esTerreno = ft === "land";
+  const esEdificio = ft === "building";
+  const tieneHab = ["flat","house","rustic"].includes(ft);
+  const tieneCert = ["flat","house","rustic"].includes(ft);
+  const tieneComunidad = ["flat","house","premises_commercial","office","garage","storage"].includes(ft);
+  const tieneDerrama = ["flat","house"].includes(ft);
+  const tieneInstalaciones = ["flat","house","rustic","premises_commercial","office","building"].includes(ft);
+  const tieneElecFont = ["flat","house","rustic","premises_commercial","office"].includes(ft);
+  const tieneExtras = ["flat","house","rustic"].includes(ft);
+  const tieneAireCalef = ["flat","house","rustic","premises_commercial","office"].includes(ft);
   const ivaRate = (Number(ivaHon)||21) / 100;
   const pct = (Number(honorarios)||0) / 100;
 
@@ -438,9 +462,9 @@ export default function FormularioCaptacion() {
     if (op !== "Alquiler" && (!precioVenta || Number(precioVenta) <= 0)) errores.push("Precio de venta");
     if (op === "Alquiler" && (!precioAlquiler || Number(precioAlquiler) <= 0)) errores.push("Renta mensual");
     if (!mConst || Number(mConst) <= 0) errores.push("m² construidos");
-    const tipoResidencial = ["Piso","Estudio","Atico","Atico Duplex","Duplex","Planta baja","Casa","Chalet","Adosado","Villa","Finca rustica","Finca"].includes(tipo);
-    if (tipoResidencial && (!banos || Number(banos) <= 0)) errores.push("Baños");
-    if (tipoResidencial && !certE) errores.push("Certificado energético");
+    if (tieneHab && (!banos || Number(banos) <= 0)) errores.push("Baños");
+    if (tieneCert && !certE) errores.push("Certificado energético");
+    if (esTerreno && (!mParcela || Number(mParcela) <= 0)) errores.push("m² parcela");
     if (errores.length > 0) {
       alert("⚠️ Campos obligatorios incompletos:\n\n• " + errores.join("\n• ") + "\n\nCompleta estos campos antes de crear la ficha.");
       return;
@@ -617,10 +641,10 @@ export default function FormularioCaptacion() {
           <div style={g3}>
             <Input label="IBI anual" value={ibi} onChange={setIbi} type="number" placeholder="850" />
             <Input label="Tasa basuras" value={basuras} onChange={setBasuras} type="number" placeholder="120" />
-            <Input label="Comunidad /mes" value={comunidad} onChange={setComunidad} type="number" placeholder="95" />
+            {tieneComunidad && <Input label="Comunidad /mes" value={comunidad} onChange={setComunidad} type="number" placeholder="95" />}
           </div>
           <div style={g2}>
-            <Input label="Extra comunidad (derramas)" value={extraCom} onChange={setExtraCom} type="number" />
+            {tieneDerrama && <Input label="Extra comunidad (derramas)" value={extraCom} onChange={setExtraCom} type="number" />}
             <Input label="Otros gastos" value={otrosGastos} onChange={setOtrosGastos} placeholder="Mantenimiento piscina..." />
           </div>
         </Sec>
@@ -628,78 +652,80 @@ export default function FormularioCaptacion() {
         {/* 5. Superficies */}
         <Sec title="Superficies y estancias">
           <div style={g4}>
-            <Input label="m2 utiles" value={mUtil} onChange={setMUtil} type="number" />
-            <Input label="m2 construidos" value={mConst} required onChange={setMConst} type="number" />
-            <Input label="m2 parcela" value={mParcela} onChange={setMParcela} type="number" />
-            <Input label="m2 terraza" value={mTerraza} onChange={setMTerraza} type="number" />
+            {!esTerreno && <Input label="m2 utiles" value={mUtil} onChange={setMUtil} type="number" />}
+            {!esTerreno && <Input label="m2 construidos" value={mConst} required={!esTerreno} onChange={setMConst} type="number" />}
+            <Input label={esTerreno ? "m2 parcela *" : "m2 parcela"} value={mParcela} onChange={setMParcela} type="number" required={esTerreno} />
+            {tieneExtras && <Input label="m2 terraza" value={mTerraza} onChange={setMTerraza} type="number" />}
           </div>
-          <div style={g4}>
+          {tieneExtras && <div style={g4}>
             <Input label="m2 balcon" value={mBalcon} onChange={setMBalcon} type="number" />
             <Input label="m2 porche" value={mPorche} onChange={setMPorche} type="number" />
             <div /><div />
-          </div>
-          <div style={g4}>
+          </div>}
+          {tieneHab && <div style={g4}>
             <Input label="Hab. dobles" value={habDob} required onChange={setHabDob} type="number" />
             <Input label="Hab. simples" value={habSim} onChange={setHabSim} type="number" />
             <Input label="Banos" value={banos} required onChange={setBanos} type="number" />
             <Input label="Aseos" value={aseos} onChange={setAseos} type="number" />
-          </div>
+          </div>}
+          {!tieneHab && (esComercial || esGaraje) && <div style={g2}>
+            <Input label="Banos" value={banos} onChange={setBanos} type="number" />
+          </div>}
           <div style={g3}>
-            <Input label="Ano construccion" value={anoCon} onChange={setAnoCon} placeholder="2005" />
+            {!esTerreno && <Input label="Ano construccion" value={anoCon} onChange={setAnoCon} placeholder="2005" />}
             <Select label="Conservacion" value={conserv} onChange={setConserv} options={CONSERVACION} />
-
           </div>
         </Sec>
 
         {/* 6. Caracteristicas */}
-        <Sec title="Caracteristicas principales">
-          <div style={g3}>
+        {(esResidencial || esComercial) && <Sec title="Caracteristicas principales">
+          {tieneCert && <div style={g3}>
             <Select label="Cert. energetico" value={certE} onChange={setCertE} required options={CERT_ENERG} />
             <Select label="Emisiones energeticas" value={emisionesEnerg} onChange={setEmisionesEnerg} options={["A","B","C","D","E","F","G"]} />
-            <Select label="IEE" value={iee} onChange={setIee} options={IEE_OPTS} />
-          </div>
-          <div style={g3}>
+            {esResidencial && <Select label="IEE" value={iee} onChange={setIee} options={IEE_OPTS} />}
+          </div>}
+          {esResidencial && <div style={g3}>
             <Select label="Suelos" value={suelos} onChange={setSuelos} options={["Gres","Gres porcelanico","Marmol","Terrazo","Tarima flotante","Parquet","Laminado","Madera maciza","Vinilo","Microcemento","Ceramica","Piedra natural","Hormigon pulido"]} />
             <Select label="Carp. exterior" value={carpExt} onChange={setCarpExt} options={["Aluminio","Aluminio con RPT","PVC","Madera","Climalit","Doble cristal","Triple cristal","Hierro/Forja"]} />
             <Select label="Carp. interior" value={carpInt} onChange={setCarpInt} options={["Lacado blanco","Roble","Cerezo","Haya","Pino","Wengue","Nogal","DM lacado","Cristal","Corredera","Block"]} />
-          </div>
-          <div style={g3}>
+          </div>}
+          {esResidencial && <div style={g3}>
             <Toggle label="Venta con mobiliario" value={ventaMob} onChange={setVentaMob} />
-          </div>
-          <div style={g3}>
+          </div>}
+          {tieneAireCalef && <div style={g3}>
             <Select label="Tipo aire acondicionado" value={aireAcondTipo} onChange={setAireAcondTipo} options={AIRE_ACOND_OPTS} />
             <Select label="Calefaccion" value={calefaccion} onChange={setCalefaccion} options={CALEFACCION_OPTS} />
-            <Select label="Agua caliente" value={aguaCal} onChange={setAguaCal} options={AGUA_CALIENTE} />
-          </div>
-        </Sec>
+            {esResidencial && <Select label="Agua caliente" value={aguaCal} onChange={setAguaCal} options={AGUA_CALIENTE} />}
+          </div>}
+        </Sec>}
 
         {/* 6b. Extras y dotaciones */}
-        <Sec title="Extras y dotaciones">
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "0 40px" }}>
+        {(esResidencial || esComercial) && <Sec title="Extras y dotaciones">
+          {tieneExtras && <div style={{ display: "flex", flexWrap: "wrap", gap: "0 40px" }}>
             <Toggle label="Terraza" value={terraza} onChange={setTerraza} />
-            <Toggle label="Balcon" value={balcon} onChange={setBalcon} />
+            {ft !== "rustic" && <Toggle label="Balcon" value={balcon} onChange={setBalcon} />}
             <Toggle label="Jardin" value={jardin} onChange={setJardin} />
             <Toggle label="Piscina" value={piscina} onChange={setPiscina} />
-            <Toggle label="Ascensor" value={ascensor} onChange={setAscensor} />
+            {ft !== "rustic" && <Toggle label="Ascensor" value={ascensor} onChange={setAscensor} />}
             <Toggle label="Armarios empotrados" value={armarios} onChange={setArmarios} />
             <Toggle label="Trastero" value={trastero} onChange={setTrastero} />
-          </div>
+          </div>}
           <div style={g3}>
             <Select label="Parking" value={parking} onChange={setParking} options={["Si","No","Comunitario","Opcional"]} />
             <Input label="N plazas" value={nPlazas} onChange={setNPlazas} type="number" />
-            <Select label="Ventanas" value={ventanas} onChange={setVentanas} options={["Interior","Exterior"]} />
+            {esResidencial && <Select label="Ventanas" value={ventanas} onChange={setVentanas} options={["Interior","Exterior"]} />}
           </div>
-        </Sec>
+        </Sec>}
 
         {/* 7. Instalaciones */}
-        <Sec title="Instalaciones y suministros">
+        {tieneInstalaciones && <Sec title="Instalaciones y suministros">
           <CheckGroup label="Suministros" options={SUMINISTROS_OPTS} selected={suministros} onChange={setSuministros} />
           <Select label="Drenaje sanitario" value={drenaje} onChange={setDrenaje} options={DRENAJE_OPTS} />
-          <div style={{ display: "flex", gap: 30 }}>
+          {tieneElecFont && <div style={{ display: "flex", gap: 30 }}>
             <Toggle label="Electricidad reformada" value={elecRef} onChange={setElecRef} />
             <Toggle label="Fontaneria reformada" value={fontRef} onChange={setFontRef} />
-          </div>
-        </Sec>
+          </div>}
+        </Sec>}
 
         {/* 10. Datos de venta */}
         <Sec title="Datos de venta">
