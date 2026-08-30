@@ -703,13 +703,29 @@ export default function FormularioCaptacion() {
 
           </div>
           {pv > 0 && Number(honorarios) > 0 && (
-            <div style={{ padding: "12px 16px", background: "#C8A97E08", borderRadius: 0, border: "1px solid #C8A97E15", marginBottom: 14 }}>
-              <span style={{ fontSize: 10, color: "#AC8A54", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}>Calculo automatico</span>
-              <div style={{ fontSize: 12, color: "#A09D93", marginTop: 6, lineHeight: 1.8 }}>
-                <div>Hon. neto: {fmtP(Math.round(honNeto))}</div>
-                <div>IVA 21%: {fmtP(Math.round(honIva))}</div>
-                <div>Hon. total: {fmtP(Math.round(honTotal))}</div>
-                <div style={{ color: "#AC8A54", fontWeight: 600, marginTop: 4 }}>Neto propietario: {fmtP(Math.round(netoProp))}</div>
+            <div style={{ padding: "14px 16px", background: "#F4EEE0", border: "1px solid #E7D9C0", marginBottom: 14 }}>
+              <div style={{ fontSize: 10, color: "#8C6E3F", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 10 }}>Cálculo automático</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px 16px" }}>
+                <div>
+                  <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 2 }}>{op === "Alquiler" ? "Renta mensual" : "Precio de venta"}</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "#16294A" }}>{fmtP(pv)}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 2 }}>Hon. neto</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "#16294A" }}>{fmtP(Math.round(honNeto))}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 2 }}>IVA ({Number(ivaHon)||21}%)</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "#16294A" }}>{fmtP(Math.round(honIva))}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 2 }}>Hon. total (neto+IVA)</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "#AC8A54" }}>{fmtP(Math.round(honTotal))}</div>
+                </div>
+                <div style={{ gridColumn: "span 2" }}>
+                  <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 2 }}>Neto propietario</div>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: "#2C6E52" }}>{fmtP(Math.round(netoProp))}</div>
+                </div>
               </div>
             </div>
           )}
