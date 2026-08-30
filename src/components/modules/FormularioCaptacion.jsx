@@ -352,6 +352,10 @@ export default function FormularioCaptacion() {
   const [puerta, setPuerta] = useState("");
   const [anoCon, setAnoCon] = useState("");
   const [conserv, setConserv] = useState("");
+  const [suelos, setSuelos] = useState("");
+  const [carpExt, setCarpExt] = useState("");
+  const [carpInt, setCarpInt] = useState("");
+  const [emisionesEnerg, setEmisionesEnerg] = useState("");
 
   // Caracteristicas
   const [certE, setCertE] = useState("");
@@ -439,6 +443,10 @@ export default function FormularioCaptacion() {
         ventanas: ventanas || null,
         cual_neg: cualNeg.filter(Boolean),
         aire_acond_tipo: aireAcondTipo || null,
+        suelos: suelos || null,
+        carp_ext: carpExt || null,
+        carp_int: carpInt || null,
+        emisiones_energ: emisionesEnerg || null,
         calefaccion: calefaccion || null,
         agua_cal: aguaCal || null,
         suministros: suministros.length > 0 ? suministros : [],
@@ -592,6 +600,10 @@ export default function FormularioCaptacion() {
             <Input label="Planta" value={planta} onChange={setPlanta} placeholder="2a, Bajo..." />
             <Input label="Ano construccion" value={anoCon} onChange={setAnoCon} placeholder="2005" />
             <Select label="Conservacion" value={conserv} onChange={setConserv} options={CONSERVACION} />
+            <Select label="Suelos" value={suelos} onChange={setSuelos} options={["Gres","Gres porcelanico","Marmol","Terrazo","Tarima flotante","Parquet","Laminado","Madera maciza","Vinilo","Microcemento","Ceramica","Piedra natural","Hormigon pulido"]} />
+            <Select label="Carp. exterior" value={carpExt} onChange={setCarpExt} options={["Aluminio","Aluminio con RPT","PVC","Madera","Climalit","Doble cristal","Triple cristal","Hierro/Forja"]} />
+            <Select label="Carp. interior" value={carpInt} onChange={setCarpInt} options={["Lacado blanco","Roble","Cerezo","Haya","Pino","Wengue","Nogal","DM lacado","Cristal","Corredera","Block"]} />
+            <Select label="Emisiones energeticas" value={emisionesEnerg} onChange={setEmisionesEnerg} options={["A","B","C","D","E","F","G"]} />
           </div>
         </Sec>
 
