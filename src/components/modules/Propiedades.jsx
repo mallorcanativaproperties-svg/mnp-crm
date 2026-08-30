@@ -972,7 +972,7 @@ function PropCard({ p, onClick }) {
   );
 }
 
-function PropDetail({ p, currentUser, onClose, onUpdate, onDelete }) {
+function PropDetail({ p, currentUser, onClose, onUpdate, onDelete, onDuplicate }) {
   // Permisos: editable solo por director o el agente que captó la propiedad
   const isDirector = !currentUser || currentUser?.role?.toLowerCase() === "director";
   const esAgentePropietario = currentUser?.nombre === p.agente || currentUser?.agente_codigo === p.agente;
@@ -1054,7 +1054,7 @@ function PropDetail({ p, currentUser, onClose, onUpdate, onDelete }) {
     if (!src.desc || !src.desc.trim()) errs.add("desc");
     if (needsBaths && (!Number(src.banos) || Number(src.banos) <= 0)) errs.add("banos");
     if (residencial) {
-      const CERT_VALIDOS = ["A","B","C","D","E","F","G","Exento","En tramite"];
+      const CERT_VALIDOS = ["A","B","C","D","E","F","G","Exento"];
       if (!src.certEnerg || !CERT_VALIDOS.includes(src.certEnerg)) errs.add("certEnerg");
     }
     if (src.anoConstruc) {
@@ -1344,6 +1344,7 @@ REGLAS:
         </button>}
         
         {isDirector && <button onClick={() => { if (onDelete) onDelete(p); }} style={{ position: "absolute", top: 16, right: 56, background: "none", border: "1px solid #D4545433", borderRadius: 0, color: "#A23A3A", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "Inter, sans-serif" }}>Eliminar</button>}
+        <button onClick={() => { if (onDuplicate) onDuplicate(p); }} style={{ position: "absolute", top: 16, right: 116, background: "none", border: "1px solid #AC8A5444", borderRadius: 0, color: "#AC8A54", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "Inter, sans-serif" }}>Duplicar</button>
         
         <div style={{ position: "absolute", top: 20, left: 36, fontSize: 11, color: "#9A968A" }}>
           {puedeEditar
@@ -1697,7 +1698,7 @@ REGLAS:
         {/* Caracteristicas */}
         {(esResidencial || esComercial) && <Sec title="Caracteristicas principales">
           <div style={g3}>
-            {tieneCert && EFl({label: "Cert. energetico", req: true, field: "certEnerg", pub: true, options: ["A","B","C","D","E","F","G","Exento","En tramite"], type: "select"})}
+            {tieneCert && EFl({label: "Cert. energetico", req: true, field: "certEnerg", pub: true, options: ["A","B","C","D","E","F","G","Exento"], type: "select"})}
             {tieneCert && EFl({label: "Emisiones energeticas", field: "emisionesEnerg", pub: true, options: ["A","B","C","D","E","F","G"], type: "select"})}
             {esResidencial && EFl({label: "IEE", field: "iee", pub: true})}
           </div>
@@ -2012,7 +2013,8 @@ function IdealistaJsonButton({ supabase }) {
     if(isPenthouse) feat.featuresPenthouse=true;
     if(isDuplex) feat.featuresDuplex=true;
     const conserv=CONSERV_MAP[row.conserv]; if(conserv) feat.featuresConservation=conserv;
-    if(row.cert_energ){if(row.cert_energ==="En tramite") feat.featuresEnergyCertificateRating="inProcess";else if(row.cert_energ==="Exento") feat.featuresEnergyCertificateRating="exempt";else if(/^[A-G]$/.test(row.cert_energ)) feat.featuresEnergyCertificateRating=row.cert_energ;}
+    if(row.ref_cat) feat.featuresCadastralReference=row.ref_cat;
+    if(row.cert_energ){if(row.cert_energ==="Exento") feat.featuresEnergyCertificateRating="exempt";else if(/^[A-G]$/.test(row.cert_energ)) feat.featuresEnergyCertificateRating=row.cert_energ;}
     if(row.emisiones_energ&&/^[A-G]$/.test(row.emisiones_energ)) feat.featuresEnergyCertificateEmissionsRating=row.emisiones_energ;
     if(row.orient){const o=row.orient.toLowerCase();if(o.includes("norte")||o.includes("north")) feat.featuresOrientationNorth=true;if(o.includes("sur")||o.includes("south")) feat.featuresOrientationSouth=true;if(o.includes("este")||o.includes("east")) feat.featuresOrientationEast=true;if(o.includes("oeste")||o.includes("west")) feat.featuresOrientationWest=true;}
     property.propertyFeatures=feat;
@@ -2037,6 +2039,7 @@ function IdealistaJsonButton({ supabase }) {
         } else if(item.etiqueta&&IMAGE_TAG_MAP[item.etiqueta]){
           img.imageLabel=IMAGE_TAG_MAP[item.etiqueta];
         }
+        img.imageAiGenerated=false;
         return img;
       });
     }
@@ -2376,6 +2379,62 @@ export default function CRMPropiedades({ currentUser }) {
     }
   }
 
+  async function duplicateProperty(prop) {
+    if (!prop.id) return;
+    // Sufijo según operación del original
+    const SUFIJO = { "Compraventa": "-VTA", "Alquiler": "-ALQ", "Traspaso": "-TRS" };
+    const sufijo = SUFIJO[prop.op] || "-DUP";
+    const newRef = (prop.ref || "") + sufijo;
+
+    // Clonar datos excluyendo id, ref y estado
+    const { id, created_at, updated_at, ...rest } = prop;
+    const newProp = {
+      ...rest,
+      ref: newRef,
+      estado: "captada",
+      fotos: 0, videos: 0, planos: 0, visitas: 0,
+      idealista_id: null,
+      desc_texto: prop.desc_texto || null,
+    };
+
+    // Insertar nueva propiedad
+    const { data: inserted, error } = await supabase
+      .from("propiedades")
+      .insert(newProp)
+      .select()
+      .single();
+
+    if (error || !inserted) {
+      alert("Error al duplicar: " + (error?.message || "Error desconocido"));
+      return;
+    }
+
+    // Duplicar fotos — copiar registros de media_propiedades
+    const { data: mediaOrig } = await supabase
+      .from("media_propiedades")
+      .select("*")
+      .eq("propiedad_id", prop.id);
+
+    if (mediaOrig && mediaOrig.length > 0) {
+      const newMedia = mediaOrig.map(({ id: _id, propiedad_id: _pid, ...m }) => ({
+        ...m,
+        propiedad_id: inserted.id,
+      }));
+      await supabase.from("media_propiedades").insert(newMedia);
+      // Actualizar contador de fotos
+      const fotosCount = newMedia.filter(m => m.tipo === "foto").length;
+      const videosCount = newMedia.filter(m => m.tipo === "video").length;
+      const planosCount = newMedia.filter(m => m.tipo === "plano").length;
+      await supabase.from("propiedades").update({ fotos: fotosCount, videos: videosCount, planos: planosCount }).eq("id", inserted.id);
+    }
+
+    await loadProps();
+    // Abrir la nueva ficha en edición
+    const newPropData = mapDbToJs(inserted);
+    setSel(newPropData);
+    alert(`✅ Ficha duplicada como ${newRef} — cambia la operación y el precio antes de publicar.`);
+  }
+
   async function deleteProperty(prop) {
     if (!prop.id) return;
     // Delete related media and docs first (cascade should handle it but just in case)
@@ -2509,7 +2568,7 @@ export default function CRMPropiedades({ currentUser }) {
           {list.length === 0 && <div style={{ textAlign: "center", padding: 60, color: "#9A968A", fontSize: 13, fontStyle: "italic" }}>Sin resultados</div>}
         </div>
 
-        {sel && <PropDetail p={sel} currentUser={currentUser} onClose={() => setSel(null)} onUpdate={(updated) => { saveProperty(updated); }} onDelete={(prop) => { if (confirm("¿Eliminar esta propiedad y todos sus archivos? Esta accion no se puede deshacer.")) deleteProperty(prop); }} />}
+        {sel && <PropDetail p={sel} currentUser={currentUser} onClose={() => setSel(null)} onUpdate={(updated) => { saveProperty(updated); }} onDelete={(prop) => { if (confirm("¿Eliminar esta propiedad y todos sus archivos? Esta accion no se puede deshacer.")) deleteProperty(prop); }} onDuplicate={(prop) => duplicateProperty(prop)} />}
       </div>
     </div>
   );
