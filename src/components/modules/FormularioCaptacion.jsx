@@ -501,6 +501,7 @@ export default function FormularioCaptacion() {
         m_balcon: Number(mBalcon) || 0,
         m_porche: Number(mPorche) || 0,
         hab_dobles: Number(habDob) || 0,
+        total_hab: Number(totalHab) || (Number(habDob)||0) + (Number(habSim)||0),
         hab_simples: Number(habSim) || 0,
         banos: Number(banos) || 0,
         aseos: Number(aseos) || 0,
@@ -665,10 +666,20 @@ export default function FormularioCaptacion() {
             <div /><div />
           </div>}
           {tieneHab && <div style={g4}>
-            <Input label="Hab. dobles" value={habDob} required onChange={setHabDob} type="number" />
-            <Input label="Hab. simples" value={habSim} onChange={setHabSim} type="number" />
+            <Input label="Hab. dobles" value={habDob} required onChange={v => { setHabDob(v); if(!totalHab) setTotalHab(String((Number(v)||0)+(Number(habSim)||0))); }} type="number" />
+            <Input label="Hab. simples" value={habSim} onChange={v => { setHabSim(v); if(!totalHab) setTotalHab(String((Number(habDob)||0)+(Number(v)||0))); }} type="number" />
             <Input label="Banos" value={banos} required onChange={setBanos} type="number" />
             <Input label="Aseos" value={aseos} onChange={setAseos} type="number" />
+          </div>}
+          {tieneHab && <div style={g3}>
+            <div>
+              <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 4 }}>Total hab. (Idealista) <span style={{color:"#A23A3A"}}>*</span></label>
+              <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                <input type="number" value={totalHab || String((Number(habDob)||0)+(Number(habSim)||0))} onChange={e => setTotalHab(e.target.value)}
+                  style={{ width: 80, background: "#FFFFFF", border: "1px solid #E7E1D4", borderRadius: 0, color: "#AC8A54", padding: "9px 12px", fontSize: 13, fontFamily: "Inter, sans-serif", fontWeight: 600 }} />
+                <span style={{ fontSize: 10, color: "#9A968A" }}>Auto: {(Number(habDob)||0)+(Number(habSim)||0)}</span>
+              </div>
+            </div>
           </div>}
           {!tieneHab && (esComercial || esGaraje) && <div style={g2}>
             <Input label="Banos" value={banos} onChange={setBanos} type="number" />

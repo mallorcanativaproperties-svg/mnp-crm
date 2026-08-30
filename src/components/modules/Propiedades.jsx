@@ -12,7 +12,7 @@ function mapDbToJs(row) {
     honorariosTipo: row.honorarios_tipo || "porcentaje", honorarios: Number(row.honorarios) || 0, ivaHon: Number(row.iva_hon) || 21, honNetoManual: Number(row.hon_neto_manual) || 0,
     certEnerg: row.cert_energ || "", conserv: row.conserv || "", anoConstruc: row.ano_construc || "",
     mUtil: Number(row.m_util) || 0, mConst: Number(row.m_const) || 0, mParcela: Number(row.m_parcela) || 0, mTerraza: Number(row.m_terraza) || 0, mBalcon: Number(row.m_balcon) || 0, mPorche: Number(row.m_porche) || 0,
-    habDobles: Number(row.hab_dobles) || 0, habSimples: Number(row.hab_simples) || 0, banos: Number(row.banos) || 0, aseos: Number(row.aseos) || 0, planta: row.planta || "",
+    habDobles: Number(row.hab_dobles) || 0, habSimples: Number(row.hab_simples) || 0, totalHab: Number(row.total_hab) || 0, banos: Number(row.banos) || 0, aseos: Number(row.aseos) || 0, planta: row.planta || "",
     parking: row.parking || "", nPlazas: Number(row.n_plazas) || 0,
     suelos: row.suelos || "", carpExt: row.carp_ext || "", carpInt: row.carp_int || "",
     persianasTipo: row.persianas_tipo || "", persianasMat: row.persianas_mat || "",
@@ -44,7 +44,7 @@ function mapJsToDb(p) {
     honorarios_tipo: p.honorariosTipo, honorarios: Number(p.honorarios) || 0, iva_hon: Number(p.ivaHon) || 0, hon_neto_manual: Number(p.honNetoManual) || 0,
     cert_energ: p.certEnerg, conserv: p.conserv, ano_construc: p.anoConstruc,
     m_util: Number(p.mUtil) || 0, m_const: Number(p.mConst) || 0, m_parcela: Number(p.mParcela) || 0, m_terraza: Number(p.mTerraza) || 0, m_balcon: Number(p.mBalcon) || 0, m_porche: Number(p.mPorche) || 0,
-    hab_dobles: Number(p.habDobles) || 0, hab_simples: Number(p.habSimples) || 0, banos: Number(p.banos) || 0, aseos: Number(p.aseos) || 0, planta: p.planta,
+    hab_dobles: Number(p.habDobles) || 0, hab_simples: Number(p.habSimples) || 0, total_hab: Number(p.totalHab) || (Number(p.habDobles)||0) + (Number(p.habSimples)||0), banos: Number(p.banos) || 0, aseos: Number(p.aseos) || 0, planta: p.planta,
     parking: p.parking, n_plazas: Number(p.nPlazas) || 0,
     suelos: p.suelos, carp_ext: p.carpExt, carp_int: p.carpInt,
     persianas_tipo: p.persianasTipo, persianas_mat: p.persianasMat,
@@ -1660,12 +1660,27 @@ REGLAS:
             </div>
           )}
           {tieneHab && (
+            <>
             <div style={{ ...g4, marginTop: 8 }}>
               {EFl({label: "Hab. dobles", req: true, field: "habDobles", pub: true, type: "number"})}
               {EFl({label: "Hab. simples", field: "habSimples", pub: true, type: "number"})}
               {EFl({label: "Banos", req: true, field: "banos", pub: true, type: "number"})}
               {EFl({label: "Aseos", field: "aseos", pub: true, type: "number"})}
             </div>
+            <div style={{ ...g3, marginTop: 8 }}>
+              <div style={{ marginBottom: 10 }}>
+                <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Total hab. (Idealista) *</div>
+                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                  <input type="number" value={d.totalHab || ((Number(d.habDobles)||0)+(Number(d.habSimples)||0))} 
+                    onChange={e => upd("totalHab", Number(e.target.value))} 
+                    onFocus={e => { if(!d.totalHab) upd("totalHab", (Number(d.habDobles)||0)+(Number(d.habSimples)||0)); e.target.select(); }}
+                    onBlur={() => autoSave(draft)}
+                    style={{ width: 80, background: "#FFFFFF", border: "1px solid #E7E1D4", borderRadius: 0, color: "#AC8A54", padding: "6px 8px", fontSize: 13, fontFamily: "Inter, sans-serif", fontWeight: 600 }} />
+                  <span style={{ fontSize: 10, color: "#9A968A" }}>Auto: {(Number(d.habDobles)||0)+(Number(d.habSimples)||0)} — ajusta si Idealista difiere</span>
+                </div>
+              </div>
+            </div>
+            </>
           )}
           {!tieneHab && (esComercial || esGaraje) && (
             <div style={{ ...g2, marginTop: 8 }}>
@@ -1915,7 +1930,7 @@ function IdealistaJsonButton({ supabase }) {
   const TIPO_MAP = { Piso:"flat",Estudio:"flat",Atico:"flat","Atico Duplex":"flat",Duplex:"flat","Planta baja":"flat",Casa:"house",Chalet:"house",Adosado:"house",Villa:"house","Finca rustica":"rustic",Finca:"rustic","Local comercial":"premises_commercial",Local:"premises_commercial",Oficina:"office",Parking:"garage",Garaje:"garage",Terreno:"land",Trastero:"storage",Edificio:"building" };
   const CONSERV_MAP = { "Buen estado":"good",Reformado:"good","A reformar":"toRestore","Obra nueva":"new","En construccion":"new" };
   const HEAT_MAP = { "Gas central":"centralGas","Gasoleo central":"centralFuelOil","Gas individual":"individualGas","Electrica individual":"individualElectric","Bomba de calor":"individualAirConditioningHeatPump","Sin calefaccion":"noHeating" };
-  const IMAGE_TAG_MAP = { LIVING_ROOM:"living_room",BEDROOM:"room",BATHROOM:"bathroom",KITCHEN:"kitchen",TERRACE:"terrace",SWIMMING_POOL:"pool",GARDEN:"garden",CORRIDOR:"hallway",PLAN:"plan",VIEWS:"view",FACADE:"facade",GARAGE:"garage",STORAGE:"storage",BALCONY:"terrace",DINING:"living_room",HALL:"hallway",PATIO:"garden",PORCH:"terrace" };
+  const IMAGE_TAG_MAP = { LIVING_ROOM:"livingRoom",BEDROOM:"room",BATHROOM:"bathroom",KITCHEN:"kitchen",TERRACE:"terrace",SWIMMING_POOL:"pool",GARDEN:"garden",CORRIDOR:"hallway",PLAN:"plan",VIEWS:"view",FACADE:"facade",GARAGE:"garage",STORAGE:"storage",BALCONY:"terrace",DINING:"livingRoom",HALL:"hallway",PATIO:"garden",PORCH:"terrace" };
   const FLOOR_MAP = { "Bajo":"groundFloor","Planta baja":"groundFloor","PB":"groundFloor","0":"groundFloor","Entreplanta":"mezzanine","Entresuelo":"mezzanine" };
   const VALID_CERT = ["A","B","C","D","E","F","G","En tramite","Exento"];
 
@@ -1975,7 +1990,11 @@ function IdealistaJsonButton({ supabase }) {
     const mUtil=Number(row.m_util)||0; if(mUtil>0) feat.featuresAreaUsable=mUtil;
     const mParcela=Number(row.m_parcela)||0; if((isHouse||tipo==="land")&&mParcela>0) feat.featuresAreaPlot=mParcela;
     const banos=(Number(row.banos)||0)+(Number(row.aseos)||0); if(banos>0) feat.featuresBathroomNumber=banos;
-    const bedrooms=(Number(row.hab_dobles)||0)+(Number(row.hab_simples)||0); if(bedrooms>0) feat.featuresBedroomNumber=bedrooms;
+    const bedrooms = (Number(row.hab_dobles)||0) + (Number(row.hab_simples)||0);
+    const bedroomsTotal = Number(row.total_hab) || bedrooms;
+    const residencialBed = ["flat","house","rustic"].includes(tipo);
+    if(residencialBed) feat.featuresBedroomNumber = bedroomsTotal;
+    else if(bedroomsTotal > 0) feat.featuresBedroomNumber = bedroomsTotal;
     if(row.ano_construc){const y=parseInt(row.ano_construc);if(y>1800&&y<=new Date().getFullYear()) feat.featuresBuiltYear=y;}
     if(row.jardin===true) feat.featuresGarden=true;
     if(row.ascensor===true) feat.featuresLiftAvailable=true;
@@ -2421,7 +2440,7 @@ export default function CRMPropiedades({ currentUser }) {
                   precioVenta: 0, precioProp: 0, precioTraspaso: 0, precioAlquiler: 0, fianzaMeses: 1, duracionMinMeses: 11, mascotas: false, precioAnt: 0, precioTraspaso: 0,
                   honorarios: 5, honorariosTipo: "porcentaje", ivaHon: 21,
                   mConst: 0, mUtil: 0, mParcela: 0, mTerraza: 0, mBalcon: 0, mPorche: 0,
-                  habDobles: 0, habSimples: 0, banos: 0, aseos: 0,
+                  habDobles: 0, habSimples: 0, totalHab: 0, banos: 0, aseos: 0,
                   certEnerg: "", iee: "", conserv: "", anoConstruc: "",
                   suelos: "", carpExt: "", carpInt: "", persianasTipo: "", persianasMat: "",
                   clima: "", aguaCal: "", aireAcondTipo: "", calefaccion: "", ventanas: "", emisionesEnerg: "", parking: "No", nPlazas: 0,
