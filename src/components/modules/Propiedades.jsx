@@ -1844,7 +1844,7 @@ function IdealistaJsonButton({ supabase }) {
     if(row.venta_mobiliario===true) feat.featuresEquippedWithFurniture=true;
     if(row.aire_acond_tipo&&row.aire_acond_tipo!=="No disponible") feat.featuresConditionedAir=true;
     if(row.calefaccion&&HEAT_MAP[row.calefaccion]) feat.featuresHeatingType=HEAT_MAP[row.calefaccion];
-    if(row.vent_ext===true) feat.featuresWindowsLocation="exterior";
+    if(row.ventanas==="Exterior") feat.featuresWindowsLocation="exterior";
     if(isStudio) feat.featuresStudio=true;
     if(isPenthouse) feat.featuresPenthouse=true;
     if(isDuplex) feat.featuresDuplex=true;
