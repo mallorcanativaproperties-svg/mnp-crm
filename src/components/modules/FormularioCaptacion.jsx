@@ -374,6 +374,7 @@ export default function FormularioCaptacion() {
   const [mPorche, setMPorche] = useState("");
   const [habDob, setHabDob] = useState("0");
   const [habSim, setHabSim] = useState("0");
+  const [totalHab, setTotalHab] = useState("");
   const [banos, setBanos] = useState("0");
   const [aseos, setAseos] = useState("0");
   const [planta, setPlanta] = useState("");
