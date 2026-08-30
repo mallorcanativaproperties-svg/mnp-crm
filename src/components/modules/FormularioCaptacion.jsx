@@ -18,7 +18,7 @@ const CERT_ENERG = ["A","B","C","D","E","F","G","Exento"];
 const VIS_DIR = ["Direccion exacta", "Solo calle", "Ocultar direccion"];
 // Opciones alineadas con ficha de propiedad
 const AIRE_ACOND_OPTS = ["No disponible","Solo frio","Frio/Calor","Preinstalacion"];
-const CALEFACCION_OPTS = ["Gas central","Gasoleo central","Gas individual","Electrica individual","Bomba de calor","Sin calefaccion"];
+const CALEFACCION_OPTS = ["Individual","Centralizada","No disponible"];
 const AGUA_CALIENTE = ["Aerotermia","Biomasa","Bomba de calor","Calentador Butano","Central","Central con contador individual","Gas Ciudad","Gas Natural","Gas Propano","Gasoil","Geotermia","No Tiene","Pellets","Placas Solares","Termo Electrico"];
 const DRENAJE_OPTS = ["Alcantarillado", "Fosa septica"];
 const SUMINISTROS_OPTS = ["Luz", "Placas solares", "Agua comunitaria", "Agua individual", "Pozo"];
@@ -349,6 +349,8 @@ export default function FormularioCaptacion() {
   const [habDob, setHabDob] = useState("0");
   const [habSim, setHabSim] = useState("0");
   const [totalHab, setTotalHab] = useState("");
+  const [tipologiaChalet, setTipologiaChalet] = useState("");
+  const [plantasChalet, setPlantasChalet] = useState("");
   const [banos, setBanos] = useState("0");
   const [aseos, setAseos] = useState("0");
   const [planta, setPlanta] = useState("");
@@ -375,6 +377,7 @@ export default function FormularioCaptacion() {
   const [nPlazas, setNPlazas] = useState("");
   const [ventanas, setVentanas] = useState("");
   const [cualNeg, setCualNeg] = useState(["", "", "", "", "", ""]);
+  const [aireAcond, setAireAcond] = useState(false);
   const [aireAcondTipo, setAireAcondTipo] = useState("");
   const [calefaccion, setCalefaccion] = useState("");
   const [aguaCal, setAguaCal] = useState("");
@@ -429,7 +432,7 @@ export default function FormularioCaptacion() {
       mUtil, mConst, mParcela, mTerraza, mBalcon, mPorche,
       habDob, habSim, totalHab, banos, aseos, conserv, anoCon, certE, iee,
       ventaMob, terraza, balcon, jardin, piscina, ascensor, armarios, trastero,
-      parking, nPlazas, ventanas, aireAcondTipo, suelos, carpExt, carpInt,
+      parking, nPlazas, ventanas, aireAcond, aireAcondTipo, tipologiaChalet, plantasChalet, suelos, carpExt, carpInt,
       emisionesEnerg, calefaccion, aguaCal, suministros, drenaje,
       elecRef, fontRef, notasPriv, propNom, propTel, propEmail, cualPos, cualNeg]);
   const pv = op === "Alquiler" ? (Number(precioAlquiler)||0) : (Number(precioVenta) || 0);
@@ -535,7 +538,10 @@ export default function FormularioCaptacion() {
       n_plazas: Number(nPlazas) || 0,
       ventanas: ventanas || null,
       cual_neg: cualNeg.filter(Boolean),
+      aire_acond: aireAcond,
       aire_acond_tipo: aireAcondTipo || null,
+      tipologia_chalet: tipologiaChalet || null,
+      plantas_chalet: Number(plantasChalet) || null,
       suelos: suelos || null,
       carp_ext: carpExt || null,
       carp_int: carpInt || null,
@@ -719,6 +725,20 @@ export default function FormularioCaptacion() {
             <Input label="m2 porche" value={mPorche} onChange={setMPorche} type="number" />
             <div /><div />
           </div>}
+          {ft === "house" && (
+            <div style={g2}>
+              <div>
+                <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>Tipologia chalet <span style={{color:"#A23A3A"}}>*</span></label>
+                <select value={tipologiaChalet} onChange={e => setTipologiaChalet(e.target.value)} style={{ width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif" }}>
+                  <option value="">Seleccionar...</option>
+                  <option value="Adosado">Chalet adosado</option>
+                  <option value="Pareado">Chalet pareado</option>
+                  <option value="Independiente">Chalet independiente</option>
+                </select>
+              </div>
+              <Input label="Plantas del chalet *" value={plantasChalet} onChange={setPlantasChalet} type="number" placeholder="2" />
+            </div>
+          )}
           {tieneHab && <div style={g4}>
             <Input label="Hab. dobles" value={habDob} required onChange={v => { setHabDob(v); if(!totalHab) setTotalHab(String((Number(v)||0)+(Number(habSim)||0))); }} type="number" />
             <Input label="Hab. simples" value={habSim} onChange={v => { setHabSim(v); if(!totalHab) setTotalHab(String((Number(habDob)||0)+(Number(v)||0))); }} type="number" />
@@ -760,7 +780,13 @@ export default function FormularioCaptacion() {
             <Toggle label="Venta con mobiliario" value={ventaMob} onChange={setVentaMob} />
           </div>}
           {tieneAireCalef && <div style={g3}>
-            <Select label="Tipo aire acondicionado" value={aireAcondTipo} onChange={setAireAcondTipo} options={AIRE_ACOND_OPTS} />
+            <div>
+              <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 8 }}>Equipamiento</label>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, color: "#22262E" }}>
+                <input type="checkbox" checked={aireAcond} onChange={e => { setAireAcond(e.target.checked); setAireAcondTipo(e.target.checked ? "Frio/Calor" : ""); }} style={{ width: 16, height: 16, accentColor: "#AC8A54" }} />
+                Aire acondicionado
+              </label>
+            </div>
             <Select label="Calefaccion" value={calefaccion} onChange={setCalefaccion} options={CALEFACCION_OPTS} />
             {esResidencial && <Select label="Agua caliente" value={aguaCal} onChange={setAguaCal} options={AGUA_CALIENTE} />}
           </div>}

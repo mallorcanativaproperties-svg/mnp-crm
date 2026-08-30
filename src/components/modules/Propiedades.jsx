@@ -16,7 +16,7 @@ function mapDbToJs(row) {
     parking: row.parking || "", nPlazas: Number(row.n_plazas) || 0,
     suelos: row.suelos || "", carpExt: row.carp_ext || "", carpInt: row.carp_int || "",
     persianasTipo: row.persianas_tipo || "", persianasMat: row.persianas_mat || "",
-    clima: row.clima || "", aguaCal: row.agua_cal || "", aireAcondTipo: row.aire_acond_tipo || "", calefaccion: row.calefaccion || "", ventanas: row.ventanas || "", emisionesEnerg: row.emisiones_energ || "",
+    clima: row.clima || "", aguaCal: row.agua_cal || "", aireAcondTipo: row.aire_acond_tipo || "", tipologiaChalet: row.tipologia_chalet || "", plantasChalet: Number(row.plantas_chalet) || 0, calefaccion: row.calefaccion || "", ventanas: row.ventanas || "", emisionesEnerg: row.emisiones_energ || "",
     suministros: row.suministros || [], drenaje: row.drenaje || "",
     elecReformada: row.elec_reformada || false, fontReformada: row.font_reformada || false,
     ventaMobiliario: row.venta_mobiliario || false, iee: row.iee || "", refCatastral: row.ref_cat || "",
@@ -48,7 +48,7 @@ function mapJsToDb(p) {
     parking: p.parking, n_plazas: Number(p.nPlazas) || 0,
     suelos: p.suelos, carp_ext: p.carpExt, carp_int: p.carpInt,
     persianas_tipo: p.persianasTipo, persianas_mat: p.persianasMat,
-    clima: p.clima, agua_cal: p.aguaCal, aire_acond_tipo: p.aireAcondTipo, calefaccion: p.calefaccion, ventanas: p.ventanas, emisiones_energ: p.emisionesEnerg, suministros: p.suministros, drenaje: p.drenaje,
+    clima: p.clima, agua_cal: p.aguaCal, aire_acond_tipo: p.aireAcondTipo, tipologia_chalet: p.tipologiaChalet || null, plantas_chalet: Number(p.plantasChalet) || null, calefaccion: p.calefaccion, ventanas: p.ventanas, emisiones_energ: p.emisionesEnerg, suministros: p.suministros, drenaje: p.drenaje,
     elec_reformada: p.elecReformada, font_reformada: p.fontReformada, venta_mobiliario: p.ventaMobiliario,
     iee: p.iee, ref_cat: p.refCatastral || null, calidades: p.calidades,
     ibi: Number(p.ibi) || 0, basuras: Number(p.basuras) || 0, comunidad: Number(p.comunidad) || 0, extra_comunidad: Number(p.extraComunidad) || 0, otros_gastos: p.otrosGastos,
@@ -1698,6 +1698,12 @@ REGLAS:
               <div /><div />
             </div>
           )}
+          {ft === "house" && (
+            <div style={{ ...g2, marginTop: 8 }}>
+              {EFl({label: "Tipologia chalet *", field: "tipologiaChalet", pub: true, options: ["Adosado","Pareado","Independiente"], type: "select", req: true})}
+              {EFl({label: "Plantas del chalet *", field: "plantasChalet", pub: true, type: "number", req: true})}
+            </div>
+          )}
           {tieneHab && (
             <>
             <div style={{ ...g4, marginTop: 8 }}>
@@ -1751,8 +1757,14 @@ REGLAS:
             {EFl({label: "Venta con mobiliario", field: "ventaMobiliario", pub: true, type: "bool"})}
           </div>}
           {tieneAireCalef && <div style={{ ...g2, marginTop: 8 }}>
-            {EFl({label: "Tipo aire acondicionado", field: "aireAcondTipo", pub: true, options: ["No disponible","Solo frio","Frio/Calor","Preinstalacion"], type: "select"})}
-            {EFl({label: "Calefaccion", field: "calefaccion", pub: true, options: ["Gas central","Gasoleo central","Gas individual","Electrica individual","Bomba de calor","Sin calefaccion"], type: "select"})}
+            {/* Aire acondicionado como checkbox */}
+              <div style={{ marginBottom: 10 }}>
+                <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 12, color: "#22262E", fontFamily: "Inter, sans-serif" }}>
+                  <input type="checkbox" checked={!!d.aireAcond} onChange={e => { upd("aireAcond", e.target.checked); upd("aireAcondTipo", e.target.checked ? "Frio/Calor" : ""); autoSave({...draft, aireAcond: e.target.checked, aireAcondTipo: e.target.checked ? "Frio/Calor" : ""}); }} style={{ width: 16, height: 16, accentColor: "#AC8A54", cursor: "pointer" }} />
+                  Aire acondicionado <span style={{ color: "#A23A3A", fontSize: 10, fontWeight: 600 }}>*</span>
+                </label>
+              </div>
+            {EFl({label: "Calefaccion", field: "calefaccion", pub: true, options: ["Individual","Centralizada","No disponible"], type: "select"})}
           </div>}
           <div style={{ ...g2, marginTop: 8 }}>
             {EFl({label: "Parking", field: "parking", pub: true, options: ["Si","No","Comunitario","Opcional"], type: "select"})}
@@ -1997,7 +2009,7 @@ function IdealistaJsonButton({ supabase }) {
   const CUSTOMER_CODE = "ilc499e07c0814d8c79fcfe3b09eaad505d8b54e164";
   const TIPO_MAP = { Piso:"flat",Estudio:"flat",Atico:"flat","Atico Duplex":"flat",Duplex:"flat","Planta baja":"flat",Casa:"house",Chalet:"house",Adosado:"house",Villa:"house","Finca rustica":"rustic",Finca:"rustic","Local comercial":"premises_commercial",Local:"premises_commercial",Oficina:"office",Parking:"garage",Garaje:"garage",Terreno:"land",Trastero:"storage",Edificio:"building" };
   const CONSERV_MAP = { "Buen estado":"good",Reformado:"good","A reformar":"toRestore","Obra nueva":"new","En construccion":"new" };
-  const HEAT_MAP = { "Gas central":"centralGas","Gasoleo central":"centralFuelOil","Gas individual":"individualGas","Electrica individual":"individualElectric","Bomba de calor":"individualAirConditioningHeatPump","Sin calefaccion":"noHeating" };
+  const HEAT_MAP = { "Individual":"individualAirConditioningHeatPump","Centralizada":"centralGas","No disponible":"noHeating","Gas central":"centralGas","Gasoleo central":"centralFuelOil","Gas individual":"individualGas","Electrica individual":"individualElectric","Bomba de calor":"individualAirConditioningHeatPump","Sin calefaccion":"noHeating" };
   const IMAGE_TAG_MAP = { LIVING_ROOM:"livingRoom",BEDROOM:"room",BATHROOM:"bathroom",KITCHEN:"kitchen",TERRACE:"terrace",SWIMMING_POOL:"pool",GARDEN:"garden",CORRIDOR:"hallway",PLAN:"plan",VIEWS:"view",FACADE:"facade",GARAGE:"garage",STORAGE:"storage",BALCONY:"terrace",DINING:"livingRoom",HALL:"hallway",PATIO:"garden",PORCH:"terrace" };
   const FLOOR_MAP = { "Bajo":"groundFloor","Planta baja":"groundFloor","PB":"groundFloor","0":"groundFloor","Entreplanta":"mezzanine","Entresuelo":"mezzanine" };
   const VALID_CERT = ["A","B","C","D","E","F","G","En tramite","Exento"];
@@ -2015,6 +2027,8 @@ function IdealistaJsonButton({ supabase }) {
     if(tipo==="land"&&(!Number(row.m_parcela)||Number(row.m_parcela)<=0)) return false;
     // Baños: obligatorio para residencial y comercial
     const needsBaths=["flat","house","rustic","premises_commercial","office"].includes(tipo);
+    if(tipo==="house"&&!row.tipologia_chalet) return false;
+    if(tipo==="house"&&(!Number(row.plantas_chalet)||Number(row.plantas_chalet)<=0)) return false;
     if(needsBaths&&(Number(row.banos)||0)+(Number(row.aseos)||0)<=0) return false;
     // Cert energético: solo residencial
     const residencial=["flat","house","rustic"].includes(tipo);
@@ -2078,7 +2092,12 @@ function IdealistaJsonButton({ supabase }) {
     if(row.balcon===true) feat.featuresBalcony=true;
     if(row.parking==="Si") feat.featuresParkingAvailable=true;
     if(row.venta_mobiliario===true) feat.featuresEquippedWithFurniture=true;
-    if(row.aire_acond_tipo&&row.aire_acond_tipo!=="No disponible") feat.featuresConditionedAir=true;
+    if(row.aire_acond===true||row.aire_acond_tipo&&row.aire_acond_tipo!=="No disponible") feat.featuresConditionedAir=true;
+    if(tipo==="house"&&row.tipologia_chalet){
+      const HT_MAP={"Adosado":"semidetached","Pareado":"terraced","Independiente":"detached"};
+      if(HT_MAP[row.tipologia_chalet]) feat.featuresHouseType=HT_MAP[row.tipologia_chalet];
+    }
+    if(tipo==="house"&&Number(row.plantas_chalet)>0) feat.featuresFloorsProperty=Number(row.plantas_chalet);
     if(row.calefaccion&&HEAT_MAP[row.calefaccion]) feat.featuresHeatingType=HEAT_MAP[row.calefaccion];
     if(row.ventanas==="Exterior") feat.featuresWindowsLocation="exterior";
     if(isStudio) feat.featuresStudio=true;
@@ -2579,7 +2598,7 @@ export default function CRMPropiedades({ currentUser }) {
                   habDobles: 0, habSimples: 0, totalHab: 0, banos: 0, aseos: 0,
                   certEnerg: "", iee: "", conserv: "", anoConstruc: "",
                   suelos: "", carpExt: "", carpInt: "", persianasTipo: "", persianasMat: "",
-                  clima: "", aguaCal: "", aireAcondTipo: "", calefaccion: "", ventanas: "", emisionesEnerg: "", parking: "No", nPlazas: 0,
+                  clima: "", aguaCal: "", aireAcondTipo: "", calefaccion: "", ventanas: "", emisionesEnerg: "", tipologiaChalet: "", plantasChalet: 0, parking: "No", nPlazas: 0,
                   ventaMobiliario: false, terraza: false, piscina: false, ascensor: false,
                   jardin: false, aireAcond: false, armarios: false, trastero: false, balcon: false,
                   ibi: 0, basuras: 0, comunidad: 0, extraComunidad: 0, otrosGastos: "",
