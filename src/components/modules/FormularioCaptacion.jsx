@@ -449,9 +449,9 @@ export default function FormularioCaptacion() {
   
 
 
-  const g2 = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 20px" };
-  const g3 = { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0 20px" };
-  const g4 = { display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "0 20px" };
+  const g2 = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "0 20px" };
+  const g3 = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "0 20px" };
+  const g4 = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "0 20px" };
 
   const handleSubmit = async () => {
     // Validar campos obligatorios Idealista
@@ -580,7 +580,7 @@ export default function FormularioCaptacion() {
   }
 
   return (
-    <div style={{ fontFamily: "Inter, sans-serif", background: "#F8F6F1", minHeight: "100vh", color: "#22262E", padding: "40px 24px" }}>
+    <div style={{ fontFamily: "Inter, sans-serif", background: "#F8F6F1", minHeight: "100vh", color: "#22262E", padding: "clamp(16px, 4vw, 40px) clamp(12px, 3vw, 24px)" }}>
       <div style={{ maxWidth: 720, margin: "0 auto" }}>
 
         {/* Header */}

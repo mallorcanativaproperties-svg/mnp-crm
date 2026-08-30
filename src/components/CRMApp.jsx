@@ -94,7 +94,21 @@ function LoadingModule() {
 export default function CRMApp() {
   const [currentUser, setCurrentUser] = useState(null);
   const [activeModule, setActiveModule] = useState("propiedades");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(typeof window !== "undefined" ? window.innerWidth > 768 : true);
+  const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth <= 768 : false);
+
+  // Detectar cambio de tamaño
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      if (mobile) setSidebarOpen(false);
+      else if (window.innerWidth > 1024) setSidebarOpen(true);
+    };
+    window.addEventListener("resize", handleResize);
+    handleResize();
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
   const [healthAlerts, setHealthAlerts] = useState([]);
 
   // Health check cada 30 minutos
@@ -143,9 +157,13 @@ export default function CRMApp() {
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "#F8F6F1", color: "#22262E" }}>
+      {/* Overlay móvil */}
+      {isMobile && sidebarOpen && (
+        <div onClick={() => setSidebarOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 99 }} />
+      )}
       {/* Sidebar */}
       <div style={{
-        width: sidebarOpen ? 220 : 56,
+        width: sidebarOpen ? 220 : (isMobile ? 0 : 56),
         background: "#16294A",
         borderRight: "1px solid #2A2926",
         display: "flex",
@@ -157,6 +175,7 @@ export default function CRMApp() {
         left: 0,
         height: "100vh",
         zIndex: 100,
+        overflow: "hidden",
       }}>
         {/* Logo */}
         <div style={{ padding: sidebarOpen ? "20px 16px" : "20px 10px", borderBottom: "1px solid #2A2926" }}>
@@ -182,7 +201,7 @@ export default function CRMApp() {
             return (
               <button
                 key={mod.key}
-                onClick={() => setActiveModule(mod.key)}
+                onClick={() => { setActiveModule(mod.key); if (isMobile) setSidebarOpen(false); }}
                 style={{
                   display: "flex", alignItems: "center", gap: 10,
                   width: "100%", padding: sidebarOpen ? "10px 16px" : "10px",
@@ -219,7 +238,15 @@ export default function CRMApp() {
       </div>
 
       {/* Main content */}
-      <div style={{ marginLeft: sidebarOpen ? 220 : 56, flex: 1, transition: "margin-left 0.2s", minHeight: "100vh" }}>
+      <div style={{ marginLeft: isMobile ? 0 : (sidebarOpen ? 220 : 56), flex: 1, transition: "margin-left 0.2s", minHeight: "100vh" }}>
+        {/* Topbar móvil */}
+        {isMobile && (
+          <div style={{ background: "#16294A", padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, position: "sticky", top: 0, zIndex: 98 }}>
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{ background: "none", border: "none", color: "#AC8A54", fontSize: 20, cursor: "pointer", padding: 0, lineHeight: 1 }}>☰</button>
+            <div style={{ fontSize: 9, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", fontWeight: 500 }}>Mallorca Nativa</div>
+            <div style={{ fontSize: 14, fontFamily: "'Playfair Display', serif", color: "#FFFFFF" }}><em>CRM</em></div>
+          </div>
+        )}
         {/* Health alerts banner */}
         {healthAlerts.length > 0 && (
           <div style={{ background: "#D4545418", borderBottom: "1px solid #D4545433", padding: "10px 24px", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>

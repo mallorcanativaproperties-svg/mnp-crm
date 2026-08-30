@@ -22,3 +22,53 @@ input, select, textarea, button {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* ═══ RESPONSIVE GLOBAL ══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; }
+
+/* Grids adaptativos */
+@media (max-width: 768px) {
+  /* Grids de 3 y 4 columnas → 1 columna en móvil */
+  [style*="gridTemplateColumns: \"1fr 1fr 1fr\""],
+  [style*="gridTemplateColumns: \"1fr 1fr 1fr 1fr\""] {
+    grid-template-columns: 1fr !important;
+  }
+  [style*="gridTemplateColumns: \"1fr 1fr\""] {
+    grid-template-columns: 1fr !important;
+  }
+  /* Padding reducido */
+  [style*="padding: \"40px 24px\""] {
+    padding: 16px !important;
+  }
+  [style*="padding: \"32px 36px\""] {
+    padding: 16px !important;
+  }
+  /* maxWidth completo */
+  [style*="maxWidth: 720"],
+  [style*="maxWidth: 760"],
+  [style*="maxWidth: 920"] {
+    max-width: 100% !important;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* Tablet: grids de 4 → 2 */
+  [style*="gridTemplateColumns: \"1fr 1fr 1fr 1fr\""] {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+/* Inputs y selects full width en móvil */
+@media (max-width: 768px) {
+  input, select, textarea {
+    width: 100% !important;
+    font-size: 16px !important; /* evita zoom en iOS */
+  }
+  button {
+    touch-action: manipulation;
+  }
+  /* Tablas de fichas */
+  .prop-card-grid {
+    flex-direction: column !important;
+  }
+}

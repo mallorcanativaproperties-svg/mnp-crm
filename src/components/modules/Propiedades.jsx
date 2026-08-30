@@ -992,9 +992,9 @@ function PropDetail({ p, currentUser, onClose, onUpdate, onDelete, onDuplicate }
     cualPosText: (p.cualPos || []).join("\n"),
     cualNegText: (p.cualNeg || []).join("\n"),
   });
-  const g2 = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 24px" };
-  const g3 = { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px 24px" };
-  const g4 = { display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "10px 24px" };
+  const g2 = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "10px 24px" };
+  const g3 = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "10px 24px" };
+  const g4 = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "10px 24px" };
   const sep = { borderBottom: "1px solid #2A2926", margin: "18px 0" };
   const intBox = { background: "#FFFFFF", border: "1px solid #D4545422", borderRadius: 0, padding: "16px 20px" };
 
@@ -1305,7 +1305,7 @@ REGLAS:
   }
 
   return (
-    <div style={{ fontFamily: "Inter, sans-serif", background: "#F8F6F1", minHeight: "100vh", color: "#22262E", padding: "40px 24px" }}>
+    <div style={{ fontFamily: "Inter, sans-serif", background: "#F8F6F1", minHeight: "100vh", color: "#22262E", padding: "clamp(16px, 4vw, 40px) clamp(12px, 3vw, 24px)" }}>
       <div style={{ maxWidth: 760, margin: "0 auto" }}>
 
         
@@ -2548,7 +2548,7 @@ export default function CRMPropiedades({ currentUser }) {
   }
 
   return (
-    <div style={{ fontFamily: "Inter, sans-serif", background: "#F8F6F1", minHeight: "100vh", color: "#22262E", padding: "40px 24px" }}>
+    <div style={{ fontFamily: "Inter, sans-serif", background: "#F8F6F1", minHeight: "100vh", color: "#22262E", padding: "clamp(16px, 4vw, 40px) clamp(12px, 3vw, 24px)" }}>
       <div style={{ maxWidth: 920, margin: "0 auto" }}>
 
         {/* Header */}
