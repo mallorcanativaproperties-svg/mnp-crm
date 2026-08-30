@@ -1476,7 +1476,7 @@ REGLAS:
           <div style={g3}>
             {EFl({label: "Precio de venta", req: true, field: "precioVenta", pub: true, gold: true, type: "number"})}
             {EFl({label: "Precio propietario", field: "precioProp", pub: false, type: "number"})}
-            {EFl({label: "Precio anterior (bajada)", field: "precioAnt", pub: true, type: "number"})}
+
           </div>
           <div style={{ ...g3, marginTop: 8 }}>
             {EFl({label: "Precio traspaso", field: "precioTraspaso", pub: true, type: "number"})}
@@ -1544,8 +1544,6 @@ REGLAS:
             {EFl({label: "Aseos", field: "aseos", pub: true, type: "number"})}
           </div>
           <div style={{ ...g3, marginTop: 8 }}>
-            {EFl({label: "Planta", field: "planta", pub: true})}
-            {EFl({label: "Puerta", field: "puerta", pub: true})}
             {EFl({label: "Ano construccion", field: "anoConstruc", pub: true})}
             {EFl({label: "Conservacion", field: "conserv", pub: true, options: ["Buen estado","Reformado","A reformar","Obra nueva","En construccion"], type: editMode ? "select" : "text"})}
           </div>

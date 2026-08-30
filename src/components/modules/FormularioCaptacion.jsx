@@ -10,7 +10,7 @@ const TIPO_GROUPS = [
   { label: "Local/Oficina", items: ["Local comercial","Local","Oficina"] },
   { label: "Otros", items: ["Parking","Garaje","Terreno","Trastero","Edificio"] },
 ];
-const OPERACIONES = ["Compraventa", "Traspaso"];
+const OPERACIONES = ["Compraventa", "Alquiler", "Traspaso"];
 // Valores alineados con mapeo Idealista en Propiedades.jsx
 const CONSERVACION = ["Buen estado","Reformado","A reformar","Obra nueva","En construccion"];
 const ORIENTACIONES = ["Norte","Sur","Este","Oeste","Noreste","Noroeste","Sureste","Suroeste"];
@@ -564,6 +564,8 @@ export default function FormularioCaptacion() {
           <div style={g2}>
             <Input label="Direccion (calle/via)" value={dir} onChange={setDir} required placeholder="C/ Ejemplo" />
             <Input label="Numero" value={num} onChange={setNum} placeholder="12" />
+            <Input label="Planta" value={planta} onChange={setPlanta} placeholder="2, Bajo, Entreplanta..." />
+            <Input label="Puerta" value={puerta} onChange={setPuerta} placeholder="A, 1..." />
           </div>
           <div style={g3}>
             <Input label="Codigo postal" value={cp} onChange={setCp} placeholder="07007" required />
@@ -610,13 +612,9 @@ export default function FormularioCaptacion() {
             <Input label="Aseos" value={aseos} onChange={setAseos} type="number" />
           </div>
           <div style={g3}>
-            <Input label="Planta" value={planta} onChange={setPlanta} placeholder="2a, Bajo..." />
             <Input label="Ano construccion" value={anoCon} onChange={setAnoCon} placeholder="2005" />
             <Select label="Conservacion" value={conserv} onChange={setConserv} options={CONSERVACION} />
-            <Select label="Suelos" value={suelos} onChange={setSuelos} options={["Gres","Gres porcelanico","Marmol","Terrazo","Tarima flotante","Parquet","Laminado","Madera maciza","Vinilo","Microcemento","Ceramica","Piedra natural","Hormigon pulido"]} />
-            <Select label="Carp. exterior" value={carpExt} onChange={setCarpExt} options={["Aluminio","Aluminio con RPT","PVC","Madera","Climalit","Doble cristal","Triple cristal","Hierro/Forja"]} />
-            <Select label="Carp. interior" value={carpInt} onChange={setCarpInt} options={["Lacado blanco","Roble","Cerezo","Haya","Pino","Wengue","Nogal","DM lacado","Cristal","Corredera","Block"]} />
-            <Select label="Emisiones energeticas" value={emisionesEnerg} onChange={setEmisionesEnerg} options={["A","B","C","D","E","F","G"]} />
+
           </div>
         </Sec>
 
@@ -624,7 +622,15 @@ export default function FormularioCaptacion() {
         <Sec title="Caracteristicas principales">
           <div style={g3}>
             <Select label="Cert. energetico" value={certE} onChange={setCertE} required options={CERT_ENERG} />
+            <Select label="Emisiones energeticas" value={emisionesEnerg} onChange={setEmisionesEnerg} options={["A","B","C","D","E","F","G"]} />
             <Select label="IEE" value={iee} onChange={setIee} options={IEE_OPTS} />
+          </div>
+          <div style={g3}>
+            <Select label="Suelos" value={suelos} onChange={setSuelos} options={["Gres","Gres porcelanico","Marmol","Terrazo","Tarima flotante","Parquet","Laminado","Madera maciza","Vinilo","Microcemento","Ceramica","Piedra natural","Hormigon pulido"]} />
+            <Select label="Carp. exterior" value={carpExt} onChange={setCarpExt} options={["Aluminio","Aluminio con RPT","PVC","Madera","Climalit","Doble cristal","Triple cristal","Hierro/Forja"]} />
+            <Select label="Carp. interior" value={carpInt} onChange={setCarpInt} options={["Lacado blanco","Roble","Cerezo","Haya","Pino","Wengue","Nogal","DM lacado","Cristal","Corredera","Block"]} />
+          </div>
+          <div style={g3}>
             <Toggle label="Venta con mobiliario" value={ventaMob} onChange={setVentaMob} />
           </div>
           <div style={g3}>
@@ -674,10 +680,7 @@ export default function FormularioCaptacion() {
             <Select label="Tipo honorarios" value={honorariosTipo} onChange={setHonorariosTipo} options={["porcentaje", "fijo"]} />
             <Input label={honorariosTipo === "porcentaje" ? "Honorarios (%)" : "Honorarios (EUR)"} value={honorarios} onChange={setHonorarios} type="number" placeholder={honorariosTipo === "porcentaje" ? "5" : "15000"} />
             <Input label="IVA honorarios (%)" value={ivaHon} onChange={setIvaHon} type="number" placeholder="21" />
-            <div style={{ marginBottom: 14 }}>
-              <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>IVA</label>
-              <div style={{ padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#9A968A", fontSize: 13 }}>21%</div>
-            </div>
+
           </div>
           {pv > 0 && Number(honorarios) > 0 && (
             <div style={{ padding: "12px 16px", background: "#C8A97E08", borderRadius: 0, border: "1px solid #C8A97E15", marginBottom: 14 }}>
