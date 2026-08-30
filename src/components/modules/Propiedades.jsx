@@ -971,13 +971,17 @@ function PropCard({ p, onClick }) {
   );
 }
 
-function PropDetail({ p, onClose, onUpdate, onDelete }) {
+function PropDetail({ p, currentUser, onClose, onUpdate, onDelete }) {
+  // Permisos: editable solo por director o el agente que captó la propiedad
+  const isDirector = currentUser?.role === "director";
+  const esAgentePropietario = currentUser?.nombre === p.agente || currentUser?.agente_codigo === p.agente;
+  const puedeEditar = isDirector || esAgentePropietario;
   const est = ESTADOS.find((e) => e.key === p.estado) || ESTADOS[0];
   const hon = calcHon(p);
   const [aiDesc, setAiDesc] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
-  const [editMode, setEditMode] = useState(true);
+  const [editMode, setEditMode] = useState(puedeEditar);
   const [autoSaveStatus, setAutoSaveStatus] = useState(null);
   const [calcDesde, setCalcDesde] = useState("venta"); // null | "saving" | "saved" | "error"
   const [draft, setDraft] = useState({ ...p, 
@@ -1278,7 +1282,7 @@ REGLAS:
           onClose();
         }} style={{ position: "absolute", top: 16, right: 20, background: "none", border: "none", color: "#9A968A", fontSize: 20, cursor: "pointer" }}>✕</button>
         
-        {<button onClick={() => { 
+        {puedeEditar && <button onClick={() => { 
           const toSave = { ...draft,
             suministros: (draft.suministrosText || "").split(",").map(s => s.trim()).filter(Boolean),
             cualPos: (draft.cualPosText || "").split("\n").filter(Boolean),
@@ -1305,9 +1309,14 @@ REGLAS:
           Guardar
         </button>}
         
-        <button onClick={() => { if (onDelete) onDelete(p); }} style={{ position: "absolute", top: 16, right: 56, background: "none", border: "1px solid #D4545433", borderRadius: 0, color: "#A23A3A", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "Inter, sans-serif" }}>Eliminar</button>
+        {isDirector && <button onClick={() => { if (onDelete) onDelete(p); }} style={{ position: "absolute", top: 16, right: 56, background: "none", border: "1px solid #D4545433", borderRadius: 0, color: "#A23A3A", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "Inter, sans-serif" }}>Eliminar</button>}
         
-        <div style={{ position: "absolute", top: 20, left: 36, fontSize: 11, color: "#9A968A" }}><span style={{ color: "#AC8A54", fontSize: 18, fontWeight: 400 }}>*</span> Obligatorio Idealista</div>
+        <div style={{ position: "absolute", top: 20, left: 36, fontSize: 11, color: "#9A968A" }}>
+          {puedeEditar
+            ? <><span style={{ color: "#A23A3A", fontSize: 14, fontWeight: 700 }}>*</span> Sincronizado con Idealista</>
+            : <span style={{ color: "#A23A3A", fontWeight: 600 }}>🔒 Solo lectura</span>
+          }
+        </div>
         {/* Indicador autoguardado */}
         {editMode && autoSaveStatus && (
           <div style={{ position: "absolute", top: 22, left: 220, fontSize: 10, color: autoSaveStatus === "saved" ? "#2C6E52" : autoSaveStatus === "error" ? "#A23A3A" : "#9A968A", display: "flex", alignItems: "center", gap: 4 }}>
@@ -2191,7 +2200,7 @@ function IdealistaImportButton() {
   );
 }
 
-export default function CRMPropiedades() {
+export default function CRMPropiedades({ currentUser }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
@@ -2430,7 +2439,7 @@ export default function CRMPropiedades() {
           {list.length === 0 && <div style={{ textAlign: "center", padding: 60, color: "#9A968A", fontSize: 13, fontStyle: "italic" }}>Sin resultados</div>}
         </div>
 
-        {sel && <PropDetail p={sel} onClose={() => setSel(null)} onUpdate={(updated) => { saveProperty(updated); }} onDelete={(prop) => { if (confirm("¿Eliminar esta propiedad y todos sus archivos? Esta accion no se puede deshacer.")) deleteProperty(prop); }} />}
+        {sel && <PropDetail p={sel} currentUser={currentUser} onClose={() => setSel(null)} onUpdate={(updated) => { saveProperty(updated); }} onDelete={(prop) => { if (confirm("¿Eliminar esta propiedad y todos sus archivos? Esta accion no se puede deshacer.")) deleteProperty(prop); }} />}
       </div>
     </div>
   );

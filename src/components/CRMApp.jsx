@@ -130,7 +130,7 @@ export default function CRMApp() {
       case "dashboard": return <Dashboard />;
       case "usuarios": return <Usuarios currentUser={currentUser} />;
       case "simulador": return <SimuladorClaudia />;
-      case "propiedades": return <Propiedades />;
+      case "propiedades": return <Propiedades currentUser={currentUser} />;
       case "captacion": return <FormularioCaptacion />;
       case "compradores": return <Compradores />;
       case "cruce": return <MotorCruce />;
