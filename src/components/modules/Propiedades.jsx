@@ -1057,6 +1057,7 @@ function PropDetail({ p, currentUser, onClose, onUpdate, onDelete, onDuplicate }
       const CERT_VALIDOS = ["A","B","C","D","E","F","G","Exento"];
       if (!src.certEnerg || !CERT_VALIDOS.includes(src.certEnerg)) errs.add("certEnerg");
     }
+    if (!src.refCatastral) errs.add("refCatastral");
     if (src.anoConstruc) {
       const y = parseInt(src.anoConstruc);
       if (isNaN(y) || y < 1800 || y > new Date().getFullYear()) errs.add("anoConstruc");
@@ -1318,7 +1319,7 @@ REGLAS:
           };
           // Validar campos obligatorios — comportamiento según estado
           if (idealistaFieldErrors.size > 0) {
-            const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético"};
+            const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético","refCatastral":"Referencia catastral"};
             const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join("\n• ");
             const esPublicada = (draft.estado || p.estado) === "publicada";
             if (esPublicada) {
@@ -1352,7 +1353,7 @@ REGLAS:
           <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
             <button onClick={() => {
               if (idealistaFieldErrors.size > 0) {
-                const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético"};
+                const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético","refCatastral":"Referencia catastral"};
                 const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join("\n• ");
                 if (!confirm("⚠️ Campos con * sin completar:\n\n• " + faltantes + "\n\n¿Volver sin guardar igualmente?")) return;
               }
@@ -1374,7 +1375,7 @@ REGLAS:
                 destinos: draft.destinos || [],
               };
               if (idealistaFieldErrors.size > 0) {
-                const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético"};
+                const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético","refCatastral":"Referencia catastral"};
                 const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join("\n• ");
                 const esPublicada = (draft.estado || p.estado) === "publicada";
                 if (esPublicada) {
@@ -1524,6 +1525,7 @@ REGLAS:
         <Sec title="Localizacion">
           {/* Importar del Catastro */}
           <CatastroImport draft={draft} upd={upd} editMode={editMode} />
+          {EFl({label: "Referencia catastral", field: "refCatastral", pub: true, req: true})}
           <div style={g2}>
             {EFl({label: "Direccion", req: true, field: "dir", pub: true})}
             {EFl({label: "Numero", field: "num", pub: true})}
@@ -1976,7 +1978,7 @@ REGLAS:
                 destinos: draft.destinos || [],
               };
               if (idealistaFieldErrors.size > 0) {
-                const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético"};
+                const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético","refCatastral":"Referencia catastral"};
                 const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join("\n• ");
                 const esPublicada = (draft.estado || p.estado) === "publicada";
                 if (esPublicada) { alert("🚫 Propiedad PUBLICADA. Completa los campos * antes de guardar."); return; }
@@ -2027,6 +2029,7 @@ function IdealistaJsonButton({ supabase }) {
     // Cert energético: solo residencial
     const residencial=["flat","house","rustic"].includes(tipo);
     if(residencial&&(!row.cert_energ||!VALID_CERT.includes(row.cert_energ))) return false;
+    if(!row.ref_cat) return false;
     if(!Array.isArray(row.destinos)||!row.destinos.includes("Idealista")) return false;
     return true;
   }
