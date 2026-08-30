@@ -285,42 +285,6 @@ export default function FormularioCaptacion() {
       .then(({ data }) => { if (data) setAgentesDB(data); });
   }, []);
 
-  // Autoguardado reactivo — se dispara cuando cambia cualquier campo
-  const autoSaveRef = useRef(null);
-  useEffect(() => {
-    if (!ref || !tipo || !op) return;
-    if (autoSaveRef.current) clearTimeout(autoSaveRef.current);
-    autoSaveRef.current = setTimeout(async () => {
-      setAutoSaveStatus("saving");
-      try {
-        const data = buildDbData();
-        if (fichaId) {
-          const { error } = await supabase.from("propiedades").update(data).eq("id", fichaId);
-          if (error) throw error;
-        } else {
-          const { data: inserted, error } = await supabase.from("propiedades").insert(data).select().single();
-          if (error) throw error;
-          setFichaId(inserted.id);
-        }
-        setAutoSaveStatus("saved");
-        setTimeout(() => setAutoSaveStatus(null), 2000);
-      } catch (e) {
-        setAutoSaveStatus("error");
-        setTimeout(() => setAutoSaveStatus(null), 3000);
-      }
-    }, 1500);
-    return () => { if (autoSaveRef.current) clearTimeout(autoSaveRef.current); };
-  }, [ref, tipo, op, agente, dir, num, cp, municipio, zona, orient, distPlaya, visDir,
-      planta, puerta, precioVenta, precioProp, precioTraspaso, precioAlquiler,
-      fianzaMeses, duracionMinMeses, mascotas, honorarios, honNetoManual,
-      honorariosTipo, ivaHon, ibi, basuras, comunidad, extraCom, otrosGastos,
-      mUtil, mConst, mParcela, mTerraza, mBalcon, mPorche,
-      habDob, habSim, totalHab, banos, aseos, conserv, anoCon, certE, iee,
-      ventaMob, terraza, balcon, jardin, piscina, ascensor, armarios, trastero,
-      parking, nPlazas, ventanas, aireAcondTipo, suelos, carpExt, carpInt,
-      emisionesEnerg, calefaccion, aguaCal, suministros, drenaje,
-      elecRef, fontRef, notasPriv, propNom, propTel, propEmail, cualPos, cualNeg]);
-
   // Generar referencia automática — 4 dígitos fijos, máximo real por agente
   async function generarRef(agenteName) {
     const found = agentesDB.find(a => a.nombre === agenteName);
@@ -432,6 +396,44 @@ export default function FormularioCaptacion() {
 
   // Cualificacion
   const [cualPos, setCualPos] = useState(["", "", "", "", "", ""]);
+
+  // autoSaveRef — debe ir después de todos los useState
+  const autoSaveRef = useRef(null);
+  // Autoguardado reactivo — se dispara cuando cambia cualquier campo
+  const autoSaveRef = useRef(null);
+  useEffect(() => {
+    if (!ref || !tipo || !op) return;
+    if (autoSaveRef.current) clearTimeout(autoSaveRef.current);
+    autoSaveRef.current = setTimeout(async () => {
+      setAutoSaveStatus("saving");
+      try {
+        const data = buildDbData();
+        if (fichaId) {
+          const { error } = await supabase.from("propiedades").update(data).eq("id", fichaId);
+          if (error) throw error;
+        } else {
+          const { data: inserted, error } = await supabase.from("propiedades").insert(data).select().single();
+          if (error) throw error;
+          setFichaId(inserted.id);
+        }
+        setAutoSaveStatus("saved");
+        setTimeout(() => setAutoSaveStatus(null), 2000);
+      } catch (e) {
+        setAutoSaveStatus("error");
+        setTimeout(() => setAutoSaveStatus(null), 3000);
+      }
+    }, 1500);
+    return () => { if (autoSaveRef.current) clearTimeout(autoSaveRef.current); };
+  }, [ref, tipo, op, agente, dir, num, cp, municipio, zona, orient, distPlaya, visDir,
+      planta, puerta, precioVenta, precioProp, precioTraspaso, precioAlquiler,
+      fianzaMeses, duracionMinMeses, mascotas, honorarios, honNetoManual,
+      honorariosTipo, ivaHon, ibi, basuras, comunidad, extraCom, otrosGastos,
+      mUtil, mConst, mParcela, mTerraza, mBalcon, mPorche,
+      habDob, habSim, totalHab, banos, aseos, conserv, anoCon, certE, iee,
+      ventaMob, terraza, balcon, jardin, piscina, ascensor, armarios, trastero,
+      parking, nPlazas, ventanas, aireAcondTipo, suelos, carpExt, carpInt,
+      emisionesEnerg, calefaccion, aguaCal, suministros, drenaje,
+      elecRef, fontRef, notasPriv, propNom, propTel, propEmail, cualPos, cualNeg]);
   const pv = op === "Alquiler" ? (Number(precioAlquiler)||0) : (Number(precioVenta) || 0);
   const pp = Number(precioProp) || 0;
 
