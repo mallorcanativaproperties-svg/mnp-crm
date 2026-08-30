@@ -27,7 +27,7 @@ function mapDbToJs(row) {
     agente: row.agente || "", estado: row.estado || "captada",
     destinos: row.destinos || [], fotos: Number(row.fotos) || 0, videos: Number(row.videos) || 0, tour360: row.tour360 || "", planos: Number(row.planos) || 0,
     fechaCap: row.fecha_cap || "", visitas: Number(row.visitas) || 0,
-    cualPos: row.cual_pos || [], cualNeg: row.cual_neg || [], cualMejoras: row.cual_mejoras || [],
+    cualPos: row.cual_pos || [], cualNeg: row.cual_neg || [],
     puerta: row.puerta || "", latitud: row.latitud != null ? row.latitud : null, longitud: row.longitud != null ? row.longitud : null, idealistaId: row.idealista_id || "",
     descEn: row.desc_en || "", descDe: row.desc_de || "",
     terraza: row.terraza || false, piscina: row.piscina || false, ascensor: row.ascensor || false,
@@ -57,7 +57,7 @@ function mapJsToDb(p) {
     agente: p.agente, estado: p.estado, destinos: p.estado === "publicada" ? (p.destinos || []) : [],
     fotos: p.fotos, videos: p.videos, tour360: p.tour360, planos: p.planos,
     fecha_cap: p.fechaCap, visitas: p.visitas,
-    cual_pos: p.cualPos, cual_neg: p.cualNeg, cual_mejoras: p.cualMejoras,
+    cual_pos: p.cualPos, cual_neg: p.cualNeg,
     puerta: p.puerta, latitud: p.latitud, longitud: p.longitud, idealista_id: p.idealistaId,
     desc_en: p.descEn, desc_de: p.descDe,
     terraza: p.terraza, piscina: p.piscina, ascensor: p.ascensor,
@@ -154,7 +154,6 @@ const SAMPLE = [
     fechaCap: "10/03/2026", visitas: 8,
     cualPos: ["Terraza grande orientacion sur", "Reforma reciente de calidad", "Piscina comunitaria"],
     cualNeg: ["Ruido de calle por las mananas", "Parking estrecho"],
-    cualMejoras: ["Pintar balcon", "Cambiar grifo cocina"],
   },
   {
     id: 2, ref: "MNP-002", tipo: "Atico", op: "Compraventa",
@@ -187,7 +186,6 @@ const SAMPLE = [
     fechaCap: "22/02/2026", visitas: 15,
     cualPos: ["Vistas 360", "Terraza enorme", "Calidades premium"],
     cualNeg: ["Sin trastero"],
-    cualMejoras: ["Toldo en terraza"],
   },
   {
     id: 3, ref: "MNP-003", tipo: "Casa", op: "Compraventa",
@@ -219,7 +217,6 @@ const SAMPLE = [
     fechaCap: "01/05/2026", visitas: 0,
     cualPos: ["Piscina privada", "Jardin grande", "Zona tranquila"],
     cualNeg: ["Cocina anticuada", "Certificado energetico bajo"],
-    cualMejoras: ["Reformar cocina", "Instalar aerotermia"],
   },
 ];
 
@@ -990,7 +987,6 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
     suministrosText: (p.suministros || []).join(", "),
     cualPosText: (p.cualPos || []).join("\n"),
     cualNegText: (p.cualNeg || []).join("\n"),
-    cualMejorasText: (p.cualMejoras || []).join("\n"),
   });
   const g2 = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 24px" };
   const g3 = { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px 24px" };
@@ -1003,7 +999,6 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
     suministrosText: (p.suministros || []).join(", "),
     cualPosText: (p.cualPos || []).join("\n"),
     cualNegText: (p.cualNeg || []).join("\n"),
-    cualMejorasText: (p.cualMejoras || []).join("\n"),
   };
   const d = editMode ? draft : pWithTexts;
   const upd = (key, val) => setDraft(prev => ({ ...prev, [key]: val }));
@@ -1017,7 +1012,6 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
         suministros: (currentDraft.suministrosText || "").split(",").map(s => s.trim()).filter(Boolean),
         cualPos: (currentDraft.cualPosText || "").split("\n").filter(Boolean),
         cualNeg: (currentDraft.cualNegText || "").split("\n").filter(Boolean),
-        cualMejoras: (currentDraft.cualMejorasText || "").split("\n").filter(Boolean),
         destinos: currentDraft.estado === "publicada" ? (currentDraft.destinos || []) : [],
       };
       if (onUpdate) await onUpdate(toSave);
@@ -1283,14 +1277,12 @@ REGLAS:
           suministrosText: (p.suministros || []).join(", "),
           cualPosText: (p.cualPos || []).join("\n"),
           cualNegText: (p.cualNeg || []).join("\n"),
-          cualMejorasText: (p.cualMejoras || []).join("\n"),
         }); setEditMode(true); }} style={{ position: "absolute", top: 16, right: 120, background: "#AC8A54", border: "none", borderRadius: 0, color: "#F8F6F1", fontSize: 10, cursor: "pointer", padding: "5px 14px", fontWeight: 600, fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>Editar</button>}
         {editMode && <button onClick={() => { 
           const toSave = { ...draft,
             suministros: (draft.suministrosText || "").split(",").map(s => s.trim()).filter(Boolean),
             cualPos: (draft.cualPosText || "").split("\n").filter(Boolean),
             cualNeg: (draft.cualNegText || "").split("\n").filter(Boolean),
-            cualMejoras: (draft.cualMejorasText || "").split("\n").filter(Boolean),
             destinos: draft.destinos || [],
           };
           // Validar campos obligatorios antes de guardar
@@ -1309,7 +1301,6 @@ REGLAS:
           suministrosText: (p.suministros || []).join(", "),
           cualPosText: (p.cualPos || []).join("\n"),
           cualNegText: (p.cualNeg || []).join("\n"),
-          cualMejorasText: (p.cualMejoras || []).join("\n"),
         }); setEditMode(false); }} style={{ position: "absolute", top: 16, right: 190, background: "none", border: "1px solid #7A7870", borderRadius: 0, color: "#9A968A", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "Inter, sans-serif" }}>Cancelar</button>}
         <button onClick={() => { if (onDelete) onDelete(p); }} style={{ position: "absolute", top: 16, right: 56, background: "none", border: "1px solid #D4545433", borderRadius: 0, color: "#A23A3A", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "Inter, sans-serif" }}>Eliminar</button>
         
@@ -1777,7 +1768,6 @@ REGLAS:
             </div>
             {EFl({label: "Puntos positivos (uno por linea)", field: "cualPosText", pub: false, type: "textarea"})}
             {EFl({label: "Puntos negativos (uno por linea)", field: "cualNegText", pub: false, type: "textarea"})}
-            {EFl({label: "Que mejorar (uno por linea)", field: "cualMejorasText", pub: false, type: "textarea"})}
           </div>
         </Sec>
 
@@ -2311,7 +2301,7 @@ export default function CRMPropiedades() {
                   propNombre: "", propTel: "", propEmail: "", fechaCap: new Date().toISOString().split("T")[0],
                   agente: "", fotos: 0, videos: 0, planos: 0, tour360: "",
                   latitud: null, longitud: null, idealistaId: "",
-                  cualPos: [], cualNeg: [], cualMejoras: [],
+                  cualPos: [], cualNeg: [],
                   calidades: [], suministros: [], elecReformada: false, fontReformada: false, drenaje: "",
                   visitas: 0, destinos: [],
                 };
