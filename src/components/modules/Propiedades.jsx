@@ -1160,7 +1160,7 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
       src.comunidad ? "Comunidad: " + fmtP(src.comunidad) + "/mes" : "",
       "",
       (src.cualPos && src.cualPos.length > 0) ? "PUNTOS POSITIVOS:\n" + src.cualPos.map((c, i) => (i + 1) + ". " + c).join("\n") : "",
-      (src.cualMejoras && src.cualMejoras.length > 0) ? "OPORTUNIDADES DE MEJORA:\n" + src.cualMejoras.map((c, i) => (i + 1) + ". " + c).join("\n") : "",
+
     ].filter(Boolean).join("\n");
 
     const systemPrompt = `Eres un copywriter inmobiliario de alto nivel especializado en el mercado de Mallorca. Tu estilo es narrativo, envolvente y sofisticado. No escribes listas de caracteristicas: escribes historias que hacen que el lector se imagine viviendo en la propiedad. Cada frase debe fluir de forma natural, conectando espacios, sensaciones y estilo de vida.
@@ -1345,7 +1345,7 @@ REGLAS:
                     style={{ width: 130, background: "#FFFFFF", border: "1px solid " + (idealistaFieldErrors.has("ref") ? "#A23A3A" : "#E7E1D4"), borderRadius: 0, color: "#AC8A54", padding: "4px 8px", fontSize: 11, fontFamily: "Inter, sans-serif" }} />
                 </div>
                 <select value={d.op || "Compraventa"} onChange={e => upd("op", e.target.value)}
-                  style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "4px 8px", fontSize: 11, fontFamily: "Inter, sans-serif" }}>
+                  style={{ background: "#FFFFFF", border: "1px solid " + (idealistaFieldErrors.has("op") ? "#A23A3A" : "#E7E1D4"), borderRadius: 0, color: "#22262E", padding: "4px 8px", fontSize: 11, fontFamily: "Inter, sans-serif" }}>
                   {OPS_LIST.map(o => <option key={o} value={o}>{o}</option>)}
                 </select>
                 <select value={d.tipo || ""} onChange={e => upd("tipo", e.target.value)}
