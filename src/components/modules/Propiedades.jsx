@@ -275,7 +275,7 @@ const MEDIA_TIPOS = [
   { key: "plano", label: "Planos", icon: "📐", accept: "image/*,.pdf", color: "#2C6E52" },
 ];
 
-function MediaSection({ propiedadId, propRef, onCountUpdate }) {
+function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) {
   const [media, setMedia] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -509,8 +509,9 @@ function MediaSection({ propiedadId, propRef, onCountUpdate }) {
 
   const filteredMedia = media.filter((m) => m.tipo === activeTab).sort((a, b) => a.orden - b.orden);
   const counts = {};
-  MEDIA_TIPOS.forEach((t) => { counts[t.key] = media.filter((m) => m.tipo === t.key).length; });
-  const currentTipo = MEDIA_TIPOS.find((t) => t.key === activeTab);
+  const TIPOS_ACTIVOS = tiposPermitidos ? MEDIA_TIPOS.filter(t => tiposPermitidos.includes(t.key)) : MEDIA_TIPOS;
+  TIPOS_ACTIVOS.forEach((t) => { counts[t.key] = media.filter((m) => m.tipo === t.key).length; });
+  const currentTipo = TIPOS_ACTIVOS.find((t) => t.key === activeTab) || TIPOS_ACTIVOS[0];
 
   const btnBase = { padding: "6px 14px", borderRadius: 0, border: "1px solid #2A2926", background: "transparent", color: "#9A968A", cursor: "pointer", fontSize: 11, fontWeight: 500, letterSpacing: "0.04em", fontFamily: "Inter, sans-serif", transition: "all 0.2s", display: "flex", alignItems: "center", gap: 6 };
 
@@ -518,7 +519,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate }) {
     <div>
       {/* Contadores resumen */}
       <div style={{ display: "flex", gap: 16, marginBottom: 18, flexWrap: "wrap" }}>
-        {MEDIA_TIPOS.map((t) => (
+        {TIPOS_ACTIVOS.map((t) => (
           <div key={t.key} style={{ textAlign: "center", minWidth: 60 }}>
             <div style={{ fontSize: 24, color: t.color, fontFamily: "'Playfair Display', serif" }}>{counts[t.key]}</div>
             <div style={{ fontSize: 10, color: "#9A968A", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.08em" }}>{t.label}</div>
@@ -978,6 +979,37 @@ function PropDetail({ p, currentUser, onClose, onUpdate, onDelete }) {
   const puedeEditar = isDirector || esAgentePropietario;
   const est = ESTADOS.find((e) => e.key === p.estado) || ESTADOS[0];
   const hon = calcHon(p);
+  // Helper de tipo para condicionalidad
+  const tipoActual = draft.tipo || p.tipo || "";
+  const TIPO_MAP_COND = {
+    Piso:"flat", Estudio:"flat", Atico:"flat", "Atico Duplex":"flat", Duplex:"flat", "Planta baja":"flat",
+    Casa:"house", Chalet:"house", Adosado:"house", Villa:"house",
+    "Finca rustica":"rustic", Finca:"rustic",
+    "Local comercial":"premises_commercial", Local:"premises_commercial",
+    Oficina:"office", Parking:"garage", Garaje:"garage",
+    Terreno:"land", Trastero:"storage", Edificio:"building",
+  };
+  const ft = TIPO_MAP_COND[tipoActual] || "flat";
+  const esResidencial = ["flat","house","rustic"].includes(ft);
+  const esComercial = ["premises_commercial","office"].includes(ft);
+  const esGaraje = ["garage","storage"].includes(ft);
+  const esTerreno = ft === "land";
+  const esEdificio = ft === "building";
+  const tieneHab = ["flat","house","rustic"].includes(ft);
+  const tieneCert = ["flat","house","rustic"].includes(ft);
+  const tieneComunidad = ["flat","house","premises_commercial","office","garage","storage"].includes(ft);
+  const tieneBasuras = true; // todos
+  const tieneIBI = true; // todos
+  const tieneDerrama = ["flat","house"].includes(ft);
+  const tieneInstalaciones = ["flat","house","rustic","premises_commercial","office","building"].includes(ft);
+  const tieneElecFont = ["flat","house","rustic","premises_commercial","office"].includes(ft);
+  const tieneExtras = ["flat","house","rustic"].includes(ft); // terraza, balcón, jardín etc.
+  const tieneAireCalef = ["flat","house","rustic","premises_commercial","office"].includes(ft);
+  // Multimedia
+  const tieneVideos = ["flat","house","rustic","premises_commercial","office","building"].includes(ft);
+  const tienePlanos = ["flat","house","rustic","premises_commercial","office","building","land"].includes(ft);
+  const tieneTour = ["flat","house","rustic","premises_commercial","office","building"].includes(ft);
+
   const [aiDesc, setAiDesc] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
@@ -1348,12 +1380,12 @@ REGLAS:
                     style={{ width: 130, background: "#FFFFFF", border: "1px solid " + (idealistaFieldErrors.has("ref") ? "#A23A3A" : "#E7E1D4"), borderRadius: 0, color: "#AC8A54", padding: "4px 8px", fontSize: 11, fontFamily: "Inter, sans-serif" }} />
                 </div>
                 <select value={d.op || "Compraventa"} onChange={e => upd("op", e.target.value)}
-                  style={{ background: "#FFFFFF", border: "1px solid " + (idealistaFieldErrors.has("op") ? "#A23A3A" : "#E7E1D4"), borderRadius: 0, color: "#22262E", padding: "4px 8px", fontSize: 11, fontFamily: "Inter, sans-serif" }}>
+                  style={{ background: "#EEF1F6", border: "2px solid " + (idealistaFieldErrors.has("op") ? "#A23A3A" : "#16294A"), borderRadius: 0, color: "#16294A", padding: "5px 10px", fontSize: 12, fontFamily: "Inter, sans-serif", fontWeight: 600, cursor: "pointer" }}>
                   {OPS_LIST.map(o => <option key={o} value={o}>{o}</option>)}
                 </select>
                 <select value={d.tipo || ""} onChange={e => upd("tipo", e.target.value)}
-                  style={{ background: "#FFFFFF", border: "1px solid " + (idealistaFieldErrors.has("tipo") ? "#A23A3A" : "#E7E1D4"), borderRadius: 0, color: "#22262E", padding: "4px 8px", fontSize: 11, fontFamily: "Inter, sans-serif" }}>
-                  <option value="">Tipo *</option>
+                  style={{ background: "#EEF1F6", border: "2px solid " + (idealistaFieldErrors.has("tipo") ? "#A23A3A" : "#16294A"), borderRadius: 0, color: "#16294A", padding: "5px 10px", fontSize: 12, fontFamily: "Inter, sans-serif", fontWeight: 600, cursor: "pointer" }}>
+                  <option value="">-- Tipo de propiedad *</option>
                   {TIPOS_LIST.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
               </div>
@@ -1599,12 +1631,12 @@ REGLAS:
         {/* Gastos */}
         <Sec title="Gastos asociados">
           <div style={g3}>
-            {EFl({label: "IBI anual", field: "ibi", pub: true, type: "number"})}
-            {EFl({label: "Tasa basuras", field: "basuras", pub: true, type: "number"})}
-            {EFl({label: "Comunidad /mes", field: "comunidad", pub: true, type: "number"})}
+            {tieneIBI && EFl({label: "IBI anual", field: "ibi", pub: true, type: "number"})}
+            {tieneBasuras && EFl({label: "Tasa basuras", field: "basuras", pub: true, type: "number"})}
+            {tieneComunidad && EFl({label: "Comunidad /mes", field: "comunidad", pub: true, type: "number"})}
           </div>
           <div style={{ ...g2, marginTop: 6 }}>
-            {EFl({label: "Extra comunidad (derramas)", field: "extraComunidad", pub: true, type: "number"})}
+            {tieneDerrama && EFl({label: "Extra comunidad (derramas)", field: "extraComunidad", pub: true, type: "number"})}
             {EFl({label: "Otros gastos", field: "otrosGastos", pub: true})}
           </div>
         </Sec>
@@ -1613,81 +1645,90 @@ REGLAS:
         {/* Superficies */}
         <Sec title="Superficies y estancias">
           <div style={g4}>
-            {EFl({label: "m2 utiles", field: "mUtil", pub: true, type: "number"})}
-            {EFl({label: "m2 construidos", req: true, field: "mConst", pub: true, type: "number"})}
-            {EFl({label: "m2 parcela", field: "mParcela", pub: true, type: "number"})}
-            {EFl({label: "m2 terraza", field: "mTerraza", pub: true, type: "number"})}
+            {!esTerreno && EFl({label: "m2 utiles", field: "mUtil", pub: true, type: "number"})}
+            {!esTerreno && EFl({label: "m2 construidos", req: !esTerreno, field: "mConst", pub: true, type: "number"})}
+            {EFl({label: esTerreno ? "m2 parcela *" : "m2 parcela", field: "mParcela", pub: true, type: "number"})}
+            {tieneExtras && EFl({label: "m2 terraza", field: "mTerraza", pub: true, type: "number"})}
           </div>
-          <div style={{ ...g4, marginTop: 8 }}>
-            {EFl({label: "m2 balcon", field: "mBalcon", pub: true, type: "number"})}
-            {EFl({label: "m2 porche", field: "mPorche", pub: true, type: "number"})}
-            <div /><div />
-          </div>
-          <div style={{ ...g4, marginTop: 8 }}>
-            {EFl({label: "Hab. dobles", req: true, field: "habDobles", pub: true, type: "number"})}
-            {EFl({label: "Hab. simples", field: "habSimples", pub: true, type: "number"})}
-            {EFl({label: "Banos", req: true, field: "banos", pub: true, type: "number"})}
-            {EFl({label: "Aseos", field: "aseos", pub: true, type: "number"})}
-          </div>
+          {tieneExtras && (
+            <div style={{ ...g4, marginTop: 8 }}>
+              {EFl({label: "m2 balcon", field: "mBalcon", pub: true, type: "number"})}
+              {EFl({label: "m2 porche", field: "mPorche", pub: true, type: "number"})}
+              <div /><div />
+            </div>
+          )}
+          {tieneHab && (
+            <div style={{ ...g4, marginTop: 8 }}>
+              {EFl({label: "Hab. dobles", req: true, field: "habDobles", pub: true, type: "number"})}
+              {EFl({label: "Hab. simples", field: "habSimples", pub: true, type: "number"})}
+              {EFl({label: "Banos", req: true, field: "banos", pub: true, type: "number"})}
+              {EFl({label: "Aseos", field: "aseos", pub: true, type: "number"})}
+            </div>
+          )}
+          {!tieneHab && (esComercial || esGaraje) && (
+            <div style={{ ...g2, marginTop: 8 }}>
+              {EFl({label: "Banos", field: "banos", pub: true, type: "number"})}
+            </div>
+          )}
           <div style={{ ...g3, marginTop: 8 }}>
-            {EFl({label: "Ano construccion", field: "anoConstruc", pub: true})}
+            {!esTerreno && EFl({label: "Ano construccion", field: "anoConstruc", pub: true})}
             {EFl({label: "Conservacion", field: "conserv", pub: true, options: ["Buen estado","Reformado","A reformar","Obra nueva","En construccion"], type: "select"})}
           </div>
         </Sec>
         <div style={sep} />
 
         {/* Caracteristicas */}
-        <Sec title="Caracteristicas principales">
+        {(esResidencial || esComercial) && <Sec title="Caracteristicas principales">
           <div style={g3}>
-            {EFl({label: "Cert. energetico", req: true, field: "certEnerg", pub: true, options: ["A","B","C","D","E","F","G","Exento","En tramite"], type: "select"})}
-            {EFl({label: "IEE", field: "iee", pub: true})}
-            {EFl({label: "Venta con mobiliario", field: "ventaMobiliario", pub: true, type: "bool"})}
+            {tieneCert && EFl({label: "Cert. energetico", req: true, field: "certEnerg", pub: true, options: ["A","B","C","D","E","F","G","Exento","En tramite"], type: "select"})}
+            {tieneCert && EFl({label: "Emisiones energeticas", field: "emisionesEnerg", pub: true, options: ["A","B","C","D","E","F","G"], type: "select"})}
+            {esResidencial && EFl({label: "IEE", field: "iee", pub: true})}
           </div>
-          <div style={{ ...g3, marginTop: 8 }}>
+          {esResidencial && <div style={{ ...g3, marginTop: 8 }}>
             {EFl({label: "Suelos", field: "suelos", pub: true})}
             {EFl({label: "Carp. exterior", field: "carpExt", pub: true})}
             {EFl({label: "Carp. interior", field: "carpInt", pub: true})}
-          </div>
-          <div style={{ ...g3, marginTop: 8 }}>
-            
+          </div>}
+          {esResidencial && <div style={{ ...g3, marginTop: 8 }}>
             {EFl({label: "Agua caliente", field: "aguaCal", pub: true})}
             {EFl({label: "Ventanas", field: "ventanas", pub: true, options: ["Interior","Exterior"], type: "select"})}
-          </div>
-          <div style={{ ...g3, marginTop: 8 }}>
+            {EFl({label: "Venta con mobiliario", field: "ventaMobiliario", pub: true, type: "bool"})}
+          </div>}
+          {tieneAireCalef && <div style={{ ...g2, marginTop: 8 }}>
             {EFl({label: "Tipo aire acondicionado", field: "aireAcondTipo", pub: true, options: ["No disponible","Solo frio","Frio/Calor","Preinstalacion"], type: "select"})}
             {EFl({label: "Calefaccion", field: "calefaccion", pub: true, options: ["Gas central","Gasoleo central","Gas individual","Electrica individual","Bomba de calor","Sin calefaccion"], type: "select"})}
-            {EFl({label: "Emisiones energeticas", field: "emisionesEnerg", pub: true, options: ["A","B","C","D","E","F","G"], type: "select"})}
-          </div>
+          </div>}
           <div style={{ ...g2, marginTop: 8 }}>
             {EFl({label: "Parking", field: "parking", pub: true, options: ["Si","No","Comunitario","Opcional"], type: "select"})}
             {EFl({label: "N plazas", field: "nPlazas", pub: true, type: "number"})}
           </div>
-          <div style={{ ...g4, marginTop: 12 }}>
-            {EFl({label: "Terraza", field: "terraza", pub: true, type: "bool"})}
-            {EFl({label: "Balcon", field: "balcon", pub: true, type: "bool"})}
-            {EFl({label: "Piscina", field: "piscina", pub: true, type: "bool"})}
-            {EFl({label: "Jardin", field: "jardin", pub: true, type: "bool"})}
-          </div>
-          <div style={{ ...g4, marginTop: 8 }}>
-            {EFl({label: "Ascensor", field: "ascensor", pub: true, type: "bool"})}
-            
-            {EFl({label: "Armarios", field: "armarios", pub: true, type: "bool"})}
-            {EFl({label: "Trastero", field: "trastero", pub: true, type: "bool"})}
-          </div>
-        </Sec>
+          {tieneExtras && <>
+            <div style={{ ...g4, marginTop: 12 }}>
+              {EFl({label: "Terraza", field: "terraza", pub: true, type: "bool"})}
+              {ft !== "rustic" && EFl({label: "Balcon", field: "balcon", pub: true, type: "bool"})}
+              {EFl({label: "Piscina", field: "piscina", pub: true, type: "bool"})}
+              {EFl({label: "Jardin", field: "jardin", pub: true, type: "bool"})}
+            </div>
+            <div style={{ ...g4, marginTop: 8 }}>
+              {ft !== "rustic" && EFl({label: "Ascensor", field: "ascensor", pub: true, type: "bool"})}
+              {EFl({label: "Armarios", field: "armarios", pub: true, type: "bool"})}
+              {EFl({label: "Trastero", field: "trastero", pub: true, type: "bool"})}
+            </div>
+          </>}
+        </Sec>}
         <div style={sep} />
 
         {/* Instalaciones */}
-        <Sec title="Instalaciones y suministros">
+        {tieneInstalaciones && <Sec title="Instalaciones y suministros">
           <div style={g2}>
             {EFl({label: "Suministros", field: "suministrosText", pub: true})}
             {EFl({label: "Drenaje sanitario", field: "drenaje", pub: true})}
           </div>
-          <div style={{ ...g2, marginTop: 8 }}>
+          {tieneElecFont && <div style={{ ...g2, marginTop: 8 }}>
             {EFl({label: "Electricidad reformada", field: "elecReformada", pub: true, type: "bool"})}
             {EFl({label: "Fontaneria reformada", field: "fontReformada", pub: true, type: "bool"})}
-          </div>
-        </Sec>
+          </div>}
+        </Sec>}
         <div style={sep} />
 
         
@@ -1758,14 +1799,19 @@ REGLAS:
 
         {/* Multimedia */}
         <Sec title="Multimedia">
-          <div style={{ marginBottom: 16 }}>
+          {tieneTour && <div style={{ marginBottom: 16 }}>
             {EFl({label: "Tour virtual (URL)", field: "tour360", pub: true})}
             {d.tour360 && d.tour360.startsWith("http") && (
               <a href={d.tour360} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: "#AC8A54", textDecoration: "underline" }}>Abrir tour virtual</a>
             )}
-          </div>
+          </div>}
           {p.id ? (
-            <MediaSection propiedadId={p.id} propRef={p.ref} onCountUpdate={(counts) => { if (onUpdate) onUpdate({ ...p, fotos: counts.foto, videos: counts.video, planos: counts.plano }); }} />
+            <MediaSection
+              propiedadId={p.id}
+              propRef={p.ref}
+              tiposPermitidos={["foto", ...(tieneVideos ? ["video"] : []), ...(tienePlanos ? ["plano"] : [])]}
+              onCountUpdate={(counts) => { if (onUpdate) onUpdate({ ...p, fotos: counts.foto, videos: counts.video, planos: counts.plano }); }}
+            />
           ) : (
             <div style={{ padding: "20px", textAlign: "center", color: "#9A968A", fontSize: 12, background: "#FFFFFF", borderRadius: 0 }}>
               Guarda la propiedad primero para poder subir fotos, videos y planos
