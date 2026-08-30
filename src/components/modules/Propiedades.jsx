@@ -1721,7 +1721,7 @@ REGLAS:
             </div>
             </>
           )}
-          {!tieneHab && (esComercial || esGaraje) && (
+          {!tieneHab && esComercial && (
             <div style={{ ...g2, marginTop: 8 }}>
               {EFl({label: "Banos", field: "banos", pub: true, type: "number"})}
             </div>

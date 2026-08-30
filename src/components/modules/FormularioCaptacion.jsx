@@ -683,7 +683,7 @@ export default function FormularioCaptacion() {
               </div>
             </div>
           </div>}
-          {!tieneHab && (esComercial || esGaraje) && <div style={g2}>
+          {!tieneHab && esComercial && <div style={g2}>
             <Input label="Banos" value={banos} onChange={setBanos} type="number" />
           </div>}
           <div style={g3}>
