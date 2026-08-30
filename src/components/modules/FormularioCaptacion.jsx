@@ -803,10 +803,6 @@ export default function FormularioCaptacion() {
               <span style={{ fontSize: 10, fontWeight: 600, color: "#A23A3A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", margin: "16px 0 8px" }}>Puntos negativos o limitaciones</span>
               <QualRow items={cualNeg} onChange={setCualNeg} color="#A23A3A" symbol="-" />
             </div>
-            <div>
-              <span style={{ fontSize: 10, fontWeight: 600, color: "#3D577E", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 8 }}>Que mejorarias</span>
-
-            </div>
           </div>
         </Sec>
 
