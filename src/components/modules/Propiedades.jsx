@@ -2327,6 +2327,7 @@ export default function CRMPropiedades({ currentUser }) {
     if (fEst !== "todos") r = r.filter((p) => p.estado === fEst);
     if (fTipo !== "todos") r = r.filter((p) => p.tipo === fTipo);
     if (sort === "precio") r.sort((a, b) => b.precioVenta - a.precioVenta);
+    if (sort === "precio_asc") r.sort((a, b) => a.precioVenta - b.precioVenta);
     else if (sort === "sup") r.sort((a, b) => b.mConst - a.mConst);
     else if (sort === "visitas") r.sort((a, b) => b.visitas - a.visitas);
     return r;
@@ -2426,6 +2427,7 @@ export default function CRMPropiedades({ currentUser }) {
           <select value={sort} onChange={(e) => setSort(e.target.value)} style={ss}>
             <option value="fecha">Recientes</option>
             <option value="precio">Mayor precio</option>
+            <option value="precio_asc">Menor precio</option>
             <option value="sup">Mayor superficie</option>
             <option value="visitas">Mas visitas</option>
           </select>
