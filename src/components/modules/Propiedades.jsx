@@ -977,7 +977,7 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
   const [aiDesc, setAiDesc] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
-  const [editMode, setEditMode] = useState(!p.id);
+  const [editMode, setEditMode] = useState(true);
   const [autoSaveStatus, setAutoSaveStatus] = useState(null);
   const [calcDesde, setCalcDesde] = useState("venta"); // null | "saving" | "saved" | "error"
   const [draft, setDraft] = useState({ ...p, 
@@ -997,7 +997,7 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
     cualPosText: (p.cualPos || []).join("\n"),
     cualNegText: (p.cualNeg || []).join("\n"),
   };
-  const d = editMode ? draft : pWithTexts;
+  const d = draft;
   const upd = (key, val) => setDraft(prev => ({ ...prev, [key]: val }));
 
   // Autoguardado al salir de cualquier campo (onBlur) — solo propiedades existentes
@@ -1064,7 +1064,7 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
     const hasErr = editMode && idealistaFieldErrors.has(field);
     const borderColor = hasErr ? "#A23A3A" : "#E7E1D4";
     const inputStyle = { width: "100%", background: "#FFFFFF", border: "1px solid " + borderColor, borderRadius: 0, color: "#22262E", padding: "6px 8px", fontSize: 13, fontFamily: "Inter, sans-serif" };
-    if (!editMode) return <Fl label={label + reqMark} value={type === "bool" ? (d[field] ? "Si" : "No") : (type === "number" ? String(d[field] || 0) : (d[field] || "-"))} pub={pub} gold={gold} />;
+
     return (
       <div style={{ marginBottom: 10 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
@@ -1277,12 +1277,8 @@ REGLAS:
           }
           onClose();
         }} style={{ position: "absolute", top: 16, right: 20, background: "none", border: "none", color: "#9A968A", fontSize: 20, cursor: "pointer" }}>✕</button>
-        {!editMode && <button onClick={() => { setDraft({ ...p, 
-          suministrosText: (p.suministros || []).join(", "),
-          cualPosText: (p.cualPos || []).join("\n"),
-          cualNegText: (p.cualNeg || []).join("\n"),
-        }); setEditMode(true); }} style={{ position: "absolute", top: 16, right: 120, background: "#AC8A54", border: "none", borderRadius: 0, color: "#F8F6F1", fontSize: 10, cursor: "pointer", padding: "5px 14px", fontWeight: 600, fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>Editar</button>}
-        {editMode && <button onClick={() => { 
+        
+        {<button onClick={() => { 
           const toSave = { ...draft,
             suministros: (draft.suministrosText || "").split(",").map(s => s.trim()).filter(Boolean),
             cualPos: (draft.cualPosText || "").split("\n").filter(Boolean),
@@ -1304,16 +1300,11 @@ REGLAS:
             }
           }
           if (onUpdate) onUpdate(toSave);
-          setEditMode(false);
         }} 
           style={{ position: "absolute", top: 16, right: 120, background: "#2C6E52", border: "none", borderRadius: 0, color: "#F8F6F1", fontSize: 10, cursor: "pointer", padding: "5px 14px", fontWeight: 600, fontFamily: "Inter, sans-serif", letterSpacing: "0.05em", transition: "all 0.2s" }}>
           Guardar
         </button>}
-        {editMode && <button onClick={() => { setDraft({ ...p,
-          suministrosText: (p.suministros || []).join(", "),
-          cualPosText: (p.cualPos || []).join("\n"),
-          cualNegText: (p.cualNeg || []).join("\n"),
-        }); setEditMode(false); }} style={{ position: "absolute", top: 16, right: 190, background: "none", border: "1px solid #7A7870", borderRadius: 0, color: "#9A968A", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "Inter, sans-serif" }}>Cancelar</button>}
+        
         <button onClick={() => { if (onDelete) onDelete(p); }} style={{ position: "absolute", top: 16, right: 56, background: "none", border: "1px solid #D4545433", borderRadius: 0, color: "#A23A3A", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "Inter, sans-serif" }}>Eliminar</button>
         
         <div style={{ position: "absolute", top: 20, left: 36, fontSize: 11, color: "#9A968A" }}><span style={{ color: "#AC8A54", fontSize: 18, fontWeight: 400 }}>*</span> Obligatorio Idealista</div>
@@ -1457,7 +1448,7 @@ REGLAS:
             {EFl({label: "Codigo postal", req: true, field: "cp", pub: true})}
             {EFl({label: "Municipio", req: true, field: "municipio", pub: true})}
             {EFl({label: "Zona", field: "zona", pub: true})}
-            {EFl({label: "Orientacion", field: "orient", pub: true, options: ["Norte","Sur","Este","Oeste","Noreste","Noroeste","Sureste","Suroeste"], type: editMode ? "select" : "text"})}
+            {EFl({label: "Orientacion", field: "orient", pub: true, options: ["Norte","Sur","Este","Oeste","Noreste","Noroeste","Sureste","Suroeste"], type: "select"})}
             {EFl({label: "Distancia playa", field: "distPlaya", pub: true})}
             {EFl({label: "Planta", field: "planta", pub: true})}
             {EFl({label: "Puerta", field: "puerta", pub: true})}
@@ -1631,7 +1622,7 @@ REGLAS:
           </div>
           <div style={{ ...g3, marginTop: 8 }}>
             {EFl({label: "Ano construccion", field: "anoConstruc", pub: true})}
-            {EFl({label: "Conservacion", field: "conserv", pub: true, options: ["Buen estado","Reformado","A reformar","Obra nueva","En construccion"], type: editMode ? "select" : "text"})}
+            {EFl({label: "Conservacion", field: "conserv", pub: true, options: ["Buen estado","Reformado","A reformar","Obra nueva","En construccion"], type: "select"})}
           </div>
         </Sec>
         <div style={sep} />
@@ -1639,7 +1630,7 @@ REGLAS:
         {/* Caracteristicas */}
         <Sec title="Caracteristicas principales">
           <div style={g3}>
-            {EFl({label: "Cert. energetico", req: true, field: "certEnerg", pub: true, options: ["A","B","C","D","E","F","G","Exento","En tramite"], type: editMode ? "select" : "text"})}
+            {EFl({label: "Cert. energetico", req: true, field: "certEnerg", pub: true, options: ["A","B","C","D","E","F","G","Exento","En tramite"], type: "select"})}
             {EFl({label: "IEE", field: "iee", pub: true})}
             {EFl({label: "Venta con mobiliario", field: "ventaMobiliario", pub: true, type: "bool"})}
           </div>
@@ -1651,15 +1642,15 @@ REGLAS:
           <div style={{ ...g3, marginTop: 8 }}>
             
             {EFl({label: "Agua caliente", field: "aguaCal", pub: true})}
-            {EFl({label: "Ventanas", field: "ventanas", pub: true, options: ["Interior","Exterior"], type: editMode ? "select" : "text"})}
+            {EFl({label: "Ventanas", field: "ventanas", pub: true, options: ["Interior","Exterior"], type: "select"})}
           </div>
           <div style={{ ...g3, marginTop: 8 }}>
-            {EFl({label: "Tipo aire acondicionado", field: "aireAcondTipo", pub: true, options: ["No disponible","Solo frio","Frio/Calor","Preinstalacion"], type: editMode ? "select" : "text"})}
-            {EFl({label: "Calefaccion", field: "calefaccion", pub: true, options: ["Gas central","Gasoleo central","Gas individual","Electrica individual","Bomba de calor","Sin calefaccion"], type: editMode ? "select" : "text"})}
-            {EFl({label: "Emisiones energeticas", field: "emisionesEnerg", pub: true, options: ["A","B","C","D","E","F","G"], type: editMode ? "select" : "text"})}
+            {EFl({label: "Tipo aire acondicionado", field: "aireAcondTipo", pub: true, options: ["No disponible","Solo frio","Frio/Calor","Preinstalacion"], type: "select"})}
+            {EFl({label: "Calefaccion", field: "calefaccion", pub: true, options: ["Gas central","Gasoleo central","Gas individual","Electrica individual","Bomba de calor","Sin calefaccion"], type: "select"})}
+            {EFl({label: "Emisiones energeticas", field: "emisionesEnerg", pub: true, options: ["A","B","C","D","E","F","G"], type: "select"})}
           </div>
           <div style={{ ...g2, marginTop: 8 }}>
-            {EFl({label: "Parking", field: "parking", pub: true, options: ["Si","No","Comunitario","Opcional"], type: editMode ? "select" : "text"})}
+            {EFl({label: "Parking", field: "parking", pub: true, options: ["Si","No","Comunitario","Opcional"], type: "select"})}
             {EFl({label: "N plazas", field: "nPlazas", pub: true, type: "number"})}
           </div>
           <div style={{ ...g4, marginTop: 12 }}>
