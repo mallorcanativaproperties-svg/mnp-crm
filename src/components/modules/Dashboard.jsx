@@ -495,22 +495,13 @@ function DashboardContent({ currentUser, onLogout, users, setUsers }) {
 }
 
 /* ── Main App ── */
-export default function Dashboard() {
-  const [currentUser, setCurrentUser] = useState(null);
-  const [users, setUsers] = useState([
-    { user: "director", pass: "mnp2026", nombre: "Director", role: "director", activo: true },
-    { user: "carlos", pass: "carlos2026", nombre: "Carlos M.", role: "agente", activo: true },
-    { user: "ana", pass: "ana2026", nombre: "Ana R.", role: "agente", activo: true },
-  ]);
-
-  if (!currentUser) {
-    return <LoginScreen users={users} onLogin={setCurrentUser} />;
-  }
+export default function Dashboard({ currentUser }) {
+  const [users, setUsers] = useState([]);
 
   return (
     <DashboardContent
-      currentUser={currentUser}
-      onLogout={() => setCurrentUser(null)}
+      currentUser={currentUser || { nombre: "Director", role: "director" }}
+      onLogout={() => {}}
       users={users}
       setUsers={setUsers}
     />

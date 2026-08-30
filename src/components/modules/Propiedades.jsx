@@ -1382,12 +1382,12 @@ REGLAS:
                     style={{ width: 130, background: "#FFFFFF", border: "1px solid " + (idealistaFieldErrors.has("ref") ? "#A23A3A" : "#E7E1D4"), borderRadius: 0, color: "#AC8A54", padding: "4px 8px", fontSize: 11, fontFamily: "Inter, sans-serif" }} />
                 </div>
                 <select value={d.op || "Compraventa"} onChange={e => upd("op", e.target.value)}
-                  style={{ background: "#EEF1F6", border: "2px solid " + (idealistaFieldErrors.has("op") ? "#A23A3A" : "#16294A"), borderRadius: 0, color: "#16294A", padding: "5px 10px", fontSize: 12, fontFamily: "Inter, sans-serif", fontWeight: 600, cursor: "pointer" }}>
+                  style={{ background: "#FFFFFF", border: "1px solid " + (idealistaFieldErrors.has("op") ? "#A23A3A" : "#E7E1D4"), borderRadius: 0, color: "#22262E", padding: "4px 8px", fontSize: 11, fontFamily: "Inter, sans-serif", cursor: "pointer" }}>
                   {OPS_LIST.map(o => <option key={o} value={o}>{o}</option>)}
                 </select>
                 <select value={d.tipo || ""} onChange={e => upd("tipo", e.target.value)}
-                  style={{ background: "#EEF1F6", border: "2px solid " + (idealistaFieldErrors.has("tipo") ? "#A23A3A" : "#16294A"), borderRadius: 0, color: "#16294A", padding: "5px 10px", fontSize: 12, fontFamily: "Inter, sans-serif", fontWeight: 600, cursor: "pointer" }}>
-                  <option value="">-- Tipo de propiedad *</option>
+                  style={{ background: "#FFFFFF", border: "1px solid " + (idealistaFieldErrors.has("tipo") ? "#A23A3A" : "#E7E1D4"), borderRadius: 0, color: "#22262E", padding: "4px 8px", fontSize: 11, fontFamily: "Inter, sans-serif", cursor: "pointer" }}>
+                  <option value="">-- Tipo *</option>
                   {TIPOS_LIST.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
               </div>
@@ -2495,4 +2495,4 @@ export default function CRMPropiedades({ currentUser }) {
     </div>
   );
 }
-// force deploy Sun Aug 30 15:16:36 UTC 2026
+// updated Sun Aug 30 15:16:36 UTC 2026

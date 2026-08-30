@@ -93,7 +93,7 @@ function LoadingModule() {
 
 export default function CRMApp() {
   const [currentUser, setCurrentUser] = useState(null);
-  const [activeModule, setActiveModule] = useState("dashboard");
+  const [activeModule, setActiveModule] = useState("propiedades");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [healthAlerts, setHealthAlerts] = useState([]);
 
@@ -127,7 +127,7 @@ export default function CRMApp() {
 
   const renderModule = () => {
     switch (activeModule) {
-      case "dashboard": return <Dashboard />;
+      case "dashboard": return <Dashboard currentUser={currentUser} />;
       case "usuarios": return <Usuarios currentUser={currentUser} />;
       case "simulador": return <SimuladorClaudia />;
       case "propiedades": return <Propiedades currentUser={currentUser} />;
