@@ -328,11 +328,38 @@ export default function FormularioCaptacion() {
   const [ivaHon, setIvaHon] = useState("21");
 
   // Calculated
-  const pv = Number(precioVenta) || 0;
-  const honNeto = honorariosTipo === "porcentaje" ? pv * ((Number(honorarios) || 0) / 100) : (Number(honorarios) || 0);
-  const honIva = honNeto * ((Number(ivaHon) || 21) / 100);
-  const honTotal = honNeto + honIva;
-  const netoProp = pv - honTotal;
+  // Motor de cálculo — puede calcularse desde precio venta O desde precio propietario
+  const [calcDesde, setCalcDesde] = useState("venta"); // "venta" | "propietario"
+  const pv = op === "Alquiler" ? (Number(precioAlquiler)||0) : (Number(precioVenta) || 0);
+  const pp = Number(precioProp) || 0;
+  
+  // Si calcula desde propietario: precio venta = precio prop + honorarios + IVA
+  const calcHonNeto = (base) => honorariosTipo === "porcentaje" ? base * ((Number(honorarios)||0) / 100) : (Number(honorarios)||0);
+  
+  let honNeto, honIva, honTotal, netoProp, precioCalc;
+  if (calcDesde === "propietario" && pp > 0) {
+    // Desde precio propietario: calcular precio de venta
+    if (honorariosTipo === "porcentaje") {
+      const pct = (Number(honorarios)||0) / 100;
+      const ivaRate = (Number(ivaHon)||21) / 100;
+      // precioVenta = precioProp / (1 - pct*(1+ivaRate))
+      precioCalc = pp / (1 - pct * (1 + ivaRate));
+    } else {
+      const hon = Number(honorarios)||0;
+      const ivaHonCalc = hon * ((Number(ivaHon)||21) / 100);
+      precioCalc = pp + hon + ivaHonCalc;
+    }
+    honNeto = calcHonNeto(precioCalc);
+    honIva = honNeto * ((Number(ivaHon)||21) / 100);
+    honTotal = honNeto + honIva;
+    netoProp = pp;
+  } else {
+    precioCalc = pv;
+    honNeto = calcHonNeto(pv);
+    honIva = honNeto * ((Number(ivaHon)||21) / 100);
+    honTotal = honNeto + honIva;
+    netoProp = pv - honTotal;
+  }
 
   // Gastos
   const [ibi, setIbi] = useState("");
@@ -683,6 +710,7 @@ export default function FormularioCaptacion() {
             {/* Precio principal condicional */}
             {op !== "Alquiler" && <Input label="Precio de venta" value={precioVenta} onChange={setPrecioVenta} type="number" placeholder="399000" required={op !== "Alquiler"} />}
             {op === "Alquiler" && <Input label="Renta mensual" value={precioAlquiler} onChange={setPrecioAlquiler} type="number" placeholder="1200" required />}
+            {op !== "Alquiler" && <Input label="Precio propietario" value={precioProp} onChange={setPrecioProp} type="number" placeholder="0" />}
           </div>
           {/* Campos específicos de Alquiler */}
           {op === "Alquiler" && (
@@ -702,13 +730,21 @@ export default function FormularioCaptacion() {
             <Input label="IVA honorarios (%)" value={ivaHon} onChange={setIvaHon} type="number" placeholder="21" />
 
           </div>
-          {pv > 0 && Number(honorarios) > 0 && (
+          {(pv > 0 || pp > 0) && Number(honorarios) > 0 && (
             <div style={{ padding: "14px 16px", background: "#F4EEE0", border: "1px solid #E7D9C0", marginBottom: 14 }}>
-              <div style={{ fontSize: 10, color: "#8C6E3F", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 10 }}>Cálculo automático</div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                <div style={{ fontSize: 10, color: "#8C6E3F", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>Cálculo automático</div>
+                {op !== "Alquiler" && (
+                  <div style={{ display: "flex", gap: 4 }}>
+                    <button onClick={() => setCalcDesde("venta")} style={{ fontSize: 10, padding: "3px 10px", border: "1px solid #AC8A54", background: calcDesde === "venta" ? "#AC8A54" : "transparent", color: calcDesde === "venta" ? "#fff" : "#AC8A54", cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>Desde precio venta</button>
+                    <button onClick={() => setCalcDesde("propietario")} style={{ fontSize: 10, padding: "3px 10px", border: "1px solid #AC8A54", background: calcDesde === "propietario" ? "#AC8A54" : "transparent", color: calcDesde === "propietario" ? "#fff" : "#AC8A54", cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>Desde precio propietario</button>
+                  </div>
+                )}
+              </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px 16px" }}>
                 <div>
                   <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 2 }}>{op === "Alquiler" ? "Renta mensual" : "Precio de venta"}</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "#16294A" }}>{fmtP(pv)}</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "#16294A" }}>{fmtP(Math.round(calcDesde === "propietario" ? precioCalc : pv))}</div>
                 </div>
                 <div>
                   <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 2 }}>Hon. neto</div>

@@ -982,7 +982,8 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
   const [editMode, setEditMode] = useState(!p.id);
-  const [autoSaveStatus, setAutoSaveStatus] = useState(null); // null | "saving" | "saved" | "error"
+  const [autoSaveStatus, setAutoSaveStatus] = useState(null);
+  const [calcDesde, setCalcDesde] = useState("venta"); // null | "saving" | "saved" | "error"
   const [draft, setDraft] = useState({ ...p, 
     suministrosText: (p.suministros || []).join(", "),
     cualPosText: (p.cualPos || []).join("\n"),
@@ -1506,22 +1507,47 @@ REGLAS:
             )}
             {EFl({label: "IVA Hon %", field: "ivaHon", pub: false, type: "number"})}
           </div>
-          {/* Motor de cálculo — usa draft en edición, datos guardados en vista */}
+          {/* Motor de cálculo dual — desde precio venta o desde precio propietario */}
           {(() => {
-            const precio = d.op === "Alquiler" ? (Number(d.precioAlquiler)||0) : (Number(d.precioVenta)||0);
-            const honBase = d.honorariosTipo === "porcentaje"
-              ? precio * ((Number(d.honorarios)||0) / 100)
-              : (Number(d.honorarios)||0);
-            const iva = honBase * ((Number(d.ivaHon)||21) / 100);
-            const honTotal = honBase + iva;
-            const netoVendedor = precio - honTotal;
+            const pv = d.op === "Alquiler" ? (Number(d.precioAlquiler)||0) : (Number(d.precioVenta)||0);
+            const pp = Number(d.precioProp)||0;
+            const calcHon = (base) => d.honorariosTipo === "porcentaje" ? base * ((Number(d.honorarios)||0)/100) : (Number(d.honorarios)||0);
+            const ivaRate = (Number(d.ivaHon)||21) / 100;
+            let honBase, iva, honTotal, netoVend, precioCalc;
+            if (calcDesde === "propietario" && pp > 0 && d.op !== "Alquiler") {
+              if (d.honorariosTipo === "porcentaje") {
+                const pct = (Number(d.honorarios)||0)/100;
+                precioCalc = pp / (1 - pct*(1+ivaRate));
+              } else {
+                const h = Number(d.honorarios)||0;
+                precioCalc = pp + h + h*ivaRate;
+              }
+              honBase = calcHon(precioCalc);
+              iva = honBase * ivaRate;
+              honTotal = honBase + iva;
+              netoVend = pp;
+            } else {
+              precioCalc = pv;
+              honBase = calcHon(pv);
+              iva = honBase * ivaRate;
+              honTotal = honBase + iva;
+              netoVend = pv - honTotal;
+            }
             return (
               <div style={{ marginTop: 14, padding: "14px 16px", background: "#F4EEE0", border: "1px solid #E7D9C0" }}>
-                <div style={{ fontSize: 10, color: "#8C6E3F", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 10 }}>Cálculo automático</div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                  <div style={{ fontSize: 10, color: "#8C6E3F", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>Cálculo automático</div>
+                  {d.op !== "Alquiler" && (
+                    <div style={{ display: "flex", gap: 4 }}>
+                      <button onClick={() => setCalcDesde("venta")} style={{ fontSize: 10, padding: "3px 10px", border: "1px solid #AC8A54", background: calcDesde === "venta" ? "#AC8A54" : "transparent", color: calcDesde === "venta" ? "#fff" : "#AC8A54", cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>Desde precio venta</button>
+                      <button onClick={() => setCalcDesde("propietario")} style={{ fontSize: 10, padding: "3px 10px", border: "1px solid #AC8A54", background: calcDesde === "propietario" ? "#AC8A54" : "transparent", color: calcDesde === "propietario" ? "#fff" : "#AC8A54", cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>Desde precio propietario</button>
+                    </div>
+                  )}
+                </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px 16px" }}>
                   <div>
                     <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 2 }}>{d.op === "Alquiler" ? "Renta mensual" : "Precio de venta"}</div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: "#16294A" }}>{fmtP(precio)}</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "#16294A" }}>{fmtP(Math.round(precioCalc))}</div>
                   </div>
                   <div>
                     <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 2 }}>Hon. neto</div>
@@ -1537,7 +1563,7 @@ REGLAS:
                   </div>
                   <div style={{ gridColumn: "span 2" }}>
                     <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 2 }}>Neto propietario</div>
-                    <div style={{ fontSize: 16, fontWeight: 700, color: "#2C6E52" }}>{fmtP(Math.round(netoVendedor))}</div>
+                    <div style={{ fontSize: 16, fontWeight: 700, color: "#2C6E52" }}>{fmtP(Math.round(netoVend))}</div>
                   </div>
                 </div>
               </div>
