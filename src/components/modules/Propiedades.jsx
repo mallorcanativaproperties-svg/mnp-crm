@@ -1241,20 +1241,29 @@ REGLAS:
   async function autoGenerateRef(agenteName) {
     const prefix = AGENTE_PREFIX[agenteName];
     if (!prefix) return "";
+    // Buscar todas las refs de este agente y encontrar el máximo número
     const { data: existing } = await supabase
       .from("propiedades")
       .select("ref")
-      .like("ref", `${prefix}%`)
-      .order("ref", { ascending: false })
-      .limit(1);
-    if (existing && existing.length > 0) {
-      const lastRef = existing[0].ref;
-      const numPart = lastRef.replace(prefix, "");
-      const nextNum = parseInt(numPart || "0") + 1;
-      const padLen = Math.max(numPart.length, String(nextNum).length);
-      return prefix + String(nextNum).padStart(padLen, "0");
-    }
-    return prefix + "0001";
+      .like("ref", `${prefix}%`);
+    let maxNum = 0;
+    (existing || []).forEach(row => {
+      // Solo refs que empiecen exactamente con el prefijo (5 chars) seguido de dígitos
+      const numStr = row.ref?.slice(prefix.length);
+      if (numStr && /^\d+$/.test(numStr)) {
+        maxNum = Math.max(maxNum, parseInt(numStr));
+      }
+    });
+    return prefix + String(maxNum + 1).padStart(4, "0");
+  }
+
+  async function reasignarRef(newAgenteName, currentRef) {
+    // Si cambia el agente, generar nueva ref con el nuevo agente
+    const newPrefix = AGENTE_PREFIX[newAgenteName];
+    if (!newPrefix) return currentRef;
+    // Si la ref actual ya pertenece al nuevo agente, no cambiar
+    if (currentRef?.startsWith(newPrefix)) return currentRef;
+    return await autoGenerateRef(newAgenteName);
   }
 
   return (
@@ -1355,10 +1364,10 @@ REGLAS:
                 <select value={d.agente || ""} onChange={async e => {
                   const agente = e.target.value;
                   upd("agente", agente);
-                  // Si es propiedad nueva (sin ref) y hay agente, generar referencia automática
-                  if (!d.ref && agente) {
-                    const refGenerada = await autoGenerateRef(agente);
-                    if (refGenerada) upd("ref", refGenerada);
+                  if (agente) {
+                    // Siempre regenerar ref al cambiar agente
+                    const newRef = await reasignarRef(agente, d.ref);
+                    if (newRef) upd("ref", newRef);
                   }
                 }}
                   style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "4px 8px", fontSize: 11, fontFamily: "Inter, sans-serif" }}>

@@ -282,21 +282,20 @@ export default function FormularioCaptacion() {
       .then(({ data }) => { if (data) setAgentesDB(data); });
   }, []);
 
-  // Generar referencia automática igual que en Propiedades.jsx
+  // Generar referencia automática — 4 dígitos fijos, máximo real por agente
   async function generarRef(agenteName) {
     const found = agentesDB.find(a => a.nombre === agenteName);
     const prefix = found?.agente_codigo;
     if (!prefix) return;
-    const { data: existing } = await supabase.from("propiedades").select("ref").like("ref", `${prefix}%`).order("ref", { ascending: false }).limit(1);
-    if (existing && existing.length > 0) {
-      const lastRef = existing[0].ref;
-      const numPart = lastRef.replace(prefix, "");
-      const nextNum = parseInt(numPart || "0") + 1;
-      const padLen = Math.max(numPart.length, String(nextNum).length);
-      setRef(prefix + String(nextNum).padStart(padLen, "0"));
-    } else {
-      setRef(prefix + "0001");
-    }
+    const { data: existing } = await supabase.from("propiedades").select("ref").like("ref", `${prefix}%`);
+    let maxNum = 0;
+    (existing || []).forEach(row => {
+      const numStr = row.ref?.slice(prefix.length);
+      if (numStr && /^\d+$/.test(numStr)) {
+        maxNum = Math.max(maxNum, parseInt(numStr));
+      }
+    });
+    setRef(prefix + String(maxNum + 1).padStart(4, "0"));
   }
 
   // Resumen
