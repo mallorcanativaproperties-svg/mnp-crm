@@ -566,7 +566,7 @@ export default function FormularioCaptacion() {
             <Input label="Numero" value={num} onChange={setNum} placeholder="12" />
           </div>
           <div style={g3}>
-            <Input label="Codigo postal" value={cp} onChange={setCp} placeholder="07007" />
+            <Input label="Codigo postal" value={cp} onChange={setCp} placeholder="07007" required />
             <Select label="Municipio" value={municipio} onChange={(v) => { setMunicipio(v); setZona(""); }} options={Object.keys(ZONAS_MAP)} required />
             <Select label="Zona" value={zona} onChange={setZona} options={municipio && ZONAS_MAP[municipio] ? ZONAS_MAP[municipio] : []} />
           </div>
