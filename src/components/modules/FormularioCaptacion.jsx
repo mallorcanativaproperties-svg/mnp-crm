@@ -397,9 +397,7 @@ export default function FormularioCaptacion() {
   // Cualificacion
   const [cualPos, setCualPos] = useState(["", "", "", "", "", ""]);
 
-  // autoSaveRef — debe ir después de todos los useState
-  const autoSaveRef = useRef(null);
-  // Autoguardado reactivo — se dispara cuando cambia cualquier campo
+  // autoSaveRef + useEffect autoguardado — después de todos los useState
   const autoSaveRef = useRef(null);
   useEffect(() => {
     if (!ref || !tipo || !op) return;
