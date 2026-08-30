@@ -258,10 +258,9 @@ function Sec({ title, children, startOpen }) {
 function Fl({ label, value, pub, gold, req }) {
   return (
     <div style={{ marginBottom: 10 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
-        <span style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>
-          {label}{(pub || req) && <span style={{ color: "#A23A3A", marginLeft: 3, fontSize: 14, fontWeight: 700, verticalAlign: "middle" }}>*</span>}
-        </span>
+      <div style={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}>
+        <span style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>{label}</span>
+        {req && <span style={{ color: "#A23A3A", fontSize: 14, fontWeight: 700 }}>*</span>}
       </div>
       <div style={{ fontSize: gold ? 16 : 13, color: gold ? "#AC8A54" : "#22262E", fontFamily: gold ? "'Playfair Display', serif" : "Inter, sans-serif" }}>
         {value || "-"}
@@ -1069,9 +1068,8 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
     return (
       <div style={{ marginBottom: 10 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
-          <span style={{ fontSize: 10, fontWeight: 600, color: hasErr ? "#A23A3A" : "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>
-            {label}{(pub || req) && <span style={{ color: "#A23A3A", marginLeft: 3, fontSize: 14, fontWeight: 700, verticalAlign: "middle" }}>*</span>}
-          </span>
+          <span style={{ fontSize: 10, fontWeight: 600, color: hasErr ? "#A23A3A" : "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>{label}</span>
+          {req && <span style={{ color: "#A23A3A", fontSize: 14, fontWeight: 700 }}>*</span>}
         </div>
         {type === "bool" ? (
           <select value={d[field] ? "true" : "false"} onChange={e => upd(field, e.target.value === "true")} onBlur={() => autoSave(draft)} style={inputStyle}>
@@ -1393,9 +1391,9 @@ REGLAS:
         {/* Resumen */}
         <Sec title="Resumen de la propiedad">
           <div style={g3}>
-            <Fl label="Referencia" value={p.ref} pub={true} />
-            <Fl label="Tipo de operacion" value={p.op} pub={true} />
-            <Fl label="Tipo de propiedad" value={p.tipo} pub={true} />
+            <Fl label="Referencia" value={p.ref} req={true} />
+            <Fl label="Tipo de operacion" value={p.op} req={true} />
+            <Fl label="Tipo de propiedad" value={p.tipo} req={true} />
           </div>
           <div style={{ marginTop: 10 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 5 }}>
