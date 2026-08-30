@@ -93,7 +93,7 @@ function LoadingModule() {
 
 export default function CRMApp() {
   const [currentUser, setCurrentUser] = useState(null);
-  const [activeModule, setActiveModule] = useState("propiedades");
+  const [activeModule, setActiveModule] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [healthAlerts, setHealthAlerts] = useState([]);
 
