@@ -780,13 +780,6 @@ export default function FormularioCaptacion() {
             <Toggle label="Venta con mobiliario" value={ventaMob} onChange={setVentaMob} />
           </div>}
           {tieneAireCalef && <div style={g3}>
-            <div>
-              <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 8 }}>Equipamiento</label>
-              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, color: "#22262E" }}>
-                <input type="checkbox" checked={aireAcond} onChange={e => { setAireAcond(e.target.checked); setAireAcondTipo(e.target.checked ? "Frio/Calor" : ""); }} style={{ width: 16, height: 16, accentColor: "#AC8A54" }} />
-                Aire acondicionado
-              </label>
-            </div>
             <Select label="Calefaccion" value={calefaccion} onChange={setCalefaccion} options={CALEFACCION_OPTS} />
             {esResidencial && <Select label="Agua caliente" value={aguaCal} onChange={setAguaCal} options={AGUA_CALIENTE} />}
           </div>}
@@ -802,6 +795,7 @@ export default function FormularioCaptacion() {
             {ft !== "rustic" && <Toggle label="Ascensor" value={ascensor} onChange={setAscensor} />}
             <Toggle label="Armarios empotrados" value={armarios} onChange={setArmarios} />
             <Toggle label="Trastero" value={trastero} onChange={setTrastero} />
+            {tieneAireCalef && <Toggle label="Aire acondicionado" value={aireAcond} onChange={e => { setAireAcond(e); setAireAcondTipo(e ? "Frio/Calor" : ""); }} />}
           </div>}
           <div style={g3}>
             <Select label="Parking" value={parking} onChange={setParking} options={["Si","No","Comunitario","Opcional"]} />

@@ -1757,13 +1757,6 @@ REGLAS:
             {EFl({label: "Venta con mobiliario", field: "ventaMobiliario", pub: true, type: "bool"})}
           </div>}
           {tieneAireCalef && <div style={{ ...g2, marginTop: 8 }}>
-            {/* Aire acondicionado como checkbox */}
-              <div style={{ marginBottom: 10 }}>
-                <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 12, color: "#22262E", fontFamily: "Inter, sans-serif" }}>
-                  <input type="checkbox" checked={!!d.aireAcond} onChange={e => { upd("aireAcond", e.target.checked); upd("aireAcondTipo", e.target.checked ? "Frio/Calor" : ""); autoSave({...draft, aireAcond: e.target.checked, aireAcondTipo: e.target.checked ? "Frio/Calor" : ""}); }} style={{ width: 16, height: 16, accentColor: "#AC8A54", cursor: "pointer" }} />
-                  Aire acondicionado <span style={{ color: "#A23A3A", fontSize: 10, fontWeight: 600 }}>*</span>
-                </label>
-              </div>
             {EFl({label: "Calefaccion", field: "calefaccion", pub: true, options: ["Individual","Centralizada","No disponible"], type: "select"})}
           </div>}
           <div style={{ ...g2, marginTop: 8 }}>
@@ -1781,6 +1774,7 @@ REGLAS:
               {ft !== "rustic" && EFl({label: "Ascensor", field: "ascensor", pub: true, type: "bool"})}
               {EFl({label: "Armarios", field: "armarios", pub: true, type: "bool"})}
               {EFl({label: "Trastero", field: "trastero", pub: true, type: "bool"})}
+              {tieneAireCalef && EFl({label: "Aire acondicionado", field: "aireAcond", pub: true, type: "bool"})}
             </div>
           </>}
         </Sec>}
