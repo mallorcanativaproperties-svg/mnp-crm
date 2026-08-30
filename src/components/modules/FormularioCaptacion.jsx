@@ -74,7 +74,7 @@ function Input({ label, value, onChange, type, placeholder, required, maxLength 
   return (
     <div style={{ marginBottom: 14 }}>
       <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
-        {label}{required && <span style={{ color: "#9C6E1B", marginLeft: 3 }}>*</span>}
+        {label}{required && <span style={{ color: "#A23A3A", marginLeft: 3, fontWeight: 700, fontSize: 16 }}>*</span>}
       </label>
       <input
         type={type || "text"}
@@ -94,7 +94,7 @@ function Select({ label, value, onChange, options, groups, required }) {
   return (
     <div style={{ marginBottom: 14 }}>
       <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
-        {label}{required && <span style={{ color: "#9C6E1B", marginLeft: 3 }}>*</span>}
+        {label}{required && <span style={{ color: "#A23A3A", marginLeft: 3, fontWeight: 700, fontSize: 16 }}>*</span>}
       </label>
       <select
         value={value}
@@ -399,8 +399,21 @@ export default function FormularioCaptacion() {
   const g4 = { display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "0 20px" };
 
   const handleSubmit = async () => {
-    if (!ref || !tipo || !dir || !municipio) {
-      alert("Completa al menos: Referencia, Tipo, Direccion y Municipio");
+    // Validar campos obligatorios Idealista
+    const errores = [];
+    if (!ref) errores.push("Referencia");
+    if (!tipo) errores.push("Tipo de propiedad");
+    if (!op) errores.push("Tipo de operación");
+    if (!dir) errores.push("Dirección");
+    if (!municipio) errores.push("Municipio");
+    if (!cp) errores.push("Código postal");
+    if (!precioVenta || Number(precioVenta) <= 0) errores.push("Precio de venta");
+    if (!mConst || Number(mConst) <= 0) errores.push("m² construidos");
+    const tipoResidencial = ["Piso","Estudio","Atico","Atico Duplex","Duplex","Planta baja","Casa","Chalet","Adosado","Villa","Finca rustica","Finca"].includes(tipo);
+    if (tipoResidencial && (!banos || Number(banos) <= 0)) errores.push("Baños");
+    if (tipoResidencial && !certE) errores.push("Certificado energético");
+    if (errores.length > 0) {
+      alert("⚠️ Campos obligatorios incompletos:\n\n• " + errores.join("\n• ") + "\n\nCompleta estos campos antes de crear la ficha.");
       return;
     }
     setSaving(true);
@@ -581,7 +594,7 @@ export default function FormularioCaptacion() {
         <Sec title="Superficies y estancias">
           <div style={g4}>
             <Input label="m2 utiles" value={mUtil} onChange={setMUtil} type="number" />
-            <Input label="m2 construidos" value={mConst} onChange={setMConst} type="number" />
+            <Input label="m2 construidos" value={mConst} required onChange={setMConst} type="number" />
             <Input label="m2 parcela" value={mParcela} onChange={setMParcela} type="number" />
             <Input label="m2 terraza" value={mTerraza} onChange={setMTerraza} type="number" />
           </div>
@@ -591,9 +604,9 @@ export default function FormularioCaptacion() {
             <div /><div />
           </div>
           <div style={g4}>
-            <Input label="Hab. dobles" value={habDob} onChange={setHabDob} type="number" />
+            <Input label="Hab. dobles" value={habDob} required onChange={setHabDob} type="number" />
             <Input label="Hab. simples" value={habSim} onChange={setHabSim} type="number" />
-            <Input label="Banos" value={banos} onChange={setBanos} type="number" />
+            <Input label="Banos" value={banos} required onChange={setBanos} type="number" />
             <Input label="Aseos" value={aseos} onChange={setAseos} type="number" />
           </div>
           <div style={g3}>
@@ -610,7 +623,7 @@ export default function FormularioCaptacion() {
         {/* 6. Caracteristicas */}
         <Sec title="Caracteristicas principales">
           <div style={g3}>
-            <Select label="Cert. energetico" value={certE} onChange={setCertE} options={CERT_ENERG} />
+            <Select label="Cert. energetico" value={certE} onChange={setCertE} required options={CERT_ENERG} />
             <Select label="IEE" value={iee} onChange={setIee} options={IEE_OPTS} />
             <Toggle label="Venta con mobiliario" value={ventaMob} onChange={setVentaMob} />
           </div>

@@ -1069,7 +1069,7 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
   const idealistaReady = idealistaFieldErrors.size === 0;
 
   function EFl({ label, field, pub, gold, type = "text", options, req }) {
-    const reqMark = req ? " *" : "";
+    const reqMark = req ? <span style={{color:"#A23A3A",marginLeft:3,fontSize:16,fontWeight:700,verticalAlign:"middle"}}> *</span> : "";
     const hasErr = editMode && idealistaFieldErrors.has(field);
     const borderColor = hasErr ? "#A23A3A" : "#E7E1D4";
     const inputStyle = { width: "100%", background: "#FFFFFF", border: "1px solid " + borderColor, borderRadius: 0, color: "#22262E", padding: "6px 8px", fontSize: 13, fontFamily: "Inter, sans-serif" };
@@ -1079,7 +1079,7 @@ function PropDetail({ p, onClose, onUpdate, onDelete }) {
         <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
           {pub !== undefined && <Dot green={pub} />}
           <span style={{ fontSize: 10, fontWeight: 600, color: hasErr ? "#A23A3A" : "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>
-            {label}{req && <span style={{ color: hasErr ? "#A23A3A" : "#AC8A54", marginLeft: 3, fontSize: 18, fontWeight: 400, lineHeight: "10px", verticalAlign: "middle" }}>*</span>}
+            {label}{req && <span style={{ color: "#A23A3A", marginLeft: 3, fontSize: 16, fontWeight: 700, lineHeight: "10px", verticalAlign: "middle" }}>*</span>}
           </span>
         </div>
         {type === "bool" ? (
@@ -1271,7 +1271,14 @@ REGLAS:
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)", display: "flex", justifyContent: "center", alignItems: "flex-start", padding: "30px 12px", zIndex: 1000, overflowY: "auto" }}>
       <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, width: "100%", maxWidth: 740, padding: "32px 36px", position: "relative" }}>
-        <button onClick={onClose} style={{ position: "absolute", top: 16, right: 20, background: "none", border: "none", color: "#9A968A", fontSize: 20, cursor: "pointer" }}>X</button>
+        <button onClick={() => {
+          if (editMode && idealistaFieldErrors.size > 0) {
+            const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético"};
+            const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join(", ");
+            if (!confirm("⚠️ Faltan campos obligatorios para Idealista:\n\n" + faltantes + "\n\n¿Cerrar sin guardar igualmente?")) return;
+          }
+          onClose();
+        }} style={{ position: "absolute", top: 16, right: 20, background: "none", border: "none", color: "#9A968A", fontSize: 20, cursor: "pointer" }}>✕</button>
         {!editMode && <button onClick={() => { setDraft({ ...p, 
           suministrosText: (p.suministros || []).join(", "),
           cualPosText: (p.cualPos || []).join("\n"),
@@ -1286,6 +1293,12 @@ REGLAS:
             cualMejoras: (draft.cualMejorasText || "").split("\n").filter(Boolean),
             destinos: draft.destinos || [],
           };
+          // Validar campos obligatorios antes de guardar
+          if (idealistaFieldErrors.size > 0) {
+            const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético"};
+            const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join("\n• ");
+            alert("⚠️ Campos obligatorios incompletos:\n\n• " + faltantes + "\n\nCompleta estos campos para poder publicar en Idealista.");
+          }
           if (onUpdate) onUpdate(toSave);
           setEditMode(false);
         }} 
