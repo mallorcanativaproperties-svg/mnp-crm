@@ -979,7 +979,14 @@ function PropDetail({ p, currentUser, onClose, onUpdate, onDelete }) {
   const puedeEditar = isDirector || esAgentePropietario;
   const est = ESTADOS.find((e) => e.key === p.estado) || ESTADOS[0];
   const hon = calcHon(p);
-  // Helper de tipo para condicionalidad
+  const [aiDesc, setAiDesc] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState("");
+  const [editMode, setEditMode] = useState(puedeEditar);
+  const [autoSaveStatus, setAutoSaveStatus] = useState(null);
+  const [calcDesde, setCalcDesde] = useState("venta"); // null | "saving" | "saved" | "error"
+
+  // Helper de tipo para condicionalidad — después de todos los hooks
   const tipoActual = draft.tipo || p.tipo || "";
   const TIPO_MAP_COND = {
     Piso:"flat", Estudio:"flat", Atico:"flat", "Atico Duplex":"flat", Duplex:"flat", "Planta baja":"flat",
@@ -998,24 +1005,16 @@ function PropDetail({ p, currentUser, onClose, onUpdate, onDelete }) {
   const tieneHab = ["flat","house","rustic"].includes(ft);
   const tieneCert = ["flat","house","rustic"].includes(ft);
   const tieneComunidad = ["flat","house","premises_commercial","office","garage","storage"].includes(ft);
-  const tieneBasuras = true; // todos
-  const tieneIBI = true; // todos
+  const tieneBasuras = true;
+  const tieneIBI = true;
   const tieneDerrama = ["flat","house"].includes(ft);
   const tieneInstalaciones = ["flat","house","rustic","premises_commercial","office","building"].includes(ft);
   const tieneElecFont = ["flat","house","rustic","premises_commercial","office"].includes(ft);
-  const tieneExtras = ["flat","house","rustic"].includes(ft); // terraza, balcón, jardín etc.
+  const tieneExtras = ["flat","house","rustic"].includes(ft);
   const tieneAireCalef = ["flat","house","rustic","premises_commercial","office"].includes(ft);
-  // Multimedia
   const tieneVideos = ["flat","house","rustic","premises_commercial","office","building"].includes(ft);
   const tienePlanos = ["flat","house","rustic","premises_commercial","office","building","land"].includes(ft);
   const tieneTour = ["flat","house","rustic","premises_commercial","office","building"].includes(ft);
-
-  const [aiDesc, setAiDesc] = useState("");
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiError, setAiError] = useState("");
-  const [editMode, setEditMode] = useState(puedeEditar);
-  const [autoSaveStatus, setAutoSaveStatus] = useState(null);
-  const [calcDesde, setCalcDesde] = useState("venta"); // null | "saving" | "saved" | "error"
   const [draft, setDraft] = useState({ ...p, 
     suministrosText: (p.suministros || []).join(", "),
     cualPosText: (p.cualPos || []).join("\n"),
