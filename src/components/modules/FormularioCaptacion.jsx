@@ -327,35 +327,9 @@ export default function FormularioCaptacion() {
   const [honorarios, setHonorarios] = useState("5");
   const [ivaHon, setIvaHon] = useState("21");
 
-  // Calculated
   // Motor de cálculo — puede calcularse desde precio venta O desde precio propietario
-  const [calcDesde, setCalcDesde] = useState("venta"); // "venta" | "propietario"
-  const pv = op === "Alquiler" ? (Number(precioAlquiler)||0) : (Number(precioVenta) || 0);
-  const pp = Number(precioProp) || 0;
+  const [calcDesde, setCalcDesde] = useState("venta");
 
-  // Helper condicionalidad por tipo — mismo sistema que ficha
-  const TIPO_MAP_COND = {
-    Piso:"flat", Estudio:"flat", Atico:"flat", "Atico Duplex":"flat", Duplex:"flat", "Planta baja":"flat",
-    Casa:"house", Chalet:"house", Adosado:"house", Villa:"house",
-    "Finca rustica":"rustic", Finca:"rustic",
-    "Local comercial":"premises_commercial", Local:"premises_commercial",
-    Oficina:"office", Parking:"garage", Garaje:"garage",
-    Terreno:"land", Trastero:"storage", Edificio:"building",
-  };
-  const ft = TIPO_MAP_COND[tipo] || "flat";
-  const esResidencial = ["flat","house","rustic"].includes(ft);
-  const esComercial = ["premises_commercial","office"].includes(ft);
-  const esGaraje = ["garage","storage"].includes(ft);
-  const esTerreno = ft === "land";
-  const esEdificio = ft === "building";
-  const tieneHab = ["flat","house","rustic"].includes(ft);
-  const tieneCert = ["flat","house","rustic"].includes(ft);
-  const tieneComunidad = ["flat","house","premises_commercial","office","garage","storage"].includes(ft);
-  const tieneDerrama = ["flat","house"].includes(ft);
-  const tieneInstalaciones = ["flat","house","rustic","premises_commercial","office","building"].includes(ft);
-  const tieneElecFont = ["flat","house","rustic","premises_commercial","office"].includes(ft);
-  const tieneExtras = ["flat","house","rustic"].includes(ft);
-  const tieneAireCalef = ["flat","house","rustic","premises_commercial","office"].includes(ft);
   const ivaRate = (Number(ivaHon)||21) / 100;
   const pct = (Number(honorarios)||0) / 100;
 
@@ -445,6 +419,33 @@ export default function FormularioCaptacion() {
 
   // Cualificacion
   const [cualPos, setCualPos] = useState(["", "", "", "", "", ""]);
+  // Helper condicionalidad por tipo — después de todos los hooks
+  const TIPO_MAP_COND = {
+    Piso:"flat", Estudio:"flat", Atico:"flat", "Atico Duplex":"flat", Duplex:"flat", "Planta baja":"flat",
+    Casa:"house", Chalet:"house", Adosado:"house", Villa:"house",
+    "Finca rustica":"rustic", Finca:"rustic",
+    "Local comercial":"premises_commercial", Local:"premises_commercial",
+    Oficina:"office", Parking:"garage", Garaje:"garage",
+    Terreno:"land", Trastero:"storage", Edificio:"building",
+  };
+  const ft = TIPO_MAP_COND[tipo] || "flat";
+  const esResidencial = ["flat","house","rustic"].includes(ft);
+  const esComercial = ["premises_commercial","office"].includes(ft);
+  const esGaraje = ["garage","storage"].includes(ft);
+  const esTerreno = ft === "land";
+  const esEdificio = ft === "building";
+  const tieneHab = ["flat","house","rustic"].includes(ft);
+  const tieneCert = ["flat","house","rustic"].includes(ft);
+  const tieneComunidad = ["flat","house","premises_commercial","office","garage","storage"].includes(ft);
+  const tieneDerrama = ["flat","house"].includes(ft);
+  const tieneInstalaciones = ["flat","house","rustic","premises_commercial","office","building"].includes(ft);
+  const tieneElecFont = ["flat","house","rustic","premises_commercial","office"].includes(ft);
+  const tieneExtras = ["flat","house","rustic"].includes(ft);
+  const tieneAireCalef = ["flat","house","rustic","premises_commercial","office"].includes(ft);
+
+
+  
+
 
   const g2 = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 20px" };
   const g3 = { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0 20px" };
@@ -485,6 +486,7 @@ export default function FormularioCaptacion() {
         duracion_min_meses: Number(duracionMinMeses) || 11,
         mascotas: mascotas,
         honorarios: Number(honorarios) || 5,
+        hon_neto_manual: Number(honNetoManual) || 0,
         honorarios_tipo: honorariosTipo,
         iva_hon: Number(ivaHon) || 21,
         ibi: Number(ibi) || 0,
@@ -851,4 +853,8 @@ export default function FormularioCaptacion() {
       </div>
     </div>
   );
-}
+} // "venta" | "propietario"
+  const pv = op === "Alquiler" ? (Number(precioAlquiler)||0) : (Number(precioVenta) || 0);
+  const pp = Number(precioProp) || 0;
+
+
