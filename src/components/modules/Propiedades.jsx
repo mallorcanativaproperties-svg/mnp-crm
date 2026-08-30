@@ -8,7 +8,7 @@ function mapDbToJs(row) {
     titulo: row.titulo || "", dir: row.dir || "", num: row.num || "", cp: row.cp || "",
     municipio: row.municipio || "", zona: row.zona || "",
     visDir: row.vis_dir || "Ocultar direccion", orient: row.orient || "", distPlaya: row.dist_playa || "",
-    precioVenta: Number(row.precio_venta) || 0, precioProp: Number(row.precio_prop) || 0, precioAnt: Number(row.precio_ant) || 0, precioTraspaso: Number(row.precio_traspaso) || 0,
+    precioVenta: Number(row.precio_venta) || 0, precioProp: Number(row.precio_prop) || 0, precioTraspaso: Number(row.precio_traspaso) || 0, precioAlquiler: Number(row.precio_alquiler) || 0, fianzaMeses: Number(row.fianza_meses) || 1, duracionMinMeses: Number(row.duracion_min_meses) || 11, mascotas: row.mascotas || false,
     honorariosTipo: row.honorarios_tipo || "porcentaje", honorarios: Number(row.honorarios) || 0, ivaHon: Number(row.iva_hon) || 21,
     certEnerg: row.cert_energ || "", conserv: row.conserv || "", anoConstruc: row.ano_construc || "",
     mUtil: Number(row.m_util) || 0, mConst: Number(row.m_const) || 0, mParcela: Number(row.m_parcela) || 0, mTerraza: Number(row.m_terraza) || 0, mBalcon: Number(row.m_balcon) || 0, mPorche: Number(row.m_porche) || 0,
@@ -40,7 +40,7 @@ function mapJsToDb(p) {
   return {
     ref: p.ref, tipo: p.tipo, op: p.op, titulo: p.titulo, dir: p.dir, num: p.num, cp: p.cp,
     municipio: p.municipio, zona: p.zona, vis_dir: p.visDir, orient: p.orient, dist_playa: p.distPlaya,
-    precio_venta: Number(p.precioVenta) || 0, precio_prop: Number(p.precioProp) || 0, precio_ant: Number(p.precioAnt) || 0, precio_traspaso: Number(p.precioTraspaso) || 0,
+    precio_venta: Number(p.precioVenta) || 0, precio_prop: Number(p.precioProp) || 0, precio_traspaso: Number(p.precioTraspaso) || 0, precio_alquiler: Number(p.precioAlquiler) || 0, fianza_meses: Number(p.fianzaMeses) || 1, duracion_min_meses: Number(p.duracionMinMeses) || 11, mascotas: p.mascotas || false,
     honorarios_tipo: p.honorariosTipo, honorarios: Number(p.honorarios) || 0, iva_hon: Number(p.ivaHon) || 0,
     cert_energ: p.certEnerg, conserv: p.conserv, ano_construc: p.anoConstruc,
     m_util: Number(p.mUtil) || 0, m_const: Number(p.mConst) || 0, m_parcela: Number(p.mParcela) || 0, m_terraza: Number(p.mTerraza) || 0, m_balcon: Number(p.mBalcon) || 0, m_porche: Number(p.mPorche) || 0,
@@ -1474,12 +1474,26 @@ REGLAS:
         {/* Datos de venta */}
         <Sec title="Datos de venta">
           <div style={g3}>
-            {EFl({label: "Precio de venta", req: true, field: "precioVenta", pub: true, gold: true, type: "number"})}
+            {/* Precio condicional según operación */}
+            {d.op !== "Alquiler" && EFl({label: "Precio de venta", req: d.op !== "Alquiler", field: "precioVenta", pub: true, gold: true, type: "number"})}
+            {d.op === "Alquiler" && EFl({label: "Renta mensual", req: true, field: "precioAlquiler", pub: true, gold: true, type: "number"})}
             {EFl({label: "Precio propietario", field: "precioProp", pub: false, type: "number"})}
-
           </div>
+          {/* Campos específicos de Alquiler */}
+          {d.op === "Alquiler" && (
+            <div style={{ ...g3, marginTop: 8 }}>
+              {EFl({label: "Fianza (meses)", field: "fianzaMeses", pub: true, type: "number"})}
+              {EFl({label: "Duracion minima (meses)", field: "duracionMinMeses", pub: true, type: "number"})}
+              {EFl({label: "Mascotas permitidas", field: "mascotas", pub: true, type: "bool"})}
+            </div>
+          )}
+          {/* Campos específicos de Traspaso */}
+          {d.op === "Traspaso" && (
+            <div style={{ ...g3, marginTop: 8 }}>
+              {EFl({label: "Precio traspaso", field: "precioTraspaso", pub: true, type: "number"})}
+            </div>
+          )}
           <div style={{ ...g3, marginTop: 8 }}>
-            {EFl({label: "Precio traspaso", field: "precioTraspaso", pub: true, type: "number"})}
             {editMode ? (
               <div style={{ marginBottom: 10 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
@@ -1789,7 +1803,8 @@ function IdealistaJsonButton({ supabase }) {
   function isValid(row) {
     if (!row.ref||!row.tipo||!row.municipio||!row.dir) return false;
     if (!row.cp&&!(row.latitud&&row.longitud)) return false;
-    if (!Number(row.precio_venta)||Number(row.precio_venta)<=0) return false;
+    const precioOp = row.op === "Alquiler" ? Number(row.precio_alquiler) : Number(row.precio_venta);
+    if(!precioOp||precioOp<=0) return false;
     if (!Number(row.m_const)||Number(row.m_const)<=0) return false;
     if (!row.op||!row.desc_texto?.trim()) return false;
     const tipo=TIPO_MAP[row.tipo]; if(!tipo) return false;
@@ -1808,9 +1823,19 @@ function IdealistaJsonButton({ supabase }) {
     const isPenthouse=row.tipo==="Atico"||row.tipo==="Atico Duplex";
     const isStudio=row.tipo==="Estudio";
     const property={propertyCode:row.ref,propertyReference:row.ref,propertyVisibility:"idealista"};
-    const price=Number(row.precio_venta)||0;
-    const op={operationType:row.op==="Alquiler"?"rent":"sale"};
+    // Precio y tipo de operación según modalidad
+    const opType = row.op === "Alquiler" ? "rent" : row.op === "Traspaso" ? "transfer" : "sale";
+    const price = row.op === "Alquiler" ? (Number(row.precio_alquiler)||0) : (Number(row.precio_venta)||0);
+    const op = {operationType: opType};
     if(price>0) op.operationPrice=price;
+    // Traspaso: incluir también precio de traspaso si existe
+    if(row.op === "Traspaso" && Number(row.precio_traspaso)>0) op.operationPriceTransfer = Number(row.precio_traspaso);
+    // Alquiler: incluir fianza y duración
+    if(row.op === "Alquiler") {
+      if(Number(row.fianza_meses)>0) op.operationDeposit = Number(row.fianza_meses);
+      if(Number(row.duracion_min_meses)>0) op.operationMinimumTerm = Number(row.duracion_min_meses);
+      if(row.mascotas === true) op.operationPetsAllowed = true;
+    }
     const community=Number(row.comunidad)||0; if(community>0) op.operationPriceCommunity=community;
     property.propertyOperation=op;
     property.propertyContact={contactName:"Mallorca Nativa Properties",contactEmail:"mallorcanativaproperties@gmail.com",contactPrimaryPhonePrefix:"34",contactPrimaryPhoneNumber:"655882682"};
@@ -2272,7 +2297,7 @@ export default function CRMPropiedades() {
                 const newProp = {
                   id: null, ref: "", tipo: "Piso", op: "Compraventa", estado: "borrador", titulo: "",
                   dir: "", num: "", cp: "", puerta: "", municipio: "", zona: "", orient: "", distPlaya: "", visDir: "Ocultar direccion", planta: "",
-                  precioVenta: 0, precioProp: 0, precioAnt: 0, precioTraspaso: 0,
+                  precioVenta: 0, precioProp: 0, precioTraspaso: 0, precioAlquiler: 0, fianzaMeses: 1, duracionMinMeses: 11, mascotas: false, precioAnt: 0, precioTraspaso: 0,
                   honorarios: 5, honorariosTipo: "porcentaje", ivaHon: 21,
                   mConst: 0, mUtil: 0, mParcela: 0, mTerraza: 0, mBalcon: 0, mPorche: 0,
                   habDobles: 0, habSimples: 0, banos: 0, aseos: 0,

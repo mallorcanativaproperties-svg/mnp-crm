@@ -319,6 +319,10 @@ export default function FormularioCaptacion() {
   const [precioVenta, setPrecioVenta] = useState("");
   const [precioProp, setPrecioProp] = useState("");
   const [precioTraspaso, setPrecioTraspaso] = useState("");
+  const [precioAlquiler, setPrecioAlquiler] = useState("");
+  const [fianzaMeses, setFianzaMeses] = useState("1");
+  const [duracionMinMeses, setDuracionMinMeses] = useState("11");
+  const [mascotas, setMascotas] = useState(false);
   const [honorariosTipo, setHonorariosTipo] = useState("porcentaje");
   const [honorarios, setHonorarios] = useState("5");
   const [ivaHon, setIvaHon] = useState("21");
@@ -407,7 +411,8 @@ export default function FormularioCaptacion() {
     if (!dir) errores.push("Dirección");
     if (!municipio) errores.push("Municipio");
     if (!cp) errores.push("Código postal");
-    if (!precioVenta || Number(precioVenta) <= 0) errores.push("Precio de venta");
+    if (op !== "Alquiler" && (!precioVenta || Number(precioVenta) <= 0)) errores.push("Precio de venta");
+    if (op === "Alquiler" && (!precioAlquiler || Number(precioAlquiler) <= 0)) errores.push("Renta mensual");
     if (!mConst || Number(mConst) <= 0) errores.push("m² construidos");
     const tipoResidencial = ["Piso","Estudio","Atico","Atico Duplex","Duplex","Planta baja","Casa","Chalet","Adosado","Villa","Finca rustica","Finca"].includes(tipo);
     if (tipoResidencial && (!banos || Number(banos) <= 0)) errores.push("Baños");
@@ -427,6 +432,10 @@ export default function FormularioCaptacion() {
         precio_venta: Number(precioVenta) || 0,
         precio_prop: Number(precioProp) || 0,
         precio_traspaso: Number(precioTraspaso) || 0,
+        precio_alquiler: Number(precioAlquiler) || 0,
+        fianza_meses: Number(fianzaMeses) || 1,
+        duracion_min_meses: Number(duracionMinMeses) || 11,
+        mascotas: mascotas,
         honorarios: Number(honorarios) || 5,
         honorarios_tipo: honorariosTipo,
         iva_hon: Number(ivaHon) || 21,
@@ -671,8 +680,19 @@ export default function FormularioCaptacion() {
         {/* 10. Datos de venta */}
         <Sec title="Datos de venta">
           <div style={g2}>
-            <Input label="Precio de venta" value={precioVenta} onChange={setPrecioVenta} type="number" placeholder="399000" required />
+            {/* Precio principal condicional */}
+            {op !== "Alquiler" && <Input label="Precio de venta" value={precioVenta} onChange={setPrecioVenta} type="number" placeholder="399000" required={op !== "Alquiler"} />}
+            {op === "Alquiler" && <Input label="Renta mensual" value={precioAlquiler} onChange={setPrecioAlquiler} type="number" placeholder="1200" required />}
           </div>
+          {/* Campos específicos de Alquiler */}
+          {op === "Alquiler" && (
+            <div style={g3}>
+              <Input label="Fianza (meses)" value={fianzaMeses} onChange={setFianzaMeses} type="number" placeholder="1" />
+              <Input label="Duracion minima (meses)" value={duracionMinMeses} onChange={setDuracionMinMeses} type="number" placeholder="11" />
+              <Toggle label="Mascotas permitidas" value={mascotas} onChange={setMascotas} />
+            </div>
+          )}
+          {/* Campos específicos de Traspaso */}
           {op === "Traspaso" && (
             <Input label="Precio traspaso" value={precioTraspaso} onChange={setPrecioTraspaso} type="number" />
           )}
