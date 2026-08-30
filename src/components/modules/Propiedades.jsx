@@ -9,7 +9,7 @@ function mapDbToJs(row) {
     municipio: row.municipio || "", zona: row.zona || "",
     visDir: row.vis_dir || "Ocultar direccion", orient: row.orient || "", distPlaya: row.dist_playa || "",
     precioVenta: Number(row.precio_venta) || 0, precioProp: Number(row.precio_prop) || 0, precioTraspaso: Number(row.precio_traspaso) || 0, precioAlquiler: Number(row.precio_alquiler) || 0, fianzaMeses: Number(row.fianza_meses) || 1, duracionMinMeses: Number(row.duracion_min_meses) || 11, mascotas: row.mascotas || false,
-    honorariosTipo: row.honorarios_tipo || "porcentaje", honorarios: Number(row.honorarios) || 0, ivaHon: Number(row.iva_hon) || 21,
+    honorariosTipo: row.honorarios_tipo || "porcentaje", honorarios: Number(row.honorarios) || 0, ivaHon: Number(row.iva_hon) || 21, honNetoManual: Number(row.hon_neto_manual) || 0,
     certEnerg: row.cert_energ || "", conserv: row.conserv || "", anoConstruc: row.ano_construc || "",
     mUtil: Number(row.m_util) || 0, mConst: Number(row.m_const) || 0, mParcela: Number(row.m_parcela) || 0, mTerraza: Number(row.m_terraza) || 0, mBalcon: Number(row.m_balcon) || 0, mPorche: Number(row.m_porche) || 0,
     habDobles: Number(row.hab_dobles) || 0, habSimples: Number(row.hab_simples) || 0, banos: Number(row.banos) || 0, aseos: Number(row.aseos) || 0, planta: row.planta || "",
@@ -41,7 +41,7 @@ function mapJsToDb(p) {
     ref: p.ref, tipo: p.tipo, op: p.op, titulo: p.titulo, dir: p.dir, num: p.num, cp: p.cp,
     municipio: p.municipio, zona: p.zona, vis_dir: p.visDir, orient: p.orient, dist_playa: p.distPlaya,
     precio_venta: Number(p.precioVenta) || 0, precio_prop: Number(p.precioProp) || 0, precio_traspaso: Number(p.precioTraspaso) || 0, precio_alquiler: Number(p.precioAlquiler) || 0, fianza_meses: Number(p.fianzaMeses) || 1, duracion_min_meses: Number(p.duracionMinMeses) || 11, mascotas: p.mascotas || false,
-    honorarios_tipo: p.honorariosTipo, honorarios: Number(p.honorarios) || 0, iva_hon: Number(p.ivaHon) || 0,
+    honorarios_tipo: p.honorariosTipo, honorarios: Number(p.honorarios) || 0, iva_hon: Number(p.ivaHon) || 0, hon_neto_manual: Number(p.honNetoManual) || 0,
     cert_energ: p.certEnerg, conserv: p.conserv, ano_construc: p.anoConstruc,
     m_util: Number(p.mUtil) || 0, m_const: Number(p.mConst) || 0, m_parcela: Number(p.mParcela) || 0, m_terraza: Number(p.mTerraza) || 0, m_balcon: Number(p.mBalcon) || 0, m_porche: Number(p.mPorche) || 0,
     hab_dobles: Number(p.habDobles) || 0, hab_simples: Number(p.habSimples) || 0, banos: Number(p.banos) || 0, aseos: Number(p.aseos) || 0, planta: p.planta,
@@ -130,7 +130,7 @@ const SAMPLE = [
     municipio: "Palma", zona: "Pere Garau",
     visDir: "Direccion exacta", orient: "Sur", distPlaya: "2 km",
     precioVenta: 399000, precioProp: 374861, precioAnt: 420000, precioTraspaso: 0,
-    honorariosTipo: "porcentaje", honorarios: 5, ivaHon: 21,
+    honorariosTipo: "porcentaje", honorarios: 5, ivaHon: 21, honNetoManual: 0,
     certEnerg: "D", conserv: "Reformado", anoConstruc: "2005",
     mUtil: 90, mConst: 105, mParcela: 0, mTerraza: 12, mBalcon: 4, mPorche: 0,
     habDobles: 2, habSimples: 0, banos: 2, aseos: 0, planta: "2a",
@@ -1500,6 +1500,23 @@ REGLAS:
                   </select>
                   <input type="number" value={d.honorarios ?? 0} onChange={e => upd("honorarios", Number(e.target.value))} onFocus={e => { if (e.target.value === "0") e.target.select(); }}
                     style={{ flex: 1, background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "6px 8px", fontSize: 13, fontFamily: "Inter, sans-serif" }} />
+              </div>
+              {/* Hon. neto: editable si fijo, calculado si porcentaje */}
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
+                  <Dot green={false} />
+                  <span style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>Hon. neto</span>
+                </div>
+                {d.honorariosTipo === "fijo" ? (
+                  <input type="number" value={d.honNetoManual ?? 0} onChange={e => upd("honNetoManual", Number(e.target.value))} onFocus={e => { if (e.target.value === "0") e.target.select(); }} onBlur={() => autoSave(draft)}
+                    style={{ width: "100%", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "6px 8px", fontSize: 13, fontFamily: "Inter, sans-serif" }} />
+                ) : (
+                  <div style={{ padding: "6px 8px", background: "#F8F6F1", border: "1px solid #E7E1D4", fontSize: 13, color: "#16294A", fontWeight: 600 }}>
+                    {d.precioVenta > 0 ? fmtP(Math.round(d.precioVenta * ((Number(d.honorarios)||0)/100))) : "—"}
+                  </div>
+                )}
+              </div>
+              <div style={{ display: "none" }}>
                 </div>
               </div>
             ) : (
@@ -1511,28 +1528,25 @@ REGLAS:
           {(() => {
             const pv = d.op === "Alquiler" ? (Number(d.precioAlquiler)||0) : (Number(d.precioVenta)||0);
             const pp = Number(d.precioProp)||0;
-            const calcHon = (base) => d.honorariosTipo === "porcentaje" ? base * ((Number(d.honorarios)||0)/100) : (Number(d.honorarios)||0);
             const ivaRate = (Number(d.ivaHon)||21) / 100;
+            const pct = (Number(d.honorarios)||0) / 100;
             let honBase, iva, honTotal, netoVend, precioCalc;
             if (calcDesde === "propietario" && pp > 0 && d.op !== "Alquiler") {
               if (d.honorariosTipo === "porcentaje") {
-                const pct = (Number(d.honorarios)||0)/100;
                 precioCalc = pp / (1 - pct*(1+ivaRate));
+                honBase = precioCalc * pct;
               } else {
-                const h = Number(d.honorarios)||0;
-                precioCalc = pp + h + h*ivaRate;
+                honBase = Number(d.honNetoManual)||0;
+                precioCalc = pp + honBase + honBase*ivaRate;
               }
-              honBase = calcHon(precioCalc);
-              iva = honBase * ivaRate;
-              honTotal = honBase + iva;
               netoVend = pp;
             } else {
               precioCalc = pv;
-              honBase = calcHon(pv);
-              iva = honBase * ivaRate;
-              honTotal = honBase + iva;
-              netoVend = pv - honTotal;
+              honBase = d.honorariosTipo === "porcentaje" ? precioCalc * pct : (Number(d.honNetoManual)||0);
+              netoVend = precioCalc - (honBase + honBase*ivaRate);
             }
+            iva = honBase * ivaRate;
+            honTotal = honBase + iva;
             return (
               <div style={{ marginTop: 14, padding: "14px 16px", background: "#F4EEE0", border: "1px solid #E7D9C0" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>

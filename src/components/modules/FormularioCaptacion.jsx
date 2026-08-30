@@ -324,6 +324,7 @@ export default function FormularioCaptacion() {
   const [duracionMinMeses, setDuracionMinMeses] = useState("11");
   const [mascotas, setMascotas] = useState(false);
   const [honorariosTipo, setHonorariosTipo] = useState("porcentaje");
+  const [honNetoManual, setHonNetoManual] = useState("");
   const [honorarios, setHonorarios] = useState("5");
   const [ivaHon, setIvaHon] = useState("21");
 
@@ -332,34 +333,31 @@ export default function FormularioCaptacion() {
   const [calcDesde, setCalcDesde] = useState("venta"); // "venta" | "propietario"
   const pv = op === "Alquiler" ? (Number(precioAlquiler)||0) : (Number(precioVenta) || 0);
   const pp = Number(precioProp) || 0;
-  
-  // Si calcula desde propietario: precio venta = precio prop + honorarios + IVA
-  const calcHonNeto = (base) => honorariosTipo === "porcentaje" ? base * ((Number(honorarios)||0) / 100) : (Number(honorarios)||0);
-  
+  const ivaRate = (Number(ivaHon)||21) / 100;
+  const pct = (Number(honorarios)||0) / 100;
+
   let honNeto, honIva, honTotal, netoProp, precioCalc;
-  if (calcDesde === "propietario" && pp > 0) {
-    // Desde precio propietario: calcular precio de venta
+  if (calcDesde === "propietario" && pp > 0 && op !== "Alquiler") {
+    // Desde precio propietario → precio venta = pp / (1 - pct*(1+ivaRate))
     if (honorariosTipo === "porcentaje") {
-      const pct = (Number(honorarios)||0) / 100;
-      const ivaRate = (Number(ivaHon)||21) / 100;
-      // precioVenta = precioProp / (1 - pct*(1+ivaRate))
       precioCalc = pp / (1 - pct * (1 + ivaRate));
+      honNeto = precioCalc * pct;
     } else {
-      const hon = Number(honorarios)||0;
-      const ivaHonCalc = hon * ((Number(ivaHon)||21) / 100);
-      precioCalc = pp + hon + ivaHonCalc;
+      // Fijo: hon neto es el que introduce el agente manualmente
+      honNeto = Number(honNetoManual) || 0;
+      precioCalc = pp + honNeto + honNeto * ivaRate;
     }
-    honNeto = calcHonNeto(precioCalc);
-    honIva = honNeto * ((Number(ivaHon)||21) / 100);
-    honTotal = honNeto + honIva;
-    netoProp = pp;
   } else {
     precioCalc = pv;
-    honNeto = calcHonNeto(pv);
-    honIva = honNeto * ((Number(ivaHon)||21) / 100);
-    honTotal = honNeto + honIva;
-    netoProp = pv - honTotal;
+    if (honorariosTipo === "porcentaje") {
+      honNeto = precioCalc * pct;
+    } else {
+      honNeto = Number(honNetoManual) || 0;
+    }
   }
+  honIva = honNeto * ivaRate;
+  honTotal = honNeto + honIva;
+  netoProp = (calcDesde === "propietario" && pp > 0 && op !== "Alquiler") ? pp : precioCalc - honTotal;
 
   // Gastos
   const [ibi, setIbi] = useState("");
@@ -728,7 +726,16 @@ export default function FormularioCaptacion() {
             <Select label="Tipo honorarios" value={honorariosTipo} onChange={setHonorariosTipo} options={["porcentaje", "fijo"]} />
             <Input label={honorariosTipo === "porcentaje" ? "Honorarios (%)" : "Honorarios (EUR)"} value={honorarios} onChange={setHonorarios} type="number" placeholder={honorariosTipo === "porcentaje" ? "5" : "15000"} />
             <Input label="IVA honorarios (%)" value={ivaHon} onChange={setIvaHon} type="number" placeholder="21" />
-
+          </div>
+          <div style={g3}>
+            {honorariosTipo === "fijo" ? (
+              <Input label="Hon. neto (introducir manualmente)" value={honNetoManual} onChange={setHonNetoManual} type="number" placeholder="0" />
+            ) : (
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Hon. neto (calculado)</div>
+                <div style={{ padding: "9px 12px", background: "#F8F6F1", border: "1px solid #E7E1D4", fontSize: 13, color: "#16294A", fontWeight: 600 }}>{(pv > 0 || pp > 0) ? fmtP(Math.round(honNeto)) : "—"}</div>
+              </div>
+            )}
           </div>
           {(pv > 0 || pp > 0) && Number(honorarios) > 0 && (
             <div style={{ padding: "14px 16px", background: "#F4EEE0", border: "1px solid #E7D9C0", marginBottom: 14 }}>
