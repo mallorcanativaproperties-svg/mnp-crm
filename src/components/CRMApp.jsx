@@ -93,7 +93,7 @@ function LoadingModule() {
 
 export default function CRMApp() {
   const [currentUser, setCurrentUser] = useState(null);
-  const [activeModule, setActiveModule] = useState("propiedades");
+  const [activeModule, setActiveModule] = useState("captacion");
   const [sidebarOpen, setSidebarOpen] = useState(typeof window !== "undefined" ? window.innerWidth > 768 : true);
   const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth <= 768 : false);
 
