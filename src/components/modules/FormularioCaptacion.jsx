@@ -435,7 +435,7 @@ export default function FormularioCaptacion() {
       parking, nPlazas, ventanas, aireAcond, aireAcondTipo, tipologiaChalet, plantasChalet, suelos, carpExt, carpInt,
       emisionesEnerg, calefaccion, aguaCal, suministros, drenaje,
       elecRef, fontRef, notasPriv, propNom, propTel, propEmail, cualPos, cualNeg]);
-  const pv = op === "Alquiler" ? (Number(precioAlquiler)||0) : (Number(precioVenta) || 0);
+  const pv = op === "Alquiler" ? (Number(precioAlquiler)||0) : op === "Traspaso" ? (Number(precioTraspaso)||0) : (Number(precioVenta) || 0);
   const pp = Number(precioProp) || 0;
 
   const ivaRate = (Number(ivaHon)||21) / 100;

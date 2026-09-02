@@ -1049,7 +1049,8 @@ function PropDetail({ p, currentUser, onClose, onUpdate, onDelete, onDuplicate }
     if (!src.dir) errs.add("dir");
     if (!src.municipio) errs.add("municipio");
     if (!src.cp && !(src.latitud && src.longitud)) errs.add("cp");
-    if (!Number(src.precioVenta) || Number(src.precioVenta) <= 0) errs.add("precioVenta");
+    const precioCheck = src.op === "Alquiler" ? Number(src.precioAlquiler) : src.op === "Traspaso" ? Number(src.precioTraspaso) : Number(src.precioVenta);
+    if (!precioCheck || precioCheck <= 0) errs.add("precioVenta");
     if (!Number(src.mConst) || Number(src.mConst) <= 0) errs.add("mConst");
     if (!src.desc || !src.desc.trim()) errs.add("desc");
     if (needsBaths && (!Number(src.banos) || Number(src.banos) <= 0)) errs.add("banos");
@@ -1611,7 +1612,7 @@ REGLAS:
           </div>
           {/* Motor de cálculo dual — desde precio venta o desde precio propietario */}
           {(() => {
-            const pv = d.op === "Alquiler" ? (Number(d.precioAlquiler)||0) : (Number(d.precioVenta)||0);
+            const pv = d.op === "Alquiler" ? (Number(d.precioAlquiler)||0) : d.op === "Traspaso" ? (Number(d.precioTraspaso)||0) : (Number(d.precioVenta)||0);
             const pp = Number(d.precioProp)||0;
             const ivaRate = (Number(d.ivaHon)||21) / 100;
             const pct = (Number(d.honorarios)||0) / 100;
@@ -2013,7 +2014,7 @@ function IdealistaJsonButton({ supabase }) {
   function isValid(row) {
     if (!row.ref||!row.tipo||!row.municipio||!row.dir) return false;
     if (!row.cp&&!(row.latitud&&row.longitud)) return false;
-    const precioOp = row.op === "Alquiler" ? Number(row.precio_alquiler) : Number(row.precio_venta);
+    const precioOp = row.op === "Alquiler" ? Number(row.precio_alquiler) : row.op === "Traspaso" ? Number(row.precio_traspaso) : Number(row.precio_venta);
     if(!precioOp||precioOp<=0) return false;
     if (!row.op||!row.desc_texto?.trim()) return false;
     const tipo=TIPO_MAP[row.tipo]; if(!tipo) return false;
@@ -2043,11 +2044,11 @@ function IdealistaJsonButton({ supabase }) {
     const property={propertyCode:row.ref,propertyReference:row.ref,propertyVisibility:"idealista"};
     // Precio y tipo de operación según modalidad
     const opType = row.op === "Alquiler" ? "rent" : row.op === "Traspaso" ? "transfer" : "sale";
-    const price = row.op === "Alquiler" ? (Number(row.precio_alquiler)||0) : (Number(row.precio_venta)||0);
+    const price = row.op === "Alquiler" ? (Number(row.precio_alquiler)||0) : row.op === "Traspaso" ? (Number(row.precio_traspaso)||0) : (Number(row.precio_venta)||0);
     const op = {operationType: opType};
     if(price>0) op.operationPrice=price;
-    // Traspaso: incluir también precio de traspaso si existe
-    if(row.op === "Traspaso" && Number(row.precio_traspaso)>0) op.operationPriceTransfer = Number(row.precio_traspaso);
+    // Traspaso: precio_venta es el precio del local (opcional)
+    if(row.op === "Traspaso" && Number(row.precio_venta)>0) op.operationPriceTransfer = Number(row.precio_venta);
     // Alquiler: incluir fianza y duración
     if(row.op === "Alquiler") {
       if(Number(row.fianza_meses)>0) op.operationDeposit = Number(row.fianza_meses);
