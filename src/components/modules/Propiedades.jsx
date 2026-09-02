@@ -1793,7 +1793,7 @@ REGLAS:
           {esResidencial && <div style={{ ...g3, marginTop: 8 }}>
             {EFl({label: "Agua caliente", field: "aguaCal", pub: true})}
             {EFl({label: "Ventanas", field: "ventanas", pub: true, options: ["Interior","Exterior"], type: "select"})}
-            {EFl({label: "Venta con mobiliario", field: "ventaMobiliario", pub: true, type: "bool"})}
+            {d.op === "Alquiler" && EFl({label: "Incluye mobiliario", field: "ventaMobiliario", pub: true, type: "bool"})}
           </div>}
           {tieneAireCalef && <div style={{ ...g2, marginTop: 8 }}>
             {EFl({label: "Calefaccion", field: "calefaccion", pub: true, options: ["Individual","Centralizada","No disponible"], type: "select"})}

@@ -776,8 +776,8 @@ export default function FormularioCaptacion() {
             <Select label="Carp. exterior" value={carpExt} onChange={setCarpExt} options={["Aluminio","Aluminio con RPT","PVC","Madera","Climalit","Doble cristal","Triple cristal","Hierro/Forja"]} />
             <Select label="Carp. interior" value={carpInt} onChange={setCarpInt} options={["Lacado blanco","Roble","Cerezo","Haya","Pino","Wengue","Nogal","DM lacado","Cristal","Corredera","Block"]} />
           </div>}
-          {esResidencial && <div style={g3}>
-            <Toggle label="Venta con mobiliario" value={ventaMob} onChange={setVentaMob} />
+          {esResidencial && op === "Alquiler" && <div style={g3}>
+            <Toggle label="Incluye mobiliario" value={ventaMob} onChange={setVentaMob} />
           </div>}
           {tieneAireCalef && <div style={g3}>
             <Select label="Calefaccion" value={calefaccion} onChange={setCalefaccion} options={CALEFACCION_OPTS} />
