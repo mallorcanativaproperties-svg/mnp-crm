@@ -982,6 +982,8 @@ function PropDetail({ p, currentUser, onClose, onUpdate, onDelete, onDuplicate }
   const [aiDesc, setAiDesc] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
+  const [translating, setTranslating] = useState(false);
+  const [translateError, setTranslateError] = useState("");
   const [editMode, setEditMode] = useState(puedeEditar);
   const [autoSaveStatus, setAutoSaveStatus] = useState(null);
   const [calcDesde, setCalcDesde] = useState("venta"); // null | "saving" | "saved" | "error"
@@ -1238,6 +1240,40 @@ REGLAS:
   }
 
   const [agentesDB, setAgentesDB] = useState([]);
+
+  async function traducirDescripcion() {
+    const textoEs = draft.desc || "";
+    if (!textoEs.trim()) {
+      setTranslateError("Escribe primero la descripción en español.");
+      return;
+    }
+    setTranslating(true);
+    setTranslateError("");
+    try {
+      const response = await fetch("/api/claude", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-haiku-4-5-20251001",
+          max_tokens: 2000,
+          system: `Eres un traductor profesional especializado en textos inmobiliarios de lujo. Traduce el texto que te proporcionen manteniendo exactamente el mismo tono, estructura y estilo narrativo. No añadas ni elimines información. Responde SOLO con el JSON, sin explicaciones. Formato: {"en": "traducción en inglés", "de": "traducción en alemán"}`,
+          messages: [{ role: "user", content: "Traduce este texto inmobiliario al inglés y alemán:\n\n" + textoEs }],
+        }),
+      });
+      const data = await response.json();
+      if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+      const text = data.content?.filter(i => i.type === "text").map(i => i.text).join("") || "";
+      const clean = text.replace(/```json|```/g, "").trim();
+      const parsed = JSON.parse(clean);
+      if (parsed.en) { upd("descEn", parsed.en); draft.descEn = parsed.en; }
+      if (parsed.de) { upd("descDe", parsed.de); draft.descDe = parsed.de; }
+      await autoSave({...draft, descEn: parsed.en || draft.descEn, descDe: parsed.de || draft.descDe});
+    } catch(e) {
+      setTranslateError("Error al traducir: " + e.message);
+    } finally {
+      setTranslating(false);
+    }
+  }
 
   // Helper condicionalidad por tipo — debe ir después de todos los hooks
   const tipoActual = draft.tipo || p.tipo || "";
@@ -1833,31 +1869,72 @@ REGLAS:
             </div>
           )}
 
+          {/* Descripción ES — obligatoria */}
           <div style={{ marginTop: 16 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 3 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                
-                <span style={{ fontSize: 10, fontWeight: 600, color: idealistaFieldErrors.has("desc") ? "#A23A3A" : "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>
-                  Descripcion{<span style={{ color: idealistaFieldErrors.has("desc") ? "#A23A3A" : "#AC8A54", marginLeft: 3, fontSize: 18, fontWeight: 400, lineHeight: "10px", verticalAlign: "middle" }}>*</span>}
-                </span>
-              </div>
+              <span style={{ fontSize: 10, fontWeight: 600, color: idealistaFieldErrors.has("desc") ? "#A23A3A" : "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                Descripcion ES <span style={{ color: "#A23A3A" }}>*</span>
+              </span>
               <span id="desc-counter" style={{ fontSize: 10, color: "#9A968A" }}>{(d.desc || "").length} / 4.000</span>
             </div>
-            <textarea 
+            <textarea
               key={"desc-" + (aiDesc ? "ai" : "manual")}
-              defaultValue={d.desc || ""} 
-              onBlur={e => upd("desc", e.target.value)}
+              defaultValue={d.desc || ""}
+              onBlur={e => { upd("desc", e.target.value); draft.desc = e.target.value; }}
               onInput={e => {
                 const counter = document.getElementById("desc-counter");
-                if (counter) {
-                  const len = e.target.value.length;
-                  counter.textContent = len + " / 4.000";
-                  counter.style.color = len > 4000 ? "#A23A3A" : "#9A968A";
-                }
+                if (counter) { const len = e.target.value.length; counter.textContent = len + " / 4.000"; counter.style.color = len > 4000 ? "#A23A3A" : "#9A968A"; }
                 draft.desc = e.target.value;
               }}
-              style={{ width: "100%", background: "#FFFFFF", border: "1px solid " + (idealistaFieldErrors.has("desc") ? "#A23A3A" : "#E7E1D4"), borderRadius: 0, color: "#22262E", padding: "14px 18px", fontSize: 13, fontFamily: "Inter, sans-serif", minHeight: 200, resize: "vertical", lineHeight: 1.6 }} />
+              style={{ width: "100%", background: "#FFFFFF", border: "1px solid " + (idealistaFieldErrors.has("desc") ? "#A23A3A" : "#E7E1D4"), borderRadius: 0, color: "#22262E", padding: "14px 18px", fontSize: 13, fontFamily: "Inter, sans-serif", minHeight: 180, resize: "vertical", lineHeight: 1.6 }} />
             {idealistaFieldErrors.has("desc") && <div style={{ fontSize: 10, color: "#A23A3A", marginTop: 3 }}>Requerido para Idealista</div>}
+          </div>
+
+          {/* Botón traducir */}
+          <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 12 }}>
+            <button onClick={traducirDescripcion} disabled={translating}
+              style={{ padding: "9px 20px", borderRadius: 0, border: "1px solid #405c6b", background: translating ? "#E7E1D4" : "transparent", color: translating ? "#9A968A" : "#405c6b", cursor: translating ? "default" : "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 8 }}>
+              {translating ? (
+                <><span style={{ display: "inline-block", width: 12, height: 12, border: "2px solid #9A968A", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />Traduciendo...</>
+              ) : "Traducir EN / DE con IA"}
+            </button>
+            {translateError && <span style={{ fontSize: 11, color: "#A23A3A" }}>{translateError}</span>}
+          </div>
+
+          {/* Descripción EN — opcional */}
+          <div style={{ marginTop: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 3 }}>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>Descripcion EN <span style={{ fontSize: 9, color: "#9A968A", fontWeight: 400 }}>(opcional — Idealista usuarios inglés)</span></span>
+              <span id="desc-en-counter" style={{ fontSize: 10, color: "#9A968A" }}>{(d.descEn || "").length} / 4.000</span>
+            </div>
+            <textarea
+              key={"descEn-" + (d.descEn || "").length}
+              defaultValue={d.descEn || ""}
+              onBlur={e => { upd("descEn", e.target.value); draft.descEn = e.target.value; }}
+              onInput={e => {
+                const counter = document.getElementById("desc-en-counter");
+                if (counter) { const len = e.target.value.length; counter.textContent = len + " / 4.000"; counter.style.color = len > 4000 ? "#A23A3A" : "#9A968A"; }
+                draft.descEn = e.target.value;
+              }}
+              style={{ width: "100%", background: "#FFFFFF", border: "1px solid #E7E1D4", borderRadius: 0, color: "#22262E", padding: "14px 18px", fontSize: 13, fontFamily: "Inter, sans-serif", minHeight: 140, resize: "vertical", lineHeight: 1.6 }} />
+          </div>
+
+          {/* Descripción DE — opcional */}
+          <div style={{ marginTop: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 3 }}>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>Descripcion DE <span style={{ fontSize: 9, color: "#9A968A", fontWeight: 400 }}>(opcional — Idealista usuarios alemán)</span></span>
+              <span id="desc-de-counter" style={{ fontSize: 10, color: "#9A968A" }}>{(d.descDe || "").length} / 4.000</span>
+            </div>
+            <textarea
+              key={"descDe-" + (d.descDe || "").length}
+              defaultValue={d.descDe || ""}
+              onBlur={e => { upd("descDe", e.target.value); draft.descDe = e.target.value; }}
+              onInput={e => {
+                const counter = document.getElementById("desc-de-counter");
+                if (counter) { const len = e.target.value.length; counter.textContent = len + " / 4.000"; counter.style.color = len > 4000 ? "#A23A3A" : "#9A968A"; }
+                draft.descDe = e.target.value;
+              }}
+              style={{ width: "100%", background: "#FFFFFF", border: "1px solid #E7E1D4", borderRadius: 0, color: "#22262E", padding: "14px 18px", fontSize: 13, fontFamily: "Inter, sans-serif", minHeight: 140, resize: "vertical", lineHeight: 1.6 }} />
           </div>
         </Sec>
         <div style={sep} />
