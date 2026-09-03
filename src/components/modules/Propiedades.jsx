@@ -2090,13 +2090,21 @@ REGLAS:
 
         {/* Cualificacion */}
         <Sec title="Cualificacion del inmueble" startOpen={true}>
-          <div style={{ marginBottom: 8 }}>
-            <span style={{ fontSize: 10, fontWeight: 600, color: "#2C6E52", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 8 }}>Puntos positivos del inmueble</span>
-            <QualRow items={d.cualPosArr || ["","","","","",""]} onChange={v => { upd("cualPosArr", v); upd("cualPosText", v.join("\n")); }} color="#2C6E52" symbol="+" />
-          </div>
-          <div style={{ marginTop: 16 }}>
-            <span style={{ fontSize: 10, fontWeight: 600, color: "#A23A3A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 8 }}>Puntos negativos o limitaciones</span>
-            <QualRow items={d.cualNegArr || ["","",""]} onChange={v => { upd("cualNegArr", v); upd("cualNegText", v.join("\n")); }} color="#A23A3A" symbol="-" />
+          <div style={{ background: "#FFFFFF", border: "1px solid #E7E1D4", padding: "16px 20px" }}>
+            <div style={{ marginBottom: 16 }}>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "#2C6E52", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 8 }}>Puntos positivos del inmueble</span>
+              <QualRow
+                items={Array.isArray(d.cualPosArr) && d.cualPosArr.length > 0 ? d.cualPosArr : (Array.isArray(d.cualPos) && d.cualPos.length > 0 ? [...d.cualPos, "", "", ""].slice(0, Math.max(d.cualPos.length, 3)) : ["", "", "", "", "", ""])}
+                onChange={v => { upd("cualPosArr", v); upd("cualPosText", v.filter(Boolean).join("\n")); }}
+                color="#2C6E52" symbol="+" />
+            </div>
+            <div>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "#A23A3A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 8 }}>Puntos negativos o limitaciones</span>
+              <QualRow
+                items={Array.isArray(d.cualNegArr) && d.cualNegArr.length > 0 ? d.cualNegArr : (Array.isArray(d.cualNeg) && d.cualNeg.length > 0 ? [...d.cualNeg, "", ""].slice(0, Math.max(d.cualNeg.length, 3)) : ["", "", ""])}
+                onChange={v => { upd("cualNegArr", v); upd("cualNegText", v.filter(Boolean).join("\n")); }}
+                color="#A23A3A" symbol="-" />
+            </div>
           </div>
         </Sec>
 
