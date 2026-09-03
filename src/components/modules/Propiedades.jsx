@@ -929,24 +929,34 @@ const VENTANAS_OPTS = ["Interior","Exterior"];
 const PARKING_OPTS = ["Si","No","Comunitario","Opcional"];
 
 function QualRow({ items, onChange, color, symbol }) {
+  const safeItems = items && items.length > 0 ? items : ["", "", ""];
   const update = (idx, val) => {
-    const copy = [...items];
+    const copy = [...safeItems];
     copy[idx] = val;
     onChange(copy);
   };
+  const addRow = () => onChange([...safeItems, ""]);
+  const removeRow = (idx) => {
+    if (safeItems.length <= 1) return;
+    onChange(safeItems.filter((_, i) => i !== idx));
+  };
   return (
     <div>
-      {items.map((item, i) => (
+      {safeItems.map((item, i) => (
         <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-          <span style={{ color: color, fontSize: 14, fontWeight: 600, width: 16 }}>{symbol}</span>
+          <span style={{ color: color, fontSize: 14, fontWeight: 600, width: 16, flexShrink: 0 }}>{symbol}</span>
           <input
             value={item}
             onChange={(e) => update(i, e.target.value)}
             placeholder={"Punto " + (i + 1)}
             style={{ flex: 1, padding: "8px 12px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 12, fontFamily: "Inter, sans-serif", outline: "none", boxSizing: "border-box" }}
           />
+          <button onClick={() => removeRow(i)} style={{ background: "none", border: "none", color: "#C8BFB0", cursor: "pointer", fontSize: 16, lineHeight: 1, padding: "0 4px", flexShrink: 0 }}>×</button>
         </div>
       ))}
+      <button onClick={addRow} style={{ marginTop: 4, background: "none", border: `1px dashed ${color}`, color: color, fontSize: 11, fontWeight: 600, cursor: "pointer", padding: "5px 12px", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
+        + Añadir punto
+      </button>
     </div>
   );
 }
