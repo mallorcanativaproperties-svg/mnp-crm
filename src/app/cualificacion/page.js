@@ -8,6 +8,35 @@ const CREAM = "#F8F6F1";
 const DARK = "#22262E";
 const LIGHT_BORDER = "#E7E1D4";
 
+function interpretarPresupuesto(raw) {
+  if (!raw) return 0;
+  const s = raw.toString().trim().toLowerCase().replace(/\s/g, "");
+  // Millones: 1.5m, 1m, 1,5m
+  if (/[\d.,]+m$/.test(s)) {
+    const n = parseFloat(s.replace("m", "").replace(",", "."));
+    return Math.round(n * 1000000);
+  }
+  // Miles: 300k, 300K
+  if (/[\d.,]+k$/.test(s)) {
+    const n = parseFloat(s.replace("k", "").replace(",", "."));
+    return Math.round(n * 1000);
+  }
+  // Número con puntos como separador de miles: 300.000
+  if (/^\d{1,3}(\.\d{3})+$/.test(s)) {
+    return parseInt(s.replace(/\./g, ""), 10);
+  }
+  // Número con coma como separador de miles: 300,000
+  if (/^\d{1,3}(,\d{3})+$/.test(s)) {
+    return parseInt(s.replace(/,/g, ""), 10);
+  }
+  // Número pequeño sin sufijo — si < 10000 asumir miles
+  const n = parseFloat(s.replace(",", "."));
+  if (!isNaN(n) && n > 0) {
+    return n < 10000 ? Math.round(n * 1000) : Math.round(n);
+  }
+  return 0;
+}
+
 export default function CualificacionCompradores() {
   const [step, setStep] = useState(0); // 0=form, 1=success
   const [sending, setSending] = useState(false);
@@ -25,8 +54,9 @@ export default function CualificacionCompradores() {
   const [alturaMax, setAlturaMax] = useState("");
   const [requisitos, setRequisitos] = useState("");
 
+  const presupuestoValido = interpretarPresupuesto(presupuesto) > 0;
   const camposValidos = email && nombre && telefono && financiacion &&
-    presupuesto && finalidad && habitaciones && zonaDeseada && alturaMax && requisitos;
+    presupuestoValido && finalidad && habitaciones && zonaDeseada && alturaMax && requisitos;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -37,7 +67,7 @@ export default function CualificacionCompradores() {
       const { error: err } = await supabase.from("compradores").insert({
         email, nombre, telefono,
         financiacion,
-        presupuesto: Number(presupuesto) || 0,
+        presupuesto: interpretarPresupuesto(presupuesto),
         finalidad,
         habitaciones,
         zona_deseada: zonaDeseada.split(",").map(z => z.trim()).filter(Boolean),
@@ -174,11 +204,16 @@ export default function CualificacionCompradores() {
 
           <Field label="Presupuesto máximo para comprar" required>
             <div style={{ position: "relative" }}>
-              <input type="number" value={presupuesto} onChange={e => setPresupuesto(e.target.value)}
-                placeholder="300000" required style={{ ...inputStyle, paddingRight: 48 }} />
+              <input type="text" value={presupuesto} onChange={e => setPresupuesto(e.target.value)}
+                placeholder="ej. 300, 300k, 300.000..." required style={{ ...inputStyle, paddingRight: 48 }} />
               <span style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", color: "#9A968A", fontSize: 14, pointerEvents: "none" }}>€</span>
             </div>
-            <div style={{ fontSize: 12, color: "#9A968A", marginTop: 6 }}>Introduce el importe en euros (ej. 300000)</div>
+            {presupuesto && (() => {
+              const v = interpretarPresupuesto(presupuesto);
+              return v > 0
+                ? <div style={{ fontSize: 13, color: "#2C6E52", marginTop: 6, fontWeight: 500 }}>✓ Interpretado como: {v.toLocaleString("es-ES")} €</div>
+                : <div style={{ fontSize: 13, color: "#A23A3A", marginTop: 6 }}>No se ha podido interpretar. Escribe el importe en números (ej. 300000 o 300k)</div>;
+            })()}
           </Field>
 
           <Field label="¿Estás buscando para...?" required>
