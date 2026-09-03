@@ -142,7 +142,7 @@ export default function CualificacionCompradores() {
             Queremos conocerte para<br /><em style={{ color: BRONZE }}>Ayudarte Mejor</em>
           </h1>
           <p style={{ fontSize: 15, color: "rgba(255,255,255,0.7)", lineHeight: 1.7, margin: 0, maxWidth: 480 }}>
-            Comprar una vivienda es una decisión importante. Para orientarte con criterio y enseñarte solo las opciones que encajen contigo, necesitamos entender tu momento y lo que estás buscando.
+            Ten acceso preferente a las propiedades con mejores precios antes de que salgan al mercado. Comprar una vivienda es una decisión importante. Para orientarte con criterio y enseñarte solo las opciones que encajen contigo, necesitamos entender tu momento y lo que estás buscando.
           </p>
         </div>
       </div>
