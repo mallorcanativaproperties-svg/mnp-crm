@@ -693,6 +693,7 @@ export default function FormularioCaptacion() {
           <CatastroImportCuestionario
             setDir={setDir} setNum={setNum} setPlanta={setPlanta} setPuerta={setPuerta}
             setCp={setCp} setMunicipio={setMunicipio} setMConst={setMConst} setAnoCon={setAnoCon}
+            setRefCat={setRefCatCuest}
           />
           <div style={g2}>
             <Input label="Direccion (calle/via)" value={dir} onChange={setDir} required placeholder="C/ Ejemplo" />
