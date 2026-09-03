@@ -246,6 +246,7 @@ export default function App() {
   const [q, setQ] = useState("");
   const [fEst, setFEst] = useState("todos");
   const [fFin, setFFin] = useState("todas");
+  const [fHip, setFHip] = useState("todas");
   const [sort, setSort] = useState("fecha");
   const [sel, setSel] = useState(null);
   const [showNew, setShowNew] = useState(false);
@@ -255,11 +256,18 @@ export default function App() {
     if (q) { const s = q.toLowerCase(); r = r.filter(b => b.nombre.toLowerCase().includes(s) || b.email.toLowerCase().includes(s) || b.tel.includes(s) || b.zd.some(z => z.toLowerCase().includes(s)) || b.req.toLowerCase().includes(s)); }
     if (fEst !== "todos") r = r.filter(b => b.st === fEst);
     if (fFin !== "todas") r = r.filter(b => b.finalidad === fFin);
+    if (fHip !== "todas") r = r.filter(b => {
+      const f = (b.fin || "").toLowerCase();
+      if (fHip === "si") return f === "sí" || f === "si";
+      if (fHip === "no") return f === "no";
+      if (fHip === "abierto") return f.includes("abierto") || f.includes("mejorar") || f.includes("condiciones");
+      return true;
+    });
     if (sort === "presupuesto") r.sort((a, b) => b.ppto - a.ppto);
     else if (sort === "score") r.sort((a, b) => score(b) - score(a));
     else if (sort === "nombre") r.sort((a, b) => a.nombre.localeCompare(b.nombre));
     return r;
-  }, [data, q, fEst, fFin, sort]);
+  }, [data, q, fEst, fFin, fHip, sort]);
 
   const avg = Math.round(data.reduce((s, b) => s + b.ppto, 0) / data.length);
   const withFin = data.filter(b => b.fin === "Sí").length;
@@ -347,6 +355,12 @@ export default function App() {
         <input type="text" placeholder="Buscar nombre, zona, teléfono..." value={q} onChange={e => setQ(e.target.value)} style={{ flex: 1, minWidth: 200, padding: "10px 16px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 12, fontFamily: "Inter, sans-serif", outline: "none", letterSpacing: "0.02em" }} />
         <select value={fEst} onChange={e => setFEst(e.target.value)} style={selSt}><option value="todos">Todos los estados</option>{ESTADOS.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}</select>
         <select value={fFin} onChange={e => setFFin(e.target.value)} style={selSt}><option value="todas">Toda finalidad</option>{FINALIDADES.map(f => <option key={f} value={f}>{f}</option>)}</select>
+        <select value={fHip} onChange={e => setFHip(e.target.value)} style={selSt}>
+          <option value="todas">Toda financiación</option>
+          <option value="si">Con hipoteca</option>
+          <option value="no">Sin hipoteca</option>
+          <option value="abierto">Abierto a mejora</option>
+        </select>
         <select value={sort} onChange={e => setSort(e.target.value)} style={selSt}><option value="fecha">Más recientes</option><option value="presupuesto">Mayor presupuesto</option><option value="score">Mayor scoring</option><option value="nombre">Nombre A-Z</option></select>
       </div>
 
