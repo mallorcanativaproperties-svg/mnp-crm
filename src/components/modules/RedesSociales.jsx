@@ -759,7 +759,7 @@ function TabCuentas() {
           Para recibir mensajes y comentarios en tiempo real, configura estos webhooks en Meta Developers:
         </div>
         <div style={{ marginTop: 10, padding: "12px 16px", background: "#F8F6F1", borderRadius: 0, fontFamily: "monospace", fontSize: 11, color: "#AC8A54", wordBreak: "break-all" }}>
-          URL: https://mnp-crm.vercel.app/api/meta/webhook<br/>
+          URL: https://crm.mallorcanativaproperties.com/api/meta/webhook<br/>
           Verify Token: mnp_meta_verify_2026<br/>
           Suscripciones: messages, messaging_postbacks, feed, comments
         </div>

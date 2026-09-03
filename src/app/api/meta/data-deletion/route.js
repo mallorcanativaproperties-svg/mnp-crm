@@ -10,7 +10,7 @@ export async function POST(request) {
     const confirmationCode = `MNP-DEL-${Date.now()}`;
     
     return NextResponse.json({
-      url: `https://mnp-crm.vercel.app/privacy`,
+      url: `https://crm.mallorcanativaproperties.com/privacy`,
       confirmation_code: confirmationCode,
     });
   } catch (err) {
