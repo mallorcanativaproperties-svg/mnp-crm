@@ -143,7 +143,7 @@ export default function CualificacionCompradores() {
   );
 
   return (
-    <div style={{ minHeight: "100vh", background: CREAM, fontFamily: "Inter, sans-serif" }}>
+    <div style={{ minHeight: "100svh", background: CREAM, fontFamily: "Inter, sans-serif" }}>
 
       {/* Header + Hero */}
       <div style={{ background: PETROL, padding: "20px 20px 40px", borderBottom: `3px solid ${BRONZE}` }}>
