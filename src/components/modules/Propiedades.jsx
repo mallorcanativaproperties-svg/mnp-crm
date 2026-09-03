@@ -928,6 +928,29 @@ const ORIENTACIONES_OPTS = ["Norte","Sur","Este","Oeste","Noreste","Noroeste","S
 const VENTANAS_OPTS = ["Interior","Exterior"];
 const PARKING_OPTS = ["Si","No","Comunitario","Opcional"];
 
+function QualRow({ items, onChange, color, symbol }) {
+  const update = (idx, val) => {
+    const copy = [...items];
+    copy[idx] = val;
+    onChange(copy);
+  };
+  return (
+    <div>
+      {items.map((item, i) => (
+        <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+          <span style={{ color: color, fontSize: 14, fontWeight: 600, width: 16 }}>{symbol}</span>
+          <input
+            value={item}
+            onChange={(e) => update(i, e.target.value)}
+            placeholder={"Punto " + (i + 1)}
+            style={{ flex: 1, padding: "8px 12px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 12, fontFamily: "Inter, sans-serif", outline: "none", boxSizing: "border-box" }}
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function PropCard({ p, onClick }) {
   const est = ESTADOS.find((e) => e.key === p.estado) || ESTADOS[0];
   return (
@@ -1007,6 +1030,9 @@ function PropDetail({ p, currentUser, onClose, onUpdate, onDelete, onDuplicate }
     suministrosText: (p.suministros || []).join(", "),
     cualPosText: (p.cualPos || []).join("\n"),
     cualNegText: (p.cualNeg || []).join("\n"),
+    cualPosArr: p.cualPos || ["","","","","",""],
+    cualNegArr: p.cualNeg || ["","",""],
+
   });
   const g2 = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "10px 24px" };
   const g3 = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "10px 24px" };
@@ -1019,6 +1045,9 @@ function PropDetail({ p, currentUser, onClose, onUpdate, onDelete, onDuplicate }
     suministrosText: (p.suministros || []).join(", "),
     cualPosText: (p.cualPos || []).join("\n"),
     cualNegText: (p.cualNeg || []).join("\n"),
+    cualPosArr: p.cualPos || ["","","","","",""],
+    cualNegArr: p.cualNeg || ["","",""],
+
   };
   const d = draft;
   const upd = (key, val) => setDraft(prev => ({ ...prev, [key]: val }));
@@ -1030,8 +1059,8 @@ function PropDetail({ p, currentUser, onClose, onUpdate, onDelete, onDuplicate }
     try {
       const toSave = { ...currentDraft,
         suministros: (currentDraft.suministrosText || "").split(",").map(s => s.trim()).filter(Boolean),
-        cualPos: (currentDraft.cualPosText || "").split("\n").filter(Boolean),
-        cualNeg: (currentDraft.cualNegText || "").split("\n").filter(Boolean),
+        cualPos: (currentDraft.cualPosArr || []).filter(Boolean),
+        cualNeg: (currentDraft.cualNegArr || []).filter(Boolean),
         destinos: currentDraft.estado === "publicada" ? (currentDraft.destinos || []) : [],
       };
       if (onUpdate) await onUpdate(toSave);
@@ -1594,10 +1623,7 @@ REGLAS:
             {EFl({label: "Planta", field: "planta", pub: true})}
             {EFl({label: "Puerta", field: "puerta", pub: true})}
           </div>
-          <div style={{ ...g2, marginTop: 8 }}>
-            {EFl({label: "Latitud", field: "latitud", pub: false, type: "number"})}
-            {EFl({label: "Longitud", field: "longitud", pub: false, type: "number"})}
-          </div>
+
           <div style={{ ...g2, marginTop: 8 }}>
             {EFl({label: "Visibilidad direccion en portales", field: "visDir", pub: false})}
             {EFl({label: "Idealista ID", field: "idealistaId", pub: false})}
@@ -2048,14 +2074,14 @@ REGLAS:
         <div style={sep} />
 
         {/* Cualificacion */}
-        <Sec title="Cualificacion del inmueble" startOpen={false}>
-          <div style={intBox}>
-            <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 14 }}>
-              
-              <span style={{ fontSize: 10, fontWeight: 600, color: "#A23A3A", textTransform: "uppercase", letterSpacing: "0.1em" }}>Formulario interno</span>
-            </div>
-            {EFl({label: "Puntos positivos (uno por linea)", field: "cualPosText", pub: false, type: "textarea"})}
-            {EFl({label: "Puntos negativos (uno por linea)", field: "cualNegText", pub: false, type: "textarea"})}
+        <Sec title="Cualificacion del inmueble" startOpen={true}>
+          <div style={{ marginBottom: 8 }}>
+            <span style={{ fontSize: 10, fontWeight: 600, color: "#2C6E52", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 8 }}>Puntos positivos del inmueble</span>
+            <QualRow items={d.cualPosArr || ["","","","","",""]} onChange={v => { upd("cualPosArr", v); upd("cualPosText", v.join("\n")); }} color="#2C6E52" symbol="+" />
+          </div>
+          <div style={{ marginTop: 16 }}>
+            <span style={{ fontSize: 10, fontWeight: 600, color: "#A23A3A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 8 }}>Puntos negativos o limitaciones</span>
+            <QualRow items={d.cualNegArr || ["","",""]} onChange={v => { upd("cualNegArr", v); upd("cualNegText", v.join("\n")); }} color="#A23A3A" symbol="-" />
           </div>
         </Sec>
 

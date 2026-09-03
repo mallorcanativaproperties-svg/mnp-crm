@@ -201,8 +201,8 @@ function QualRow({ items, onChange, color, symbol }) {
   );
 }
 
-function CatastroImportCuestionario({ setDir, setNum, setPlanta, setPuerta, setCp, setMunicipio, setMConst, setAnoCon }) {
-  const [refCat, setRefCat] = useState("");
+function CatastroImportCuestionario({ setDir, setNum, setPlanta, setPuerta, setCp, setMunicipio, setMConst, setAnoCon, setRefCat }) {
+  const [refCatInput, setRefCatInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState(null);
 
@@ -211,7 +211,7 @@ function CatastroImportCuestionario({ setDir, setNum, setPlanta, setPuerta, setC
   const SETTERS = { dir: setDir, num: setNum, planta: setPlanta, puerta: setPuerta, cp: setCp, municipio: setMunicipio, mConst: (v) => setMConst(String(v)), anoCon: setAnoCon };
 
   async function importar() {
-    const ref = refCat.trim().replace(/\s/g, "").toUpperCase();
+    const ref = refCatInput.trim().replace(/\s/g, "").toUpperCase();
     if (!ref || ref.length < 14) { setMsg({ type: "error", text: "Referencia catastral no válida (mínimo 14 caracteres)" }); return; }
     setLoading(true); setMsg(null);
     try {
@@ -241,7 +241,9 @@ function CatastroImportCuestionario({ setDir, setNum, setPlanta, setPuerta, setC
       if (!campos.mConst && ds?.stl) { const m2 = parseFloat(String(ds.stl).replace(",", ".")); if (m2 > 0) campos.mConst = m2; }
       const antRaw = ds?.ant || inmueble?.debi?.ant || dt?.crop?.ant;
       if (antRaw) { const ano = parseInt(String(antRaw).trim()); if (ano > 1800 && ano <= new Date().getFullYear()) campos.anoCon = String(ano); }
-      const aplicados = [];
+      // Guardar ref catastral en el estado del componente padre
+      if (setRefCat) setRefCat(refCatInput.trim().replace(/\s/g, "").toUpperCase());
+      const aplicados = ["Ref. catastral"];
       Object.entries(campos).forEach(([k, v]) => { if (v !== undefined && v !== null && v !== "" && SETTERS[k]) { SETTERS[k](v); aplicados.push(LABELS[k] || k); } });
       const noImportados = Object.keys(LABELS).filter(k => !campos[k]).map(k => LABELS[k]);
       if (aplicados.length === 0) setMsg({ type: "error", text: "⚠️ Referencia encontrada pero sin datos disponibles. Completa manualmente." });
@@ -259,7 +261,7 @@ function CatastroImportCuestionario({ setDir, setNum, setPlanta, setPuerta, setC
     <div style={{ marginBottom: 20, padding: "14px 16px", background: "#F4EEE0", border: "1px solid #2A2926", borderRadius: 0 }}>
       <div style={{ fontSize: 10, fontWeight: 700, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>Importar del Catastro</div>
       <div style={{ display: "flex", gap: 8 }}>
-        <input type="text" value={refCat} onChange={e => setRefCat(e.target.value.toUpperCase())} onKeyDown={e => e.key === "Enter" && importar()} placeholder="Ej: 9872023VH5797S0001WX" style={iSt} />
+        <input type="text" value={refCatInput} onChange={e => setRefCatInput(e.target.value.toUpperCase())} onKeyDown={e => e.key === "Enter" && importar()} placeholder="Ej: 9872023VH5797S0001WX" style={iSt} />
         <button onClick={importar} disabled={loading || !refCat.trim()}
           style={{ background: loading || !refCat.trim() ? "#E7E1D4" : "#AC8A54", border: "none", borderRadius: 0, color: loading || !refCat.trim() ? "#C8BFB0" : "#F8F6F1", fontSize: 11, fontWeight: 700, cursor: loading || !refCat.trim() ? "not-allowed" : "pointer", padding: "0 16px", fontFamily: "Inter, sans-serif", whiteSpace: "nowrap" }}>
           {loading ? "Consultando..." : "Importar"}
@@ -349,6 +351,7 @@ export default function FormularioCaptacion() {
   const [habDob, setHabDob] = useState("0");
   const [habSim, setHabSim] = useState("0");
   const [totalHab, setTotalHab] = useState("");
+  const [refCatCuest, setRefCatCuest] = useState("");
   const [tipologiaChalet, setTipologiaChalet] = useState("");
   const [plantasChalet, setPlantasChalet] = useState("");
   const [banos, setBanos] = useState("0");
@@ -443,7 +446,7 @@ export default function FormularioCaptacion() {
       ventaMob, terraza, balcon, jardin, piscina, ascensor, armarios, trastero,
       parking, nPlazas, ventanas, aireAcond, aireAcondTipo, tipologiaChalet, plantasChalet, suelos, carpExt, carpInt,
       emisionesEnerg, calefaccion, aguaCal, suministros, drenaje,
-      elecRef, fontRef, notasPriv, propNom, propTel, propEmail, cualPos, cualNeg]);
+      elecRef, fontRef, notasPriv, propNom, propTel, propEmail, cualPos, cualNeg, refCatCuest]);
   const pv = op === "Alquiler" ? (Number(precioAlquiler)||0) : op === "Traspaso" ? (Number(precioTraspaso)||0) : (Number(precioVenta) || 0);
   const pp = Number(precioProp) || 0;
 
@@ -548,6 +551,7 @@ export default function FormularioCaptacion() {
       ventanas: ventanas || null,
       cual_neg: cualNeg.filter(Boolean),
       aire_acond: aireAcond,
+      ref_cat: refCatCuest || null,
       aire_acond_tipo: aireAcondTipo || null,
       tipologia_chalet: tipologiaChalet || null,
       plantas_chalet: Number(plantasChalet) || null,
