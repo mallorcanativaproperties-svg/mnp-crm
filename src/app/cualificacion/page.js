@@ -85,22 +85,36 @@ export default function CualificacionCompradores() {
     </div>
   );
 
-  const RadioOption = ({ value, current, onChange, name }) => (
-    <label style={{
-      display: "flex", alignItems: "center", gap: 10,
-      padding: "6px 0", cursor: "pointer",
-      fontFamily: "Inter, sans-serif", fontSize: 15,
-      color: current === value ? BRONZE : DARK,
-      fontWeight: current === value ? 600 : 400,
-      WebkitTapHighlightColor: "transparent",
-      width: "100%", boxSizing: "border-box",
-      overflow: "hidden",
-    }}>
-      <input type="radio" name={name} value={value} checked={current === value}
-        onChange={() => onChange(value)}
-        style={{ accentColor: BRONZE, width: 18, height: 18, flexShrink: 0 }} />
-      <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "normal", lineHeight: 1.4 }}>{value}</span>
-    </label>
+  const RadioOption = ({ value, current, onChange }) => (
+    <div
+      onClick={() => onChange(value)}
+      style={{
+        padding: "12px 16px",
+        marginBottom: 8,
+        background: current === value ? PETROL : "#FFFFFF",
+        color: current === value ? "#FFFFFF" : DARK,
+        border: `1px solid ${current === value ? PETROL : BORDER}`,
+        cursor: "pointer",
+        fontFamily: "Inter, sans-serif",
+        fontSize: 15,
+        lineHeight: 1.4,
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        WebkitTapHighlightColor: "transparent",
+        userSelect: "none",
+      }}
+    >
+      <span style={{
+        width: 20, height: 20, borderRadius: "50%",
+        border: `2px solid ${current === value ? "#FFFFFF" : BORDER}`,
+        background: current === value ? "#FFFFFF" : "transparent",
+        flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center",
+      }}>
+        {current === value && <span style={{ width: 8, height: 8, borderRadius: "50%", background: PETROL, display: "block" }} />}
+      </span>
+      {value}
+    </div>
   );
 
   if (step === 1) return (
