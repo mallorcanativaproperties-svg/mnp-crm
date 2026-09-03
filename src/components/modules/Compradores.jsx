@@ -292,6 +292,9 @@ export default function App() {
             <p style={{ fontSize: 12, color: "#9A968A", margin: "10px 0 0", letterSpacing: "0.04em" }}>Formulario Instagram · Mallorca · {data.length} registros</p>
           </div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <button onClick={syncFromSheet} disabled={syncing} style={{ padding: "12px 20px", borderRadius: 0, border: "1px solid #6AAF8D", background: "transparent", color: syncing ? "#9A968A" : "#2C6E52", cursor: syncing ? "wait" : "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", transition: "all 0.3s" }}>
+              {syncing ? "Sincronizando..." : "↻ Sync Google Sheet"}
+            </button>
             <button onClick={() => {
               navigator.clipboard.writeText("https://crm.mallorcanativaproperties.com/cualificacion");
               alert("✅ Link copiado: crm.mallorcanativaproperties.com/cualificacion");
