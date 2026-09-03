@@ -87,8 +87,8 @@ export default function CualificacionCompradores() {
 
   const RadioOption = ({ value, current, onChange, name }) => (
     <label style={{
-      display: "flex", alignItems: "center", gap: 12,
-      padding: "12px 14px", marginBottom: 8,
+      display: "flex", alignItems: "center", gap: 10,
+      padding: "8px 10px", marginBottom: 6,
       border: `1.5px solid ${current === value ? BRONZE : BORDER}`,
       background: current === value ? `${BRONZE}08` : "#FFFFFF",
       cursor: "pointer", fontFamily: "Inter, sans-serif",
