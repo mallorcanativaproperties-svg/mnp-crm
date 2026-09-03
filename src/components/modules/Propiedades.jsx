@@ -1311,7 +1311,7 @@ REGLAS:
   }, []);
   const AGENTE_PREFIX = Object.fromEntries((agentesDB || []).map(a => [a.nombre, a.agente_codigo]));
   const AGENTES_LIST = (agentesDB || []).map(a => a.nombre);
-  const TIPOS_LIST = ["Piso", "Estudio", "Atico", "Atico Duplex", "Duplex", "Planta baja", "Casa", "Chalet", "Adosado", "Villa", "Finca rustica", "Local comercial", "Oficina", "Parking", "Terreno", "Trastero", "Edificio"];
+  const TIPOS_LIST = ["Piso", "Estudio", "Atico", "Atico Duplex", "Duplex", "Planta baja", "Casa", "Chalet", "Adosado", "Villa", "Finca rustica", "Finca", "Local comercial", "Local", "Oficina", "Parking", "Garaje", "Terreno", "Trastero", "Edificio"];
   const OPS_LIST = ["Compraventa", "Alquiler", "Traspaso"];
 
   async function autoGenerateRef(agenteName) {
