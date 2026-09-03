@@ -62,13 +62,34 @@ function parseFullCsv(text) {
 
 function parsePresupuesto(raw) {
   if (!raw) return 0;
-  let s = raw.toString();
-  // Handle "300000 como mucho", "350.000€", "500mil", etc.
-  s = s.replace(/[€\s]/g, "").replace(/como\s*mucho/i, "").replace(/mil/i, "000");
-  s = s.replace(/\./g, ""); // remove thousand separators
-  s = s.replace(",", "."); // decimal comma to dot
-  const num = parseFloat(s);
-  return isNaN(num) ? 0 : num;
+  let s = raw.toString().trim().toLowerCase();
+  // Limpiar texto libre: "como mucho", "€", espacios
+  s = s.replace(/como\s*mucho/i, "").replace(/[€\s]/g, "").replace(/mil/i, "k");
+  // Millones: 1.5m, 1m
+  if (/[\d.,]+m$/.test(s)) {
+    const n = parseFloat(s.replace("m", "").replace(",", "."));
+    if (!isNaN(n)) return Math.round(n * 1000000);
+  }
+  // Miles: 300k
+  if (/[\d.,]+k$/.test(s)) {
+    const n = parseFloat(s.replace("k", "").replace(",", "."));
+    if (!isNaN(n)) return Math.round(n * 1000);
+  }
+  // Número con puntos como separador de miles: 300.000
+  if (/^\d{1,3}(\.\d{3})+$/.test(s)) {
+    return parseInt(s.replace(/\./g, ""), 10);
+  }
+  // Número con coma como separador de miles: 300,000
+  if (/^\d{1,3}(,\d{3})+$/.test(s)) {
+    return parseInt(s.replace(/,/g, ""), 10);
+  }
+  // Número limpio
+  const n = parseFloat(s.replace(",", "."));
+  if (!isNaN(n) && n > 0) {
+    // Si es menor de 10.000 asumir miles
+    return n < 10000 ? Math.round(n * 1000) : Math.round(n);
+  }
+  return 0;
 }
 
 export async function POST() {
