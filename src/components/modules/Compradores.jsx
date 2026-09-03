@@ -291,11 +291,18 @@ export default function App() {
             <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 400, margin: 0, lineHeight: 1.1 }}>Base de <em style={{ fontStyle: "italic" }}>Compradores</em></h1>
             <p style={{ fontSize: 12, color: "#9A968A", margin: "10px 0 0", letterSpacing: "0.04em" }}>Formulario Instagram · Mallorca · {data.length} registros</p>
           </div>
-          <div style={{ display: "flex", gap: 10 }}>
-            <button onClick={syncFromSheet} disabled={syncing} style={{ padding: "12px 20px", borderRadius: 0, border: "1px solid #6AAF8D", background: "transparent", color: syncing ? "#9A968A" : "#2C6E52", cursor: syncing ? "wait" : "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", transition: "all 0.3s" }}>
-              {syncing ? "Sincronizando..." : "↻ Sync Google Sheet"}
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <button onClick={() => {
+              navigator.clipboard.writeText("https://crm.mallorcanativaproperties.com/cualificacion");
+              alert("✅ Link copiado: crm.mallorcanativaproperties.com/cualificacion");
+            }} style={{ padding: "12px 20px", borderRadius: 0, border: "1px solid #405c6b", background: "transparent", color: "#405c6b", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}>
+              🔗 Copiar link formulario
             </button>
-            <button onClick={() => setShowNew(true)} style={{ padding: "12px 28px", borderRadius: 0, border: "1px solid #C8A97E", background: "transparent", color: "#AC8A54", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", transition: "all 0.3s" }}
+            <a href="https://crm.mallorcanativaproperties.com/cualificacion" target="_blank" rel="noopener noreferrer"
+              style={{ padding: "12px 20px", borderRadius: 0, border: "1px solid #405c6b", background: "transparent", color: "#405c6b", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
+              ↗ Ver formulario
+            </a>
+            <button onClick={() => setShowNew(true)} style={{ padding: "12px 28px", borderRadius: 0, border: "1px solid #C8A97E", background: "transparent", color: "#AC8A54", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}
               onMouseEnter={e => { e.currentTarget.style.background = "#AC8A54"; e.currentTarget.style.color = "#F8F6F1"; }}
               onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#AC8A54"; }}
             >+ Nuevo comprador</button>
