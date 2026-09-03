@@ -1995,11 +1995,11 @@ REGLAS:
                     const next = on ? current.filter(x => x !== dest) : [...current, dest];
                     upd("destinos", next);
                   }}
-                  style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 0, border: "1px solid " + (on ? "#8FA88A44" : "#E7E1D4"), background: on ? "#8FA88A0D" : "transparent", cursor: canEdit ? "pointer" : "default", opacity: editMode && !canEdit ? 0.4 : 1, transition: "all 0.15s" }}>
-                  <div style={{ width: 14, height: 14, borderRadius: 0, border: "1px solid " + (on ? "#2C6E52" : "#9A968A"), background: on ? "#2C6E52" : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    {on && <span style={{ color: "#FFFFFF", fontSize: 10, fontWeight: 700 }}>✓</span>}
+                  style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", borderRadius: 0, border: "2px solid " + (on ? "#2C6E52" : "#9A968A"), background: on ? "#2C6E5215" : "#FFFFFF", cursor: canEdit ? "pointer" : "default", opacity: editMode && !canEdit ? 0.6 : 1, transition: "all 0.15s" }}>
+                  <div style={{ width: 18, height: 18, borderRadius: 0, border: "2px solid " + (on ? "#2C6E52" : "#9A968A"), background: on ? "#2C6E52" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    {on && <span style={{ color: "#FFFFFF", fontSize: 12, fontWeight: 700, lineHeight: 1 }}>✓</span>}
                   </div>
-                  <span style={{ fontSize: 12, color: on ? "#2C6E52" : "#9A968A" }}>{dest}</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: on ? "#2C6E52" : "#22262E", fontFamily: "Inter, sans-serif" }}>{dest}</span>
                 </div>
               );
             })}
