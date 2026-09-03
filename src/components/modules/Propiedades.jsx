@@ -1755,12 +1755,10 @@ REGLAS:
               <div style={{ marginBottom: 10 }}>
                 <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Total hab. (Idealista) *</div>
                 <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                  <input type="number" value={d.totalHab || ((Number(d.habDobles)||0)+(Number(d.habSimples)||0))} 
-                    onChange={e => upd("totalHab", Number(e.target.value))} 
-                    onFocus={e => { if(!d.totalHab) upd("totalHab", (Number(d.habDobles)||0)+(Number(d.habSimples)||0)); e.target.select(); }}
-                    onBlur={() => autoSave(draft)}
-                    style={{ width: 80, background: "#FFFFFF", border: "1px solid #E7E1D4", borderRadius: 0, color: "#AC8A54", padding: "6px 8px", fontSize: 13, fontFamily: "Inter, sans-serif", fontWeight: 600 }} />
-                  <span style={{ fontSize: 10, color: "#9A968A" }}>Auto: {(Number(d.habDobles)||0)+(Number(d.habSimples)||0)} — ajusta si Idealista difiere</span>
+                  <div style={{ width: 80, background: "#F8F6F1", border: "1px solid #E7E1D4", borderRadius: 0, color: "#AC8A54", padding: "6px 8px", fontSize: 13, fontFamily: "Inter, sans-serif", fontWeight: 700, textAlign: "center" }}>
+                    {(Number(d.habDobles)||0)+(Number(d.habSimples)||0)}
+                  </div>
+                  <span style={{ fontSize: 10, color: "#9A968A" }}>Calculado automáticamente — se envía a Idealista</span>
                 </div>
               </div>
             </div>
@@ -1768,7 +1766,8 @@ REGLAS:
           )}
           {!tieneHab && esComercial && (
             <div style={{ ...g2, marginTop: 8 }}>
-              {EFl({label: "Banos", field: "banos", pub: true, type: "number"})}
+              {EFl({label: "Aseos / Banos", field: "banos", pub: true, type: "number"})}
+              {EFl({label: "Aseos", field: "aseos", pub: true, type: "number"})}
             </div>
           )}
           <div style={{ ...g3, marginTop: 8 }}>

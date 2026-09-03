@@ -758,14 +758,16 @@ export default function FormularioCaptacion() {
             <div>
               <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 4 }}>Total hab. (Idealista) <span style={{color:"#A23A3A"}}>*</span></label>
               <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                <input type="number" value={totalHab || String((Number(habDob)||0)+(Number(habSim)||0))} onChange={e => setTotalHab(e.target.value)}
-                  style={{ width: 80, background: "#FFFFFF", border: "1px solid #E7E1D4", borderRadius: 0, color: "#AC8A54", padding: "9px 12px", fontSize: 13, fontFamily: "Inter, sans-serif", fontWeight: 600 }} />
-                <span style={{ fontSize: 10, color: "#9A968A" }}>Auto: {(Number(habDob)||0)+(Number(habSim)||0)}</span>
+                <div style={{ width: 80, background: "#F8F6F1", border: "1px solid #E7E1D4", borderRadius: 0, color: "#AC8A54", padding: "9px 12px", fontSize: 13, fontFamily: "Inter, sans-serif", fontWeight: 700, textAlign: "center" }}>
+                  {(Number(habDob)||0)+(Number(habSim)||0)}
+                </div>
+                <span style={{ fontSize: 10, color: "#9A968A" }}>Total enviado a Idealista</span>
               </div>
             </div>
           </div>}
           {!tieneHab && esComercial && <div style={g2}>
             <Input label="Banos" value={banos} onChange={setBanos} type="number" />
+            <Input label="Aseos" value={aseos} onChange={setAseos} type="number" />
           </div>}
           <div style={g3}>
             {!esTerreno && <Input label="Ano construccion" value={anoCon} onChange={setAnoCon} placeholder="2005" />}
