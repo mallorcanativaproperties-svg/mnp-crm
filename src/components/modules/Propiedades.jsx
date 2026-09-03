@@ -1569,7 +1569,7 @@ REGLAS:
             {EFl({label: "Codigo postal", req: true, field: "cp", pub: true})}
             {EFl({label: "Municipio", req: true, field: "municipio", pub: true})}
             {EFl({label: "Zona", field: "zona", pub: true})}
-            {EFl({label: "Orientacion", field: "orient", pub: true, options: ["Norte","Sur","Este","Oeste","Noreste","Noroeste","Sureste","Suroeste"], type: "select"})}
+            {esResidencial && EFl({label: "Orientacion", field: "orient", pub: true, options: ["Norte","Sur","Este","Oeste","Noreste","Noroeste","Sureste","Suroeste"], type: "select"})}
             {EFl({label: "Distancia playa", field: "distPlaya", pub: true})}
             {EFl({label: "Planta", field: "planta", pub: true})}
             {EFl({label: "Puerta", field: "puerta", pub: true})}

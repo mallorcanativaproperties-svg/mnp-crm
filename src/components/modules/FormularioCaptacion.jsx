@@ -413,9 +413,18 @@ export default function FormularioCaptacion() {
           const { error } = await supabase.from("propiedades").update(data).eq("id", fichaId);
           if (error) throw error;
         } else {
-          const { data: inserted, error } = await supabase.from("propiedades").insert(data).select().single();
-          if (error) throw error;
-          setFichaId(inserted.id);
+          // Verificar si ya existe una ficha con esa ref antes de crear
+          const { data: existing } = await supabase.from("propiedades").select("id").eq("ref", data.ref).maybeSingle();
+          if (existing) {
+            // Ya existe — enlazar y actualizar en lugar de duplicar
+            setFichaId(existing.id);
+            const { error } = await supabase.from("propiedades").update(data).eq("id", existing.id);
+            if (error) throw error;
+          } else {
+            const { data: inserted, error } = await supabase.from("propiedades").insert(data).select().single();
+            if (error) throw error;
+            setFichaId(inserted.id);
+          }
         }
         setAutoSaveStatus("saved");
         setTimeout(() => setAutoSaveStatus(null), 2000);
@@ -693,8 +702,8 @@ export default function FormularioCaptacion() {
             <Select label="Zona" value={zona} onChange={setZona} options={municipio && ZONAS_MAP[municipio] ? ZONAS_MAP[municipio] : []} />
           </div>
           <div style={g3}>
-            <Select label="Orientacion" value={orient} onChange={setOrient} options={ORIENTACIONES} />
-            <Input label="Distancia playa" value={distPlaya} onChange={setDistPlaya} placeholder="2 km" />
+            {esResidencial && <Select label="Orientacion" value={orient} onChange={setOrient} options={ORIENTACIONES} />}
+            {esResidencial && <Input label="Distancia playa" value={distPlaya} onChange={setDistPlaya} placeholder="2 km" />}
             <Select label="Visibilidad direccion (portales)" value={visDir} onChange={setVisDir} options={VIS_DIR} />
           </div>
         </Sec>
