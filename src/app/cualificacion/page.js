@@ -87,19 +87,20 @@ export default function CualificacionCompradores() {
 
   const RadioOption = ({ value, current, onChange, name }) => (
     <label style={{
-      display: "flex", alignItems: "center", gap: 14,
+      display: "flex", alignItems: "flex-start", gap: 12,
       padding: "14px 16px", marginBottom: 8,
       border: `2px solid ${current === value ? BRONZE : BORDER}`,
       background: current === value ? `${BRONZE}0A` : "#FFFFFF",
       cursor: "pointer", fontFamily: "Inter, sans-serif",
-      fontSize: 15, color: DARK, lineHeight: 1.4,
+      fontSize: 15, color: DARK, lineHeight: 1.5,
       WebkitTapHighlightColor: "transparent",
       transition: "border-color 0.15s, background 0.15s",
+      boxSizing: "border-box", width: "100%",
     }}>
       <input type="radio" name={name} value={value} checked={current === value}
         onChange={() => onChange(value)}
-        style={{ accentColor: BRONZE, width: 20, height: 20, flexShrink: 0 }} />
-      <span>{value}</span>
+        style={{ accentColor: BRONZE, width: 20, height: 20, flexShrink: 0, marginTop: 2 }} />
+      <span style={{ flex: 1, wordBreak: "break-word" }}>{value}</span>
     </label>
   );
 
