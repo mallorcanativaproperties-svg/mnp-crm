@@ -793,6 +793,7 @@ export default function FormularioCaptacion() {
           {tieneAireCalef && <div style={g3}>
             <Select label="Calefaccion" value={calefaccion} onChange={setCalefaccion} options={CALEFACCION_OPTS} />
             {esResidencial && <Select label="Agua caliente" value={aguaCal} onChange={setAguaCal} options={AGUA_CALIENTE} />}
+            {esResidencial && <Select label="Ventanas" value={ventanas} onChange={setVentanas} options={["Interior","Exterior"]} />}
           </div>}
         </Sec>}
 
@@ -811,7 +812,6 @@ export default function FormularioCaptacion() {
           <div style={g3}>
             <Select label="Parking" value={parking} onChange={setParking} options={["Si","No","Comunitario","Opcional"]} />
             <Input label="N plazas" value={nPlazas} onChange={setNPlazas} type="number" />
-            {esResidencial && <Select label="Ventanas" value={ventanas} onChange={setVentanas} options={["Interior","Exterior"]} />}
           </div>
         </Sec>}
 
