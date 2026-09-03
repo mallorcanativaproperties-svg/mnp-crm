@@ -1626,7 +1626,6 @@ REGLAS:
 
           <div style={{ ...g2, marginTop: 8 }}>
             {EFl({label: "Visibilidad direccion en portales", field: "visDir", pub: false})}
-            {EFl({label: "Idealista ID", field: "idealistaId", pub: false})}
           </div>
         </Sec>
         <div style={sep} />
@@ -1835,32 +1834,35 @@ REGLAS:
             {EFl({label: "Carp. exterior", field: "carpExt", pub: true, options: CARP_EXT_OPTS, type: "select"})}
             {EFl({label: "Carp. interior", field: "carpInt", pub: true, options: CARP_INT_OPTS, type: "select"})}
           </div>}
-          {esResidencial && <div style={{ ...g3, marginTop: 8 }}>
-            {EFl({label: "Agua caliente", field: "aguaCal", pub: true, options: AGUA_CALIENTE_OPTS, type: "select"})}
-            {EFl({label: "Ventanas", field: "ventanas", pub: true, options: ["Interior","Exterior"], type: "select"})}
-            {d.op === "Alquiler" && EFl({label: "Incluye mobiliario", field: "ventaMobiliario", pub: true, type: "bool"})}
-          </div>}
-          {tieneAireCalef && <div style={{ ...g2, marginTop: 8 }}>
+          {tieneAireCalef && <div style={{ ...g3, marginTop: 8 }}>
             {EFl({label: "Calefaccion", field: "calefaccion", pub: true, options: ["Individual","Centralizada","No disponible"], type: "select"})}
+            {esResidencial && EFl({label: "Agua caliente", field: "aguaCal", pub: true, options: AGUA_CALIENTE_OPTS, type: "select"})}
+            {esResidencial && EFl({label: "Ventanas", field: "ventanas", pub: true, options: ["Interior","Exterior"], type: "select"})}
+          </div>}
+          {esResidencial && d.op === "Alquiler" && <div style={{ ...g3, marginTop: 8 }}>
+            {EFl({label: "Incluye mobiliario", field: "ventaMobiliario", pub: true, type: "bool"})}
+          </div>}
+        </Sec>}
+        <div style={sep} />
+
+        {/* Extras y dotaciones — separado de características, igual que cuestionario */}
+        {(esResidencial || esComercial || esGaraje) && <Sec title="Extras y dotaciones">
+          {tieneExtras && <div style={{ ...g4, marginTop: 4 }}>
+            {EFl({label: "Terraza", field: "terraza", pub: true, type: "bool"})}
+            {ft !== "rustic" && EFl({label: "Balcon", field: "balcon", pub: true, type: "bool"})}
+            {EFl({label: "Jardin", field: "jardin", pub: true, type: "bool"})}
+            {EFl({label: "Piscina", field: "piscina", pub: true, type: "bool"})}
+          </div>}
+          {tieneExtras && <div style={{ ...g4, marginTop: 8 }}>
+            {ft !== "rustic" && EFl({label: "Ascensor", field: "ascensor", pub: true, type: "bool"})}
+            {EFl({label: "Armarios empotrados", field: "armarios", pub: true, type: "bool"})}
+            {EFl({label: "Trastero", field: "trastero", pub: true, type: "bool"})}
+            {tieneAireCalef && EFl({label: "Aire acondicionado", field: "aireAcond", pub: true, type: "bool"})}
           </div>}
           <div style={{ ...g2, marginTop: 8 }}>
             {EFl({label: "Parking", field: "parking", pub: true, options: ["Si","No","Comunitario","Opcional"], type: "select"})}
             {EFl({label: "N plazas", field: "nPlazas", pub: true, type: "number"})}
           </div>
-          {tieneExtras && <>
-            <div style={{ ...g4, marginTop: 12 }}>
-              {EFl({label: "Terraza", field: "terraza", pub: true, type: "bool"})}
-              {ft !== "rustic" && EFl({label: "Balcon", field: "balcon", pub: true, type: "bool"})}
-              {EFl({label: "Piscina", field: "piscina", pub: true, type: "bool"})}
-              {EFl({label: "Jardin", field: "jardin", pub: true, type: "bool"})}
-            </div>
-            <div style={{ ...g4, marginTop: 8 }}>
-              {ft !== "rustic" && EFl({label: "Ascensor", field: "ascensor", pub: true, type: "bool"})}
-              {EFl({label: "Armarios", field: "armarios", pub: true, type: "bool"})}
-              {EFl({label: "Trastero", field: "trastero", pub: true, type: "bool"})}
-              {tieneAireCalef && EFl({label: "Aire acondicionado", field: "aireAcond", pub: true, type: "bool"})}
-            </div>
-          </>}
         </Sec>}
         <div style={sep} />
 
@@ -2051,6 +2053,9 @@ REGLAS:
             })}
           </div>
           {editMode && d.estado === "publicada" && <div style={{ fontSize: 10, color: "#9A968A", marginTop: 8 }}>Haz clic para activar o desactivar cada portal</div>}
+          <div style={{ ...g2, marginTop: 12 }}>
+            {EFl({label: "Idealista ID", field: "idealistaId", pub: false})}
+          </div>
         </Sec>
         <div style={sep} />
 
