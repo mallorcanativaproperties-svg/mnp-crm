@@ -914,6 +914,20 @@ function DocsSection({ propiedadId, propRef }) {
   );
 }
 
+// Opciones compartidas con cuestionario
+const CONSERVACION_OPTS = ["Buen estado","Reformado","A reformar","Obra nueva","En construccion"];
+const CERT_ENERG_OPTS = ["A","B","C","D","E","F","G","Exento"];
+const CALEFACCION_OPTS_P = ["Individual","Centralizada","No disponible"];
+const AGUA_CALIENTE_OPTS = ["Aerotermia","Biomasa","Bomba de calor","Calentador Butano","Central","Central con contador individual","Gas Ciudad","Gas Natural","Gas Propano","Gasoil","Geotermia","No Tiene","Pellets","Placas Solares","Termo Electrico"];
+const DRENAJE_OPTS_P = ["Alcantarillado","Fosa septica"];
+const IEE_OPTS_P = ["Favorable","Desfavorable","Pendiente","No aplica"];
+const SUELOS_OPTS = ["Gres","Gres porcelanico","Marmol","Terrazo","Tarima flotante","Parquet","Laminado","Madera maciza","Vinilo","Microcemento","Ceramica","Piedra natural","Hormigon pulido"];
+const CARP_EXT_OPTS = ["Aluminio","Aluminio con RPT","PVC","Madera","Climalit","Doble cristal","Triple cristal","Hierro/Forja"];
+const CARP_INT_OPTS = ["Lacado blanco","Roble","Cerezo","Haya","Pino","Wengue","Nogal","DM lacado","Cristal","Corredera","Block"];
+const ORIENTACIONES_OPTS = ["Norte","Sur","Este","Oeste","Noreste","Noroeste","Sureste","Suroeste"];
+const VENTANAS_OPTS = ["Interior","Exterior"];
+const PARKING_OPTS = ["Si","No","Comunitario","Opcional"];
+
 function PropCard({ p, onClick }) {
   const est = ESTADOS.find((e) => e.key === p.estado) || ESTADOS[0];
   return (
@@ -1788,15 +1802,15 @@ REGLAS:
           <div style={g3}>
             {tieneCert && EFl({label: "Cert. energetico", req: true, field: "certEnerg", pub: true, options: ["A","B","C","D","E","F","G","Exento"], type: "select"})}
             {tieneCert && EFl({label: "Emisiones energeticas", field: "emisionesEnerg", pub: true, options: ["A","B","C","D","E","F","G"], type: "select"})}
-            {esResidencial && EFl({label: "IEE", field: "iee", pub: true})}
+            {esResidencial && EFl({label: "IEE", field: "iee", pub: true, options: IEE_OPTS_P, type: "select"})}
           </div>
           {esResidencial && <div style={{ ...g3, marginTop: 8 }}>
-            {EFl({label: "Suelos", field: "suelos", pub: true})}
-            {EFl({label: "Carp. exterior", field: "carpExt", pub: true})}
-            {EFl({label: "Carp. interior", field: "carpInt", pub: true})}
+            {EFl({label: "Suelos", field: "suelos", pub: true, options: SUELOS_OPTS, type: "select"})}
+            {EFl({label: "Carp. exterior", field: "carpExt", pub: true, options: CARP_EXT_OPTS, type: "select"})}
+            {EFl({label: "Carp. interior", field: "carpInt", pub: true, options: CARP_INT_OPTS, type: "select"})}
           </div>}
           {esResidencial && <div style={{ ...g3, marginTop: 8 }}>
-            {EFl({label: "Agua caliente", field: "aguaCal", pub: true})}
+            {EFl({label: "Agua caliente", field: "aguaCal", pub: true, options: AGUA_CALIENTE_OPTS, type: "select"})}
             {EFl({label: "Ventanas", field: "ventanas", pub: true, options: ["Interior","Exterior"], type: "select"})}
             {d.op === "Alquiler" && EFl({label: "Incluye mobiliario", field: "ventaMobiliario", pub: true, type: "bool"})}
           </div>}
@@ -1828,7 +1842,7 @@ REGLAS:
         {tieneInstalaciones && <Sec title="Instalaciones y suministros">
           <div style={g2}>
             {EFl({label: "Suministros", field: "suministrosText", pub: true})}
-            {EFl({label: "Drenaje sanitario", field: "drenaje", pub: true})}
+            {EFl({label: "Drenaje sanitario", field: "drenaje", pub: true, options: DRENAJE_OPTS_P, type: "select"})}
           </div>
           {tieneElecFont && <div style={{ ...g2, marginTop: 8 }}>
             {EFl({label: "Electricidad reformada", field: "elecReformada", pub: true, type: "bool"})}
