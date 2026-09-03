@@ -93,11 +93,13 @@ export default function CualificacionCompradores() {
       color: current === value ? BRONZE : DARK,
       fontWeight: current === value ? 600 : 400,
       WebkitTapHighlightColor: "transparent",
+      width: "100%", boxSizing: "border-box",
+      overflow: "hidden",
     }}>
       <input type="radio" name={name} value={value} checked={current === value}
         onChange={() => onChange(value)}
         style={{ accentColor: BRONZE, width: 18, height: 18, flexShrink: 0 }} />
-      {value}
+      <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "normal", lineHeight: 1.4 }}>{value}</span>
     </label>
   );
 
@@ -127,7 +129,7 @@ export default function CualificacionCompradores() {
   );
 
   return (
-    <div style={{ minHeight: "100vh", background: CREAM, fontFamily: "Inter, sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: CREAM, fontFamily: "Inter, sans-serif", overflowX: "hidden" }}>
 
       {/* Header + Hero */}
       <div style={{ background: PETROL, padding: "20px 20px 40px", borderBottom: `3px solid ${BRONZE}` }}>
@@ -152,7 +154,7 @@ export default function CualificacionCompradores() {
       </div>
 
       {/* Formulario */}
-      <div style={{ maxWidth: 600, margin: "0 auto", padding: "32px 20px 48px" }}>
+      <div style={{ maxWidth: 600, margin: "0 auto", padding: "32px 20px 48px", overflowX: "hidden", boxSizing: "border-box" }}>
         <form onSubmit={handleSubmit} noValidate>
 
           <Field label="Correo electrónico" required>
