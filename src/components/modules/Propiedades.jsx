@@ -1437,10 +1437,11 @@ REGLAS:
           </div>
         )}
         {/* Banner estado Idealista — solo visible en modo edición */}
+        {/* Aviso Idealista */}
         {editMode && (
-          <div style={{ marginTop: 48, marginBottom: -8, padding: "10px 16px", borderRadius: 0, background: idealistaReady ? "#6AAF8D11" : "#F6E7E5", border: "1px solid " + (idealistaReady ? "#6AAF8D44" : "#D4545444"), display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 16 }}>{idealistaReady ? "✅" : "⚠️"}</span>
-            <span style={{ fontSize: 11, color: idealistaReady ? "#2C6E52" : "#A23A3A", fontWeight: 600, fontFamily: "Inter, sans-serif" }}>
+          <div style={{ marginBottom: 24, padding: "12px 18px", background: idealistaReady ? "#2C6E5210" : "#A23A3A08", border: "1px solid " + (idealistaReady ? "#2C6E5230" : "#A23A3A25"), display: "flex", alignItems: "center", gap: 12 }}>
+            <span style={{ fontSize: 18 }}>{idealistaReady ? "✅" : "⚠️"}</span>
+            <span style={{ fontSize: 12, color: idealistaReady ? "#2C6E52" : "#A23A3A", fontWeight: 600, fontFamily: "Inter, sans-serif", letterSpacing: "0.02em" }}>
               {idealistaReady
                 ? "Propiedad lista para Idealista — todos los campos requeridos están completos"
                 : idealistaFieldErrors.size + " campo(s) requerido(s) para Idealista sin completar"}
@@ -1449,39 +1450,44 @@ REGLAS:
         )}
 
         {/* Header */}
-        <div style={{ marginBottom: 16 }}>
+        <div style={{ marginBottom: 24 }}>
           {editMode ? (
             <>
-              <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8, flexWrap: "wrap" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <span style={{ fontSize: 10, color: "#9A968A" }}>REF<span style={{ color: "#AC8A54", fontSize: 18, fontWeight: 400 }}>*</span>:</span>
+              {/* Fila: REF + Operación + Tipo */}
+              <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 12, flexWrap: "wrap" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, background: "#F8F6F1", border: "1px solid " + (idealistaFieldErrors.has("ref") ? "#A23A3A" : "#E7E1D4"), padding: "6px 12px" }}>
+                  <span style={{ fontSize: 9, fontWeight: 700, color: "#AC8A54", letterSpacing: "0.15em", textTransform: "uppercase" }}>Ref</span>
+                  <span style={{ color: "#A23A3A", fontSize: 12 }}>*</span>
                   <input type="text" value={d.ref || ""} onChange={e => upd("ref", e.target.value)}
-                    style={{ width: 130, background: "#FFFFFF", border: "1px solid " + (idealistaFieldErrors.has("ref") ? "#A23A3A" : "#E7E1D4"), borderRadius: 0, color: "#AC8A54", padding: "4px 8px", fontSize: 11, fontFamily: "Inter, sans-serif" }} />
+                    style={{ width: 110, background: "transparent", border: "none", outline: "none", color: "#16294A", padding: 0, fontSize: 12, fontFamily: "Inter, sans-serif", fontWeight: 700 }} />
                 </div>
                 <select value={d.op || "Compraventa"} onChange={e => upd("op", e.target.value)}
-                  style={{ background: "#FFFFFF", border: "1px solid " + (idealistaFieldErrors.has("op") ? "#A23A3A" : "#E7E1D4"), borderRadius: 0, color: "#22262E", padding: "4px 8px", fontSize: 11, fontFamily: "Inter, sans-serif", cursor: "pointer" }}>
+                  style={{ background: "#FFFFFF", border: "1px solid " + (idealistaFieldErrors.has("op") ? "#A23A3A" : "#E7E1D4"), borderRadius: 0, color: "#22262E", padding: "6px 12px", fontSize: 12, fontFamily: "Inter, sans-serif", cursor: "pointer", fontWeight: 500 }}>
                   {OPS_LIST.map(o => <option key={o} value={o}>{o}</option>)}
                 </select>
                 <select value={d.tipo || ""} onChange={e => upd("tipo", e.target.value)}
-                  style={{ background: "#FFFFFF", border: "1px solid " + (idealistaFieldErrors.has("tipo") ? "#A23A3A" : "#E7E1D4"), borderRadius: 0, color: "#22262E", padding: "4px 8px", fontSize: 11, fontFamily: "Inter, sans-serif", cursor: "pointer" }}>
+                  style={{ background: "#FFFFFF", border: "1px solid " + (idealistaFieldErrors.has("tipo") ? "#A23A3A" : "#E7E1D4"), borderRadius: 0, color: "#22262E", padding: "6px 12px", fontSize: 12, fontFamily: "Inter, sans-serif", cursor: "pointer", fontWeight: 500 }}>
                   <option value="">-- Tipo *</option>
                   {TIPOS_LIST.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
               </div>
-              <input type="text" value={d.titulo || ""} onChange={e => upd("titulo", e.target.value)} placeholder="Titulo de la propiedad"
-                style={{ width: "100%", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "8px 12px", fontSize: 18, fontFamily: "'Playfair Display', serif", marginBottom: 6 }} />
-              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                <span style={{ fontSize: 11, color: "#9A968A" }}>Agente:</span>
+
+              {/* Título */}
+              <input type="text" value={d.titulo || ""} onChange={e => upd("titulo", e.target.value)} placeholder="Título de la propiedad"
+                style={{ width: "100%", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "10px 14px", fontSize: 20, fontFamily: "'Playfair Display', serif", marginBottom: 12, boxSizing: "border-box" }} />
+
+              {/* Agente */}
+              <div style={{ display: "flex", gap: 10, alignItems: "center", background: "#F8F6F1", border: "1px solid #E7E1D4", padding: "8px 14px" }}>
+                <span style={{ fontSize: 9, fontWeight: 700, color: "#9A968A", letterSpacing: "0.15em", textTransform: "uppercase", flexShrink: 0 }}>Agente captador</span>
                 <select value={d.agente || ""} onChange={async e => {
                   const agente = e.target.value;
                   upd("agente", agente);
                   if (agente) {
-                    // Siempre regenerar ref al cambiar agente
                     const newRef = await reasignarRef(agente, d.ref);
                     if (newRef) upd("ref", newRef);
                   }
                 }}
-                  style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "4px 8px", fontSize: 11, fontFamily: "Inter, sans-serif" }}>
+                  style={{ background: "transparent", border: "none", outline: "none", color: "#22262E", padding: 0, fontSize: 12, fontFamily: "Inter, sans-serif", fontWeight: 600, cursor: "pointer", flex: 1 }}>
                   <option value="">Seleccionar agente</option>
                   {AGENTES_LIST.map(a => <option key={a} value={a}>{a}</option>)}
                 </select>
@@ -1489,14 +1495,14 @@ REGLAS:
             </>
           ) : (
             <>
-              <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8, flexWrap: "wrap" }}>
-                <span style={{ fontSize: 10, color: "#9A968A", letterSpacing: "0.1em" }}>{p.ref}</span>
+              <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 10, flexWrap: "wrap" }}>
+                <span style={{ fontSize: 10, color: "#AC8A54", fontWeight: 700, letterSpacing: "0.12em" }}>{p.ref}</span>
                 <Tag color={est.accent}>{est.label}</Tag>
                 <Tag color="#3D577E">{p.op}</Tag>
                 <Tag>{p.tipo}</Tag>
               </div>
               <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 400, color: "#22262E", margin: 0, lineHeight: 1.2 }}>{p.titulo}</h2>
-              <div style={{ fontSize: 12, color: "#9A968A", marginTop: 6 }}>Captada {p.fechaCap} - Agente: {p.agente}</div>
+              <div style={{ fontSize: 12, color: "#9A968A", marginTop: 8 }}>Captada {p.fechaCap} · Agente: <strong style={{ color: "#22262E" }}>{p.agente}</strong></div>
             </>
           )}
         </div>
