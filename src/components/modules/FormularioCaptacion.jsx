@@ -860,41 +860,40 @@ export default function FormularioCaptacion() {
               </div>
             )}
           </div>
-          {(pv > 0 || pp > 0) && Number(honorarios) > 0 && (
-            <div style={{ padding: "14px 16px", background: "#F4EEE0", border: "1px solid #E7D9C0", marginBottom: 14 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                <div style={{ fontSize: 10, color: "#8C6E3F", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>Cálculo automático</div>
-                {op !== "Alquiler" && (
-                  <div style={{ display: "flex", gap: 4 }}>
-                    <button onClick={() => setCalcDesde("venta")} style={{ fontSize: 10, padding: "3px 10px", border: "1px solid #AC8A54", background: calcDesde === "venta" ? "#AC8A54" : "transparent", color: calcDesde === "venta" ? "#fff" : "#AC8A54", cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>Desde precio venta</button>
-                    <button onClick={() => setCalcDesde("propietario")} style={{ fontSize: 10, padding: "3px 10px", border: "1px solid #AC8A54", background: calcDesde === "propietario" ? "#AC8A54" : "transparent", color: calcDesde === "propietario" ? "#fff" : "#AC8A54", cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>Desde precio propietario</button>
-                  </div>
-                )}
+          {/* Panel cálculo automático — siempre visible */}
+          <div style={{ padding: "16px 18px", background: "#F4EEE0", border: "1px solid #E7D9C0", marginTop: 8, marginBottom: 4 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
+              <div style={{ fontSize: 10, color: "#8C6E3F", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>Cálculo Automático</div>
+              {op !== "Alquiler" && (
+                <div style={{ display: "flex", gap: 6 }}>
+                  <button onClick={() => setCalcDesde("venta")} style={{ fontSize: 10, padding: "5px 12px", border: "1px solid #AC8A54", borderRadius: 0, background: calcDesde === "venta" ? "#AC8A54" : "transparent", color: calcDesde === "venta" ? "#fff" : "#AC8A54", cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600, letterSpacing: "0.04em" }}>Desde precio venta</button>
+                  <button onClick={() => setCalcDesde("propietario")} style={{ fontSize: 10, padding: "5px 12px", border: "1px solid #AC8A54", borderRadius: 0, background: calcDesde === "propietario" ? "#AC8A54" : "transparent", color: calcDesde === "propietario" ? "#fff" : "#AC8A54", cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600, letterSpacing: "0.04em" }}>Desde precio propietario</button>
+                </div>
+              )}
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "12px 20px" }}>
+              <div>
+                <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 4 }}>{op === "Alquiler" ? "Renta mensual" : "Precio de venta"}</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "#16294A" }}>{pv > 0 || precioCalc > 0 ? fmtP(Math.round(calcDesde === "propietario" && precioCalc > 0 ? precioCalc : pv)) : "—"}</div>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px 16px" }}>
-                <div>
-                  <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 2 }}>{op === "Alquiler" ? "Renta mensual" : "Precio de venta"}</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "#16294A" }}>{fmtP(Math.round(calcDesde === "propietario" ? precioCalc : pv))}</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 2 }}>Hon. neto</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "#16294A" }}>{fmtP(Math.round(honNeto))}</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 2 }}>IVA ({Number(ivaHon)||21}%)</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "#16294A" }}>{fmtP(Math.round(honIva))}</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 2 }}>Hon. total (neto+IVA)</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "#AC8A54" }}>{fmtP(Math.round(honTotal))}</div>
-                </div>
-                <div style={{ gridColumn: "span 2" }}>
-                  <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 2 }}>Neto propietario</div>
-                  <div style={{ fontSize: 16, fontWeight: 700, color: "#2C6E52" }}>{fmtP(Math.round(netoProp))}</div>
-                </div>
+              <div>
+                <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 4 }}>Hon. neto</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "#16294A" }}>{honNeto > 0 ? fmtP(Math.round(honNeto)) : "—"}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 4 }}>IVA ({Number(ivaHon)||21}%)</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "#16294A" }}>{honIva > 0 ? fmtP(Math.round(honIva)) : "—"}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 4 }}>Hon. total (neto+IVA)</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "#AC8A54" }}>{honTotal > 0 ? fmtP(Math.round(honTotal)) : "—"}</div>
+              </div>
+              <div style={{ gridColumn: "span 2" }}>
+                <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 4 }}>Neto propietario</div>
+                <div style={{ fontSize: 17, fontWeight: 700, color: "#2C6E52" }}>{netoProp > 0 ? fmtP(Math.round(netoProp)) : "—"}</div>
               </div>
             </div>
-          )}
+          </div>
         </Sec>
 
         {/* 11. Datos propietario */}
