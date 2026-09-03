@@ -143,7 +143,7 @@ export default function CualificacionCompradores() {
   );
 
   return (
-    <div style={{ minHeight: "100vh", background: CREAM, fontFamily: "Inter, sans-serif", overflowX: "hidden" }}>
+    <div style={{ minHeight: "100vh", background: CREAM, fontFamily: "Inter, sans-serif" }}>
 
       {/* Header + Hero */}
       <div style={{ background: PETROL, padding: "20px 20px 40px", borderBottom: `3px solid ${BRONZE}` }}>
@@ -168,7 +168,7 @@ export default function CualificacionCompradores() {
       </div>
 
       {/* Formulario */}
-      <div style={{ maxWidth: 600, margin: "0 auto", padding: "32px 20px 48px", overflowX: "hidden", boxSizing: "border-box" }}>
+      <div style={{ maxWidth: 600, margin: "0 auto", padding: "32px 20px 48px", boxSizing: "border-box" }}>
         <form onSubmit={handleSubmit} noValidate>
 
           <Field label="Correo electrónico" required>
