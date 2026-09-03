@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 
 function mapBuyerDb(row) {
@@ -93,7 +93,234 @@ function ScoreBar({ value }) {
   </div>;
 }
 
-function Card({ b, onClick }) {
+
+// ═══ WHATSAPP PANEL — Chat con comprador via Claudia ═════════════
+const CLAUDIA_PROMPT_SHORT = `Eres Claudia, secretaria coordinadora de Mallorca Nativa Properties. Recibes leads de compradores por WhatsApp. Cualifica al comprador, entiende su necesidad y deriva al agente correcto.`;
+
+function WhatsAppPanel({ buyer, onClose }) {
+  const [mensajes, setMensajes] = useState([]);
+  const [convId, setConvId] = useState(null);
+  const [modoManual, setModoManual] = useState(false);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [loadingConv, setLoadingConv] = useState(true);
+  const chatRef = useRef(null);
+
+  // Cargar o crear conversación al abrir
+  useEffect(() => {
+    async function loadConv() {
+      setLoadingConv(true);
+      try {
+        // Buscar conversación existente por teléfono con agente_ia = claudia
+        let phone = (buyer.tel || "").replace(/\D/g, "");
+        if (phone.startsWith("34") && phone.length === 11) phone = phone.slice(2);
+
+        const { data: convs } = await supabase
+          .from("conversaciones")
+          .select("*")
+          .eq("agente_ia", "claudia")
+          .order("updated_at", { ascending: false });
+
+        // Buscar por teléfono aproximado
+        const conv = convs?.find(c => {
+          const cPhone = (c.telefono || "").replace(/\D/g, "");
+          return cPhone.endsWith(phone) || phone.endsWith(cPhone.slice(-9));
+        });
+
+        if (conv) {
+          setConvId(conv.id);
+          setModoManual(conv.estado === "manual");
+          // Cargar mensajes
+          const { data: msgs } = await supabase
+            .from("mensajes")
+            .select("*")
+            .eq("conversacion_id", conv.id)
+            .order("created_at", { ascending: true });
+          setMensajes((msgs || []).map(m => ({
+            from: m.from_who || "cliente",
+            text: m.texto || "",
+            ts: m.timestamp ? new Date(m.timestamp).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) : "",
+          })));
+        } else {
+          // No existe conversación — crear una nueva vacía
+          const tel = (buyer.tel || "").replace(/\D/g, "");
+          const { data: newConv } = await supabase
+            .from("conversaciones")
+            .insert({
+              contacto: buyer.nombre,
+              telefono: buyer.tel,
+              canal: "WhatsApp",
+              estado: "manual",
+              agente_ia: "claudia",
+              updated_at: new Date().toISOString(),
+            })
+            .select()
+            .single();
+          if (newConv) {
+            setConvId(newConv.id);
+            setModoManual(true);
+          }
+        }
+      } catch (e) {
+        console.error("Error cargando conversación:", e);
+      } finally {
+        setLoadingConv(false);
+      }
+    }
+    loadConv();
+  }, [buyer.tel]);
+
+  // Scroll al último mensaje
+  useEffect(() => {
+    if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
+  }, [mensajes]);
+
+  // Guardar mensaje en Supabase
+  async function saveMsg(texto, fromWho) {
+    if (!convId) return;
+    await supabase.from("mensajes").insert({
+      conversacion_id: convId,
+      texto,
+      from_who: fromWho,
+      timestamp: new Date().toISOString(),
+    });
+    await supabase.from("conversaciones").update({ updated_at: new Date().toISOString() }).eq("id", convId);
+  }
+
+  // Envío manual — WhatsApp real
+  async function handleSend() {
+    if (!input.trim() || loading) return;
+    const texto = input.trim();
+    setInput("");
+    setLoading(true);
+    const newMsg = { from: "agente_manual", text: texto, ts: new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) };
+    setMensajes(prev => [...prev, newMsg]);
+    try {
+      const res = await fetch("/api/manual-reply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ conversacion_id: convId, telefono: buyer.tel, texto, agente: "Claudia" }),
+      });
+      const data = await res.json();
+      if (!data.ok) {
+        setMensajes(prev => [...prev, { from: "sistema", text: `Error: ${data.error}`, ts: "" }]);
+      } else {
+        await saveMsg(texto, "agente_manual");
+      }
+    } catch (e) {
+      setMensajes(prev => [...prev, { from: "sistema", text: `Error: ${e.message}`, ts: "" }]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Toggle manual/IA
+  async function toggleModo() {
+    const nuevo = !modoManual;
+    setModoManual(nuevo);
+    if (convId) {
+      await supabase.from("conversaciones").update({ estado: nuevo ? "manual" : "activo", updated_at: new Date().toISOString() }).eq("id", convId);
+      const sysMsg = { from: "sistema", text: nuevo ? "Modo manual activado — Claudia en pausa" : "IA reactivada — Claudia responde automáticamente", ts: "" };
+      setMensajes(prev => [...prev, sysMsg]);
+      await saveMsg(sysMsg.text, "sistema");
+    }
+  }
+
+  const PETROL = "#405c6b";
+  const BRONZE = "#AC8A54";
+
+  return (
+    <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: "min(420px, 100vw)", background: "#FFFFFF", borderLeft: "1px solid #2A2926", zIndex: 1100, display: "flex", flexDirection: "column", boxShadow: "-4px 0 24px rgba(0,0,0,0.15)" }}>
+      {/* Header */}
+      <div style={{ background: PETROL, padding: "16px 20px", flexShrink: 0 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ width: 40, height: 40, borderRadius: "50%", background: BRONZE, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, color: "#fff", fontWeight: 700, flexShrink: 0 }}>
+              {buyer.nombre?.charAt(0) || "?"}
+            </div>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: "#FFFFFF", fontFamily: "Inter, sans-serif" }}>{buyer.nombre}</div>
+              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.6)", fontFamily: "Inter, sans-serif" }}>{buyer.tel}</div>
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <button onClick={toggleModo} style={{ padding: "5px 10px", border: `1px solid ${modoManual ? "#D4545466" : "#6AAF8D66"}`, background: modoManual ? "#D4545420" : "#6AAF8D20", color: modoManual ? "#ffaaaa" : "#aaffcc", cursor: "pointer", fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", fontFamily: "Inter, sans-serif", borderRadius: 0 }}>
+              {modoManual ? "⏸ MANUAL" : "🤖 IA ACTIVA"}
+            </button>
+            <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.7)", fontSize: 20, cursor: "pointer", lineHeight: 1 }}>✕</button>
+          </div>
+        </div>
+        <div style={{ marginTop: 8, fontSize: 10, color: "rgba(255,255,255,0.5)", fontFamily: "Inter, sans-serif", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+          Claudia · Cualificación compradores
+        </div>
+      </div>
+
+      {/* Aviso modo */}
+      {modoManual && (
+        <div style={{ padding: "8px 16px", background: "#A23A3A15", borderBottom: "1px solid #A23A3A25", fontSize: 11, color: "#A23A3A", fontFamily: "Inter, sans-serif" }}>
+          ⚠️ Claudia en pausa. Tus mensajes se envían directamente al cliente.
+        </div>
+      )}
+
+      {/* Mensajes */}
+      <div ref={chatRef} style={{ flex: 1, overflowY: "auto", padding: "16px", background: "#F8F6F1" }}>
+        {loadingConv ? (
+          <div style={{ textAlign: "center", padding: 40, color: "#9A968A", fontSize: 12, fontFamily: "Inter, sans-serif" }}>Cargando conversación...</div>
+        ) : mensajes.length === 0 ? (
+          <div style={{ textAlign: "center", padding: 40 }}>
+            <div style={{ fontSize: 32, marginBottom: 12 }}>💬</div>
+            <div style={{ fontSize: 13, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>Sin mensajes aún.<br/>Inicia la conversación con {buyer.nombre}.</div>
+          </div>
+        ) : mensajes.map((m, i) => {
+          if (m.from === "sistema") return (
+            <div key={i} style={{ textAlign: "center", margin: "8px 0" }}>
+              <span style={{ fontSize: 10, color: "#9A968A", padding: "3px 10px", background: "#E7E1D4", borderRadius: 10, fontFamily: "Inter, sans-serif" }}>{m.text}</span>
+            </div>
+          );
+          const isAgent = m.from !== "cliente";
+          const isManual = m.from === "agente_manual";
+          return (
+            <div key={i} style={{ display: "flex", justifyContent: isAgent ? "flex-end" : "flex-start", marginBottom: 8 }}>
+              <div style={{ maxWidth: "80%", padding: "10px 14px", background: isAgent ? PETROL : "#FFFFFF", color: isAgent ? "#FFFFFF" : "#22262E", borderRadius: isAgent ? "12px 12px 2px 12px" : "12px 12px 12px 2px", border: isAgent ? "none" : "1px solid #E7E1D4", fontSize: 13, fontFamily: "Inter, sans-serif", lineHeight: 1.5 }}>
+                {isManual && <div style={{ fontSize: 9, color: "rgba(255,255,255,0.6)", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.08em" }}>Manual</div>}
+                {m.text}
+                {m.ts && <div style={{ fontSize: 9, color: isAgent ? "rgba(255,255,255,0.5)" : "#9A968A", marginTop: 4, textAlign: "right" }}>{m.ts}</div>}
+              </div>
+            </div>
+          );
+        })}
+        {loading && (
+          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
+            <div style={{ padding: "10px 14px", background: PETROL + "44", borderRadius: 12, fontSize: 12, color: PETROL, fontFamily: "Inter, sans-serif" }}>enviando...</div>
+          </div>
+        )}
+      </div>
+
+      {/* Input */}
+      <div style={{ padding: "12px 16px", borderTop: "1px solid #E7E1D4", background: "#FFFFFF", flexShrink: 0 }}>
+        <div style={{ display: "flex", gap: 8 }}>
+          <input
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+            placeholder={modoManual ? "Escribe al cliente — se enviará por WhatsApp..." : "Modo IA activo — activa Manual para escribir"}
+            disabled={!modoManual}
+            style={{ flex: 1, padding: "10px 14px", background: modoManual ? "#FFFFFF" : "#F8F6F1", border: "1px solid " + (modoManual ? "#2A2926" : "#E7E1D4"), borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", outline: "none", boxSizing: "border-box", cursor: modoManual ? "text" : "not-allowed" }}
+          />
+          <button
+            onClick={handleSend}
+            disabled={!modoManual || !input.trim() || loading}
+            style={{ padding: "10px 18px", borderRadius: 0, border: "none", background: modoManual && input.trim() && !loading ? PETROL : "#E7E1D4", color: modoManual && input.trim() && !loading ? "#FFFFFF" : "#9A968A", cursor: modoManual && input.trim() && !loading ? "pointer" : "default", fontSize: 11, fontWeight: 600, fontFamily: "Inter, sans-serif", letterSpacing: "0.06em", textTransform: "uppercase" }}
+          >
+            ➤
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Card({ b, onClick, onWhatsApp }) {
   const s = score(b);
   const est = ESTADOS.find(e => e.key === b.st) || ESTADOS[0];
   return <div onClick={onClick} style={{
@@ -128,10 +355,17 @@ function Card({ b, onClick }) {
       {b.ze.map((z, i) => <span key={"e" + i} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 0, fontFamily: "Inter, sans-serif", background: "#D4956A0D", color: "#9C6E1B", border: "1px solid #D4956A22", letterSpacing: "0.03em" }}>✕ {z}</span>)}
     </div>
     {b.ag && <div style={{ marginTop: 10, fontSize: 11, color: "#3D577E", fontFamily: "Inter, sans-serif", fontWeight: 500 }}>Agente: {b.ag}</div>}
+    <button
+      onClick={e => { e.stopPropagation(); onWhatsApp && onWhatsApp(b); }}
+      style={{ position: "absolute", bottom: 20, right: 20, width: 36, height: 36, borderRadius: "50%", background: "#25D366", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, boxShadow: "0 2px 8px rgba(37,211,102,0.4)", transition: "transform 0.2s" }}
+      title="WhatsApp con Claudia"
+      onMouseEnter={e => e.currentTarget.style.transform = "scale(1.1)"}
+      onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+    >💬</button>
   </div>;
 }
 
-function Detail({ b, onClose, onSave, onDelete }) {
+function Detail({ b, onClose, onSave, onDelete, onWhatsApp }) {
   const [ed, setEd] = useState(false);
   const [f, setF] = useState({ ...b });
   const [autoSaveStatus, setAutoSaveStatus] = useState(null);
@@ -160,6 +394,7 @@ function Detail({ b, onClose, onSave, onDelete }) {
     <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, width: "100%", maxWidth: 620, padding: "36px 40px", position: "relative" }}>
       <button onClick={onClose} style={{ position: "absolute", top: 20, right: 24, background: "none", border: "none", color: "#9A968A", fontSize: 20, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>✕</button>
       <button onClick={() => { if (onDelete) onDelete(b); }} style={{ position: "absolute", top: 22, right: 60, background: "none", border: "1px solid #D4545433", borderRadius: 0, color: "#A23A3A", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "Inter, sans-serif" }}>Eliminar</button>
+      <button onClick={() => onWhatsApp && onWhatsApp(b)} style={{ position: "absolute", top: 22, right: 110, background: "#25D366", border: "none", borderRadius: "50%", width: 32, height: 32, cursor: "pointer", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(37,211,102,0.4)" }} title="WhatsApp con Claudia">💬</button>
       {ed && autoSaveStatus && <div style={{ position: "absolute", top: 24, left: 40, fontSize: 10, color: autoSaveStatus === "saved" ? "#2C6E52" : autoSaveStatus === "error" ? "#A23A3A" : "#9A968A" }}>{autoSaveStatus === "saving" ? "⏳ Guardando..." : autoSaveStatus === "saved" ? "✓ Guardado" : "✗ Error"}</div>}
       <div style={{ borderBottom: "1px solid #2A2926", paddingBottom: 24, marginBottom: 28 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
@@ -250,6 +485,7 @@ export default function App() {
   const [sort, setSort] = useState("fecha");
   const [sel, setSel] = useState(null);
   const [showNew, setShowNew] = useState(false);
+  const [waBuyer, setWaBuyer] = useState(null);
 
   const list = useMemo(() => {
     let r = [...data];
@@ -367,11 +603,12 @@ export default function App() {
       <div style={{ fontSize: 11, color: "#9A968A", marginBottom: 12, letterSpacing: "0.06em" }}>{list.length} de {data.length} compradores</div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {list.map(b => <Card key={b.id} b={b} onClick={() => setSel(b)} />)}
+        {list.map(b => <Card key={b.id} b={b} onClick={() => setSel(b)} onWhatsApp={b => setWaBuyer(b)} />)}
         {list.length === 0 && <div style={{ textAlign: "center", padding: 60, color: "#9A968A", fontSize: 13, fontStyle: "italic" }}>No se encontraron compradores con esos filtros</div>}
       </div>
 
-      {sel && <Detail b={sel} onClose={() => setSel(null)} onSave={async u => { 
+      {waBuyer && <WhatsAppPanel buyer={waBuyer} onClose={() => setWaBuyer(null)} />}
+      {sel && <Detail b={sel} onClose={() => setSel(null)} onWhatsApp={b => setWaBuyer(b)} onSave={async u => { 
         const dbData = mapBuyerToDb(u);
         const { error } = await supabase.from("compradores").update(dbData).eq("id", u.id); 
         if (error) { alert("Error al guardar: " + error.message); return; }
