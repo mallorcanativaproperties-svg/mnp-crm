@@ -157,19 +157,19 @@ function CheckGroup({ label, options, selected, onChange }) {
   return (
     <div style={{ marginBottom: 14 }}>
       <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 8 }}>{label}</label>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
         {options.map((opt) => {
           const on = selected.includes(opt);
           return (
             <div
               key={opt}
               onClick={() => toggle(opt)}
-              style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 0, border: "1px solid " + (on ? "#C8A97E44" : "#E7E1D4"), background: on ? "#C8A97E0D" : "transparent", cursor: "pointer", transition: "all 0.15s" }}
+              style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 16px", borderRadius: 0, border: "2px solid " + (on ? "#AC8A54" : "#9A968A"), background: on ? "#AC8A5415" : "#FFFFFF", cursor: "pointer", transition: "all 0.15s" }}
             >
-              <div style={{ width: 12, height: 12, borderRadius: 0, border: "1px solid " + (on ? "#AC8A54" : "#9A968A"), background: on ? "#AC8A54" : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                {on && <span style={{ color: "#F8F6F1", fontSize: 9, fontWeight: 700 }}>v</span>}
+              <div style={{ width: 18, height: 18, borderRadius: 0, border: "2px solid " + (on ? "#AC8A54" : "#9A968A"), background: on ? "#AC8A54" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                {on && <span style={{ color: "#FFFFFF", fontSize: 12, fontWeight: 700, lineHeight: 1 }}>✓</span>}
               </div>
-              <span style={{ fontSize: 11, color: on ? "#AC8A54" : "#A09D93" }}>{opt}</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: on ? "#AC8A54" : "#22262E", fontFamily: "Inter, sans-serif" }}>{opt}</span>
             </div>
           );
         })}
