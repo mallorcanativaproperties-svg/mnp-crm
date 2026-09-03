@@ -262,8 +262,8 @@ function CatastroImportCuestionario({ setDir, setNum, setPlanta, setPuerta, setC
       <div style={{ fontSize: 10, fontWeight: 700, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>Importar del Catastro</div>
       <div style={{ display: "flex", gap: 8 }}>
         <input type="text" value={refCatInput} onChange={e => setRefCatInput(e.target.value.toUpperCase())} onKeyDown={e => e.key === "Enter" && importar()} placeholder="Ej: 9872023VH5797S0001WX" style={iSt} />
-        <button onClick={importar} disabled={loading || !refCat.trim()}
-          style={{ background: loading || !refCat.trim() ? "#E7E1D4" : "#AC8A54", border: "none", borderRadius: 0, color: loading || !refCat.trim() ? "#C8BFB0" : "#F8F6F1", fontSize: 11, fontWeight: 700, cursor: loading || !refCat.trim() ? "not-allowed" : "pointer", padding: "0 16px", fontFamily: "Inter, sans-serif", whiteSpace: "nowrap" }}>
+        <button onClick={importar} disabled={loading || !refCatInput.trim()}
+          style={{ background: loading || !refCatInput.trim() ? "#E7E1D4" : "#AC8A54", border: "none", borderRadius: 0, color: loading || !refCatInput.trim() ? "#C8BFB0" : "#F8F6F1", fontSize: 11, fontWeight: 700, cursor: loading || !refCatInput.trim() ? "not-allowed" : "pointer", padding: "0 16px", fontFamily: "Inter, sans-serif", whiteSpace: "nowrap" }}>
           {loading ? "Consultando..." : "Importar"}
         </button>
       </div>
