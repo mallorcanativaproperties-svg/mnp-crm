@@ -100,7 +100,7 @@ const CLAUDIA_PROMPT_SHORT = `Eres Claudia, secretaria coordinadora de Mallorca 
 function WhatsAppPanel({ buyer, onClose }) {
   const [mensajes, setMensajes] = useState([]);
   const [convId, setConvId] = useState(null);
-  const [modoManual, setModoManual] = useState(false);
+  const [modoManual, setModoManual] = useState(true); // Siempre manual al abrir
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingConv, setLoadingConv] = useState(true);
@@ -203,12 +203,12 @@ function WhatsAppPanel({ buyer, onClose }) {
       });
       const data = await res.json();
       if (!data.ok) {
-        setMensajes(prev => [...prev, { from: "sistema", text: `Error: ${data.error}`, ts: "" }]);
+        setMensajes(prev => [...prev, { from: "sistema", text: `⚠️ Error al enviar: ${data.error || "error desconocido"}`, ts: "" }]);
       } else {
         await saveMsg(texto, "agente_manual");
       }
     } catch (e) {
-      setMensajes(prev => [...prev, { from: "sistema", text: `Error: ${e.message}`, ts: "" }]);
+      setMensajes(prev => [...prev, { from: "sistema", text: `⚠️ Error: ${e.message}`, ts: "" }]);
     } finally {
       setLoading(false);
     }
