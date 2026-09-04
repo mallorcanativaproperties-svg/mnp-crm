@@ -355,13 +355,13 @@ function Card({ b, onClick, onWhatsApp }) {
       {b.ze.map((z, i) => <span key={"e" + i} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 0, fontFamily: "Inter, sans-serif", background: "#D4956A0D", color: "#9C6E1B", border: "1px solid #D4956A22", letterSpacing: "0.03em" }}>✕ {z}</span>)}
     </div>
     {b.ag && <div style={{ marginTop: 10, fontSize: 11, color: "#3D577E", fontFamily: "Inter, sans-serif", fontWeight: 500 }}>Agente: {b.ag}</div>}
-    <button
-      onClick={e => { e.stopPropagation(); onWhatsApp && onWhatsApp(b); }}
-      style={{ position: "absolute", bottom: 20, right: 20, width: 36, height: 36, borderRadius: "50%", background: "#25D366", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, boxShadow: "0 2px 8px rgba(37,211,102,0.4)", transition: "transform 0.2s" }}
-      title="WhatsApp con Claudia"
-      onMouseEnter={e => e.currentTarget.style.transform = "scale(1.1)"}
-      onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
-    >💬</button>
+    <a
+      href={"https://wa.me/" + (b.tel || "").replace(/\D/g, "").replace(/^0+/, "").replace(/^(?!34)(\d{9})$/, "34$1")}
+      target="_blank" rel="noopener noreferrer"
+      onClick={e => e.stopPropagation()}
+      style={{ position: "absolute", bottom: 20, right: 20, width: 36, height: 36, borderRadius: "50%", background: "#25D366", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, boxShadow: "0 2px 8px rgba(37,211,102,0.4)", textDecoration: "none" }}
+      title="Abrir WhatsApp"
+    >💬</a>
   </div>;
 }
 
@@ -394,7 +394,7 @@ function Detail({ b, onClose, onSave, onDelete, onWhatsApp }) {
     <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, width: "100%", maxWidth: 620, padding: "36px 40px", position: "relative" }}>
       <button onClick={onClose} style={{ position: "absolute", top: 20, right: 24, background: "none", border: "none", color: "#9A968A", fontSize: 20, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>✕</button>
       <button onClick={() => { if (onDelete) onDelete(b); }} style={{ position: "absolute", top: 22, right: 60, background: "none", border: "1px solid #D4545433", borderRadius: 0, color: "#A23A3A", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "Inter, sans-serif" }}>Eliminar</button>
-      <button onClick={() => onWhatsApp && onWhatsApp(b)} style={{ position: "absolute", top: 22, right: 110, background: "#25D366", border: "none", borderRadius: "50%", width: 32, height: 32, cursor: "pointer", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(37,211,102,0.4)" }} title="WhatsApp con Claudia">💬</button>
+      <a href={"https://wa.me/" + (b.tel || "").replace(/\D/g, "").replace(/^0+/, "").replace(/^(?!34)(\d{9})$/, "34$1")} target="_blank" rel="noopener noreferrer" style={{ position: "absolute", top: 22, right: 110, background: "#25D366", border: "none", borderRadius: "50%", width: 32, height: 32, cursor: "pointer", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 8px rgba(37,211,102,0.4)", textDecoration: "none" }} title="Abrir WhatsApp">💬</a>
       {ed && autoSaveStatus && <div style={{ position: "absolute", top: 24, left: 40, fontSize: 10, color: autoSaveStatus === "saved" ? "#2C6E52" : autoSaveStatus === "error" ? "#A23A3A" : "#9A968A" }}>{autoSaveStatus === "saving" ? "⏳ Guardando..." : autoSaveStatus === "saved" ? "✓ Guardado" : "✗ Error"}</div>}
       <div style={{ borderBottom: "1px solid #2A2926", paddingBottom: 24, marginBottom: 28 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
