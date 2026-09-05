@@ -238,3 +238,60 @@ export async function GET(request) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+
+// ── Seguimiento formulario cualificación ─────────────────────────
+// Se ejecuta cada hora. Si han pasado 24h desde que se mandó el formulario
+// y el cliente no lo ha cumplimentado, se manda un recordatorio.
+async function seguimientoFormulario() {
+  const hace24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+  // Conversaciones con formulario enviado hace más de 24h y no cumplimentado
+  const { data: convs } = await supabase
+    .from("conversaciones")
+    .select("id, telefono, contacto, formulario_enviado_at, recordatorio_formulario_sent")
+    .eq("formulario_cumplimentado", false)
+    .not("formulario_enviado_at", "is", null)
+    .lt("formulario_enviado_at", hace24h)
+    .is("recordatorio_formulario_sent", null);
+
+  for (const conv of convs || []) {
+    // Verificar si el cliente ha cumplimentado el formulario (está en tabla compradores)
+    const tel = (conv.telefono || "").replace(/\D/g, "");
+    const telSin34 = tel.startsWith("34") ? tel.slice(2) : tel;
+    const telCon34 = tel.startsWith("34") ? tel : "34" + tel;
+
+    const { data: comprador } = await supabase
+      .from("compradores")
+      .select("id")
+      .or(`telefono.ilike.%${telSin34}%,telefono.ilike.%${telCon34}%`)
+      .limit(1)
+      .single();
+
+    if (comprador) {
+      // Ya cumplimentó — marcar y enviar confirmación
+      await supabase.from("conversaciones").update({
+        formulario_cumplimentado: true,
+        updated_at: new Date().toISOString(),
+      }).eq("id", conv.id);
+
+      await sendWhatsApp(conv.telefono, "Gracias, hemos recibido tus preferencias. El agente las tendrá en cuenta.");
+      await supabase.from("mensajes").insert({
+        conversacion_id: conv.id, from_who: "claudia",
+        texto: "Gracias, hemos recibido tus preferencias. El agente las tendrá en cuenta.",
+        timestamp: new Date().toISOString(),
+      });
+    } else {
+      // No cumplimentó — mandar recordatorio
+      const recordatorio = `Hola!\n\nNo he podido enviarte las propiedades, ¿has cumplimentado el formulario?\nhttps://crm.mallorcanativaproperties.com/cualificacion`;
+      await sendWhatsApp(conv.telefono, recordatorio);
+      await supabase.from("mensajes").insert({
+        conversacion_id: conv.id, from_who: "claudia",
+        texto: recordatorio, timestamp: new Date().toISOString(),
+      });
+      await supabase.from("conversaciones").update({
+        recordatorio_formulario_sent: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }).eq("id", conv.id);
+    }
+  }
+}

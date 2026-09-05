@@ -68,11 +68,21 @@ export async function sendWhatsApp(to, text) {
   return data;
 }
 
-// Baileys/Evolution no tiene el concepto de "plantillas aprobadas" de Meta (no existe
-// la ventana de 24h para mensajes salientes), así que no hace falta abrir conversación
-// con una plantilla: se deja como no-op para no romper firmas de llamada existentes.
-export async function sendWhatsAppTemplate() {
-  return { ok: true, skipped: true, reason: "not_needed_on_evolution" };
+// Envía botones interactivos (Evolution API los soporta sin plantillas de Meta)
+export async function sendButtons(to, text, buttons) {
+  const phone = normalizePhone(to);
+  const data = await evoFetch(`/message/sendButtons/${EVOLUTION_INSTANCE}`, {
+    method: "POST",
+    body: JSON.stringify({
+      number: phone,
+      title: "",
+      description: text,
+      footer: "",
+      buttons: buttons.map(b => ({ buttonId: b.id, buttonText: { displayText: b.title }, type: 1 })),
+    }),
+  });
+  console.log(`Evolution sendButtons to ${phone}:`, JSON.stringify(data).slice(0, 200));
+  return data;
 }
 
 export async function markAsRead(remoteJidOrPhone, messageId) {
