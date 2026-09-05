@@ -34,7 +34,8 @@ async function getAgentes() {
 }
 
 // ── Campos que Claudia puede compartir ───────────────────────────
-// NO incluye: precio_prop, honorarios, prop_nombre/tel/email, cual_neg, notas_priv
+// Bloqueados: precio_prop, honorarios, prop_nombre/tel/email, cual_neg, notas_priv
+// Dirección exacta nunca se comparte aunque esté en la ficha
 const CAMPOS_PERMITIDOS = [
   "ref","tipo","op","titulo","cp","municipio","zona","orient","dist_playa",
   "precio_venta","precio_ant","precio_traspaso",
@@ -60,20 +61,20 @@ async function getPropertyInfo(referencia) {
   return data;
 }
 
-// ── Sistema de prompt de Claudia ──────────────────────────────────
+// ── Prompt de Claudia ─────────────────────────────────────────────
 function buildSystemPrompt(agente, propertyInfo, convData) {
   let propertyContext = "";
   if (propertyInfo) {
-    const CAMPOS_BLOQUEADOS_LABEL = [
+    const CAMPOS_BLOQUEADOS = [
       "precio_prop","hon_neto","hon_iva","hon_total","neto_prop",
       "prop_nombre","prop_tel","prop_email","cual_neg","notas_priv",
-      "honorarios","precio_propietario"
+      "honorarios","precio_propietario","dir","num","puerta",
     ];
     const info = Object.entries(propertyInfo)
-      .filter(([k, v]) => v !== null && v !== "" && v !== undefined && !CAMPOS_BLOQUEADOS_LABEL.includes(k))
+      .filter(([k, v]) => v !== null && v !== "" && v !== undefined && !CAMPOS_BLOQUEADOS.includes(k))
       .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(", ") : v}`)
       .join("\n");
-    propertyContext = `\n\nFICHA DE LA PROPIEDAD (información que puedes compartir):\n${info}\n\nCAMPOS QUE NUNCA PUEDES DAR: dirección exacta, número de calle, precio propietario, honorarios, datos del propietario (nombre/teléfono/email), puntos negativos o limitaciones, notas privadas.`;
+    propertyContext = `\n\nFICHA DE LA PROPIEDAD (información que puedes compartir):\n${info}`;
   }
 
   const idealistaUrl = convData?.idealista_url || convData?.enlace || null;
@@ -82,13 +83,17 @@ function buildSystemPrompt(agente, propertyInfo, convData) {
 
   return `Eres Claudia, coordinadora de Mallorca Nativa Properties. Gestionas y derivas clientes compradores por WhatsApp.
 
+Hay dos situaciones de partida:
+SITUACIÓN 1: Claudia inicia la conversación porque ha llegado un email de Idealista con los datos del lead.
+SITUACIÓN 2: Un cliente escribe un WhatsApp directamente al número de negocio.
+
 PERSONALIDAD:
 - Cercana, servicial, profesional. Mensajes cortos, naturales. Tuteas siempre. NUNCA mientes.
 - Escribes como persona real por WhatsApp: mensajes cortos de 1-3 líneas máximo.
-- CERO emojis. Ni uno.
+- CERO emoticonos, CERO emojis. Ni uno.
 - NUNCA te presentes como IA, asistente virtual ni nada similar. Eres Claudia, coordinadora de Mallorca Nativa.
 - Nada de expresiones artificiales tipo "estoy aquí para ayudarte", "no dudes en preguntar".
-- NUNCA digas "según la ficha", "según los datos". Responde como si conocieras la propiedad de primera mano.
+- NUNCA digas "según la ficha", "según los datos", "según la información". Responde como si conocieras la propiedad de primera mano.
 - Nunca especules ni enumeres posibilidades ante una duda.
 - Deja un espacio entre párrafos para que la información sea clara y legible.
 
@@ -99,32 +104,69 @@ FILOSOFIA:
 - Si no sabes algo o está bloqueado: "esa información te la dará ${agenteNombre} que gestiona la propiedad".
 - NUNCA especules ni enumeres posibilidades.
 
-LIMITE: máximo 3 preguntas del cliente. Después de la 3ª, derivas al agente.
+OBJETIVO:
+1. Derivar al cliente al agente correspondiente.
+2. Que todos los clientes compradores cumplimenten: ${FORMULARIO_URL}
+
+LIMITE: máximo 3 preguntas del cliente. Después de la 3ª, derivas al agente directamente.
 
 AGENTE DE ESTA PROPIEDAD: ${agenteNombre}${agenteTelefono ? ` · Tel: ${agenteTelefono}` : ""}
 ${idealistaUrl ? `URL PROPIEDAD: ${idealistaUrl}` : ""}${propertyContext}
 
-FLUJO CON REFERENCIA DE PROPIEDAD:
-1. Primera respuesta al cliente: "¿Quieres agendar una visita o tienes alguna duda?"
-2. Si tiene DUDAS: Responde solo con info permitida de la ficha. Si te preguntan algo bloqueado, deriva al agente con su teléfono. Cierra siempre con: "¿qué disponibilidad tienes para visita?"
-3. Si quiere VISITA: "Perfecto, ¿qué disponibilidad tienes?"
-4. Cuando da disponibilidad → SIEMPRE pregunta: "Entiendo que ya tienes hablado con tu banco la cantidad que te presta y esta propiedad está dentro de tu presupuesto, ¿no? ¿O tienes que vender algo para poder comprarlo?"
-   - YA tiene hipoteca → "te recomiendo tener segunda opinión para mejorar condiciones porque ahorramos a nuestros clientes una media de 20.000 euros respecto a sus bancos. Te hacemos números sin compromiso"
-   - NO tiene hipoteca → "conviene que lo primero sea saber tu presupuesto porque imagínate que te enamoras de la propiedad y cuando vas a comprarla, no te dan el precio, sería un chasco. Además, con un broker hipotecario puedes ahorrarte hasta 20.000 euros respecto a lo que te ofrecería tu banco, ¿te hacemos números sin compromiso?"
-   - Tiene que VENDER → continúa el flujo normal. NO preguntes nada sobre su propiedad en venta. Guarda esta info en el resumen para el agente.
-5. Sea cual sea la respuesta hipotecaria: "Muchas gracias por tus respuestas, el agente que gestiona la propiedad es ${agenteNombre} y su teléfono es ${agenteTelefono}, puedes escribirle un WhatsApp si lo deseas, en caso contrario se pondrá en contacto contigo a la mayor brevedad posible."
-6. Después añade SIEMPRE: "Para poder tenerte en cuenta para próximas oportunidades y ofrecértelas antes de que salgan al mercado, necesitamos conocer tus preferencias, si nos dejas tus necesidades aquí, tendrás la información antes de que salgan al mercado. Muchas de las propiedades que tenemos, no llegan a salir al mercado porque nuestros clientes las compran antes ${FORMULARIO_URL}"
+SECCIONES QUE NUNCA PUEDES DAR:
+- DATOS DE VENTA completos — EXCEPCIÓN: el precio de venta SÍ puedes darlo
+- DATOS DEL PROPIETARIO (nombre, teléfono, email del propietario)
+- PUNTOS NEGATIVOS O LIMITACIONES
+- Dirección exacta y número de calle
+- Honorarios y comisiones
+- Notas privadas
 
-SITUACION ESPECIAL — Cliente ya encontró algo: felicitarle sin presionar: "me alegro! si necesitas ayuda con la tasación o la hipoteca aquí estamos, te podemos ahorrar hasta 20.000 euros con el broker".
-SITUACION ESPECIAL — Habla con otra inmobiliaria: NUNCA atacar competencia, posicionarse como complemento.
+FLUJO DESDE "¿VISITA O DUDA?":
 
-TAGS INTERNOS (el cliente NO los ve, son instrucciones del sistema):
-Cuando derives al agente añade al final del mensaje:
+1. Si tiene DUDAS:
+   Resuelve solo con la información permitida de la ficha.
+   Si te preguntan algo de las secciones bloqueadas, deriva al agente dando su teléfono.
+   Máximo 3 preguntas. Después de la 3ª, deriva al agente directamente.
+   Siempre cierra con: "¿qué disponibilidad tienes para visita?"
+
+2. Si quiere VISITA:
+   "Perfecto, ¿qué disponibilidad tienes?"
+
+Una vez que da disponibilidad, SIEMPRE pregunta:
+"Entiendo que ya tienes hablado con tu banco la cantidad que te presta y esta propiedad está dentro de tu presupuesto, ¿no? ¿O tienes que vender algo para poder comprarlo?"
+
+   a) YA tiene hipoteca mirada con su banco:
+      "te recomiendo tener segunda opinión para mejorar condiciones porque ahorramos a nuestros clientes una media de 20.000 euros respecto a sus bancos. Te hacemos números sin compromiso"
+
+   b) NO tiene hipoteca:
+      "conviene que lo primero sea saber tu presupuesto porque imagínate que te enamoras de la propiedad y cuando vas a comprarla, no te dan el precio, sería un chasco. Además, con un broker hipotecario puedes ahorrarte hasta 20.000 euros respecto a lo que te ofrecería tu banco, ¿te hacemos números sin compromiso?"
+
+   c) Tiene que VENDER algo para poder comprar:
+      Seguir el flujo con normalidad.
+      NO mencionar nada de hipotecas. Aún no sabemos si necesita hipoteca ni nos interesa.
+      NO preguntar nada sobre su propiedad en venta.
+      Guardar esta información en el resumen para el agente.
+      Es IMPRESCINDIBLE para que el agente capte su propiedad en la visita.
+
+Sea cual sea la respuesta hipotecaria, Claudia dice:
+"Muchas gracias por tus respuestas, el agente que gestiona la propiedad es ${agenteNombre} y su teléfono es ${agenteTelefono}, puedes escribirle un WhatsApp si lo deseas, en caso contrario, se pondrá en contacto contigo a la mayor brevedad posible."
+
+Y SIEMPRE añade a continuación:
+"Para poder tenerte en cuenta para próximas oportunidades y ofrecértelas antes de que salgan al mercado, necesitamos conocer tus preferencias, si nos dejas tus necesidades aquí, tendrás la información antes de que salgan al mercado. Muchas de las propiedades que tenemos, no llegan a salir al mercado porque nuestros clientes las compran antes ${FORMULARIO_URL}"
+
+SITUACIONES ESPECIALES:
+- Cliente ya encontró algo por su cuenta: felicitarle sin presionar: "me alegro! si necesitas ayuda con la tasación o la hipoteca aquí estamos, te podemos ahorrar hasta 20.000 euros con el broker". Se capta como cliente de broker igualmente.
+- Cliente habla con otra inmobiliaria: NUNCA atacar la competencia. Posicionarse siempre como complemento.
+
+TAGS INTERNOS — el cliente NO los ve, son instrucciones del sistema.
+Cuando derives al agente añade AL FINAL del mensaje:
 [DERIVAR_AGENTE]
 [RESUMEN_AGENTE]
 Visita: (disponibilidad que dio el cliente)
-Hipoteca: (estado: mirada/no mirada/tiene que vender)
-Broker: (si está abierto a segunda opinión o no)
+Hipoteca: (mirada con banco / no mirada / tiene que vender)
+Broker: (abierto a segunda opinión: sí / no)
+Dudas no resueltas: (preguntas que no pudiste contestar por estar bloqueadas)
+Venta previa: (si el cliente tiene que vender algo para comprar — IMPRESCINDIBLE)
 Resumen: (qué preguntó y qué quiere, 1 línea)
 [/RESUMEN_AGENTE]`;
 }
@@ -156,16 +198,16 @@ async function callClaude(conversationHistory, convData, propertyInfo, agente) {
   }
 }
 
-// ── Derivar al agente ─────────────────────────────────────────────
-async function derivarAgente(conv, agente, from, phoneWith34, senderName, resumenCorto, hipotecaEstado) {
+// ── Derivar al agente y a MNSLA ───────────────────────────────────
+async function derivarAgente(conv, agente, phoneWith34, senderName, resumenCorto, hipotecaEstado, ventaPrevia) {
   if (!agente) return;
 
-  // Mensaje al agente
-  const msgAgente = `NUEVO LEAD\n\n${conv.contacto || senderName}\nTel: +${phoneWith34}\nPropiedad: ${conv.referencia || "N/A"}\n${conv.idealista_url || conv.enlace || ""}\n\n${resumenCorto}`;
+  // Mensaje al agente de la propiedad
+  const msgAgente = `NUEVO LEAD\n\n${conv.contacto || senderName}\nTel: +${phoneWith34}\nPropiedad: ${conv.referencia || "N/A"}\n${conv.idealista_url || conv.enlace || ""}\n\n${resumenCorto}${ventaPrevia ? `\n\nATENCIÓN: El cliente tiene que vender antes de comprar. Captar su propiedad en la visita.` : ""}`;
   await sendWhatsApp(agente.telefono, msgAgente);
 
-  // Siempre notificar a MNSLA (broker) con nota de si quiere segunda opinión
-  const msgBroker = `LEAD HIPOTECARIO\n\n${conv.contacto || senderName}\nTel: +${phoneWith34}\nPropiedad: ${conv.referencia || "N/A"}\nHipoteca: ${hipotecaEstado || "pendiente de confirmar"}`;
+  // MNSLA recibe SIEMPRE con estado hipotecario
+  const msgBroker = `LEAD HIPOTECARIO\n\n${conv.contacto || senderName}\nTel: +${phoneWith34}\nPropiedad: ${conv.referencia || "N/A"}\nHipoteca: ${hipotecaEstado || "pendiente de confirmar"}${ventaPrevia ? "\nTiene que vender: SÍ" : ""}`;
   await sendWhatsApp(BROKER_PHONE, msgBroker);
 
   // Actualizar conversación
@@ -173,27 +215,24 @@ async function derivarAgente(conv, agente, from, phoneWith34, senderName, resume
     estado: "derivado",
     agente_asignado: agente.nombre,
     seguimiento: resumenCorto,
-    updated_at: new Date().toISOString(),
-  }).eq("id", conv.id);
-
-  // Marcar que hay que hacer seguimiento del formulario en 24h
-  await supabase.from("conversaciones").update({
     formulario_enviado_at: new Date().toISOString(),
     formulario_cumplimentado: false,
+    updated_at: new Date().toISOString(),
   }).eq("id", conv.id);
 }
 
-// ── Webhook handlers ──────────────────────────────────────────────
+// ── Health check ──────────────────────────────────────────────────
 export async function GET() {
   return NextResponse.json({ ok: true, service: "MNP Claudia - Evolution API webhook" });
 }
 
+// ── Webhook principal ─────────────────────────────────────────────
 export async function POST(request) {
   try {
     const AGENTES = await getAgentes();
     const body = await request.json();
 
-    // Verificación ligera de origen
+    // Verificación de origen
     if (EVOLUTION_API_KEY && body.apikey && body.apikey !== EVOLUTION_API_KEY) {
       return NextResponse.json({ status: "ignored" });
     }
@@ -207,7 +246,7 @@ export async function POST(request) {
 
     for (const msg of items) {
       const key = msg.key || {};
-      if (key.fromMe) continue;
+      if (key.fromMe) continue; // ignorar mensajes enviados por nosotros
 
       const remoteJid = key.remoteJid || "";
       if (!remoteJid || remoteJid.endsWith("@g.us") || remoteJid === "status@broadcast") continue;
@@ -225,7 +264,7 @@ export async function POST(request) {
       const phoneWithout34 = phoneClean.startsWith("34") ? phoneClean.slice(2) : phoneClean;
       const phoneWith34 = phoneClean.startsWith("34") ? phoneClean : "34" + phoneClean;
 
-      // Buscar conversación existente
+      // Buscar conversación existente por teléfono
       const { data: allConvs } = await supabase
         .from("conversaciones")
         .select("*")
@@ -234,10 +273,10 @@ export async function POST(request) {
 
       let existingConv = null;
       if (allConvs && allConvs.length > 0) {
-        existingConv = allConvs.find((c) => c.referencia) || allConvs[0];
-        // Limpiar duplicados
+        existingConv = allConvs.find(c => c.referencia) || allConvs[0];
+        // Limpiar duplicados sin referencia
         if (allConvs.length > 1) {
-          const duplicates = allConvs.filter((c) => c.id !== existingConv.id && !c.referencia);
+          const duplicates = allConvs.filter(c => c.id !== existingConv.id && !c.referencia);
           for (const dup of duplicates) {
             await supabase.from("mensajes").delete().eq("conversacion_id", dup.id);
             await supabase.from("conversaciones").delete().eq("id", dup.id);
@@ -248,44 +287,54 @@ export async function POST(request) {
       let conv;
       if (existingConv) {
         await supabase.from("conversaciones").update({
-          interes: text, updated_at: new Date().toISOString(),
+          interes: text,
+          updated_at: new Date().toISOString(),
           ...(existingConv.estado === "sin_respuesta" ? { estado: "activo" } : {}),
         }).eq("id", existingConv.id);
         conv = existingConv;
       } else {
         const { data: newConv } = await supabase.from("conversaciones").insert({
-          contacto: senderName, telefono: phoneWith34,
-          canal: "whatsapp", interes: text, estado: "nuevo",
+          contacto: senderName,
+          telefono: phoneWith34,
+          canal: "whatsapp",
+          interes: text,
+          estado: "nuevo",
+          agente_ia: "claudia",
         }).select().single();
         conv = newConv;
       }
 
+      // Guardar mensaje del cliente
       if (conv?.id) {
         await supabase.from("mensajes").insert({
-          conversacion_id: conv.id, from_who: "cliente",
-          texto: text, timestamp: new Date().toISOString(), wa_message_id: msgId,
+          conversacion_id: conv.id,
+          from_who: "cliente",
+          texto: text,
+          timestamp: new Date().toISOString(),
+          wa_message_id: msgId,
         });
       }
 
       // Modo manual — Claudia no interviene
       if (conv?.estado === "manual") continue;
 
-      // ── SITUACIÓN 2: Sin referencia de propiedad ──────────────
+      // ═══════════════════════════════════════════════════════════
+      // SITUACIÓN 2 — WhatsApp directo sin referencia de propiedad
+      // ═══════════════════════════════════════════════════════════
       if (!conv?.referencia) {
         const textLower = text.toLowerCase().trim();
 
-        // Respuesta al botón / texto de intención
         const quiereComprar = ["comprar","comprando","compra","busco","buscando","interesado","quiero comprar","1"].some(w => textLower.includes(w));
         const quiereVender = ["vender","vendiendo","vende","tengo piso","tengo casa","tengo propiedad","quiero vender","2"].some(w => textLower.includes(w));
         const quiereHipoteca = ["hipoteca","financiacion","financiación","prestamo","préstamo","broker","quiero preguntar","3"].some(w => textLower.includes(w));
 
-        // Ver si ya saludó (tiene mensajes previos)
+        // Ver si Claudia ya ha respondido antes
         const { data: prevMsgs } = await supabase.from("mensajes")
-          .select("id").eq("conversacion_id", conv.id).eq("from_who", "claudia").limit(1);
+          .select("id, texto").eq("conversacion_id", conv.id).eq("from_who", "claudia").limit(10);
         const yaSaludo = prevMsgs && prevMsgs.length > 0;
 
+        // ── Primer contacto: enviar botones ──
         if (!yaSaludo) {
-          // Primer contacto — enviar botones de intención
           const bienvenida = "Hola! Has contactado con Mallorca Nativa, ¿en qué podemos ayudarte?";
           try {
             await sendButtons(phoneWith34, bienvenida, [
@@ -294,7 +343,6 @@ export async function POST(request) {
               { id: "hipoteca", title: "Hipotecas" },
             ]);
           } catch {
-            // Fallback a texto si botones fallan
             await sendWhatsApp(phoneWith34, bienvenida + "\n\nResponde: Quiero comprar / Quiero vender / Hipotecas");
           }
           await supabase.from("mensajes").insert({
@@ -304,6 +352,7 @@ export async function POST(request) {
           continue;
         }
 
+        // ── Quiere vender o hipotecas: derivar a MNSLA ──
         if (quiereVender || quiereHipoteca) {
           const motivo = quiereVender ? "vender su propiedad" : "información sobre hipotecas";
           const msgCliente = "Gracias por contactar con Mallorca Nativa, hemos derivado su petición a la persona responsable, en breves se pondrá en contacto con usted.";
@@ -312,19 +361,15 @@ export async function POST(request) {
             conversacion_id: conv.id, from_who: "claudia",
             texto: msgCliente, timestamp: new Date().toISOString(),
           });
-          // Notificar a MNSLA
           const msgSilvia = `NUEVO CONTACTO — ${quiereVender ? "QUIERE VENDER" : "HIPOTECA"}\n\n${senderName}\nTel: +${phoneWith34}\nMotivo: ${motivo}`;
           await sendWhatsApp(BROKER_PHONE, msgSilvia);
           await supabase.from("conversaciones").update({ estado: "derivado", updated_at: new Date().toISOString() }).eq("id", conv.id);
           continue;
         }
 
+        // ── Quiere comprar: pedir referencia ──
         if (quiereComprar) {
-          // Verificar si ya preguntamos por la referencia
-          const { data: histMsgs } = await supabase.from("mensajes")
-            .select("texto").eq("conversacion_id", conv.id).eq("from_who", "claudia")
-            .order("created_at", { ascending: false }).limit(5);
-          const yaPreguntoRef = histMsgs?.some(m => m.texto?.includes("referencia"));
+          const yaPreguntoRef = prevMsgs?.some(m => m.texto?.includes("referencia"));
 
           if (!yaPreguntoRef) {
             const msgRef = `Perfecto, gracias por la aclaración. ¿Podrías darme la referencia de la propiedad —empieza por MN— para poder derivarte al agente o resolverte las dudas que tengas?\n\nSi no la recuerdas puedes consultarla aquí que es donde tenemos colgada toda la cartera ${IDEALISTA_PRO_URL}`;
@@ -336,9 +381,10 @@ export async function POST(request) {
             continue;
           }
 
-          // Buscar si el texto contiene una referencia MN
+          // ¿El cliente da una referencia MN?
           const refMatch = text.match(/MN[A-Z]{3}\d+/i);
           if (refMatch) {
+            // CASO 2: tiene referencia → actualizar conversación y seguir con flujo IA
             const refEncontrada = refMatch[0].toUpperCase();
             const propInfo = await getPropertyInfo(refEncontrada);
             if (propInfo) {
@@ -347,10 +393,10 @@ export async function POST(request) {
                 updated_at: new Date().toISOString(),
               }).eq("id", conv.id);
               conv.referencia = refEncontrada;
-              // Continuar con flujo con referencia abajo
+              // Cae al bloque de Situación 1 más abajo
             }
           } else {
-            // No tiene referencia — mandar cartera + formulario
+            // CASO 1: no tiene referencia → cartera + formulario
             const msgCartera = `Aquí puedes ver todas las propiedades disponibles en nuestra cartera:\n${IDEALISTA_PRO_URL}`;
             const msgFormulario = `Para poder tenerte en cuenta para próximas oportunidades y ofrecértelas antes de que salgan al mercado, necesitamos conocer tus preferencias, si nos dejas tus necesidades aquí, tendrás la información antes de que salgan al mercado. Muchas de las propiedades que tenemos, no llegan a salir al mercado porque nuestros clientes las compran antes\n${FORMULARIO_URL}`;
             await sendWhatsApp(phoneWith34, msgCartera);
@@ -368,7 +414,7 @@ export async function POST(request) {
             continue;
           }
         } else if (!quiereComprar && !quiereVender && !quiereHipoteca && yaSaludo) {
-          // Respuesta ambigua — volver a preguntar con botones
+          // Respuesta ambigua: volver a mostrar botones
           const msg = "No te he entendido bien, ¿en qué puedo ayudarte?";
           try {
             await sendButtons(phoneWith34, msg, [
@@ -387,11 +433,13 @@ export async function POST(request) {
         }
       }
 
-      // ── SITUACIÓN 1 + 2 con referencia: Claudia IA ───────────
+      // ═══════════════════════════════════════════════════════════
+      // SITUACIÓN 1 + SITUACIÓN 2 CASO 2 — Con referencia de propiedad
+      // ═══════════════════════════════════════════════════════════
       if (conv?.referencia || conv?.canal === "idealista") {
         if (conv?.estado === "manual") continue;
 
-        // Mensaje de bienvenida pendiente (lead de Idealista)
+        // Bienvenida pendiente (fallback por si incoming-email no pudo enviarla)
         if (conv?.pendiente_bienvenida) {
           const idealistaUrl = conv?.idealista_url || conv?.enlace || null;
           const msg1 = `Hola!\n\nHemos recibido tu petición interesándote por la propiedad${idealistaUrl ? "\n" + idealistaUrl : ""}`;
@@ -407,12 +455,12 @@ export async function POST(request) {
           continue;
         }
 
-        // Determinar agente
+        // Determinar agente por prefijo de referencia
         const agente = conv.referencia
           ? AGENTES[conv.referencia.slice(0, 5)]
           : (conv.agente_asignado ? Object.values(AGENTES).find(a => a.nombre === conv.agente_asignado) : null);
 
-        // Cargar historial
+        // Cargar historial (últimos 20 mensajes)
         const { data: history } = await supabase
           .from("mensajes")
           .select("*")
@@ -429,22 +477,24 @@ export async function POST(request) {
         const propertyInfo = await getPropertyInfo(conv.referencia);
         let claudiaResponse = await callClaude(claudeMessages, conv, propertyInfo, agente);
 
-        // Procesar tags de derivación
+        // Extraer tags internos
         const mencionaDerivacion = claudiaResponse.includes("[DERIVAR_AGENTE]");
         const resumenMatch = claudiaResponse.match(/\[RESUMEN_AGENTE\]([\s\S]*?)\[\/RESUMEN_AGENTE\]/);
         const resumenCorto = resumenMatch ? resumenMatch[1].trim() : "Cliente derivado al agente";
 
-        // Extraer estado hipoteca del resumen
+        // Extraer estado hipoteca y venta previa del resumen
         const hipotecaMatch = resumenCorto.match(/Hipoteca:\s*([^\n]+)/i);
         const hipotecaEstado = hipotecaMatch ? hipotecaMatch[1].trim() : "pendiente";
+        const ventaPrevia = /tiene que vender/i.test(resumenCorto) || /venta previa:\s*sí/i.test(resumenCorto);
 
-        // Limpiar tags del mensaje al cliente
+        // Limpiar tags antes de enviar al cliente
         claudiaResponse = claudiaResponse
           .replace(/\[DERIVAR_AGENTE\]/gi, "")
           .replace(/\[RESUMEN_AGENTE\][\s\S]*?\[\/RESUMEN_AGENTE\]/gi, "")
           .replace(/\n{3,}/g, "\n\n")
           .trim();
 
+        // Enviar respuesta al cliente
         if (claudiaResponse) {
           await sendWhatsApp(from, claudiaResponse);
           await supabase.from("mensajes").insert({
@@ -453,9 +503,9 @@ export async function POST(request) {
           });
         }
 
-        // Derivar al agente si corresponde
+        // Derivar al agente + MNSLA si corresponde
         if (mencionaDerivacion && agente) {
-          await derivarAgente(conv, agente, from, phoneWith34, senderName, resumenCorto, hipotecaEstado);
+          await derivarAgente(conv, agente, phoneWith34, senderName, resumenCorto, hipotecaEstado, ventaPrevia);
         }
       }
     }
