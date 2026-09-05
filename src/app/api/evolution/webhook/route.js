@@ -11,15 +11,26 @@ const supabase = createClient(
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 const EVOLUTION_API_KEY = process.env.EVOLUTION_API_KEY || "";
 
-const AGENTES = {
-  MNSBK: { nombre: "Suren Kamil Bocholian",    telefono: "640130766" },
-  MNAQA: { nombre: "Anabel Quesada Acosta",    telefono: "647231895" },
-  MNJAC: { nombre: "Jaime Alonso Ciriano",     telefono: "630517356" },
-  MNGET: { nombre: "Guim Eroles Triay",        telefono: "657884143" },
-  MNSLA: { nombre: "Silvia Lopez Antunez",     telefono: "655882682" },
-  MNSIL: { nombre: "Silvia Iglesias Lopez",    telefono: "601531100" },
-  MNWBB: { nombre: "Wassila Bouchou Brahimi",  telefono: "691043149" },
-};
+// Agentes — se leen dinámicamente de Supabase para no requerir cambios manuales
+async function getAgentes() {
+  const { data } = await supabase
+    .from("usuarios")
+    .select("nombre, agente_codigo, agente_telefono")
+    .eq("activo", true)
+    .not("agente_codigo", "is", null);
+  
+  const map = {};
+  for (const u of data || []) {
+    if (u.agente_codigo && u.agente_telefono) {
+      map[u.agente_codigo] = {
+        nombre: u.nombre,
+        telefono: u.agente_telefono.replace(/\D/g, ""),
+      };
+    }
+  }
+  return map;
+}
+
 
 // Campos de la ficha de propiedad que CLAUDIA puede compartir
 const CAMPOS_PERMITIDOS = ["ref","tipo","op","titulo","cp","municipio","zona","orient","dist_playa","precio_venta","precio_ant","precio_traspaso","cert_energ","conserv","ano_construc","m_util","m_const","m_parcela","m_terraza","m_balcon","m_porche","hab_dobles","hab_simples","banos","aseos","planta","parking","n_plazas","suelos","carp_int","carp_ext","persianas_tipo","persianas_mat","aire_acond_tipo","calefaccion","agua_cal","ventanas","suministros","drenaje","elec_reformada","font_reformada","venta_mobiliario","iee","ibi","extra_comunidad","otros_gastos","desc_texto","estado","destinos","agente","terraza","piscina","ascensor","jardin","armarios","trastero","balcon"];
@@ -35,6 +46,7 @@ async function getPropertyInfo(referencia) {
 }
 
 async function callClaude(conversationHistory, convData, propertyInfo) {
+  const AGENTES = await getAgentes();
   let agente = convData?.referencia ? AGENTES[convData.referencia.slice(0, 5)] : null;
   if (!agente && convData?.agente_asignado) {
     agente = Object.values(AGENTES).find((a) => a.nombre === convData.agente_asignado) || null;
@@ -152,6 +164,7 @@ export async function GET() {
 
 export async function POST(request) {
   try {
+    const AGENTES = await getAgentes();
     const body = await request.json();
 
     // Comprobación ligera de origen: si Evolution incluye su apikey en el payload,

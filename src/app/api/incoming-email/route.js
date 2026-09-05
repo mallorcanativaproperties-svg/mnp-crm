@@ -9,15 +9,26 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
 );
 
-const AGENTES = {
-  MNSBK: { nombre: "Suren Kamil Bocholian",    telefono: "640130766" },
-  MNAQA: { nombre: "Anabel Quesada Acosta",    telefono: "647231895" },
-  MNJAC: { nombre: "Jaime Alonso Ciriano",     telefono: "630517356" },
-  MNGET: { nombre: "Guim Eroles Triay",        telefono: "657884143" },
-  MNSLA: { nombre: "Silvia Lopez Antunez",     telefono: "655882682" },
-  MNSIL: { nombre: "Silvia Iglesias Lopez",    telefono: "601531100" },
-  MNWBB: { nombre: "Wassila Bouchou Brahimi",  telefono: "691043149" },
-};
+// Agentes — se leen dinámicamente de Supabase para no requerir cambios manuales
+async function getAgentes() {
+  const { data } = await supabase
+    .from("usuarios")
+    .select("nombre, agente_codigo, agente_telefono")
+    .eq("activo", true)
+    .not("agente_codigo", "is", null);
+  
+  const map = {};
+  for (const u of data || []) {
+    if (u.agente_codigo && u.agente_telefono) {
+      map[u.agente_codigo] = {
+        nombre: u.nombre,
+        telefono: u.agente_telefono.replace(/\D/g, ""),
+      };
+    }
+  }
+  return map;
+}
+
 
 
 
@@ -30,6 +41,7 @@ function getAgente(referencia) {
 // POST: receives email content as JSON from the CRM button or manual trigger
 export async function POST(request) {
   try {
+    const AGENTES = await getAgentes();
     const body = await request.json();
     const { emailBody, subject } = body;
 
