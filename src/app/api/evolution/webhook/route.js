@@ -350,13 +350,16 @@ export async function POST(request) {
               // Continuar con flujo con referencia abajo
             }
           } else {
-            // No tiene referencia — mandar formulario
+            // No tiene referencia — mandar cartera + formulario
+            const msgCartera = `Aquí puedes ver todas las propiedades disponibles en nuestra cartera:\n${IDEALISTA_PRO_URL}`;
             const msgFormulario = `Para poder tenerte en cuenta para próximas oportunidades y ofrecértelas antes de que salgan al mercado, necesitamos conocer tus preferencias, si nos dejas tus necesidades aquí, tendrás la información antes de que salgan al mercado. Muchas de las propiedades que tenemos, no llegan a salir al mercado porque nuestros clientes las compran antes\n${FORMULARIO_URL}`;
+            await sendWhatsApp(phoneWith34, msgCartera);
+            await new Promise(r => setTimeout(r, 1500));
             await sendWhatsApp(phoneWith34, msgFormulario);
-            await supabase.from("mensajes").insert({
-              conversacion_id: conv.id, from_who: "claudia",
-              texto: msgFormulario, timestamp: new Date().toISOString(),
-            });
+            await supabase.from("mensajes").insert([
+              { conversacion_id: conv.id, from_who: "claudia", texto: msgCartera, timestamp: new Date().toISOString() },
+              { conversacion_id: conv.id, from_who: "claudia", texto: msgFormulario, timestamp: new Date().toISOString() },
+            ]);
             await supabase.from("conversaciones").update({
               formulario_enviado_at: new Date().toISOString(),
               formulario_cumplimentado: false,
