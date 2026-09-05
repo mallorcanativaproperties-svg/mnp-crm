@@ -200,8 +200,8 @@ export async function POST(request) {
     // Con Evolution API no hay ventana de 24h que abrir con una plantilla:
     // se manda directamente el saludo real.
     const msg2 = isRetake
-      ? `Hemos visto que te has vuelto a interesar por esta propiedad${idealistaUrl ? "\n" + idealistaUrl : ""}`
-      : `Hemos recibido tu petición interesándote por la propiedad${idealistaUrl ? "\n" + idealistaUrl : ""}`;
+      ? `Hola!\n\nHemos visto que te has vuelto a interesar por esta propiedad${idealistaUrl ? "\n" + idealistaUrl : ""}`
+      : `Hola!\n\nHemos recibido tu petición interesándote por la propiedad${idealistaUrl ? "\n" + idealistaUrl : ""}`;
     const msg3 = "¿Quieres agendar una visita o tienes alguna duda?";
 
     const result1 = await sendWhatsApp(phoneClean, msg2);
