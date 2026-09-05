@@ -181,6 +181,7 @@ function WhatsAppPanel({ buyer, onClose }) {
             const added = nuevos.filter(m => !ids.has(m.id)).map(m => ({
               id: m.id, from: m.from_who || "cliente", text: m.texto || "",
               ts: m.timestamp ? new Date(m.timestamp).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) : "",
+              date: m.timestamp ? new Date(m.timestamp) : new Date(),
             }));
             return added.length > 0 ? [...prev, ...added] : prev;
           });
@@ -209,8 +210,9 @@ function WhatsAppPanel({ buyer, onClose }) {
     const texto = input.trim();
     setInput("");
     setLoading(true);
-    const ts = new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
-    setMensajes(prev => [...prev, { from: "agente_manual", text: texto, ts }]);
+    const now = new Date();
+    const ts = now.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+    setMensajes(prev => [...prev, { from: "agente_manual", text: texto, ts, date: now }]);
     try {
       const res = await fetch("/api/manual-reply", {
         method: "POST",
@@ -291,24 +293,58 @@ function WhatsAppPanel({ buyer, onClose }) {
             <div style={{ fontSize: 32, marginBottom: 12 }}>💬</div>
             <div style={{ fontSize: 13, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>Sin mensajes aún.<br/>Inicia la conversación con {buyer.nombre}.</div>
           </div>
-        ) : mensajes.map((m, i) => {
-          if (m.from === "sistema") return (
-            <div key={i} style={{ textAlign: "center", margin: "8px 0" }}>
-              <span style={{ fontSize: 10, color: "#9A968A", padding: "3px 10px", background: "#E7E1D4", borderRadius: 10, fontFamily: "Inter, sans-serif" }}>{m.text}</span>
-            </div>
-          );
-          const isAgent = m.from !== "cliente";
-          const isManual = m.from === "agente_manual";
-          return (
-            <div key={i} style={{ display: "flex", justifyContent: isAgent ? "flex-end" : "flex-start", marginBottom: 8 }}>
-              <div style={{ maxWidth: "80%", padding: "10px 14px", background: isAgent ? PETROL : "#FFFFFF", color: isAgent ? "#FFFFFF" : "#22262E", borderRadius: isAgent ? "12px 12px 2px 12px" : "12px 12px 12px 2px", border: isAgent ? "none" : "1px solid #E7E1D4", fontSize: 13, fontFamily: "Inter, sans-serif", lineHeight: 1.5 }}>
-                {isManual && <div style={{ fontSize: 9, color: "rgba(255,255,255,0.6)", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.08em" }}>Manual</div>}
-                {m.text}
-                {m.ts && <div style={{ fontSize: 9, color: isAgent ? "rgba(255,255,255,0.5)" : "#9A968A", marginTop: 4, textAlign: "right" }}>{m.ts}</div>}
+        ) : (() => {
+          // Función para formato de fecha estilo WhatsApp
+          const fmtDate = (d) => {
+            if (!d) return "";
+            const hoy = new Date();
+            const ayer = new Date(hoy); ayer.setDate(ayer.getDate() - 1);
+            const isSameDay = (a, b) => a.toDateString() === b.toDateString();
+            if (isSameDay(d, hoy)) return "Hoy";
+            if (isSameDay(d, ayer)) return "Ayer";
+            return d.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
+          };
+          const elements = [];
+          let lastDateStr = null;
+          mensajes.forEach((m, i) => {
+            // Separador de fecha
+            const dateStr = m.date ? fmtDate(m.date) : null;
+            if (dateStr && dateStr !== lastDateStr) {
+              lastDateStr = dateStr;
+              elements.push(
+                <div key={`date-${i}`} style={{ textAlign: "center", margin: "16px 0 8px" }}>
+                  <span style={{ fontSize: 11, color: "#9A968A", padding: "4px 12px", background: "#E7E1D4", borderRadius: 10, fontFamily: "Inter, sans-serif" }}>{dateStr}</span>
+                </div>
+              );
+            }
+            // Mensaje sistema
+            if (m.from === "sistema") {
+              elements.push(
+                <div key={i} style={{ textAlign: "center", margin: "4px 0 8px" }}>
+                  <span style={{ fontSize: 10, color: "#9A968A", padding: "3px 10px", background: "#E7E1D4", borderRadius: 10, fontFamily: "Inter, sans-serif" }}>{m.text}</span>
+                </div>
+              );
+              return;
+            }
+            const isAgent = m.from !== "cliente";
+            const isManual = m.from === "agente_manual";
+            elements.push(
+              <div key={i} style={{ display: "flex", justifyContent: isAgent ? "flex-end" : "flex-start", marginBottom: 4 }}>
+                <div style={{ maxWidth: "80%", padding: "8px 12px 6px", background: isAgent ? PETROL : "#FFFFFF", color: isAgent ? "#FFFFFF" : "#22262E", borderRadius: isAgent ? "12px 12px 2px 12px" : "12px 12px 12px 2px", border: isAgent ? "none" : "1px solid #E7E1D4", fontSize: 14, fontFamily: "Inter, sans-serif", lineHeight: 1.5 }}>
+                  {isManual && <div style={{ fontSize: 9, color: "rgba(255,255,255,0.55)", marginBottom: 2, textTransform: "uppercase", letterSpacing: "0.08em" }}>Agente</div>}
+                  <div style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{m.text}</div>
+                  {m.ts && (
+                    <div style={{ fontSize: 10, color: isAgent ? "rgba(255,255,255,0.5)" : "#9A968A", marginTop: 3, textAlign: "right", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 3 }}>
+                      {m.ts}
+                      {isAgent && <span style={{ fontSize: 12, opacity: 0.7 }}>✓✓</span>}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          });
+          return elements;
+        })()}
         {loading && (
           <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
             <div style={{ padding: "10px 14px", background: PETROL + "44", borderRadius: 12, fontSize: 12, color: PETROL, fontFamily: "Inter, sans-serif" }}>enviando...</div>
