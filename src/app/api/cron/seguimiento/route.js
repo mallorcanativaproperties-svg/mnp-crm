@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { sendWhatsApp } from "@/lib/evolutionApi";
 
 const AGENTES = {
   MNSBK: { nombre: "Suren", telefono: "640130766" },
@@ -20,19 +21,6 @@ const MENSAJES_SEGUIMIENTO = [
 ];
 
 const MSG_BROKER = "Se me ha olvidado comentarte que podemos hacerte un estudio hipotecario gratuito. Ahorramos una media de 20.000 euros a nuestros clientes respecto a su banco habitual. Le mando tu telefono a Silvia, nuestra broker?";
-
-async function sendWhatsApp(to, text) {
-  const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN;
-  const PHONE_ID = process.env.WHATSAPP_PHONE_ID;
-  let phone = to.replace(/\D/g, "");
-  if (!phone.startsWith("34") && phone.length === 9) phone = "34" + phone;
-  const res = await fetch(`https://graph.facebook.com/v21.0/${PHONE_ID}/messages`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${WHATSAPP_TOKEN}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ messaging_product: "whatsapp", to: phone, type: "text", text: { body: text } }),
-  });
-  return await res.json();
-}
 
 export async function GET(request) {
   const authHeader = request.headers.get("authorization");

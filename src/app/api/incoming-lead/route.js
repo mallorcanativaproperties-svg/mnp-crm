@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { sendLeadEvent } from "@/lib/metaCapi";
 import { createClient } from "@supabase/supabase-js";
+import { sendWhatsApp } from "@/lib/evolutionApi";
 
 function getSupabase() {
   return createClient(
@@ -10,10 +11,7 @@ function getSupabase() {
   );
 }
 
-const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN;
-const PHONE_ID = process.env.WHATSAPP_PHONE_ID;
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
-const GRAPH_URL = `https://graph.facebook.com/v21.0/${PHONE_ID}/messages`;
 
 const AGENTES = {
   MNSBK: { nombre: "Suren", telefono: "640130766" },
@@ -22,41 +20,6 @@ const AGENTES = {
   MNGET: { nombre: "Guim", telefono: "657884143" },
   MNSLA: { nombre: "Silvia", telefono: "655882682" },
 };
-
-async function sendWhatsApp(to, text) {
-  let phone = to.replace(/\D/g, "");
-  if (!phone.startsWith("34") && phone.length === 9) phone = "34" + phone;
-  const res = await fetch(GRAPH_URL, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${WHATSAPP_TOKEN}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ messaging_product: "whatsapp", to: phone, type: "text", text: { body: text } }),
-  });
-  const data = await res.json();
-  console.log(`WhatsApp to ${phone}:`, JSON.stringify(data));
-  return data;
-}
-
-async function sendWhatsAppTemplate(to, templateName, variables = []) {
-  let phone = to.replace(/\D/g, "");
-  if (!phone.startsWith("34") && phone.length === 9) phone = "34" + phone;
-  const components = variables.length > 0 ? [{
-    type: "body",
-    parameters: variables.map(v => ({ type: "text", text: String(v) }))
-  }] : [];
-  const res = await fetch(GRAPH_URL, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${WHATSAPP_TOKEN}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      messaging_product: "whatsapp",
-      to: phone,
-      type: "template",
-      template: { name: templateName, language: { code: "es_ES" }, components },
-    }),
-  });
-  const data = await res.json();
-  console.log(`Template ${templateName} to ${phone}:`, JSON.stringify(data));
-  return data;
-}
 
 async function callAna(lead, conv) {
   const systemPrompt = `Eres Ana, asesora inmobiliaria de Mallorca Nativa Properties. Recibes leads de compradores particulares que buscan propiedades.
@@ -209,9 +172,7 @@ export async function POST(request) {
     // Llamar a Ana para generar el primer mensaje
     const anaResponse = await callAna(lead, conv);
 
-    // Enviar plantilla primero (abre conversación) + mensaje de Ana
-    await sendWhatsAppTemplate(phone, "mnp_lead_bienvenida", [lead.nombre || "cliente"]);
-    await new Promise(r => setTimeout(r, 2000));
+    // Enviar mensaje de bienvenida generado por Ana
     await sendWhatsApp(phone, anaResponse);
 
     // Guardar mensajes en Supabase

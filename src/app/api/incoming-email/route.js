@@ -2,15 +2,12 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { sendLeadEvent } from "@/lib/metaCapi";
 import { createClient } from "@supabase/supabase-js";
+import { sendWhatsApp } from "@/lib/evolutionApi";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
 );
-
-const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN;
-const PHONE_ID = process.env.WHATSAPP_PHONE_ID;
-const GRAPH_URL = `https://graph.facebook.com/v21.0/${PHONE_ID}/messages`;
 
 const AGENTES = {
   MNSBK: { nombre: "Suren", telefono: "640130766" },
@@ -19,44 +16,6 @@ const AGENTES = {
   MNGET: { nombre: "Guim", telefono: "657884143" },
   MNSLA: { nombre: "Silvia", telefono: "655882682" },
 };
-
-async function sendWhatsApp(to, text) {
-  let phone = to.replace(/\D/g, "");
-  if (!phone.startsWith("34") && phone.length === 9) phone = "34" + phone;
-  if (phone.startsWith("34") && phone.length === 11) { /* ok */ }
-  else if (phone.length === 9) phone = "34" + phone;
-
-  const res = await fetch(GRAPH_URL, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${WHATSAPP_TOKEN}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ messaging_product: "whatsapp", to: phone, type: "text", text: { body: text } }),
-  });
-  const data = await res.json();
-  console.log(`WhatsApp to ${phone}:`, JSON.stringify(data));
-  return data;
-}
-
-async function sendWhatsAppTemplate(to, templateName, variables = []) {
-  let phone = to.replace(/\D/g, "");
-  if (!phone.startsWith("34") && phone.length === 9) phone = "34" + phone;
-  const components = variables.length > 0 ? [{
-    type: "body",
-    parameters: variables.map(v => ({ type: "text", text: String(v) }))
-  }] : [];
-  const res = await fetch(GRAPH_URL, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${WHATSAPP_TOKEN}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      messaging_product: "whatsapp",
-      to: phone,
-      type: "template",
-      template: { name: templateName, language: { code: "es_ES" }, components },
-    }),
-  });
-  const data = await res.json();
-  console.log(`Template ${templateName} to ${phone}:`, JSON.stringify(data));
-  return data;
-}
 
 
 
@@ -224,20 +183,26 @@ export async function POST(request) {
       }
     }
 
-    // Solo plantilla — abre conversación sin textos libres
-    // Los textos libres se envían cuando el cliente responde (webhook)
-    const result1 = await sendWhatsAppTemplate(phoneClean, "mnp_captacion_inicio");
-    console.log("Template sent:", JSON.stringify(result1));
+    // Con Evolution API no hay ventana de 24h que abrir con una plantilla:
+    // se manda directamente el saludo real.
+    const msg2 = isRetake
+      ? `Hemos visto que te has vuelto a interesar por esta propiedad${idealistaUrl ? "\n" + idealistaUrl : ""}`
+      : `Hemos recibido tu petición interesándote por la propiedad${idealistaUrl ? "\n" + idealistaUrl : ""}`;
+    const msg3 = "¿Quieres agendar una visita o tienes alguna duda?";
 
-    // Guardar contexto en Supabase para que Claudia sepa qué decir cuando responda
+    const result1 = await sendWhatsApp(phoneClean, msg2);
+    await new Promise((r) => setTimeout(r, 1500));
+    await sendWhatsApp(phoneClean, msg3);
+    console.log("Bienvenida enviada:", JSON.stringify(result1));
+
     if (conv?.id) {
       await supabase.from("mensajes").insert([
-        { conversacion_id: conv.id, from_who: "claudia", texto: "Hola", timestamp: new Date().toISOString(), sent_by: "CLAUDIA" },
+        { conversacion_id: conv.id, from_who: "claudia", texto: msg2, timestamp: new Date().toISOString(), sent_by: "CLAUDIA" },
+        { conversacion_id: conv.id, from_who: "claudia", texto: msg3, timestamp: new Date().toISOString(), sent_by: "CLAUDIA" },
       ]);
-      // Guardar URL y contexto para el siguiente mensaje
       await supabase.from("conversaciones").update({
         idealista_url: idealistaUrl,
-        pendiente_bienvenida: true,
+        pendiente_bienvenida: false,
       }).eq("id", conv.id);
     }
 
