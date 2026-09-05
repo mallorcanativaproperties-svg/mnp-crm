@@ -10,11 +10,13 @@ const supabase = createClient(
 );
 
 const AGENTES = {
-  MNSBK: { nombre: "Suren", telefono: "640130766" },
-  MNAQA: { nombre: "Anabel", telefono: "647231895" },
-  MNJAC: { nombre: "Jaime", telefono: "630517356" },
-  MNGET: { nombre: "Guim", telefono: "657884143" },
-  MNSLA: { nombre: "Silvia", telefono: "655882682" },
+  MNSBK: { nombre: "Suren Kamil Bocholian",    telefono: "640130766" },
+  MNAQA: { nombre: "Anabel Quesada Acosta",    telefono: "647231895" },
+  MNJAC: { nombre: "Jaime Alonso Ciriano",     telefono: "630517356" },
+  MNGET: { nombre: "Guim Eroles Triay",        telefono: "657884143" },
+  MNSLA: { nombre: "Silvia Lopez Antunez",     telefono: "655882682" },
+  MNSIL: { nombre: "Silvia Iglesias Lopez",    telefono: "601531100" },
+  MNWBB: { nombre: "Wassila Bouchou Brahimi",  telefono: "691043149" },
 };
 
 
