@@ -230,7 +230,7 @@ function WhatsAppPanel({ buyer, onClose }) {
   const BRONZE = "#AC8A54";
 
   return (
-    <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: "min(420px, 100vw)", background: "#FFFFFF", borderLeft: "1px solid #2A2926", zIndex: 1100, display: "flex", flexDirection: "column", boxShadow: "-4px 0 24px rgba(0,0,0,0.15)" }}>
+    <div style={{ position: "fixed", top: 0, left: 0, bottom: 0, width: "min(420px, 100vw)", background: "#FFFFFF", borderRight: "1px solid #2A2926", zIndex: 1100, display: "flex", flexDirection: "column", boxShadow: "4px 0 24px rgba(0,0,0,0.15)" }}>
       {/* Header */}
       <div style={{ background: PETROL, padding: "16px 20px", flexShrink: 0 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
