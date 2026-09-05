@@ -182,6 +182,8 @@ function WhatsAppPanel({ buyer, onClose }) {
               id: m.id, from: m.from_who || "cliente", text: m.texto || "",
               ts: m.timestamp ? new Date(m.timestamp).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) : "",
               date: m.timestamp ? new Date(m.timestamp) : new Date(),
+              leido: m.leido || false,
+              wa_message_id: m.wa_message_id || null,
             }));
             return added.length > 0 ? [...prev, ...added] : prev;
           });
@@ -336,7 +338,9 @@ function WhatsAppPanel({ buyer, onClose }) {
                   {m.ts && (
                     <div style={{ fontSize: 10, color: isAgent ? "rgba(255,255,255,0.5)" : "#9A968A", marginTop: 3, textAlign: "right", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 3 }}>
                       {m.ts}
-                      {isAgent && <span style={{ fontSize: 12, opacity: 0.7 }}>✓✓</span>}
+                      {isAgent && (
+                        <span style={{ fontSize: 12, color: m.leido ? "#4FC3F7" : "inherit", opacity: m.leido ? 1 : 0.7 }}>✓✓</span>
+                      )}
                     </div>
                   )}
                 </div>

@@ -238,6 +238,22 @@ export async function POST(request) {
     }
 
     const eventName = (body.event || "").toLowerCase();
+
+    // Procesar MESSAGES_UPDATE — marcar mensajes como leídos
+    if (eventName === "messages.update" || eventName === "messages_update") {
+      const updates = Array.isArray(body.data) ? body.data : body.data ? [body.data] : [];
+      for (const upd of updates) {
+        const status = upd?.update?.status || upd?.status || "";
+        const msgId = upd?.key?.id || upd?.id || "";
+        if ((status === "READ" || status === "read") && msgId) {
+          await supabase.from("mensajes")
+            .update({ leido: true })
+            .eq("wa_message_id", msgId);
+        }
+      }
+      return NextResponse.json({ status: "ok" });
+    }
+
     if (eventName && eventName !== "messages.upsert" && eventName !== "messages_upsert") {
       return NextResponse.json({ status: "ok" });
     }

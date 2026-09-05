@@ -32,7 +32,8 @@ export async function POST(request) {
         texto,
         timestamp: new Date().toISOString(),
         sent_by: agente || "MANUAL",
-        wamid: waData?.key?.id || null,
+        wa_message_id: waData?.key?.id || waData?.id || null,
+        leido: false,
       });
 
       await getSupabase().from("conversaciones").update({
