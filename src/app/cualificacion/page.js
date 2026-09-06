@@ -129,6 +129,7 @@ export default function CualificacionCompradores() {
   const [finalidad, setFinalidad]       = useState("");
   const [habitaciones, setHabitaciones] = useState("");
   const [zonaDeseada, setZonaDeseada]   = useState("");
+  const [zonaExcluida, setZonaExcluida] = useState("");
   const [alturaMax, setAlturaMax]       = useState("");
   const [requisitos, setRequisitos]     = useState("");
   const [pais, setPais]                 = useState("España");
@@ -147,7 +148,7 @@ export default function CualificacionCompradores() {
         presupuesto: ppto, finalidad, habitaciones,
         zona_deseada: zonaDeseada.split(",").map(z => z.trim()).filter(Boolean),
         pais,
-        zona_excluida: [], altura_max: alturaMax, requisitos,
+        zona_excluida: zonaExcluida.split(",").map(z => z.trim()).filter(Boolean), altura_max: alturaMax, requisitos,
         estado: "nuevo", origen: "formulario_web",
         created_at: new Date().toISOString(),
       });
@@ -323,10 +324,16 @@ export default function CualificacionCompradores() {
               placeholder="ej. 2, 3, o mínimo 2" style={INP} />
           </Field>
 
-          <Field label="Zonas preferidas y zonas que descartas" required>
+          <Field label="Zonas donde te gustaría vivir" required hint="Separa las zonas por comas si son varias">
             <textarea value={zonaDeseada} onChange={e => setZonaDeseada(e.target.value)}
-              placeholder="ej. Palma centro, Portixol, Santa Catalina... descarto Son Gotleu"
-              style={{ ...INP, minHeight: 100, resize: "vertical", lineHeight: 1.65 }} />
+              placeholder="ej. Palma centro, Portixol, Santa Catalina, Marratxí..."
+              style={{ ...INP, minHeight: 90, resize: "vertical", lineHeight: 1.65 }} />
+          </Field>
+
+          <Field label="Zonas que descartas" hint="Opcional — separa por comas si son varias">
+            <textarea value={zonaExcluida} onChange={e => setZonaExcluida(e.target.value)}
+              placeholder="ej. Son Gotleu, Corea..."
+              style={{ ...INP, minHeight: 70, resize: "vertical", lineHeight: 1.65 }} />
           </Field>
 
           <Field label="¿Hasta qué planta comprarías sin ascensor?" required>
