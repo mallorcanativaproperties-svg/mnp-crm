@@ -13,7 +13,6 @@ const TIPOS_POST = ["Post", "Reel", "Story", "Carousel", "Video", "Short"];
 const TABS = [
   { key: "silvia", label: "Silvia IA", icon: "🤖" },
   { key: "publicar", label: "Publicar", icon: "✎" },
-  { key: "linkedin", label: "LinkedIn", icon: "LI" },
   { key: "automations", label: "Automatizaciones", icon: "⚡" },
   { key: "cuentas", label: "Cuentas", icon: "◉" },
 ];
@@ -1212,60 +1211,6 @@ function TabSilvia() {
 /* ══════════════════════════════════
    MAIN EXPORT
    ══════════════════════════════════ */
-/* ── Tab LinkedIn ── */
-function TabLinkedIn() {
-  const [texto, setTexto] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [resultado, setResultado] = useState(null);
-  const chars = texto.length;
-
-  async function publicar() {
-    if (!texto.trim() || loading) return;
-    setLoading(true); setResultado(null);
-    try {
-      const res = await fetch("/api/linkedin/post", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ texto, imageUrl: imageUrl.trim() || null }),
-      });
-      const data = await res.json();
-      setResultado(data.ok ? { ok: true } : { ok: false, error: data.error });
-      if (data.ok) { setTexto(""); setImageUrl(""); }
-    } catch (e) { setResultado({ ok: false, error: e.message }); }
-    finally { setLoading(false); }
-  }
-
-  const iSt = { width: "100%", padding: "12px 16px", background: "#FFFFFF", border: "1px solid #E7E1D4", color: "#1a2528", fontSize: 13, fontFamily: "Inter, sans-serif", outline: "none", boxSizing: "border-box" };
-
-  return (
-    <div style={{ maxWidth: 640, padding: "24px 0" }}>
-      <div style={{ marginBottom: 20, padding: "12px 16px", background: "rgba(172,138,84,0.08)", border: "1px solid rgba(172,138,84,0.25)", borderLeft: "3px solid #AC8A54", fontSize: 12, color: "#8f7141", lineHeight: 1.5 }}>
-        Publicación temporal en perfil personal. Acceso a página de empresa pendiente de aprobación por LinkedIn.
-      </div>
-      <div style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 8 }}>Contenido del post</div>
-        <textarea value={texto} onChange={e => setTexto(e.target.value)} placeholder="Escribe el contenido del post..." maxLength={3000}
-          style={{ ...iSt, minHeight: 180, resize: "vertical", lineHeight: 1.7 }} />
-        <div style={{ textAlign: "right", fontSize: 11, color: chars > 2700 ? "#A23A3A" : "#9A968A", marginTop: 4 }}>{chars} / 3000</div>
-      </div>
-      <div style={{ marginBottom: 20 }}>
-        <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 8 }}>URL de imagen (opcional)</div>
-        <input value={imageUrl} onChange={e => setImageUrl(e.target.value)} placeholder="https://..." style={iSt} />
-        {imageUrl.trim() && <img src={imageUrl} alt="preview" style={{ marginTop: 10, maxWidth: "100%", maxHeight: 180, objectFit: "cover", border: "1px solid #E7E1D4", display: "block" }} onError={e => e.target.style.display = "none"} />}
-      </div>
-      {resultado && (
-        <div style={{ padding: "12px 16px", marginBottom: 16, borderLeft: `3px solid ${resultado.ok ? "#2C6E52" : "#A23A3A"}`, background: resultado.ok ? "rgba(44,110,82,0.08)" : "rgba(162,58,58,0.08)", fontSize: 13, color: resultado.ok ? "#2C6E52" : "#A23A3A" }}>
-          {resultado.ok ? "✓ Post publicado en LinkedIn." : `Error: ${resultado.error}`}
-        </div>
-      )}
-      <button onClick={publicar} disabled={!texto.trim() || loading}
-        style={{ width: "100%", padding: "13px 0", background: (!texto.trim() || loading) ? "#E7E1D4" : "#0A66C2", border: "none", color: (!texto.trim() || loading) ? "#9A968A" : "#FFFFFF", fontSize: 12, fontWeight: 600, letterSpacing: "0.1em", cursor: (!texto.trim() || loading) ? "not-allowed" : "pointer", fontFamily: "Inter, sans-serif" }}>
-        {loading ? "Publicando..." : "Publicar en LinkedIn"}
-      </button>
-    </div>
-  );
-}
-
 export default function RedesSociales() {
   const [activeTab, setActiveTab] = useState("silvia");
 
@@ -1301,7 +1246,6 @@ export default function RedesSociales() {
         {/* Tab content */}
         {activeTab === "silvia" && <TabSilvia />}
         {activeTab === "publicar" && <TabPublicar />}
-        {activeTab === "linkedin" && <TabLinkedIn />}
         {activeTab === "automations" && <TabAutomations />}
         {activeTab === "cuentas" && <TabCuentas />}
       </div>
