@@ -11,9 +11,9 @@ const REDES = [
 ];
 const TIPOS_POST = ["Post", "Reel", "Story", "Carousel", "Video", "Short"];
 const TABS = [
-  { key: "silvia", label: "Silvia IA", icon: "🤖" },
   { key: "publicar", label: "Publicar", icon: "✎" },
   { key: "automations", label: "Automatizaciones", icon: "⚡" },
+  { key: "silvia", label: "Silvia IA", icon: "🤖" },
   { key: "cuentas", label: "Cuentas", icon: "◉" },
 ];
 const HASHTAG_SUGGESTIONS = {
