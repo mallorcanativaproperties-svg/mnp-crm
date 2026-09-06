@@ -309,11 +309,30 @@ function MatchCard({ buyer, prop, view, onWa }) {
             </div>
             <span style={{ fontSize: 10, color: "#9A968A", marginLeft: 6 }}>{pct}% del ppto</span>
           </div>
-          {/* Botón WhatsApp */}
+          {/* Botón WhatsApp — icono dorado igual al de base de compradores */}
           <button onClick={() => onWa && onWa(buyer, prop)}
-            style={{ marginTop: 12, padding: "8px 16px", background: "#1a2528", border: "none", color: "#F8F6F1", fontFamily: "Raleway, Inter, sans-serif", fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, marginLeft: "auto" }}>
-            <svg width="16" height="16" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="17" fill="#AC8A54"/><path d="M18 8.5C12.75 8.5 8.5 12.75 8.5 18C8.5 19.85 9.02 21.58 9.92 23.05L8.5 27.5L13.1 26.1C14.52 26.92 16.2 27.5 18 27.5C23.25 27.5 27.5 23.25 27.5 18C27.5 12.75 23.25 8.5 18 8.5Z" fill="white" fillOpacity="0.9"/><path d="M23.5 21.2C23.2 21.95 22.1 22.6 21.25 22.75C20.65 22.85 19.85 22.9 17.1 21.8C13.7 20.45 11.55 17 11.4 16.8C11.25 16.6 10.2 15.2 10.2 13.75C10.2 12.3 10.95 11.6 11.25 11.25C11.55 10.95 11.9 10.85 12.1 10.85C12.3 10.85 12.5 10.85 12.7 10.85C12.9 10.85 13.15 10.8 13.4 11.35C13.65 11.9 14.25 13.35 14.3 13.5C14.35 13.65 14.4 13.85 14.3 14.05C14.2 14.3 14.15 14.4 13.95 14.65C13.8 14.85 13.6 15.1 13.45 15.25C13.25 15.45 13.05 15.65 13.25 15.95C13.45 16.3 14.2 17.5 15.3 18.5C16.7 19.75 17.85 20.15 18.2 20.3C18.55 20.45 18.75 20.4 18.95 20.2C19.15 19.95 19.9 19.1 20.1 18.8C20.3 18.45 20.55 18.5 20.85 18.6C21.15 18.7 22.6 19.4 22.9 19.55C23.2 19.7 23.4 19.75 23.5 19.9C23.6 20.05 23.6 20.75 23.5 21.2Z" fill="#8B6500"/></svg>
-            Enviar propiedad
+            style={{ marginTop: 12, width: 38, height: 38, display: "flex", alignItems: "center", justifyContent: "center", background: "none", border: "none", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.25))", transition: "transform 0.2s", cursor: "pointer", padding: 0, marginLeft: "auto" }}
+            title="Enviar propiedad por WhatsApp"
+            onMouseEnter={e => e.currentTarget.style.transform = "scale(1.12)"}
+            onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}>
+            <svg width="38" height="38" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <radialGradient id="goldGradMC" cx="40%" cy="35%" r="60%">
+                  <stop offset="0%" stopColor="#FFE57A"/>
+                  <stop offset="40%" stopColor="#D4A017"/>
+                  <stop offset="100%" stopColor="#8B6500"/>
+                </radialGradient>
+                <radialGradient id="goldRingMC" cx="40%" cy="35%" r="60%">
+                  <stop offset="0%" stopColor="#FFD700"/>
+                  <stop offset="60%" stopColor="#B8860B"/>
+                  <stop offset="100%" stopColor="#6B4E00"/>
+                </radialGradient>
+              </defs>
+              <circle cx="18" cy="18" r="17" fill="url(#goldRingMC)" stroke="#8B6500" strokeWidth="0.5"/>
+              <circle cx="18" cy="18" r="14" fill="url(#goldGradMC)"/>
+              <path d="M18 8.5C12.75 8.5 8.5 12.75 8.5 18C8.5 19.85 9.02 21.58 9.92 23.05L8.5 27.5L13.1 26.1C14.52 26.92 16.2 27.5 18 27.5C23.25 27.5 27.5 23.25 27.5 18C27.5 12.75 23.25 8.5 18 8.5Z" fill="white" fillOpacity="0.9"/>
+              <path d="M23.5 21.2C23.2 21.95 22.1 22.6 21.25 22.75C20.65 22.85 19.85 22.9 17.1 21.8C13.7 20.45 11.55 17 11.4 16.8C11.25 16.6 10.2 15.2 10.2 13.75C10.2 12.3 10.95 11.6 11.25 11.25C11.55 10.95 11.9 10.85 12.1 10.85C12.3 10.85 12.5 10.85 12.7 10.85C12.9 10.85 13.15 10.8 13.4 11.35C13.65 11.9 14.25 13.35 14.3 13.5C14.35 13.65 14.4 13.85 14.3 14.05C14.2 14.3 14.15 14.4 13.95 14.65C13.8 14.85 13.6 15.1 13.45 15.25C13.25 15.45 13.05 15.65 13.25 15.95C13.45 16.3 14.2 17.5 15.3 18.5C16.7 19.75 17.85 20.15 18.2 20.3C18.55 20.45 18.75 20.4 18.95 20.2C19.15 19.95 19.9 19.1 20.1 18.8C20.3 18.45 20.55 18.5 20.85 18.6C21.15 18.7 22.6 19.4 22.9 19.55C23.2 19.7 23.4 19.75 23.5 19.9C23.6 20.05 23.6 20.75 23.5 21.2Z" fill="#B8860B"/>
+            </svg>
           </button>
         </div>
       </div>
