@@ -14,29 +14,49 @@ export async function POST(request) {
       process.env.NEXT_PUBLIC_SUPABASE_URL,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     );
-    const { mediaId, tipo, estilo, imageUrl } = await request.json();
+    const { mediaId, tipo, estilo, imageUrl, previewOnly, storageKey } = await request.json();
 
-    if (!mediaId || !tipo || !imageUrl) {
-      return NextResponse.json({ ok: false, error: "Faltan parámetros" }, { status: 400 });
+    if (!tipo) return NextResponse.json({ ok: false, error: "Falta tipo" }, { status: 400 });
+
+    // ── APLICAR: reemplazar original con variación ya generada ───
+    if (tipo === "aplicar") {
+      if (!mediaId || !imageUrl) return NextResponse.json({ ok: false, error: "Faltan parámetros" }, { status: 400 });
+
+      // Obtener datos del media original
+      const { data: mediaRow } = await supabase.from("media_propiedades").select("url, nombre").eq("id", mediaId).single();
+      if (!mediaRow) throw new Error("Media no encontrado");
+
+      // Eliminar original del storage
+      const oldPath = mediaRow.url.split("/propiedades-media/")[1];
+      if (oldPath) await supabase.storage.from("propiedades-media").remove([decodeURIComponent(oldPath)]);
+
+      // Actualizar URL en BD con la variación elegida
+      await supabase.from("media_propiedades").update({ url: imageUrl, nombre: `homestaging-${Date.now()}.jpg` }).eq("id", mediaId);
+
+      // Limpiar la foto temporal (si tiene storageKey)
+      // No eliminamos porque ya es la URL que usaremos
+
+      return NextResponse.json({ ok: true, newUrl: imageUrl });
     }
 
-    const prompt = tipo === "mejora"
-      ? PROMPT_MEJORA
-      : PROMPT_HOME_STAGING(estilo || "nórdico");
+    // ── MEJORA o HOME STAGING: llamar a OpenAI ───────────────────
+    if (!mediaId || !imageUrl) return NextResponse.json({ ok: false, error: "Faltan parámetros" }, { status: 400 });
 
-    // Descargar imagen original como buffer
+    const prompt = tipo === "mejora" ? PROMPT_MEJORA : PROMPT_HOME_STAGING(estilo || "nórdico");
+
+    // Descargar imagen original
     const imgRes = await fetch(imageUrl);
     if (!imgRes.ok) throw new Error("No se pudo descargar la imagen original");
     const imgBuffer = await imgRes.arrayBuffer();
     const imgBlob = new Blob([imgBuffer], { type: "image/jpeg" });
 
-    // Llamada a OpenAI gpt-image-1 edits
+    // Llamada a OpenAI
     const formData = new FormData();
     formData.append("model", "gpt-image-1");
     formData.append("image", imgBlob, "original.jpg");
     formData.append("prompt", prompt);
     formData.append("n", "1");
-    formData.append("size", "1536x1024"); // landscape soportado por gpt-image-1
+    formData.append("size", "1536x1024");
     formData.append("quality", "high");
 
     const openaiRes = await fetch("https://api.openai.com/v1/images/edits", {
@@ -50,10 +70,8 @@ export async function POST(request) {
 
     const b64 = openaiData.data?.[0]?.b64_json;
     const resultUrl = openaiData.data?.[0]?.url;
-
     if (!b64 && !resultUrl) throw new Error("OpenAI no devolvió imagen");
 
-    // Subir imagen resultante a Supabase Storage
     let finalBuffer;
     if (b64) {
       const binaryStr = atob(b64);
@@ -61,44 +79,39 @@ export async function POST(request) {
       for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
       finalBuffer = bytes.buffer;
     } else {
-      const res2 = await fetch(resultUrl);
-      finalBuffer = await res2.arrayBuffer();
+      const r = await fetch(resultUrl);
+      finalBuffer = await r.arrayBuffer();
     }
 
-    // Obtener path actual del media
-    const { data: mediaRow } = await supabase
-      .from("media_propiedades")
-      .select("url, propiedad_id, orden, es_portada, nombre")
-      .eq("id", mediaId)
-      .single();
-
-    if (!mediaRow) throw new Error("Media no encontrado en BD");
-
-    // Nuevo path con sufijo -ia
-    const ext = "jpg";
     const ts = Date.now();
-    const oldPath = mediaRow.url.split("/propiedades-media/")[1];
+    const oldPath = imageUrl.split("/propiedades-media/")[1];
     const folder = oldPath?.split("/").slice(0, 2).join("/") || "ia";
-    const newPath = `${folder}/ia-${tipo}-${ts}.${ext}`;
 
-    const { error: uploadErr } = await supabase.storage
-      .from("propiedades-media")
-      .upload(newPath, finalBuffer, { contentType: "image/jpeg", cacheControl: "3600", upsert: false });
+    if (previewOnly) {
+      // Home Staging preview: subir con nombre temporal, NO eliminar original, NO actualizar BD
+      const previewPath = `${folder}/preview-${tipo}-${ts}.jpg`;
+      const { error: uploadErr } = await supabase.storage.from("propiedades-media")
+        .upload(previewPath, finalBuffer, { contentType: "image/jpeg", cacheControl: "3600", upsert: false });
+      if (uploadErr) throw new Error("Error subiendo preview: " + uploadErr.message);
+      const { data: urlData } = supabase.storage.from("propiedades-media").getPublicUrl(previewPath);
+      return NextResponse.json({ ok: true, newUrl: urlData?.publicUrl, storageKey: previewPath });
+    } else {
+      // Mejora: subir nueva imagen, eliminar original, actualizar BD
+      const newPath = `${folder}/ia-${tipo}-${ts}.jpg`;
+      const { error: uploadErr } = await supabase.storage.from("propiedades-media")
+        .upload(newPath, finalBuffer, { contentType: "image/jpeg", cacheControl: "3600", upsert: false });
+      if (uploadErr) throw new Error("Error subiendo imagen: " + uploadErr.message);
+      const { data: urlData } = supabase.storage.from("propiedades-media").getPublicUrl(newPath);
+      const newUrl = urlData?.publicUrl;
 
-    if (uploadErr) throw new Error("Error subiendo imagen IA: " + uploadErr.message);
+      // Eliminar original
+      if (oldPath) await supabase.storage.from("propiedades-media").remove([decodeURIComponent(oldPath)]);
 
-    const { data: urlData } = supabase.storage.from("propiedades-media").getPublicUrl(newPath);
-    const newUrl = urlData?.publicUrl;
+      // Actualizar BD
+      await supabase.from("media_propiedades").update({ url: newUrl, nombre: `ia-${tipo}-${ts}.jpg` }).eq("id", mediaId);
 
-    // Eliminar imagen original del storage
-    if (oldPath) {
-      await supabase.storage.from("propiedades-media").remove([decodeURIComponent(oldPath)]);
+      return NextResponse.json({ ok: true, newUrl });
     }
-
-    // Actualizar URL en BD
-    await supabase.from("media_propiedades").update({ url: newUrl, nombre: `ia-${tipo}-${ts}.jpg` }).eq("id", mediaId);
-
-    return NextResponse.json({ ok: true, newUrl });
   } catch (err) {
     console.error("foto-ia error:", err);
     return NextResponse.json({ ok: false, error: err.message }, { status: 500 });
