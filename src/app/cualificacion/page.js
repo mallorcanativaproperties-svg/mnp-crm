@@ -59,6 +59,23 @@ function Field({ label, required, children, hint }) {
   );
 }
 
+
+const PAISES = [
+  { pais: "España", prefijo: "+34", flag: "🇪🇸" },
+  { pais: "Alemania", prefijo: "+49", flag: "🇩🇪" },
+  { pais: "Reino Unido", prefijo: "+44", flag: "🇬🇧" },
+  { pais: "Países Bajos", prefijo: "+31", flag: "🇳🇱" },
+  { pais: "Francia", prefijo: "+33", flag: "🇫🇷" },
+  { pais: "Suecia", prefijo: "+46", flag: "🇸🇪" },
+  { pais: "Noruega", prefijo: "+47", flag: "🇳🇴" },
+  { pais: "Dinamarca", prefijo: "+45", flag: "🇩🇰" },
+  { pais: "Suiza", prefijo: "+41", flag: "🇨🇭" },
+  { pais: "Bélgica", prefijo: "+32", flag: "🇧🇪" },
+  { pais: "Italia", prefijo: "+39", flag: "🇮🇹" },
+  { pais: "Estados Unidos", prefijo: "+1", flag: "🇺🇸" },
+  { pais: "Otro", prefijo: "", flag: "🌍" },
+];
+
 const INP = {
   width: "100%", padding: "14px 16px",
   background: WH,
@@ -128,6 +145,7 @@ export default function CualificacionCompradores() {
         email, nombre, telefono, financiacion,
         presupuesto: ppto, finalidad, habitaciones,
         zona_deseada: zonaDeseada.split(",").map(z => z.trim()).filter(Boolean),
+        pais,
         zona_excluida: [], altura_max: alturaMax, requisitos,
         estado: "nuevo", origen: "formulario_web",
         created_at: new Date().toISOString(),
@@ -235,6 +253,15 @@ export default function CualificacionCompradores() {
           <Field label="Teléfono" required>
             <input type="tel" value={telefono} onChange={e => setTelefono(e.target.value)}
               placeholder="+34 600 000 000" autoComplete="tel" inputMode="tel" style={INP} />
+          </Field>
+
+          <Field label="País de residencia">
+            <select value={pais} onChange={e => setPais(e.target.value)}
+              style={{ ...INP, cursor: "pointer", appearance: "none", WebkitAppearance: "none", backgroundImage: "url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239A968A' strokeWidth='1.5' fill='none'/%3E%3C/svg%3E")", backgroundRepeat: "no-repeat", backgroundPosition: "right 16px center" }}>
+              {PAISES.map(p => (
+                <option key={p.pais} value={p.pais}>{p.flag} {p.pais} {p.prefijo}</option>
+              ))}
+            </select>
           </Field>
 
           <Divider />

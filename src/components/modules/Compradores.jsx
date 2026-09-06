@@ -7,7 +7,7 @@ function mapBuyerDb(row) {
     id: row.id, ts: row.created_at ? new Date(row.created_at).toLocaleDateString("es-ES") : "", 
     email: row.email || "", nombre: row.nombre || "", tel: row.telefono || "",
     fin: row.financiacion || "", ppto: row.presupuesto || 0, finalidad: row.finalidad || "",
-    hab: row.habitaciones || "", zd: row.zona_deseada || [], ze: row.zona_excluida || [],
+    hab: row.habitaciones || "", zd: row.zona_deseada || [], ze: row.zona_excluida || [], pais: row.pais || "España",
     alt: row.altura_max || "", req: row.requisitos || "", st: row.estado || "nuevo",
     ag: row.agente_asignado || "", notas: row.notas || "", scoring: row.scoring || 0,
     origen: row.origen || "",
@@ -46,6 +46,22 @@ const BUYERS = [
   { id: 18, ts: "24/02/2026", email: "cristinafusteramos@hotmail.com", nombre: "Cristina Fuster Ramos", tel: "645096684", fin: "Sí", ppto: 350000, finalidad: "Inversión", hab: "2+", zd: ["S'Olivera","Escorxador","Plaza de Toros","Ctra. Valldemossa"], ze: [], alt: "Bajo", req: "", st: "cualificado", ag: "Carlos M." },
   { id: 19, ts: "25/02/2026", email: "jordi.sanchez.roca@gmail.com", nombre: "Jordi Sánchez", tel: "669271899", fin: "Sí", ppto: 400000, finalidad: "Primera vivienda", hab: "3", zd: ["Son Cotoner","Son Dameto"], ze: [], alt: "Ascensor", req: "Parking", st: "nuevo", ag: "" },
   { id: 20, ts: "25/02/2026", email: "marta.segui@gmail.com", nombre: "Marta Seguí Aguiló", tel: "657556864", fin: "Sí", ppto: 400000, finalidad: "Cambio de vivienda", hab: "3-4", zd: ["Pere Garau","Plaza de Toros","Marqués de Fuensanta"], ze: [], alt: "Bajo", req: "Parking y terraza o balcón", st: "contactado", ag: "" },
+];
+
+const PAISES = [
+  { pais: "España", prefijo: "+34", flag: "🇪🇸" },
+  { pais: "Alemania", prefijo: "+49", flag: "🇩🇪" },
+  { pais: "Reino Unido", prefijo: "+44", flag: "🇬🇧" },
+  { pais: "Países Bajos", prefijo: "+31", flag: "🇳🇱" },
+  { pais: "Francia", prefijo: "+33", flag: "🇫🇷" },
+  { pais: "Suecia", prefijo: "+46", flag: "🇸🇪" },
+  { pais: "Noruega", prefijo: "+47", flag: "🇳🇴" },
+  { pais: "Dinamarca", prefijo: "+45", flag: "🇩🇰" },
+  { pais: "Suiza", prefijo: "+41", flag: "🇨🇭" },
+  { pais: "Bélgica", prefijo: "+32", flag: "🇧🇪" },
+  { pais: "Italia", prefijo: "+39", flag: "🇮🇹" },
+  { pais: "Estados Unidos", prefijo: "+1", flag: "🇺🇸" },
+  { pais: "Otro", prefijo: "", flag: "🌍" },
 ];
 
 const ESTADOS = [
@@ -206,6 +222,12 @@ function Detail({ b, onClose, onSave, onDelete, onWhatsApp }) {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px 28px", marginBottom: 28 }}>
         <div><L>Email</L>{ed ? <input value={f.email} onChange={e => setF({ ...f, email: e.target.value })} onBlur={e => autoBlur({...f, email: e.target.value})} style={iSt} /> : <div style={{ fontSize: 13, color: "#22262E", fontFamily: "Inter, sans-serif" }}>{b.email}</div>}</div>
         <div><L>Teléfono</L>{ed ? <input value={f.tel} onChange={e => setF({ ...f, tel: e.target.value })} onBlur={e => autoBlur({...f, tel: e.target.value})} style={iSt} /> : <div style={{ fontSize: 13, color: "#22262E", fontFamily: "Inter, sans-serif" }}>{b.tel}</div>}</div>
+        <div style={{ gridColumn: "span 2" }}><L>País de residencia</L>{ed
+          ? <select value={f.pais || "España"} onChange={e => setF({ ...f, pais: e.target.value })} onBlur={() => autoBlur({...f})} style={{ ...iSt, appearance: "auto" }}>
+              {PAISES.map(p => <option key={p.pais} value={p.pais}>{p.flag} {p.pais} {p.prefijo}</option>)}
+            </select>
+          : (() => { const p = PAISES.find(x => x.pais === (b.pais || "España")) || PAISES[0]; return <div style={{ fontSize: 13, color: "#22262E", fontFamily: "Inter, sans-serif" }}>{p.flag} {p.pais} <span style={{ color: "#9A968A" }}>{p.prefijo}</span></div>; })()
+        }</div>
         <div><L>Presupuesto</L>{ed ? <input type="number" value={f.ppto} onChange={e => setF({ ...f, ppto: +e.target.value })} style={iSt} onFocus={e => e.target.style.borderColor = "#C8A97E44"} onBlur={e => { e.target.style.borderColor = "#E7E1D4"; autoBlur({...f, ppto: +e.target.value}); }} /> : <div style={{ fontSize: 18, color: "#AC8A54", fontFamily: "'Playfair Display', serif" }}>{fmt(b.ppto)}</div>}</div>
         <div><L>Habitaciones</L>{ed ? <input value={f.hab} onChange={e => setF({ ...f, hab: e.target.value })} onBlur={e => autoBlur({...f, hab: e.target.value})} style={iSt} /> : <div style={{ fontSize: 13, color: "#22262E", fontFamily: "Inter, sans-serif" }}>{b.hab}</div>}</div>
         <div><L>Finalidad de compra</L>{ed ? <select value={f.finalidad} onChange={e => setF({ ...f, finalidad: e.target.value })} style={iSt}>{FINALIDADES.map(x => <option key={x}>{x}</option>)}</select> : <div style={{ fontSize: 13, color: "#22262E", fontFamily: "Inter, sans-serif", fontStyle: "italic" }}>{b.finalidad}</div>}</div>
@@ -243,8 +265,8 @@ function Detail({ b, onClose, onSave, onDelete, onWhatsApp }) {
 }
 
 function NewBuyer({ onClose, onAdd }) {
-  const [f, setF] = useState({ nombre: "", email: "", tel: "", fin: "Sí", ppto: "", finalidad: "Primera vivienda", hab: "", zd: "", ze: "", alt: "", req: "", ag: "" });
-  const add = () => { onAdd({ ...f, id: Date.now(), ts: new Date().toLocaleDateString("es-ES"), ppto: +f.ppto || 0, zd: f.zd.split(",").map(z => z.trim()).filter(Boolean), ze: f.ze.split(",").map(z => z.trim()).filter(Boolean), st: "nuevo" }); onClose(); };
+  const [f, setF] = useState({ nombre: "", email: "", tel: "", fin: "Sí", ppto: "", finalidad: "Primera vivienda", hab: "", zd: "", ze: "", alt: "", req: "", ag: "", pais: "España" });
+  const add = () => { onAdd({ ...f, id: Date.now(), ts: new Date().toLocaleDateString("es-ES"), ppto: +f.ppto || 0, zd: f.zd.split(",").map(z => z.trim()).filter(Boolean), ze: f.ze.split(",").map(z => z.trim()).filter(Boolean), st: "nuevo", pais: f.pais || "España" }); onClose(); };
   const iSt = { width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box", outline: "none" };
   const L = ({ children }) => <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 6, fontFamily: "Inter, sans-serif" }}>{children}</div>;
 
@@ -257,6 +279,7 @@ function NewBuyer({ onClose, onAdd }) {
         <div style={{ gridColumn: "span 2" }}><L>Nombre y apellidos</L><input value={f.nombre} onChange={e => setF({ ...f, nombre: e.target.value })} style={iSt} /></div>
         <div><L>Email</L><input value={f.email} onChange={e => setF({ ...f, email: e.target.value })} style={iSt} /></div>
         <div><L>Teléfono</L><input value={f.tel} onChange={e => setF({ ...f, tel: e.target.value })} style={iSt} /></div>
+        <div style={{ gridColumn: "span 2" }}><L>País de residencia</L><select value={f.pais} onChange={e => setF({ ...f, pais: e.target.value })} style={{ ...iSt, appearance: "auto" }}>{PAISES.map(p => <option key={p.pais} value={p.pais}>{p.flag} {p.pais} {p.prefijo}</option>)}</select></div>
         <div><L>Presupuesto (€)</L><input type="number" value={f.ppto} onChange={e => setF({ ...f, ppto: e.target.value })} style={iSt} /></div>
         <div><L>Habitaciones</L><input value={f.hab} onChange={e => setF({ ...f, hab: e.target.value })} onBlur={e => autoBlur({...f, hab: e.target.value})} style={iSt} /></div>
         <div><L>Finalidad</L><select value={f.finalidad} onChange={e => setF({ ...f, finalidad: e.target.value })} style={{ ...iSt, appearance: "auto" }}>{FINALIDADES.map(x => <option key={x}>{x}</option>)}</select></div>

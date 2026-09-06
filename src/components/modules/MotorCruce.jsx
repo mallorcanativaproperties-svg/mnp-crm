@@ -348,7 +348,7 @@ export default function MotorCruce() {
       if (bRes.data) setBUYERS(bRes.data.map(r => ({
         id: r.id, nombre: r.nombre || "", ppto: r.presupuesto || 0, fin: r.finalidad || "",
         hab: r.habitaciones || "", zd: r.zona_deseada || [], ze: r.zona_excluida || [],
-        tel: r.telefono || "", st: r.estado || "nuevo", agente: r.agente_asignado || "",
+        tel: r.telefono || "", st: r.estado || "nuevo", agente: r.agente_asignado || "", pais: r.pais || "España",
       })));
       if (pRes.data) setPROPS(pRes.data.map(r => ({
         id: r.id, ref: r.ref || "", titulo: r.titulo || "", tipo: r.tipo || "",
