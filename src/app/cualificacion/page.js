@@ -276,7 +276,7 @@ export default function CualificacionCompradores() {
             </div>
             <div style={{ display: "flex", gap: 0 }}>
               <select value={pais} onChange={e => setPais(e.target.value)}
-                style={{ ...INP, width: "auto", minWidth: 100, flexShrink: 0, borderRight: "none", background: "#F0ECE6", color: "#1a2528", cursor: "pointer", appearance: "auto", paddingRight: 8 }}>
+                style={{ ...INP, width: "auto", maxWidth: 90, flexShrink: 0, borderRight: "none", background: "#F0ECE6", color: "#1a2528", cursor: "pointer", appearance: "auto", paddingLeft: 8, paddingRight: 4, fontSize: 14 }}>
                 {PAISES.map(p => (
                   <option key={p.pais} value={p.pais}>{p.flag} {p.prefijo || p.pais}</option>
                 ))}
