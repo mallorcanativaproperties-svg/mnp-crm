@@ -194,15 +194,18 @@ function Detail({ b, onClose, onSave, onDelete, onWhatsApp }) {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
           <div>
             <div style={{ fontSize: 10, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.15em", fontFamily: "Inter, sans-serif", marginBottom: 8 }}>Ficha de comprador</div>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 400, color: "#22262E", margin: 0, lineHeight: 1.2 }}>{b.nombre}</h2>
+            {ed
+              ? <input value={f.nombre} onChange={e => setF({ ...f, nombre: e.target.value })} onBlur={e => autoBlur({...f, nombre: e.target.value})} style={{ ...iSt, fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 400, color: "#22262E", border: "1px solid #E7E1D4", marginBottom: 8 }} />
+              : <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 400, color: "#22262E", margin: 0, lineHeight: 1.2 }}>{b.nombre}</h2>
+            }
             <div style={{ fontSize: 12, color: "#9A968A", marginTop: 8, fontFamily: "Inter, sans-serif" }}>Registrado el {b.ts}</div>
           </div>
           <div style={{ textAlign: "right" }}><Badge color={est.accent}>{est.label}</Badge><div style={{ marginTop: 10 }}><ScoreBar value={s} /></div></div>
         </div>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px 28px", marginBottom: 28 }}>
-        <div><L>Email</L><div style={{ fontSize: 13, color: "#22262E", fontFamily: "Inter, sans-serif" }}>{b.email}</div></div>
-        <div><L>Teléfono</L><div style={{ fontSize: 13, color: "#22262E", fontFamily: "Inter, sans-serif" }}>{b.tel}</div></div>
+        <div><L>Email</L>{ed ? <input value={f.email} onChange={e => setF({ ...f, email: e.target.value })} onBlur={e => autoBlur({...f, email: e.target.value})} style={iSt} /> : <div style={{ fontSize: 13, color: "#22262E", fontFamily: "Inter, sans-serif" }}>{b.email}</div>}</div>
+        <div><L>Teléfono</L>{ed ? <input value={f.tel} onChange={e => setF({ ...f, tel: e.target.value })} onBlur={e => autoBlur({...f, tel: e.target.value})} style={iSt} /> : <div style={{ fontSize: 13, color: "#22262E", fontFamily: "Inter, sans-serif" }}>{b.tel}</div>}</div>
         <div><L>Presupuesto</L>{ed ? <input type="number" value={f.ppto} onChange={e => setF({ ...f, ppto: +e.target.value })} style={iSt} onFocus={e => e.target.style.borderColor = "#C8A97E44"} onBlur={e => { e.target.style.borderColor = "#E7E1D4"; autoBlur({...f, ppto: +e.target.value}); }} /> : <div style={{ fontSize: 18, color: "#AC8A54", fontFamily: "'Playfair Display', serif" }}>{fmt(b.ppto)}</div>}</div>
         <div><L>Habitaciones</L>{ed ? <input value={f.hab} onChange={e => setF({ ...f, hab: e.target.value })} onBlur={e => autoBlur({...f, hab: e.target.value})} style={iSt} /> : <div style={{ fontSize: 13, color: "#22262E", fontFamily: "Inter, sans-serif" }}>{b.hab}</div>}</div>
         <div><L>Finalidad de compra</L>{ed ? <select value={f.finalidad} onChange={e => setF({ ...f, finalidad: e.target.value })} style={iSt}>{FINALIDADES.map(x => <option key={x}>{x}</option>)}</select> : <div style={{ fontSize: 13, color: "#22262E", fontFamily: "Inter, sans-serif", fontStyle: "italic" }}>{b.finalidad}</div>}</div>
@@ -210,8 +213,20 @@ function Detail({ b, onClose, onSave, onDelete, onWhatsApp }) {
         <div><L>Altura máx. sin ascensor</L>{ed ? <input value={f.alt} onChange={e => setF({ ...f, alt: e.target.value })} style={iSt} /> : <div style={{ fontSize: 13, color: "#22262E", fontFamily: "Inter, sans-serif" }}>{b.alt}</div>}</div>
         <div><L>Estado</L>{ed ? <select value={f.st} onChange={e => setF({ ...f, st: e.target.value })} style={iSt}>{ESTADOS.map(x => <option key={x.key} value={x.key}>{x.label}</option>)}</select> : <Badge color={est.accent}>{est.label}</Badge>}</div>
       </div>
-      <div style={{ marginBottom: 20 }}><L>Zonas deseadas</L><div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>{b.zd.map((z, i) => <span key={i} style={{ fontSize: 11, padding: "4px 12px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E22" }}>{z}</span>)}</div></div>
-      {b.ze.length > 0 && <div style={{ marginBottom: 20 }}><L>Zonas excluidas</L><div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>{b.ze.map((z, i) => <span key={i} style={{ fontSize: 11, padding: "4px 12px", borderRadius: 0, background: "#D4956A0D", color: "#9C6E1B", border: "1px solid #D4956A22" }}>✕ {z}</span>)}</div></div>}
+      <div style={{ marginBottom: 20 }}><L>Zonas deseadas</L>
+        {ed
+          ? <input value={(f.zd || []).join(", ")} onChange={e => setF({ ...f, zd: e.target.value.split(",").map(z => z.trim()).filter(Boolean) })} onBlur={e => autoBlur({...f, zd: e.target.value.split(",").map(z => z.trim()).filter(Boolean)})} style={{ ...iSt, width: "100%" }} placeholder="Palma, Marratxí, Inca..." />
+          : <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>{b.zd.map((z, i) => <span key={i} style={{ fontSize: 11, padding: "4px 12px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E22" }}>{z}</span>)}</div>
+        }
+      </div>
+      <div style={{ marginBottom: 20 }}><L>Zonas excluidas</L>
+        {ed
+          ? <input value={(f.ze || []).join(", ")} onChange={e => setF({ ...f, ze: e.target.value.split(",").map(z => z.trim()).filter(Boolean) })} onBlur={e => autoBlur({...f, ze: e.target.value.split(",").map(z => z.trim()).filter(Boolean)})} style={{ ...iSt, width: "100%" }} placeholder="Son Gotleu, Corea..." />
+          : b.ze.length > 0
+            ? <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>{b.ze.map((z, i) => <span key={i} style={{ fontSize: 11, padding: "4px 12px", borderRadius: 0, background: "#D4956A0D", color: "#9C6E1B", border: "1px solid #D4956A22" }}>✕ {z}</span>)}</div>
+            : <div style={{ fontSize: 13, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>—</div>
+        }
+      </div>
       <div style={{ marginBottom: 20 }}><L>Requisitos especiales</L>{ed ? <textarea value={f.req} onChange={e => setF({ ...f, req: e.target.value })} onBlur={e => autoBlur({...f, req: e.target.value})} style={{ ...iSt, minHeight: 80, resize: "vertical" }} /> : <div style={{ fontSize: 13, color: "#22262E", fontFamily: "Inter, sans-serif", lineHeight: 1.6, background: "#FFFFFF", padding: "14px 18px", borderRadius: 0 }}>{b.req || "—"}</div>}</div>
       <div style={{ marginBottom: 28 }}><L>Agente asignado</L>{ed ? <input value={f.ag} onChange={e => setF({ ...f, ag: e.target.value })} onBlur={e => autoBlur({...f, ag: e.target.value})} style={iSt} placeholder="Nombre del agente" /> : <div style={{ fontSize: 13, color: b.ag ? "#3D577E" : "#9A968A", fontFamily: "Inter, sans-serif" }}>{b.ag || "Sin asignar"}</div>}</div>
       <div style={{ display: "flex", gap: 12, justifyContent: "flex-end", borderTop: "1px solid #2A2926", paddingTop: 20 }}>
