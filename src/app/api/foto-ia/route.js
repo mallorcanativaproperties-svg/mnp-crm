@@ -1,4 +1,5 @@
 export const dynamic = "force-dynamic";
+export const maxDuration = 120; // 2 minutos — OpenAI puede tardar 40s por imagen
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
@@ -44,8 +45,11 @@ export async function POST(request) {
 
     const prompt = tipo === "mejora" ? PROMPT_MEJORA : PROMPT_HOME_STAGING(estilo || "nórdico");
 
-    // Descargar imagen original
-    const imgRes = await fetch(imageUrl);
+    // Descargar imagen original con timeout
+    const downloadCtrl = new AbortController();
+    const downloadTimeout = setTimeout(() => downloadCtrl.abort(), 30000);
+    const imgRes = await fetch(imageUrl, { signal: downloadCtrl.signal });
+    clearTimeout(downloadTimeout);
     if (!imgRes.ok) throw new Error("No se pudo descargar la imagen original");
     const imgBuffer = await imgRes.arrayBuffer();
     const imgBlob = new Blob([imgBuffer], { type: "image/jpeg" });
@@ -59,11 +63,15 @@ export async function POST(request) {
     formData.append("size", "1536x1024");
     formData.append("quality", "high");
 
+    const openaiCtrl = new AbortController();
+    const openaiTimeout = setTimeout(() => openaiCtrl.abort(), 90000);
     const openaiRes = await fetch("https://api.openai.com/v1/images/edits", {
       method: "POST",
       headers: { Authorization: `Bearer ${OPENAI_API_KEY}` },
       body: formData,
+      signal: openaiCtrl.signal,
     });
+    clearTimeout(openaiTimeout);
 
     const openaiData = await openaiRes.json();
     if (openaiData.error) throw new Error(openaiData.error.message);

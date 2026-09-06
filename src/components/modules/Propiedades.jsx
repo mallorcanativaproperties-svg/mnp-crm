@@ -556,11 +556,15 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
   async function mejorarFoto(item) {
     setIaLoading(true);
     try {
+      const ctrl1 = new AbortController();
+      const t1 = setTimeout(() => ctrl1.abort(), 100000);
       const res = await fetch("/api/foto-ia", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mediaId: item.id, tipo: "mejora", estilo: null, imageUrl: item.url }),
+        signal: ctrl1.signal,
       });
+      clearTimeout(t1);
       const data = await res.json();
       if (!data.ok) throw new Error(data.error);
       // Reemplaza la original — recargar y cerrar
@@ -579,11 +583,15 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
   async function generarVariacionIA(item, estilo) {
     setIaLoading(true);
     try {
+      const ctrl2 = new AbortController();
+      const t2 = setTimeout(() => ctrl2.abort(), 100000);
       const res = await fetch("/api/foto-ia", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mediaId: item.id, tipo: "homestaging", estilo, imageUrl: item.url, previewOnly: true }),
+        signal: ctrl2.signal,
       });
+      clearTimeout(t2);
       const data = await res.json();
       if (!data.ok) throw new Error(data.error);
       return { url: data.newUrl, storageKey: data.storageKey };
@@ -600,11 +608,15 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
     if (!iaModal || !variacion) return;
     setIaLoading(true);
     try {
+      const ctrl3 = new AbortController();
+      const t3 = setTimeout(() => ctrl3.abort(), 30000);
       const res = await fetch("/api/foto-ia", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mediaId: iaModal.item.id, tipo: "aplicar", imageUrl: variacion.url, storageKey: variacion.storageKey }),
+        signal: ctrl3.signal,
       });
+      clearTimeout(t3);
       const data = await res.json();
       if (!data.ok) throw new Error(data.error);
       await loadMedia(true);
