@@ -81,24 +81,22 @@ async function publishFacebook(post, account) {
 }
 
 async function publishLinkedIn(post, account) {
-  // Usar token de env vars si no hay cuenta conectada o si el account_id es de organización
-  const token = account?.access_token || process.env.LINKEDIN_ACCESS_TOKEN;
-  if (!token) return { success: false, error: "LinkedIn no configurado" };
+  const token = account?.access_token;
+  if (!token) return { success: false, error: "LinkedIn no conectado — configura el token en Redes Sociales → Cuentas" };
 
   try {
     const text = `${post.texto || ""}\n\n${post.hashtags || ""}`.trim();
 
-    // Determinar el author — organización si hay account_id, perfil personal si no
+    // Si hay account_id es página de empresa, si no es perfil personal
     let authorUrn;
     if (account?.account_id) {
       authorUrn = `urn:li:organization:${account.account_id}`;
     } else {
-      // Obtener perfil personal del token
       const meRes = await fetch("https://api.linkedin.com/v2/userinfo", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const me = await meRes.json();
-      if (!me.sub) return { success: false, error: "No se pudo obtener perfil LinkedIn" };
+      if (!me.sub) return { success: false, error: "Token de LinkedIn inválido o caducado" };
       authorUrn = `urn:li:person:${me.sub}`;
     }
 
@@ -114,7 +112,7 @@ async function publishLinkedIn(post, account) {
       },
     };
 
-    // Añadir imagen si hay
+    // Imagen si hay
     const imageUrl = post.media_urls?.[0];
     if (imageUrl && post.media_types?.[0] !== "video") {
       const registerRes = await fetch("https://api.linkedin.com/v2/assets?action=registerUpload", {
@@ -187,8 +185,7 @@ export async function POST(request) {
 
     for (const red of post.redes || []) {
       const account = accounts?.find((a) => a.platform === red);
-      // LinkedIn puede funcionar sin cuenta en BD si hay LINKEDIN_ACCESS_TOKEN en env
-      if (!account && red !== "linkedin") { results[red] = { success: false, error: "Not connected" }; continue; }
+      if (!account) { results[red] = { success: false, error: "Not connected" }; continue; }
       const publisher = PUBLISHERS[red];
       if (publisher) {
         results[red] = await publisher(post, account);
