@@ -686,6 +686,7 @@ function TabCuentas() {
   const [pageIdInput, setPageIdInput] = useState("");
   const [igUserIdInput, setIgUserIdInput] = useState("");
   const [accountNameInput, setAccountNameInput] = useState("");
+  const [refreshTokenInput, setRefreshTokenInput] = useState("");
   const [saving, setSaving] = useState(false);
 
   const load = useCallback(async () => {
@@ -701,13 +702,13 @@ function TabCuentas() {
     const existing = accounts.find((a) => a.platform === showConnect);
     const data = {
       platform: showConnect, access_token: tokenInput, account_id: accountIdInput,
-      page_id: pageIdInput, ig_user_id: igUserIdInput,
+      page_id: pageIdInput, ig_user_id: igUserIdInput, refresh_token: refreshTokenInput,
       account_name: accountNameInput || showConnect, connected: true,
       updated_at: new Date().toISOString(),
     };
     if (existing) { await supabase.from("social_accounts").update(data).eq("id", existing.id); }
     else { await supabase.from("social_accounts").insert(data); }
-    setSaving(false); setShowConnect(null); setTokenInput(""); setAccountIdInput(""); setPageIdInput(""); setIgUserIdInput(""); setAccountNameInput(""); load();
+    setSaving(false); setShowConnect(null); setTokenInput(""); setAccountIdInput(""); setPageIdInput(""); setIgUserIdInput(""); setAccountNameInput(""); setRefreshTokenInput(""); load();
   };
 
   const disconnect = async (id) => {
@@ -719,7 +720,7 @@ function TabCuentas() {
     facebook: { fields: ["access_token", "page_id"], help: "Necesitas: Token de página de Facebook (con permisos pages_manage_posts, pages_read_engagement), y Page ID." },
     linkedin: { fields: ["access_token", "account_id"], help: "Necesitas: Access Token de LinkedIn (con permisos w_organization_social), y Organization ID." },
     tiktok: { fields: ["access_token"], help: "Necesitas: Access Token de TikTok (con permiso video.publish). Registra tu app en developers.tiktok.com." },
-    youtube: { fields: ["access_token"], help: "Necesitas: Access Token de Google/YouTube (con scope youtube.upload). Configura OAuth en Google Cloud Console." },
+    youtube: { fields: ["access_token", "refresh_token"], help: "Necesitas: Access Token de Google/YouTube (expira en 1h) y Refresh Token (permanente). Ambos se generan al autorizar en /api/youtube/callback." },
   };
 
   return (
@@ -744,7 +745,7 @@ function TabCuentas() {
                 </div>
               )}
               <div style={{ display: "flex", gap: 6 }}>
-                <button onClick={() => { setShowConnect(r.key); setTokenInput(acc?.access_token || ""); setAccountIdInput(acc?.account_id || ""); setPageIdInput(acc?.page_id || ""); setIgUserIdInput(acc?.ig_user_id || ""); setAccountNameInput(acc?.account_name || ""); }} style={S.btnGold}>{acc ? "Editar" : "Conectar"}</button>
+                <button onClick={() => { setShowConnect(r.key); setTokenInput(acc?.access_token || ""); setAccountIdInput(acc?.account_id || ""); setPageIdInput(acc?.page_id || ""); setIgUserIdInput(acc?.ig_user_id || ""); setAccountNameInput(acc?.account_name || ""); setRefreshTokenInput(acc?.refresh_token || ""); }} style={S.btnGold}>{acc ? "Editar" : "Conectar"}</button>
                 {acc && <button onClick={() => disconnect(acc.id)} style={{ ...S.btnSecondary, fontSize: 9, padding: "5px 10px", borderColor: "#A23A3A44", color: "#A23A3A" }}>Desconectar</button>}
               </div>
             </div>
@@ -777,6 +778,7 @@ function TabCuentas() {
             <div style={{ marginBottom: 14 }}><label style={S.label}>Nombre de cuenta</label><input value={accountNameInput} onChange={(e) => setAccountNameInput(e.target.value)} placeholder="@mallorcanativaproperties" style={S.input} /></div>
             <div style={{ marginBottom: 14 }}><label style={S.label}>Access Token</label><input value={tokenInput} onChange={(e) => setTokenInput(e.target.value)} placeholder="Token..." style={S.input} type="password" /></div>
             {platformInfo[showConnect]?.fields.includes("account_id") && <div style={{ marginBottom: 14 }}><label style={S.label}>Account/Organization ID</label><input value={accountIdInput} onChange={(e) => setAccountIdInput(e.target.value)} placeholder="ID..." style={S.input} /></div>}
+            {platformInfo[showConnect]?.fields.includes("refresh_token") && <div style={{ marginBottom: 14 }}><label style={S.label}>Refresh Token</label><input value={refreshTokenInput} onChange={(e) => setRefreshTokenInput(e.target.value)} placeholder="1//..." style={S.input} /></div>}
             {platformInfo[showConnect]?.fields.includes("page_id") && <div style={{ marginBottom: 14 }}><label style={S.label}>Facebook Page ID</label><input value={pageIdInput} onChange={(e) => setPageIdInput(e.target.value)} placeholder="Page ID..." style={S.input} /></div>}
             {platformInfo[showConnect]?.fields.includes("ig_user_id") && <div style={{ marginBottom: 14 }}><label style={S.label}>Instagram User ID</label><input value={igUserIdInput} onChange={(e) => setIgUserIdInput(e.target.value)} placeholder="IG User ID..." style={S.input} /></div>}
             <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", borderTop: "1px solid #2A2926", paddingTop: 20 }}>

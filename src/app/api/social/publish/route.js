@@ -175,8 +175,7 @@ async function refreshYouTubeToken(refreshToken) {
 }
 
 async function publishYouTube(post, account) {
-  // account_id contiene el refresh token
-  const refreshToken = account?.account_id;
+  const refreshToken = account?.refresh_token;
   let accessToken = account?.access_token;
 
   const mediaUrl = post.media_urls?.[0];
