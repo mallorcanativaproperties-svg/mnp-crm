@@ -1766,6 +1766,16 @@ REGLAS:
           </div>
           {/* Botones de acción en header */}
           <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+            {p.ref && (
+              <button onClick={e => {
+                const url = `https://mallorcanativaproperties.com/propiedades/${p.ref.toLowerCase()}/`;
+                navigator.clipboard.writeText(url);
+                e.currentTarget.textContent = "✓ Copiado";
+                setTimeout(() => { if(e.currentTarget) e.currentTarget.textContent = "Copiar link web"; }, 2000);
+              }} style={{ padding: "8px 16px", borderRadius: 0, border: "1px solid #AC8A5444", background: "transparent", color: "#AC8A54", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
+                Copiar link web
+              </button>
+            )}
             <button onClick={() => {
               if (idealistaFieldErrors.size > 0) {
                 const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético","refCatastral":"Referencia catastral"};
