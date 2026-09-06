@@ -572,7 +572,7 @@ function WhatsAppPanel({ buyer, onClose }) {
       });
       const data = await res.json();
       if (!data.ok) setMensajes(prev => [...prev, { from: "sistema", text: `Error: ${data.error || "error desconocido"}`, ts: "" }]);
-      else await saveMsg(texto, "agente_manual");
+      else await supabase.from("conversaciones").update({ updated_at: new Date().toISOString() }).eq("id", convId);
     } catch (e) {
       setMensajes(prev => [...prev, { from: "sistema", text: `Error: ${e.message}`, ts: "" }]);
     } finally { setLoading(false); }

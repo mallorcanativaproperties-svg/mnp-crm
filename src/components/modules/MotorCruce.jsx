@@ -125,11 +125,10 @@ function WhatsAppCrucePanel({ buyer, prop, onClose }) {
         body: JSON.stringify({ conversacion_id: convId, telefono: buyer.tel, texto, agente: "Claudia" }),
       });
       const data = await res.json();
-      if (data.ok) {
-        await supabase.from("mensajes").insert({ conversacion_id: convId, texto, from_who: "agente_manual", timestamp: now.toISOString() });
-        await supabase.from("conversaciones").update({ updated_at: now.toISOString() }).eq("id", convId);
-      } else {
+      if (!data.ok) {
         setMensajes(prev => [...prev, { from: "sistema", text: `Error: ${data.error}`, ts: "" }]);
+      } else {
+        await supabase.from("conversaciones").update({ updated_at: now.toISOString() }).eq("id", convId);
       }
     } catch (e) { setMensajes(prev => [...prev, { from: "sistema", text: `Error: ${e.message}`, ts: "" }]); }
     finally { setLoading(false); }
