@@ -2,11 +2,14 @@
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 
-const BRONZE = "#AC8A54";
-const PETROL = "#405c6b";
-const CREAM = "#F8F6F1";
-const DARK = "#22262E";
-const BORDER = "#E7E1D4";
+// ── Paleta Mallorca Nativa ──────────────────────────────────────
+const B  = "#8f7141";   // bronze oscuro — firma
+const BL = "#AC8A54";   // bronze claro — acento
+const P  = "#405c6b";   // petróleo
+const DK = "#1a2528";   // casi negro
+const CR = "#F2EFEB";   // crema muy suave
+const WH = "#FFFFFF";
+const BD = "#DDD8D0";   // borde
 
 function interpretarPresupuesto(raw) {
   if (!raw) return 0;
@@ -20,50 +23,77 @@ function interpretarPresupuesto(raw) {
   return 0;
 }
 
-const INP = {
-  width: "100%", padding: "15px 16px",
-  background: "#FFFFFF", border: `1px solid ${BORDER}`,
-  borderRadius: 0, color: DARK, fontSize: 16,
-  fontFamily: "Inter, sans-serif", outline: "none",
-  WebkitAppearance: "none", appearance: "none",
-  boxSizing: "border-box",
-};
+// Componentes fuera del render para evitar re-mount con teclado móvil
+function Divider() {
+  return <div style={{ height: 1, background: BD, margin: "32px 0" }} />;
+}
+
+function SectionTitle({ children }) {
+  return (
+    <div style={{ marginBottom: 24 }}>
+      <div style={{ width: 28, height: 1, background: BL, marginBottom: 12 }} />
+      <div style={{
+        fontFamily: "'Libre Baskerville', Georgia, serif",
+        fontSize: 13, fontWeight: 400, color: P,
+        letterSpacing: "0.04em", lineHeight: 1.4,
+      }}>{children}</div>
+    </div>
+  );
+}
 
 function Field({ label, required, children, hint }) {
   return (
-    <div style={{ marginBottom: 24 }}>
-      <label style={{ display: "block", marginBottom: 8, fontSize: 15, fontWeight: 500, color: DARK, fontFamily: "Inter, sans-serif", lineHeight: 1.4 }}>
-        {label}{required && <span style={{ color: BRONZE, marginLeft: 4 }}>*</span>}
+    <div style={{ marginBottom: 28 }}>
+      <label style={{
+        display: "block", marginBottom: hint ? 6 : 10,
+        fontSize: 13, fontWeight: 400, color: DK,
+        fontFamily: "'Libre Baskerville', Georgia, serif",
+        lineHeight: 1.5, letterSpacing: "0.01em",
+      }}>
+        {label}
+        {required && <span style={{ color: BL, marginLeft: 5, fontFamily: "Inter, sans-serif", fontSize: 11 }}>*</span>}
       </label>
-      {hint && <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 8, lineHeight: 1.5, margin: "0 0 8px" }}>{hint}</p>}
+      {hint && <p style={{ fontSize: 12, color: "#8A8480", marginBottom: 10, lineHeight: 1.5, fontFamily: "Inter, sans-serif", margin: "0 0 10px" }}>{hint}</p>}
       {children}
     </div>
   );
 }
 
+const INP = {
+  width: "100%", padding: "14px 16px",
+  background: WH,
+  border: `1px solid ${BD}`,
+  borderTop: `2px solid ${BD}`,
+  borderRadius: 0, color: DK, fontSize: 16,
+  fontFamily: "Inter, sans-serif", outline: "none",
+  WebkitAppearance: "none", appearance: "none",
+  boxSizing: "border-box",
+  transition: "border-color 0.15s",
+};
+
 function RadioOption({ value, current, onChange }) {
-  const selected = current === value;
+  const sel = current === value;
   return (
-    <div
-      onClick={() => onChange(value)}
-      style={{
-        padding: "12px 14px", marginBottom: 8,
-        background: selected ? PETROL : "#FFFFFF",
-        color: selected ? "#FFFFFF" : DARK,
-        border: `1px solid ${selected ? PETROL : BORDER}`,
-        cursor: "pointer", fontFamily: "Inter, sans-serif",
-        fontSize: 15, lineHeight: 1.4,
-        display: "flex", alignItems: "center", gap: 10,
-        WebkitTapHighlightColor: "transparent", userSelect: "none",
-      }}
-    >
+    <div onClick={() => onChange(value)} style={{
+      padding: "13px 16px", marginBottom: 6,
+      background: sel ? DK : WH,
+      color: sel ? WH : DK,
+      borderLeft: `3px solid ${sel ? BL : "transparent"}`,
+      border: `1px solid ${sel ? DK : BD}`,
+      borderLeft: `3px solid ${sel ? BL : BD}`,
+      cursor: "pointer",
+      fontFamily: "Inter, sans-serif", fontSize: 14,
+      lineHeight: 1.4, display: "flex", alignItems: "center", gap: 12,
+      WebkitTapHighlightColor: "transparent", userSelect: "none",
+      transition: "all 0.15s",
+    }}>
       <span style={{
-        width: 18, height: 18, borderRadius: "50%", flexShrink: 0,
-        border: `2px solid ${selected ? "#FFFFFF" : "#9A968A"}`,
-        background: selected ? "#FFFFFF" : "transparent",
+        width: 16, height: 16, borderRadius: "50%", flexShrink: 0,
+        border: `1.5px solid ${sel ? BL : "#9A968A"}`,
+        background: sel ? BL : "transparent",
         display: "flex", alignItems: "center", justifyContent: "center",
       }}>
-        {selected && <span style={{ width: 8, height: 8, borderRadius: "50%", background: PETROL, display: "block" }} />}
+        {sel && <span style={{ width: 6, height: 6, borderRadius: "50%", background: WH, display: "block" }} />}
       </span>
       {value}
     </div>
@@ -71,34 +101,32 @@ function RadioOption({ value, current, onChange }) {
 }
 
 export default function CualificacionCompradores() {
-  const [step, setStep] = useState(0);
-  const [sending, setSending] = useState(false);
-  const [error, setError] = useState("");
-  const [email, setEmail] = useState("");
-  const [nombre, setNombre] = useState("");
+  const [step, setStep]         = useState(0);
+  const [sending, setSending]   = useState(false);
+  const [error, setError]       = useState("");
+  const [email, setEmail]       = useState("");
+  const [nombre, setNombre]     = useState("");
   const [telefono, setTelefono] = useState("");
   const [financiacion, setFinanciacion] = useState("");
-  const [presupuesto, setPresupuesto] = useState("");
-  const [finalidad, setFinalidad] = useState("");
+  const [presupuesto, setPresupuesto]   = useState("");
+  const [finalidad, setFinalidad]       = useState("");
   const [habitaciones, setHabitaciones] = useState("");
-  const [zonaDeseada, setZonaDeseada] = useState("");
-  const [alturaMax, setAlturaMax] = useState("");
-  const [requisitos, setRequisitos] = useState("");
+  const [zonaDeseada, setZonaDeseada]   = useState("");
+  const [alturaMax, setAlturaMax]       = useState("");
+  const [requisitos, setRequisitos]     = useState("");
 
-  const presupuestoValido = interpretarPresupuesto(presupuesto) > 0;
+  const ppto = presupuesto ? interpretarPresupuesto(presupuesto) : 0;
   const camposValidos = email && nombre && telefono && financiacion &&
-    presupuestoValido && finalidad && habitaciones && zonaDeseada && alturaMax && requisitos;
+    ppto > 0 && finalidad && habitaciones && zonaDeseada && alturaMax && requisitos;
 
   async function handleSubmit(e) {
     e.preventDefault();
     if (!camposValidos) return;
-    setSending(true);
-    setError("");
+    setSending(true); setError("");
     try {
       const { error: err } = await supabase.from("compradores").insert({
         email, nombre, telefono, financiacion,
-        presupuesto: interpretarPresupuesto(presupuesto),
-        finalidad, habitaciones,
+        presupuesto: ppto, finalidad, habitaciones,
         zona_deseada: zonaDeseada.split(",").map(z => z.trim()).filter(Boolean),
         zona_excluida: [], altura_max: alturaMax, requisitos,
         estado: "nuevo", origen: "formulario_web",
@@ -106,72 +134,111 @@ export default function CualificacionCompradores() {
       });
       if (err) throw err;
       setStep(1);
-    } catch {
-      setError("Ha ocurrido un error. Por favor inténtalo de nuevo.");
-    } finally {
-      setSending(false);
-    }
+    } catch { setError("Ha ocurrido un error. Por favor inténtalo de nuevo."); }
+    finally { setSending(false); }
   }
 
-  const ppto = presupuesto ? interpretarPresupuesto(presupuesto) : 0;
-
+  // ── Pantalla de confirmación ──────────────────────────────────
   if (step === 1) return (
-    <div style={{ minHeight: "100vh", background: CREAM, display: "flex", alignItems: "center", justifyContent: "center", padding: "32px 20px" }}>
-      <div style={{ maxWidth: 480, width: "100%", textAlign: "center" }}>
-        <div style={{ marginBottom: 32 }}>
-          <div style={{ fontSize: 11, color: BRONZE, letterSpacing: "0.25em", marginBottom: 6, fontWeight: 600 }}>MALLORCA NATIVA</div>
-          <div style={{ fontSize: 11, color: PETROL, letterSpacing: "0.2em" }}>PROPERTIES</div>
+    <div style={{ minHeight: "100svh", background: CR, display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
+      <div style={{ maxWidth: 440, width: "100%", textAlign: "center" }}>
+        <div style={{ marginBottom: 40 }}>
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="24" cy="24" r="23" stroke={BL} strokeWidth="1.5"/>
+            <path d="M14 24l7 7 13-14" stroke={BL} strokeWidth="1.5" strokeLinecap="square"/>
+          </svg>
         </div>
-        <div style={{ fontSize: 56, marginBottom: 20 }}>✓</div>
-        <h2 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "clamp(22px, 6vw, 28px)", fontWeight: 400, color: DARK, marginBottom: 16, lineHeight: 1.3 }}>
-          Gracias, hemos recibido tu información
-        </h2>
-        <p style={{ fontSize: 15, color: "#6B7280", lineHeight: 1.7, marginBottom: 32 }}>
-          Uno de nuestros agentes revisará tu perfil y se pondrá en contacto contigo en breve.
+        <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: "clamp(20px, 5vw, 26px)", fontWeight: 400, color: DK, marginBottom: 16, lineHeight: 1.35 }}>
+          Hemos recibido tu perfil
+        </div>
+        <p style={{ fontSize: 14, color: "#6B7280", lineHeight: 1.8, marginBottom: 36, fontFamily: "Inter, sans-serif" }}>
+          Uno de nuestros agentes revisará tu información y se pondrá en contacto contigo en breve para presentarte las propiedades que mejor encajen con lo que buscas.
         </p>
-        <div style={{ height: 1, background: BORDER, margin: "28px 0" }} />
-        <p style={{ fontSize: 13, color: "#9A968A" }}>
-          Mallorca Nativa Properties · <a href="https://mallorcanativaproperties.com" style={{ color: BRONZE, textDecoration: "none" }}>mallorcanativaproperties.com</a>
-        </p>
+        <div style={{ height: 1, background: BD, marginBottom: 28 }} />
+        <div style={{ fontSize: 11, color: BL, letterSpacing: "0.18em", marginBottom: 6 }}>MALLORCA NATIVA PROPERTIES</div>
+        <a href="https://mallorcanativaproperties.com" style={{ fontSize: 12, color: "#9A968A", textDecoration: "none", fontFamily: "Inter, sans-serif" }}>
+          mallorcanativaproperties.com
+        </a>
       </div>
     </div>
   );
 
+  // ── Formulario principal ──────────────────────────────────────
   return (
-    <div style={{ background: CREAM, fontFamily: "Inter, sans-serif" }}>
+    <div style={{ background: CR, fontFamily: "Inter, sans-serif" }}>
 
-      <div style={{ background: PETROL, padding: "20px 20px 40px", borderBottom: `3px solid ${BRONZE}` }}>
-        <div style={{ maxWidth: 600, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: 24 }}>
-            <div style={{ fontSize: 10, color: `${BRONZE}CC`, letterSpacing: "0.3em", marginBottom: 5, fontWeight: 600 }}>MALLORCA NATIVA</div>
-            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.45)", letterSpacing: "0.25em" }}>PROPERTIES</div>
+      {/* Hero */}
+      <div style={{
+        background: DK,
+        padding: "0",
+        position: "relative",
+        overflow: "hidden",
+        minHeight: "clamp(260px, 42vw, 380px)",
+        display: "flex", flexDirection: "column", justifyContent: "flex-end",
+      }}>
+        {/* Overlay degradado sobre imagen imaginada */}
+        <div style={{
+          position: "absolute", inset: 0,
+          background: `linear-gradient(160deg, ${DK} 0%, rgba(26,37,40,0.75) 50%, rgba(64,92,107,0.6) 100%)`,
+          zIndex: 1,
+        }} />
+        {/* Textura de puntos sutil */}
+        <div style={{
+          position: "absolute", inset: 0, opacity: 0.035,
+          backgroundImage: "radial-gradient(circle, #AC8A54 1px, transparent 1px)",
+          backgroundSize: "24px 24px", zIndex: 2,
+        }} />
+
+        <div style={{ position: "relative", zIndex: 3, padding: "32px 24px 40px", maxWidth: 620, margin: "0 auto", width: "100%", boxSizing: "border-box" }}>
+          {/* Logotipo texto */}
+          <div style={{ marginBottom: 28 }}>
+            <div style={{ fontSize: 10, color: BL, letterSpacing: "0.28em", marginBottom: 4, fontWeight: 400 }}>MALLORCA NATIVA</div>
+            <div style={{ width: 32, height: 1, background: `${BL}80` }} />
           </div>
-          <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "clamp(24px, 6vw, 36px)", fontWeight: 400, color: "#FFFFFF", margin: "0 0 14px", lineHeight: 1.25 }}>
-            Queremos conocerte para <em style={{ color: BRONZE }}>Ayudarte Mejor</em>
+
+          <h1 style={{
+            fontFamily: "'Libre Baskerville', Georgia, serif",
+            fontSize: "clamp(26px, 6vw, 40px)",
+            fontWeight: 400, color: WH,
+            margin: "0 0 16px", lineHeight: 1.2,
+            maxWidth: 520,
+          }}>
+            Encuentra tu propiedad en Mallorca
           </h1>
-          <p style={{ fontSize: "clamp(14px, 3.5vw, 15px)", color: "rgba(255,255,255,0.7)", lineHeight: 1.7, margin: 0 }}>
-            Ten acceso preferente a las propiedades con mejores precios antes de que salgan al mercado. Para orientarte con criterio y enseñarte solo las opciones que encajen contigo, necesitamos entender tu momento y lo que estás buscando.
+          <p style={{
+            fontSize: "clamp(13px, 3vw, 15px)",
+            color: "rgba(255,255,255,0.62)",
+            lineHeight: 1.75, margin: 0, maxWidth: 460,
+            fontFamily: "Inter, sans-serif",
+          }}>
+            Cuéntanos lo que buscas. Accede antes que nadie a las propiedades que coinciden con tu perfil, incluso antes de que salgan al mercado.
           </p>
         </div>
       </div>
 
-      <div style={{ maxWidth: 600, margin: "0 auto", padding: "32px 20px 48px", boxSizing: "border-box" }}>
+      {/* Formulario */}
+      <div style={{ maxWidth: 580, margin: "0 auto", padding: "44px 24px 56px", boxSizing: "border-box" }}>
         <form onSubmit={handleSubmit} noValidate>
+
+          <SectionTitle>Datos de contacto</SectionTitle>
 
           <Field label="Correo electrónico" required>
             <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-              placeholder="tucorreo@ejemplo.com" autoComplete="email" inputMode="email" style={INP} />
+              placeholder="nombre@correo.com" autoComplete="email" inputMode="email" style={INP} />
           </Field>
 
-          <Field label="Nombre y Apellidos" required>
+          <Field label="Nombre y apellidos" required>
             <input type="text" value={nombre} onChange={e => setNombre(e.target.value)}
               placeholder="Tu nombre completo" autoComplete="name" style={INP} />
           </Field>
 
-          <Field label="Teléfono de contacto" required>
+          <Field label="Teléfono" required>
             <input type="tel" value={telefono} onChange={e => setTelefono(e.target.value)}
               placeholder="+34 600 000 000" autoComplete="tel" inputMode="tel" style={INP} />
           </Field>
+
+          <Divider />
+          <SectionTitle>Tu situación financiera</SectionTitle>
 
           <Field label="¿Necesitas financiación?" required>
             {["Sí", "No", "Estoy abierto a que me mejoren condiciones"].map(opt => (
@@ -179,20 +246,27 @@ export default function CualificacionCompradores() {
             ))}
           </Field>
 
-          <Field label="Presupuesto máximo para comprar" required hint="Puedes escribir 300, 300k o 300.000">
+          <Field label="Presupuesto máximo" required hint="Puedes escribir 300, 300k o 300.000">
             <div style={{ position: "relative" }}>
               <input type="text" value={presupuesto} onChange={e => setPresupuesto(e.target.value)}
-                placeholder="ej. 300k, 300.000..." inputMode="decimal" style={{ ...INP, paddingRight: 44 }} />
-              <span style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", color: "#9A968A", fontSize: 15, pointerEvents: "none" }}>€</span>
+                placeholder="ej. 450.000 o 450k" inputMode="decimal" style={{ ...INP, paddingRight: 46 }} />
+              <span style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", color: "#9A968A", fontSize: 14, pointerEvents: "none", fontFamily: "'Libre Baskerville', Georgia, serif" }}>€</span>
             </div>
             {presupuesto && (
               ppto > 0
-                ? <p style={{ fontSize: 13, color: "#2C6E52", marginTop: 6, fontWeight: 600 }}>✓ {ppto.toLocaleString("es-ES")} €</p>
-                : <p style={{ fontSize: 13, color: "#A23A3A", marginTop: 6 }}>No reconocido — prueba con 300000 o 300k</p>
+                ? <p style={{ fontSize: 12, color: P, marginTop: 8, fontFamily: "Inter, sans-serif", letterSpacing: "0.02em" }}>
+                    {ppto.toLocaleString("es-ES")} €
+                  </p>
+                : <p style={{ fontSize: 12, color: "#A23A3A", marginTop: 8, fontFamily: "Inter, sans-serif" }}>
+                    Formato no reconocido — prueba con 450000 o 450k
+                  </p>
             )}
           </Field>
 
-          <Field label="¿Estás buscando para...?" required>
+          <Divider />
+          <SectionTitle>Lo que estás buscando</SectionTitle>
+
+          <Field label="¿Para qué necesitas la propiedad?" required>
             {["Primera vivienda", "Cambio de vivienda", "Inversión", "Segunda residencia"].map(opt => (
               <RadioOption key={opt} value={opt} current={finalidad} onChange={setFinalidad} />
             ))}
@@ -200,53 +274,61 @@ export default function CualificacionCompradores() {
 
           <Field label="Número de habitaciones" required>
             <input type="text" value={habitaciones} onChange={e => setHabitaciones(e.target.value)}
-              placeholder="ej. 2, 3, o entre 2 y 3" style={INP} />
+              placeholder="ej. 2, 3, o mínimo 2" style={INP} />
           </Field>
 
-          <Field label="Zonas que te gustan y zonas que prefieres evitar" required>
+          <Field label="Zonas preferidas y zonas que descartas" required>
             <textarea value={zonaDeseada} onChange={e => setZonaDeseada(e.target.value)}
-              placeholder="ej. Palma centro, Marratxí... Prefiero evitar Son Gotleu"
-              style={{ ...INP, minHeight: 110, resize: "vertical", lineHeight: 1.6 }} />
+              placeholder="ej. Palma centro, Portixol, Santa Catalina... descarto Son Gotleu"
+              style={{ ...INP, minHeight: 100, resize: "vertical", lineHeight: 1.65 }} />
           </Field>
 
           <Field label="¿Hasta qué planta comprarías sin ascensor?" required>
             <input type="text" value={alturaMax} onChange={e => setAlturaMax(e.target.value)}
-              placeholder="ej. Bajo, 1º, 2º, indiferente..." style={INP} />
+              placeholder="ej. Primera, segunda, indiferente si tiene ascensor..." style={INP} />
           </Field>
 
-          <Field label="¿Algo imprescindible que debamos saber?" required>
+          <Field label="Requisitos imprescindibles" required>
             <textarea value={requisitos} onChange={e => setRequisitos(e.target.value)}
-              placeholder="Terraza, garaje, animales, sin reforma..."
-              style={{ ...INP, minHeight: 120, resize: "vertical", lineHeight: 1.6 }} />
+              placeholder="Terraza, garaje, acepta animales, listo para entrar..."
+              style={{ ...INP, minHeight: 110, resize: "vertical", lineHeight: 1.65 }} />
           </Field>
 
           {error && (
-            <div style={{ padding: "14px 16px", background: "#FEF2F2", border: "1px solid #FECACA", color: "#991B1B", fontSize: 14, marginBottom: 20, lineHeight: 1.5 }}>
+            <div style={{ padding: "13px 16px", borderLeft: `3px solid #A23A3A`, background: "#FEF2F2", color: "#991B1B", fontSize: 13, marginBottom: 24, lineHeight: 1.5, fontFamily: "Inter, sans-serif" }}>
               {error}
             </div>
           )}
 
           <button type="submit" disabled={sending || !camposValidos} style={{
-            width: "100%", padding: "18px 24px",
-            background: (sending || !camposValidos) ? "#D1C4B0" : `linear-gradient(135deg, ${BRONZE}, #C8A97E)`,
-            border: "none", borderRadius: 0, color: "#FFFFFF",
-            fontSize: 16, fontWeight: 600, letterSpacing: "0.04em",
+            width: "100%", padding: "17px 24px",
+            background: (sending || !camposValidos) ? "#C8BFB5" : DK,
+            border: "none", color: WH,
+            fontSize: 13, fontWeight: 500, letterSpacing: "0.1em",
             cursor: (sending || !camposValidos) ? "not-allowed" : "pointer",
-            fontFamily: "Inter, sans-serif", minHeight: 56,
+            fontFamily: "Inter, sans-serif",
+            minHeight: 54, transition: "background 0.2s",
             WebkitTapHighlightColor: "transparent",
           }}>
             {sending ? "Enviando..." : "Enviar mi perfil"}
           </button>
 
-          <p style={{ textAlign: "center", fontSize: 12, color: "#9A968A", marginTop: 16, lineHeight: 1.7 }}>
-            Tus datos se tratarán con total confidencialidad y solo se usarán para ayudarte en tu búsqueda de vivienda.
+          {/* Detalle bronce bajo el botón */}
+          {!sending && camposValidos && (
+            <div style={{ height: 2, background: `linear-gradient(90deg, ${BL}, ${B})`, marginTop: 0 }} />
+          )}
+
+          <p style={{ textAlign: "center", fontSize: 11, color: "#9A968A", marginTop: 20, lineHeight: 1.8, fontFamily: "Inter, sans-serif" }}>
+            Tus datos se tratarán con total confidencialidad y únicamente para ayudarte en tu búsqueda.
           </p>
         </form>
 
-        <div style={{ height: 1, background: BORDER, margin: "36px 0 28px" }} />
+        <Divider />
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 10, color: BRONZE, letterSpacing: "0.2em", marginBottom: 4, fontWeight: 600 }}>MALLORCA NATIVA PROPERTIES</div>
-          <a href="https://mallorcanativaproperties.com" style={{ fontSize: 12, color: "#9A968A", textDecoration: "none" }}>mallorcanativaproperties.com</a>
+          <div style={{ fontSize: 10, color: BL, letterSpacing: "0.22em", marginBottom: 6 }}>MALLORCA NATIVA PROPERTIES</div>
+          <a href="https://mallorcanativaproperties.com" style={{ fontSize: 12, color: "#9A968A", textDecoration: "none", fontFamily: "Inter, sans-serif" }}>
+            mallorcanativaproperties.com
+          </a>
         </div>
       </div>
     </div>
