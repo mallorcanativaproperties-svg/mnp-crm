@@ -74,38 +74,6 @@ function EmptyState({ text, icon }) {
 }
 
 function ConfirmModal({ text, onConfirm, onCancel }) {
-  const isVideo = ["Reel", "Video", "Short"].includes(tipo);
-  const isCarousel = tipo === "Carousel";
-  const maxFiles = isCarousel ? 10 : 1;
-  const acceptedTypes = isVideo ? "video/mp4,video/mov,video/avi" : "image/jpeg,image/png,image/webp";
-
-  async function handleUpload(e) {
-    const files = Array.from(e.target.files);
-    if (!files.length) return;
-    if (mediaFiles.length + files.length > maxFiles) {
-      setUploadError(`Máximo ${maxFiles} archivo${maxFiles > 1 ? "s" : ""} para este tipo de post`);
-      return;
-    }
-    setUploading(true); setUploadError("");
-    try {
-      const uploaded = [];
-      for (const file of files) {
-        const ext = file.name.split(".").pop();
-        const path = `posts/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-        const { error } = await supabase.storage.from("social-media").upload(path, file, { cacheControl: "3600", upsert: false });
-        if (error) throw new Error(error.message);
-        const { data: urlData } = supabase.storage.from("social-media").getPublicUrl(path);
-        uploaded.push({ url: urlData.publicUrl, type: file.type.startsWith("video") ? "video" : "image", name: file.name });
-      }
-      setMediaFiles(prev => [...prev, ...uploaded]);
-    } catch (e) { setUploadError("Error subiendo: " + e.message); }
-    finally { setUploading(false); }
-  }
-
-  function removeMedia(idx) {
-    setMediaFiles(prev => prev.filter((_, i) => i !== idx));
-  }
-
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={onCancel}>
       <div style={{ ...S.card, maxWidth: 400, padding: "28px 32px" }} onClick={(e) => e.stopPropagation()}>
@@ -168,6 +136,38 @@ function PostEditor({ post, onClose, onSaved }) {
   const [mediaFiles, setMediaFiles] = useState(post?.media_urls ? post.media_urls.map((url, i) => ({ url, type: post.media_types?.[i] || "image", name: url.split("/").pop() })) : []);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
+  const isVideo = ["Reel", "Video", "Short"].includes(tipo);
+  const isCarousel = tipo === "Carousel";
+  const maxFiles = isCarousel ? 10 : 1;
+  const acceptedTypes = isVideo ? "video/mp4,video/mov,video/avi" : "image/jpeg,image/png,image/webp";
+
+  async function handleUpload(e) {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    if (mediaFiles.length + files.length > maxFiles) {
+      setUploadError(`Máximo ${maxFiles} archivo${maxFiles > 1 ? "s" : ""} para este tipo de post`);
+      return;
+    }
+    setUploading(true); setUploadError("");
+    try {
+      const uploaded = [];
+      for (const file of files) {
+        const ext = file.name.split(".").pop();
+        const path = `posts/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const { error } = await supabase.storage.from("social-media").upload(path, file, { cacheControl: "3600", upsert: false });
+        if (error) throw new Error(error.message);
+        const { data: urlData } = supabase.storage.from("social-media").getPublicUrl(path);
+        uploaded.push({ url: urlData.publicUrl, type: file.type.startsWith("video") ? "video" : "image", name: file.name });
+      }
+      setMediaFiles(prev => [...prev, ...uploaded]);
+    } catch (e) { setUploadError("Error subiendo: " + e.message); }
+    finally { setUploading(false); }
+  }
+
+  function removeMedia(idx) {
+    setMediaFiles(prev => prev.filter((_, i) => i !== idx));
+  }
+
   const toggleRed = (key) => setRedes((p) => p.includes(key) ? p.filter((r) => r !== key) : [...p, key]);
   const handleSave = async (estado) => {
     setSaving(true);
