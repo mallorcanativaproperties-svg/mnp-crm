@@ -1302,7 +1302,7 @@ function PropCard({ p, onClick }) {
           <div style={{ fontSize: 11, color: "#9A968A", marginTop: 2 }}>{p.mConst} m2 - {p.habDobles + p.habSimples} hab - {(p.banos || 0) + (p.aseos || 0)} ban.</div>
         </div>
       </div>
-      <div style={{ display: "flex", gap: 16, marginTop: 14, fontSize: 12, color: "#A09D93", flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: 16, marginTop: 14, fontSize: 12, color: "#A09D93", flexWrap: "wrap", alignItems: "center" }}>
         <span>Fotos: {p.fotos}</span>
         {p.videos > 0 && <span>Videos: {p.videos}</span>}
         {p.tour360 && typeof p.tour360 === "string" && p.tour360.startsWith("http") && <span>Tour 360</span>}
@@ -1311,6 +1311,14 @@ function PropCard({ p, onClick }) {
         <span>{p.demandas || 0} demandas</span>
         <span style={{ opacity: 0.3 }}>|</span>
         <span>{p.agente}</span>
+        {p.ref && (
+          <a href={`https://mallorcanativaproperties.com/propiedades/${p.ref.toLowerCase()}/`}
+            target="_blank" rel="noopener noreferrer"
+            onClick={e => e.stopPropagation()}
+            style={{ marginLeft: "auto", fontSize: 11, color: "#AC8A54", textDecoration: "none", letterSpacing: "0.04em", flexShrink: 0 }}>
+            Ver en web →
+          </a>
+        )}
       </div>
       {p.estado === "publicada" && p.destinos.length > 0 && (
         <div style={{ display: "flex", gap: 5, marginTop: 10, flexWrap: "wrap" }}>
