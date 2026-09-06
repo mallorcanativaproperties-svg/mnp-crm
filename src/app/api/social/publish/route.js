@@ -81,11 +81,70 @@ async function publishFacebook(post, account) {
 }
 
 async function publishLinkedIn(post, account) {
-  const { access_token, account_id } = account;
+  // Usar token de env vars si no hay cuenta conectada o si el account_id es de organización
+  const token = account?.access_token || process.env.LINKEDIN_ACCESS_TOKEN;
+  if (!token) return { success: false, error: "LinkedIn no configurado" };
+
   try {
     const text = `${post.texto || ""}\n\n${post.hashtags || ""}`.trim();
-    const body = { author: `urn:li:organization:${account_id}`, lifecycleState: "PUBLISHED", visibility: { "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC" }, specificContent: { "com.linkedin.ugc.ShareContent": { shareCommentary: { text }, shareMediaCategory: "NONE" } } };
-    const res = await fetch("https://api.linkedin.com/v2/ugcPosts", { method: "POST", headers: { Authorization: `Bearer ${access_token}`, "Content-Type": "application/json", "X-Restli-Protocol-Version": "2.0.0" }, body: JSON.stringify(body) });
+
+    // Determinar el author — organización si hay account_id, perfil personal si no
+    let authorUrn;
+    if (account?.account_id) {
+      authorUrn = `urn:li:organization:${account.account_id}`;
+    } else {
+      // Obtener perfil personal del token
+      const meRes = await fetch("https://api.linkedin.com/v2/userinfo", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const me = await meRes.json();
+      if (!me.sub) return { success: false, error: "No se pudo obtener perfil LinkedIn" };
+      authorUrn = `urn:li:person:${me.sub}`;
+    }
+
+    const body = {
+      author: authorUrn,
+      lifecycleState: "PUBLISHED",
+      visibility: { "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC" },
+      specificContent: {
+        "com.linkedin.ugc.ShareContent": {
+          shareCommentary: { text },
+          shareMediaCategory: "NONE",
+        },
+      },
+    };
+
+    // Añadir imagen si hay
+    const imageUrl = post.media_urls?.[0];
+    if (imageUrl && post.media_types?.[0] !== "video") {
+      const registerRes = await fetch("https://api.linkedin.com/v2/assets?action=registerUpload", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          registerUploadRequest: {
+            recipes: ["urn:li:digitalmediaRecipe:feedshare-image"],
+            owner: authorUrn,
+            serviceRelationships: [{ relationshipType: "OWNER", identifier: "urn:li:userGeneratedContent" }],
+          },
+        }),
+      });
+      const registerData = await registerRes.json();
+      const uploadUrl = registerData?.value?.uploadMechanism?.["com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest"]?.uploadUrl;
+      const asset = registerData?.value?.asset;
+      if (uploadUrl && asset) {
+        const imgRes = await fetch(imageUrl);
+        const imgBuffer = await imgRes.arrayBuffer();
+        await fetch(uploadUrl, { method: "PUT", headers: { Authorization: `Bearer ${token}`, "Content-Type": "image/jpeg" }, body: imgBuffer });
+        body.specificContent["com.linkedin.ugc.ShareContent"].shareMediaCategory = "IMAGE";
+        body.specificContent["com.linkedin.ugc.ShareContent"].media = [{ status: "READY", description: { text: "" }, media: asset, title: { text: "" } }];
+      }
+    }
+
+    const res = await fetch("https://api.linkedin.com/v2/ugcPosts", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json", "X-Restli-Protocol-Version": "2.0.0" },
+      body: JSON.stringify(body),
+    });
     const data = await res.json();
     return data.id ? { success: true, post_id: data.id } : { success: false, error: JSON.stringify(data) };
   } catch (err) { return { success: false, error: err.message }; }
@@ -128,7 +187,8 @@ export async function POST(request) {
 
     for (const red of post.redes || []) {
       const account = accounts?.find((a) => a.platform === red);
-      if (!account) { results[red] = { success: false, error: "Not connected" }; continue; }
+      // LinkedIn puede funcionar sin cuenta en BD si hay LINKEDIN_ACCESS_TOKEN en env
+      if (!account && red !== "linkedin") { results[red] = { success: false, error: "Not connected" }; continue; }
       const publisher = PUBLISHERS[red];
       if (publisher) {
         results[red] = await publisher(post, account);
