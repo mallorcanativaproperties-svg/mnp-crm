@@ -727,7 +727,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
       {iaModal && (
         <div onClick={() => { if (!iaLoading) { setIaModal(null); setIaVariaciones([]); setIaSeleccionada(null); } }}
           style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2100 }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: "#1A2528", border: "1px solid #2A2926", width: "min(900px, 96vw)", maxHeight: "92vh", overflowY: "auto", padding: 28, position: "relative" }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: "#1A2528", border: "1px solid #2A2926", width: "min(1100px, 96vw)", maxHeight: "95vh", overflowY: "auto", padding: "28px 32px", position: "relative" }}>
             {/* Header */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
               <div>
@@ -740,7 +740,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
             {/* Foto original */}
             <div style={{ marginBottom: 20 }}>
               <div style={{ fontSize: 10, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Foto original</div>
-              <img src={iaModal.item.url} alt="original" style={{ width: "100%", maxHeight: 220, objectFit: "cover", border: "1px solid #2A2926" }} />
+              <img src={iaModal.item.url} alt="original" style={{ width: "100%", maxHeight: 380, objectFit: "cover", border: "1px solid #2A2926" }} />
             </div>
 
             {/* Opciones */}
@@ -797,7 +797,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                   {iaVariaciones.map((v, i) => (
                     <div key={i} onClick={() => setIaSeleccionada(i)}
                       style={{ border: `2px solid ${iaSeleccionada === i ? "#AC8A54" : "#2A2926"}`, cursor: "pointer", position: "relative", background: iaSeleccionada === i ? "#AC8A5415" : "transparent" }}>
-                      <img src={v.url} alt={v.label} style={{ width: "100%", height: 160, objectFit: "cover", display: "block" }} />
+                      <img src={v.url} alt={v.label} style={{ width: "100%", height: 220, objectFit: "cover", display: "block" }} />
                       <div style={{ padding: "6px 8px", fontSize: 11, color: iaSeleccionada === i ? "#AC8A54" : "#9A968A", fontWeight: iaSeleccionada === i ? 700 : 400 }}>
                         {iaSeleccionada === i ? "✓ " : ""}{v.label}
                       </div>

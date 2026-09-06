@@ -36,7 +36,7 @@ export async function POST(request) {
     formData.append("image", imgBlob, "original.jpg");
     formData.append("prompt", prompt);
     formData.append("n", "1");
-    formData.append("size", "1792x1024"); // 16:9 más cercano disponible
+    formData.append("size", "1536x1024"); // landscape soportado por gpt-image-1
     formData.append("quality", "high");
 
     const openaiRes = await fetch("https://api.openai.com/v1/images/edits", {
