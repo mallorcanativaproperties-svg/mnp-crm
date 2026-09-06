@@ -275,6 +275,26 @@ const MEDIA_TIPOS = [
   { key: "plano", label: "Planos", icon: "📐", accept: "image/*,.pdf", color: "#2C6E52" },
 ];
 
+
+// Etiquetas de estancia para Idealista — valores que acepta imageLabel en el feed
+const ETIQUETAS_IDEALISTA = [
+  { value: "",             label: "Sin etiqueta" },
+  { value: "LIVING_ROOM", label: "Salón / Comedor" },
+  { value: "BEDROOM",     label: "Habitación" },
+  { value: "BATHROOM",    label: "Baño" },
+  { value: "KITCHEN",     label: "Cocina" },
+  { value: "TERRACE",     label: "Terraza" },
+  { value: "BALCONY",     label: "Balcón" },
+  { value: "GARDEN",      label: "Jardín / Patio" },
+  { value: "SWIMMING_POOL", label: "Piscina" },
+  { value: "FACADE",      label: "Fachada" },
+  { value: "VIEWS",       label: "Vistas" },
+  { value: "CORRIDOR",    label: "Pasillo / Entrada" },
+  { value: "GARAGE",      label: "Garaje" },
+  { value: "STORAGE",     label: "Trastero" },
+  { value: "PLAN",        label: "Plano" },
+];
+
 function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) {
   const [media, setMedia] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -452,6 +472,11 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
     await supabase.from("media_propiedades").update({ es_portada: false }).eq("propiedad_id", propiedadId).eq("tipo", "foto");
     await supabase.from("media_propiedades").update({ es_portada: true }).eq("id", item.id);
     await loadMedia(true);
+  }
+
+  async function handleEtiqueta(item, etiqueta) {
+    await supabase.from("media_propiedades").update({ etiqueta: etiqueta || null }).eq("id", item.id);
+    setMedia(prev => prev.map(m => m.id === item.id ? { ...m, etiqueta } : m));
   }
 
   // Drag & drop reorder
@@ -744,8 +769,23 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                 />
               )}
 
+              {/* Etiqueta de estancia — solo fotos */}
+              {activeTab === "foto" && (
+                <div style={{ padding: "0 8px 4px" }}>
+                  <select
+                    value={item.etiqueta || ""}
+                    onChange={(e) => { e.stopPropagation(); handleEtiqueta(item, e.target.value); }}
+                    onClick={(e) => e.stopPropagation()}
+                    style={{ width: "100%", padding: "4px 6px", fontSize: 10, background: "#F8F6F1", border: "1px solid #E7E1D4", color: item.etiqueta ? "#1a2528" : "#9A968A", fontFamily: "Inter, sans-serif", outline: "none", cursor: "pointer", appearance: "none", WebkitAppearance: "none" }}
+                  >
+                    {ETIQUETAS_IDEALISTA.map(e => (
+                      <option key={e.value} value={e.value}>{e.label}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
               {/* Info + actions bar */}
-              <div style={{ padding: "6px 8px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ padding: "4px 8px 6px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <span style={{ fontSize: 10, color: "#9A968A", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "50%" }}>
                   {item.nombre || `${activeTab}-${idx + 1}`}
                 </span>
