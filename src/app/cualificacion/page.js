@@ -131,6 +131,7 @@ export default function CualificacionCompradores() {
   const [zonaDeseada, setZonaDeseada]   = useState("");
   const [alturaMax, setAlturaMax]       = useState("");
   const [requisitos, setRequisitos]     = useState("");
+  const [pais, setPais]                 = useState("España");
 
   const ppto = presupuesto ? interpretarPresupuesto(presupuesto) : 0;
   const camposValidos = email && nombre && telefono && financiacion &&
