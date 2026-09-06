@@ -184,10 +184,14 @@ function WhatsAppCrucePanel({ buyer, prop, onClose }) {
           <div style={{ fontSize: 10, color: "rgba(248,246,241,0.4)", letterSpacing: "0.1em", marginBottom: 3 }}>PROPIEDAD</div>
           <div style={{ fontSize: 12, color: CREAM, fontWeight: 500, marginBottom: propUrl ? 4 : 0 }}>{prop.titulo}</div>
           {propUrl && (
-            <a href={propUrl} target="_blank" rel="noopener noreferrer"
-              style={{ fontSize: 11, color: BRONZE, textDecoration: "none", letterSpacing: "0.02em", wordBreak: "break-all" }}>
-              {propUrl}
-            </a>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+              <span style={{ fontSize: 11, color: "rgba(248,246,241,0.5)", wordBreak: "break-all", flex: 1 }}>{propUrl}</span>
+              <button
+                onClick={e => { navigator.clipboard.writeText(propUrl); e.currentTarget.textContent = "✓"; setTimeout(() => { if(e.currentTarget) e.currentTarget.textContent = "Copiar"; }, 2000); }}
+                style={{ fontSize: 10, color: BRONZE, background: "none", border: `1px solid ${BRONZE}44`, padding: "2px 8px", cursor: "pointer", flexShrink: 0, fontFamily: "Raleway, Inter, sans-serif", letterSpacing: "0.06em" }}>
+                Copiar
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -633,12 +637,16 @@ export default function MotorCruce() {
                         </div>
                         <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: "#22262E" }}>{prop.titulo}</div>
                         <div style={{ fontSize: 13, color: "#9A968A", marginTop: 4 }}>{prop.zona}, {prop.municipio} - {prop.mConst} m2 - {fmtP(prop.precioVenta)}</div>
-                        {prop.ref && (
-                          <a href={`https://mallorcanativaproperties.com/propiedades/${prop.ref.toLowerCase()}/`} target="_blank" rel="noopener noreferrer"
-                            style={{ display: "inline-block", marginTop: 8, fontSize: 12, color: "#AC8A54", textDecoration: "none", letterSpacing: "0.02em" }}>
-                            Ver en web →
-                          </a>
-                        )}
+                        {prop.ref && (() => {
+                          const webUrl = `https://mallorcanativaproperties.com/propiedades/${prop.ref.toLowerCase()}/`;
+                          return (
+                            <button
+                              onClick={e => { navigator.clipboard.writeText(webUrl); e.currentTarget.textContent = "✓ Copiado"; setTimeout(() => { if(e.currentTarget) e.currentTarget.textContent = "Copiar link web"; }, 2000); }}
+                              style={{ marginTop: 8, fontSize: 11, color: "#AC8A54", background: "none", border: "1px solid #C8A97E33", padding: "3px 10px", cursor: "pointer", letterSpacing: "0.04em", fontFamily: "Raleway, Inter, sans-serif", display: "inline-block" }}>
+                              Copiar link web
+                            </button>
+                          );
+                        })()}
                         <div style={{ display: "flex", gap: 5, marginTop: 10, flexWrap: "wrap" }}>
                           {prop.calidades.slice(0, 8).map((c, i) => (
                             <span key={i} style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E15" }}>{c}</span>

@@ -1311,14 +1311,16 @@ function PropCard({ p, onClick }) {
         <span>{p.demandas || 0} demandas</span>
         <span style={{ opacity: 0.3 }}>|</span>
         <span>{p.agente}</span>
-        {p.ref && (
-          <a href={`https://mallorcanativaproperties.com/propiedades/${p.ref.toLowerCase()}/`}
-            target="_blank" rel="noopener noreferrer"
-            onClick={e => e.stopPropagation()}
-            style={{ marginLeft: "auto", fontSize: 11, color: "#AC8A54", textDecoration: "none", letterSpacing: "0.04em", flexShrink: 0 }}>
-            Ver en web →
-          </a>
-        )}
+        {p.ref && (() => {
+          const webUrl = `https://mallorcanativaproperties.com/propiedades/${p.ref.toLowerCase()}/`;
+          return (
+            <button
+              onClick={e => { e.stopPropagation(); navigator.clipboard.writeText(webUrl); e.currentTarget.textContent = "✓ Copiado"; setTimeout(() => { if(e.currentTarget) e.currentTarget.textContent = "Copiar link web"; }, 2000); }}
+              style={{ marginLeft: "auto", fontSize: 11, color: "#AC8A54", background: "none", border: "1px solid #C8A97E33", padding: "2px 10px", cursor: "pointer", letterSpacing: "0.04em", flexShrink: 0, fontFamily: "Inter, sans-serif" }}>
+              Copiar link web
+            </button>
+          );
+        })()}
       </div>
       {p.estado === "publicada" && p.destinos.length > 0 && (
         <div style={{ display: "flex", gap: 5, marginTop: 10, flexWrap: "wrap" }}>
