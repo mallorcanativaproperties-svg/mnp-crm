@@ -30,8 +30,8 @@ export async function POST(request) {
       const oldPath = mediaRow.url.split("/propiedades-media/")[1];
       if (oldPath) await supabase.storage.from("propiedades-media").remove([decodeURIComponent(oldPath)]);
 
-      // Actualizar URL en BD con la variación elegida
-      await supabase.from("media_propiedades").update({ url: imageUrl, nombre: `homestaging-${Date.now()}.jpg` }).eq("id", mediaId);
+      // Actualizar URL en BD con la variación elegida — ia_generada: true (home staging)
+      await supabase.from("media_propiedades").update({ url: imageUrl, nombre: `homestaging-${Date.now()}.jpg`, ia_generada: true }).eq("id", mediaId);
 
       // Limpiar la foto temporal (si tiene storageKey)
       // No eliminamos porque ya es la URL que usaremos
@@ -107,8 +107,8 @@ export async function POST(request) {
       // Eliminar original
       if (oldPath) await supabase.storage.from("propiedades-media").remove([decodeURIComponent(oldPath)]);
 
-      // Actualizar BD
-      await supabase.from("media_propiedades").update({ url: newUrl, nombre: `ia-${tipo}-${ts}.jpg` }).eq("id", mediaId);
+      // Actualizar BD — mejora: ia_generada false (foto real mejorada, no generada)
+      await supabase.from("media_propiedades").update({ url: newUrl, nombre: `ia-${tipo}-${ts}.jpg`, ia_generada: false }).eq("id", mediaId);
 
       return NextResponse.json({ ok: true, newUrl });
     }

@@ -190,7 +190,7 @@ function buildProperty(row, media) {
       const match = url.match(/propiedades-media\/(.+)$/);
       const relativePath = match ? match[1] : url;
 
-      const img = { imageOrder: i + 1, imageUrl: relativePath };
+      const img = { imageOrder: i + 1, imageUrl: relativePath, imageAiGenerated: photo.ia_generada === true };
       if (photo.etiqueta && IMAGE_TAG_MAP[photo.etiqueta]) {
         img.imageLabel = IMAGE_TAG_MAP[photo.etiqueta];
       }

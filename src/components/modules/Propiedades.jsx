@@ -344,16 +344,20 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
         src.connect(dest);
         dest.stream.getAudioTracks().forEach(t => stream.addTrack(t));
 
-        const mimeType = MediaRecorder.isTypeSupported("video/webm;codecs=vp9,opus")
-          ? "video/webm;codecs=vp9,opus"
-          : "video/webm";
+        // MP4 es el formato aceptado por Idealista (webm no está en su lista)
+        const mimeType = MediaRecorder.isTypeSupported("video/mp4")
+          ? "video/mp4"
+          : MediaRecorder.isTypeSupported("video/webm;codecs=vp9,opus")
+            ? "video/webm;codecs=vp9,opus"
+            : "video/webm";
+        const ext = mimeType.includes("mp4") ? ".mp4" : ".webm";
         const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 1_500_000 });
         const chunks = [];
         recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
         recorder.onstop = () => {
           URL.revokeObjectURL(url);
           const blob = new Blob(chunks, { type: mimeType });
-          const compressed = new File([blob], file.name.replace(/\.[^.]+$/, ".webm"), { type: mimeType });
+          const compressed = new File([blob], file.name.replace(/\.[^.]+$/, ext), { type: mimeType });
           resolve(compressed);
         };
 
@@ -387,6 +391,10 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
           uploaded++;
           continue;
         }
+      } else if (tipo === "foto" && file.size > 8 * 1024 * 1024) {
+        alert(`La foto "${file.name}" supera el límite de 8MB de Idealista (${(file.size/1024/1024).toFixed(1)}MB). Comprime la imagen antes de subirla.`);
+        uploaded++;
+        continue;
       } else if (file.size > MAX_SIZE) {
         alert(`El archivo "${file.name}" supera el límite de 50MB (${(file.size/1024/1024).toFixed(0)}MB).`);
         uploaded++;
@@ -2528,7 +2536,7 @@ function IdealistaJsonButton({ supabase }) {
         } else if(item.etiqueta&&IMAGE_TAG_MAP[item.etiqueta]){
           img.imageLabel=IMAGE_TAG_MAP[item.etiqueta];
         }
-        img.imageAiGenerated=false;
+        img.imageAiGenerated=item.ia_generada===true;
         return img;
       });
     }
