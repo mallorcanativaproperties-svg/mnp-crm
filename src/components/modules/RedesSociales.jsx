@@ -220,7 +220,8 @@ function PostEditor({ post, onClose, onSaved }) {
                 }
                 <button onClick={() => removeMedia(i)} style={{ position: "absolute", top: -6, right: -6, width: 18, height: 18, borderRadius: "50%", background: "#A23A3A", border: "none", color: "#fff", fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 1 }}>✕</button>
               </div>
-            );}}
+              );
+            })}
             {mediaFiles.length < maxFiles && (
               <label style={{ width: 80, height: 80, border: "2px dashed #E7E1D4", display: "flex", alignItems: "center", justifyContent: "center", cursor: uploading ? "not-allowed" : "pointer", background: "#FAFAFA", flexDirection: "column", gap: 4 }}>
                 <span style={{ fontSize: 22, color: "#9A968A" }}>{uploading ? "⏳" : "+"}</span>
