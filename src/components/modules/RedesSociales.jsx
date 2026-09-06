@@ -74,6 +74,38 @@ function EmptyState({ text, icon }) {
 }
 
 function ConfirmModal({ text, onConfirm, onCancel }) {
+  const isVideo = ["Reel", "Video", "Short"].includes(tipo);
+  const isCarousel = tipo === "Carousel";
+  const maxFiles = isCarousel ? 10 : 1;
+  const acceptedTypes = isVideo ? "video/mp4,video/mov,video/avi" : "image/jpeg,image/png,image/webp";
+
+  async function handleUpload(e) {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    if (mediaFiles.length + files.length > maxFiles) {
+      setUploadError(`Máximo ${maxFiles} archivo${maxFiles > 1 ? "s" : ""} para este tipo de post`);
+      return;
+    }
+    setUploading(true); setUploadError("");
+    try {
+      const uploaded = [];
+      for (const file of files) {
+        const ext = file.name.split(".").pop();
+        const path = `posts/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const { error } = await supabase.storage.from("social-media").upload(path, file, { cacheControl: "3600", upsert: false });
+        if (error) throw new Error(error.message);
+        const { data: urlData } = supabase.storage.from("social-media").getPublicUrl(path);
+        uploaded.push({ url: urlData.publicUrl, type: file.type.startsWith("video") ? "video" : "image", name: file.name });
+      }
+      setMediaFiles(prev => [...prev, ...uploaded]);
+    } catch (e) { setUploadError("Error subiendo: " + e.message); }
+    finally { setUploading(false); }
+  }
+
+  function removeMedia(idx) {
+    setMediaFiles(prev => prev.filter((_, i) => i !== idx));
+  }
+
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={onCancel}>
       <div style={{ ...S.card, maxWidth: 400, padding: "28px 32px" }} onClick={(e) => e.stopPropagation()}>
@@ -133,10 +165,13 @@ function PostEditor({ post, onClose, onSaved }) {
   const [propRef, setPropRef] = useState(post?.prop_ref || "");
   const [saving, setSaving] = useState(false);
   const [showSugg, setShowSugg] = useState(false);
+  const [mediaFiles, setMediaFiles] = useState(post?.media_urls ? post.media_urls.map((url, i) => ({ url, type: post.media_types?.[i] || "image", name: url.split("/").pop() })) : []);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
   const toggleRed = (key) => setRedes((p) => p.includes(key) ? p.filter((r) => r !== key) : [...p, key]);
   const handleSave = async (estado) => {
     setSaving(true);
-    const data = { titulo, tipo, texto, hashtags, primer_comentario: primerComentario, redes, estado, prop_ref: propRef, fecha_programada: fecha ? new Date(fecha).toISOString() : null, updated_at: new Date().toISOString() };
+    const data = { titulo, tipo, texto, hashtags, primer_comentario: primerComentario, redes, estado, prop_ref: propRef, fecha_programada: fecha ? new Date(fecha).toISOString() : null, media_urls: mediaFiles.map(f => f.url), media_types: mediaFiles.map(f => f.type), updated_at: new Date().toISOString() };
     if (post?.id) { await supabase.from("social_posts").update(data).eq("id", post.id); }
     else { await supabase.from("social_posts").insert(data); }
     setSaving(false); onSaved(); onClose();
@@ -163,6 +198,37 @@ function PostEditor({ post, onClose, onSaved }) {
           {showSugg && (<div style={{ marginTop: 6, padding: "10px 14px", ...S.card }}>{Object.entries(HASHTAG_SUGGESTIONS).map(([cat, tags]) => (<div key={cat} style={{ marginBottom: 8 }}><div style={{ fontSize: 9, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>{cat}</div><div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>{tags.map((tag) => (<span key={tag} onClick={() => setHashtags((h) => (h ? h + " " : "") + tag)} style={{ fontSize: 10, padding: "3px 8px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E22", cursor: "pointer" }}>{tag}</span>))}<span onClick={() => setHashtags((h) => (h ? h + " " : "") + tags.join(" "))} style={{ fontSize: 10, padding: "3px 8px", borderRadius: 0, background: "#6AAF8D0D", color: "#2C6E52", border: "1px solid #6AAF8D22", cursor: "pointer" }}>+ Todos</span></div></div>))}</div>)}
         </div>
         <div style={{ marginBottom: 14 }}><label style={S.label}>Primer comentario (opcional)</label><input value={primerComentario} onChange={(e) => setPrimerComentario(e.target.value)} placeholder="Link en bio, hashtags extra, CTA..." style={S.input} /><div style={{ fontSize: 9, color: "#7A787066", marginTop: 3 }}>Se publica automáticamente como primer comentario</div></div>
+        {/* Archivos multimedia */}
+        <div style={{ marginBottom: 14 }}>
+          <label style={S.label}>
+            {isVideo ? "Vídeo" : isCarousel ? `Imágenes (máx. ${maxFiles})` : "Imagen"}
+          </label>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 8 }}>
+            {mediaFiles.map((f, i) => (
+              <div key={i} style={{ position: "relative", width: 80, height: 80 }}>
+                {f.type === "video"
+                  ? <div style={{ width: 80, height: 80, background: "#1a2528", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid #E7E1D4" }}>
+                      <span style={{ fontSize: 24 }}>▶</span>
+                    </div>
+                  : <img src={f.url} alt={f.name} style={{ width: 80, height: 80, objectFit: "cover", border: "1px solid #E7E1D4", display: "block" }} />
+                }
+                <button onClick={() => removeMedia(i)} style={{ position: "absolute", top: -6, right: -6, width: 18, height: 18, borderRadius: "50%", background: "#A23A3A", border: "none", color: "#fff", fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 1 }}>✕</button>
+              </div>
+            ))}
+            {mediaFiles.length < maxFiles && (
+              <label style={{ width: 80, height: 80, border: "2px dashed #E7E1D4", display: "flex", alignItems: "center", justifyContent: "center", cursor: uploading ? "not-allowed" : "pointer", background: "#FAFAFA", flexDirection: "column", gap: 4 }}>
+                <span style={{ fontSize: 22, color: "#9A968A" }}>{uploading ? "⏳" : "+"}</span>
+                <span style={{ fontSize: 9, color: "#9A968A" }}>{uploading ? "Subiendo..." : "Añadir"}</span>
+                <input type="file" accept={acceptedTypes} multiple={isCarousel} onChange={handleUpload} style={{ display: "none" }} disabled={uploading} />
+              </label>
+            )}
+          </div>
+          {uploadError && <div style={{ fontSize: 11, color: "#A23A3A", marginTop: 4 }}>{uploadError}</div>}
+          <div style={{ fontSize: 10, color: "#9A968A" }}>
+            {isVideo ? "MP4, MOV o AVI" : "JPG, PNG o WEBP"}{isCarousel ? ` · hasta ${maxFiles} imágenes` : ""}
+          </div>
+        </div>
+
         <div style={{ marginBottom: 14 }}><label style={S.label}>Publicar en</label>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>{REDES.map((r) => { const on = redes.includes(r.key); return (<div key={r.key} onClick={() => toggleRed(r.key)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 0, border: "1px solid " + (on ? r.color + "66" : "#E7E1D4"), background: on ? r.color + "12" : "transparent", cursor: "pointer" }}><div style={{ width: 12, height: 12, borderRadius: 0, border: "1px solid " + (on ? r.color : "#9A968A"), background: on ? r.color : "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>{on && <span style={{ color: "#fff", fontSize: 8, fontWeight: 700 }}>✓</span>}</div><span style={{ fontSize: 11, color: on ? r.color : "#9A968A" }}>{r.label}</span></div>); })}</div>
         </div>
