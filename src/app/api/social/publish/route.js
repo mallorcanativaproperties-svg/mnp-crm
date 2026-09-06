@@ -159,13 +159,64 @@ async function publishTikTok(post, account) {
   } catch (err) { return { success: false, error: err.message }; }
 }
 
+async function refreshYouTubeToken(refreshToken) {
+  const res = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+      client_id: process.env.YOUTUBE_CLIENT_ID,
+      client_secret: process.env.YOUTUBE_CLIENT_SECRET,
+    }),
+  });
+  const data = await res.json();
+  return data.access_token || null;
+}
+
 async function publishYouTube(post, account) {
-  const { access_token } = account;
+  // account_id contiene el refresh token
+  const refreshToken = account?.account_id;
+  let accessToken = account?.access_token;
+
   const mediaUrl = post.media_urls?.[0];
-  if (!mediaUrl) return { success: false, error: "YouTube requires a video" };
+  if (!mediaUrl) return { success: false, error: "YouTube requiere un vídeo" };
+
   try {
-    const metadata = { snippet: { title: post.titulo || "Video", description: `${post.texto || ""}\n\n${post.hashtags || ""}`.trim(), tags: (post.hashtags || "").split(/\s+/).filter((t) => t.startsWith("#")).map((t) => t.slice(1)), categoryId: "22" }, status: { privacyStatus: "public", selfDeclaredMadeForKids: false } };
-    const res = await fetch("https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status", { method: "POST", headers: { Authorization: `Bearer ${access_token}`, "Content-Type": "application/json" }, body: JSON.stringify(metadata) });
+    const metadata = {
+      snippet: {
+        title: post.titulo || "Mallorca Nativa Properties",
+        description: `${post.texto || ""}\n\n${post.hashtags || ""}`.trim(),
+        tags: (post.hashtags || "").split(/\s+/).filter(t => t.startsWith("#")).map(t => t.slice(1)),
+        categoryId: "22",
+      },
+      status: { privacyStatus: "public", selfDeclaredMadeForKids: false },
+    };
+
+    // Intentar publicar con el token actual
+    let res = await fetch("https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+      body: JSON.stringify(metadata),
+    });
+
+    // Si el token ha caducado (401) y hay refresh token, renovar y reintentar
+    if (res.status === 401 && refreshToken) {
+      const newToken = await refreshYouTubeToken(refreshToken);
+      if (!newToken) return { success: false, error: "Token de YouTube caducado y no se pudo renovar" };
+
+      // Actualizar token en Supabase
+      await supabase.from("social_accounts").update({ access_token: newToken }).eq("id", account.id);
+      accessToken = newToken;
+
+      // Reintentar con el nuevo token
+      res = await fetch("https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+        body: JSON.stringify(metadata),
+      });
+    }
+
     if (res.ok) return { success: true, post_id: "pending", upload_url: res.headers.get("Location") };
     const err = await res.json();
     return { success: false, error: err.error?.message || "YouTube failed" };
