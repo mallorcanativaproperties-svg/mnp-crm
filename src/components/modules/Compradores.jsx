@@ -97,289 +97,6 @@ function ScoreBar({ value }) {
 // ═══ WHATSAPP PANEL — Chat con comprador via Claudia ═════════════
 const CLAUDIA_PROMPT_SHORT = `Eres Claudia, secretaria coordinadora de Mallorca Nativa Properties. Recibes leads de compradores por WhatsApp. Cualifica al comprador, entiende su necesidad y deriva al agente correcto.`;
 
-function WhatsAppPanel({ buyer, onClose }) {
-  const [mensajes, setMensajes] = useState([]);
-  const [convId, setConvId] = useState(null);
-  const [modoManual, setModoManual] = useState(true);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [loadingConv, setLoadingConv] = useState(true);
-  const chatRef = useRef(null);
-  const pollRef = useRef(null);
-  const lastMsgTs = useRef(null);
-
-  const PETROL = "#405c6b";
-  const BRONZE = "#AC8A54";
-
-  // Cargar o crear conversación
-  useEffect(() => {
-    async function loadConv() {
-      setLoadingConv(true);
-      try {
-        let phone = (buyer.tel || "").replace(/\D/g, "");
-        if (phone.startsWith("34") && phone.length === 11) phone = phone.slice(2);
-        const phoneWith34 = "34" + phone;
-        const phoneSin34 = phone;
-
-        const { data: convs } = await supabase
-          .from("conversaciones")
-          .select("*")
-          .or(`telefono.eq.${phoneWith34},telefono.eq.${phoneSin34},telefono.eq.+${phoneWith34}`)
-          .order("updated_at", { ascending: false });
-
-        let conv = convs?.[0] || null;
-
-        if (conv) {
-          setConvId(conv.id);
-          setModoManual(conv.estado === "manual" || conv.estado !== "activo");
-          const { data: msgs } = await supabase
-            .from("mensajes")
-            .select("*")
-            .eq("conversacion_id", conv.id)
-            .order("created_at", { ascending: true });
-          const mapped = (msgs || []).map(m => ({
-            id: m.id, from: m.from_who || "cliente",
-            text: m.texto || "",
-            ts: m.timestamp ? new Date(m.timestamp).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) : "",
-          }));
-          setMensajes(mapped);
-          if (mapped.length > 0) lastMsgTs.current = msgs[msgs.length - 1].created_at;
-        } else {
-          // Crear conversación nueva
-          const telNorm = phone.length === 9 ? "34" + phone : phone;
-          const { data: newConv } = await supabase
-            .from("conversaciones")
-            .insert({
-              contacto: buyer.nombre, telefono: telNorm,
-              canal: "whatsapp", estado: "manual",
-              agente_ia: "claudia", updated_at: new Date().toISOString(),
-            })
-            .select().single();
-          if (newConv) { setConvId(newConv.id); setModoManual(true); }
-        }
-      } catch (e) { console.error("Error cargando conversación:", e); }
-      finally { setLoadingConv(false); }
-    }
-    loadConv();
-    return () => { if (pollRef.current) clearInterval(pollRef.current); };
-  }, [buyer.tel]);
-
-  // Polling — recibe mensajes nuevos del comprador cada 3s
-  useEffect(() => {
-    if (!convId) return;
-    pollRef.current = setInterval(async () => {
-      try {
-        let q = supabase.from("mensajes").select("*")
-          .eq("conversacion_id", convId)
-          .order("created_at", { ascending: true });
-        if (lastMsgTs.current) q = q.gt("created_at", lastMsgTs.current);
-        const { data: nuevos } = await q;
-        if (nuevos && nuevos.length > 0) {
-          lastMsgTs.current = nuevos[nuevos.length - 1].created_at;
-          setMensajes(prev => {
-            const ids = new Set(prev.map(m => m.id));
-            const added = nuevos.filter(m => !ids.has(m.id)).map(m => ({
-              id: m.id, from: m.from_who || "cliente", text: m.texto || "",
-              ts: m.timestamp ? new Date(m.timestamp).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) : "",
-              date: m.timestamp ? new Date(m.timestamp) : new Date(),
-              leido: m.leido || false,
-              wa_message_id: m.wa_message_id || null,
-            }));
-            return added.length > 0 ? [...prev, ...added] : prev;
-          });
-        }
-      } catch {}
-    }, 3000);
-    return () => clearInterval(pollRef.current);
-  }, [convId]);
-
-  // Scroll al último mensaje
-  useEffect(() => {
-    if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
-  }, [mensajes]);
-
-  async function saveMsg(texto, fromWho) {
-    if (!convId) return;
-    await supabase.from("mensajes").insert({
-      conversacion_id: convId, texto, from_who: fromWho,
-      timestamp: new Date().toISOString(),
-    });
-    await supabase.from("conversaciones").update({ updated_at: new Date().toISOString() }).eq("id", convId);
-  }
-
-  async function handleSend() {
-    if (!input.trim() || loading) return;
-    const texto = input.trim();
-    setInput("");
-    setLoading(true);
-    const now = new Date();
-    const ts = now.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
-    setMensajes(prev => [...prev, { from: "agente_manual", text: texto, ts, date: now }]);
-    try {
-      const res = await fetch("/api/manual-reply", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ conversacion_id: convId, telefono: buyer.tel, texto, agente: "Claudia" }),
-      });
-      const data = await res.json();
-      if (!data.ok) {
-        setMensajes(prev => [...prev, { from: "sistema", text: `⚠️ Error: ${data.error || "error desconocido"}`, ts: "" }]);
-      } else {
-        await saveMsg(texto, "agente_manual");
-      }
-    } catch (e) {
-      setMensajes(prev => [...prev, { from: "sistema", text: `⚠️ Error: ${e.message}`, ts: "" }]);
-    } finally { setLoading(false); }
-  }
-
-  async function toggleModo() {
-    const nuevo = !modoManual;
-    setModoManual(nuevo);
-    if (convId) {
-      await supabase.from("conversaciones").update({
-        estado: nuevo ? "manual" : "activo", updated_at: new Date().toISOString(),
-      }).eq("id", convId);
-      const txt = nuevo ? "Modo manual activado — Claudia en pausa" : "IA reactivada — Claudia responde automáticamente";
-      setMensajes(prev => [...prev, { from: "sistema", text: txt, ts: "" }]);
-      await saveMsg(txt, "sistema");
-    }
-  }
-
-  return (
-    <div style={{
-        position: "fixed", top: 0, bottom: 0, zIndex: 1100,
-        display: "flex", flexDirection: "column", background: "#FFFFFF",
-        // Responsive: pantalla completa en móvil, panel lateral izquierdo en desktop
-        left: 0,
-        width: typeof window !== "undefined" && window.innerWidth < 640 ? "100vw" : "min(420px, 100vw)",
-        borderRight: typeof window !== "undefined" && window.innerWidth < 640 ? "none" : "1px solid #2A2926",
-        boxShadow: "4px 0 24px rgba(0,0,0,0.15)",
-      }}>
-      {/* Header */}
-      <div style={{ background: PETROL, padding: "16px 20px", flexShrink: 0 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ width: 40, height: 40, borderRadius: "50%", background: BRONZE, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, color: "#fff", fontWeight: 700, flexShrink: 0 }}>
-              {buyer.nombre?.charAt(0) || "?"}
-            </div>
-            <div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: "#FFFFFF", fontFamily: "Inter, sans-serif" }}>{buyer.nombre}</div>
-              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.6)", fontFamily: "Inter, sans-serif" }}>{buyer.tel}</div>
-            </div>
-          </div>
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <button onClick={toggleModo} style={{ padding: "5px 10px", border: `1px solid ${modoManual ? "#D4545466" : "#6AAF8D66"}`, background: modoManual ? "#D4545420" : "#6AAF8D20", color: modoManual ? "#ffaaaa" : "#aaffcc", cursor: "pointer", fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", fontFamily: "Inter, sans-serif", borderRadius: 0 }}>
-              {modoManual ? "⏸ MANUAL" : "🤖 IA ACTIVA"}
-            </button>
-            <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.7)", fontSize: 20, cursor: "pointer", lineHeight: 1 }}>✕</button>
-          </div>
-        </div>
-        <div style={{ marginTop: 8, fontSize: 10, color: "rgba(255,255,255,0.5)", fontFamily: "Inter, sans-serif", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-          Claudia · Cualificación compradores
-        </div>
-      </div>
-
-      {/* Aviso modo */}
-      {modoManual && (
-        <div style={{ padding: "8px 16px", background: "#A23A3A15", borderBottom: "1px solid #A23A3A25", fontSize: 11, color: "#A23A3A", fontFamily: "Inter, sans-serif" }}>
-          ⚠️ Claudia en pausa. Tus mensajes se envían directamente al cliente.
-        </div>
-      )}
-
-      {/* Mensajes */}
-      <div ref={chatRef} style={{ flex: 1, overflowY: "auto", padding: "16px", background: "#F8F6F1" }}>
-        {loadingConv ? (
-          <div style={{ textAlign: "center", padding: 40, color: "#9A968A", fontSize: 12, fontFamily: "Inter, sans-serif" }}>Cargando conversación...</div>
-        ) : mensajes.length === 0 ? (
-          <div style={{ textAlign: "center", padding: 40 }}>
-            <div style={{ fontSize: 32, marginBottom: 12 }}>💬</div>
-            <div style={{ fontSize: 13, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>Sin mensajes aún.<br/>Inicia la conversación con {buyer.nombre}.</div>
-          </div>
-        ) : (() => {
-          // Función para formato de fecha estilo WhatsApp
-          const fmtDate = (d) => {
-            if (!d) return "";
-            const hoy = new Date();
-            const ayer = new Date(hoy); ayer.setDate(ayer.getDate() - 1);
-            const isSameDay = (a, b) => a.toDateString() === b.toDateString();
-            if (isSameDay(d, hoy)) return "Hoy";
-            if (isSameDay(d, ayer)) return "Ayer";
-            return d.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
-          };
-          const elements = [];
-          let lastDateStr = null;
-          mensajes.forEach((m, i) => {
-            // Separador de fecha
-            const dateStr = m.date ? fmtDate(m.date) : null;
-            if (dateStr && dateStr !== lastDateStr) {
-              lastDateStr = dateStr;
-              elements.push(
-                <div key={`date-${i}`} style={{ textAlign: "center", margin: "16px 0 8px" }}>
-                  <span style={{ fontSize: 11, color: "#9A968A", padding: "4px 12px", background: "#E7E1D4", borderRadius: 10, fontFamily: "Inter, sans-serif" }}>{dateStr}</span>
-                </div>
-              );
-            }
-            // Mensaje sistema
-            if (m.from === "sistema") {
-              elements.push(
-                <div key={i} style={{ textAlign: "center", margin: "4px 0 8px" }}>
-                  <span style={{ fontSize: 10, color: "#9A968A", padding: "3px 10px", background: "#E7E1D4", borderRadius: 10, fontFamily: "Inter, sans-serif" }}>{m.text}</span>
-                </div>
-              );
-              return;
-            }
-            const isAgent = m.from !== "cliente";
-            const isManual = m.from === "agente_manual";
-            elements.push(
-              <div key={i} style={{ display: "flex", justifyContent: isAgent ? "flex-end" : "flex-start", marginBottom: 4 }}>
-                <div style={{ maxWidth: "80%", padding: "8px 12px 6px", background: isAgent ? PETROL : "#FFFFFF", color: isAgent ? "#FFFFFF" : "#22262E", borderRadius: isAgent ? "12px 12px 2px 12px" : "12px 12px 12px 2px", border: isAgent ? "none" : "1px solid #E7E1D4", fontSize: 14, fontFamily: "Inter, sans-serif", lineHeight: 1.5 }}>
-                  {isManual && <div style={{ fontSize: 9, color: "rgba(255,255,255,0.55)", marginBottom: 2, textTransform: "uppercase", letterSpacing: "0.08em" }}>Agente</div>}
-                  <div style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{m.text}</div>
-                  {m.ts && (
-                    <div style={{ fontSize: 10, color: isAgent ? "rgba(255,255,255,0.5)" : "#9A968A", marginTop: 3, textAlign: "right", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 3 }}>
-                      {m.ts}
-                      {isAgent && (
-                        <span style={{ fontSize: 12, color: m.leido ? "#4FC3F7" : "inherit", opacity: m.leido ? 1 : 0.7 }}>✓✓</span>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          });
-          return elements;
-        })()}
-        {loading && (
-          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
-            <div style={{ padding: "10px 14px", background: PETROL + "44", borderRadius: 12, fontSize: 12, color: PETROL, fontFamily: "Inter, sans-serif" }}>enviando...</div>
-          </div>
-        )}
-      </div>
-
-      {/* Input */}
-      <div style={{ padding: "12px 16px", borderTop: "1px solid #E7E1D4", background: "#FFFFFF", flexShrink: 0 }}>
-        <div style={{ display: "flex", gap: 8 }}>
-          <input
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-            placeholder={modoManual ? "Escribe al cliente — se enviará por WhatsApp..." : "Modo IA activo — activa Manual para escribir"}
-            disabled={!modoManual}
-            style={{ flex: 1, padding: "10px 14px", background: modoManual ? "#FFFFFF" : "#F8F6F1", border: "1px solid " + (modoManual ? "#2A2926" : "#E7E1D4"), borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", outline: "none", boxSizing: "border-box", cursor: modoManual ? "text" : "not-allowed" }}
-          />
-          <button
-            onClick={handleSend}
-            disabled={!modoManual || !input.trim() || loading}
-            style={{ padding: "10px 18px", borderRadius: 0, border: "none", background: modoManual && input.trim() && !loading ? PETROL : "#E7E1D4", color: modoManual && input.trim() && !loading ? "#FFFFFF" : "#9A968A", cursor: modoManual && input.trim() && !loading ? "pointer" : "default", fontSize: 11, fontWeight: 600, fontFamily: "Inter, sans-serif", letterSpacing: "0.06em", textTransform: "uppercase" }}
-          >
-            ➤
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function Card({ b, onClick, onWhatsApp }) {
   const s = score(b);
   const est = ESTADOS.find(e => e.key === b.st) || ESTADOS[0];
@@ -703,3 +420,243 @@ export default function App() {
     </div>
   </div>;
 }
+
+function WhatsAppPanel({ buyer, onClose }) {
+  const [mensajes, setMensajes] = useState([]);
+  const [convId, setConvId] = useState(null);
+  const [modoManual, setModoManual] = useState(true);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [loadingConv, setLoadingConv] = useState(true);
+  const chatRef = useRef(null);
+  const pollRef = useRef(null);
+  const lastMsgTs = useRef(null);
+
+  const PETROL = "#1a2528";
+  const BRONZE = "#AC8A54";
+  const CREAM = "#F8F6F1";
+
+  useEffect(() => {
+    async function loadConv() {
+      setLoadingConv(true);
+      try {
+        let phone = (buyer.tel || "").replace(/\D/g, "");
+        if (phone.startsWith("34") && phone.length === 11) phone = phone.slice(2);
+        const phoneWith34 = "34" + phone;
+        const phoneSin34 = phone;
+        const { data: convs } = await supabase.from("conversaciones").select("*")
+          .or(`telefono.eq.${phoneWith34},telefono.eq.${phoneSin34},telefono.eq.+${phoneWith34}`)
+          .order("updated_at", { ascending: false });
+        let conv = convs?.[0] || null;
+        if (conv) {
+          setConvId(conv.id);
+          setModoManual(conv.estado === "manual" || conv.estado !== "activo");
+          const { data: msgs } = await supabase.from("mensajes").select("*")
+            .eq("conversacion_id", conv.id).order("created_at", { ascending: true });
+          const mapped = (msgs || []).map(m => ({
+            id: m.id, from: m.from_who || "cliente", text: m.texto || "",
+            ts: m.timestamp ? new Date(m.timestamp).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) : "",
+            date: m.timestamp ? new Date(m.timestamp) : new Date(),
+            leido: m.leido || false, wa_message_id: m.wa_message_id || null,
+          }));
+          setMensajes(mapped);
+          if (mapped.length > 0) lastMsgTs.current = msgs[msgs.length - 1].created_at;
+        } else {
+          const telNorm = phone.length === 9 ? "34" + phone : phone;
+          const { data: newConv } = await supabase.from("conversaciones").insert({
+            contacto: buyer.nombre, telefono: telNorm, canal: "whatsapp",
+            estado: "manual", agente_ia: "claudia", updated_at: new Date().toISOString(),
+          }).select().single();
+          if (newConv) { setConvId(newConv.id); setModoManual(true); }
+        }
+      } catch (e) { console.error("Error cargando conversación:", e); }
+      finally { setLoadingConv(false); }
+    }
+    loadConv();
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
+  }, [buyer.tel]);
+
+  useEffect(() => {
+    if (!convId) return;
+    pollRef.current = setInterval(async () => {
+      try {
+        let q = supabase.from("mensajes").select("*").eq("conversacion_id", convId).order("created_at", { ascending: true });
+        if (lastMsgTs.current) q = q.gt("created_at", lastMsgTs.current);
+        const { data: nuevos } = await q;
+        if (nuevos && nuevos.length > 0) {
+          lastMsgTs.current = nuevos[nuevos.length - 1].created_at;
+          setMensajes(prev => {
+            const ids = new Set(prev.map(m => m.id));
+            const added = nuevos.filter(m => !ids.has(m.id)).map(m => ({
+              id: m.id, from: m.from_who || "cliente", text: m.texto || "",
+              ts: m.timestamp ? new Date(m.timestamp).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) : "",
+              date: m.timestamp ? new Date(m.timestamp) : new Date(),
+              leido: m.leido || false, wa_message_id: m.wa_message_id || null,
+            }));
+            const updated = prev.map(p => { const f = nuevos.find(n => n.id === p.id); return f ? { ...p, leido: f.leido || p.leido } : p; });
+            return added.length > 0 ? [...updated, ...added] : updated;
+          });
+        } else if (convId) {
+          const { data: leidoUpdates } = await supabase.from("mensajes").select("id, leido")
+            .eq("conversacion_id", convId).eq("leido", true).eq("from_who", "agente_manual");
+          if (leidoUpdates && leidoUpdates.length > 0) {
+            const leidoIds = new Set(leidoUpdates.map(m => m.id));
+            setMensajes(prev => prev.map(m => leidoIds.has(m.id) ? { ...m, leido: true } : m));
+          }
+        }
+      } catch {}
+    }, 3000);
+    return () => clearInterval(pollRef.current);
+  }, [convId]);
+
+  useEffect(() => {
+    if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
+  }, [mensajes]);
+
+  async function saveMsg(texto, fromWho) {
+    if (!convId) return;
+    await supabase.from("mensajes").insert({ conversacion_id: convId, texto, from_who: fromWho, timestamp: new Date().toISOString() });
+    await supabase.from("conversaciones").update({ updated_at: new Date().toISOString() }).eq("id", convId);
+  }
+
+  async function handleSend() {
+    if (!input.trim() || loading) return;
+    const texto = input.trim();
+    setInput("");
+    setLoading(true);
+    const now = new Date();
+    const ts = now.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+    setMensajes(prev => [...prev, { from: "agente_manual", text: texto, ts, date: now, leido: false }]);
+    try {
+      const res = await fetch("/api/manual-reply", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ conversacion_id: convId, telefono: buyer.tel, texto, agente: "Claudia" }),
+      });
+      const data = await res.json();
+      if (!data.ok) setMensajes(prev => [...prev, { from: "sistema", text: `Error: ${data.error || "error desconocido"}`, ts: "" }]);
+      else await saveMsg(texto, "agente_manual");
+    } catch (e) {
+      setMensajes(prev => [...prev, { from: "sistema", text: `Error: ${e.message}`, ts: "" }]);
+    } finally { setLoading(false); }
+  }
+
+  async function toggleModo() {
+    const nuevo = !modoManual;
+    setModoManual(nuevo);
+    if (convId) {
+      await supabase.from("conversaciones").update({ estado: nuevo ? "manual" : "activo", updated_at: new Date().toISOString() }).eq("id", convId);
+      const txt = nuevo ? "Modo manual activado — Claudia en pausa" : "IA reactivada — Claudia responde automáticamente";
+      setMensajes(prev => [...prev, { from: "sistema", text: txt, ts: "" }]);
+      await saveMsg(txt, "sistema");
+    }
+  }
+
+  const fmtDate = (d) => {
+    if (!d) return "";
+    const hoy = new Date(); const ayer = new Date(hoy); ayer.setDate(ayer.getDate() - 1);
+    const same = (a, b) => a.toDateString() === b.toDateString();
+    if (same(d, hoy)) return "Hoy";
+    if (same(d, ayer)) return "Ayer";
+    return d.toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" });
+  };
+
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+
+  return (
+    <div style={{ position: "fixed", top: 0, bottom: 0, zIndex: 1100, left: 0, width: isMobile ? "100vw" : "min(420px,100vw)", background: CREAM, borderRight: isMobile ? "none" : "1px solid #E7E1D4", boxShadow: "4px 0 40px rgba(26,37,40,0.18)", display: "flex", flexDirection: "column", fontFamily: "Raleway, Inter, sans-serif" }}>
+
+      <div style={{ height: 3, background: BRONZE, flexShrink: 0 }} />
+
+      <div style={{ background: PETROL, padding: "16px 20px", flexShrink: 0 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ width: 40, height: 40, background: BRONZE, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 17, color: CREAM, fontWeight: 400, flexShrink: 0 }}>
+              {buyer.nombre?.charAt(0)?.toUpperCase() || "?"}
+            </div>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: CREAM, letterSpacing: "0.01em", lineHeight: 1.3 }}>{buyer.nombre}</div>
+              <div style={{ fontSize: 11, color: BRONZE, letterSpacing: "0.04em", marginTop: 1 }}>{buyer.tel}</div>
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <button onClick={toggleModo} style={{ padding: "5px 12px", background: modoManual ? "rgba(172,138,84,0.15)" : "rgba(64,92,107,0.3)", border: `1px solid ${modoManual ? BRONZE : "#405c6b"}`, color: modoManual ? BRONZE : "#7aafc4", cursor: "pointer", fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", fontFamily: "Raleway, Inter, sans-serif" }}>
+              {modoManual ? "MANUAL" : "IA ACTIVA"}
+            </button>
+            <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(248,246,241,0.4)", fontSize: 18, cursor: "pointer", lineHeight: 1, padding: "0 0 0 8px" }}>✕</button>
+          </div>
+        </div>
+        <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid rgba(255,255,255,0.06)", fontSize: 10, color: "rgba(248,246,241,0.3)", letterSpacing: "0.12em" }}>
+          CLAUDIA · CUALIFICACIÓN COMPRADORES
+        </div>
+      </div>
+
+      {modoManual && (
+        <div style={{ padding: "8px 20px", background: "rgba(172,138,84,0.08)", borderBottom: "1px solid rgba(172,138,84,0.2)", fontSize: 11, color: "#8f7141", letterSpacing: "0.02em", flexShrink: 0 }}>
+          Claudia en pausa — tus mensajes llegan directamente al cliente
+        </div>
+      )}
+
+      <div ref={chatRef} style={{ flex: 1, overflowY: "auto", padding: "20px 16px", background: "#EDEAE4" }}>
+        {loadingConv ? (
+          <div style={{ textAlign: "center", padding: 48, color: "#9A968A", fontSize: 12 }}>Cargando conversación...</div>
+        ) : mensajes.length === 0 ? (
+          <div style={{ textAlign: "center", padding: 48 }}>
+            <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 28, color: "#C8BFB0", marginBottom: 12 }}>✦</div>
+            <div style={{ fontSize: 13, color: "#9A968A", lineHeight: 1.6 }}>Sin mensajes aún.<br/>Inicia la conversación con {buyer.nombre}.</div>
+          </div>
+        ) : (() => {
+          const elements = [];
+          let lastDateStr = null;
+          mensajes.forEach((m, i) => {
+            const dateStr = m.date ? fmtDate(m.date) : null;
+            if (dateStr && dateStr !== lastDateStr) {
+              lastDateStr = dateStr;
+              elements.push(<div key={`d-${i}`} style={{ textAlign: "center", margin: "16px 0 8px" }}><span style={{ fontSize: 11, color: "#9A968A", padding: "4px 14px", background: "#D6D0C8", borderRadius: 12 }}>{dateStr}</span></div>);
+            }
+            if (m.from === "sistema") {
+              elements.push(<div key={i} style={{ textAlign: "center", margin: "4px 0 8px" }}><span style={{ fontSize: 10, color: "#9A968A", padding: "3px 12px", background: "#D6D0C8", borderRadius: 10 }}>{m.text}</span></div>);
+              return;
+            }
+            const isAgent = m.from !== "cliente";
+            elements.push(
+              <div key={i} style={{ display: "flex", justifyContent: isAgent ? "flex-end" : "flex-start", marginBottom: 4 }}>
+                <div style={{ maxWidth: "78%", padding: "9px 13px 7px", background: isAgent ? PETROL : "#FFFFFF", color: isAgent ? CREAM : "#22262E", borderRadius: isAgent ? "12px 12px 2px 12px" : "12px 12px 12px 2px", border: isAgent ? "none" : "1px solid #E7E1D4", fontSize: 13, lineHeight: 1.55, boxShadow: "0 1px 3px rgba(0,0,0,0.07)" }}>
+                  {m.from === "agente_manual" && <div style={{ fontSize: 9, color: BRONZE, marginBottom: 3, letterSpacing: "0.1em" }}>AGENTE</div>}
+                  <div style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{m.text}</div>
+                  {m.ts && (
+                    <div style={{ fontSize: 10, color: isAgent ? "rgba(248,246,241,0.4)" : "#9A968A", marginTop: 4, textAlign: "right", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 3 }}>
+                      {m.ts}
+                      {isAgent && <span style={{ fontSize: 12, color: m.leido ? "#4FC3F7" : "rgba(248,246,241,0.4)" }}>✓✓</span>}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          });
+          return elements;
+        })()}
+        {loading && (
+          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
+            <div style={{ padding: "9px 14px", background: "rgba(26,37,40,0.2)", borderRadius: 12, fontSize: 12, color: PETROL }}>enviando...</div>
+          </div>
+        )}
+      </div>
+
+      <div style={{ padding: "12px 16px", borderTop: "1px solid #E7E1D4", background: CREAM, flexShrink: 0 }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <input value={input} onChange={e => setInput(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+            placeholder={modoManual ? "Escribe un mensaje..." : "Activa modo manual para escribir"}
+            disabled={!modoManual}
+            style={{ flex: 1, padding: "11px 16px", background: modoManual ? "#FFFFFF" : "#F0ECE6", border: "1px solid #E7E1D4", color: "#1a2528", fontSize: 14, fontFamily: "Raleway, Inter, sans-serif", outline: "none", cursor: modoManual ? "text" : "not-allowed", borderRadius: 20 }} />
+          <button onClick={handleSend} disabled={!modoManual || !input.trim() || loading}
+            style={{ width: 42, height: 42, borderRadius: "50%", background: (modoManual && input.trim() && !loading) ? BRONZE : "#E7E1D4", border: "none", color: (modoManual && input.trim() && !loading) ? CREAM : "#9A968A", cursor: (modoManual && input.trim() && !loading) ? "pointer" : "default", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            ➤
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+

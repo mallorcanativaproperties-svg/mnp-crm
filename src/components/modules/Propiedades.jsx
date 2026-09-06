@@ -726,41 +726,122 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
       {/* Modal IA — Mejora de foto y Home Staging */}
       {iaModal && (
         <div onClick={() => { if (!iaLoading) { setIaModal(null); setIaVariaciones([]); setIaSeleccionada(null); } }}
-          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2100 }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: "#1A2528", border: "1px solid #2A2926", width: "min(1100px, 96vw)", maxHeight: "95vh", overflowY: "auto", padding: "28px 32px", position: "relative" }}>
+          style={{ position: "fixed", inset: 0, background: "rgba(10,14,15,0.94)", backdropFilter: "blur(20px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2100 }}>
+          <div onClick={e => e.stopPropagation()} style={{
+            background: "#F8F6F1",
+            width: "min(1120px, 96vw)",
+            maxHeight: "95vh",
+            overflowY: "auto",
+            position: "relative",
+            boxShadow: "0 32px 80px rgba(0,0,0,0.5)",
+          }}>
+
+            {/* Franja superior bronce */}
+            <div style={{ background: "#AC8A54", height: 3, width: "100%" }} />
+
             {/* Header */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+            <div style={{ padding: "24px 32px 0", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
               <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: "#F8F6F1", letterSpacing: "0.06em", textTransform: "uppercase" }}>Editar con IA</div>
-                <div style={{ fontSize: 11, color: "#9A968A", marginTop: 2 }}>{iaModal.item.nombre}</div>
+                <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 22, fontWeight: 400, color: "#1a2528", letterSpacing: "-0.01em", lineHeight: 1.2 }}>
+                  Edición con Inteligencia Artificial
+                </div>
+                <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, color: "#AC8A54", marginTop: 4, letterSpacing: "0.06em" }}>
+                  {iaModal.item.nombre}
+                </div>
               </div>
-              {!iaLoading && <button onClick={() => { setIaModal(null); setIaVariaciones([]); setIaSeleccionada(null); }} style={{ background: "none", border: "none", color: "#9A968A", fontSize: 20, cursor: "pointer" }}>✕</button>}
+              {!iaLoading && (
+                <button onClick={() => { setIaModal(null); setIaVariaciones([]); setIaSeleccionada(null); }}
+                  style={{ background: "none", border: "none", color: "#9A968A", fontSize: 22, cursor: "pointer", lineHeight: 1, padding: "4px 0 0 16px" }}>✕</button>
+              )}
             </div>
 
-            {/* Foto original */}
-            <div style={{ marginBottom: 20 }}>
-              <div style={{ fontSize: 10, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Foto original</div>
-              <img src={iaModal.item.url} alt="original" style={{ width: "100%", maxHeight: 380, objectFit: "cover", border: "1px solid #2A2926" }} />
-            </div>
+            {/* Separador */}
+            <div style={{ height: 1, background: "#E7E1D4", margin: "20px 32px" }} />
 
-            {/* Opciones */}
-            {iaVariaciones.length < 3 && !iaLoading && (
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 20 }}>
-                {/* Mejora */}
-                <button
-                  onClick={async () => {
-                    const url = await generarVariacionIA(iaModal.item, "mejora", null);
-                    if (url) setIaVariaciones(prev => [...prev, { url, tipo: "mejora", label: `Mejora ${prev.length + 1}` }]);
-                  }}
-                  disabled={iaVariaciones.length >= 3}
-                  style={{ padding: "10px 18px", background: "#405c6b", border: "none", color: "#F8F6F1", fontSize: 12, fontWeight: 600, cursor: "pointer", letterSpacing: "0.05em", opacity: iaVariaciones.length >= 3 ? 0.4 : 1 }}>
-                  ✦ Mejorar fotografía
-                </button>
+            {/* Layout: foto original a la izquierda, controles a la derecha */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: 0, padding: "0 32px 28px" }}>
+
+              {/* Foto original */}
+              <div style={{ paddingRight: 28 }}>
+                <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 10, color: "#9A968A", letterSpacing: "0.12em", marginBottom: 10 }}>IMAGEN ORIGINAL</div>
+                <div style={{ position: "relative", overflow: "hidden" }}>
+                  <img src={iaModal.item.url} alt="original"
+                    style={{ width: "100%", height: 420, objectFit: "cover", display: "block", border: "1px solid #E7E1D4" }} />
+                </div>
+
+                {/* Variaciones */}
+                {iaVariaciones.length > 0 && (
+                  <div style={{ marginTop: 24 }}>
+                    <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 10, color: "#9A968A", letterSpacing: "0.12em", marginBottom: 12 }}>
+                      VARIACIONES GENERADAS — {iaVariaciones.length}/3
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(iaVariaciones.length, 3)}, 1fr)`, gap: 10 }}>
+                      {iaVariaciones.map((v, i) => (
+                        <div key={i} onClick={() => setIaSeleccionada(i)} style={{
+                          cursor: "pointer",
+                          border: `2px solid ${iaSeleccionada === i ? "#AC8A54" : "#E7E1D4"}`,
+                          transition: "border-color 0.2s",
+                          background: "#fff",
+                        }}>
+                          <div style={{ position: "relative" }}>
+                            <img src={v.url} alt={v.label} style={{ width: "100%", height: 160, objectFit: "cover", display: "block" }} />
+                            {iaSeleccionada === i && (
+                              <div style={{ position: "absolute", top: 8, right: 8, background: "#AC8A54", color: "#fff", width: 22, height: 22, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700 }}>✓</div>
+                            )}
+                          </div>
+                          <div style={{ padding: "8px 10px", fontFamily: "Raleway, Inter, sans-serif", fontSize: 11, color: iaSeleccionada === i ? "#AC8A54" : "#6B7280", fontWeight: iaSeleccionada === i ? 600 : 400, borderTop: "1px solid #E7E1D4" }}>
+                            {v.label}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Panel de controles */}
+              <div style={{ borderLeft: "1px solid #E7E1D4", paddingLeft: 28, display: "flex", flexDirection: "column", gap: 0 }}>
+
+                {/* Mejorar fotografía */}
+                <div style={{ marginBottom: 28 }}>
+                  <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 10, color: "#9A968A", letterSpacing: "0.12em", marginBottom: 10 }}>MEJORA AUTOMÁTICA</div>
+                  <p style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, color: "#6B7280", lineHeight: 1.6, marginBottom: 14 }}>
+                    Optimiza iluminación, ángulo y encuadre. Retira desorden. Alta definición 16:9.
+                  </p>
+                  <button
+                    onClick={async () => {
+                      const url = await generarVariacionIA(iaModal.item, "mejora", null);
+                      if (url) setIaVariaciones(prev => [...prev, { url, tipo: "mejora", label: `Mejora ${prev.length + 1}` }]);
+                    }}
+                    disabled={iaVariaciones.length >= 3 || iaLoading}
+                    style={{
+                      width: "100%", padding: "13px 0",
+                      background: (iaVariaciones.length >= 3 || iaLoading) ? "#E7E1D4" : "#1a2528",
+                      border: "none", color: (iaVariaciones.length >= 3 || iaLoading) ? "#9A968A" : "#F8F6F1",
+                      fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, fontWeight: 600,
+                      letterSpacing: "0.08em", cursor: (iaVariaciones.length >= 3 || iaLoading) ? "not-allowed" : "pointer",
+                      transition: "all 0.2s",
+                    }}>
+                    Mejorar fotografía
+                  </button>
+                </div>
+
+                <div style={{ height: 1, background: "#E7E1D4", marginBottom: 28 }} />
 
                 {/* Home Staging */}
-                <div style={{ display: "flex", gap: 0 }}>
+                <div style={{ marginBottom: 28 }}>
+                  <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 10, color: "#9A968A", letterSpacing: "0.12em", marginBottom: 10 }}>HOME STAGING VIRTUAL</div>
+                  <p style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, color: "#6B7280", lineHeight: 1.6, marginBottom: 14 }}>
+                    Rediseño visual del espacio manteniendo la estructura. Elige el estilo.
+                  </p>
                   <select value={iaEstilo} onChange={e => setIaEstilo(e.target.value)}
-                    style={{ padding: "10px 12px", background: "#111110", border: "1px solid #2A2926", borderRight: "none", color: "#F8F6F1", fontSize: 12, cursor: "pointer", outline: "none" }}>
+                    style={{
+                      width: "100%", padding: "11px 14px", marginBottom: 10,
+                      background: "#fff", border: "1px solid #E7E1D4",
+                      color: "#1a2528", fontFamily: "Raleway, Inter, sans-serif",
+                      fontSize: 13, outline: "none", cursor: "pointer",
+                      appearance: "none", WebkitAppearance: "none",
+                    }}>
                     {["Nórdico","Industrial","Ecléctico","Minimalista","Bohemio","Art Deco"].map(e => (
                       <option key={e} value={e.toLowerCase()}>{e}</option>
                     ))}
@@ -770,61 +851,59 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                       const url = await generarVariacionIA(iaModal.item, "homestaging", iaEstilo);
                       if (url) setIaVariaciones(prev => [...prev, { url, tipo: "homestaging", label: `${iaEstilo.charAt(0).toUpperCase() + iaEstilo.slice(1)} ${prev.length + 1}` }]);
                     }}
-                    disabled={iaVariaciones.length >= 3}
-                    style={{ padding: "10px 18px", background: "#8f7141", border: "none", color: "#F8F6F1", fontSize: 12, fontWeight: 600, cursor: "pointer", letterSpacing: "0.05em", opacity: iaVariaciones.length >= 3 ? 0.4 : 1 }}>
-                    ⌂ Home Staging
+                    disabled={iaVariaciones.length >= 3 || iaLoading}
+                    style={{
+                      width: "100%", padding: "13px 0",
+                      background: (iaVariaciones.length >= 3 || iaLoading) ? "#E7E1D4" : "#AC8A54",
+                      border: "none", color: (iaVariaciones.length >= 3 || iaLoading) ? "#9A968A" : "#F8F6F1",
+                      fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, fontWeight: 600,
+                      letterSpacing: "0.08em", cursor: (iaVariaciones.length >= 3 || iaLoading) ? "not-allowed" : "pointer",
+                      transition: "all 0.2s",
+                    }}>
+                    Generar Home Staging
                   </button>
                 </div>
-              </div>
-            )}
 
-            {/* Loading */}
-            {iaLoading && (
-              <div style={{ textAlign: "center", padding: "24px 0", color: "#9A968A", fontSize: 13 }}>
-                <div style={{ fontSize: 28, marginBottom: 10, animation: "spin 2s linear infinite", display: "inline-block" }}>✦</div>
-                <div>Generando imagen con IA...</div>
-                <div style={{ fontSize: 11, marginTop: 6, color: "#6B7280" }}>Puede tardar 20-40 segundos</div>
-              </div>
-            )}
+                {/* Loading */}
+                {iaLoading && (
+                  <div style={{ textAlign: "center", padding: "20px 0", borderTop: "1px solid #E7E1D4" }}>
+                    <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 28, color: "#AC8A54", marginBottom: 10, lineHeight: 1 }}>✦</div>
+                    <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 13, color: "#1a2528", fontWeight: 500 }}>Generando imagen...</div>
+                    <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 11, color: "#9A968A", marginTop: 6 }}>20 — 40 segundos</div>
+                  </div>
+                )}
 
-            {/* Variaciones generadas */}
-            {iaVariaciones.length > 0 && (
-              <div>
-                <div style={{ fontSize: 10, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12 }}>
-                  Variaciones generadas ({iaVariaciones.length}/3) — elige la que más te guste
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(iaVariaciones.length, 3)}, 1fr)`, gap: 10, marginBottom: 16 }}>
-                  {iaVariaciones.map((v, i) => (
-                    <div key={i} onClick={() => setIaSeleccionada(i)}
-                      style={{ border: `2px solid ${iaSeleccionada === i ? "#AC8A54" : "#2A2926"}`, cursor: "pointer", position: "relative", background: iaSeleccionada === i ? "#AC8A5415" : "transparent" }}>
-                      <img src={v.url} alt={v.label} style={{ width: "100%", height: 220, objectFit: "cover", display: "block" }} />
-                      <div style={{ padding: "6px 8px", fontSize: 11, color: iaSeleccionada === i ? "#AC8A54" : "#9A968A", fontWeight: iaSeleccionada === i ? 700 : 400 }}>
-                        {iaSeleccionada === i ? "✓ " : ""}{v.label}
+                {/* Restante y acciones */}
+                {!iaLoading && (
+                  <div style={{ marginTop: "auto", paddingTop: 20, borderTop: "1px solid #E7E1D4" }}>
+                    {iaVariaciones.length < 3 && iaVariaciones.length > 0 && (
+                      <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 11, color: "#9A968A", marginBottom: 14 }}>
+                        {3 - iaVariaciones.length} generación{3 - iaVariaciones.length !== 1 ? "es" : ""} restante{3 - iaVariaciones.length !== 1 ? "s" : ""}
                       </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Botones de acción */}
-                <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-                  {iaVariaciones.length < 3 && !iaLoading && (
-                    <div style={{ fontSize: 11, color: "#9A968A", alignSelf: "center" }}>
-                      Puedes generar {3 - iaVariaciones.length} variación{3 - iaVariaciones.length !== 1 ? "es" : ""} más
-                    </div>
-                  )}
-                  <button onClick={() => { setIaModal(null); setIaVariaciones([]); setIaSeleccionada(null); loadMedia(true); }}
-                    style={{ padding: "10px 18px", background: "none", border: "1px solid #2A2926", color: "#9A968A", fontSize: 12, cursor: "pointer" }}>
-                    Cancelar
-                  </button>
-                  {iaSeleccionada !== null && (
-                    <button onClick={() => aplicarVariacionIA(iaVariaciones[iaSeleccionada])}
-                      style={{ padding: "10px 18px", background: "#AC8A54", border: "none", color: "#F8F6F1", fontSize: 12, fontWeight: 700, cursor: "pointer", letterSpacing: "0.05em" }}>
-                      Usar esta imagen
+                    )}
+                    {iaSeleccionada !== null && (
+                      <button onClick={() => aplicarVariacionIA(iaVariaciones[iaSeleccionada])}
+                        style={{
+                          width: "100%", padding: "14px 0", marginBottom: 10,
+                          background: "#AC8A54", border: "none", color: "#F8F6F1",
+                          fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, fontWeight: 700,
+                          letterSpacing: "0.1em", cursor: "pointer",
+                        }}>
+                        USAR ESTA IMAGEN
+                      </button>
+                    )}
+                    <button onClick={() => { setIaModal(null); setIaVariaciones([]); setIaSeleccionada(null); loadMedia(true); }}
+                      style={{
+                        width: "100%", padding: "11px 0", background: "none",
+                        border: "1px solid #E7E1D4", color: "#9A968A",
+                        fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, cursor: "pointer",
+                      }}>
+                      Cancelar
                     </button>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         </div>
       )}
