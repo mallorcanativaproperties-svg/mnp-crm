@@ -204,15 +204,23 @@ function PostEditor({ post, onClose, onSaved }) {
             {isVideo ? "Vídeo" : isCarousel ? `Imágenes (máx. ${maxFiles})` : "Imagen"}
           </label>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 8 }}>
-            {mediaFiles.map((f, i) => (
-              <div key={i} style={{ position: "relative", width: f.type === "video" ? "100%" : 80, height: f.type === "video" ? "auto" : 80 }}>
+            {mediaFiles.map((f, i) => {
+              const containerStyle = f.type === "video"
+                ? tipo === "Reel" || tipo === "Short"
+                  ? { position: "relative", width: "100%", maxWidth: 340, aspectRatio: "9/16" }  // Vertical 9:16
+                  : { position: "relative", width: "100%", maxWidth: 560, aspectRatio: "16/9" }  // Horizontal 16:9
+                : tipo === "Story"
+                  ? { position: "relative", width: "100%", maxWidth: 340, aspectRatio: "9/16" }  // Story vertical
+                  : { position: "relative", width: 80, height: 80 };                             // Post cuadrado
+              return (
+              <div key={i} style={containerStyle}>
                 {f.type === "video"
-                  ? <video src={f.url} style={{ width: "100%", maxHeight: 400, display: "block", border: "1px solid #E7E1D4", background: "#000" }} controls muted playsInline />
-                  : <img src={f.url} alt={f.name} style={{ width: 80, height: 80, objectFit: "cover", border: "1px solid #E7E1D4", display: "block" }} />
+                  ? <video src={f.url} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", border: "1px solid #E7E1D4", background: "#000" }} controls muted playsInline />
+                  : <img src={f.url} alt={f.name} style={{ width: "100%", height: "100%", objectFit: "cover", border: "1px solid #E7E1D4", display: "block" }} />
                 }
                 <button onClick={() => removeMedia(i)} style={{ position: "absolute", top: -6, right: -6, width: 18, height: 18, borderRadius: "50%", background: "#A23A3A", border: "none", color: "#fff", fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 1 }}>✕</button>
               </div>
-            ))}
+            );}}
             {mediaFiles.length < maxFiles && (
               <label style={{ width: 80, height: 80, border: "2px dashed #E7E1D4", display: "flex", alignItems: "center", justifyContent: "center", cursor: uploading ? "not-allowed" : "pointer", background: "#FAFAFA", flexDirection: "column", gap: 4 }}>
                 <span style={{ fontSize: 22, color: "#9A968A" }}>{uploading ? "⏳" : "+"}</span>
