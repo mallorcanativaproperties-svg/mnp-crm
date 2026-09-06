@@ -263,11 +263,8 @@ export default function CualificacionCompradores() {
             }}>
               <svg width="22" height="22" viewBox="0 0 36 36" fill="none" style={{ flexShrink: 0, marginTop: 1 }}><circle cx="18" cy="18" r="18" fill="#AC8A54"/><path d="M18 7C12.48 7 8 11.48 8 17c0 1.74.47 3.37.92 4.41L7 29l7.59-1.92A9.96 9.96 0 0018 27c5.52 0 10-4.48 10-10S23.52 7 18 7z" fill="white" fillOpacity="0.9"/><path d="M23.5 21.2c-.3.75-1.4 1.4-2.25 1.55-.6.1-1.4.15-4.15-.95C13.7 20.45 11.55 17 11.4 16.8c-.15-.2-1.2-1.6-1.2-3.05 0-1.45.75-2.15 1.05-2.5.3-.3.65-.4.85-.4.2 0 .4 0 .6 0 .2 0 .45-.05.7.5.25.55.85 2 .9 2.15.05.15.1.35 0 .55-.1.25-.15.35-.35.6-.15.2-.35.45-.5.6-.2.2-.4.4-.2.7.2.35.95 1.55 2.05 2.55 1.4 1.25 2.55 1.65 2.9 1.8.35.15.55.1.75-.1.2-.25.95-1.1 1.15-1.4.2-.35.45-.3.75-.2.3.1 1.75.8 2.05.95.3.15.5.2.6.35.1.15.1.85 0 1.3z" fill="#8B6500"/></svg>
               <div>
-                <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 13, color: "#F8F6F1", fontWeight: 400, marginBottom: 3 }}>
+                <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 13, color: "#F8F6F1", fontWeight: 400 }}>
                   Te enviaremos las oportunidades por WhatsApp
-                </div>
-                <div style={{ fontFamily: "Inter, sans-serif", fontSize: 11, color: "#AC8A54", lineHeight: 1.5 }}>
-                  Escribe tu número con el prefijo del país — ej. +34 para España, +49 para Alemania. Solo así podremos contactarte.
                 </div>
               </div>
             </div>
