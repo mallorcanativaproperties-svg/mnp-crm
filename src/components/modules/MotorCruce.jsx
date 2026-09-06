@@ -35,8 +35,8 @@ function WhatsAppCrucePanel({ buyer, prop, onClose }) {
   const pollRef = useRef(null);
   const lastMsgTs = useRef(null);
 
-  const propUrl = prop.idealistaId
-    ? `https://mallorcanativaproperties.com/propiedades/${prop.idealistaId}/`
+  const propUrl = prop.ref
+    ? `https://mallorcanativaproperties.com/propiedades/${prop.ref.toLowerCase()}/`
     : null;
 
   const msgInicial = `Hola!\nTe escribimos de Mallorca Nativa y según tus preferencias, esta propiedad podría interesarte. Si quieres hacer visita, coméntanos tu disponibilidad.${propUrl ? "\n\n" + propUrl : ""}`;
@@ -182,7 +182,7 @@ function WhatsAppCrucePanel({ buyer, prop, onClose }) {
         {/* Propiedad + link */}
         <div style={{ background: "rgba(255,255,255,0.06)", padding: "8px 10px", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
           <div style={{ fontSize: 10, color: "rgba(248,246,241,0.4)", letterSpacing: "0.1em", marginBottom: 3 }}>PROPIEDAD</div>
-          <div style={{ fontSize: 12, color: CREAM, fontWeight: 500, marginBottom: prop.idealistaId ? 4 : 0 }}>{prop.titulo}</div>
+          <div style={{ fontSize: 12, color: CREAM, fontWeight: 500, marginBottom: propUrl ? 4 : 0 }}>{prop.titulo}</div>
           {propUrl && (
             <a href={propUrl} target="_blank" rel="noopener noreferrer"
               style={{ fontSize: 11, color: BRONZE, textDecoration: "none", letterSpacing: "0.02em", wordBreak: "break-all" }}>
@@ -354,6 +354,7 @@ export default function MotorCruce() {
         banos: r.banos || 0, estado: r.estado || "", agente: r.agente || "",
         calidades: r.calidades || [],
         idealistaId: r.idealista_id || "",
+        ref: r.ref || "",
       })));
       setLoading(false);
     }
@@ -632,8 +633,8 @@ export default function MotorCruce() {
                         </div>
                         <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: "#22262E" }}>{prop.titulo}</div>
                         <div style={{ fontSize: 13, color: "#9A968A", marginTop: 4 }}>{prop.zona}, {prop.municipio} - {prop.mConst} m2 - {fmtP(prop.precioVenta)}</div>
-                        {prop.idealistaId && (
-                          <a href={`https://mallorcanativaproperties.com/propiedades/${prop.idealistaId}/`} target="_blank" rel="noopener noreferrer"
+                        {prop.ref && (
+                          <a href={`https://mallorcanativaproperties.com/propiedades/${prop.ref.toLowerCase()}/`} target="_blank" rel="noopener noreferrer"
                             style={{ display: "inline-block", marginTop: 8, fontSize: 12, color: "#AC8A54", textDecoration: "none", letterSpacing: "0.02em" }}>
                             Ver en web →
                           </a>
