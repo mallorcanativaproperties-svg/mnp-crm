@@ -1280,7 +1280,7 @@ function TabSilvia() {
    MAIN EXPORT
    ══════════════════════════════════ */
 export default function RedesSociales() {
-  const [activeTab, setActiveTab] = useState("silvia");
+  const [activeTab, setActiveTab] = useState("publicar");
 
   const tabStyle = (active) => ({
     padding: "10px 20px", borderRadius: 0, border: "none",
