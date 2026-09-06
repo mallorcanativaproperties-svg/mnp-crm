@@ -205,9 +205,9 @@ function PostEditor({ post, onClose, onSaved }) {
           </label>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 8 }}>
             {mediaFiles.map((f, i) => (
-              <div key={i} style={{ position: "relative", width: 80, height: 80 }}>
+              <div key={i} style={{ position: "relative", width: f.type === "video" ? "100%" : 80, height: f.type === "video" ? "auto" : 80 }}>
                 {f.type === "video"
-                  ? <video src={f.url} style={{ width: 80, height: 80, objectFit: "cover", border: "1px solid #E7E1D4", display: "block" }} muted playsInline />
+                  ? <video src={f.url} style={{ width: "100%", maxHeight: 400, display: "block", border: "1px solid #E7E1D4", background: "#000" }} controls muted playsInline />
                   : <img src={f.url} alt={f.name} style={{ width: 80, height: 80, objectFit: "cover", border: "1px solid #E7E1D4", display: "block" }} />
                 }
                 <button onClick={() => removeMedia(i)} style={{ position: "absolute", top: -6, right: -6, width: 18, height: 18, borderRadius: "50%", background: "#A23A3A", border: "none", color: "#fff", fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 1 }}>✕</button>
