@@ -785,13 +785,13 @@ export default function MotorCruce() {
         )}
 
       </div>
+      {waMatch && (
+        <WhatsAppCrucePanel
+          buyer={waMatch.buyer}
+          prop={waMatch.prop}
+          onClose={() => setWaMatch(null)}
+        />
+      )}
     </div>
-    {waMatch && (
-      <WhatsAppCrucePanel
-        buyer={waMatch.buyer}
-        prop={waMatch.prop}
-        onClose={() => setWaMatch(null)}
-      />
-    )}
   );
 }
