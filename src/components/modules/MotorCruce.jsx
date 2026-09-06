@@ -347,6 +347,9 @@ export default function MotorCruce() {
   const [PROPS, setPROPS] = useState([]);
   const [loading, setLoading] = useState(true);
   const [waMatch, setWaMatch] = useState(null); // { buyer, prop }
+  const [vinculaciones, setVinculaciones] = useState([]); // { propiedad_id, comprador_id, estado }
+  const [busquedaManual, setBusquedaManual] = useState("");
+  const [showBuscador, setShowBuscador] = useState(false);
 
   // Filters
   const [fMunicipio, setFMunicipio] = useState("todos");
@@ -359,10 +362,12 @@ export default function MotorCruce() {
   useEffect(() => {
     async function load() {
       setLoading(true);
-      const [bRes, pRes] = await Promise.all([
+      const [bRes, pRes, vRes] = await Promise.all([
         supabase.from("compradores").select("*").order("created_at", { ascending: false }),
         supabase.from("propiedades").select("*").order("created_at", { ascending: false }),
+        supabase.from("propiedades_compradores").select("*"),
       ]);
+      if (vRes.data) setVinculaciones(vRes.data);
       if (bRes.data) setBUYERS(bRes.data.map(r => ({
         id: r.id, nombre: r.nombre || "", ppto: r.presupuesto || 0, fin: r.finalidad || "",
         hab: r.habitaciones || "", zd: r.zona_deseada || [], ze: r.zona_excluida || [],
@@ -519,6 +524,40 @@ export default function MotorCruce() {
 
   const hasFilters = fMunicipio !== "todos" || fZona !== "todos" || fOp !== "todos" || fPptoMin || fPptoMax || fQuery;
 
+  async function vincularComprador(propId, compradorId) {
+    const { data, error } = await supabase.from("propiedades_compradores").upsert({
+      propiedad_id: propId, comprador_id: compradorId, tipo: "manual", estado: "pendiente",
+      updated_at: new Date().toISOString(),
+    }, { onConflict: "propiedad_id,comprador_id" }).select().single();
+    if (!error && data) setVinculaciones(prev => [...prev.filter(v => !(v.propiedad_id === propId && v.comprador_id === compradorId)), data]);
+  }
+
+  async function actualizarEstado(propId, compradorId, estado) {
+    const { data, error } = await supabase.from("propiedades_compradores")
+      .update({ estado, updated_at: new Date().toISOString() })
+      .eq("propiedad_id", propId).eq("comprador_id", compradorId).select().single();
+    if (!error && data) setVinculaciones(prev => prev.map(v => (v.propiedad_id === propId && v.comprador_id === compradorId) ? data : v));
+  }
+
+  function getVinculacion(propId, compradorId) {
+    return vinculaciones.find(v => v.propiedad_id === propId && v.comprador_id === compradorId) || null;
+  }
+
+  function getVinculadosByProp(propId) {
+    return vinculaciones
+      .filter(v => v.propiedad_id === propId && v.tipo === "manual")
+      .map(v => ({ buyer: BUYERS.find(b => b.id === v.comprador_id), estado: v.estado }))
+      .filter(v => v.buyer);
+  }
+
+  const buyersFiltradosBusqueda = busquedaManual.trim().length > 1
+    ? BUYERS.filter(b =>
+        b.nombre.toLowerCase().includes(busquedaManual.toLowerCase()) ||
+        b.tel.includes(busquedaManual) ||
+        (b.zd || []).some(z => z.toLowerCase().includes(busquedaManual.toLowerCase()))
+      )
+    : [];
+
   return (
     <div style={{ fontFamily: "Inter, sans-serif", background: "#F8F6F1", minHeight: "100vh", color: "#22262E", padding: "40px 24px" }}>
       <div style={{ maxWidth: 920, margin: "0 auto" }}>
@@ -673,18 +712,128 @@ export default function MotorCruce() {
                       </div>
 
                       <div style={{ fontSize: 11, color: "#9A968A", marginBottom: 12, letterSpacing: "0.06em" }}>
-                        {matches.length} compradores compatibles (presupuesto + zona)
+                        {matches.length} compradores compatibles automáticamente (presupuesto + zona)
                       </div>
 
                       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                         {matches
                           .sort((a, b) => b.ppto - a.ppto)
-                          .map((buyer) => (
-                            <MatchCard key={buyer.id} buyer={buyer} prop={prop} view="prop" onWa={(b, p) => setWaMatch({ buyer: b, prop: p })} />
-                          ))}
+                          .map((buyer) => {
+                            const vinc = getVinculacion(prop.id, buyer.id);
+                            return (
+                              <div key={buyer.id}>
+                                <MatchCard buyer={buyer} prop={prop} view="prop" onWa={(b, p) => setWaMatch({ buyer: b, prop: p })} />
+                                {/* Botones validar / descartar */}
+                                <div style={{ display: "flex", gap: 6, padding: "6px 0 10px", justifyContent: "flex-end" }}>
+                                  {(!vinc || vinc.estado === "pendiente" || vinc.estado === "descartado") && (
+                                    <button onClick={() => vinc ? actualizarEstado(prop.id, buyer.id, "interesado") : vincularComprador(prop.id, buyer.id).then(() => actualizarEstado(prop.id, buyer.id, "interesado"))}
+                                      style={{ padding: "5px 14px", background: vinc?.estado === "interesado" ? "#2C6E52" : "none", border: "1px solid #2C6E52", color: vinc?.estado === "interesado" ? "#fff" : "#2C6E52", fontSize: 11, cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
+                                      ✓ Interesado
+                                    </button>
+                                  )}
+                                  {(!vinc || vinc.estado === "pendiente" || vinc.estado === "interesado") && (
+                                    <button onClick={() => vinc ? actualizarEstado(prop.id, buyer.id, "descartado") : vincularComprador(prop.id, buyer.id).then(() => actualizarEstado(prop.id, buyer.id, "descartado"))}
+                                      style={{ padding: "5px 14px", background: vinc?.estado === "descartado" ? "#A23A3A" : "none", border: "1px solid #A23A3A", color: vinc?.estado === "descartado" ? "#fff" : "#A23A3A", fontSize: 11, cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
+                                      ✕ Descartar
+                                    </button>
+                                  )}
+                                  {vinc && (
+                                    <span style={{ fontSize: 10, color: vinc.estado === "interesado" ? "#2C6E52" : vinc.estado === "descartado" ? "#A23A3A" : "#9A968A", alignSelf: "center", letterSpacing: "0.06em" }}>
+                                      {vinc.estado === "interesado" ? "Marcado como interesado" : vinc.estado === "descartado" ? "Descartado" : ""}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
                         {matches.length === 0 && (
-                          <div style={{ textAlign: "center", padding: 40, color: "#9A968A", fontSize: 13, fontStyle: "italic" }}>
-                            Ningun comprador compatible con esta propiedad
+                          <div style={{ textAlign: "center", padding: "24px 0", color: "#9A968A", fontSize: 13, fontStyle: "italic" }}>
+                            Ningún comprador compatible automáticamente
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Vinculados manualmente */}
+                      {(() => {
+                        const vinculados = getVinculadosByProp(prop.id).filter(v => !matches.find(m => m.id === v.buyer.id));
+                        if (vinculados.length === 0) return null;
+                        return (
+                          <div style={{ marginTop: 24 }}>
+                            <div style={{ fontSize: 11, color: "#AC8A54", marginBottom: 12, letterSpacing: "0.06em", borderTop: "1px solid #E7E1D4", paddingTop: 16 }}>
+                              {vinculados.length} compradores vinculados manualmente
+                            </div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                              {vinculados.map(({ buyer, estado }) => (
+                                <div key={buyer.id}>
+                                  <MatchCard buyer={buyer} prop={prop} view="prop" onWa={(b, p) => setWaMatch({ buyer: b, prop: p })} />
+                                  <div style={{ display: "flex", gap: 6, padding: "6px 0 10px", justifyContent: "flex-end", alignItems: "center" }}>
+                                    <button onClick={() => actualizarEstado(prop.id, buyer.id, "interesado")}
+                                      style={{ padding: "5px 14px", background: estado === "interesado" ? "#2C6E52" : "none", border: "1px solid #2C6E52", color: estado === "interesado" ? "#fff" : "#2C6E52", fontSize: 11, cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
+                                      ✓ Interesado
+                                    </button>
+                                    <button onClick={() => actualizarEstado(prop.id, buyer.id, "descartado")}
+                                      style={{ padding: "5px 14px", background: estado === "descartado" ? "#A23A3A" : "none", border: "1px solid #A23A3A", color: estado === "descartado" ? "#fff" : "#A23A3A", fontSize: 11, cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
+                                      ✕ Descartar
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })()}
+
+                      {/* Buscador manual */}
+                      <div style={{ marginTop: 24, borderTop: "1px solid #E7E1D4", paddingTop: 20 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                          <div style={{ fontSize: 11, color: "#9A968A", letterSpacing: "0.06em" }}>VINCULAR COMPRADOR MANUALMENTE</div>
+                          {!showBuscador && (
+                            <button onClick={() => setShowBuscador(true)}
+                              style={{ padding: "6px 14px", background: "#1a2528", border: "none", color: "#F8F6F1", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.06em" }}>
+                              + Buscar comprador
+                            </button>
+                          )}
+                        </div>
+                        {showBuscador && (
+                          <div>
+                            <div style={{ display: "flex", gap: 0, marginBottom: 12 }}>
+                              <input
+                                value={busquedaManual}
+                                onChange={e => setBusquedaManual(e.target.value)}
+                                placeholder="Buscar por nombre, teléfono o zona..."
+                                autoFocus
+                                style={{ flex: 1, padding: "10px 14px", border: "1px solid #E7E1D4", borderRight: "none", background: "#fff", color: "#1a2528", fontSize: 13, fontFamily: "Inter, sans-serif", outline: "none" }}
+                              />
+                              <button onClick={() => { setShowBuscador(false); setBusquedaManual(""); }}
+                                style={{ padding: "10px 14px", background: "none", border: "1px solid #E7E1D4", color: "#9A968A", fontSize: 12, cursor: "pointer" }}>
+                                Cancelar
+                              </button>
+                            </div>
+                            {busquedaManual.trim().length > 1 && (
+                              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                                {buyersFiltradosBusqueda.length === 0 && (
+                                  <div style={{ fontSize: 12, color: "#9A968A", padding: "12px 0", fontStyle: "italic" }}>Sin resultados</div>
+                                )}
+                                {buyersFiltradosBusqueda.map(buyer => {
+                                  const yaVinculado = vinculaciones.some(v => v.propiedad_id === prop.id && v.comprador_id === buyer.id);
+                                  return (
+                                    <div key={buyer.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: "#fff", border: "1px solid #E7E1D4", gap: 12 }}>
+                                      <div>
+                                        <div style={{ fontSize: 13, fontWeight: 600, color: "#1a2528", fontFamily: "Inter, sans-serif" }}>{buyer.nombre}</div>
+                                        <div style={{ fontSize: 11, color: "#9A968A", marginTop: 2 }}>{buyer.tel} · {fmtP(buyer.ppto)} · {(buyer.zd || []).slice(0, 2).join(", ")}</div>
+                                      </div>
+                                      {yaVinculado
+                                        ? <span style={{ fontSize: 11, color: "#AC8A54", letterSpacing: "0.04em" }}>Ya vinculado</span>
+                                        : <button onClick={() => { vincularComprador(prop.id, buyer.id); setShowBuscador(false); setBusquedaManual(""); }}
+                                            style={{ padding: "6px 14px", background: "#AC8A54", border: "none", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", flexShrink: 0 }}>
+                                            Vincular
+                                          </button>
+                                      }
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
