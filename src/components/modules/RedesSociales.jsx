@@ -207,9 +207,7 @@ function PostEditor({ post, onClose, onSaved }) {
             {mediaFiles.map((f, i) => (
               <div key={i} style={{ position: "relative", width: 80, height: 80 }}>
                 {f.type === "video"
-                  ? <div style={{ width: 80, height: 80, background: "#1a2528", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid #E7E1D4" }}>
-                      <span style={{ fontSize: 24 }}>▶</span>
-                    </div>
+                  ? <video src={f.url} style={{ width: 80, height: 80, objectFit: "cover", border: "1px solid #E7E1D4", display: "block" }} muted playsInline />
                   : <img src={f.url} alt={f.name} style={{ width: 80, height: 80, objectFit: "cover", border: "1px solid #E7E1D4", display: "block" }} />
                 }
                 <button onClick={() => removeMedia(i)} style={{ position: "absolute", top: -6, right: -6, width: 18, height: 18, borderRadius: "50%", background: "#A23A3A", border: "none", color: "#fff", fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 1 }}>✕</button>
