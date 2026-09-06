@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 
 const EST_COLORS = { nuevo:"#AC8A54", contactado:"#2C6E52", cualificado:"#9C6E1B", visita:"#3D577E", negociacion:"#C4A55A", cerrado:"#2C6E52", descartado:"#9A968A" };
@@ -19,7 +19,231 @@ function Tag({ children, color }) {
   );
 }
 
-function MatchCard({ buyer, prop, view }) {
+
+const BRONZE = "#AC8A54";
+const PETROL = "#1a2528";
+const CREAM = "#F8F6F1";
+
+function WhatsAppCrucePanel({ buyer, prop, onClose }) {
+  const [mensajes, setMensajes] = useState([]);
+  const [convId, setConvId] = useState(null);
+  const [modoManual, setModoManual] = useState(true);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [loadingConv, setLoadingConv] = useState(true);
+  const chatRef = useRef(null);
+  const pollRef = useRef(null);
+  const lastMsgTs = useRef(null);
+
+  const propUrl = prop.idealistaId
+    ? `https://mallorcanativaproperties.com/propiedades/${prop.idealistaId}/`
+    : null;
+
+  const msgInicial = `Hola!\nTe escribimos de Mallorca Nativa y según tus preferencias, esta propiedad podría interesarte. Si quieres hacer visita, coméntanos tu disponibilidad.${propUrl ? "\n\n" + propUrl : ""}`;
+
+  useEffect(() => {
+    async function loadConv() {
+      setLoadingConv(true);
+      try {
+        let phone = (buyer.tel || "").replace(/\D/g, "");
+        if (phone.startsWith("34") && phone.length === 11) phone = phone.slice(2);
+        const phoneWith34 = "34" + phone;
+        const { data: convs } = await supabase.from("conversaciones").select("*")
+          .or(`telefono.eq.${phoneWith34},telefono.eq.${phone}`)
+          .order("updated_at", { ascending: false });
+        let conv = convs?.[0] || null;
+        if (conv) {
+          setConvId(conv.id);
+          setModoManual(conv.estado === "manual" || conv.estado !== "activo");
+          const { data: msgs } = await supabase.from("mensajes").select("*")
+            .eq("conversacion_id", conv.id).order("created_at", { ascending: true });
+          const mapped = (msgs || []).map(m => ({
+            id: m.id, from: m.from_who || "cliente", text: m.texto || "",
+            ts: m.timestamp ? new Date(m.timestamp).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) : "",
+            date: m.timestamp ? new Date(m.timestamp) : new Date(),
+            leido: m.leido || false,
+          }));
+          setMensajes(mapped);
+          if (msgs?.length) lastMsgTs.current = msgs[msgs.length - 1].created_at;
+        } else {
+          const telNorm = phone.length === 9 ? "34" + phone : phone;
+          const { data: newConv } = await supabase.from("conversaciones").insert({
+            contacto: buyer.nombre, telefono: telNorm, canal: "whatsapp",
+            estado: "manual", agente_ia: "claudia", updated_at: new Date().toISOString(),
+          }).select().single();
+          if (newConv) setConvId(newConv.id);
+        }
+      } catch (e) { console.error(e); }
+      finally {
+        setLoadingConv(false);
+        // Pre-rellenar mensaje inicial
+        setInput(msgInicial);
+      }
+    }
+    loadConv();
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
+  }, [buyer.tel]);
+
+  useEffect(() => {
+    if (!convId) return;
+    pollRef.current = setInterval(async () => {
+      try {
+        let q = supabase.from("mensajes").select("*").eq("conversacion_id", convId).order("created_at", { ascending: true });
+        if (lastMsgTs.current) q = q.gt("created_at", lastMsgTs.current);
+        const { data: nuevos } = await q;
+        if (nuevos?.length) {
+          lastMsgTs.current = nuevos[nuevos.length - 1].created_at;
+          setMensajes(prev => {
+            const ids = new Set(prev.map(m => m.id));
+            const added = nuevos.filter(m => !ids.has(m.id)).map(m => ({
+              id: m.id, from: m.from_who || "cliente", text: m.texto || "",
+              ts: m.timestamp ? new Date(m.timestamp).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) : "",
+              date: m.timestamp ? new Date(m.timestamp) : new Date(), leido: m.leido || false,
+            }));
+            const updated = prev.map(p => { const f = nuevos.find(n => n.id === p.id); return f ? { ...p, leido: f.leido || p.leido } : p; });
+            return added.length ? [...updated, ...added] : updated;
+          });
+        }
+      } catch {}
+    }, 3000);
+    return () => clearInterval(pollRef.current);
+  }, [convId]);
+
+  useEffect(() => { if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight; }, [mensajes]);
+
+  async function handleSend() {
+    if (!input.trim() || loading) return;
+    const texto = input.trim();
+    setInput("");
+    setLoading(true);
+    const now = new Date();
+    const ts = now.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+    setMensajes(prev => [...prev, { from: "agente_manual", text: texto, ts, date: now, leido: false }]);
+    try {
+      const res = await fetch("/api/manual-reply", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ conversacion_id: convId, telefono: buyer.tel, texto, agente: "Claudia" }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        await supabase.from("mensajes").insert({ conversacion_id: convId, texto, from_who: "agente_manual", timestamp: now.toISOString() });
+        await supabase.from("conversaciones").update({ updated_at: now.toISOString() }).eq("id", convId);
+      } else {
+        setMensajes(prev => [...prev, { from: "sistema", text: `Error: ${data.error}`, ts: "" }]);
+      }
+    } catch (e) { setMensajes(prev => [...prev, { from: "sistema", text: `Error: ${e.message}`, ts: "" }]); }
+    finally { setLoading(false); }
+  }
+
+  async function toggleModo() {
+    const nuevo = !modoManual;
+    setModoManual(nuevo);
+    if (convId) {
+      await supabase.from("conversaciones").update({ estado: nuevo ? "manual" : "activo", updated_at: new Date().toISOString() }).eq("id", convId);
+      const txt = nuevo ? "Modo manual activado — Claudia en pausa" : "IA reactivada";
+      setMensajes(prev => [...prev, { from: "sistema", text: txt, ts: "" }]);
+    }
+  }
+
+  const fmtDate = (d) => {
+    if (!d) return "";
+    const hoy = new Date(); const ayer = new Date(hoy); ayer.setDate(ayer.getDate() - 1);
+    if (d.toDateString() === hoy.toDateString()) return "Hoy";
+    if (d.toDateString() === ayer.toDateString()) return "Ayer";
+    return d.toLocaleDateString("es-ES", { day: "numeric", month: "long" });
+  };
+
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+
+  return (
+    <div style={{ position: "fixed", top: 0, bottom: 0, right: 0, zIndex: 1100, width: isMobile ? "100vw" : "min(420px,100vw)", background: CREAM, borderLeft: "1px solid #E7E1D4", boxShadow: "-4px 0 40px rgba(26,37,40,0.18)", display: "flex", flexDirection: "column", fontFamily: "Raleway, Inter, sans-serif" }}>
+
+      <div style={{ height: 3, background: BRONZE, flexShrink: 0 }} />
+
+      {/* Header */}
+      <div style={{ background: PETROL, padding: "14px 18px", flexShrink: 0 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ width: 38, height: 38, background: BRONZE, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 16, color: CREAM, flexShrink: 0 }}>
+              {buyer.nombre?.charAt(0)?.toUpperCase() || "?"}
+            </div>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: CREAM }}>{buyer.nombre}</div>
+              <div style={{ fontSize: 11, color: BRONZE, marginTop: 1 }}>{buyer.tel}</div>
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <button onClick={toggleModo} style={{ padding: "4px 10px", background: modoManual ? "rgba(172,138,84,0.15)" : "rgba(64,92,107,0.3)", border: `1px solid ${modoManual ? BRONZE : "#405c6b"}`, color: modoManual ? BRONZE : "#7aafc4", cursor: "pointer", fontSize: 9, fontWeight: 600, letterSpacing: "0.08em", fontFamily: "Raleway, Inter, sans-serif" }}>
+              {modoManual ? "MANUAL" : "IA ACTIVA"}
+            </button>
+            <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(248,246,241,0.4)", fontSize: 18, cursor: "pointer", lineHeight: 1 }}>✕</button>
+          </div>
+        </div>
+        {/* Propiedad + link */}
+        <div style={{ background: "rgba(255,255,255,0.06)", padding: "8px 10px", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+          <div style={{ fontSize: 10, color: "rgba(248,246,241,0.4)", letterSpacing: "0.1em", marginBottom: 3 }}>PROPIEDAD</div>
+          <div style={{ fontSize: 12, color: CREAM, fontWeight: 500, marginBottom: prop.idealistaId ? 4 : 0 }}>{prop.titulo}</div>
+          {propUrl && (
+            <a href={propUrl} target="_blank" rel="noopener noreferrer"
+              style={{ fontSize: 11, color: BRONZE, textDecoration: "none", letterSpacing: "0.02em", wordBreak: "break-all" }}>
+              {propUrl}
+            </a>
+          )}
+        </div>
+      </div>
+
+      {/* Mensajes */}
+      <div ref={chatRef} style={{ flex: 1, overflowY: "auto", padding: "16px", background: "#EDEAE4" }}>
+        {loadingConv ? (
+          <div style={{ textAlign: "center", padding: 40, color: "#9A968A", fontSize: 12 }}>Cargando...</div>
+        ) : mensajes.length === 0 ? (
+          <div style={{ textAlign: "center", padding: 40 }}>
+            <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 24, color: "#C8BFB0", marginBottom: 10 }}>✦</div>
+            <div style={{ fontSize: 12, color: "#9A968A", lineHeight: 1.6 }}>Sin mensajes. El mensaje de presentación<br/>está listo en el campo de texto.</div>
+          </div>
+        ) : (() => {
+          const elements = []; let lastDate = null;
+          mensajes.forEach((m, i) => {
+            const ds = m.date ? fmtDate(m.date) : null;
+            if (ds && ds !== lastDate) {
+              lastDate = ds;
+              elements.push(<div key={`d-${i}`} style={{ textAlign: "center", margin: "12px 0 6px" }}><span style={{ fontSize: 10, color: "#9A968A", padding: "3px 12px", background: "#D6D0C8", borderRadius: 12 }}>{ds}</span></div>);
+            }
+            if (m.from === "sistema") { elements.push(<div key={i} style={{ textAlign: "center", margin: "4px 0" }}><span style={{ fontSize: 10, color: "#9A968A", padding: "2px 10px", background: "#D6D0C8", borderRadius: 10 }}>{m.text}</span></div>); return; }
+            const isAgent = m.from !== "cliente";
+            elements.push(
+              <div key={i} style={{ display: "flex", justifyContent: isAgent ? "flex-end" : "flex-start", marginBottom: 4 }}>
+                <div style={{ maxWidth: "80%", padding: "8px 12px 6px", background: isAgent ? PETROL : "#FFFFFF", color: isAgent ? CREAM : "#22262E", borderRadius: isAgent ? "12px 12px 2px 12px" : "12px 12px 12px 2px", fontSize: 13, lineHeight: 1.55, boxShadow: "0 1px 3px rgba(0,0,0,0.07)", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+                  {m.text}
+                  {m.ts && <div style={{ fontSize: 10, color: isAgent ? "rgba(248,246,241,0.4)" : "#9A968A", marginTop: 3, textAlign: "right", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 3 }}>
+                    {m.ts}{isAgent && <span style={{ fontSize: 12, color: m.leido ? "#4FC3F7" : "rgba(248,246,241,0.4)" }}>✓✓</span>}
+                  </div>}
+                </div>
+              </div>
+            );
+          });
+          return elements;
+        })()}
+      </div>
+
+      {/* Input */}
+      <div style={{ padding: "12px 14px", borderTop: "1px solid #E7E1D4", background: CREAM, flexShrink: 0 }}>
+        <textarea value={input} onChange={e => setInput(e.target.value)}
+          onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+          placeholder="Escribe un mensaje..."
+          disabled={!modoManual}
+          rows={input.split("\n").length > 3 ? 5 : 3}
+          style={{ width: "100%", padding: "10px 14px", background: modoManual ? "#FFFFFF" : "#F0ECE6", border: "1px solid #E7E1D4", color: "#1a2528", fontSize: 13, fontFamily: "Raleway, Inter, sans-serif", outline: "none", resize: "none", cursor: modoManual ? "text" : "not-allowed", borderRadius: 8, boxSizing: "border-box", marginBottom: 8, lineHeight: 1.5 }} />
+        <button onClick={handleSend} disabled={!modoManual || !input.trim() || loading}
+          style={{ width: "100%", padding: "11px 0", borderRadius: 0, background: (modoManual && input.trim() && !loading) ? BRONZE : "#E7E1D4", border: "none", color: (modoManual && input.trim() && !loading) ? CREAM : "#9A968A", fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", cursor: (modoManual && input.trim() && !loading) ? "pointer" : "default" }}>
+          {loading ? "Enviando..." : "Enviar por WhatsApp"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function MatchCard({ buyer, prop, view, onWa }) {
   const margin = prop.precioVenta <= buyer.ppto ? buyer.ppto - prop.precioVenta : 0;
   const pct = buyer.ppto > 0 ? Math.round((prop.precioVenta / buyer.ppto) * 100) : 0;
   const zonaMatch = buyer.zd.some((z) => {
@@ -81,6 +305,12 @@ function MatchCard({ buyer, prop, view }) {
             </div>
             <span style={{ fontSize: 10, color: "#9A968A", marginLeft: 6 }}>{pct}% del ppto</span>
           </div>
+          {/* Botón WhatsApp */}
+          <button onClick={() => onWa && onWa(buyer, prop)}
+            style={{ marginTop: 12, padding: "8px 16px", background: "#1a2528", border: "none", color: "#F8F6F1", fontFamily: "Raleway, Inter, sans-serif", fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, marginLeft: "auto" }}>
+            <svg width="16" height="16" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="17" fill="#AC8A54"/><path d="M18 8.5C12.75 8.5 8.5 12.75 8.5 18C8.5 19.85 9.02 21.58 9.92 23.05L8.5 27.5L13.1 26.1C14.52 26.92 16.2 27.5 18 27.5C23.25 27.5 27.5 23.25 27.5 18C27.5 12.75 23.25 8.5 18 8.5Z" fill="white" fillOpacity="0.9"/><path d="M23.5 21.2C23.2 21.95 22.1 22.6 21.25 22.75C20.65 22.85 19.85 22.9 17.1 21.8C13.7 20.45 11.55 17 11.4 16.8C11.25 16.6 10.2 15.2 10.2 13.75C10.2 12.3 10.95 11.6 11.25 11.25C11.55 10.95 11.9 10.85 12.1 10.85C12.3 10.85 12.5 10.85 12.7 10.85C12.9 10.85 13.15 10.8 13.4 11.35C13.65 11.9 14.25 13.35 14.3 13.5C14.35 13.65 14.4 13.85 14.3 14.05C14.2 14.3 14.15 14.4 13.95 14.65C13.8 14.85 13.6 15.1 13.45 15.25C13.25 15.45 13.05 15.65 13.25 15.95C13.45 16.3 14.2 17.5 15.3 18.5C16.7 19.75 17.85 20.15 18.2 20.3C18.55 20.45 18.75 20.4 18.95 20.2C19.15 19.95 19.9 19.1 20.1 18.8C20.3 18.45 20.55 18.5 20.85 18.6C21.15 18.7 22.6 19.4 22.9 19.55C23.2 19.7 23.4 19.75 23.5 19.9C23.6 20.05 23.6 20.75 23.5 21.2Z" fill="#8B6500"/></svg>
+            Enviar propiedad
+          </button>
         </div>
       </div>
     </div>
@@ -94,6 +324,7 @@ export default function MotorCruce() {
   const [BUYERS, setBUYERS] = useState([]);
   const [PROPS, setPROPS] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [waMatch, setWaMatch] = useState(null); // { buyer, prop }
 
   // Filters
   const [fMunicipio, setFMunicipio] = useState("todos");
@@ -122,6 +353,7 @@ export default function MotorCruce() {
         mConst: r.m_const || 0, habDobles: r.hab_dobles || 0, habSimples: r.hab_simples || 0,
         banos: r.banos || 0, estado: r.estado || "", agente: r.agente || "",
         calidades: r.calidades || [],
+        idealistaId: r.idealista_id || "",
       })));
       setLoading(false);
     }
@@ -400,6 +632,12 @@ export default function MotorCruce() {
                         </div>
                         <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: "#22262E" }}>{prop.titulo}</div>
                         <div style={{ fontSize: 13, color: "#9A968A", marginTop: 4 }}>{prop.zona}, {prop.municipio} - {prop.mConst} m2 - {fmtP(prop.precioVenta)}</div>
+                        {prop.idealistaId && (
+                          <a href={`https://mallorcanativaproperties.com/propiedades/${prop.idealistaId}/`} target="_blank" rel="noopener noreferrer"
+                            style={{ display: "inline-block", marginTop: 8, fontSize: 12, color: "#AC8A54", textDecoration: "none", letterSpacing: "0.02em" }}>
+                            Ver en web →
+                          </a>
+                        )}
                         <div style={{ display: "flex", gap: 5, marginTop: 10, flexWrap: "wrap" }}>
                           {prop.calidades.slice(0, 8).map((c, i) => (
                             <span key={i} style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E15" }}>{c}</span>
@@ -415,7 +653,7 @@ export default function MotorCruce() {
                         {matches
                           .sort((a, b) => b.ppto - a.ppto)
                           .map((buyer) => (
-                            <MatchCard key={buyer.id} buyer={buyer} prop={prop} view="prop" />
+                            <MatchCard key={buyer.id} buyer={buyer} prop={prop} view="prop" onWa={(b, p) => setWaMatch({ buyer: b, prop: p })} />
                           ))}
                         {matches.length === 0 && (
                           <div style={{ textAlign: "center", padding: 40, color: "#9A968A", fontSize: 13, fontStyle: "italic" }}>
@@ -521,7 +759,7 @@ export default function MotorCruce() {
                         {matches
                           .sort((a, b) => a.precioVenta - b.precioVenta)
                           .map((prop) => (
-                            <MatchCard key={prop.id} buyer={buyer} prop={prop} view="buyer" />
+                            <MatchCard key={prop.id} buyer={buyer} prop={prop} view="buyer" onWa={(b, p) => setWaMatch({ buyer: b, prop: p })} />
                           ))}
                         {matches.length === 0 && (
                           <div style={{ textAlign: "center", padding: 40, color: "#9A968A", fontSize: 13, fontStyle: "italic" }}>
