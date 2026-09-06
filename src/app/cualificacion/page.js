@@ -144,7 +144,13 @@ export default function CualificacionCompradores() {
     setSending(true); setError("");
     try {
       const { error: err } = await supabase.from("compradores").insert({
-        email, nombre, telefono, financiacion,
+        email, nombre,
+        telefono: (() => {
+          const prefijo = PAISES.find(p => p.pais === pais)?.prefijo || "";
+          const num = telefono.trim().replace(/^0+/, "");
+          return prefijo && !num.startsWith(prefijo) ? prefijo + num : num;
+        })(),
+        financiacion,
         presupuesto: ppto, finalidad, habitaciones,
         zona_deseada: zonaDeseada.split(",").map(z => z.trim()).filter(Boolean),
         pais,
@@ -268,17 +274,17 @@ export default function CualificacionCompradores() {
                 </div>
               </div>
             </div>
-            <input type="tel" value={telefono} onChange={e => setTelefono(e.target.value)}
-              placeholder="+34 600 000 000" autoComplete="tel" inputMode="tel" style={INP} />
-          </Field>
-
-          <Field label="País de residencia">
-            <select value={pais} onChange={e => setPais(e.target.value)}
-              style={{ ...INP, cursor: "pointer", appearance: "auto" }}>
-              {PAISES.map(p => (
-                <option key={p.pais} value={p.pais}>{p.flag} {p.pais} {p.prefijo}</option>
-              ))}
-            </select>
+            <div style={{ display: "flex", gap: 0 }}>
+              <select value={pais} onChange={e => setPais(e.target.value)}
+                style={{ ...INP, width: "auto", minWidth: 100, flexShrink: 0, borderRight: "none", background: "#F0ECE6", color: "#1a2528", cursor: "pointer", appearance: "auto", paddingRight: 8 }}>
+                {PAISES.map(p => (
+                  <option key={p.pais} value={p.pais}>{p.flag} {p.prefijo || p.pais}</option>
+                ))}
+              </select>
+              <input type="tel" value={telefono} onChange={e => setTelefono(e.target.value)}
+                placeholder="600 000 000" autoComplete="tel" inputMode="tel"
+                style={{ ...INP, flex: 1 }} />
+            </div>
           </Field>
 
           <Divider />
