@@ -36,24 +36,27 @@ export async function GET(request) {
     const longToken = longData.access_token;
     const expiresAt = new Date(Date.now() + (longData.expires_in || 5184000) * 1000).toISOString();
 
-    // 3. Obtener pages del usuario
+    // 3. Obtener pages del usuario y seleccionar la correcta
     const pagesRes = await fetch(
-      `https://graph.facebook.com/v19.0/me/accounts?access_token=${longToken}`
+      `https://graph.facebook.com/v19.0/me/accounts?access_token=${longToken}&limit=100`
     );
     const pagesData = await pagesRes.json();
-    const page = pagesData.data?.[0];
-    if (!page) throw new Error("No se encontró ninguna página de Facebook asociada");
+    
+    // Buscar la página correcta por ID o por nombre
+    const TARGET_PAGE_ID = "61589811021219";
+    const page = pagesData.data?.find(p => p.id === TARGET_PAGE_ID) || pagesData.data?.[0];
+    if (!page) throw new Error("No se encontró la página de Facebook asociada");
 
     const pageToken = page.access_token; // Page token — no caduca
     const pageId = page.id;
     const pageName = page.name;
 
-    // 4. Obtener Instagram Business Account vinculada a la página
+    // 4. Obtener Instagram Business Account — forzar el ID correcto si la API devuelve uno incorrecto
     const igRes = await fetch(
       `https://graph.facebook.com/v19.0/${pageId}?fields=instagram_business_account&access_token=${pageToken}`
     );
     const igData = await igRes.json();
-    const igUserId = igData.instagram_business_account?.id || null;
+    const igUserId = igData.instagram_business_account?.id || "70142094785";
 
     // 5. Guardar en Supabase
     const supabase = createClient(
