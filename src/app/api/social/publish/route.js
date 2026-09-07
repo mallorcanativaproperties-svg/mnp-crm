@@ -183,11 +183,12 @@ async function publishYouTube(post, account) {
   if (!mediaUrl) return { success: false, error: "YouTube requiere un vídeo" };
 
   try {
+    const isShort = post.tipo === "Short" || post.tipo === "Reel";
     const metadata = {
       snippet: {
-        title: post.titulo || "Mallorca Nativa Properties",
-        description: `${post.texto || ""}\n\n${post.hashtags || ""}`.trim(),
-        tags: (post.hashtags || "").split(/\s+/).filter(t => t.startsWith("#")).map(t => t.slice(1)),
+        title: isShort ? `${post.titulo || "Mallorca Nativa Properties"} #Shorts` : (post.titulo || "Mallorca Nativa Properties"),
+        description: `${post.texto || ""}\n\n${post.hashtags || ""}${isShort ? "\n#Shorts" : ""}`.trim(),
+        tags: [...(post.hashtags || "").split(/\s+/).filter(t => t.startsWith("#")).map(t => t.slice(1)), ...(isShort ? ["Shorts"] : [])],
         categoryId: "22",
       },
       status: { privacyStatus: "public", selfDeclaredMadeForKids: false },
