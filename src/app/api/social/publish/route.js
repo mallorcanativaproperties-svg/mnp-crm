@@ -120,10 +120,10 @@ async function publishLinkedIn(post, account) {
   try {
     const text = `${post.texto || ""}\n\n${post.hashtags || ""}`.trim();
 
-    // Si hay account_id es página de empresa, si no es perfil personal
+    // account_id guarda el LinkedIn Person ID directamente
     let authorUrn;
     if (account?.account_id) {
-      authorUrn = `urn:li:organization:${account.account_id}`;
+      authorUrn = `urn:li:person:${account.account_id}`;
     } else {
       // Usar /v2/me para obtener el ID del perfil (no requiere scope openid)
       const meRes = await fetch("https://api.linkedin.com/v2/me", {
