@@ -95,12 +95,13 @@ async function publishLinkedIn(post, account) {
     if (account?.account_id) {
       authorUrn = `urn:li:organization:${account.account_id}`;
     } else {
-      const meRes = await fetch("https://api.linkedin.com/v2/userinfo", {
-        headers: { Authorization: `Bearer ${token}` },
+      // Usar /v2/me para obtener el ID del perfil (no requiere scope openid)
+      const meRes = await fetch("https://api.linkedin.com/v2/me", {
+        headers: { Authorization: `Bearer ${token}`, "X-Restli-Protocol-Version": "2.0.0" },
       });
       const me = await meRes.json();
-      if (!me.sub) return { success: false, error: "Token de LinkedIn inválido o caducado" };
-      authorUrn = `urn:li:person:${me.sub}`;
+      if (!me.id) return { success: false, error: "Token de LinkedIn inválido o caducado" };
+      authorUrn = `urn:li:person:${me.id}`;
     }
 
     const body = {
