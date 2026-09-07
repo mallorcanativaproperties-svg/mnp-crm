@@ -100,7 +100,8 @@ async function publishLinkedIn(post, account) {
         headers: { Authorization: `Bearer ${token}`, "X-Restli-Protocol-Version": "2.0.0" },
       });
       const me = await meRes.json();
-      if (!me.id) return { success: false, error: "Token de LinkedIn inválido o caducado" };
+      console.log("LinkedIn /v2/me response:", JSON.stringify(me));
+      if (!me.id) return { success: false, error: `LinkedIn /v2/me: ${JSON.stringify(me)}` };
       authorUrn = `urn:li:person:${me.id}`;
     }
 
