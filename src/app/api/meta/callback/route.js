@@ -64,29 +64,36 @@ export async function GET(request) {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     );
 
-    // Facebook
-    await supabase.from("social_accounts").upsert({
-      platform: "facebook",
-      account_name: pageName,
-      access_token: pageToken,
-      page_id: pageId,
-      token_expires_at: null, // Page tokens no caducan
-      connected: true,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: "platform" });
+    // Facebook — actualizar fila existente
+    const { data: fbRow } = await supabase.from("social_accounts").select("id").eq("platform", "facebook").single();
+    if (fbRow) {
+      await supabase.from("social_accounts").update({
+        account_name: pageName, access_token: pageToken, page_id: pageId,
+        token_expires_at: null, connected: true, updated_at: new Date().toISOString(),
+      }).eq("id", fbRow.id);
+    } else {
+      await supabase.from("social_accounts").insert({
+        platform: "facebook", account_name: pageName, access_token: pageToken,
+        page_id: pageId, token_expires_at: null, connected: true,
+      });
+    }
 
-    // Instagram
+    // Instagram — actualizar fila existente
     if (igUserId) {
-      await supabase.from("social_accounts").upsert({
-        platform: "instagram",
-        account_name: "@mallorcanativaproperties",
-        access_token: pageToken,
-        page_id: pageId,
-        ig_user_id: igUserId,
-        token_expires_at: null,
-        connected: true,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: "platform" });
+      const { data: igRow } = await supabase.from("social_accounts").select("id").eq("platform", "instagram").single();
+      if (igRow) {
+        await supabase.from("social_accounts").update({
+          account_name: "@mallorcanativaproperties", access_token: pageToken,
+          page_id: pageId, ig_user_id: igUserId,
+          token_expires_at: null, connected: true, updated_at: new Date().toISOString(),
+        }).eq("id", igRow.id);
+      } else {
+        await supabase.from("social_accounts").insert({
+          platform: "instagram", account_name: "@mallorcanativaproperties",
+          access_token: pageToken, page_id: pageId, ig_user_id: igUserId,
+          token_expires_at: null, connected: true,
+        });
+      }
     }
 
     return html(`
