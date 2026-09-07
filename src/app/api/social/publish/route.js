@@ -30,10 +30,40 @@ async function publishInstagram(post, account) {
       containerParams.media_type = "CAROUSEL";
       containerParams.children = children.join(",");
     } else if (post.tipo === "Reel") {
-      // Reels usan endpoint específico
-      containerParams.media_type = "REELS";
-      containerParams.video_url = mediaUrl;
-      containerParams.share_to_feed = true;
+      // Reels — usar v17.0 que es la versión estable para este endpoint
+      const reelRes = await fetch(`https://graph.facebook.com/v17.0/${ig_user_id}/media`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          media_type: "REELS",
+          video_url: mediaUrl,
+          caption: containerParams.caption,
+          share_to_feed: true,
+          access_token,
+        }),
+      });
+      const reelData = await reelRes.json();
+      console.log("Reel container response:", JSON.stringify(reelData));
+      if (!reelData.id) return { success: false, error: reelData.error?.message || "Reel container failed" };
+
+      // Esperar procesamiento
+      let status = "IN_PROGRESS", attempts = 0;
+      while (status === "IN_PROGRESS" && attempts < 30) {
+        await new Promise(r => setTimeout(r, 3000));
+        const sr = await fetch(`https://graph.facebook.com/v17.0/${reelData.id}?fields=status_code&access_token=${access_token}`);
+        const sd = await sr.json();
+        status = sd.status_code || "FINISHED"; attempts++;
+      }
+
+      const pr = await fetch(`https://graph.facebook.com/v17.0/${ig_user_id}/media_publish`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ creation_id: reelData.id, access_token }),
+      });
+      const pd = await pr.json();
+      console.log("Reel publish response:", JSON.stringify(pd));
+      if (!pd.id) return { success: false, error: pd.error?.message || "Reel publish failed" };
+      return { success: true, post_id: pd.id };
     } else if (isVideo) {
       containerParams.media_type = "VIDEO";
       containerParams.video_url = mediaUrl;
