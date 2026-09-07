@@ -9,7 +9,7 @@ const supabase = createClient(
 
 async function publishInstagram(post, account) {
   const { access_token, ig_user_id } = account;
-  const baseUrl = "https://graph.facebook.com/v21.0";
+  const baseUrl = "https://graph.facebook.com/v19.0";
   console.log("publishInstagram — tipo:", post.tipo, "media_types:", post.media_types, "media_urls:", post.media_urls?.length);
   try {
     let containerParams = { access_token, caption: `${post.texto || ""}\n\n${post.hashtags || ""}`.trim() };
@@ -30,12 +30,13 @@ async function publishInstagram(post, account) {
       containerParams.media_type = "CAROUSEL";
       containerParams.children = children.join(",");
     } else if (post.tipo === "Reel") {
-      containerParams.media_type = "REELS"; containerParams.video_url = mediaUrl;
-    } else if (post.tipo === "Story") {
-      containerParams.media_type = "STORIES";
-      if (isVideo) containerParams.video_url = mediaUrl; else containerParams.image_url = mediaUrl;
+      // Reels usan endpoint específico
+      containerParams.media_type = "REELS";
+      containerParams.video_url = mediaUrl;
+      containerParams.share_to_feed = true;
     } else if (isVideo) {
-      containerParams.media_type = "VIDEO"; containerParams.video_url = mediaUrl;
+      containerParams.media_type = "VIDEO";
+      containerParams.video_url = mediaUrl;
     } else {
       containerParams.image_url = mediaUrl;
     }
@@ -44,6 +45,7 @@ async function publishInstagram(post, account) {
     const cd = await cr.json();
     if (!cd.id) return { success: false, error: cd.error?.message || "Container failed" };
 
+    // Esperar procesamiento de vídeo
     if (isVideo || post.tipo === "Reel") {
       let status = "IN_PROGRESS", attempts = 0;
       while (status === "IN_PROGRESS" && attempts < 30) {
