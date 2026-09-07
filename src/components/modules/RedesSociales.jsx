@@ -9,7 +9,7 @@ const REDES = [
   { key: "tiktok", label: "TikTok", color: "#00F2EA", icon: "TK" },
   { key: "youtube", label: "YouTube", color: "#FF0000", icon: "YT" },
 ];
-const TIPOS_POST = ["Post", "Reel", "Story", "Carousel", "Video", "Short"];
+const TIPOS_POST = ["Post", "Reel", "Carousel", "Video", "Short"];
 const TABS = [
   { key: "publicar", label: "Publicar", icon: "✎" },
   { key: "automations", label: "Automatizaciones", icon: "⚡" },
@@ -216,11 +216,9 @@ function PostEditor({ post, onClose, onSaved }) {
             {mediaFiles.map((f, i) => {
               const containerStyle = f.type === "video"
                 ? tipo === "Reel" || tipo === "Short"
-                  ? { position: "relative", width: "100%", maxWidth: 340, aspectRatio: "9/16" }  // Vertical 9:16
-                  : { position: "relative", width: "100%", maxWidth: 560, aspectRatio: "16/9" }  // Horizontal 16:9
-                : tipo === "Story"
-                  ? { position: "relative", width: "100%", maxWidth: 340, aspectRatio: "9/16" }  // Story vertical
-                  : { position: "relative", width: 80, height: 80 };                             // Post cuadrado
+                  ? { position: "relative", width: "100%", maxWidth: 340, aspectRatio: "9/16" }
+                  : { position: "relative", width: "100%", maxWidth: 560, aspectRatio: "16/9" }
+                : { position: "relative", width: 80, height: 80 };
               return (
               <div key={i} style={containerStyle}>
                 {f.type === "video"
