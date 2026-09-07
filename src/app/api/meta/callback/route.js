@@ -58,10 +58,10 @@ export async function GET(request) {
     const igData = await igRes.json();
     const igUserId = igData.instagram_business_account?.id || "70142094785";
 
-    // 5. Guardar en Supabase
+    // 5. Guardar en Supabase — usar service role para bypass RLS
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     );
 
     // Facebook — actualizar fila existente
