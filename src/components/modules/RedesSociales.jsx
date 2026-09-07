@@ -52,6 +52,15 @@ const S = {
 function fmtNum(n) { if (n >= 1e6) return (n/1e6).toFixed(1)+"M"; if (n >= 1e3) return (n/1e3).toFixed(1)+"k"; return String(n); }
 function fmtDate(d) { if (!d) return ""; try { return new Date(d).toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }); } catch { return d; } }
 function timeAgo(d) { if (!d) return ""; const s = Math.floor((Date.now() - new Date(d).getTime()) / 1000); if (s < 60) return "ahora"; if (s < 3600) return Math.floor(s/60)+"min"; if (s < 86400) return Math.floor(s/3600)+"h"; return Math.floor(s/86400)+"d"; }
+const TOKEN_WARNING_DAYS = 7;
+function daysUntil(d) { if (!d) return null; return Math.ceil((new Date(d).getTime() - Date.now()) / 86400000); }
+function tokenStatus(acc) {
+  const days = daysUntil(acc?.token_expires_at);
+  if (days === null) return { level: "ok", days: null };
+  if (days <= 0) return { level: "expired", days };
+  if (days <= TOKEN_WARNING_DAYS) return { level: "warning", days };
+  return { level: "ok", days };
+}
 
 function Tag({ children, color }) {
   const c = color || "#AC8A54";
@@ -796,25 +805,48 @@ function TabCuentas() {
     youtube: { fields: ["access_token", "refresh_token"], help: "Necesitas: Access Token de Google/YouTube (expira en 1h) y Refresh Token (permanente). Ambos se generan al autorizar en /api/youtube/callback." },
   };
 
+  const atRisk = REDES.map((r) => ({ r, acc: accounts.find((a) => a.platform === r.key && a.connected) }))
+    .filter(({ acc }) => acc && ["expired", "warning"].includes(tokenStatus(acc).level));
+
   return (
     <div>
+      {atRisk.length > 0 && (
+        <div style={{ ...S.card, marginBottom: 16, borderColor: atRisk.some(({ acc }) => tokenStatus(acc).level === "expired") ? "#A23A3A55" : "#AC8A5455", background: atRisk.some(({ acc }) => tokenStatus(acc).level === "expired") ? "#A23A3A0D" : "#AC8A540D" }}>
+          <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 8, color: atRisk.some(({ acc }) => tokenStatus(acc).level === "expired") ? "#A23A3A" : "#AC8A54" }}>
+            ⚠ {atRisk.length === 1 ? "Una cuenta necesita" : `${atRisk.length} cuentas necesitan`} atención
+          </div>
+          {atRisk.map(({ r, acc }) => {
+            const st = tokenStatus(acc);
+            return (
+              <div key={r.key} style={{ fontSize: 11, color: "#4A4740", marginBottom: 4 }}>
+                <strong style={{ color: r.color }}>{r.label}</strong>: {st.level === "expired" ? `token caducado desde hace ${Math.abs(st.days)} día${Math.abs(st.days) === 1 ? "" : "s"} — hay que renovarlo o dejará de publicar.` : `token caduca en ${st.days} día${st.days === 1 ? "" : "s"} — conviene renovarlo pronto.`}
+                {r.key === "linkedin" && <> <a href="https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=78g5leci0a63zj&redirect_uri=https://crm.mallorcanativaproperties.com/api/linkedin/callback&scope=w_member_social&state=mnplinkedin" target="_blank" rel="noreferrer" style={{ color: "#AC8A54", textDecoration: "underline" }}>Renovar ahora →</a></>}
+              </div>
+            );
+          })}
+        </div>
+      )}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12 }}>
         {REDES.map((r) => {
           const acc = accounts.find((a) => a.platform === r.key && a.connected);
+          const st = tokenStatus(acc);
+          const borderColor = !acc ? "#E7E1D4" : st.level === "expired" ? "#A23A3A88" : st.level === "warning" ? "#AC8A5488" : r.color + "44";
           return (
-            <div key={r.key} style={{ ...S.card, borderColor: acc ? r.color + "44" : "#E7E1D4" }}>
+            <div key={r.key} style={{ ...S.card, borderColor }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
                 <RedIcon red={r.key} size={32} />
                 <div>
                   <div style={{ fontSize: 13, color: r.color, fontWeight: 500 }}>{r.label}</div>
-                  {acc && <div style={{ fontSize: 10, color: "#2C6E52" }}>Conectado</div>}
+                  {acc && st.level === "expired" && <div style={{ fontSize: 10, color: "#A23A3A", fontWeight: 600 }}>⚠ Token caducado</div>}
+                  {acc && st.level === "warning" && <div style={{ fontSize: 10, color: "#AC8A54", fontWeight: 600 }}>⚠ Caduca en {st.days}d</div>}
+                  {acc && st.level === "ok" && <div style={{ fontSize: 10, color: "#2C6E52" }}>Conectado</div>}
                   {!acc && <div style={{ fontSize: 10, color: "#9A968A" }}>No conectado</div>}
                 </div>
               </div>
               {acc && (
                 <div style={{ marginBottom: 10 }}>
                   <div style={{ fontSize: 10, color: "#A09D93" }}>{acc.account_name}</div>
-                  {acc.token_expires_at && <div style={{ fontSize: 9, color: "#9A968A" }}>Token expira: {fmtDate(acc.token_expires_at)}</div>}
+                  {acc.token_expires_at && <div style={{ fontSize: 9, color: st.level === "expired" ? "#A23A3A" : st.level === "warning" ? "#AC8A54" : "#9A968A" }}>Token expira: {fmtDate(acc.token_expires_at)}</div>}
                 </div>
               )}
               <div style={{ display: "flex", gap: 6 }}>
@@ -1066,7 +1098,7 @@ function TabSilvia() {
                             </div>
                           )}
                           <div style={{ display: "flex", gap: 6 }}>
-                            <a
+                            
                               href={`https://www.instagram.com/direct/new/?usernames=${c.username}`}
                               target="_blank" rel="noopener noreferrer"
                               style={{ padding: "6px 12px", borderRadius: 0, border: "none", background: "linear-gradient(135deg, #C8A97E, #D4B896)", color: "#F8F6F1", cursor: "pointer", fontSize: 10, fontWeight: 600, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4 }}
