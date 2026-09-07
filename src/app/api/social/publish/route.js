@@ -10,6 +10,7 @@ const supabase = createClient(
 async function publishInstagram(post, account) {
   const { access_token, ig_user_id } = account;
   const baseUrl = "https://graph.facebook.com/v21.0";
+  console.log("publishInstagram — tipo:", post.tipo, "media_types:", post.media_types, "media_urls:", post.media_urls?.length);
   try {
     let containerParams = { access_token, caption: `${post.texto || ""}\n\n${post.hashtags || ""}`.trim() };
     const mediaUrl = post.media_urls?.[0];
