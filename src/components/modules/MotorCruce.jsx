@@ -524,9 +524,9 @@ export default function MotorCruce() {
 
   const hasFilters = fMunicipio !== "todos" || fZona !== "todos" || fOp !== "todos" || fPptoMin || fPptoMax || fQuery;
 
-  async function vincularComprador(propId, compradorId) {
+  async function vincularComprador(propId, compradorId, tipo = "manual") {
     const { data, error } = await supabase.from("propiedades_compradores").upsert({
-      propiedad_id: propId, comprador_id: compradorId, tipo: "manual", estado: "pendiente",
+      propiedad_id: propId, comprador_id: compradorId, tipo, estado: "pendiente",
       updated_at: new Date().toISOString(),
     }, { onConflict: "propiedad_id,comprador_id" }).select().single();
     if (!error && data) setVinculaciones(prev => [...prev.filter(v => !(v.propiedad_id === propId && v.comprador_id === compradorId)), data]);
@@ -545,8 +545,8 @@ export default function MotorCruce() {
 
   function getVinculadosByProp(propId) {
     return vinculaciones
-      .filter(v => v.propiedad_id === propId && v.tipo === "manual")
-      .map(v => ({ buyer: BUYERS.find(b => b.id === v.comprador_id), estado: v.estado }))
+      .filter(v => v.propiedad_id === propId)
+      .map(v => ({ buyer: BUYERS.find(b => b.id === v.comprador_id), estado: v.estado, tipo: v.tipo }))
       .filter(v => v.buyer);
   }
 
@@ -726,13 +726,19 @@ export default function MotorCruce() {
                                 {/* Botones validar / descartar */}
                                 <div style={{ display: "flex", gap: 6, padding: "6px 0 10px", justifyContent: "flex-end" }}>
                                   {(!vinc || vinc.estado === "pendiente" || vinc.estado === "descartado") && (
-                                    <button onClick={() => vinc ? actualizarEstado(prop.id, buyer.id, "interesado") : vincularComprador(prop.id, buyer.id).then(() => actualizarEstado(prop.id, buyer.id, "interesado"))}
+                                    <button onClick={async () => {
+                                      if (!vinc) await vincularComprador(prop.id, buyer.id);
+                                      await actualizarEstado(prop.id, buyer.id, "interesado");
+                                    }}
                                       style={{ padding: "5px 14px", background: vinc?.estado === "interesado" ? "#2C6E52" : "none", border: "1px solid #2C6E52", color: vinc?.estado === "interesado" ? "#fff" : "#2C6E52", fontSize: 11, cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
                                       ✓ Interesado
                                     </button>
                                   )}
                                   {(!vinc || vinc.estado === "pendiente" || vinc.estado === "interesado") && (
-                                    <button onClick={() => vinc ? actualizarEstado(prop.id, buyer.id, "descartado") : vincularComprador(prop.id, buyer.id).then(() => actualizarEstado(prop.id, buyer.id, "descartado"))}
+                                    <button onClick={async () => {
+                                      if (!vinc) await vincularComprador(prop.id, buyer.id);
+                                      await actualizarEstado(prop.id, buyer.id, "descartado");
+                                    }}
                                       style={{ padding: "5px 14px", background: vinc?.estado === "descartado" ? "#A23A3A" : "none", border: "1px solid #A23A3A", color: vinc?.estado === "descartado" ? "#fff" : "#A23A3A", fontSize: 11, cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
                                       ✕ Descartar
                                     </button>
@@ -755,7 +761,7 @@ export default function MotorCruce() {
 
                       {/* Vinculados manualmente */}
                       {(() => {
-                        const vinculados = getVinculadosByProp(prop.id).filter(v => !matches.find(m => m.id === v.buyer.id));
+                        const vinculados = getVinculadosByProp(prop.id).filter(v => !matches.find(m => m.id === v.buyer.id) && v.estado !== "descartado");
                         if (vinculados.length === 0) return null;
                         return (
                           <div style={{ marginTop: 24 }}>
