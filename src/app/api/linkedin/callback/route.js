@@ -1,5 +1,11 @@
 export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
+);
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -51,17 +57,52 @@ export async function GET(request) {
 
     const accessToken = tokenData.access_token;
     const expiresIn = tokenData.expires_in; // segundos
+    const expiresAt = new Date(Date.now() + expiresIn * 1000).toISOString();
+
+    // Guardar directamente en Supabase (social_accounts) — es de ahí de donde
+    // /api/social/publish lee el token real, no de una variable de entorno.
+    let saveError = null;
+    try {
+      const { data: existing } = await supabase
+        .from("social_accounts")
+        .select("id")
+        .eq("platform", "linkedin")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (existing) {
+        const { error } = await supabase
+          .from("social_accounts")
+          .update({ access_token: accessToken, token_expires_at: expiresAt, connected: true, updated_at: new Date().toISOString() })
+          .eq("id", existing.id);
+        saveError = error;
+      } else {
+        const { error } = await supabase
+          .from("social_accounts")
+          .insert({ platform: "linkedin", access_token: accessToken, token_expires_at: expiresAt, connected: true });
+        saveError = error;
+      }
+    } catch (e) {
+      saveError = e;
+    }
 
     return new NextResponse(`
       <html><body style="font-family:sans-serif;padding:40px;background:#1a2528;color:#F8F6F1;max-width:700px">
         <div style="color:#AC8A54;font-size:11px;letter-spacing:0.2em;margin-bottom:16px">MALLORCA NATIVA · LINKEDIN</div>
-        <h2 style="color:#F8F6F1;font-weight:400;margin-bottom:24px">✓ Autorización completada</h2>
-        <p style="color:#9A968A;margin-bottom:24px">Copia este Access Token y añádelo en Vercel como variable de entorno <code style="color:#AC8A54">LINKEDIN_ACCESS_TOKEN</code></p>
+        ${saveError ? `
+        <h2 style="color:#A23A3A;font-weight:400;margin-bottom:24px">⚠ Token generado pero no se pudo guardar</h2>
+        <p style="color:#9A968A;margin-bottom:16px">Error al guardar en la base de datos: ${saveError.message || JSON.stringify(saveError)}</p>
+        <p style="color:#9A968A;margin-bottom:24px">Copia este token y pégalo a mano en <strong>Redes Sociales → Cuentas → LinkedIn → Access Token</strong>:</p>
         <div style="background:#0d1a1d;border:1px solid #2A2926;padding:20px;word-break:break-all;font-family:monospace;font-size:13px;color:#AC8A54;margin-bottom:16px">
           ${accessToken}
         </div>
-        <p style="color:#6B7280;font-size:12px">Expira en ${Math.round(expiresIn / 86400)} días. Tendrás que repetir este proceso cuando caduque.</p>
-        <p style="color:#6B7280;font-size:12px;margin-top:8px">Una vez añadido en Vercel, cierra esta ventana.</p>
+        ` : `
+        <h2 style="color:#F8F6F1;font-weight:400;margin-bottom:24px">✓ Token renovado y guardado</h2>
+        <p style="color:#9A968A;margin-bottom:24px">El nuevo Access Token se ha guardado directamente en el CRM (Redes Sociales → Cuentas → LinkedIn). No hace falta copiar nada — ya puedes publicar.</p>
+        `}
+        <p style="color:#6B7280;font-size:12px">Expira en ${Math.round(expiresIn / 86400)} días (${new Date(expiresAt).toLocaleDateString("es-ES")}). LinkedIn no permite renovación automática para este tipo de token — tendrás que repetir este proceso (visitar esta misma URL) cuando vuelva a caducar.</p>
+        <p style="color:#6B7280;font-size:12px;margin-top:8px">Puedes cerrar esta ventana.</p>
       </body></html>
     `, { headers: { "Content-Type": "text/html" } });
 
