@@ -2,6 +2,12 @@
   "framework": "nextjs",
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
+  "crons": [
+    {
+      "path": "/api/meta/refresh",
+      "schedule": "0 8 * * *"
+    }
+  ],
   "headers": [
     {
       "source": "/api/idealista/feed",
