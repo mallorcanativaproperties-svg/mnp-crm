@@ -9,6 +9,7 @@ const FormularioCaptacion = dynamic(() => import("./modules/FormularioCaptacion"
 const Compradores = dynamic(() => import("./modules/Compradores"), { ssr: false });
 const MotorCruce = dynamic(() => import("./modules/MotorCruce"), { ssr: false });
 const RedesSociales = dynamic(() => import("./modules/RedesSociales"), { ssr: false });
+const Captacion = dynamic(() => import("./modules/Captacion"), { ssr: false });
 const AgentesIA = dynamic(() => import("./modules/AgentesIA"), { ssr: false });
 const FirmaElectronica = dynamic(() => import("./modules/FirmaElectronica"), { ssr: false });
 const Usuarios = dynamic(() => import("./modules/Usuarios"), { ssr: false });
@@ -19,6 +20,7 @@ const MODULES = [
   { key: "propiedades", label: "Propiedades", icon: "⌂", color: "#2C6E52", roles: ["director", "agente", "broker"] },
   { key: "compradores", label: "Compradores", icon: "◎", color: "#3D577E", roles: ["director", "agente", "broker"] },
   { key: "cruce", label: "Motor Cruce", icon: "⇌", color: "#2C6E52", roles: ["director", "agente", "broker"] },
+  { key: "captacion", label: "Captación ANA", icon: "◎", color: "#9C6E1B", roles: ["director", "agente"] },
   { key: "redes", label: "Redes Sociales", icon: "◉", color: "#E1306C", roles: ["director", "agente"] },
   { key: "agentes", label: "Agentes IA", icon: "◈", color: "#9C6E1B", roles: ["director"] },
   { key: "firma", label: "Firma Electronica", icon: "✍", color: "#2C6E52", roles: ["director", "agente", "broker"] },
@@ -148,6 +150,7 @@ export default function CRMApp() {
       case "captacion": return <FormularioCaptacion />;
       case "compradores": return <Compradores />;
       case "cruce": return <MotorCruce />;
+      case "captacion": return <Captacion />;
       case "redes": return <RedesSociales />;
       case "agentes": return <AgentesIA />;
       case "firma": return <FirmaElectronica />;

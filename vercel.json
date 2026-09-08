@@ -10,6 +10,10 @@
     {
       "path": "/api/cron/social-tokens",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/captacion",
+      "schedule": "0 7,13 * * *"
     }
   ],
   "headers": [
