@@ -20,7 +20,7 @@ const MODULES = [
   { key: "propiedades", label: "Propiedades", icon: "⌂", color: "#2C6E52", roles: ["director", "agente", "broker"] },
   { key: "compradores", label: "Compradores", icon: "◎", color: "#3D577E", roles: ["director", "agente", "broker"] },
   { key: "cruce", label: "Motor Cruce", icon: "⇌", color: "#2C6E52", roles: ["director", "agente", "broker"] },
-  { key: "captacion_ana", label: "Captación ANA", icon: "◎", color: "#9C6E1B", roles: ["director", "agente"] },
+  { key: "captacion_ana", label: "Prospección Particulares", icon: "◎", color: "#9C6E1B", roles: ["director", "agente"] },
   { key: "redes", label: "Redes Sociales", icon: "◉", color: "#E1306C", roles: ["director", "agente"] },
   { key: "agentes", label: "Agentes IA", icon: "◈", color: "#9C6E1B", roles: ["director"] },
   { key: "firma", label: "Firma Electronica", icon: "✍", color: "#2C6E52", roles: ["director", "agente", "broker"] },
