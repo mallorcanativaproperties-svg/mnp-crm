@@ -27,7 +27,7 @@ async function runApifyScraper(startUrls) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      startUrls: startUrls.map(url => ({ url })),
+      searchUrls: startUrls.map(url => ({ url })),
       maxListings: 100,
       proxyConfiguration: { useApifyProxy: true, apifyProxyGroups: ["RESIDENTIAL"] },
     }),
