@@ -3,62 +3,55 @@ export const maxDuration = 300;
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-const APIFY_TOKEN = process.env.APIFY_TOKEN;
-const ACTOR_ID = "makework36~idealista-scraper";
+const SCRAPER_API_KEY = process.env.SCRAPER_API_KEY;
 
-// URLs de Idealista con filtros ya aplicados — particulares en venta Mallorca y Menorca
+// URLs de Idealista con filtros — particulares en venta Mallorca y Menorca
 const SEARCH_URLS = [
-  // Mallorca — recién publicados (últimas 48h)
   "https://www.idealista.com/venta-viviendas/mallorca/con-publicado_ultimas-48-horas,particulares/?ordenado-por=fecha-publicacion-desc",
-  // Mallorca — más de 3 meses
   "https://www.idealista.com/venta-viviendas/mallorca/con-publicado_mas-de-3-meses,particulares/",
-  // Mallorca — bajada de precio
   "https://www.idealista.com/venta-viviendas/mallorca/con-precio-rebajado,particulares/",
-  // Menorca — recién publicados
   "https://www.idealista.com/venta-viviendas/menorca/con-publicado_ultimas-48-horas,particulares/?ordenado-por=fecha-publicacion-desc",
-  // Menorca — más de 3 meses
   "https://www.idealista.com/venta-viviendas/menorca/con-publicado_mas-de-3-meses,particulares/",
-  // Menorca — bajada de precio
   "https://www.idealista.com/venta-viviendas/menorca/con-precio-rebajado,particulares/",
 ];
 
-async function runApifyScraper(startUrls) {
-  const runRes = await fetch(`https://api.apify.com/v2/acts/${ACTOR_ID}/runs?token=${APIFY_TOKEN}&waitForFinish=180`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      searchUrls: startUrls.map(url => ({ url })),
-      maxListings: 100,
-      proxyConfiguration: { useApifyProxy: true, apifyProxyGroups: ["RESIDENTIAL"] },
-    }),
-  });
+function scraperUrl(targetUrl) {
+  return `https://api.scraperapi.com/?api_key=${SCRAPER_API_KEY}&url=${encodeURIComponent(targetUrl)}&country_code=es&render=false`;
+}
 
-  if (!runRes.ok) throw new Error(`Apify error ${runRes.status}: ${await runRes.text()}`);
-  const runData = await runRes.json();
-  const runId = runData.data?.id || runData.id;
-  if (!runId) throw new Error("No runId: " + JSON.stringify(runData).slice(0, 200));
-
-  // Esperar si aún no terminó
-  let status = runData.data?.status || "RUNNING";
-  let attempts = 0;
-  while (["RUNNING", "READY"].includes(status) && attempts < 36) {
-    await new Promise(r => setTimeout(r, 5000));
-    const sr = await fetch(`https://api.apify.com/v2/actor-runs/${runId}?token=${APIFY_TOKEN}`);
-    const sd = await sr.json();
-    status = sd.data?.status;
-    attempts++;
+function parseListings(html) {
+  const listings = [];
+  // Extraer JSON de los datos de Idealista embebidos en el HTML
+  const jsonMatch = html.match(/window\.__INITIAL_PROPS__\s*=\s*({.+?});\s*<\/script>/s) ||
+                    html.match(/window\.APP_INITIAL_STATE\s*=\s*({.+?});\s*<\/script>/s);
+  
+  if (jsonMatch) {
+    try {
+      const data = JSON.parse(jsonMatch[1]);
+      const items = data?.adList || data?.result?.adList || data?.adIds || [];
+      return items;
+    } catch {}
   }
 
-  const itemsRes = await fetch(`https://api.apify.com/v2/actor-runs/${runId}/dataset/items?token=${APIFY_TOKEN}&limit=200`);
-  if (!itemsRes.ok) return [];
-  return await itemsRes.json();
+  // Fallback: extraer datos de los meta tags y atributos data-*
+  const regex = /"adId"\s*:\s*"?(\d+)"?.*?"price"\s*:\s*(\d+)/gs;
+  let match;
+  while ((match = regex.exec(html)) !== null) {
+    listings.push({ id: match[1], price: parseInt(match[2]) });
+  }
+  return listings;
+}
+
+function extractPhone(html) {
+  const phoneMatch = html.match(/"phoneNumber"\s*:\s*"([+\d\s]{9,15})"/);
+  return phoneMatch ? phoneMatch[1].replace(/\s/g, "") : null;
 }
 
 function detectarChivatos(item) {
   const chivatos = [];
-  if (item.priceDown) chivatos.push({ tipo: "bajada_precio", valor: item.priceDownPercentage });
-  if (item.listingUpdate) {
-    const dias = Math.floor((Date.now() - new Date(item.listingUpdate).getTime()) / 86400000);
+  if (item.priceDown || item.hasPriceDropped) chivatos.push({ tipo: "bajada_precio", valor: item.priceDropPercentage || null });
+  if (item.newDevelopment === false && item.distance) {
+    const dias = item.daysAgo || 0;
     if (dias <= 2) chivatos.push({ tipo: "recien_publicado", valor: dias });
     if (dias > 90) chivatos.push({ tipo: "mas_3_meses", valor: dias });
   }
@@ -69,6 +62,12 @@ function detectarChivatos(item) {
   return chivatos;
 }
 
+async function fetchWithScraper(url) {
+  const res = await fetch(scraperUrl(url), { signal: AbortSignal.timeout(30000) });
+  if (!res.ok) throw new Error(`ScraperAPI error ${res.status}`);
+  return await res.text();
+}
+
 export async function GET() {
   try {
     const supabase = createClient(
@@ -76,53 +75,62 @@ export async function GET() {
       process.env.SUPABASE_SERVICE_KEY
     );
 
-    const items = await runApifyScraper(SEARCH_URLS);
-    if (!Array.isArray(items) || items.length === 0) {
-      return NextResponse.json({ ok: true, message: "Sin resultados", total: 0 });
+    let totalGuardados = 0, totalSinTelefono = 0, totalEncontrados = 0;
+
+    for (const searchUrl of SEARCH_URLS) {
+      let html;
+      try {
+        html = await fetchWithScraper(searchUrl);
+      } catch (e) {
+        console.error(`Error scraping ${searchUrl}:`, e.message);
+        continue;
+      }
+
+      // Extraer listado de anuncios del HTML
+      const listings = parseListings(html);
+      console.log(`${searchUrl} → ${listings.length} anuncios`);
+      totalEncontrados += listings.length;
+
+      for (const item of listings.slice(0, 20)) {
+        if (!item.id) continue;
+
+        // Intentar obtener teléfono del detalle si está disponible
+        let telefono = item.phone || item.phoneNumber || null;
+
+        const chivatos = detectarChivatos(item);
+        const { error } = await supabase.from("captacion_particulares").upsert({
+          idealista_id: String(item.id || item.adId),
+          url: item.url || `https://www.idealista.com/inmueble/${item.id || item.adId}/`,
+          titulo: item.title || item.suggestedTexts?.title || null,
+          precio: item.price || null,
+          precio_m2: item.priceByArea || null,
+          superficie: item.size || item.attributes?.constructedArea || null,
+          habitaciones: item.rooms || item.attributes?.bedrooms || null,
+          municipio: item.municipality || item.address?.municipality || null,
+          distrito: item.district || null,
+          latitud: item.latitude || item.coordinates?.latitude || null,
+          longitud: item.longitude || item.coordinates?.longitude || null,
+          telefono,
+          foto_principal: item.thumbnail || item.photos?.[0]?.url || null,
+          bajada_precio: !!(item.priceDown || item.hasPriceDropped),
+          porcentaje_bajada: item.priceDropPercentage || null,
+          chivatos,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: "idealista_id", ignoreDuplicates: false });
+
+        if (!error) {
+          if (telefono) totalGuardados++;
+          else totalSinTelefono++;
+        }
+      }
     }
 
-    let guardados = 0, sinTelefono = 0;
-
-    for (const item of items) {
-      if (!item.id) continue;
-      const telefono = item.contacts?.phone1?.phoneNumberForMobileDialing || null;
-      if (!telefono) { sinTelefono++; continue; }
-
-      const chivatos = detectarChivatos(item);
-      const diasPublicado = item.listingUpdate
-        ? Math.floor((Date.now() - new Date(item.listingUpdate).getTime()) / 86400000)
-        : null;
-
-      const { error } = await supabase.from("captacion_particulares").upsert({
-        idealista_id: item.id,
-        url: item.url,
-        titulo: item.title,
-        precio: item.price,
-        precio_m2: item.priceByArea,
-        superficie: item.size,
-        habitaciones: item.rooms,
-        banos: item.baths,
-        direccion: item.address,
-        municipio: item.municipality,
-        distrito: item.district,
-        latitud: item.latitude,
-        longitud: item.longitude,
-        telefono,
-        nombre_contacto: item.contacts?.contactName || item.contacts?.commercialName || null,
-        foto_principal: item.photos?.[0]?.url || null,
-        precio_anterior: item.priceDown ? Math.round(item.price / (1 - (item.priceDownPercentage || 0) / 100)) : null,
-        bajada_precio: !!item.priceDown,
-        porcentaje_bajada: item.priceDownPercentage || null,
-        dias_publicado: diasPublicado,
-        fecha_publicacion: item.listingUpdate || null,
-        chivatos,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: "idealista_id", ignoreDuplicates: false });
-
-      if (!error) guardados++;
-    }
-
-    return NextResponse.json({ ok: true, total: items.length, guardados, sin_telefono: sinTelefono });
+    return NextResponse.json({
+      ok: true,
+      encontrados: totalEncontrados,
+      guardados: totalGuardados,
+      sin_telefono: totalSinTelefono,
+    });
 
   } catch (err) {
     console.error("Cron captacion error:", err);

@@ -1,34 +1,26 @@
 export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 
-const APIFY_TOKEN = process.env.APIFY_TOKEN;
-const ACTOR_ID = "crawlerbros~idealista-scraper";
+const SCRAPER_API_KEY = process.env.SCRAPER_API_KEY;
 
 export async function GET() {
-  // Ejecutar con solo una URL y 3 items para ver el output
-  const runRes = await fetch(`https://api.apify.com/v2/acts/${ACTOR_ID}/runs?token=${APIFY_TOKEN}&waitForFinish=120`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      searchUrls: [{ url: "https://www.idealista.com/venta-viviendas/palma-de-mallorca/" }],
-      maxListings: 3,
-      proxyConfiguration: { useApifyProxy: true },
-    }),
-  });
-  const runData = await runRes.json();
-  const runId = runData.data?.id || runData.id;
-  if (!runId) return NextResponse.json({ error: "No runId", runData });
+  const targetUrl = "https://www.idealista.com/venta-viviendas/palma-de-mallorca/con-particulares/";
+  const scraperUrl = `https://api.scraperapi.com/?api_key=${SCRAPER_API_KEY}&url=${encodeURIComponent(targetUrl)}&country_code=es&render=false`;
 
-  let status = runData.data?.status || "RUNNING";
-  let attempts = 0;
-  while (["RUNNING", "READY"].includes(status) && attempts < 24) {
-    await new Promise(r => setTimeout(r, 5000));
-    const sr = await fetch(`https://api.apify.com/v2/actor-runs/${runId}?token=${APIFY_TOKEN}`);
-    status = (await sr.json()).data?.status;
-    attempts++;
+  try {
+    const res = await fetch(scraperUrl, { signal: AbortSignal.timeout(30000) });
+    const html = await res.text();
+    const blocked = html.includes("DataDome") || html.includes("robot") || html.includes("captcha");
+    const hasListings = html.includes("idealista.com/inmueble") || html.includes("adId");
+
+    return NextResponse.json({
+      status: res.status,
+      blocked,
+      hasListings,
+      htmlLength: html.length,
+      snippet: html.slice(0, 500),
+    });
+  } catch (e) {
+    return NextResponse.json({ error: e.message });
   }
-
-  const itemsRes = await fetch(`https://api.apify.com/v2/actor-runs/${runId}/dataset/items?token=${APIFY_TOKEN}&limit=3`);
-  const items = await itemsRes.json();
-  return NextResponse.json({ status, items: items.slice(0, 2), keys: items[0] ? Object.keys(items[0]) : [] });
 }
