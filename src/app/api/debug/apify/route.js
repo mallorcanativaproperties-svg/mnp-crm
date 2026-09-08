@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 
 const APIFY_TOKEN = process.env.APIFY_TOKEN;
-const ACTOR_ID = "makework36~idealista-scraper";
+const ACTOR_ID = "crawlerbros~idealista-scraper";
 
 export async function GET() {
   // Ejecutar con solo una URL y 3 items para ver el output
@@ -10,7 +10,7 @@ export async function GET() {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      searchUrls: [{ url: "https://www.idealista.com/venta-viviendas/palma-de-mallorca/con-particulares/" }],
+      searchUrls: [{ url: "https://www.idealista.com/venta-viviendas/palma-de-mallorca/" }],
       maxListings: 3,
       proxyConfiguration: { useApifyProxy: true },
     }),
