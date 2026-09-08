@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 const APIFY_TOKEN = process.env.APIFY_TOKEN;
-const ACTOR_ID = "laster04~idealista-scraper";
+const ACTOR_ID = "makework36~idealista-scraper";
 
 // URLs de Idealista con filtros ya aplicados — particulares en venta Mallorca y Menorca
 const SEARCH_URLS = [
@@ -27,12 +27,9 @@ async function runApifyScraper(startUrls) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      startUrl: startUrls,
-      operation: "sale",
-      country: "es",
-      maxItems: 100,
-      fetchDetails: false,
-      proxy: { useApifyProxy: true, apifyProxyGroups: ["RESIDENTIAL"] },
+      startUrls: startUrls.map(url => ({ url })),
+      maxListings: 100,
+      proxyConfiguration: { useApifyProxy: true, apifyProxyGroups: ["RESIDENTIAL"] },
     }),
   });
 
