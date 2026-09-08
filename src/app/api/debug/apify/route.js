@@ -5,10 +5,10 @@ const SCRAPER_API_KEY = process.env.SCRAPER_API_KEY;
 
 export async function GET() {
   const targetUrl = "https://www.idealista.com/venta-viviendas/palma-de-mallorca/con-particulares/";
-  const scraperUrl = `https://api.scraperapi.com/?api_key=${SCRAPER_API_KEY}&url=${encodeURIComponent(targetUrl)}&country_code=es&render=false`;
+  const scraperUrl = `https://api.scraperapi.com/?api_key=${SCRAPER_API_KEY}&url=${encodeURIComponent(targetUrl)}&country_code=es&render=true&premium=true`;
 
   try {
-    const res = await fetch(scraperUrl, { signal: AbortSignal.timeout(30000) });
+    const res = await fetch(scraperUrl, { signal: AbortSignal.timeout(60000) });
     const html = await res.text();
     const blocked = html.includes("DataDome") || html.includes("robot") || html.includes("captcha");
     const hasListings = html.includes("idealista.com/inmueble") || html.includes("adId");
