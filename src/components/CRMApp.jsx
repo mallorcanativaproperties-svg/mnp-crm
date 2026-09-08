@@ -16,7 +16,7 @@ const Usuarios = dynamic(() => import("./modules/Usuarios"), { ssr: false });
 const SimuladorClaudia = dynamic(() => import("./modules/SimuladorClaudia"), { ssr: false });
 
 const MODULES = [
-  { key: "captacion", label: "Captacion", icon: "✎", color: "#9C6E1B", roles: ["director", "agente", "broker"] },
+  { key: "captacion", label: "Formulario Cualificación", icon: "✎", color: "#9C6E1B", roles: ["director", "agente", "broker"] },
   { key: "propiedades", label: "Propiedades", icon: "⌂", color: "#2C6E52", roles: ["director", "agente", "broker"] },
   { key: "compradores", label: "Compradores", icon: "◎", color: "#3D577E", roles: ["director", "agente", "broker"] },
   { key: "cruce", label: "Motor Cruce", icon: "⇌", color: "#2C6E52", roles: ["director", "agente", "broker"] },
