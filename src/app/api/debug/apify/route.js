@@ -34,9 +34,8 @@ export async function GET() {
     const resumen = isArray
       ? { 
           total: items.length,
-          particulares: items.filter(i => !i.agency || i.agency?.type !== "professional").length,
-          agencias: items.filter(i => i.agency?.type === "professional").length,
-          muestra: items.slice(0, 3).map(i => ({ id: i.propertyId, agency_type: i.agency?.type || null, agency_null: i.agency === null, phone: i.phone }))
+          keys: items[0] ? Object.keys(items[0]) : [],
+          sample: items[0] || null,
         }
       : { raw_type: typeof items, keys: Object.keys(items || {}), sample: JSON.stringify(items).slice(0, 800) };
 
