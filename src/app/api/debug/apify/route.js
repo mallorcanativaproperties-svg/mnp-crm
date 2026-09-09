@@ -29,18 +29,13 @@ export async function GET() {
 
     const itemsRes = await fetch(`https://api.apify.com/v2/actor-runs/${runId}/dataset/items?token=${APIFY_TOKEN}&limit=10`);
     const items = await itemsRes.json();
+    // Mostrar el formato raw para diagnosticar
+    const sample = Array.isArray(items) ? items[0] : items;
+    const resumen = Array.isArray(items) 
+      ? items.slice(0, 3).map(i => ({ id: i.propertyId || i.id, agency_type: i.agency?.type, phone: i.phone, type: typeof i }))
+      : { raw_type: typeof items, keys: Object.keys(items || {}), sample: JSON.stringify(items).slice(0, 500) };
 
-    // Mostrar solo los campos relevantes para identificar particulares
-    const resumen = items.map(i => ({
-      id: i.propertyId,
-      agency_type: i.agency?.type || null,
-      agency_name: i.agency?.name || null,
-      agency_null: i.agency === null,
-      phone: i.phone,
-      purchaseType: i.purchaseType,
-    }));
-
-    return NextResponse.json({ status, count: items.length, resumen });
+    return NextResponse.json({ status, count: Array.isArray(items) ? items.length : "not array", resumen });
   } catch (e) {
     return NextResponse.json({ error: e.message });
   }
