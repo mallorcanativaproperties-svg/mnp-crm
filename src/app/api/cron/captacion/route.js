@@ -97,7 +97,9 @@ export async function GET() {
         if (!id) continue;
 
         const telefono = item.phone || null;
-        const esParticular = !item.agency || item.agency?.type !== "professional";
+        // Solo particulares — saltar si tiene agencia profesional
+        const tieneAgencia = item.agency && item.agency.type === "professional";
+        if (tieneAgencia) continue;
         if (!telefono) { totalSinTelefono++; }
 
         const chivatos = detectarChivatos(item);
