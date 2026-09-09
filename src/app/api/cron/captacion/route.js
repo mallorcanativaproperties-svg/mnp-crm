@@ -29,13 +29,11 @@ const SEARCHES = [
     input: { startUrls: [{ url: "https://www.habitaclia.com/viviendas-particulares-provincia-menorca.htm" }], maxResults: 100 },
     label: "Habitaclia - Menorca", isla: "Menorca", portal: "habitaclia",
   },
-  // Milanuncios — particulares (actor getascraper)
+  // Milanuncios — particulares con URL directa filtrada
   {
     actor: "getascraper~milanuncios-scraper",
     input: { 
-      url: "https://www.milanuncios.com/venta-de-pisos-en-baleares/particular.htm",
-      category: "inmobiliaria",
-      sellerType: "private",
+      url: "https://www.milanuncios.com/inmobiliaria-en-baleares/?desde=100000&demanda=n&vendedor=part&orden=relevance",
       maxItems: 200,
     },
     label: "Milanuncios - Baleares", isla: "Mallorca", portal: "milanuncios",
