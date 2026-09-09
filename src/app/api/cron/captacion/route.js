@@ -46,7 +46,9 @@ async function runApifyActor(input) {
     `https://api.apify.com/v2/actor-runs/${runId}/dataset/items?token=${APIFY_TOKEN}&limit=200`
   );
   if (!itemsRes.ok) return [];
-  return await itemsRes.json();
+  const raw = await itemsRes.json();
+  // Algunos actores devuelven objeto con items dentro
+  return Array.isArray(raw) ? raw : (raw?.items || raw?.data || []);
 }
 
 function detectarChivatos(item) {

@@ -28,14 +28,14 @@ export async function GET() {
     }
 
     const itemsRes = await fetch(`https://api.apify.com/v2/actor-runs/${runId}/dataset/items?token=${APIFY_TOKEN}&limit=10`);
-    const items = await itemsRes.json();
-    // Mostrar el formato raw para diagnosticar
-    const sample = Array.isArray(items) ? items[0] : items;
-    const resumen = Array.isArray(items) 
-      ? items.slice(0, 3).map(i => ({ id: i.propertyId || i.id, agency_type: i.agency?.type, phone: i.phone, type: typeof i }))
-      : { raw_type: typeof items, keys: Object.keys(items || {}), sample: JSON.stringify(items).slice(0, 500) };
+    const raw = await itemsRes.json();
+    const items = Array.isArray(raw) ? raw : (raw?.items || raw?.data || raw);
+    const isArray = Array.isArray(items);
+    const resumen = isArray
+      ? items.slice(0, 3).map(i => ({ id: i.propertyId || i.id, agency_type: i.agency?.type, phone: i.phone }))
+      : { raw_type: typeof items, keys: Object.keys(items || {}), sample: JSON.stringify(items).slice(0, 800) };
 
-    return NextResponse.json({ status, count: Array.isArray(items) ? items.length : "not array", resumen });
+    return NextResponse.json({ status, count: isArray ? items.length : "not array", resumen });
   } catch (e) {
     return NextResponse.json({ error: e.message });
   }
