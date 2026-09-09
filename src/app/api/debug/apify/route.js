@@ -3,7 +3,7 @@ export const maxDuration = 120;
 import { NextResponse } from "next/server";
 
 const APIFY_TOKEN = process.env.APIFY_TOKEN;
-const ACTOR_ID = "fetch_cat~fotocasa-property-listings-scraper";
+const ACTOR_ID = "axlymxp~idealista-api-actor";
 
 export async function GET() {
   try {
@@ -12,12 +12,25 @@ export async function GET() {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ startUrls: [{ url: "https://www.fotocasa.es/es/comprar/viviendas/particulares/illes-balears-provincia/mallorca/pl" }], maxItems: 10 }),
+        body: JSON.stringify({
+          country: "es",
+          operation: "sale",
+          propertyType: "homes",
+          locationName: "Mallorca",
+          maxItems: 5,
+        }),
       }
     );
 
+    if (!runRes.ok) {
+      const err = await runRes.text();
+      return NextResponse.json({ error: `Actor error ${runRes.status}: ${err.slice(0, 300)}` });
+    }
+
     const runData = await runRes.json();
     const runId = runData.data?.id;
+    if (!runId) return NextResponse.json({ error: "No runId", runData });
+
     let status = runData.data?.status || "RUNNING";
     let attempts = 0;
     while (["RUNNING", "READY"].includes(status) && attempts < 18) {
@@ -27,19 +40,16 @@ export async function GET() {
       attempts++;
     }
 
-    const itemsRes = await fetch(`https://api.apify.com/v2/actor-runs/${runId}/dataset/items?token=${APIFY_TOKEN}&limit=10`);
+    const itemsRes = await fetch(`https://api.apify.com/v2/actor-runs/${runId}/dataset/items?token=${APIFY_TOKEN}&limit=5`);
     const raw = await itemsRes.json();
-    const items = Array.isArray(raw) ? raw : (raw?.items || raw?.data || raw);
-    const isArray = Array.isArray(items);
-    const resumen = isArray
-      ? { 
-          total: items.length,
-          keys: items[0] ? Object.keys(items[0]) : [],
-          sample: items[0] || null,
-        }
-      : { raw_type: typeof items, keys: Object.keys(items || {}), sample: JSON.stringify(items).slice(0, 800) };
+    const items = Array.isArray(raw) ? raw : [];
 
-    return NextResponse.json({ status, count: isArray ? items.length : "not array", resumen });
+    return NextResponse.json({
+      status,
+      count: items.length,
+      keys: items[0] ? Object.keys(items[0]) : [],
+      sample: items[0] || null,
+    });
   } catch (e) {
     return NextResponse.json({ error: e.message });
   }
