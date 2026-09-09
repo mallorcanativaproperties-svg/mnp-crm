@@ -12,7 +12,7 @@ export async function GET() {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ urls: ["https://www.fotocasa.es/es/comprar/viviendas/particulares/illes-balears-provincia/mallorca/pl"], maxItems: 5 }),
+        body: JSON.stringify({ location: "Mallorca", operation: "buy", publicationDate: "last48h", sortBy: "latest", maxItems: 10 }),
       }
     );
 
@@ -32,7 +32,12 @@ export async function GET() {
     const items = Array.isArray(raw) ? raw : (raw?.items || raw?.data || raw);
     const isArray = Array.isArray(items);
     const resumen = isArray
-      ? items.slice(0, 3).map(i => ({ id: i.propertyId || i.id, agency_type: i.agency?.type, phone: i.phone }))
+      ? { 
+          total: items.length,
+          particulares: items.filter(i => !i.agency || i.agency?.type !== "professional").length,
+          agencias: items.filter(i => i.agency?.type === "professional").length,
+          muestra: items.slice(0, 3).map(i => ({ id: i.propertyId, agency_type: i.agency?.type || null, agency_null: i.agency === null, phone: i.phone }))
+        }
       : { raw_type: typeof items, keys: Object.keys(items || {}), sample: JSON.stringify(items).slice(0, 800) };
 
     return NextResponse.json({ status, count: isArray ? items.length : "not array", resumen });

@@ -6,10 +6,12 @@ import { createClient } from "@supabase/supabase-js";
 const APIFY_TOKEN = process.env.APIFY_TOKEN;
 const ACTOR_ID = "igolaizola~fotocasa-scraper";
 
-// URLs de Fotocasa con filtro de particulares aplicado
+// Búsquedas con parámetros correctos según el schema del actor
 const SEARCHES = [
-  { url: "https://www.fotocasa.es/es/comprar/viviendas/particulares/illes-balears-provincia/mallorca/pl", label: "Mallorca - particulares" },
-  { url: "https://www.fotocasa.es/es/comprar/viviendas/particulares/illes-balears-provincia/menorca/pl", label: "Menorca - particulares" },
+  { location: "Mallorca", publicationDate: "last48h", label: "Mallorca - últimas 48h" },
+  { location: "Mallorca", publicationDate: "lastWeek", sortBy: "latest", label: "Mallorca - última semana" },
+  { location: "Menorca", publicationDate: "last48h", label: "Menorca - últimas 48h" },
+  { location: "Menorca", publicationDate: "lastWeek", sortBy: "latest", label: "Menorca - última semana" },
 ];
 
 async function runApifyActor(input) {
@@ -98,10 +100,9 @@ export async function GET() {
         const id = item.propertyId || item.id;
         if (!id) continue;
 
+        // Filtrar particulares — saltar agencias profesionales
+        if (item.agency && item.agency.type === "professional") continue;
         const telefono = item.phone || null;
-        // Solo particulares — saltar si tiene agencia profesional
-        const tieneAgencia = item.agency && item.agency.type === "professional";
-        if (tieneAgencia) continue;
         if (!telefono) { totalSinTelefono++; }
 
         const chivatos = detectarChivatos(item);
