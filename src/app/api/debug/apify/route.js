@@ -15,7 +15,7 @@ export async function GET() {
         body: JSON.stringify({
           location: "mallorca",
           operation: "buy",
-          propertyType: "homes",
+          propertyType: "home",
           advertiserType: "private",
           maxItems: 3,
         }),

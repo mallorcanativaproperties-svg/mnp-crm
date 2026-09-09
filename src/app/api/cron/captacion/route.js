@@ -80,7 +80,7 @@ export async function GET() {
         items = await runApifyActor({
           location: search.location,
           operation: "buy",
-          propertyType: "homes",
+          propertyType: "home",
           advertiserType: "private", // solo particulares
           maxItems: 100,
           sortBy: "publicationDate",
