@@ -178,7 +178,7 @@ export async function GET() {
         console.log("Milanuncios sample:", JSON.stringify(items[0]).slice(0, 500));
       }
       if (search.portal === "habitaclia" && items[0]) {
-        console.log("Habitaclia sample:", JSON.stringify(items[0]).slice(0, 500));
+        console.log("Habitaclia sample:", JSON.stringify(items[0]).slice(0, 1500));
       }
       totalEncontrados += items.length;
 
