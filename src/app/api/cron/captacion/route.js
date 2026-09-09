@@ -80,10 +80,7 @@ export async function GET() {
       let items = [];
       try {
         items = await runApifyActor({
-          location: search.location,
-          operation: "buy",
-          propertyType: "home",
-          advertiserType: "private", // solo particulares
+          startUrls: [{ url: search.url }],
           maxListings: 100,
         });
       } catch (e) {
