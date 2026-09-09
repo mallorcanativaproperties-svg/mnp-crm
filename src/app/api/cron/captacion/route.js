@@ -135,7 +135,7 @@ function normalizarItem(item, search) {
       bajada_precio: false,
       dias_publicado: item.date ? Math.floor((Date.now() - new Date(item.date).getTime()) / 86400000) : null,
       fecha_publicacion: item.date || null,
-      es_particular: item.sellerType === "private" || !item.sellerName,
+      es_particular: item.sellerType === "private" || !item.sellerName || item.sellerName === "Anónimo" || item.advertiserName === "Anónimo",
     };
   }
   return null;
