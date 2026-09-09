@@ -32,7 +32,12 @@ const SEARCHES = [
   // Milanuncios — particulares (actor getascraper)
   {
     actor: "getascraper~milanuncios-scraper",
-    input: { url: "https://www.milanuncios.com/venta-de-pisos-en-baleares/particular.htm", sellerType: "private", maxItems: 100 },
+    input: { 
+      url: "https://www.milanuncios.com/venta-de-pisos-en-baleares/particular.htm",
+      category: "inmobiliaria",
+      sellerType: "private",
+      maxItems: 200,
+    },
     label: "Milanuncios - Baleares", isla: "Mallorca", portal: "milanuncios",
   },
 ];
