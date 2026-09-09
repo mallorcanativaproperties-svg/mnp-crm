@@ -101,15 +101,21 @@ export async function GET() {
 
         const chivatos = detectarChivatos(item);
 
+        // Extraer superficie y habitaciones de features si no vienen directamente
+        const featNums = (item.features || []).map(f => parseInt(f)).filter(n => !isNaN(n));
+        const superficieVal = item.area || featNums.find(n => n > 20) || null;
+        const habitacionesVal = item.rooms || featNums.find(n => n > 0 && n <= 10) || null;
+        const banosVal = item.bathrooms || null;
+
         const { error } = await supabase.from("captacion_particulares").upsert({
           idealista_id: String(id),
           url: item.url,
           titulo: item.title,
           precio: item.price,
           precio_m2: item.pricePerSquareMeter,
-          superficie: item.area || (item.features ? parseInt(item.features.find(f => parseInt(f) > 10) || 0) : null),
-          habitaciones: item.rooms,
-          banos: item.bathrooms,
+          superficie: superficieVal,
+          habitaciones: habitacionesVal,
+          banos: banosVal,
           direccion: item.address,
           municipio: item.location || search.label.split(" - ")[0],
           distrito: search.url.includes("menorca") ? "Menorca" : "Mallorca",
@@ -118,6 +124,7 @@ export async function GET() {
           telefono,
           nombre_contacto: item.agencyName || null,
           foto_principal: item.images?.[0] || null,
+          fotos: item.images || [],
           bajada_precio: item.changeStatus === "priceReduction",
           dias_publicado: item.publishedAt
             ? Math.floor((Date.now() - new Date(item.publishedAt).getTime()) / 86400000)
