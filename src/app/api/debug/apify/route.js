@@ -3,7 +3,7 @@ export const maxDuration = 120;
 import { NextResponse } from "next/server";
 
 const APIFY_TOKEN = process.env.APIFY_TOKEN;
-const ACTOR_ID = "ralvaromariano~fotocasa";
+const ACTOR_ID = "igolaizola~fotocasa-scraper";
 
 export async function GET() {
   try {
@@ -12,7 +12,7 @@ export async function GET() {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ startUrls: [{ url: "https://www.fotocasa.es/es/comprar/viviendas/particulares/illes-balears-provincia/mallorca/pl" }], maxItems: 5 }),
+        body: JSON.stringify({ urls: ["https://www.fotocasa.es/es/comprar/viviendas/particulares/illes-balears-provincia/mallorca/pl"], maxItems: 5 }),
       }
     );
 

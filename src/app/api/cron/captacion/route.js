@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 const APIFY_TOKEN = process.env.APIFY_TOKEN;
-const ACTOR_ID = "ralvaromariano~fotocasa";
+const ACTOR_ID = "igolaizola~fotocasa-scraper";
 
 // URLs de Fotocasa con filtro de particulares aplicado
 const SEARCHES = [
