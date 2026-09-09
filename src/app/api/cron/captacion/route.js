@@ -115,7 +115,7 @@ function normalizarItem(item, search) {
       bajada_precio: !!(item.priceReduction || item.hasPriceDropped),
       dias_publicado: item.publishedAt ? Math.floor((Date.now() - new Date(item.publishedAt).getTime()) / 86400000) : null,
       fecha_publicacion: item.publishedAt || null,
-      es_particular: !item.agencyName && !item.advertiserName?.toLowerCase().includes("inmob"),
+      es_particular: !item.agencyName && !item.advertiserName?.toLowerCase().includes("inmob") && !item.advertiserName?.toLowerCase().includes("s.l") && !item.advertiserName?.toLowerCase().includes("grup"),
     };
   } else if (search.portal === "milanuncios") {
     return {
