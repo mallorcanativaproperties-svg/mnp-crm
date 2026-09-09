@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 
 const BRONZE = "#AC8A54";
@@ -35,6 +35,14 @@ function ChivatoTag({ chivato }) {
 
 function TarjetaParticular({ item, onUpdate, onWhatsApp }) {
   const cfg = ESTADO_CONFIG[item.estado] || ESTADO_CONFIG.pendiente;
+  const [telEdit, setTelEdit] = React.useState(item.telefono || "");
+  const [telGuardado, setTelGuardado] = React.useState(false);
+
+  async function guardarTelefono() {
+    await onUpdate(item.id, { telefono: telEdit });
+    setTelGuardado(true);
+    setTimeout(() => setTelGuardado(false), 2000);
+  }
 
   return (
     <div style={{ background: "#fff", border: `1px solid ${BORDER}`, borderLeft: `3px solid ${cfg.color}`, marginBottom: 10, padding: "16px 18px" }}>
@@ -64,12 +72,13 @@ function TarjetaParticular({ item, onUpdate, onWhatsApp }) {
         <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-end", flexShrink: 0 }}>
           <span style={{ fontSize: 10, padding: "3px 10px", background: cfg.bg, color: cfg.color, fontFamily: "Inter, sans-serif", letterSpacing: "0.06em" }}>{cfg.label}</span>
           <div style={{ display: "flex", gap: 6 }}>
+          <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
             <a href={item.url} target="_blank" rel="noopener noreferrer"
               style={{ fontSize: 11, color: BRONZE, textDecoration: "none", border: `1px solid ${BRONZE}44`, padding: "4px 10px", fontFamily: "Inter, sans-serif" }}>
               Ver anuncio
             </a>
-            {item.telefono && (
-              <button onClick={() => onWhatsApp(item)}
+            {(item.telefono || telEdit) && (
+              <button onClick={() => onWhatsApp({ ...item, telefono: telEdit || item.telefono })}
                 style={{ padding: "4px 6px", background: "none", border: "none", cursor: "pointer", filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.2))" }}
                 title="Contactar por WhatsApp">
                 <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
@@ -82,6 +91,22 @@ function TarjetaParticular({ item, onUpdate, onWhatsApp }) {
                 </svg>
               </button>
             )}
+          </div>
+          {/* Campo teléfono manual */}
+          <div style={{ display: "flex", gap: 6, marginTop: 8, alignItems: "center" }}>
+            <input
+              value={telEdit}
+              onChange={e => setTelEdit(e.target.value)}
+              placeholder="Añadir teléfono..."
+              style={{ fontSize: 12, padding: "4px 10px", border: `1px solid ${BORDER}`, color: PETROL, fontFamily: "Inter, sans-serif", width: 140, outline: "none" }}
+            />
+            {telEdit && telEdit !== item.telefono && (
+              <button onClick={guardarTelefono}
+                style={{ fontSize: 11, padding: "4px 10px", background: PETROL, border: "none", color: CREAM, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>
+                {telGuardado ? "✓" : "Guardar"}
+              </button>
+            )}
+          </div>
           </div>
           <select value={item.estado} onChange={e => onUpdate(item.id, { estado: e.target.value })}
             style={{ fontSize: 11, padding: "4px 8px", border: `1px solid ${BORDER}`, background: "#fff", color: PETROL, fontFamily: "Inter, sans-serif", cursor: "pointer", appearance: "auto" }}>
