@@ -96,7 +96,7 @@ function normalizarItem(item, search) {
     };
   } else if (search.portal === "habitaclia") {
     return {
-      id: item.id || item.propertyId,
+      id: item.adId || item.id || item.propertyId || item.realEstateAdId,
       url: item.url,
       titulo: item.title || item.address,
       precio: item.price,
