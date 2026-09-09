@@ -132,6 +132,8 @@ export async function GET() {
         if (!error) {
           totalGuardados++;
           if (!telefono) totalSinTelefono++;
+        } else {
+          console.error("Supabase upsert error:", error.message, "id:", id);
         }
       }
     }
