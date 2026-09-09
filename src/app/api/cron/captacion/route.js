@@ -97,10 +97,8 @@ export async function GET() {
         const id = item.propertyId || item.id;
         if (!id) continue;
 
-        // Solo particulares — saltar agencias (agency.type === "professional")
-        if (item.agency?.type === "professional") continue;
-
         const telefono = item.phone || null;
+        const esParticular = !item.agency || item.agency?.type !== "professional";
         if (!telefono) { totalSinTelefono++; }
 
         const chivatos = detectarChivatos(item);
@@ -132,7 +130,10 @@ export async function GET() {
           updated_at: new Date().toISOString(),
         }, { onConflict: "idealista_id", ignoreDuplicates: false });
 
-        if (!error) totalGuardados++;
+        if (!error) {
+          totalGuardados++;
+          if (!telefono) totalSinTelefono++;
+        }
       }
     }
 
@@ -141,6 +142,7 @@ export async function GET() {
       encontrados: totalEncontrados,
       guardados: totalGuardados,
       sin_telefono: totalSinTelefono,
+      message: `${totalGuardados} guardados de ${totalEncontrados} encontrados`,
     });
 
   } catch (err) {
