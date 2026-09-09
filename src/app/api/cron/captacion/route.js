@@ -83,7 +83,6 @@ export async function GET() {
           propertyType: "home",
           advertiserType: "private", // solo particulares
           maxItems: 100,
-          sortBy: "publicationDate",
         });
       } catch (e) {
         console.error(`Error en búsqueda ${search.label}:`, e.message);
