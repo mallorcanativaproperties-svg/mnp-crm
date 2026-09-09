@@ -4,12 +4,13 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 const APIFY_TOKEN = process.env.APIFY_TOKEN;
-const ACTOR_ID = "igolaizola~fotocasa-scraper";
+const ACTOR_ID = "azzouzana~fotocasa-es-search-results-scraper-by-search-url";
 
-// Búsquedas en Fotocasa — particulares en venta Mallorca y Menorca
+// URLs de Fotocasa con filtro de particulares aplicado
 const SEARCHES = [
-  { location: "mallorca", label: "Mallorca - particulares" },
-  { location: "menorca", label: "Menorca - particulares" },
+  { url: "https://www.fotocasa.es/es/comprar/viviendas/mallorca/particulares/l", label: "Mallorca - particulares" },
+  { url: "https://www.fotocasa.es/es/comprar/viviendas/mallorca/particulares-precio-rebajado/l", label: "Mallorca - bajada precio" },
+  { url: "https://www.fotocasa.es/es/comprar/viviendas/menorca/particulares/l", label: "Menorca - particulares" },
 ];
 
 async function runApifyActor(input) {
@@ -90,7 +91,7 @@ export async function GET() {
       }
 
       totalEncontrados += items.length;
-      console.log(`${search.label}: ${items.length} anuncios`);
+      console.log(`${search.label}: ${items.length} anuncios desde ${search.url}`);
 
       for (const item of items) {
         const id = item.propertyId || item.id;
