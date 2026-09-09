@@ -18,15 +18,15 @@ const SEARCHES = [
     input: { startUrls: [{ url: "https://www.fotocasa.es/es/comprar/viviendas/particulares/illes-balears-provincia/menorca/pl" }], maxListings: 100 },
     label: "Fotocasa - Menorca", isla: "Menorca", portal: "fotocasa",
   },
-  // Habitaclia — particulares (actor logiover)
+  // Habitaclia — particulares (actor trev0n con URL directa)
   {
-    actor: "logiover~habitaclia-com-spain-scraper",
-    input: { location: "mallorca", transaction: "sale", advertiser: "private", maxResults: 200 },
+    actor: "trev0n~habitaclia-com-spain-scraper",
+    input: { startUrls: [{ url: "https://www.habitaclia.com/viviendas-particulares-provincia-mallorca.htm" }], maxResults: 200 },
     label: "Habitaclia - Mallorca", isla: "Mallorca", portal: "habitaclia",
   },
   {
-    actor: "logiover~habitaclia-com-spain-scraper",
-    input: { location: "menorca", transaction: "sale", advertiser: "private", maxResults: 100 },
+    actor: "trev0n~habitaclia-com-spain-scraper",
+    input: { startUrls: [{ url: "https://www.habitaclia.com/viviendas-particulares-provincia-menorca.htm" }], maxResults: 100 },
     label: "Habitaclia - Menorca", isla: "Menorca", portal: "habitaclia",
   },
   // Milanuncios — particulares (actor getascraper)
