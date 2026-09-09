@@ -112,6 +112,7 @@ export async function GET() {
           banos: item.bathrooms,
           direccion: item.address,
           municipio: item.location || search.label.split(" - ")[0],
+          distrito: search.url.includes("menorca") ? "Menorca" : "Mallorca",
           latitud: item.latitude,
           longitud: item.longitude,
           telefono,

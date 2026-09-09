@@ -157,9 +157,8 @@ export default function Captacion() {
     if (filtroBusqueda && !i.titulo?.toLowerCase().includes(filtroBusqueda.toLowerCase()) &&
         !i.municipio?.toLowerCase().includes(filtroBusqueda.toLowerCase()) &&
         !i.telefono?.includes(filtroBusqueda)) return false;
-    if (filtroIsla === "mallorca" && !i.municipio?.toLowerCase().includes("mallorca") &&
-        i.url?.includes("menorca")) return false;
-    if (filtroIsla === "menorca" && !i.url?.includes("menorca")) return false;
+    if (filtroIsla === "mallorca" && i.distrito === "Menorca") return false;
+    if (filtroIsla === "menorca" && i.distrito !== "Menorca") return false;
     if (filtroTipo === "particular" && i.nombre_contacto) return false;
     if (filtroTipo === "agencia" && !i.nombre_contacto) return false;
     return true;
