@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 
 const BRONZE = "#AC8A54";
@@ -183,7 +183,7 @@ function FichaModal({ item, onClose, onUpdate }) {
   );
 }
 
-function TarjetaParticular({ item, onUpdate, onClick }) {
+function TarjetaParticular({ item, onUpdate, onClick, onAna }) {
   const cfg = ESTADO_CONFIG[item.estado] || ESTADO_CONFIG.pendiente;
   const fotos = item.fotos?.length ? item.fotos : item.foto_principal ? [item.foto_principal] : [];
   const diasColor = item.dias_publicado <= 2 ? "#2C6E52" : item.dias_publicado > 90 ? "#9C6E1B" : "#9A968A";
@@ -224,6 +224,218 @@ function TarjetaParticular({ item, onUpdate, onClick }) {
           )}
           <span style={{ fontSize: 10, padding: "2px 8px", background: cfg.bg, color: cfg.color, fontFamily: "Inter, sans-serif", marginLeft: "auto" }}>{cfg.label}</span>
         </div>
+
+        {/* Botones acción */}
+        <div style={{ display: "flex", gap: 8, marginTop: 10, paddingTop: 10, borderTop: `1px solid ${BORDER}` }} onClick={e => e.stopPropagation()}>
+          <a href={item.url} target="_blank" rel="noopener noreferrer"
+            style={{ flex: 1, textAlign: "center", fontSize: 11, color: BRONZE, textDecoration: "none", border: `1px solid ${BRONZE}44`, padding: "6px 8px", fontFamily: "Inter, sans-serif" }}>
+            Ver anuncio
+          </a>
+          <button onClick={() => onAna(item)}
+            style={{ flex: 1, padding: "6px 8px", background: PETROL, border: "none", color: CREAM, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.04em" }}>
+            Chat ANA
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AnaPanel({ item, onClose }) {
+  const [mensajes, setMensajes] = useState([]);
+  const [convId, setConvId] = useState(null);
+  const [modoManual, setModoManual] = useState(true);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [loadingConv, setLoadingConv] = useState(true);
+  const chatRef = useRef(null);
+  const pollRef = useRef(null);
+  const lastMsgTs = useRef(null);
+
+  const telefono = item.telefono || "";
+  const nombre = item.titulo?.slice(0, 30) || "Propietario";
+
+  useEffect(() => {
+    async function loadConv() {
+      setLoadingConv(true);
+      try {
+        if (!telefono) { setLoadingConv(false); return; }
+        let phone = telefono.replace(/\D/g, "");
+        if (phone.startsWith("34") && phone.length === 11) phone = phone.slice(2);
+        const phoneWith34 = "34" + phone;
+        const { data: convs } = await supabase.from("conversaciones").select("*")
+          .or(`telefono.eq.${phoneWith34},telefono.eq.${phone},telefono.eq.+${phoneWith34}`)
+          .eq("agente_ia", "ana")
+          .order("updated_at", { ascending: false });
+        let conv = convs?.[0] || null;
+        if (conv) {
+          setConvId(conv.id);
+          setModoManual(conv.estado !== "activo");
+          const { data: msgs } = await supabase.from("mensajes").select("*")
+            .eq("conversacion_id", conv.id).order("created_at", { ascending: true });
+          const mapped = (msgs || []).map(m => ({
+            id: m.id, from: m.from_who || "cliente", text: m.texto || "",
+            ts: m.timestamp ? new Date(m.timestamp).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) : "",
+            date: m.timestamp ? new Date(m.timestamp) : new Date(),
+          }));
+          setMensajes(mapped);
+          if (msgs?.length > 0) lastMsgTs.current = msgs[msgs.length - 1].created_at;
+        } else {
+          const telNorm = phone.length === 9 ? "34" + phone : phone;
+          const { data: newConv } = await supabase.from("conversaciones").insert({
+            contacto: nombre, telefono: telNorm, canal: "whatsapp",
+            estado: "manual", agente_ia: "ana", updated_at: new Date().toISOString(),
+          }).select().single();
+          if (newConv) { setConvId(newConv.id); setModoManual(true); }
+        }
+      } catch (e) { console.error("Error cargando conv ANA:", e); }
+      finally { setLoadingConv(false); }
+    }
+    loadConv();
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
+  }, [telefono]);
+
+  useEffect(() => {
+    if (!convId) return;
+    pollRef.current = setInterval(async () => {
+      try {
+        let q = supabase.from("mensajes").select("*").eq("conversacion_id", convId).order("created_at", { ascending: true });
+        if (lastMsgTs.current) q = q.gt("created_at", lastMsgTs.current);
+        const { data: nuevos } = await q;
+        if (nuevos?.length > 0) {
+          lastMsgTs.current = nuevos[nuevos.length - 1].created_at;
+          setMensajes(prev => {
+            const ids = new Set(prev.map(m => m.id));
+            const added = nuevos.filter(m => !ids.has(m.id)).map(m => ({
+              id: m.id, from: m.from_who || "cliente", text: m.texto || "",
+              ts: m.timestamp ? new Date(m.timestamp).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) : "",
+              date: m.timestamp ? new Date(m.timestamp) : new Date(),
+            }));
+            return added.length > 0 ? [...prev, ...added] : prev;
+          });
+        }
+      } catch {}
+    }, 3000);
+    return () => clearInterval(pollRef.current);
+  }, [convId]);
+
+  useEffect(() => {
+    if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
+  }, [mensajes]);
+
+  async function handleSend() {
+    if (!input.trim() || loading || !convId) return;
+    const texto = input.trim();
+    setInput("");
+    setLoading(true);
+    const now = new Date();
+    const ts = now.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+    setMensajes(prev => [...prev, { from: "agente_manual", text: texto, ts, date: now }]);
+    try {
+      const res = await fetch("/api/manual-reply", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ conversacion_id: convId, telefono, texto, agente: "Ana" }),
+      });
+      const data = await res.json();
+      if (!data.ok) setMensajes(prev => [...prev, { from: "sistema", text: `Error: ${data.error}`, ts: "" }]);
+    } catch (e) {
+      setMensajes(prev => [...prev, { from: "sistema", text: `Error: ${e.message}`, ts: "" }]);
+    } finally { setLoading(false); }
+  }
+
+  async function toggleModo() {
+    const nuevo = !modoManual;
+    setModoManual(nuevo);
+    if (convId) {
+      await supabase.from("conversaciones").update({ estado: nuevo ? "manual" : "activo", updated_at: new Date().toISOString() }).eq("id", convId);
+      const txt = nuevo ? "Modo manual activado — ANA en pausa" : "IA reactivada — ANA responde automáticamente";
+      setMensajes(prev => [...prev, { from: "sistema", text: txt, ts: "" }]);
+      await supabase.from("mensajes").insert({ conversacion_id: convId, texto: txt, from_who: "sistema", timestamp: new Date().toISOString() });
+    }
+  }
+
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
+
+  return (
+    <div style={{ position: "fixed", top: 0, bottom: 0, zIndex: 1100, right: 0, width: isMobile ? "100vw" : "min(420px,100vw)", background: CREAM, borderLeft: "1px solid #E7E1D4", boxShadow: "-4px 0 40px rgba(26,37,40,0.18)", display: "flex", flexDirection: "column", fontFamily: "Raleway, Inter, sans-serif" }}>
+
+      <div style={{ height: 3, background: BRONZE, flexShrink: 0 }} />
+
+      <div style={{ background: PETROL, padding: "16px 20px", flexShrink: 0 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ width: 40, height: 40, background: BRONZE, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 17, color: CREAM, fontWeight: 400 }}>
+              {nombre.charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: CREAM, lineHeight: 1.3 }}>{nombre}</div>
+              <div style={{ fontSize: 11, color: BRONZE, marginTop: 1 }}>{telefono || "Sin teléfono"}</div>
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <button onClick={toggleModo} style={{ padding: "5px 12px", background: modoManual ? "rgba(172,138,84,0.15)" : "rgba(64,92,107,0.3)", border: `1px solid ${modoManual ? BRONZE : "#405c6b"}`, color: modoManual ? BRONZE : "#7aafc4", cursor: "pointer", fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", fontFamily: "Raleway, Inter, sans-serif" }}>
+              {modoManual ? "MANUAL" : "ANA ACTIVA"}
+            </button>
+            <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(248,246,241,0.4)", fontSize: 18, cursor: "pointer", padding: "0 0 0 8px" }}>✕</button>
+          </div>
+        </div>
+        <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid rgba(255,255,255,0.06)", fontSize: 10, color: "rgba(248,246,241,0.3)", letterSpacing: "0.12em" }}>
+          ANA · CAPTACIÓN PARTICULARES
+        </div>
+      </div>
+
+      {modoManual && (
+        <div style={{ padding: "8px 20px", background: "rgba(172,138,84,0.08)", borderBottom: "1px solid rgba(172,138,84,0.2)", fontSize: 11, color: "#8f7141", flexShrink: 0 }}>
+          ANA en pausa — tus mensajes llegan directamente al propietario
+        </div>
+      )}
+
+      {!telefono && (
+        <div style={{ padding: "20px", background: "rgba(162,58,58,0.06)", borderBottom: "1px solid rgba(162,58,58,0.15)", fontSize: 12, color: "#A23A3A", flexShrink: 0 }}>
+          Este propietario no tiene teléfono. Añádelo en la ficha para poder contactar.
+        </div>
+      )}
+
+      <div ref={chatRef} style={{ flex: 1, overflowY: "auto", padding: "20px 16px", background: "#EDEAE4" }}>
+        {loadingConv ? (
+          <div style={{ textAlign: "center", padding: 48, color: "#9A968A", fontSize: 12 }}>Cargando conversación...</div>
+        ) : mensajes.length === 0 ? (
+          <div style={{ textAlign: "center", padding: 48, color: "#9A968A", fontSize: 12, fontStyle: "italic" }}>
+            {telefono ? "Sin mensajes aún. Escribe el primer mensaje." : "Añade un teléfono para iniciar la conversación."}
+          </div>
+        ) : (
+          mensajes.map((m, i) => {
+            const isAgente = m.from === "agente_manual" || m.from === "ana";
+            const isSistema = m.from === "sistema";
+            if (isSistema) return (
+              <div key={m.id || i} style={{ textAlign: "center", margin: "8px 0" }}>
+                <span style={{ fontSize: 10, color: "#9A968A", background: "rgba(154,150,138,0.15)", padding: "3px 10px" }}>{m.text}</span>
+              </div>
+            );
+            return (
+              <div key={m.id || i} style={{ display: "flex", justifyContent: isAgente ? "flex-end" : "flex-start", marginBottom: 8 }}>
+                <div style={{ maxWidth: "80%", background: isAgente ? PETROL : "#fff", color: isAgente ? CREAM : PETROL, padding: "10px 14px", fontSize: 13, lineHeight: 1.5, boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}>
+                  <div>{m.text}</div>
+                  <div style={{ fontSize: 10, color: isAgente ? "rgba(248,246,241,0.4)" : "#9A968A", marginTop: 4, textAlign: "right" }}>{m.ts}</div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      <div style={{ padding: "12px 16px", background: "#fff", borderTop: "1px solid #E7E1D4", flexShrink: 0 }}>
+        <div style={{ display: "flex", gap: 8 }}>
+          <input value={input} onChange={e => setInput(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && !e.shiftKey && handleSend()}
+            placeholder={telefono ? "Escribe un mensaje..." : "Sin teléfono"}
+            disabled={!telefono || loading}
+            style={{ flex: 1, padding: "10px 14px", border: "1px solid #E7E1D4", background: telefono ? "#fff" : "#F5F5F5", color: PETROL, fontSize: 13, fontFamily: "Inter, sans-serif", outline: "none" }} />
+          <button onClick={handleSend} disabled={!telefono || loading || !input.trim()}
+            style={{ padding: "10px 16px", background: input.trim() && telefono ? PETROL : "#E7E1D4", border: "none", color: input.trim() && telefono ? CREAM : "#9A968A", cursor: input.trim() && telefono ? "pointer" : "not-allowed", fontSize: 13, fontFamily: "Inter, sans-serif" }}>
+            {loading ? "..." : "→"}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -240,6 +452,7 @@ export default function Captacion() {
   const [scrapingMsg, setScrapingMsg] = useState("");
   const [stats, setStats] = useState({});
   const [fichaItem, setFichaItem] = useState(null);
+  const [anaItem, setAnaItem] = useState(null);
 
   useEffect(() => { load(); }, [filtroEstado]);
 
@@ -358,7 +571,7 @@ export default function Captacion() {
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
             {filtrados.map(item => (
-              <TarjetaParticular key={item.id} item={item} onUpdate={handleUpdate} onClick={() => setFichaItem(item)} />
+              <TarjetaParticular key={item.id} item={item} onUpdate={handleUpdate} onClick={() => setFichaItem(item)} onAna={() => setAnaItem(item)} />
             ))}
           </div>
         )}
@@ -366,6 +579,8 @@ export default function Captacion() {
 
       {/* Ficha modal */}
       {fichaItem && <FichaModal item={fichaItem} onClose={() => setFichaItem(null)} onUpdate={handleUpdate} />}
+      {/* Panel ANA */}
+      {anaItem && <AnaPanel item={anaItem} onClose={() => setAnaItem(null)} />}
     </div>
   );
 }
