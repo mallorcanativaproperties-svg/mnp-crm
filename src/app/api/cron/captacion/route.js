@@ -50,11 +50,11 @@ async function runApifyActor(input) {
 
 function detectarChivatos(item) {
   const chivatos = [];
-  if (item.priceReduction || item.hasPriceDropped) {
-    chivatos.push({ tipo: "bajada_precio", valor: item.priceReductionPercentage || null });
+  if (item.transaction?.priceDrop) {
+    chivatos.push({ tipo: "bajada_precio", valor: item.transaction.priceDrop || null });
   }
-  if (item.publishedDate) {
-    const dias = Math.floor((Date.now() - new Date(item.publishedDate).getTime()) / 86400000);
+  if (item.publicationDate) {
+    const dias = Math.floor((Date.now() - new Date(item.publicationDate).getTime()) / 86400000);
     if (dias <= 2) chivatos.push({ tipo: "recien_publicado", valor: dias });
     if (dias > 90) chivatos.push({ tipo: "mas_3_meses", valor: dias });
   }
@@ -94,38 +94,40 @@ export async function GET() {
       console.log(`${search.label}: ${items.length} anuncios`);
 
       for (const item of items) {
-        const id = item.id || item.propertyId || item.url?.match(/\/(\d+)\/?$/)?.[1];
+        const id = item.propertyId || item.id;
         if (!id) continue;
 
-        const telefono = item.phone || item.contactPhone || item.advertiser?.phone || null;
+        // Solo particulares — saltar agencias (agency.type === "professional")
+        if (item.agency?.type === "professional") continue;
+
+        const telefono = item.phone || null;
         if (!telefono) { totalSinTelefono++; }
 
         const chivatos = detectarChivatos(item);
 
         const { error } = await supabase.from("captacion_particulares").upsert({
-          idealista_id: String(id), // usamos mismo campo aunque sea fotocasa
+          idealista_id: String(id),
           url: item.url,
-          titulo: item.title,
-          precio: item.price,
-          precio_m2: item.priceByArea || item.pricePerM2,
-          superficie: item.size || item.area,
-          habitaciones: item.rooms || item.bedrooms,
-          banos: item.bathrooms || item.baths,
-          direccion: item.address || item.location?.address,
-          municipio: item.municipality || item.location?.municipality || search.location,
-          distrito: item.district || item.location?.district,
-          latitud: item.latitude || item.coordinates?.lat,
-          longitud: item.longitude || item.coordinates?.lng,
+          titulo: item.street ? `${item.street}, ${item.location?.level5Name || search.location}` : item.description?.slice(0, 80),
+          precio: item.transaction?.price,
+          superficie: item.surface,
+          habitaciones: item.rooms,
+          banos: item.baths,
+          direccion: item.street,
+          municipio: item.location?.level5Name || item.location?.level4Name || search.location,
+          distrito: item.location?.level8Name || item.location?.level7Name,
+          latitud: item.location?.latitude ? parseFloat(item.location.latitude) : null,
+          longitud: item.location?.longitude ? parseFloat(item.location.longitude) : null,
           telefono,
-          nombre_contacto: item.advertiser?.name || null,
-          foto_principal: item.thumbnail || item.photos?.[0]?.url || item.images?.[0],
-          precio_anterior: item.originalPrice || null,
-          bajada_precio: !!(item.priceReduction || item.hasPriceDropped),
-          porcentaje_bajada: item.priceReductionPercentage || null,
-          dias_publicado: item.publishedDate
-            ? Math.floor((Date.now() - new Date(item.publishedDate).getTime()) / 86400000)
+          nombre_contacto: item.agency?.name || null,
+          foto_principal: item.multimedia?.find(m => m.type === "2")?.url || null,
+          precio_anterior: item.transaction?.priceDrop ? Math.round(item.transaction.price / (1 - item.transaction.priceDrop / 100)) : null,
+          bajada_precio: !!item.transaction?.priceDrop,
+          porcentaje_bajada: item.transaction?.priceDrop || null,
+          dias_publicado: item.publicationDate
+            ? Math.floor((Date.now() - new Date(item.publicationDate).getTime()) / 86400000)
             : null,
-          fecha_publicacion: item.publishedDate || null,
+          fecha_publicacion: item.publicationDate || null,
           chivatos,
           updated_at: new Date().toISOString(),
         }, { onConflict: "idealista_id", ignoreDuplicates: false });
