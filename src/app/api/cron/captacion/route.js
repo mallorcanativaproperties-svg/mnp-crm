@@ -81,7 +81,8 @@ export async function GET() {
       try {
         items = await runApifyActor({
           startUrls: [{ url: search.url }],
-          maxListings: 100,
+          maxListings: 500,
+          maxPages: 50,
         });
       } catch (e) {
         console.error(`Error en búsqueda ${search.label}:`, e.message);
