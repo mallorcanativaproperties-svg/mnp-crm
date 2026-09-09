@@ -120,18 +120,29 @@ export default function Captacion() {
 
   async function handleScrapingManual() {
     setScrapingManual(true);
-    setScrapingMsg("Iniciando scraping en Idealista...");
+    setScrapingMsg("Iniciando scraping en Fotocasa... (puede tardar 3-5 minutos)");
     try {
-      const res = await fetch("/api/cron/captacion");
+      const ctrl = new AbortController();
+      const timeout = setTimeout(() => ctrl.abort(), 290000); // 4.8 minutos
+      const res = await fetch("/api/cron/captacion", { signal: ctrl.signal });
+      clearTimeout(timeout);
       const data = await res.json();
       if (data.ok) {
-        setScrapingMsg(`✓ Completado — ${data.nuevos} nuevos, ${data.sin_telefono} sin teléfono`);
+        setScrapingMsg(`✓ Completado — ${data.guardados} guardados de ${data.encontrados} encontrados`);
         await load();
       } else {
         setScrapingMsg("Error: " + data.error);
       }
-    } catch (e) { setScrapingMsg("Error: " + e.message); }
-    finally { setScrapingManual(false); }
+    } catch (e) {
+      if (e.name === "AbortError") {
+        setScrapingMsg("✓ Scraping en curso — recarga en unos minutos para ver los resultados");
+        await load();
+      } else {
+        setScrapingMsg("Error: " + e.message);
+      }
+    } finally {
+      setScrapingManual(false);
+    }
   }
 
   function handleWhatsApp(item) {
