@@ -175,8 +175,8 @@ export async function GET() {
 
       for (const item of items) {
         const norm = normalizarItem(item, search);
-        if (!norm?.id) continue;
-        if (!norm.es_particular) continue; // Solo particulares
+        if (!norm?.id) { console.log(`${search.label}: item sin id`, JSON.stringify(item).slice(0, 100)); continue; }
+        if (!norm.es_particular) { console.log(`${search.label}: descartado agencia — nombre_contacto:`, norm.nombre_contacto); continue; }
 
         const chivatos = detectarChivatos(norm);
         // Verificar si ya existe para no sobreescribir fecha_publicacion
