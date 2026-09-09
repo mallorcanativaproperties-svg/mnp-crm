@@ -171,6 +171,9 @@ export async function GET() {
       }
       const { search, items } = result.value;
       console.log(`${search.label}: ${items.length} anuncios`);
+      if (search.portal === "milanuncios" && items[0]) {
+        console.log("Milanuncios sample:", JSON.stringify(items[0]).slice(0, 500));
+      }
       totalEncontrados += items.length;
 
       for (const item of items) {
