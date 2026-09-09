@@ -92,6 +92,8 @@ export default function Captacion() {
   const [loading, setLoading] = useState(true);
   const [filtroEstado, setFiltroEstado] = useState("pendiente");
   const [filtroBusqueda, setFiltroBusqueda] = useState("");
+  const [filtroIsla, setFiltroIsla] = useState("todas");
+  const [filtroTipo, setFiltroTipo] = useState("todos");
   const [scrapingManual, setScrapingManual] = useState(false);
   const [scrapingMsg, setScrapingMsg] = useState("");
   const [stats, setStats] = useState({});
@@ -151,11 +153,17 @@ export default function Captacion() {
     window.open(`https://wa.me/${phone}?text=${msg}`, "_blank");
   }
 
-  const filtrados = items.filter(i =>
-    !filtroBusqueda || i.titulo?.toLowerCase().includes(filtroBusqueda.toLowerCase()) ||
-    i.municipio?.toLowerCase().includes(filtroBusqueda.toLowerCase()) ||
-    i.telefono?.includes(filtroBusqueda)
-  );
+  const filtrados = items.filter(i => {
+    if (filtroBusqueda && !i.titulo?.toLowerCase().includes(filtroBusqueda.toLowerCase()) &&
+        !i.municipio?.toLowerCase().includes(filtroBusqueda.toLowerCase()) &&
+        !i.telefono?.includes(filtroBusqueda)) return false;
+    if (filtroIsla === "mallorca" && !i.municipio?.toLowerCase().includes("mallorca") &&
+        i.url?.includes("menorca")) return false;
+    if (filtroIsla === "menorca" && !i.url?.includes("menorca")) return false;
+    if (filtroTipo === "particular" && i.nombre_contacto) return false;
+    if (filtroTipo === "agencia" && !i.nombre_contacto) return false;
+    return true;
+  });
 
   const totalConChivatos = items.filter(i => (i.chivatos || []).length > 0).length;
 
@@ -199,6 +207,18 @@ export default function Captacion() {
           <input value={filtroBusqueda} onChange={e => setFiltroBusqueda(e.target.value)}
             placeholder="Buscar por zona, teléfono..."
             style={{ flex: 1, minWidth: 200, padding: "9px 14px", border: `1px solid ${BORDER}`, background: "#fff", color: PETROL, fontSize: 13, fontFamily: "Inter, sans-serif", outline: "none" }} />
+          <select value={filtroIsla} onChange={e => setFiltroIsla(e.target.value)}
+            style={{ padding: "9px 14px", border: `1px solid ${BORDER}`, background: "#fff", color: PETROL, fontSize: 13, fontFamily: "Inter, sans-serif", cursor: "pointer", appearance: "auto" }}>
+            <option value="todas">Todas las islas</option>
+            <option value="mallorca">Mallorca</option>
+            <option value="menorca">Menorca</option>
+          </select>
+          <select value={filtroTipo} onChange={e => setFiltroTipo(e.target.value)}
+            style={{ padding: "9px 14px", border: `1px solid ${BORDER}`, background: "#fff", color: PETROL, fontSize: 13, fontFamily: "Inter, sans-serif", cursor: "pointer", appearance: "auto" }}>
+            <option value="todos">Particular y agencia</option>
+            <option value="particular">Solo particulares</option>
+            <option value="agencia">Solo agencias</option>
+          </select>
           <select value={filtroEstado} onChange={e => setFiltroEstado(e.target.value)}
             style={{ padding: "9px 14px", border: `1px solid ${BORDER}`, background: "#fff", color: PETROL, fontSize: 13, fontFamily: "Inter, sans-serif", cursor: "pointer", appearance: "auto" }}>
             <option value="todos">Todos los estados</option>
