@@ -4,14 +4,12 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 const APIFY_TOKEN = process.env.APIFY_TOKEN;
-const ACTOR_ID = "igolaizola~fotocasa-scraper";
+const ACTOR_ID = "fetch_cat~fotocasa-property-listings-scraper";
 
-// Búsquedas con parámetros correctos según el schema del actor
+// URLs directas de Fotocasa con filtro de particulares
 const SEARCHES = [
-  { location: "Mallorca", publicationDate: "last48h", label: "Mallorca - últimas 48h" },
-  { location: "Mallorca", publicationDate: "lastWeek", sortBy: "latest", label: "Mallorca - última semana" },
-  { location: "Menorca", publicationDate: "last48h", label: "Menorca - últimas 48h" },
-  { location: "Menorca", publicationDate: "lastWeek", sortBy: "latest", label: "Menorca - última semana" },
+  { url: "https://www.fotocasa.es/es/comprar/viviendas/particulares/illes-balears-provincia/mallorca/pl", label: "Mallorca - particulares" },
+  { url: "https://www.fotocasa.es/es/comprar/viviendas/particulares/illes-balears-provincia/menorca/pl", label: "Menorca - particulares" },
 ];
 
 async function runApifyActor(input) {
@@ -97,11 +95,9 @@ export async function GET() {
       console.log(`${search.label}: ${items.length} anuncios desde ${search.url}`);
 
       for (const item of items) {
-        const id = item.propertyId || item.id;
+        const id = item.propertyId || item.id || item.realEstateAdId;
         if (!id) continue;
 
-        // Filtrar particulares — saltar agencias profesionales
-        if (item.agency && item.agency.type === "professional") continue;
         const telefono = item.phone || null;
         if (!telefono) { totalSinTelefono++; }
 
