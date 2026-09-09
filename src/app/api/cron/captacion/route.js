@@ -84,7 +84,7 @@ export async function GET() {
           operation: "buy",
           propertyType: "home",
           advertiserType: "private", // solo particulares
-          maxItems: 100,
+          maxListings: 100,
         });
       } catch (e) {
         console.error(`Error en búsqueda ${search.label}:`, e.message);
