@@ -18,15 +18,15 @@ const SEARCHES = [
     input: { startUrls: [{ url: "https://www.fotocasa.es/es/comprar/viviendas/particulares/illes-balears-provincia/menorca/pl" }], maxListings: 100 },
     label: "Fotocasa - Menorca", isla: "Menorca", portal: "fotocasa",
   },
-  // Habitaclia — particulares (actor trev0n con URL directa)
+  // Habitaclia — todas las viviendas, filtrar particulares por campo
   {
     actor: "trev0n~habitaclia-com-spain-scraper",
-    input: { startUrls: [{ url: "https://www.habitaclia.com/viviendas-particulares-provincia-mallorca.htm" }], maxResults: 200 },
+    input: { startUrls: [{ url: "https://www.habitaclia.com/viviendas-provincia-mallorca.htm" }], maxResults: 500 },
     label: "Habitaclia - Mallorca", isla: "Mallorca", portal: "habitaclia",
   },
   {
     actor: "trev0n~habitaclia-com-spain-scraper",
-    input: { startUrls: [{ url: "https://www.habitaclia.com/viviendas-particulares-provincia-menorca.htm" }], maxResults: 100 },
+    input: { startUrls: [{ url: "https://www.habitaclia.com/viviendas-provincia-menorca.htm" }], maxResults: 200 },
     label: "Habitaclia - Menorca", isla: "Menorca", portal: "habitaclia",
   },
   // Milanuncios — particulares con URL directa filtrada
@@ -176,6 +176,9 @@ export async function GET() {
       console.log(`${search.label}: ${items.length} anuncios`);
       if (search.portal === "milanuncios" && items[0]) {
         console.log("Milanuncios sample:", JSON.stringify(items[0]).slice(0, 500));
+      }
+      if (search.portal === "habitaclia" && items[0]) {
+        console.log("Habitaclia sample:", JSON.stringify(items[0]).slice(0, 500));
       }
       totalEncontrados += items.length;
 
