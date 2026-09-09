@@ -3,7 +3,7 @@ export const maxDuration = 120;
 import { NextResponse } from "next/server";
 
 const APIFY_TOKEN = process.env.APIFY_TOKEN;
-const ACTOR_ID = "igolaizola~fotocasa-scraper";
+const ACTOR_ID = "ralvaromariano~fotocasa";
 
 export async function GET() {
   try {
@@ -12,7 +12,7 @@ export async function GET() {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ location: "mallorca", operation: "buy", advertiserType: "private", maxItems: 5 }),
+        body: JSON.stringify({ startUrls: [{ url: "https://www.fotocasa.es/es/comprar/viviendas/mallorca/particulares/l" }], maxItems: 5 }),
       }
     );
 
