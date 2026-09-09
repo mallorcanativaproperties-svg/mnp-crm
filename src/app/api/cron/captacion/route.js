@@ -160,15 +160,17 @@ export async function GET() {
     const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
     let totalGuardados = 0, totalSinTelefono = 0, totalEncontrados = 0;
 
-    for (const search of SEARCHES) {
-      let items = [];
-      try {
-        items = await runApifyActor(search.actor, search.input);
-        console.log(`${search.label}: ${items.length} anuncios`);
-      } catch (e) {
-        console.error(`Error en ${search.label}:`, e.message);
+    const results = await Promise.allSettled(
+      SEARCHES.map(search => runApifyActor(search.actor, search.input).then(items => ({ search, items })))
+    );
+
+    for (const result of results) {
+      if (result.status === "rejected") {
+        console.error("Error en búsqueda:", result.reason?.message);
         continue;
       }
+      const { search, items } = result.value;
+      console.log(`${search.label}: ${items.length} anuncios`);
       totalEncontrados += items.length;
 
       for (const item of items) {
