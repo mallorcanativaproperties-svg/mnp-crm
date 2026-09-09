@@ -12,24 +12,14 @@ export async function GET() {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          location: "mallorca",
-          operation: "buy",
-          maxItems: 3,
-        }),
+        body: JSON.stringify({ location: "mallorca", operation: "buy", maxItems: 10 }),
       }
     );
-
-    if (!runRes.ok) {
-      const err = await runRes.text();
-      return NextResponse.json({ error: `Actor error ${runRes.status}: ${err.slice(0, 300)}` });
-    }
 
     const runData = await runRes.json();
     const runId = runData.data?.id;
     let status = runData.data?.status || "RUNNING";
     let attempts = 0;
-
     while (["RUNNING", "READY"].includes(status) && attempts < 18) {
       await new Promise(r => setTimeout(r, 5000));
       const sr = await fetch(`https://api.apify.com/v2/actor-runs/${runId}?token=${APIFY_TOKEN}`);
@@ -37,17 +27,20 @@ export async function GET() {
       attempts++;
     }
 
-    const itemsRes = await fetch(
-      `https://api.apify.com/v2/actor-runs/${runId}/dataset/items?token=${APIFY_TOKEN}&limit=3`
-    );
+    const itemsRes = await fetch(`https://api.apify.com/v2/actor-runs/${runId}/dataset/items?token=${APIFY_TOKEN}&limit=10`);
     const items = await itemsRes.json();
 
-    return NextResponse.json({
-      status,
-      count: items.length,
-      keys: items[0] ? Object.keys(items[0]) : [],
-      sample: items[0] || null,
-    });
+    // Mostrar solo los campos relevantes para identificar particulares
+    const resumen = items.map(i => ({
+      id: i.propertyId,
+      agency_type: i.agency?.type || null,
+      agency_name: i.agency?.name || null,
+      agency_null: i.agency === null,
+      phone: i.phone,
+      purchaseType: i.purchaseType,
+    }));
+
+    return NextResponse.json({ status, count: items.length, resumen });
   } catch (e) {
     return NextResponse.json({ error: e.message });
   }
