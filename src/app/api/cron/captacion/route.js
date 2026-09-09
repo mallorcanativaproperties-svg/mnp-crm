@@ -177,6 +177,18 @@ export async function GET() {
         if (!norm.es_particular) continue; // Solo particulares
 
         const chivatos = detectarChivatos(norm);
+        // Verificar si ya existe para no sobreescribir fecha_publicacion
+        const { data: existing } = await supabase.from("captacion_particulares")
+          .select("fecha_publicacion, dias_publicado")
+          .eq("idealista_id", `${search.portal}_${String(norm.id)}`)
+          .single();
+
+        // Si ya existe con fecha real, conservarla y recalcular días
+        const fechaPub = existing?.fecha_publicacion || norm.fecha_publicacion;
+        const diasPub = fechaPub
+          ? Math.floor((Date.now() - new Date(fechaPub).getTime()) / 86400000)
+          : norm.dias_publicado;
+
         const { error } = await supabase.from("captacion_particulares").upsert({
           idealista_id: `${search.portal}_${String(norm.id)}`,
           url: norm.url,
@@ -196,8 +208,8 @@ export async function GET() {
           foto_principal: norm.foto_principal,
           fotos: norm.fotos,
           bajada_precio: norm.bajada_precio,
-          dias_publicado: norm.dias_publicado,
-          fecha_publicacion: norm.fecha_publicacion,
+          dias_publicado: diasPub,
+          fecha_publicacion: fechaPub,
           chivatos,
           portal: search.portal,
           updated_at: new Date().toISOString(),
