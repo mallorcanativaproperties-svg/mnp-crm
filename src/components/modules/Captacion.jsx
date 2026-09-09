@@ -45,13 +45,20 @@ function TarjetaParticular({ item, onUpdate, onWhatsApp }) {
           </div>
           <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 15, color: PETROL, marginBottom: 4, lineHeight: 1.3 }}>{item.titulo || "Sin título"}</div>
           <div style={{ fontSize: 12, color: "#9A968A", marginBottom: 6 }}>{item.direccion || item.municipio}</div>
-          <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 16, flexWrap: "wrap", alignItems: "center" }}>
             <span style={{ fontSize: 14, color: BRONZE, fontWeight: 600 }}>{fmtP(item.precio)}</span>
-            {item.bajada_precio && item.precio_anterior && (
-              <span style={{ fontSize: 12, color: "#A23A3A", textDecoration: "line-through" }}>{fmtP(item.precio_anterior)}</span>
+            {item.bajada_precio && (
+              <span style={{ fontSize: 11, color: "#A23A3A", background: "rgba(162,58,58,0.08)", padding: "2px 8px", fontFamily: "Inter, sans-serif" }}>
+                ↓ Precio rebajado{item.precio_anterior ? ` (antes ${fmtP(item.precio_anterior)})` : ""}
+              </span>
             )}
-            {item.superficie && <span style={{ fontSize: 12, color: "#9A968A" }}>{item.superficie} m²</span>}
             {item.habitaciones && <span style={{ fontSize: 12, color: "#9A968A" }}>{item.habitaciones} hab.</span>}
+            {item.superficie && <span style={{ fontSize: 12, color: "#9A968A" }}>{item.superficie} m²</span>}
+            {item.dias_publicado !== null && item.dias_publicado !== undefined && (
+              <span style={{ fontSize: 11, color: item.dias_publicado <= 2 ? "#2C6E52" : item.dias_publicado > 90 ? "#9C6E1B" : "#9A968A", fontFamily: "Inter, sans-serif" }}>
+                {item.dias_publicado === 0 ? "Hoy" : item.dias_publicado === 1 ? "Ayer" : `Hace ${item.dias_publicado} días`}
+              </span>
+            )}
           </div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-end", flexShrink: 0 }}>
