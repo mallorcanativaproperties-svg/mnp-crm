@@ -96,7 +96,9 @@ export async function GET() {
         const id = item.id;
         if (!id) continue;
 
-        // fetch_cat no devuelve teléfono — los particulares no exponen teléfono en Fotocasa
+        // Saltar agencias — solo particulares (agencyName null)
+        if (item.agencyName) continue;
+
         const telefono = item.agencyPhone || null;
         if (!telefono) { totalSinTelefono++; }
 
