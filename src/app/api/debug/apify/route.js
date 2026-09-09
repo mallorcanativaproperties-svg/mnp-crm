@@ -12,7 +12,7 @@ export async function GET() {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ startUrls: [{ url: "https://www.fotocasa.es/es/comprar/viviendas/mallorca/particulares/l" }], maxItems: 5 }),
+        body: JSON.stringify({ startUrls: [{ url: "https://www.fotocasa.es/es/comprar/viviendas/particulares/illes-balears-provincia/mallorca/pl" }], maxItems: 5 }),
       }
     );
 

@@ -8,9 +8,8 @@ const ACTOR_ID = "ralvaromariano~fotocasa";
 
 // URLs de Fotocasa con filtro de particulares aplicado
 const SEARCHES = [
-  { url: "https://www.fotocasa.es/es/comprar/viviendas/mallorca/particulares/l", label: "Mallorca - particulares" },
-  { url: "https://www.fotocasa.es/es/comprar/viviendas/mallorca/particulares-precio-rebajado/l", label: "Mallorca - bajada precio" },
-  { url: "https://www.fotocasa.es/es/comprar/viviendas/menorca/particulares/l", label: "Menorca - particulares" },
+  { url: "https://www.fotocasa.es/es/comprar/viviendas/particulares/illes-balears-provincia/mallorca/pl", label: "Mallorca - particulares" },
+  { url: "https://www.fotocasa.es/es/comprar/viviendas/particulares/illes-balears-provincia/menorca/pl", label: "Menorca - particulares" },
 ];
 
 async function runApifyActor(input) {
