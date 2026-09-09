@@ -7,7 +7,7 @@ export async function GET() {
   const targetUrl = "https://www.idealista.com/venta-viviendas/palma-de-mallorca/con-particulares/";
 
   try {
-    const res = await fetch(`https://api.zenrows.com/v1/?apikey=${ZENROWS_API_KEY}&url=${encodeURIComponent(targetUrl)}&js_render=false&premium_proxy=true&proxy_country=es`, {
+    const res = await fetch(`https://api.zenrows.com/v1/?apikey=${ZENROWS_API_KEY}&url=${encodeURIComponent(targetUrl)}&js_render=true&premium_proxy=true&proxy_country=es`, {
       signal: AbortSignal.timeout(55000),
     });
 
