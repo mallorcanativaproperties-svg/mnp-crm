@@ -488,7 +488,7 @@ export default function Captacion() {
 
   async function handleScrapingManual() {
     setScrapingManual(true);
-    setScrapingMsg("Iniciando scraping en Fotocasa... (puede tardar 3-5 minutos)");
+    setScrapingMsg("Iniciando scraping en portales... (puede tardar 3-5 minutos)");
     try {
       const ctrl = new AbortController();
       const timeout = setTimeout(() => ctrl.abort(), 290000);
@@ -529,7 +529,7 @@ export default function Captacion() {
             <h1 style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: "clamp(22px,5vw,30px)", fontWeight: 400, color: PETROL, margin: 0 }}>Particulares en captación</h1>
             <button onClick={handleScrapingManual} disabled={scrapingManual}
               style={{ padding: "10px 20px", background: scrapingManual ? "#E7E1D4" : PETROL, border: "none", color: scrapingManual ? "#9A968A" : CREAM, fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", cursor: scrapingManual ? "not-allowed" : "pointer", fontFamily: "Inter, sans-serif" }}>
-              {scrapingManual ? "Buscando..." : "Buscar en Fotocasa"}
+              {scrapingManual ? "Buscando..." : "Buscar en portales"}
             </button>
           </div>
           {scrapingMsg && <div style={{ marginTop: 10, fontSize: 12, color: scrapingMsg.startsWith("✓") ? "#2C6E52" : "#A23A3A" }}>{scrapingMsg}</div>}
@@ -577,7 +577,7 @@ export default function Captacion() {
         ) : filtrados.length === 0 ? (
           <div style={{ textAlign: "center", padding: 60 }}>
             <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 32, color: "#C8BFB0", marginBottom: 12 }}>◇</div>
-            <div style={{ fontSize: 13, color: "#9A968A" }}>No hay particulares en este estado.<br/>Pulsa "Buscar en Fotocasa" para importar.</div>
+            <div style={{ fontSize: 13, color: "#9A968A" }}>No hay particulares en este estado.<br/>Pulsa "Buscar en portales" para importar.</div>
           </div>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
