@@ -209,7 +209,10 @@ function TarjetaParticular({ item, onUpdate, onClick, onAna }) {
 
         {/* Título y dirección */}
         <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 14, color: PETROL, marginBottom: 3, lineHeight: 1.3 }}>{item.titulo || "Sin título"}</div>
-        <div style={{ fontSize: 11, color: "#9A968A", marginBottom: 10 }}>{item.distrito} · {item.municipio}</div>
+        <div style={{ fontSize: 11, color: "#9A968A", marginBottom: 10, display: "flex", gap: 8, alignItems: "center" }}>
+          <span>{item.distrito} · {item.municipio}</span>
+          {item.portal && <span style={{ fontSize: 9, padding: "1px 6px", background: item.portal === "fotocasa" ? "rgba(255,107,53,0.1)" : item.portal === "habitaclia" ? "rgba(0,122,255,0.1)" : "rgba(44,110,82,0.1)", color: item.portal === "fotocasa" ? "#E8450A" : item.portal === "habitaclia" ? "#0066CC" : "#2C6E52", letterSpacing: "0.06em", textTransform: "uppercase" }}>{item.portal}</span>}
+        </div>
 
         {/* Datos clave */}
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center", marginBottom: 6 }}>
