@@ -60,7 +60,7 @@ function Carrusel({ fotos }) {
   );
 }
 
-function FichaModal({ item, onClose, onUpdate }) {
+function FichaModal({ item, onClose, onUpdate, onAna }) {
   const [notas, setNotas] = useState(item.notas || "");
   const [agente, setAgente] = useState(item.agente_asignado || "");
   const [telEdit, setTelEdit] = useState(item.telefono || "");
@@ -143,11 +143,17 @@ function FichaModal({ item, onClose, onUpdate }) {
               <input value={telEdit} onChange={e => setTelEdit(e.target.value)} placeholder="Añadir teléfono del propietario..."
                 style={{ flex: 1, padding: "10px 14px", border: `1px solid ${BORDER}`, background: "#fff", color: PETROL, fontSize: 13, fontFamily: "Inter, sans-serif", outline: "none" }} />
               {telEdit && (
-                <a href={`https://wa.me/${telEdit.replace(/\D/g, "")}?text=${encodeURIComponent(`Hola! Soy de Mallorca Nativa Properties. He visto tu anuncio en Fotocasa y me gustaría hablar contigo.`)}`}
-                  target="_blank" rel="noopener noreferrer"
-                  style={{ padding: "10px 14px", background: PETROL, color: CREAM, fontSize: 11, textDecoration: "none", fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center" }}>
-                  WhatsApp
-                </a>
+                <>
+                  <a href={`https://wa.me/${telEdit.replace(/\D/g, "")}?text=${encodeURIComponent(`Hola! Soy de Mallorca Nativa Properties. He visto tu anuncio en Fotocasa y me gustaría hablar contigo.`)}`}
+                    target="_blank" rel="noopener noreferrer"
+                    style={{ padding: "10px 14px", background: "#2C6E52", color: CREAM, fontSize: 11, textDecoration: "none", fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center" }}>
+                    WhatsApp
+                  </a>
+                  <button onClick={() => { onClose(); setTimeout(() => onAna({ ...item, telefono: telEdit }), 100); }}
+                    style={{ padding: "10px 14px", background: PETROL, border: "none", color: CREAM, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>
+                    Chat ANA
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -231,10 +237,12 @@ function TarjetaParticular({ item, onUpdate, onClick, onAna }) {
             style={{ flex: 1, textAlign: "center", fontSize: 11, color: BRONZE, textDecoration: "none", border: `1px solid ${BRONZE}44`, padding: "6px 8px", fontFamily: "Inter, sans-serif" }}>
             Ver anuncio
           </a>
-          <button onClick={() => onAna(item)}
-            style={{ flex: 1, padding: "6px 8px", background: PETROL, border: "none", color: CREAM, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.04em" }}>
-            Chat ANA
-          </button>
+          {item.telefono && (
+            <button onClick={() => onAna(item)}
+              style={{ flex: 1, padding: "6px 8px", background: PETROL, border: "none", color: CREAM, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.04em" }}>
+              Chat ANA
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -578,7 +586,7 @@ export default function Captacion() {
       </div>
 
       {/* Ficha modal */}
-      {fichaItem && <FichaModal item={fichaItem} onClose={() => setFichaItem(null)} onUpdate={handleUpdate} />}
+      {fichaItem && <FichaModal item={fichaItem} onClose={() => setFichaItem(null)} onUpdate={handleUpdate} onAna={(i) => setAnaItem(i)} />}
       {/* Panel ANA */}
       {anaItem && <AnaPanel item={anaItem} onClose={() => setAnaItem(null)} />}
     </div>
