@@ -176,7 +176,7 @@ function FichaModal({ item, onClose, onUpdate, onAna }) {
           <div style={{ display: "flex", gap: 10, justifyContent: "space-between", alignItems: "center" }}>
             <a href={item.url} target="_blank" rel="noopener noreferrer"
               style={{ fontSize: 12, color: BRONZE, textDecoration: "none", border: `1px solid ${BRONZE}44`, padding: "8px 16px", fontFamily: "Inter, sans-serif" }}>
-              Ver anuncio en Fotocasa →
+              Ver anuncio en {item.portal ? item.portal.charAt(0).toUpperCase() + item.portal.slice(1) : "portal"} →
             </a>
             <button onClick={guardar} disabled={guardando}
               style={{ padding: "10px 24px", background: PETROL, border: "none", color: CREAM, fontSize: 12, fontWeight: 600, cursor: guardando ? "not-allowed" : "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.06em" }}>
