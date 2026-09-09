@@ -52,11 +52,11 @@ async function runApifyActor(input) {
 
 function detectarChivatos(item) {
   const chivatos = [];
-  if (item.transaction?.priceDrop) {
-    chivatos.push({ tipo: "bajada_precio", valor: item.transaction.priceDrop || null });
+  if (item.changeStatus === "priceReduction") {
+    chivatos.push({ tipo: "bajada_precio", valor: null });
   }
-  if (item.publicationDate) {
-    const dias = Math.floor((Date.now() - new Date(item.publicationDate).getTime()) / 86400000);
+  if (item.publishedAt) {
+    const dias = Math.floor((Date.now() - new Date(item.publishedAt).getTime()) / 86400000);
     if (dias <= 2) chivatos.push({ tipo: "recien_publicado", valor: dias });
     if (dias > 90) chivatos.push({ tipo: "mas_3_meses", valor: dias });
   }
@@ -95,10 +95,11 @@ export async function GET() {
       console.log(`${search.label}: ${items.length} anuncios desde ${search.url}`);
 
       for (const item of items) {
-        const id = item.propertyId || item.id || item.realEstateAdId;
+        const id = item.id;
         if (!id) continue;
 
-        const telefono = item.phone || null;
+        // fetch_cat no devuelve teléfono — los particulares no exponen teléfono en Fotocasa
+        const telefono = item.agencyPhone || null;
         if (!telefono) { totalSinTelefono++; }
 
         const chivatos = detectarChivatos(item);
@@ -106,26 +107,24 @@ export async function GET() {
         const { error } = await supabase.from("captacion_particulares").upsert({
           idealista_id: String(id),
           url: item.url,
-          titulo: item.street ? `${item.street}, ${item.location?.level5Name || search.location}` : item.description?.slice(0, 80),
-          precio: item.transaction?.price,
-          superficie: item.surface,
+          titulo: item.title,
+          precio: item.price,
+          precio_m2: item.pricePerSquareMeter,
+          superficie: item.area || (item.features ? parseInt(item.features.find(f => parseInt(f) > 10) || 0) : null),
           habitaciones: item.rooms,
-          banos: item.baths,
-          direccion: item.street,
-          municipio: item.location?.level5Name || item.location?.level4Name || search.location,
-          distrito: item.location?.level8Name || item.location?.level7Name,
-          latitud: item.location?.latitude ? parseFloat(item.location.latitude) : null,
-          longitud: item.location?.longitude ? parseFloat(item.location.longitude) : null,
+          banos: item.bathrooms,
+          direccion: item.address,
+          municipio: item.location || search.label.split(" - ")[0],
+          latitud: item.latitude,
+          longitud: item.longitude,
           telefono,
-          nombre_contacto: item.agency?.name || null,
-          foto_principal: item.multimedia?.find(m => m.type === "2")?.url || null,
-          precio_anterior: item.transaction?.priceDrop ? Math.round(item.transaction.price / (1 - item.transaction.priceDrop / 100)) : null,
-          bajada_precio: !!item.transaction?.priceDrop,
-          porcentaje_bajada: item.transaction?.priceDrop || null,
-          dias_publicado: item.publicationDate
-            ? Math.floor((Date.now() - new Date(item.publicationDate).getTime()) / 86400000)
+          nombre_contacto: item.agencyName || null,
+          foto_principal: item.images?.[0] || null,
+          bajada_precio: item.changeStatus === "priceReduction",
+          dias_publicado: item.publishedAt
+            ? Math.floor((Date.now() - new Date(item.publishedAt).getTime()) / 86400000)
             : null,
-          fecha_publicacion: item.publicationDate || null,
+          fecha_publicacion: item.publishedAt || null,
           chivatos,
           updated_at: new Date().toISOString(),
         }, { onConflict: "idealista_id", ignoreDuplicates: false });
