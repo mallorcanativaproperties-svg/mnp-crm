@@ -18,15 +18,15 @@ const SEARCHES = [
     input: { startUrls: [{ url: "https://www.fotocasa.es/es/comprar/viviendas/particulares/illes-balears-provincia/menorca/pl" }], maxListings: 100 },
     label: "Fotocasa - Menorca", isla: "Menorca", portal: "fotocasa",
   },
-  // Habitaclia — todas las viviendas, filtrar particulares por campo
+  // Habitaclia — particulares (studio-amba con location)
   {
-    actor: "trev0n~habitaclia-com-spain-scraper",
-    input: { startUrls: [{ url: "https://www.habitaclia.com/viviendas-provincia-mallorca.htm" }], maxResults: 500 },
+    actor: "studio-amba~habitaclia-scraper",
+    input: { location: "mallorca", listingType: "comprar", propertyType: "pisos", maxResults: 200, proxyConfiguration: { useApifyProxy: true, apifyProxyGroups: ["RESIDENTIAL"] } },
     label: "Habitaclia - Mallorca", isla: "Mallorca", portal: "habitaclia",
   },
   {
-    actor: "trev0n~habitaclia-com-spain-scraper",
-    input: { startUrls: [{ url: "https://www.habitaclia.com/viviendas-provincia-menorca.htm" }], maxResults: 200 },
+    actor: "studio-amba~habitaclia-scraper",
+    input: { location: "menorca", listingType: "comprar", propertyType: "pisos", maxResults: 100, proxyConfiguration: { useApifyProxy: true, apifyProxyGroups: ["RESIDENTIAL"] } },
     label: "Habitaclia - Menorca", isla: "Menorca", portal: "habitaclia",
   },
   // Milanuncios — particulares con URL directa filtrada
@@ -95,26 +95,27 @@ function normalizarItem(item, search) {
       es_particular: !item.agencyName,
     };
   } else if (search.portal === "habitaclia") {
+    const id = item.adId || item.id || item.propertyId || item.realEstateAdId;
     return {
-      id: item.adId || item.id || item.propertyId || item.realEstateAdId,
-      url: item.detailUrl || item.url,
-      titulo: item.title || item.address,
+      id,
+      url: item.url || item.detailUrl,
+      titulo: item.itemTitle || item.title || item.address,
       precio: item.price,
-      superficie: item.area || item.size,
+      superficie: item.surface || item.area || item.size,
       habitaciones: item.rooms || item.bedrooms,
       banos: item.bathrooms || item.baths,
-      precio_m2: item.priceByArea || item.pricePerM2 || (item.price && (item.area || item.size) ? Math.round(item.price / (item.area || item.size)) : null),
-      direccion: item.address,
+      precio_m2: item.priceByArea || item.pricePerM2 || (item.price && (item.surface || item.area) ? Math.round(item.price / (item.surface || item.area)) : null),
+      direccion: item.address || item.location,
       municipio: item.municipality || item.location,
       latitud: item.latitude || item.coordinates?.lat,
       longitud: item.longitude || item.coordinates?.lng,
       telefono: item.phone || item.advertiserPhone || null,
       nombre_contacto: item.advertiserName || item.agencyName || null,
-      fotos: item.images || item.photos || (item.imageUrl ? [item.imageUrl] : []),
-      foto_principal: item.images?.[0] || item.photos?.[0] || item.imageUrl || null,
+      fotos: item.images || item.photos || (item.image ? [item.image] : []),
+      foto_principal: item.images?.[0] || item.photos?.[0] || item.image || null,
       bajada_precio: !!(item.priceReduction || item.hasPriceDropped),
       dias_publicado: item.publishedAt ? Math.floor((Date.now() - new Date(item.publishedAt).getTime()) / 86400000) : null,
-      fecha_publicacion: item.publishedAt || null,
+      fecha_publicacion: item.publishedAt || item.scrapedAt || null,
       es_particular: !item.agencyName && !item.advertiserName?.toLowerCase().includes("inmob") && !item.advertiserName?.toLowerCase().includes("s.l") && !item.advertiserName?.toLowerCase().includes("grup"),
     };
   } else if (search.portal === "milanuncios") {
