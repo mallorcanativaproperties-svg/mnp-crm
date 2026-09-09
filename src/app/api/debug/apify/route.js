@@ -1,35 +1,39 @@
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 import { NextResponse } from "next/server";
+import { HttpsProxyAgent } from "https-proxy-agent";
 
 export async function GET() {
-  const host = process.env.BRIGHTDATA_HOST;
   const user = process.env.BRIGHTDATA_USER;
   const pass = process.env.BRIGHTDATA_PASS;
   const targetUrl = "https://www.idealista.com/venta-viviendas/mallorca/";
 
   try {
-    const auth = Buffer.from(`${user}:${pass}`).toString("base64");
-    // Web Unlocker API — petición directa con autenticación proxy
-    const res = await fetch(`https://${host}/v1/requests`, {
-      method: "POST",
+    const proxyUrl = `https://${user}:${pass}@brd.superproxy.io:44445`;
+    const agent = new HttpsProxyAgent(proxyUrl);
+
+    const res = await fetch(targetUrl, {
+      // @ts-ignore
+      agent,
       headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Basic ${auth}`,
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept-Language": "es-ES,es;q=0.9",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
       },
-      body: JSON.stringify({ url: targetUrl, country: "es" }),
       signal: AbortSignal.timeout(55000),
     });
 
-    const text = await res.text();
-    let data;
-    try { data = JSON.parse(text); } catch { data = { raw: text.slice(0, 500) }; }
+    const html = await res.text();
+    const blocked = html.includes("DataDome") || html.includes("captcha") || html.length < 5000;
+    const hasListings = html.includes("idealista.com/inmueble") || html.includes('"adId"') || html.includes("item-multimedia");
 
-    const html = data.html || data.body || text;
-    const blocked = typeof html === "string" && (html.includes("DataDome") || html.includes("captcha") || html.length < 5000);
-    const hasListings = typeof html === "string" && (html.includes("idealista.com/inmueble") || html.includes('"adId"'));
-
-    return NextResponse.json({ status: res.status, blocked, hasListings, htmlLength: typeof html === "string" ? html.length : 0, data });
+    return NextResponse.json({
+      status: res.status,
+      blocked,
+      hasListings,
+      htmlLength: html.length,
+      snippet: html.slice(0, 500),
+    });
   } catch (e) {
     return NextResponse.json({ error: e.message });
   }

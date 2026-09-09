@@ -10,6 +10,7 @@
   "dependencies": {
     "@supabase/supabase-js": "2.45.0",
     "basic-ftp": "^6.0.1",
+    "https-proxy-agent": "^9.1.0",
     "jspdf": "^4.2.1",
     "next": "^14.2.35",
     "nodemailer": "^8.0.7",
