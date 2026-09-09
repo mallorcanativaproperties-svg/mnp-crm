@@ -79,7 +79,7 @@ export async function GET() {
       try {
         items = await runApifyActor({
           location: search.location,
-          operation: "sale",
+          operation: "buy",
           propertyType: "homes",
           advertiserType: "private", // solo particulares
           maxItems: 100,
