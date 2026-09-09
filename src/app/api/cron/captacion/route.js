@@ -101,18 +101,23 @@ export async function GET() {
 
         const chivatos = detectarChivatos(item);
 
-        // Extraer superficie y habitaciones de features si no vienen directamente
+        // Extraer campos de features
         const featNums = (item.features || []).map(f => parseInt(f)).filter(n => !isNaN(n));
         const superficieVal = item.area || featNums.find(n => n > 20) || null;
         const habitacionesVal = item.rooms || featNums.find(n => n > 0 && n <= 10) || null;
         const banosVal = item.bathrooms || null;
+        // Calcular precio/m² si no viene del actor
+        const precioM2Val = item.pricePerSquareMeter || (item.price && superficieVal ? Math.round(item.price / superficieVal) : null);
+        // dias_publicado desde publishedAt o scrapedAt
+        const fechaPub = item.publishedAt || item.scrapedAt || null;
+        const diasPubVal = fechaPub ? Math.floor((Date.now() - new Date(fechaPub).getTime()) / 86400000) : null;
 
         const { error } = await supabase.from("captacion_particulares").upsert({
           idealista_id: String(id),
           url: item.url,
           titulo: item.title,
           precio: item.price,
-          precio_m2: item.pricePerSquareMeter,
+          precio_m2: precioM2Val,
           superficie: superficieVal,
           habitaciones: habitacionesVal,
           banos: banosVal,
@@ -126,10 +131,8 @@ export async function GET() {
           foto_principal: item.images?.[0] || null,
           fotos: item.images || [],
           bajada_precio: item.changeStatus === "priceReduction",
-          dias_publicado: item.publishedAt
-            ? Math.floor((Date.now() - new Date(item.publishedAt).getTime()) / 86400000)
-            : null,
-          fecha_publicacion: item.publishedAt || null,
+          dias_publicado: diasPubVal,
+          fecha_publicacion: item.publishedAt || item.scrapedAt || null,
           chivatos,
           updated_at: new Date().toISOString(),
         }, { onConflict: "idealista_id", ignoreDuplicates: false });

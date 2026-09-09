@@ -109,11 +109,13 @@ function FichaModal({ item, onClose, onUpdate }) {
               { label: "Bajada", value: item.bajada_precio ? `Sí${item.porcentaje_bajada ? ` (${Math.round(item.porcentaje_bajada)}%)` : ""}` : "No" },
               { label: "Superficie", value: item.superficie ? `${item.superficie} m²` : "—" },
               { label: "Habitaciones", value: item.habitaciones || "—" },
-              { label: "Baños", value: item.banos || "—" },
               { label: "Publicado", value: fmtDias(item.dias_publicado) || "—" },
-              { label: "Fecha publicación", value: item.fecha_publicacion ? new Date(item.fecha_publicacion).toLocaleDateString("es-ES") : "—" },
               { label: "Distrito", value: item.distrito || "—" },
               { label: "Municipio", value: item.municipio || "—" },
+              { label: "Baños", value: item.banos || "—" },
+              { label: "Ascensor", value: (item.features || []).includes("5") || (item.features || []).includes(5) ? "Sí" : "—" },
+              { label: "Días publicado", value: item.dias_publicado !== null && item.dias_publicado !== undefined ? fmtDias(item.dias_publicado) : "—" },
+              { label: "Fecha publicación", value: item.fecha_publicacion ? new Date(item.fecha_publicacion).toLocaleDateString("es-ES") : "—" },
               { label: "Contacto", value: item.nombre_contacto || "Particular" },
             ].map(({ label, value }) => (
               <div key={label} style={{ background: "#fff", border: `1px solid ${BORDER}`, padding: "12px 14px" }}>
@@ -204,15 +206,19 @@ function TarjetaParticular({ item, onUpdate, onClick }) {
         <div style={{ fontSize: 11, color: "#9A968A", marginBottom: 10 }}>{item.distrito} · {item.municipio}</div>
 
         {/* Datos clave */}
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center", marginBottom: 8 }}>
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center", marginBottom: 6 }}>
           <span style={{ fontSize: 15, color: BRONZE, fontWeight: 700 }}>{fmtP(item.precio)}</span>
-          {item.precio_m2 && <span style={{ fontSize: 11, color: "#9A968A" }}>{item.precio_m2.toLocaleString("es-ES")} €/m²</span>}
-          {item.bajada_precio && <span style={{ fontSize: 11, color: "#A23A3A", background: "rgba(162,58,58,0.08)", padding: "2px 6px" }}>↓ Precio rebajado</span>}
+          {item.precio_m2 && <span style={{ fontSize: 11, color: "#9A968A" }}>{Math.round(item.precio_m2).toLocaleString("es-ES")} €/m²</span>}
+          {item.bajada_precio && <span style={{ fontSize: 11, color: "#A23A3A", background: "rgba(162,58,58,0.08)", padding: "2px 6px" }}>↓ Rebajado</span>}
+        </div>
+
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center", marginBottom: 6 }}>
+          {item.habitaciones && <span style={{ fontSize: 11, color: "#9A968A" }}>{item.habitaciones} hab.</span>}
+          {item.superficie && <span style={{ fontSize: 11, color: "#9A968A" }}>{item.superficie} m²</span>}
+          {item.banos && <span style={{ fontSize: 11, color: "#9A968A" }}>{item.banos} baños</span>}
         </div>
 
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
-          {item.habitaciones && <span style={{ fontSize: 11, color: "#9A968A" }}>{item.habitaciones} hab.</span>}
-          {item.superficie && <span style={{ fontSize: 11, color: "#9A968A" }}>{item.superficie} m²</span>}
           {item.dias_publicado !== null && item.dias_publicado !== undefined && (
             <span style={{ fontSize: 11, color: diasColor }}>{fmtDias(item.dias_publicado)}</span>
           )}
