@@ -1,4 +1,5 @@
 "use client";
+import { supabase } from "@/lib/supabase";
 import { useState, useMemo } from "react";
 
 const COLS = [
@@ -9,29 +10,7 @@ const COLS = [
   { key: "retirada", label: "Retirada", accent: "#9A968A" },
 ];
 
-const INIT_PROPS = [
-  { id:1, ref:"MNP-001", titulo:"Piso reformado terraza Pere Garau", tipo:"Piso", zona:"Pere Garau", precio:399000, mConst:105, hab:2, agente:"Carlos M.", estado:"publicada", visitas:8, fechaCap:"10/03/2026" },
-  { id:2, ref:"MNP-002", titulo:"Atico panoramico Plaza de Toros", tipo:"Atico", zona:"Plaza de Toros", precio:485000, mConst:95, hab:2, agente:"Ana R.", estado:"publicada", visitas:15, fechaCap:"22/02/2026" },
-  { id:3, ref:"MNP-003", titulo:"Casa jardin piscina Sa Cabaneta", tipo:"Casa", zona:"Sa Cabaneta", precio:520000, mConst:195, hab:4, agente:"Carlos M.", estado:"captada", visitas:0, fechaCap:"01/05/2026" },
-  { id:4, ref:"MNP-004", titulo:"Local pie de calle Inca", tipo:"Local", zona:"Centro, Inca", precio:109000, mConst:42, hab:0, agente:"Ana R.", estado:"publicada", visitas:3, fechaCap:"15/04/2026" },
-  { id:5, ref:"MNP-005", titulo:"Chalet vistas mar Bendinat", tipo:"Chalet", zona:"Bendinat", precio:890000, mConst:280, hab:4, agente:"Carlos M.", estado:"reservada", visitas:22, fechaCap:"05/01/2026" },
-  { id:6, ref:"MNP-006", titulo:"Piso centrico Santa Catalina", tipo:"Piso", zona:"Santa Catalina", precio:345000, mConst:75, hab:2, agente:"Ana R.", estado:"vendida", visitas:18, fechaCap:"12/12/2025" },
-  { id:7, ref:"MNP-007", titulo:"Duplex reformado Son Espanyolet", tipo:"Duplex", zona:"Son Espanyolet", precio:425000, mConst:130, hab:3, agente:"Carlos M.", estado:"publicada", visitas:6, fechaCap:"20/04/2026" },
-  { id:8, ref:"MNP-008", titulo:"Apartamento Portals Nous", tipo:"Apartamento", zona:"Portals Nous", precio:310000, mConst:65, hab:1, agente:"Ana R.", estado:"vendida", visitas:12, fechaCap:"08/11/2025" },
-  { id:9, ref:"MNP-009", titulo:"Finca rustica Alaro", tipo:"Finca rustica", zona:"Alaro", precio:750000, mConst:220, hab:5, agente:"Carlos M.", estado:"captada", visitas:0, fechaCap:"05/05/2026" },
-  { id:10, ref:"MNP-010", titulo:"Planta baja jardin Pont dInca", tipo:"Planta baja", zona:"Pont dInca", precio:285000, mConst:88, hab:3, agente:"Ana R.", estado:"retirada", visitas:4, fechaCap:"01/03/2026" },
-];
-
-const ALL_ACTIVITY = [
-  { text:"Nueva captacion: Finca rustica Alaro", agent:"Carlos M.", date:"05/05/2026", color:"#AC8A54" },
-  { text:"Nueva captacion: Casa Sa Cabaneta", agent:"Carlos M.", date:"01/05/2026", color:"#AC8A54" },
-  { text:"MNP-005 pasa a Reservada", agent:"Carlos M.", date:"28/04/2026", color:"#9C6E1B" },
-  { text:"3 visitas programadas esta semana", agent:"Ana R.", date:"27/04/2026", color:"#3D577E" },
-  { text:"MNP-007 publicada en Idealista", agent:"Carlos M.", date:"20/04/2026", color:"#2C6E52" },
-  { text:"MNP-006 vendida - Santa Catalina", agent:"Ana R.", date:"15/04/2026", color:"#2C6E52" },
-  { text:"MNP-008 vendida - Portals Nous", agent:"Ana R.", date:"10/03/2026", color:"#2C6E52" },
-  { text:"12 nuevos matches comprador-propiedad", agent:"Sistema", date:"09/05/2026", color:"#AC8A54" },
-];
+// Datos cargados desde Supabase — sin hardcoding
 
 function fmtP(n) {
   if (!n) return "-";
@@ -216,7 +195,62 @@ function KanbanCol({ col, props, onDrop, showValue }) {
 
 /* ── Dashboard Content ── */
 function DashboardContent({ currentUser, onLogout, users, setUsers }) {
-  const [props, setProps] = useState(INIT_PROPS);
+  const [props, setProps] = useState([]);
+  const [activity, setActivity] = useState([]);
+  const [compradores, setCompradores] = useState(0);
+  const [matches, setMatches] = useState(0);
+  const [particulares, setParticulares] = useState(0);
+
+  useEffect(() => {
+    async function loadDashboard() {
+      // Propiedades reales
+      const { data: propsData } = await supabase
+        .from("propiedades")
+        .select("id, ref, titulo, tipo, municipio, precio, num_habitaciones, estado, created_at, agente")
+        .order("created_at", { ascending: false });
+
+      if (propsData) {
+        setProps(propsData.map(p => ({
+          id: p.id,
+          ref: p.ref || "—",
+          titulo: p.titulo || "Sin título",
+          tipo: p.tipo || "—",
+          zona: p.municipio || "—",
+          precio: p.precio || 0,
+          mConst: 0,
+          hab: p.num_habitaciones || 0,
+          agente: p.agente || "—",
+          estado: p.estado || "captada",
+          visitas: 0,
+          fechaCap: p.created_at ? new Date(p.created_at).toLocaleDateString("es-ES") : "—",
+        })));
+      }
+
+      // Compradores
+      const { count: cCount } = await supabase.from("compradores").select("id", { count: "exact", head: true });
+      setCompradores(cCount || 0);
+
+      // Matches confirmados
+      const { count: mCount } = await supabase.from("propiedades_compradores").select("id", { count: "exact", head: true }).eq("estado", "interesado");
+      setMatches(mCount || 0);
+
+      // Particulares en prospección
+      const { count: pCount } = await supabase.from("captacion_particulares").select("id", { count: "exact", head: true }).eq("estado", "pendiente");
+      setParticulares(pCount || 0);
+
+      // Actividad reciente — últimas propiedades modificadas
+      const { data: recent } = await supabase.from("propiedades").select("ref, titulo, estado, updated_at, agente").order("updated_at", { ascending: false }).limit(8);
+      if (recent) {
+        setActivity(recent.map(p => ({
+          text: `${p.ref} — ${p.titulo?.slice(0, 40)}`,
+          agent: p.agente || "Sistema",
+          date: p.updated_at ? new Date(p.updated_at).toLocaleDateString("es-ES") : "—",
+          color: p.estado === "vendida" ? "#2C6E52" : p.estado === "reservada" ? "#9C6E1B" : "#AC8A54",
+        })));
+      }
+    }
+    loadDashboard();
+  }, []);
   const isDirector = currentUser.role === "director";
   const [showUserMgmt, setShowUserMgmt] = useState(false);
   const [newUser, setNewUser] = useState({ user: "", pass: "", nombre: "", role: "agente" });
@@ -227,8 +261,8 @@ function DashboardContent({ currentUser, onLogout, users, setUsers }) {
   }, [props, isDirector, currentUser.nombre]);
 
   const myActivity = useMemo(() => {
-    if (isDirector) return ALL_ACTIVITY;
-    return ALL_ACTIVITY.filter((a) => a.agent === currentUser.nombre || a.agent === "Sistema");
+    if (isDirector) return activity;
+    return activity.filter((a) => a.agent === currentUser.nombre || a.agent === "Sistema");
   }, [isDirector, currentUser.nombre]);
 
   const handleDrop = (propId, newEstado) => {
@@ -265,8 +299,9 @@ function DashboardContent({ currentUser, onLogout, users, setUsers }) {
     { n: stats.vendidas, l: "Vendidas", color: "#2C6E52" },
     { n: fmtShort(stats.valorPipeline) + " EUR", l: "Valor pipeline", color: "#AC8A54" },
     { n: fmtShort(stats.valorVendido) + " EUR", l: "Valor vendido", color: "#2C6E52" },
-    { n: fmtP(stats.avgPrecio), l: "Precio medio", color: "#22262E" },
-    { n: stats.totalVisitas, l: "Visitas totales", color: "#3D577E" },
+    { n: compradores, l: "Compradores", color: "#3D577E" },
+    { n: matches, l: "Matches interesados", color: "#2C6E52" },
+    { n: particulares, l: "Particulares pendientes", color: "#9C6E1B" },
   ] : [
     { n: stats.activas, l: "Mis propiedades activas", color: "#AC8A54" },
     { n: stats.vendidas, l: "Mis vendidas", color: "#2C6E52" },
