@@ -63,7 +63,7 @@ export async function GET() {
           .single();
 
         if (propError) {
-          console.error(`Error insertando ${prop.ref}:`, propError.message);
+          console.error(`Error insertando ${prop.ref}:`, propError.message, JSON.stringify(propError));
           errores++;
           continue;
         }
