@@ -39,7 +39,22 @@ export default function EncargosVenta() {
   const [copied, setCopied] = useState(null);
   const [form, setForm] = useState(FORM_INIT);
 
-  useEffect(() => { load(); loadProps(); }, []);
+  useEffect(() => { load(); loadProps(); loadCurrentUser(); }, []);
+
+  async function loadCurrentUser() {
+    // Obtener usuario actual del localStorage (mismo sistema que CRMApp)
+    const login = typeof window !== "undefined" ? localStorage.getItem("mnp_user_login") : null;
+    if (!login) return;
+    const { data } = await supabase.from("usuarios").select("nombre, dni, poliza_rc").eq("user_login", login).single();
+    if (data) {
+      setForm(f => ({
+        ...f,
+        consultor_nombre: data.nombre || "",
+        consultor_dni: data.dni || "",
+        consultor_poliza: data.poliza_rc || "",
+      }));
+    }
+  }
 
   async function load() {
     const res = await fetch("/api/encargos");

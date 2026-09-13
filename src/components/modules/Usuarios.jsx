@@ -23,7 +23,7 @@ export default function Usuarios({ currentUser }) {
   }
 
   function abrirNuevo() {
-    setForm({ user_login: "", pass_hash: "", nombre: "", role: "agente", agente_codigo: "", agente_telefono: "", activo: true });
+    setForm({ user_login: "", pass_hash: "", nombre: "", role: "agente", agente_codigo: "", agente_telefono: "", email: "", dni: "", poliza_rc: "", activo: true });
     setModal("nuevo");
     setMsg(null);
   }
@@ -171,6 +171,9 @@ export default function Usuarios({ currentUser }) {
               <div>
                 <label style={lSt}>Teléfono</label>
                 <input style={iSt} value={form.agente_telefono || ""} onChange={e => setForm(f => ({ ...f, agente_telefono: e.target.value }))} placeholder="ej: 640130766" />
+                <input style={iSt} value={form.email || ""} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="Email del agente" />
+                <input style={iSt} value={form.dni || ""} onChange={e => setForm(f => ({ ...f, dni: e.target.value }))} placeholder="DNI/NIE del agente" />
+                <input style={iSt} value={form.poliza_rc || ""} onChange={e => setForm(f => ({ ...f, poliza_rc: e.target.value }))} placeholder="Número de póliza RC (para encargos)" />
               </div>
               {modal !== "nuevo" && (
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
