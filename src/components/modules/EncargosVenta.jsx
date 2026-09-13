@@ -49,13 +49,13 @@ export default function EncargosVenta() {
   }
 
   async function loadProps() {
-    const { data } = await supabase.from("propiedades").select("id, ref, titulo, municipio, precio, tipo").order("created_at", { ascending: false }).limit(100);
+    const { data } = await supabase.from("propiedades").select("id, ref, dir, municipio, precioVenta, tipo").order("created_at", { ascending: false }).limit(100);
     setPropiedades(data || []);
   }
 
   function handlePropChange(propId) {
     const prop = propiedades.find(p => p.id === propId);
-    if (prop) setForm(f => ({ ...f, propiedad_id: propId, prop_ref: prop.ref || "", prop_direccion: prop.titulo || "", prop_tipo: prop.tipo || "", importe_publicacion: prop.precio || "" }));
+    if (prop) setForm(f => ({ ...f, propiedad_id: propId, prop_ref: prop.ref || "", prop_direccion: prop.dir || "", prop_tipo: prop.tipo || "", importe_publicacion: prop.precioVenta || "" }));
     else setForm(f => ({ ...f, propiedad_id: propId }));
   }
 
@@ -140,7 +140,7 @@ export default function EncargosVenta() {
                   <div style={S.sectionTitle}>Propiedad vinculada</div>
                   <select value={form.propiedad_id} onChange={e => handlePropChange(e.target.value)} style={{ ...S.input, marginBottom: 12 }}>
                     <option value="">Seleccionar propiedad del CRM...</option>
-                    {propiedades.map(p => <option key={p.id} value={p.id}>{p.ref} — {p.titulo} · {p.municipio}</option>)}
+                    {propiedades.map(p => <option key={p.id} value={p.id}>{p.ref} — {p.dir} · {p.municipio}</option>)}
                   </select>
                   <div style={S.grid2}>
                     <div style={{ gridColumn: "1/-1" }}><label style={S.label}>Dirección propiedad</label><input {...F("prop_direccion")} /></div>
