@@ -8,7 +8,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 );
 
-const WP_ENDPOINT = "https://mallorcanativaproperties.com/wp-json/mnp/v1/propiedades";
+const WP_ENDPOINT = "https://mallorcanativaproperties.com/wp-json/mnp/v1/propiedades-export";
 
 async function uploadFoto(imageUrl, ref, index) {
   try {
