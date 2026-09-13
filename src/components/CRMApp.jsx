@@ -108,6 +108,8 @@ export default function CRMApp() {
   const [currentUser, setCurrentUser] = useState(null);
   const [activeModule, setActiveModule] = useState("captacion");
   const [sidebarOpen, setSidebarOpen] = useState(typeof window !== "undefined" ? window.innerWidth > 768 : true);
+  const [expandedGroups, setExpandedGroups] = useState({ "Propiedades": true, "Compradores": true, "Redes Sociales": true, "Agentes IA": true, "Gestión": true });
+  const toggleGroup = (group) => setExpandedGroups(prev => ({ ...prev, [group]: !prev[group] }));
   const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth <= 768 : false);
 
   // Detectar cambio de tamaño
@@ -244,39 +246,61 @@ export default function CRMApp() {
                 </div>
               )}
 
-              {/* Grupos */}
-              {Object.entries(grouped).map(([group, mods]) => (
-                <div key={group} style={{ marginTop: 8 }}>
-                  {sidebarOpen && (
-                    <div style={{ padding: "6px 16px 2px", fontSize: 9, color: "rgba(255,255,255,0.25)", letterSpacing: "0.15em", textTransform: "uppercase" }}>
-                      {group}
-                    </div>
-                  )}
-                  {mods.map(mod => {
-                    const active = activeModule === mod.key;
-                    return (
-                      <button
-                        key={mod.key}
-                        onClick={() => { setActiveModule(mod.key); if (isMobile) setSidebarOpen(false); }}
-                        style={{
-                          display: "flex", alignItems: "center", gap: 10,
-                          width: "100%", padding: sidebarOpen ? "9px 16px" : "9px",
-                          background: active ? mod.color + "12" : "transparent",
-                          border: "none", borderLeft: active ? "3px solid " + mod.color : "3px solid transparent",
-                          color: active ? "#AC8A54" : "rgba(255,255,255,0.65)",
-                          cursor: "pointer", fontSize: 12, fontWeight: active ? 600 : 400,
-                          fontFamily: "Inter, sans-serif", textAlign: "left",
-                          transition: "all 0.15s",
-                          justifyContent: sidebarOpen ? "flex-start" : "center",
-                        }}
-                      >
-                        <span style={{ fontSize: 15 }}>{mod.icon}</span>
-                        {sidebarOpen && <span>{mod.label}</span>}
-                      </button>
-                    );
-                  })}
-                </div>
-              ))}
+              {/* Grupos colapsables */}
+              {Object.entries(grouped).map(([group, mods]) => {
+                const isExpanded = expandedGroups[group] !== false;
+                const hasActive = mods.some(m => m.key === activeModule);
+                return (
+                  <div key={group} style={{ marginTop: 4 }}>
+                    {/* Cabecera del grupo — colapsable */}
+                    <button
+                      onClick={() => sidebarOpen ? toggleGroup(group) : null}
+                      style={{
+                        display: "flex", alignItems: "center", justifyContent: sidebarOpen ? "space-between" : "center",
+                        width: "100%", padding: sidebarOpen ? "7px 16px" : "7px",
+                        background: hasActive ? "rgba(172,138,84,0.06)" : "transparent",
+                        border: "none", cursor: sidebarOpen ? "pointer" : "default",
+                        color: hasActive ? "rgba(172,138,84,0.7)" : "rgba(255,255,255,0.2)",
+                        fontFamily: "Inter, sans-serif",
+                      }}
+                    >
+                      {sidebarOpen ? (
+                        <>
+                          <span style={{ fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase", fontWeight: 600 }}>{group}</span>
+                          <span style={{ fontSize: 10, opacity: 0.5, transition: "transform 0.2s", transform: isExpanded ? "rotate(0deg)" : "rotate(-90deg)", display: "inline-block" }}>▾</span>
+                        </>
+                      ) : (
+                        <span style={{ fontSize: 8, letterSpacing: "0.1em" }}>···</span>
+                      )}
+                    </button>
+
+                    {/* Items del grupo */}
+                    {(isExpanded || !sidebarOpen) && mods.map(mod => {
+                      const active = activeModule === mod.key;
+                      return (
+                        <button
+                          key={mod.key}
+                          onClick={() => { setActiveModule(mod.key); if (isMobile) setSidebarOpen(false); }}
+                          style={{
+                            display: "flex", alignItems: "center", gap: 10,
+                            width: "100%", padding: sidebarOpen ? "9px 16px 9px 24px" : "9px",
+                            background: active ? mod.color + "12" : "transparent",
+                            border: "none", borderLeft: active ? "3px solid " + mod.color : "3px solid transparent",
+                            color: active ? "#AC8A54" : "rgba(255,255,255,0.65)",
+                            cursor: "pointer", fontSize: 12, fontWeight: active ? 600 : 400,
+                            fontFamily: "Inter, sans-serif", textAlign: "left",
+                            transition: "all 0.15s",
+                            justifyContent: sidebarOpen ? "flex-start" : "center",
+                          }}
+                        >
+                          <span style={{ fontSize: 14 }}>{mod.icon}</span>
+                          {sidebarOpen && <span>{mod.label}</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                );
+              })}
             </>;
           })()}
         </nav>
