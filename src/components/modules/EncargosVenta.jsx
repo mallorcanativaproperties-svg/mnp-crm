@@ -64,14 +64,14 @@ export default function EncargosVenta() {
   }
 
   async function loadProps() {
-    const { data, error } = await supabase.from("propiedades").select("id, ref, dir, municipio, precioVenta, tipo").order("created_at", { ascending: false }).limit(100);
+    const { data, error } = await supabase.from("propiedades").select("id, ref, dir, municipio, precio_venta, tipo").order("created_at", { ascending: false }).limit(100);
     console.log("Propiedades cargadas:", data?.length, "error:", error?.message);
     setPropiedades(data || []);
   }
 
   function handlePropChange(propId) {
     const prop = propiedades.find(p => p.id === propId);
-    if (prop) setForm(f => ({ ...f, propiedad_id: propId, prop_ref: prop.ref || "", prop_direccion: prop.dir || "", prop_tipo: prop.tipo || "", importe_publicacion: prop.precioVenta || "" }));
+    if (prop) setForm(f => ({ ...f, propiedad_id: propId, prop_ref: prop.ref || "", prop_direccion: prop.dir || "", prop_tipo: prop.tipo || "", importe_publicacion: prop.precio_venta || "" }));
     else setForm(f => ({ ...f, propiedad_id: propId }));
   }
 
