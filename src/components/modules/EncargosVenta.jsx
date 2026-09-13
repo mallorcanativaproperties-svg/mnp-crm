@@ -64,7 +64,8 @@ export default function EncargosVenta() {
   }
 
   async function loadProps() {
-    const { data } = await supabase.from("propiedades").select("id, ref, dir, municipio, precioVenta, tipo").order("created_at", { ascending: false }).limit(100);
+    const { data, error } = await supabase.from("propiedades").select("id, ref, dir, municipio, precioVenta, tipo").order("created_at", { ascending: false }).limit(100);
+    console.log("Propiedades cargadas:", data?.length, "error:", error?.message);
     setPropiedades(data || []);
   }
 
