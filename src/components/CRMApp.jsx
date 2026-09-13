@@ -8,6 +8,7 @@ const Propiedades = dynamic(() => import("./modules/Propiedades"), { ssr: false 
 const FormularioCaptacion = dynamic(() => import("./modules/FormularioCaptacion"), { ssr: false });
 const Compradores = dynamic(() => import("./modules/Compradores"), { ssr: false });
 const MotorCruce = dynamic(() => import("./modules/MotorCruce"), { ssr: false });
+const EncargosVenta = dynamic(() => import("./modules/EncargosVenta"), { ssr: false });
 const RedesSociales = dynamic(() => import("./modules/RedesSociales"), { ssr: false });
 const Captacion = dynamic(() => import("./modules/Captacion"), { ssr: false });
 const AgentesIA = dynamic(() => import("./modules/AgentesIA"), { ssr: false });
@@ -22,6 +23,7 @@ const MODULES = [
   // PROPIEDADES
   { key: "propiedades", label: "Propiedades", icon: "⌂", color: "#2C6E52", roles: ["director", "agente", "broker"], group: "Propiedades" },
   { key: "captacion_ana", label: "Prospección Particulares", icon: "◎", color: "#2C6E52", roles: ["director", "agente"], group: "Propiedades" },
+  { key: "encargos", label: "Encargos de Venta", icon: "📋", color: "#2C6E52", roles: ["director", "agente"], group: "Propiedades" },
   { key: "firma", label: "Firma Electrónica", icon: "✍", color: "#2C6E52", roles: ["director", "agente", "broker"], group: "Propiedades" },
 
   // COMPRADORES
@@ -166,6 +168,7 @@ export default function CRMApp() {
       case "captacion_ana": return <Captacion />;
       case "redes": return <RedesSociales />;
       case "agentes": return <AgentesIA />;
+      case "encargos": return <EncargosVenta />;
       case "firma": return <FirmaElectronica />;
       default: return <Dashboard />;
     }
