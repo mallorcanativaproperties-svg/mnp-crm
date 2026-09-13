@@ -18,10 +18,10 @@ async function uploadFoto(imageUrl, ref, index) {
     const ext = imageUrl.split(".").pop().split("?")[0].toLowerCase() || "jpg";
     const path = `propiedades/${ref}/${index}.${ext}`;
     const { error } = await supabase.storage
-      .from("media")
+      .from("propiedades-media")
       .upload(path, buffer, { contentType: `image/${ext === "jpg" ? "jpeg" : ext}`, upsert: true });
     if (error) { console.error("Upload error:", error.message); return null; }
-    const { data: urlData } = supabase.storage.from("media").getPublicUrl(path);
+    const { data: urlData } = supabase.storage.from("propiedades-media").getPublicUrl(path);
     return urlData.publicUrl;
   } catch (e) {
     console.error("Error uploading foto:", e.message);
