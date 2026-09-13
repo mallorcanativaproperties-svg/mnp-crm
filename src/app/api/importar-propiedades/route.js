@@ -55,7 +55,6 @@ export async function GET() {
             num_banos: prop.num_banos ? Number(prop.num_banos) : null,
             metros_construidos: prop.metros_construidos ? Number(prop.metros_construidos) : null,
             estado: "publicada",
-            descripcion: prop.descripcion || null,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           })
