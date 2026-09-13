@@ -16,17 +16,28 @@ const Usuarios = dynamic(() => import("./modules/Usuarios"), { ssr: false });
 const SimuladorClaudia = dynamic(() => import("./modules/SimuladorClaudia"), { ssr: false });
 
 const MODULES = [
-  { key: "captacion", label: "Formulario Cualificación", icon: "✎", color: "#9C6E1B", roles: ["director", "agente", "broker"] },
-  { key: "propiedades", label: "Propiedades", icon: "⌂", color: "#2C6E52", roles: ["director", "agente", "broker"] },
-  { key: "compradores", label: "Compradores", icon: "◎", color: "#3D577E", roles: ["director", "agente", "broker"] },
-  { key: "cruce", label: "Motor Cruce", icon: "⇌", color: "#2C6E52", roles: ["director", "agente", "broker"] },
-  { key: "captacion_ana", label: "Prospección Particulares", icon: "◎", color: "#9C6E1B", roles: ["director", "agente"] },
-  { key: "redes", label: "Redes Sociales", icon: "◉", color: "#E1306C", roles: ["director", "agente"] },
-  { key: "agentes", label: "Agentes IA", icon: "◈", color: "#9C6E1B", roles: ["director"] },
-  { key: "firma", label: "Firma Electronica", icon: "✍", color: "#2C6E52", roles: ["director", "agente", "broker"] },
-  { key: "dashboard", label: "Dashboard", icon: "◆", color: "#AC8A54", roles: ["director"] },
-  { key: "usuarios", label: "Usuarios", icon: "◎", color: "#AC8A54", roles: ["director"] },
-  { key: "simulador", label: "Simulador Claudia", icon: "◈", color: "#3D577E", roles: ["director"] },
+  // Acceso rápido — siempre primero
+  { key: "captacion", label: "Formulario Cualificación", icon: "✎", color: "#AC8A54", roles: ["director", "agente", "broker"], group: null },
+
+  // PROPIEDADES
+  { key: "propiedades", label: "Propiedades", icon: "⌂", color: "#2C6E52", roles: ["director", "agente", "broker"], group: "Propiedades" },
+  { key: "captacion_ana", label: "Prospección Particulares", icon: "◎", color: "#2C6E52", roles: ["director", "agente"], group: "Propiedades" },
+  { key: "firma", label: "Firma Electrónica", icon: "✍", color: "#2C6E52", roles: ["director", "agente", "broker"], group: "Propiedades" },
+
+  // COMPRADORES
+  { key: "compradores", label: "Base Compradores", icon: "◎", color: "#3D577E", roles: ["director", "agente", "broker"], group: "Compradores" },
+  { key: "cruce", label: "Motor de Cruce", icon: "⇌", color: "#3D577E", roles: ["director", "agente", "broker"], group: "Compradores" },
+
+  // REDES SOCIALES
+  { key: "redes", label: "Redes Sociales", icon: "◉", color: "#E1306C", roles: ["director", "agente"], group: "Redes Sociales" },
+
+  // AGENTES IA
+  { key: "agentes", label: "Agentes IA", icon: "◈", color: "#9C6E1B", roles: ["director"], group: "Agentes IA" },
+  { key: "simulador", label: "Simulador Claudia", icon: "◈", color: "#9C6E1B", roles: ["director"], group: "Agentes IA" },
+
+  // GESTIÓN
+  { key: "dashboard", label: "Dashboard", icon: "◆", color: "#AC8A54", roles: ["director"], group: "Gestión" },
+  { key: "usuarios", label: "Usuarios", icon: "◎", color: "#AC8A54", roles: ["director"], group: "Gestión" },
 ];
 
 function LoginScreen({ onLogin }) {
@@ -199,29 +210,75 @@ export default function CRMApp() {
 
         {/* Navigation */}
         <nav style={{ flex: 1, padding: "8px 0", overflowY: "auto" }}>
-          {availableModules.map((mod) => {
-            const active = activeModule === mod.key;
-            return (
-              <button
-                key={mod.key}
-                onClick={() => { setActiveModule(mod.key); if (isMobile) setSidebarOpen(false); }}
-                style={{
-                  display: "flex", alignItems: "center", gap: 10,
-                  width: "100%", padding: sidebarOpen ? "10px 16px" : "10px",
-                  background: active ? mod.color + "12" : "transparent",
-                  border: "none", borderLeft: active ? "3px solid " + mod.color : "3px solid transparent",
-                  color: active ? "#AC8A54" : "rgba(255,255,255,0.65)",
-                  cursor: "pointer", fontSize: 12, fontWeight: active ? 600 : 400,
-                  fontFamily: "Inter, sans-serif", textAlign: "left",
-                  transition: "all 0.15s",
-                  justifyContent: sidebarOpen ? "flex-start" : "center",
-                }}
-              >
-                <span style={{ fontSize: 16 }}>{mod.icon}</span>
-                {sidebarOpen && <span>{mod.label}</span>}
-              </button>
-            );
-          })}
+          {(() => {
+            const available = availableModules;
+            const topModule = available.find(m => m.group === null);
+            const grouped = {};
+            available.filter(m => m.group !== null).forEach(m => {
+              if (!grouped[m.group]) grouped[m.group] = [];
+              grouped[m.group].push(m);
+            });
+
+            return <>
+              {/* Formulario Cualificación — destacado */}
+              {topModule && (
+                <div style={{ padding: "8px 10px 4px" }}>
+                  <button
+                    key={topModule.key}
+                    onClick={() => { setActiveModule(topModule.key); if (isMobile) setSidebarOpen(false); }}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 10,
+                      width: "100%", padding: sidebarOpen ? "10px 16px" : "10px",
+                      background: activeModule === topModule.key ? "#AC8A5422" : "rgba(172,138,84,0.08)",
+                      border: "none", borderLeft: activeModule === topModule.key ? "3px solid #AC8A54" : "3px solid rgba(172,138,84,0.3)",
+                      color: activeModule === topModule.key ? "#AC8A54" : "rgba(172,138,84,0.8)",
+                      cursor: "pointer", fontSize: 12, fontWeight: 600,
+                      fontFamily: "Inter, sans-serif", textAlign: "left",
+                      justifyContent: sidebarOpen ? "flex-start" : "center",
+                      letterSpacing: "0.04em",
+                    }}
+                  >
+                    <span style={{ fontSize: 16 }}>{topModule.icon}</span>
+                    {sidebarOpen && <span>{topModule.label}</span>}
+                  </button>
+                </div>
+              )}
+
+              {/* Grupos */}
+              {Object.entries(grouped).map(([group, mods]) => (
+                <div key={group} style={{ marginTop: 8 }}>
+                  {sidebarOpen && (
+                    <div style={{ padding: "6px 16px 2px", fontSize: 9, color: "rgba(255,255,255,0.25)", letterSpacing: "0.15em", textTransform: "uppercase" }}>
+                      {group}
+                    </div>
+                  )}
+                  {mods.map(mod => {
+                    const active = activeModule === mod.key;
+                    return (
+                      <button
+                        key={mod.key}
+                        onClick={() => { setActiveModule(mod.key); if (isMobile) setSidebarOpen(false); }}
+                        style={{
+                          display: "flex", alignItems: "center", gap: 10,
+                          width: "100%", padding: sidebarOpen ? "9px 16px" : "9px",
+                          background: active ? mod.color + "12" : "transparent",
+                          border: "none", borderLeft: active ? "3px solid " + mod.color : "3px solid transparent",
+                          color: active ? "#AC8A54" : "rgba(255,255,255,0.65)",
+                          cursor: "pointer", fontSize: 12, fontWeight: active ? 600 : 400,
+                          fontFamily: "Inter, sans-serif", textAlign: "left",
+                          transition: "all 0.15s",
+                          justifyContent: sidebarOpen ? "flex-start" : "center",
+                        }}
+                      >
+                        <span style={{ fontSize: 15 }}>{mod.icon}</span>
+                        {sidebarOpen && <span>{mod.label}</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              ))}
+            </>;
+          })()}
         </nav>
 
         {/* User info */}
