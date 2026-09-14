@@ -256,8 +256,7 @@ async function ftpUploadBuffer(client, buffer, remotePath) {
 export async function GET(request) {
   // Verificar CRON_SECRET
   const auth = request.headers.get("authorization");
-  const bypass = request.nextUrl.searchParams.get("bypass");
-  if (auth !== `Bearer ${process.env.CRON_SECRET}` && bypass !== "mnp2026temp") {
+  if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
