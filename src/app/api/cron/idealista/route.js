@@ -269,6 +269,8 @@ export async function GET(request) {
     return NextResponse.json({ error: "FTP credentials not configured" }, { status: 500 });
   }
 
+  const supabase = getSupabase();
+
   try {
     // 1. Obtener propiedades publicadas de Supabase
     const { data: propiedades, error: propErr } = await supabase
