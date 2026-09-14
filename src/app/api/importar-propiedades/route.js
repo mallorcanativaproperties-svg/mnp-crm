@@ -44,7 +44,7 @@ export async function GET() {
         // 2. Insertar propiedad en Supabase
         const { data: propInserted, error: propError } = await supabase
           .from("propiedades")
-          .insert({
+          .upsert({
             ref: prop.ref,
             dir: prop.dir || prop.titulo,
             municipio: prop.municipio,
@@ -57,7 +57,7 @@ export async function GET() {
             estado: "publicada",
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
-          })
+          }, { onConflict: "ref" })
           .select("id")
           .single();
 
