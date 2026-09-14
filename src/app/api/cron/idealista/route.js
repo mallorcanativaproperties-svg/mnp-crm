@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import ftp from "basic-ftp";
+import * as ftp from "basic-ftp";
 import { Readable } from "stream";
 
 export const dynamic = "force-dynamic";
