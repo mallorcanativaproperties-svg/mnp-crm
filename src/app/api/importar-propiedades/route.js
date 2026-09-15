@@ -3,10 +3,9 @@ export const maxDuration = 300;
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-);
+function getSupabase() {
+  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
+}
 
 const WP_ENDPOINT = "https://mallorcanativaproperties.com/wp-json/mnp/v1/propiedades-export";
 
@@ -17,11 +16,11 @@ async function uploadFoto(imageUrl, ref, index) {
     const buffer = await res.arrayBuffer();
     const ext = imageUrl.split(".").pop().split("?")[0].toLowerCase() || "jpg";
     const path = `propiedades/${ref}/${index}.${ext}`;
-    const { error } = await supabase.storage
+    const { error } = await getSupabase().storage
       .from("propiedades-media")
       .upload(path, buffer, { contentType: `image/${ext === "jpg" ? "jpeg" : ext}`, upsert: true });
     if (error) { console.error("Upload error:", error.message); return null; }
-    const { data: urlData } = supabase.storage.from("propiedades-media").getPublicUrl(path);
+    const { data: urlData } = getSupabase().storage.from("propiedades-media").getPublicUrl(path);
     return urlData.publicUrl;
   } catch (e) {
     console.error("Error uploading foto:", e.message);
@@ -42,7 +41,7 @@ export async function GET() {
     for (const prop of props) {
       try {
         // 2. Insertar propiedad en Supabase
-        const { data: propInserted, error: propError } = await supabase
+        const { data: propInserted, error: propError } = await getSupabase()
           .from("propiedades")
           .upsert({
             ref: prop.ref,
@@ -72,7 +71,7 @@ export async function GET() {
           for (let i = 0; i < prop.fotos.length; i++) {
             const publicUrl = await uploadFoto(prop.fotos[i], prop.ref, i + 1);
             if (publicUrl) {
-              await supabase.from("media_propiedades").insert({
+              await getSupabase().from("media_propiedades").insert({
                 propiedad_id: propInserted.id,
                 url: publicUrl,
                 orden: i + 1,
