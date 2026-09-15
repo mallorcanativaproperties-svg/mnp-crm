@@ -1233,7 +1233,7 @@ function DocsSection({ propiedadId, propRef }) {
 // Opciones compartidas con cuestionario
 const CONSERVACION_OPTS = ["Buen estado","Reformado","A reformar","Obra nueva","En construccion"];
 const CERT_ENERG_OPTS = ["A","B","C","D","E","F","G","Exento"];
-const CALEFACCION_OPTS_P = ["Individual","Centralizada","No disponible"];
+const CALEFACCION_OPTS_P = ["Gas central","Gas individual","Electrica central","Electrica individual","Bomba de calor","Aerotermia","Suelo radiante","Sin calefaccion"];
 const AGUA_CALIENTE_OPTS = ["Aerotermia","Biomasa","Bomba de calor","Calentador Butano","Central","Central con contador individual","Gas Ciudad","Gas Natural","Gas Propano","Gasoil","Geotermia","No Tiene","Pellets","Placas Solares","Termo Electrico"];
 const DRENAJE_OPTS_P = ["Alcantarillado","Fosa septica"];
 const IEE_OPTS_P = ["Favorable","Desfavorable","Pendiente","No aplica"];
@@ -1687,6 +1687,7 @@ REGLAS:
   const esResidencial = ["flat","house","rustic"].includes(ft);
   const esComercial = ["premises_commercial","office"].includes(ft);
   const esGaraje = ["garage","storage"].includes(ft);
+  const esEdificio = ft === "building";
   const esTerreno = ft === "land";
   const esEdificio = ft === "building";
   const tieneHab = ["flat","house","rustic"].includes(ft);
@@ -2535,7 +2536,7 @@ function IdealistaJsonButton({ supabase }) {
     Garaje:"garage", Parking:"garage", Trastero:"storage", Edificio:"building",
   };
   const CONSERV_MAP = { "Buen estado":"good",Reformado:"good","A reformar":"toRestore","Obra nueva":"new","En construccion":"new" };
-  const HEAT_MAP = { "Individual":"individualAirConditioningHeatPump","Centralizada":"centralGas","No disponible":"noHeating","Gas central":"centralGas","Gasoleo central":"centralFuelOil","Gas individual":"individualGas","Electrica individual":"individualElectric","Bomba de calor":"individualAirConditioningHeatPump","Sin calefaccion":"noHeating" };
+  const HEAT_MAP = { "Gas central":"centralGas","Gas individual":"individualGas","Electrica central":"centralElectric","Electrica individual":"individualElectric","Bomba de calor":"individualAirConditioningHeatPump","Aerotermia":"centralHeatPump","Suelo radiante":"centralRadiantFloor","Sin calefaccion":"noHeating" };
   const IMAGE_TAG_MAP = { LIVING_ROOM:"livingRoom",BEDROOM:"room",BATHROOM:"bathroom",KITCHEN:"kitchen",TERRACE:"terrace",SWIMMING_POOL:"pool",GARDEN:"garden",CORRIDOR:"hallway",PLAN:"plan",VIEWS:"view",FACADE:"facade",GARAGE:"garage",STORAGE:"storage",BALCONY:"terrace",DINING:"livingRoom",HALL:"hallway",PATIO:"garden",PORCH:"terrace" };
   const FLOOR_MAP = { "Bajo":"groundFloor","Planta baja":"groundFloor","PB":"groundFloor","0":"groundFloor","Entreplanta":"mezzanine","Entresuelo":"mezzanine" };
   const VALID_CERT = ["A","B","C","D","E","F","G","En tramite","Exento"];

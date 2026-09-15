@@ -16,6 +16,7 @@ const OPERACIONES = ["Compraventa", "Alquiler", "Traspaso"];
 const CONSERVACION = ["Buen estado","Reformado","A reformar","Obra nueva","En construccion"];
 const ORIENTACIONES = ["Norte","Sur","Este","Oeste","Noreste","Noroeste","Sureste","Suroeste"];
 const CERT_ENERG = ["A","B","C","D","E","F","G","Exento"];
+const PARKING_OPTS = ["No","Si","Comunitario","Opcional"];
 const VIS_DIR = ["Direccion exacta", "Solo calle", "Ocultar direccion"];
 // Opciones alineadas con ficha de propiedad
 const AIRE_ACOND_OPTS = ["No disponible","Solo frio","Frio/Calor","Preinstalacion"];
@@ -513,11 +514,13 @@ export default function FormularioCaptacion() {
   const esEdificio = ft === "building";
   const tieneHab = ["flat","house","rustic"].includes(ft);
   const tieneCert = ["flat","house","rustic"].includes(ft);
+  const tieneExtras = ["flat","house","rustic"].includes(ft);
   const tieneComunidad = ["flat","house","premises_commercial","office","garage","storage"].includes(ft);
+  const tieneIBI = true;
+  const tieneBasuras = true;
   const tieneDerrama = ["flat","house"].includes(ft);
   const tieneInstalaciones = ["flat","house","rustic","premises_commercial","office","building"].includes(ft);
   const tieneElecFont = ["flat","house","rustic","premises_commercial","office"].includes(ft);
-  const tieneExtras = ["flat","house","rustic"].includes(ft);
   const tieneAireCalef = ["flat","house","rustic","premises_commercial","office"].includes(ft);
 
 

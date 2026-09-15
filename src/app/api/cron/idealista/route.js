@@ -37,7 +37,7 @@ const TIPO_MAP = {
 };
 
 const CONSERV_MAP = {
-  "Buen estado": "good", "Reformado": "renovated", Reformado: "good",
+  "Buen estado": "good", "Reformado": "renovated",
   "A reformar": "toRestore", "Obra nueva": "new", "En construccion": "new",
 };
 
@@ -89,6 +89,8 @@ function buildProperty(row, media) {
   if (price > 0) operation.operationPrice = price;
   const community = Number(row.comunidad) || 0;
   if (community > 0 && !isAlquiler) operation.operationPriceCommunity = community;
+  const basuras = Number(row.basuras) || 0;
+  if (basuras > 0) operation.operationPriceUrbanizacion = basuras;
   // Alquiler — campos específicos
   if (isAlquiler) {
     if (Number(row.duracion_min_meses) > 0) operation.rentMinimumTerm = Number(row.duracion_min_meses);
