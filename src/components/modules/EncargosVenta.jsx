@@ -335,9 +335,10 @@ export default function EncargosVenta() {
                         <input value={prop.email} onChange={e => setForm(f => ({ ...f, propietarios: f.propietarios.map((p, i) => i === idx ? { ...p, email: e.target.value } : p) }))} style={S.input} /></div>
                       <div style={{ gridColumn: "1/-1" }}><label style={S.label}>Dirección</label>
                         <input value={prop.direccion} onChange={e => setForm(f => ({ ...f, propietarios: f.propietarios.map((p, i) => i === idx ? { ...p, direccion: e.target.value } : p) }))} style={S.input} placeholder="Dirección completa del propietario" /></div>
+                    </div>
                   </div>
                 ))}
-                <button onClick={() => setForm(f => ({ ...f, propietarios: [...f.propietarios, { nombre: "", dni: "", tel: "", email: "" }] }))}
+                <button onClick={() => setForm(f => ({ ...f, propietarios: [...f.propietarios, { ...PROP_INIT }] }))}
                   style={{ width: "100%", padding: "10px", background: "none", border: `1px dashed ${BORDER}`, color: BRONZE, fontSize: 12, cursor: "pointer", fontFamily: "Inter, sans-serif", marginBottom: 14 }}>
                   + Añadir propietario
                 </button>
