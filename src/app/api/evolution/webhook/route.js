@@ -5,7 +5,7 @@ import { sendWhatsApp, sendButtons, markAsRead, extractIncomingText, jidToPhone 
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co",
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder"
+  process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder"
 );
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;

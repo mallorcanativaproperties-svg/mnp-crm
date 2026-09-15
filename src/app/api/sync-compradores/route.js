@@ -5,7 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 const SHEET_ID = "13-c-aane5RK-QLrSm4oqxqF6Lk5RlxAtmOym302kv6Q";
 
 function getSupabase() {
-  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 }
 
 // Parse full CSV text properly handling quoted fields with commas and newlines
