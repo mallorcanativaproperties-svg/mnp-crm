@@ -168,28 +168,35 @@ export default function EncargosVenta() {
                   </div>
                 </div>
 
-                {/* Propietario 1 */}
-                <div style={S.section}>
-                  <div style={S.sectionTitle}>Propietario 1</div>
-                  <div style={S.grid2}>
-                    <div><label style={S.label}>Nombre completo</label><input {...F("prop1_nombre")} /></div>
-                    <div><label style={S.label}>DNI/NIE</label><input {...F("prop1_dni")} /></div>
-                    <div><label style={S.label}>Teléfono</label><input {...F("prop1_tel")} /></div>
-                    <div><label style={S.label}>Email</label><input {...F("prop1_email")} /></div>
+                {/* Propietarios dinámicos */}
+                {form.propietarios.map((prop, idx) => (
+                  <div key={idx} style={S.section}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                      <div style={S.sectionTitle}>Propietario {idx + 1}</div>
+                      {idx > 0 && (
+                        <button onClick={() => setForm(f => ({ ...f, propietarios: f.propietarios.filter((_, i) => i !== idx) }))}
+                          style={{ background: "none", border: "none", color: "#A23A3A", cursor: "pointer", fontSize: 18, padding: 0 }}>✕</button>
+                      )}
+                    </div>
+                    <div style={S.grid2}>
+                      <div><label style={S.label}>Nombre completo</label>
+                        <input value={prop.nombre} onChange={e => setForm(f => ({ ...f, propietarios: f.propietarios.map((p, i) => i === idx ? { ...p, nombre: e.target.value } : p) }))} style={S.input} /></div>
+                      <div><label style={S.label}>DNI/NIE</label>
+                        <input value={prop.dni} onChange={e => setForm(f => ({ ...f, propietarios: f.propietarios.map((p, i) => i === idx ? { ...p, dni: e.target.value } : p) }))} style={S.input} /></div>
+                      <div><label style={S.label}>Teléfono</label>
+                        <input value={prop.tel} onChange={e => setForm(f => ({ ...f, propietarios: f.propietarios.map((p, i) => i === idx ? { ...p, tel: e.target.value } : p) }))} style={S.input} /></div>
+                      <div><label style={S.label}>Email</label>
+                        <input value={prop.email} onChange={e => setForm(f => ({ ...f, propietarios: f.propietarios.map((p, i) => i === idx ? { ...p, email: e.target.value } : p) }))} style={S.input} /></div>
+                    </div>
+                    {idx === 0 && (
+                      <div><label style={S.label}>Dirección propietarios</label><input value={form.dir_propietarios} onChange={e => setForm(f => ({ ...f, dir_propietarios: e.target.value }))} style={S.input} /></div>
+                    )}
                   </div>
-                  <div><label style={S.label}>Dirección propietarios</label><input {...F("dir_propietarios")} /></div>
-                </div>
-
-                {/* Propietario 2 */}
-                <div style={S.section}>
-                  <div style={S.sectionTitle}>Propietario 2 (si hay dos titulares)</div>
-                  <div style={S.grid2}>
-                    <div><label style={S.label}>Nombre completo</label><input {...F("prop2_nombre")} /></div>
-                    <div><label style={S.label}>DNI/NIE</label><input {...F("prop2_dni")} /></div>
-                    <div><label style={S.label}>Teléfono</label><input {...F("prop2_tel")} /></div>
-                    <div><label style={S.label}>Email</label><input {...F("prop2_email")} /></div>
-                  </div>
-                </div>
+                ))}
+                <button onClick={() => setForm(f => ({ ...f, propietarios: [...f.propietarios, { nombre: "", dni: "", tel: "", email: "" }] }))}
+                  style={{ width: "100%", padding: "10px", background: "none", border: `1px dashed ${BORDER}`, color: BRONZE, fontSize: 12, cursor: "pointer", fontFamily: "Inter, sans-serif", marginBottom: 14 }}>
+                  + Añadir propietario
+                </button>
 
                 {/* Económico */}
                 <div style={S.section}>
