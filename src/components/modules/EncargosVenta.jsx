@@ -370,9 +370,16 @@ export default function EncargosVenta() {
                   {enc.importe_publicacion && <span style={{ color: "#9A968A" }}>Precio: {fmtP(enc.importe_publicacion)}</span>}
                   {enc.duracion_meses && <span style={{ color: "#9A968A" }}>{enc.duracion_meses} meses</span>}
                 </div>
+                {enc.otp_codigo && enc.estado === "enviado" && (
+                  <div style={{ fontSize: 11, color: "#9C6E1B", marginTop: 6, background: "rgba(156,110,27,0.08)", padding: "4px 8px", display: "inline-block" }}>
+                    Código verificación: <strong style={{ letterSpacing: 2 }}>{enc.otp_codigo}</strong>
+                    {enc.otp_email && <span style={{ color: "#9A968A" }}> → {enc.otp_email}</span>}
+                  </div>
+                )}
                 {enc.firma_propietario_fecha && (
                   <div style={{ fontSize: 11, color: "#2C6E52", marginTop: 6 }}>
-                    ✓ Firmado por propietario el {new Date(enc.firma_propietario_fecha).toLocaleDateString("es-ES")}
+                    ✓ Firmado el {new Date(enc.firma_propietario_fecha).toLocaleDateString("es-ES")}
+                    {enc.ip_firma && <span style={{ color: "#9A968A" }}> · IP: {enc.ip_firma}</span>}
                   </div>
                 )}
               </div>
