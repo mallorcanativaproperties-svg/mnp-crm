@@ -327,7 +327,7 @@ export default function FormularioCaptacion() {
   const [zona, setZona] = useState("");
   const [orient, setOrient] = useState("");
   const [distPlaya, setDistPlaya] = useState("");
-  const [visDir, setVisDir] = useState("Ocultar direccion");
+  const [visDir, setVisDir] = useState("Solo calle");
 
   // Venta
   const [precioVenta, setPrecioVenta] = useState("");
@@ -777,6 +777,15 @@ export default function FormularioCaptacion() {
                   {(Number(habDob)||0)+(Number(habSim)||0)}
                 </div>
                 <span style={{ fontSize: 10, color: "#9A968A" }}>Total enviado a Idealista</span>
+              </div>
+            </div>
+            <div>
+              <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 4 }}>Total baños (Idealista)</label>
+              <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                <div style={{ width: 80, background: "#F8F6F1", border: "1px solid #E7E1D4", borderRadius: 0, color: "#AC8A54", padding: "9px 12px", fontSize: 13, fontFamily: "Inter, sans-serif", fontWeight: 700, textAlign: "center" }}>
+                  {(Number(banos)||0)+(Number(aseos)||0)}
+                </div>
+                <span style={{ fontSize: 10, color: "#9A968A" }}>Baños + aseos — bathNumber</span>
               </div>
             </div>
           </div>}
