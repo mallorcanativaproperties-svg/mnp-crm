@@ -2533,11 +2533,11 @@ function IdealistaJsonButton({ supabase }) {
     "Terreno rustico":"land", "Terreno rural":"land", "Terreno industrial":"land",
     Garaje:"garage", Parking:"garage", Trastero:"storage", Edificio:"building",
   };
-  const CONSERV_MAP = { "Buen estado":"good",Reformado:"good","A reformar":"toRestore","Obra nueva":"new","En construccion":"new" };
+  const CONSERV_MAP = { "Buen estado":"good","Reformado":"renovated","A reformar":"toRestore","Obra nueva":"new","En construccion":"new" };
   const HEAT_MAP = { "Gas central":"centralGas","Gas individual":"individualGas","Electrica central":"centralElectric","Electrica individual":"individualElectric","Bomba de calor":"individualAirConditioningHeatPump","Aerotermia":"centralHeatPump","Suelo radiante":"centralRadiantFloor","Sin calefaccion":"noHeating" };
-  const IMAGE_TAG_MAP = { LIVING_ROOM:"livingRoom",BEDROOM:"room",BATHROOM:"bathroom",KITCHEN:"kitchen",TERRACE:"terrace",SWIMMING_POOL:"pool",GARDEN:"garden",CORRIDOR:"hallway",PLAN:"plan",VIEWS:"view",FACADE:"facade",GARAGE:"garage",STORAGE:"storage",BALCONY:"terrace",DINING:"livingRoom",HALL:"hallway",PATIO:"garden",PORCH:"terrace" };
+  const IMAGE_TAG_MAP = { LIVING_ROOM:"living_room",BEDROOM:"room",BATHROOM:"bathroom",KITCHEN:"kitchen",TERRACE:"terrace",SWIMMING_POOL:"pool",GARDEN:"garden",CORRIDOR:"hallway",PLAN:"plan",VIEWS:"view",FACADE:"facade",GARAGE:"garage",STORAGE:"storage",BALCONY:"terrace",DINING:"living_room",HALL:"hallway",PATIO:"garden",PORCH:"terrace" };
   const FLOOR_MAP = { "Bajo":"groundFloor","Planta baja":"groundFloor","PB":"groundFloor","0":"groundFloor","Entreplanta":"mezzanine","Entresuelo":"mezzanine" };
-  const VALID_CERT = ["A","B","C","D","E","F","G","En tramite","Exento"];
+  const VALID_CERT = ["A","B","C","D","E","F","G","Exento"];
 
   function isValid(row) {
     if (!row.ref||!row.tipo||!row.municipio||!row.dir) return false;
@@ -2571,17 +2571,17 @@ function IdealistaJsonButton({ supabase }) {
     const isStudio=row.tipo==="Estudio";
     const property={propertyCode:row.ref,propertyReference:row.ref,propertyVisibility:"idealista"};
     // Precio y tipo de operación según modalidad
-    const opType = row.op === "Alquiler" ? "rent" : row.op === "Traspaso" ? "transfer" : "sale";
+    const opType = row.op === "Alquiler" ? "rent" : "sale";
     const price = row.op === "Alquiler" ? (Number(row.precio_alquiler)||0) : row.op === "Traspaso" ? (Number(row.precio_traspaso)||0) : (Number(row.precio_venta)||0);
     const op = {operationType: opType};
     if(price>0) op.operationPrice=price;
-    // Traspaso: precio_venta es el precio del local (opcional)
-    if(row.op === "Traspaso" && Number(row.precio_venta)>0) op.operationPriceTransfer = Number(row.precio_venta);
+
     // Alquiler: incluir fianza y duración
     if(row.op === "Alquiler") {
-      if(Number(row.fianza_meses)>0) op.operationDeposit = Number(row.fianza_meses);
-      if(Number(row.duracion_min_meses)>0) op.operationMinimumTerm = Number(row.duracion_min_meses);
-      if(row.mascotas === true) op.operationPetsAllowed = true;
+      if(Number(row.fianza_meses)>0) op.rentDepositMonths = Number(row.fianza_meses);
+      if(Number(row.duracion_min_meses)>0) op.rentMinimumTerm = Number(row.duracion_min_meses);
+      if(row.mascotas === true) op.rentPetsAllowed = true;
+      else if(row.mascotas === false) op.rentPetsAllowed = false;
     }
     const community=Number(row.comunidad)||0; if(community>0) op.operationPriceCommunity=community;
     property.propertyOperation=op;
@@ -2626,7 +2626,7 @@ function IdealistaJsonButton({ supabase }) {
     if(tipo==="house"&&Number(row.plantas_chalet)>0) feat.featuresFloorsBelowGround=Number(row.plantas_chalet);
     if(row.calefaccion&&HEAT_MAP[row.calefaccion]) feat.featuresHeatingType=HEAT_MAP[row.calefaccion];
     if(row.vent_ext===true) feat.featuresWindowsLocation="exterior";
-    if(isStudio) feat.featuresStudio=true;
+    if(isStudio||row.tipo==="Loft") feat.featuresStudio=true;
     if(isPenthouse) feat.featuresPenthouse=true;
     if(isDuplex) feat.featuresDuplex=true;
     const conserv=CONSERV_MAP[row.conserv]; if(conserv) feat.featuresConservation=conserv;
