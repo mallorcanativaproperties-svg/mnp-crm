@@ -1436,18 +1436,15 @@ function PropDetail({ p, currentUser, onClose, onUpdate, onDelete, onDuplicate }
     const precioCheck = src.op === "Alquiler" ? Number(src.precioAlquiler) : src.op === "Traspaso" ? Number(src.precioTraspaso) : Number(src.precioVenta);
     if (!precioCheck || precioCheck <= 0) errs.add(src.op === "Alquiler" ? "precioAlquiler" : src.op === "Traspaso" ? "precioTraspaso" : "precioVenta");
     // m² construidos obligatorio excepto terrenos (que requieren m² parcela)
-    if (featuresType !== "land") {
-      if (!Number(src.mConst) || Number(src.mConst) <= 0) errs.add("mConst");
-    } else {
-      if (!Number(src.mParcela) || Number(src.mParcela) <= 0) errs.add("mParcela");
-    }
+    const needsMConst = !["land","garage","storage"].includes(featuresType);
+    if (needsMConst && (!Number(src.mConst) || Number(src.mConst) <= 0)) errs.add("mConst");
+    if (featuresType === "land" && (!Number(src.mParcela) || Number(src.mParcela) <= 0)) errs.add("mParcela");
     if (!src.desc || !src.desc.trim()) errs.add("desc");
     if (needsBaths && (Number(src.banos)||0) + (Number(src.aseos)||0) <= 0) errs.add("banos");
     if (residencial) {
       const CERT_VALIDOS = ["A","B","C","D","E","F","G","Exento"];
       if (!src.certEnerg || !CERT_VALIDOS.includes(src.certEnerg)) errs.add("certEnerg");
     }
-    if (!src.refCatastral) errs.add("refCatastral");
     if (src.anoConstruc) {
       const y = parseInt(src.anoConstruc);
       if (isNaN(y) || y < 1800 || y > new Date().getFullYear()) errs.add("anoConstruc");
@@ -2239,8 +2236,35 @@ REGLAS:
             {ft !== "rustic" && EFl({label: "Ascensor", field: "ascensor", pub: true, type: "bool"})}
             {EFl({label: "Armarios empotrados", field: "armarios", pub: true, type: "bool"})}
             {EFl({label: "Trastero", field: "trastero", pub: true, type: "bool"})}
-            {tieneAireCalef && EFl({label: "Aire acondicionado", field: "aireAcond", pub: true, type: "bool"})}
-            {tieneAireCalef && d.aireAcond && EFl({label: "Tipo aire acondicionado", field: "aireAcondTipo", pub: true, options: ["Solo frio","Frio/Calor","Preinstalacion"], type: "select"})}
+            {tieneAireCalef && (() => {
+              const aireVal = draft?.aireAcond;
+              return (<>
+                <div>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4, display: "flex", alignItems: "center", gap: 4 }}>
+                    Aire acond.
+                    <span style={{ fontSize: 8, color: "#AC8A54" }}>★</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <button onClick={() => {
+                      const newVal = !aireVal;
+                      upd("aireAcond", newVal);
+                      if (newVal && (!draft?.aireAcondTipo || draft?.aireAcondTipo === "No disponible")) upd("aireAcondTipo", "Frio/Calor");
+                      if (!newVal) upd("aireAcondTipo", "");
+                    }} style={{ width: 36, height: 20, borderRadius: 10, border: "none", background: aireVal ? "#2C6E52" : "#E7E1D4", cursor: "pointer", position: "relative", transition: "background 0.2s", flexShrink: 0 }}>
+                      <span style={{ position: "absolute", top: 2, left: aireVal ? 18 : 2, width: 16, height: 16, borderRadius: "50%", background: "#fff", transition: "left 0.2s", display: "block" }} />
+                    </button>
+                    <span style={{ fontSize: 12 }}>{aireVal ? "Sí" : "No"}</span>
+                  </div>
+                </div>
+                {aireVal && (
+                  <select value={draft?.aireAcondTipo || ""} onChange={e => upd("aireAcondTipo", e.target.value)}
+                    style={{ background:"#FFFFFF",border:"1px solid #E7E1D4",borderRadius:0,color:"#22262E",padding:"8px 12px",fontSize:12,fontFamily:"Inter, sans-serif" }}>
+                    <option value="">-- Tipo</option>
+                    {["Solo frio","Frio/Calor","Preinstalacion"].map(o => <option key={o}>{o}</option>)}
+                  </select>
+                )}
+              </>);
+            })()}
           </div>}
           <div style={{ ...g2, marginTop: 8 }}>
             {EFl({label: "Parking", field: "parking", pub: true, options: ["Si","No","Comunitario","Opcional"], type: "select"})}
@@ -2553,8 +2577,7 @@ function IdealistaJsonButton({ supabase }) {
     if(tipo==="land"&&(!Number(row.m_parcela)||Number(row.m_parcela)<=0)) return false;
     // Baños: obligatorio para residencial y comercial
     const needsBaths=["flat","house","rustic","premises_commercial","office"].includes(tipo);
-    if(tipo==="house"&&!row.tipologia_chalet) return false;
-    if(tipo==="house"&&(!Number(row.plantas_chalet)||Number(row.plantas_chalet)<=0)) return false;
+    // tipología y plantas chalet: opcionales en Idealista, no bloquean publicación
     if(needsBaths&&(Number(row.banos)||0)+(Number(row.aseos)||0)<=0) return false;
     // Cert energético: solo residencial
     const residencial=["flat","house","rustic"].includes(tipo);
@@ -2623,7 +2646,7 @@ function IdealistaJsonButton({ supabase }) {
       const HT_MAP={"Adosado":"terraced","Pareado":"semiDetached","Independiente":"detached","En hilera":"terraced"};
       if(HT_MAP[row.tipologia_chalet]) feat.featuresHouseSubtype=HT_MAP[row.tipologia_chalet];
     }
-    if((tipo==="house"||tipo==="rustic")&&Number(row.plantas_chalet)>0) feat.featuresFloorsBelowGround=Number(row.plantas_chalet);
+    if((tipo==="house"||tipo==="rustic")&&Number(row.plantas_chalet)>0) feat.featuresFloorNumber=Number(row.plantas_chalet);
     if(row.calefaccion&&HEAT_MAP[row.calefaccion]) feat.featuresHeatingType=HEAT_MAP[row.calefaccion];
     if(row.vent_ext===true) feat.featuresWindowsLocation="exterior";
     if(isStudio||row.tipo==="Loft") feat.featuresStudio=true;

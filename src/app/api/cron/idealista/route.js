@@ -188,7 +188,7 @@ function buildProperty(row, media) {
     if (row.tipologia_chalet && TIPOLOGIA_MAP[row.tipologia_chalet]) {
       features.featuresHouseSubtype = TIPOLOGIA_MAP[row.tipologia_chalet];
     }
-    if (Number(row.plantas_chalet) > 0) features.featuresFloorsBelowGround = Number(row.plantas_chalet);
+    if (Number(row.plantas_chalet) > 0) features.featuresFloorNumber = Number(row.plantas_chalet);
   }
 
   if (row.cert_energ) {
