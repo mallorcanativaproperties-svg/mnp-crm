@@ -19,16 +19,37 @@ const S = {
 const PROP_INIT = { nombre: "", dni: "", tel: "", email: "" };
 
 const FORM_INIT = {
-  tipo: "sin_compromiso",
+  // Tipo principal y subtipo
+  categoria: "venta",       // venta | arrendamiento | traspaso
+  tipo: "sin_compromiso",   // sin_compromiso | premium | abierto | exclusiva
   propiedad_id: "",
+  // Propietarios / Cedente
   propietarios: [{ ...PROP_INIT }],
   dir_propietarios: "",
+  // Inmueble / Negocio
   prop_direccion: "", prop_tipo: "", prop_garaje: "", prop_trastero: "",
   prop_ref_catastral: "", prop_reg_registral: "", prop_ref: "",
+  // Arrendamiento específico
+  tipo_arrendamiento: "permanente", // permanente | no_permanente
+  renta_mensual: "", fianza: "", honorarios_paga: "propietario",
+  // Traspaso específico
+  tipo_negocio: "", superficie_m2: "", renta_local: "",
+  arrendamiento_fecha_inicio: "", arrendamiento_duracion: "", arrendamiento_vencimiento: "",
+  arrendamiento_fianza: "", arrendamiento_mensualidades: "",
+  // Económico común
   importe_publicacion: "", honorarios: "", iva_honorarios: "", importe_propietario: "",
+  // Condiciones
   duracion_meses: 3,
   fecha_contrato: new Date().toISOString().split("T")[0],
+  clausulas_especificas: "",
+  // Consultor
   consultor_nombre: "", consultor_dni: "", consultor_poliza: "",
+};
+
+const CATEGORIA_TIPOS = {
+  venta:         [["sin_compromiso", "Sin Compromiso (Abierto)"], ["premium", "Premium (Exclusiva)"]],
+  arrendamiento: [["abierto", "Abierto (Sin Exclusividad)"], ["exclusiva", "Exclusiva (Premium)"]],
+  traspaso:      [["abierto", "Abierto (Sin Exclusividad)"], ["exclusiva", "Exclusiva"]],
 };
 
 export default function EncargosVenta() {
@@ -78,8 +99,12 @@ export default function EncargosVenta() {
 
   async function handleSave() {
     if (!form.propietarios[0]?.nombre) return;
-    setSaving(true);
-    const res = await fetch("/api/encargos", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
+    const payload = {
+      ...form,
+      prop1_nombre: form.propietarios[0]?.nombre,
+      prop1_tel: form.propietarios[0]?.tel,
+    };
+    const res = await fetch("/api/encargos", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
     const data = await res.json();
     if (data.ok) { setShowForm(false); setForm(FORM_INIT); await load(); }
     setSaving(false);
@@ -139,13 +164,21 @@ export default function EncargosVenta() {
 
               <div style={{ padding: "24px" }}>
 
-                {/* Tipo */}
+                {/* Categoría y tipo */}
                 <div style={S.section}>
                   <div style={S.sectionTitle}>Tipo de encargo</div>
-                  <div style={{ display: "flex", gap: 10 }}>
-                    {[["sin_compromiso", "Sin Compromiso de Exclusividad"], ["premium", "Compromiso Premium (Exclusividad)"]].map(([v, l]) => (
+                  <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+                    {[["venta","Venta"],["arrendamiento","Arrendamiento"],["traspaso","Traspaso"]].map(([v,l]) => (
+                      <button key={v} onClick={() => setForm(f => ({ ...f, categoria: v, tipo: CATEGORIA_TIPOS[v][0][0] }))}
+                        style={{ flex: 1, padding: "10px", border: `2px solid ${form.categoria === v ? BRONZE : BORDER}`, background: form.categoria === v ? `${BRONZE}11` : "#fff", color: form.categoria === v ? BRONZE : PETROL, cursor: "pointer", fontSize: 12, fontWeight: form.categoria === v ? 600 : 400, fontFamily: "Inter, sans-serif" }}>
+                        {l}
+                      </button>
+                    ))}
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    {CATEGORIA_TIPOS[form.categoria].map(([v,l]) => (
                       <button key={v} onClick={() => setForm(f => ({ ...f, tipo: v }))}
-                        style={{ flex: 1, padding: "12px 8px", border: `2px solid ${form.tipo === v ? BRONZE : BORDER}`, background: form.tipo === v ? `${BRONZE}11` : "#fff", color: form.tipo === v ? BRONZE : PETROL, cursor: "pointer", fontSize: 12, fontWeight: form.tipo === v ? 600 : 400, fontFamily: "Inter, sans-serif" }}>
+                        style={{ flex: 1, padding: "10px", border: `2px solid ${form.tipo === v ? "#405c6b" : BORDER}`, background: form.tipo === v ? "rgba(64,92,107,0.08)" : "#fff", color: form.tipo === v ? "#405c6b" : PETROL, cursor: "pointer", fontSize: 12, fontWeight: form.tipo === v ? 600 : 400, fontFamily: "Inter, sans-serif" }}>
                         {l}
                       </button>
                     ))}
@@ -197,6 +230,67 @@ export default function EncargosVenta() {
                   style={{ width: "100%", padding: "10px", background: "none", border: `1px dashed ${BORDER}`, color: BRONZE, fontSize: 12, cursor: "pointer", fontFamily: "Inter, sans-serif", marginBottom: 14 }}>
                   + Añadir propietario
                 </button>
+
+                {/* Campos específicos Arrendamiento */}
+                {form.categoria === "arrendamiento" && (
+                  <div style={S.section}>
+                    <div style={S.sectionTitle}>Datos del arrendamiento</div>
+                    <div style={{ marginBottom: 12 }}>
+                      <label style={S.label}>Tipo de arrendamiento</label>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        {[["permanente","Permanente (vivienda habitual)"],["no_permanente","No permanente (temporada / uso distinto)"]].map(([v,l]) => (
+                          <button key={v} onClick={() => setForm(f => ({ ...f, tipo_arrendamiento: v }))}
+                            style={{ flex: 1, padding: "8px", border: `1px solid ${form.tipo_arrendamiento === v ? BRONZE : BORDER}`, background: form.tipo_arrendamiento === v ? `${BRONZE}11` : "#fff", color: form.tipo_arrendamiento === v ? BRONZE : PETROL, cursor: "pointer", fontSize: 11, fontFamily: "Inter, sans-serif" }}>
+                            {l}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div style={S.grid2}>
+                      <div><label style={S.label}>Renta mensual solicitada (€)</label><input type="number" {...F("renta_mensual")} /></div>
+                      <div><label style={S.label}>Fianza pactada (€)</label><input type="number" {...F("fianza")} /></div>
+                    </div>
+                    <div style={{ marginBottom: 12 }}>
+                      <label style={S.label}>Parte que abona los honorarios</label>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        {[["propietario","Propietario"],["inquilino","Inquilino"]].map(([v,l]) => (
+                          <button key={v} onClick={() => setForm(f => ({ ...f, honorarios_paga: v }))}
+                            style={{ flex: 1, padding: "8px", border: `1px solid ${form.honorarios_paga === v ? BRONZE : BORDER}`, background: form.honorarios_paga === v ? `${BRONZE}11` : "#fff", color: form.honorarios_paga === v ? BRONZE : PETROL, cursor: "pointer", fontSize: 12, fontFamily: "Inter, sans-serif" }}>
+                            {l}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Campos específicos Traspaso */}
+                {form.categoria === "traspaso" && (
+                  <div style={S.section}>
+                    <div style={S.sectionTitle}>Datos del negocio / traspaso</div>
+                    <div style={S.grid2}>
+                      <div><label style={S.label}>Tipo de negocio / actividad</label><input {...F("tipo_negocio")} /></div>
+                      <div><label style={S.label}>Superficie aproximada (m²)</label><input type="number" {...F("superficie_m2")} /></div>
+                      <div><label style={S.label}>Renta mensual del local (€)</label><input type="number" {...F("renta_local")} /></div>
+                    </div>
+                    <div style={{ fontSize: 10, color: "#9A968A", letterSpacing: "0.1em", margin: "8px 0 6px" }}>SITUACIÓN DEL ARRENDAMIENTO</div>
+                    <div style={S.grid2}>
+                      <div><label style={S.label}>Fecha inicio</label><input type="date" {...F("arrendamiento_fecha_inicio")} /></div>
+                      <div><label style={S.label}>Duración</label><input {...F("arrendamiento_duracion")} placeholder="ej: 5 años" /></div>
+                      <div><label style={S.label}>Vencimiento</label><input type="date" {...F("arrendamiento_vencimiento")} /></div>
+                      <div><label style={S.label}>Fianza (€)</label><input type="number" {...F("arrendamiento_fianza")} /></div>
+                      <div><label style={S.label}>Nº mensualidades depositadas</label><input type="number" {...F("arrendamiento_mensualidades")} /></div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Cláusulas específicas */}
+                <div style={S.section}>
+                  <div style={S.sectionTitle}>Cláusulas específicas (opcional)</div>
+                  <div style={{ fontSize: 11, color: "#9A968A", marginBottom: 8 }}>Si se cumplimenta, se añadirá al contrato como cláusula adicional.</div>
+                  <textarea {...F("clausulas_especificas")} placeholder="Escribe aquí las cláusulas adicionales que quieras incluir en el contrato..." rows={4}
+                    style={{ width: "100%", padding: "10px 12px", border: `1px solid ${BORDER}`, background: "#fff", color: PETROL, fontSize: 13, fontFamily: "Inter, sans-serif", outline: "none", resize: "vertical", boxSizing: "border-box" }} />
+                </div>
 
                 {/* Económico */}
                 <div style={S.section}>
@@ -253,8 +347,11 @@ export default function EncargosVenta() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, flexWrap: "wrap" }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6, flexWrap: "wrap" }}>
-                  <span style={{ fontSize: 10, padding: "2px 8px", background: enc.tipo === "premium" ? `${BRONZE}11` : "rgba(64,92,107,0.1)", color: enc.tipo === "premium" ? BRONZE : "#405c6b", letterSpacing: "0.06em" }}>
-                    {enc.tipo === "premium" ? "PREMIUM" : "SIN COMPROMISO"}
+                  <span style={{ fontSize: 10, padding: "2px 8px", background: `${BRONZE}11`, color: BRONZE, letterSpacing: "0.06em" }}>
+                    {(enc.categoria || "venta").toUpperCase()}
+                  </span>
+                  <span style={{ fontSize: 10, padding: "2px 8px", background: "rgba(64,92,107,0.1)", color: "#405c6b", letterSpacing: "0.06em" }}>
+                    {enc.tipo === "premium" || enc.tipo === "exclusiva" ? "EXCLUSIVA" : "ABIERTO"}
                   </span>
                   <span style={{ fontSize: 10, padding: "2px 8px", background: `${ESTADO_COLOR[enc.estado] || "#9A968A"}11`, color: ESTADO_COLOR[enc.estado] || "#9A968A", letterSpacing: "0.06em" }}>
                     {ESTADO_LABEL[enc.estado] || enc.estado}
