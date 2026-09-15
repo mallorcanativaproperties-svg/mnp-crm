@@ -827,8 +827,6 @@ export default function FormularioCaptacion() {
             <Select label="Carp. exterior" value={carpExt} onChange={setCarpExt} options={["Aluminio","Aluminio con RPT","PVC","Madera","Climalit","Doble cristal","Triple cristal","Hierro/Forja"]} />
             <Select label="Carp. interior" value={carpInt} onChange={setCarpInt} options={["Lacado blanco","Roble","Cerezo","Haya","Pino","Wengue","Nogal","DM lacado","Cristal","Corredera","Block"]} />
           </div>}
-          {esResidencial && op === "Alquiler" && <div style={g3}>
-          </div>}
           {tieneAireCalef && <div style={g3}>
             <Select label="Calefaccion" value={calefaccion} onChange={setCalefaccion} options={CALEFACCION_OPTS} />
             {esResidencial && <Select label="Agua caliente" value={aguaCal} onChange={setAguaCal} options={AGUA_CALIENTE} />}
@@ -847,8 +845,9 @@ export default function FormularioCaptacion() {
             <Toggle label="Armarios empotrados" value={armarios} onChange={setArmarios} />
             <Toggle label="Trastero" value={trastero} onChange={setTrastero} />
             <Toggle label="Ventanas exteriores" value={ventExt} onChange={setVentExt} />
-            <Toggle label="Incluye mobiliario" value={ventaMob} onChange={setVentaMob} />
+            {(esResidencial || esComercial) && <Toggle label="Incluye mobiliario" value={ventaMob} onChange={setVentaMob} />}
             {tieneAireCalef && <Toggle label="Aire acondicionado" value={aireAcond} onChange={e => { setAireAcond(e); setAireAcondTipo(e ? "Frio/Calor" : ""); }} />}
+            {tieneAireCalef && aireAcond && <Select label="Tipo aire" value={aireAcondTipo} onChange={setAireAcondTipo} options={["Solo frio","Frio/Calor","Preinstalacion"]} />}
           </div>}
           <div style={g3}>
             <Select label="Parking" value={parking} onChange={setParking} options={["Si","No","Comunitario","Opcional"]} />

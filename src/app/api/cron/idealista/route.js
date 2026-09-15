@@ -381,55 +381,57 @@ export async function GET(request) {
     const client = new ftp.Client();
     client.ftp.verbose = false;
 
-    await client.access({
-      host: FTP_HOST,
-      user: FTP_USER,
-      password: FTP_PASS,
-      secure: true,
-    });
+    try {
+      await client.access({
+        host: FTP_HOST,
+        user: FTP_USER,
+        password: FTP_PASS,
+        secure: true,
+      });
 
-    // 4a. Subir el JSON
-    const jsonFileName = `${CUSTOMER_CODE}.json`;
-    await ftpUploadBuffer(client, jsonBuffer, jsonFileName);
+      // 4a. Subir el JSON
+      const jsonFileName = `${CUSTOMER_CODE}.json`;
+      await ftpUploadBuffer(client, jsonBuffer, jsonFileName);
 
-    // 4b. Subir las fotos de cada propiedad
-    let fotosSubidas = 0;
-    let fotosError = 0;
+      // 4b. Subir las fotos de cada propiedad
+      let fotosSubidas = 0;
+      let fotosError = 0;
 
-    for (const prop of validas) {
-      const media = (mediaAll || []).filter(m => m.propiedad_id === prop.id && m.tipo === "foto" && m.url);
+      for (const prop of validas) {
+        const media = (mediaAll || []).filter(m => m.propiedad_id === prop.id && m.tipo === "foto" && m.url);
 
-      for (const foto of media) {
-        try {
-          // Descargar foto desde Supabase
-          const response = await fetch(foto.url);
-          if (!response.ok) { fotosError++; continue; }
-          const arrayBuffer = await response.arrayBuffer();
-          const buffer = Buffer.from(arrayBuffer);
+        for (const foto of media) {
+          try {
+            // Descargar foto desde Supabase
+            const response = await fetch(foto.url);
+            if (!response.ok) { fotosError++; continue; }
+            const arrayBuffer = await response.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
 
-          // Path relativo en FTP: REF/foto/archivo.ext
-          const url = foto.url || "";
-          const match = url.match(/propiedades-media\/(.+)$/);
-          const remotePath = match ? match[1] : `${prop.ref}/foto/${Date.now()}.jpg`;
+            // Path relativo en FTP: REF/foto/archivo.ext
+            const url = foto.url || "";
+            const match = url.match(/propiedades-media\/(.+)$/);
+            const remotePath = match ? match[1] : `${prop.ref}/foto/${Date.now()}.jpg`;
 
-          await ftpUploadBuffer(client, buffer, remotePath);
-          fotosSubidas++;
-        } catch (e) {
-          fotosError++;
+            await ftpUploadBuffer(client, buffer, remotePath);
+            fotosSubidas++;
+          } catch (e) {
+            fotosError++;
+          }
         }
       }
+
+      return NextResponse.json({
+        ok: true,
+        fecha: sendDate,
+        propiedades: validas.length,
+        fotosSubidas,
+        fotosError,
+        json: jsonFileName,
+      });
+    } finally {
+      client.close();
     }
-
-    client.close();
-
-    return NextResponse.json({
-      ok: true,
-      fecha: sendDate,
-      propiedades: validas.length,
-      fotosSubidas,
-      fotosError,
-      json: jsonFileName,
-    });
 
   } catch (err) {
     console.error("Idealista FTP cron error:", err);
