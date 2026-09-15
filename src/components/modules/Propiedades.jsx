@@ -310,7 +310,6 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
   const [iaVariaciones, setIaVariaciones] = useState([]); // hasta 3 variaciones generadas
   const [iaLoading, setIaLoading] = useState(false);
   const [iaSeleccionada, setIaSeleccionada] = useState(null); // variación elegida
-  const [ieeWarning, setIeeWarning] = useState(null);
 
   useEffect(() => {
     if (propiedadId) loadMedia(false);
@@ -2849,6 +2848,7 @@ export default function CRMPropiedades({ currentUser }) {
   const [fTipo, setFTipo] = useState("todos");
   const [sort, setSort] = useState("fecha");
   const [sel, setSel] = useState(null);
+  const [ieeWarning, setIeeWarning] = useState(null);
 
   useEffect(() => {
     loadProps();
