@@ -310,6 +310,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
   const [iaVariaciones, setIaVariaciones] = useState([]); // hasta 3 variaciones generadas
   const [iaLoading, setIaLoading] = useState(false);
   const [iaSeleccionada, setIaSeleccionada] = useState(null); // variación elegida
+  const [ieeWarning, setIeeWarning] = useState(null);
 
   useEffect(() => {
     if (propiedadId) loadMedia(false);
@@ -2900,11 +2901,12 @@ export default function CRMPropiedades({ currentUser }) {
   // Validación de reglas Idealista (instrucciones de António Lopes)
   // Solo aplica si la propiedad tiene "Idealista" en destinos y estado = publicada
   async function saveProperty(prop) {
-    // IEE warning for buildings >= 49 years old
+    // IEE warning for buildings >= 49 years old — aviso informativo, no bloquea
     if (prop.anoConstruc) {
       const age = new Date().getFullYear() - parseInt(prop.anoConstruc);
       if (age >= 49) {
-        alert("AVISO: Este inmueble tiene " + age + " anos. Es obligatorio solicitar el Informe de Evaluacion del Edificio (IEE).");
+        // Mostrar aviso no bloqueante y continuar guardando
+        setIeeWarning(`AVISO: Este inmueble tiene ${age} años. Es obligatorio solicitar el Informe de Evaluación del Edificio (IEE).`);
       }
     }
     
@@ -3052,6 +3054,14 @@ export default function CRMPropiedades({ currentUser }) {
   return (
     <div style={{ fontFamily: "Inter, sans-serif", background: "#F8F6F1", minHeight: "100vh", color: "#22262E", padding: "clamp(16px, 4vw, 40px) clamp(12px, 3vw, 24px)" }}>
       <div style={{ maxWidth: 920, margin: "0 auto" }}>
+
+        {/* Banner aviso IEE — no bloqueante */}
+        {ieeWarning && (
+          <div style={{ background: "#FFF8E7", border: "1px solid #F0C040", padding: "12px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+            <span style={{ fontSize: 13, color: "#7A5C00" }}>⚠️ {ieeWarning}</span>
+            <button onClick={() => setIeeWarning(null)} style={{ background: "none", border: "none", color: "#7A5C00", cursor: "pointer", fontSize: 16, padding: 0, flexShrink: 0 }}>✕</button>
+          </div>
+        )}
 
         {/* Header */}
         <div style={{ marginBottom: 40, borderBottom: "1px solid #2A2926", paddingBottom: 32 }}>
