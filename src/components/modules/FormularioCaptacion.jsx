@@ -14,7 +14,7 @@ const TIPO_GROUPS = [
 const OPERACIONES = ["Compraventa", "Alquiler", "Traspaso"];
 // Valores alineados con mapeo Idealista en Propiedades.jsx
 const CONSERVACION = ["Buen estado","Reformado","A reformar","Obra nueva","En construccion"];
-const const ORIENTACIONES = ["Norte","Sur","Este","Oeste","Noreste","Noroeste","Sureste","Suroeste"];
+const ORIENTACIONES = ["Norte","Sur","Este","Oeste","Noreste","Noroeste","Sureste","Suroeste"];
 const CERT_ENERG = ["A","B","C","D","E","F","G","Exento"];
 const VIS_DIR = ["Direccion exacta", "Solo calle", "Ocultar direccion"];
 // Opciones alineadas con ficha de propiedad
