@@ -206,7 +206,7 @@ function DashboardContent({ currentUser, onLogout, users, setUsers }) {
       // Propiedades reales
       const { data: propsData } = await supabase
         .from("propiedades")
-        .select("id, ref, titulo, tipo, municipio, precio, num_habitaciones, estado, created_at, agente")
+        .select("id, ref, titulo, tipo, municipio, precio_venta, precio_alquiler, precio_traspaso, op, total_hab, hab_dobles, hab_simples, estado, created_at, agente")
         .order("created_at", { ascending: false });
 
       if (propsData) {
@@ -216,9 +216,9 @@ function DashboardContent({ currentUser, onLogout, users, setUsers }) {
           titulo: p.titulo || "Sin título",
           tipo: p.tipo || "—",
           zona: p.municipio || "—",
-          precio: p.precio || 0,
+          precio: p.op === "Alquiler" ? (p.precio_alquiler || 0) : p.op === "Traspaso" ? (p.precio_traspaso || 0) : (p.precio_venta || 0),
           mConst: 0,
-          hab: p.num_habitaciones || 0,
+          hab: p.total_hab || (Number(p.hab_dobles)||0) + (Number(p.hab_simples)||0),
           agente: p.agente || "—",
           estado: p.estado || "captada",
           visitas: 0,
