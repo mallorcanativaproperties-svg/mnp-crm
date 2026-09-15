@@ -16,7 +16,7 @@ const S = {
   grid2: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 },
 };
 
-const PROP_INIT = { nombre: "", dni: "", tel: "", email: "" };
+const PROP_INIT = { nombre: "", dni: "", tel: "", email: "", direccion: "" };
 
 const FORM_INIT = {
   // Tipo principal y subtipo
@@ -43,7 +43,7 @@ const FORM_INIT = {
   fecha_contrato: new Date().toISOString().split("T")[0],
   clausulas_especificas: "",
   // Consultor
-  consultor_nombre: "", consultor_dni: "", consultor_poliza: "",
+  consultor_id: "", consultor_nombre: "", consultor_dni: "", consultor_poliza: "",
 };
 
 const CATEGORIA_TIPOS = {
@@ -158,22 +158,28 @@ export default function EncargosVenta() {
   const [generandoPdf, setGenerandoPdf] = useState(false);
   const [pdfListo, setPdfListo] = useState(null);
   const [form, setForm] = useState(FORM_INIT);
+  const [usuarios, setUsuarios] = useState([]);
 
-  useEffect(() => { load(); loadProps(); loadCurrentUser(); }, []);
+  useEffect(() => { load(); loadProps(); loadCurrentUser(); loadUsuarios(); }, []);
 
   async function loadCurrentUser() {
-    // Obtener usuario actual del localStorage (mismo sistema que CRMApp)
     const login = typeof window !== "undefined" ? localStorage.getItem("mnp_user_login") : null;
     if (!login) return;
-    const { data } = await supabase.from("usuarios").select("nombre, dni, poliza_rc").eq("user_login", login).single();
+    const { data } = await supabase.from("usuarios").select("id, nombre, dni, poliza_rc").eq("user_login", login).single();
     if (data) {
       setForm(f => ({
         ...f,
+        consultor_id: data.id || "",
         consultor_nombre: data.nombre || "",
         consultor_dni: data.dni || "",
         consultor_poliza: data.poliza_rc || "",
       }));
     }
+  }
+
+  async function loadUsuarios() {
+    const { data } = await supabase.from("usuarios").select("id, nombre, dni, poliza_rc").eq("activo", true).order("nombre");
+    setUsuarios(data || []);
   }
 
   async function load() {
@@ -191,7 +197,16 @@ export default function EncargosVenta() {
 
   function handlePropChange(propId) {
     const prop = propiedades.find(p => p.id === propId);
-    if (prop) setForm(f => ({ ...f, propiedad_id: propId, prop_ref: prop.ref || "", prop_direccion: prop.dir || "", prop_tipo: prop.tipo || "", importe_publicacion: prop.precio_venta || "" }));
+    if (prop) setForm(f => ({
+      ...f,
+      propiedad_id: propId,
+      prop_ref: prop.ref || "",
+      prop_direccion: prop.dir || "",
+      prop_tipo: prop.tipo || "",
+      // Pre-rellenar condiciones económicas desde la propiedad
+      importe_publicacion: prop.precio_venta || f.importe_publicacion,
+      renta_mensual: prop.precio_alquiler || f.renta_mensual,
+    }));
     else setForm(f => ({ ...f, propiedad_id: propId }));
   }
 
@@ -316,12 +331,10 @@ export default function EncargosVenta() {
                         <input value={prop.dni} onChange={e => setForm(f => ({ ...f, propietarios: f.propietarios.map((p, i) => i === idx ? { ...p, dni: e.target.value } : p) }))} style={S.input} /></div>
                       <div><label style={S.label}>Teléfono</label>
                         <input value={prop.tel} onChange={e => setForm(f => ({ ...f, propietarios: f.propietarios.map((p, i) => i === idx ? { ...p, tel: e.target.value } : p) }))} style={S.input} /></div>
-                      <div><label style={S.label}>Email</label>
+                      <div style={{ gridColumn: "1/-1" }}><label style={S.label}>Email</label>
                         <input value={prop.email} onChange={e => setForm(f => ({ ...f, propietarios: f.propietarios.map((p, i) => i === idx ? { ...p, email: e.target.value } : p) }))} style={S.input} /></div>
-                    </div>
-                    {idx === 0 && (
-                      <div><label style={S.label}>Dirección propietarios</label><input value={form.dir_propietarios} onChange={e => setForm(f => ({ ...f, dir_propietarios: e.target.value }))} style={S.input} /></div>
-                    )}
+                      <div style={{ gridColumn: "1/-1" }}><label style={S.label}>Dirección</label>
+                        <input value={prop.direccion} onChange={e => setForm(f => ({ ...f, propietarios: f.propietarios.map((p, i) => i === idx ? { ...p, direccion: e.target.value } : p) }))} style={S.input} placeholder="Dirección completa del propietario" /></div>
                   </div>
                 ))}
                 <button onClick={() => setForm(f => ({ ...f, propietarios: [...f.propietarios, { nombre: "", dni: "", tel: "", email: "" }] }))}
@@ -413,8 +426,18 @@ export default function EncargosVenta() {
                 {/* Consultor */}
                 <div style={S.section}>
                   <div style={S.sectionTitle}>Consultor colaborador</div>
+                  <div style={{ marginBottom: 12 }}>
+                    <label style={S.label}>Seleccionar agente</label>
+                    <select value={form.consultor_id || ""} onChange={e => {
+                      const u = usuarios.find(u => u.id === e.target.value);
+                      if (u) setForm(f => ({ ...f, consultor_id: u.id, consultor_nombre: u.nombre || "", consultor_dni: u.dni || "", consultor_poliza: u.poliza_rc || "" }));
+                    }} style={S.input}>
+                      <option value="">Seleccionar agente...</option>
+                      {usuarios.map(u => <option key={u.id} value={u.id}>{u.nombre}</option>)}
+                    </select>
+                  </div>
                   <div style={S.grid2}>
-                    <div><label style={S.label}>Nombre completo</label><input {...F("consultor_nombre")} /></div>
+                    <div><label style={S.label}>Nombre</label><input {...F("consultor_nombre")} /></div>
                     <div><label style={S.label}>DNI/NIE</label><input {...F("consultor_dni")} /></div>
                     <div style={{ gridColumn: "1/-1" }}><label style={S.label}>Número de póliza RC</label><input {...F("consultor_poliza")} /></div>
                   </div>
