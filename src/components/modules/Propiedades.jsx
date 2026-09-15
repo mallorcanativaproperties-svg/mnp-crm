@@ -19,7 +19,7 @@ function mapDbToJs(row) {
     clima: row.clima || "", aguaCal: row.agua_cal || "", aireAcondTipo: row.aire_acond_tipo || "", tipologiaChalet: row.tipologia_chalet || "", plantasChalet: Number(row.plantas_chalet) || 0, calefaccion: row.calefaccion || "", ventanas: row.ventanas || "", emisionesEnerg: row.emisiones_energ || "",
     suministros: row.suministros || [], drenaje: row.drenaje || "",
     elecReformada: row.elec_reformada || false, fontReformada: row.font_reformada || false,
-    ventaMobiliario: row.venta_mobiliario || false, iee: row.iee || "", refCatastral: row.ref_cat || "",
+    ventaMobiliario: row.venta_mobiliario || false, ventExt: row.vent_ext || false, iee: row.iee || "", refCatastral: row.ref_cat || "",
     calidades: row.calidades || [],
     ibi: Number(row.ibi) || 0, basuras: Number(row.basuras) || 0, comunidad: Number(row.comunidad) || 0, extraComunidad: Number(row.extra_comunidad) || 0, otrosGastos: row.otros_gastos || "",
     desc: row.desc_texto || "", notasPriv: row.notas_priv || "",
@@ -49,7 +49,7 @@ function mapJsToDb(p) {
     suelos: p.suelos, carp_ext: p.carpExt, carp_int: p.carpInt,
     persianas_tipo: p.persianasTipo, persianas_mat: p.persianasMat,
     clima: p.clima, agua_cal: p.aguaCal, aire_acond_tipo: p.aireAcondTipo, tipologia_chalet: p.tipologiaChalet || null, plantas_chalet: Number(p.plantasChalet) || null, calefaccion: p.calefaccion, ventanas: p.ventanas, emisiones_energ: p.emisionesEnerg, suministros: p.suministros, drenaje: p.drenaje,
-    elec_reformada: p.elecReformada, font_reformada: p.fontReformada, venta_mobiliario: p.ventaMobiliario,
+    elec_reformada: p.elecReformada, font_reformada: p.fontReformada, venta_mobiliario: p.ventaMobiliario, vent_ext: p.ventExt || false,
     iee: p.iee, ref_cat: p.refCatastral || null, calidades: p.calidades,
     ibi: Number(p.ibi) || 0, basuras: Number(p.basuras) || 0, comunidad: Number(p.comunidad) || 0, extra_comunidad: Number(p.extraComunidad) || 0, otros_gastos: p.otrosGastos,
     desc_texto: p.desc, notas_priv: p.notasPriv,
@@ -2218,11 +2218,11 @@ REGLAS:
             {EFl({label: "Carp. interior", field: "carpInt", pub: true, options: CARP_INT_OPTS, type: "select"})}
           </div>}
           {tieneAireCalef && <div style={{ ...g3, marginTop: 8 }}>
-            {EFl({label: "Calefaccion", field: "calefaccion", pub: true, options: ["Individual","Centralizada","No disponible"], type: "select"})}
+            {EFl({label: "Calefaccion", field: "calefaccion", pub: true, options: ["Gas central","Gas individual","Electrica central","Electrica individual","Bomba de calor","Aerotermia","Suelo radiante","Sin calefaccion"], type: "select"})}
             {esResidencial && EFl({label: "Agua caliente", field: "aguaCal", pub: true, options: AGUA_CALIENTE_OPTS, type: "select"})}
-            {esResidencial && EFl({label: "Ventanas", field: "ventanas", pub: true, options: ["Interior","Exterior"], type: "select"})}
+            {EFl({label: "Ventanas exteriores", field: "ventExt", pub: true, type: "bool"})}
           </div>}
-          {esResidencial && d.op === "Alquiler" && <div style={{ ...g3, marginTop: 8 }}>
+          {esResidencial && <div style={{ ...g3, marginTop: 8 }}>
             {EFl({label: "Incluye mobiliario", field: "ventaMobiliario", pub: true, type: "bool"})}
           </div>}
         </Sec>}
@@ -3138,7 +3138,7 @@ export default function CRMPropiedades({ currentUser }) {
                   certEnerg: "", iee: "", conserv: "", anoConstruc: "",
                   suelos: "", carpExt: "", carpInt: "", persianasTipo: "", persianasMat: "",
                   clima: "", aguaCal: "", aireAcondTipo: "", calefaccion: "", ventanas: "", emisionesEnerg: "", tipologiaChalet: "", plantasChalet: 0, parking: "No", nPlazas: 0,
-                  ventaMobiliario: false, terraza: false, piscina: false, ascensor: false,
+                  ventaMobiliario: false, ventExt: false, terraza: false, piscina: false, ascensor: false,
                   jardin: false, aireAcond: false, armarios: false, trastero: false, balcon: false,
                   ibi: 0, basuras: 0, comunidad: 0, extraComunidad: 0, otrosGastos: "",
                   desc: "", notasPriv: "", descEn: "", descDe: "",

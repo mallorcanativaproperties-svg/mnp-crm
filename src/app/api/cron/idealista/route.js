@@ -37,7 +37,7 @@ const TIPO_MAP = {
 };
 
 const CONSERV_MAP = {
-  "Buen estado": "good", Reformado: "good",
+  "Buen estado": "good", "Reformado": "renovated", Reformado: "good",
   "A reformar": "toRestore", "Obra nueva": "new", "En construccion": "new",
 };
 
@@ -158,6 +158,9 @@ function buildProperty(row, media) {
   if (row.trastero === true) features.featuresStorage = true;
   if (row.terraza === true) features.featuresTerrace = true;
   if (row.armarios === true) features.featuresWardrobes = true;
+  if (row.vent_ext === true || row.ventExt === true) features.featuresWindowsLocation = "exterior";
+  if (row.elec_reformada === true) features.featuresRenovatedElectricity = true;
+  if (row.font_reformada === true) features.featuresRenovatedPlumbing = true;
   if (row.balcon === true) features.featuresBalcony = true;
   if (row.parking === "Si") features.featuresParkingAvailable = true;
   if (row.venta_mobiliario === true) features.featuresEquippedWithFurniture = true;
@@ -165,7 +168,7 @@ function buildProperty(row, media) {
   if (row.aire_acond_tipo && row.aire_acond_tipo !== "No disponible") features.featuresConditionedAir = true;
   if (row.calefaccion && HEAT_MAP[row.calefaccion]) features.featuresHeatingType = HEAT_MAP[row.calefaccion];
 
-  if (row.vent_ext === true) features.featuresWindowsLocation = "exterior";
+
   if (isStudio || row.tipo === "Loft") features.featuresStudio = true;
   if (isPenthouse) features.featuresPenthouse = true;
   if (isDuplex) features.featuresDuplex = true;

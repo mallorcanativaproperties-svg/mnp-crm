@@ -399,6 +399,7 @@ export default function FormularioCaptacion() {
   // Instalaciones
   const [suministros, setSuministros] = useState([]);
   const [drenaje, setDrenaje] = useState("");
+  const [ventExt, setVentExt] = useState(false);
   const [elecRef, setElecRef] = useState(false);
   const [fontRef, setFontRef] = useState(false);
 
@@ -457,7 +458,7 @@ export default function FormularioCaptacion() {
       ventaMob, terraza, balcon, jardin, piscina, ascensor, armarios, trastero,
       parking, nPlazas, ventanas, aireAcond, aireAcondTipo, tipologiaChalet, plantasChalet, suelos, carpExt, carpInt,
       emisionesEnerg, calefaccion, aguaCal, suministros, drenaje,
-      elecRef, fontRef, notasPriv, propNom, propTel, propEmail, cualPos, cualNeg, refCatCuest]);
+      ventExt, elecRef, fontRef, notasPriv, propNom, propTel, propEmail, cualPos, cualNeg, refCatCuest]);
   const pv = op === "Alquiler" ? (Number(precioAlquiler)||0) : op === "Traspaso" ? (Number(precioTraspaso)||0) : (Number(precioVenta) || 0);
   const pp = Number(precioProp) || 0;
 
@@ -584,6 +585,7 @@ export default function FormularioCaptacion() {
       agua_cal: aguaCal || null,
       suministros: suministros.length > 0 ? suministros : [],
       drenaje: drenaje || null,
+      vent_ext: ventExt,
       elec_reformada: elecRef,
       font_reformada: fontRef,
       notas_priv: notasPriv || null,
@@ -823,7 +825,6 @@ export default function FormularioCaptacion() {
             <Select label="Carp. interior" value={carpInt} onChange={setCarpInt} options={["Lacado blanco","Roble","Cerezo","Haya","Pino","Wengue","Nogal","DM lacado","Cristal","Corredera","Block"]} />
           </div>}
           {esResidencial && op === "Alquiler" && <div style={g3}>
-            <Toggle label="Incluye mobiliario" value={ventaMob} onChange={setVentaMob} />
           </div>}
           {tieneAireCalef && <div style={g3}>
             <Select label="Calefaccion" value={calefaccion} onChange={setCalefaccion} options={CALEFACCION_OPTS} />
@@ -842,6 +843,8 @@ export default function FormularioCaptacion() {
             {ft !== "rustic" && <Toggle label="Ascensor" value={ascensor} onChange={setAscensor} />}
             <Toggle label="Armarios empotrados" value={armarios} onChange={setArmarios} />
             <Toggle label="Trastero" value={trastero} onChange={setTrastero} />
+            <Toggle label="Ventanas exteriores" value={ventExt} onChange={setVentExt} />
+            <Toggle label="Incluye mobiliario" value={ventaMob} onChange={setVentaMob} />
             {tieneAireCalef && <Toggle label="Aire acondicionado" value={aireAcond} onChange={e => { setAireAcond(e); setAireAcondTipo(e ? "Frio/Calor" : ""); }} />}
           </div>}
           <div style={g3}>
@@ -868,6 +871,14 @@ export default function FormularioCaptacion() {
             {op === "Alquiler" && <Input label="Renta mensual" value={precioAlquiler} onChange={setPrecioAlquiler} type="number" placeholder="1200" required />}
             {op !== "Alquiler" && <Input label="Precio propietario" value={precioProp} onChange={setPrecioProp} type="number" placeholder="0" />}
           </div>
+          {/* Reformas */}
+          {(esResidencial || esComercial) && (
+            <div style={g3}>
+              <Toggle label="Electricidad reformada" value={elecRef} onChange={setElecRef} />
+              <Toggle label="Fontaneria reformada" value={fontRef} onChange={setFontRef} />
+            </div>
+          )}
+
           {/* Campos específicos de Alquiler */}
           {op === "Alquiler" && (
             <div style={g3}>
