@@ -7,7 +7,7 @@ function mapDbToJs(row) {
     id: row.id, ref: row.ref || "", tipo: row.tipo || "", op: row.op || "Compraventa",
     titulo: row.titulo || "", dir: row.dir || "", num: row.num || "", cp: row.cp || "",
     municipio: row.municipio || "", zona: row.zona || "",
-    visDir: row.vis_dir || "Ocultar direccion", orient: row.orient || "", distPlaya: row.dist_playa || "",
+    visDir: row.vis_dir || "Solo calle", orient: row.orient || "", distPlaya: row.dist_playa || "",
     precioVenta: Number(row.precio_venta) || 0, precioProp: Number(row.precio_prop) || 0, precioTraspaso: Number(row.precio_traspaso) || 0, precioAlquiler: Number(row.precio_alquiler) || 0, fianzaMeses: Number(row.fianza_meses) || 1, duracionMinMeses: Number(row.duracion_min_meses) || 11, mascotas: row.mascotas || false,
     honorariosTipo: row.honorarios_tipo || "porcentaje", honorarios: Number(row.honorarios) || 0, ivaHon: Number(row.iva_hon) || 21, honNetoManual: Number(row.hon_neto_manual) || 0,
     certEnerg: row.cert_energ || "", conserv: row.conserv || "", anoConstruc: row.ano_construc || "",
@@ -2092,6 +2092,15 @@ REGLAS:
                     <div style={{ fontSize: 16, fontWeight: 700, color: "#2C6E52" }}>{fmtP(Math.round(netoVend))}</div>
                   </div>
                 </div>
+                {/* Botón volcar resultados */}
+                <button onClick={() => {
+                  if (d.op !== "Alquiler") upd("precioVenta", Math.round(precioCalc));
+                  else upd("precioAlquiler", Math.round(precioCalc));
+                  upd("precioProp", Math.round(netoVend));
+                  upd("honNetoManual", Math.round(honBase));
+                }} style={{ marginTop: 12, padding: "7px 14px", background: "#AC8A54", border: "none", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.06em" }}>
+                  ↓ Aplicar valores a la ficha
+                </button>
               </div>
             );
           })()}
@@ -2149,6 +2158,15 @@ REGLAS:
                     {(Number(d.habDobles)||0)+(Number(d.habSimples)||0)}
                   </div>
                   <span style={{ fontSize: 10, color: "#9A968A" }}>Calculado automáticamente — se envía a Idealista</span>
+                </div>
+              </div>
+              <div style={{ marginBottom: 10 }}>
+                <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Total baños (Idealista) *</div>
+                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                  <div style={{ width: 80, background: "#F8F6F1", border: "1px solid #E7E1D4", borderRadius: 0, color: "#AC8A54", padding: "6px 8px", fontSize: 13, fontFamily: "Inter, sans-serif", fontWeight: 700, textAlign: "center" }}>
+                    {(Number(d.banos)||0)+(Number(d.aseos)||0)}
+                  </div>
+                  <span style={{ fontSize: 10, color: "#9A968A" }}>Baños + aseos — se envía a Idealista como bathNumber</span>
                 </div>
               </div>
             </div>
@@ -2696,6 +2714,8 @@ function CatastroImport({ draft, upd, editMode }) {
       const loint = lourb?.loint; // interior del inmueble (planta, puerta)
 
       const campos = {};
+      // Siempre aplicar la referencia catastral introducida
+      campos.refCatastral = ref;
       const TIPO_VIA = { CL:"Calle", AV:"Avenida", PZ:"Plaza", CM:"Camino", CR:"Carretera", PS:"Paseo", RD:"Ronda", GL:"Glorieta", RB:"Rambla", TR:"Travesia", UR:"Urbanizacion" };
 
       // Dirección
@@ -2740,7 +2760,7 @@ function CatastroImport({ draft, upd, editMode }) {
 
       // Aplicar campos
       const aplicados = [];
-      const LABELS = { dir:"Dirección", num:"Número", planta:"Planta", puerta:"Puerta", cp:"CP", municipio:"Municipio", mConst:"m² construidos", anoConstruc:"Año construcción" };
+      const LABELS = { refCatastral:"Ref. catastral", dir:"Dirección", num:"Número", planta:"Planta", puerta:"Puerta", cp:"CP", municipio:"Municipio", mConst:"m² construidos", anoConstruc:"Año construcción" };
       Object.entries(campos).forEach(([k, v]) => {
         if (v !== undefined && v !== null && v !== "") {
           upd(k, v);
@@ -3079,7 +3099,7 @@ export default function CRMPropiedades({ currentUser }) {
               onClick={() => {
                 const newProp = {
                   id: null, ref: "", tipo: "Piso", op: "Compraventa", estado: "borrador", titulo: "",
-                  dir: "", num: "", cp: "", puerta: "", municipio: "", zona: "", orient: "", distPlaya: "", visDir: "Ocultar direccion", planta: "",
+                  dir: "", num: "", cp: "", puerta: "", municipio: "", zona: "", orient: "", distPlaya: "", visDir: "Solo calle", planta: "",
                   precioVenta: 0, precioProp: 0, precioTraspaso: 0, precioAlquiler: 0, fianzaMeses: 1, duracionMinMeses: 11, mascotas: false, precioAnt: 0, precioTraspaso: 0,
                   honorarios: 5, honorariosTipo: "porcentaje", ivaHon: 21,
                   mConst: 0, mUtil: 0, mParcela: 0, mTerraza: 0, mBalcon: 0, mPorche: 0,
@@ -3148,7 +3168,7 @@ export default function CRMPropiedades({ currentUser }) {
 
         {/* List */}
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {list.map((p) => (<PropCard key={p.id} p={p} onClick={() => setSel(p)} />))}
+          {list.map((p) => (<PropCard key={p.id} p={p} onClick={() => { setSel(p); setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 50); }} />))}
           {list.length === 0 && <div style={{ textAlign: "center", padding: 60, color: "#9A968A", fontSize: 13, fontStyle: "italic" }}>Sin resultados</div>}
         </div>
 
