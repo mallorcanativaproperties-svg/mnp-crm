@@ -1689,7 +1689,6 @@ REGLAS:
   const esGaraje = ["garage","storage"].includes(ft);
   const esEdificio = ft === "building";
   const esTerreno = ft === "land";
-  const esEdificio = ft === "building";
   const tieneHab = ["flat","house","rustic"].includes(ft);
   const tieneCert = ["flat","house","rustic"].includes(ft);
   const tieneComunidad = ["flat","house","premises_commercial","office","garage","storage"].includes(ft);
