@@ -2655,6 +2655,8 @@ function IdealistaJsonButton({ supabase }) {
           img.imageLabel="plan";
         } else if(item.etiqueta&&IMAGE_TAG_MAP[item.etiqueta]){
           img.imageLabel=IMAGE_TAG_MAP[item.etiqueta];
+        } else {
+          img.imageLabel="unknown";
         }
         img.imageAiGenerated=item.ia_generada===true;
         return img;

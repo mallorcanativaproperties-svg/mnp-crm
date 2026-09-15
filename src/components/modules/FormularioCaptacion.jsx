@@ -613,10 +613,11 @@ export default function FormularioCaptacion() {
     if (!dir) errores.push("Dirección");
     if (!municipio) errores.push("Municipio");
     if (!cp) errores.push("Código postal");
-    if (op !== "Alquiler" && (!precioVenta || Number(precioVenta) <= 0)) errores.push("Precio de venta");
+    if (op === "Compraventa" && (!precioVenta || Number(precioVenta) <= 0)) errores.push("Precio de venta");
     if (op === "Alquiler" && (!precioAlquiler || Number(precioAlquiler) <= 0)) errores.push("Renta mensual");
-    if (!mConst || Number(mConst) <= 0) errores.push("m² construidos");
-    if (tieneHab && (!banos || Number(banos) <= 0)) errores.push("Baños");
+    if (op === "Traspaso" && (!precioTraspaso || Number(precioTraspaso) <= 0)) errores.push("Precio de traspaso");
+    if (!esTerreno && !esGaraje && (!mConst || Number(mConst) <= 0)) errores.push("m² construidos");
+    if (tieneHab && (Number(banos)||0) + (Number(aseos)||0) <= 0) errores.push("Baños");
     if (tieneCert && !certE) errores.push("Certificado energético");
     if (esTerreno && (!mParcela || Number(mParcela) <= 0)) errores.push("m² parcela");
     if (errores.length > 0) {

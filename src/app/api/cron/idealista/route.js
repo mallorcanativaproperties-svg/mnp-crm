@@ -266,17 +266,20 @@ function isValid(row) {
       ? Number(row.precio_traspaso)
       : Number(row.precio_venta);
   if (!opPrice || opPrice <= 0) return false;
-  if (!Number(row.m_const) || Number(row.m_const) <= 0) return false;
   if (!row.op) return false;
   if (!row.desc_texto?.trim()) return false;
   const tipo = TIPO_MAP[row.tipo];
   if (!tipo) return false;
+  // m_const obligatorio excepto terrenos y garage/storage
+  const needsMConst = !["land","garage","storage"].includes(tipo);
+  if (needsMConst && (!Number(row.m_const) || Number(row.m_const) <= 0)) return false;
+  if (tipo === "land" && (!Number(row.m_parcela) || Number(row.m_parcela) <= 0)) return false;
   const needsBaths = ["flat","house","rustic","premises_commercial","office"].includes(tipo);
   if (needsBaths && (Number(row.banos) || 0) + (Number(row.aseos) || 0) <= 0) return false;
   const residencial = ["flat","house","rustic"].includes(tipo);
   if (residencial) {
     const cert = row.cert_energ;
-    if (!cert || !["A","B","C","D","E","F","G","En tramite","Exento"].includes(cert)) return false;
+    if (!cert || !["A","B","C","D","E","F","G","Exento"].includes(cert)) return false;
   }
   if (!Array.isArray(row.destinos) || !row.destinos.includes("Idealista")) return false;
   return true;
