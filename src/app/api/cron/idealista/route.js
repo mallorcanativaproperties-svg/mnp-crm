@@ -292,7 +292,14 @@ function cleanObj(obj) {
   if (obj && typeof obj === "object") {
     return Object.fromEntries(
       Object.entries(obj)
-        .filter(([, v]) => v !== null && v !== undefined && v !== "" && v !== 0 || typeof v === "boolean" || typeof v === "number" && v > 0)
+        .filter(([, v]) => {
+          if (v === null || v === undefined) return false;
+          if (typeof v === "boolean") return true; // preservar false
+          if (typeof v === "number") return true;  // preservar 0
+          if (typeof v === "string") return v !== "";
+          if (Array.isArray(v)) return v.length > 0;
+          return true;
+        })
         .map(([k, v]) => [k, cleanObj(v)])
     );
   }
@@ -362,7 +369,7 @@ export async function GET(request) {
         contactPrimaryPhoneNumber: "655882682",
       },
       customerProperties: validas.map(row => {
-        const media = (mediaAll || []).filter(m => m.ref_propiedad === row.ref);
+        const media = (mediaAll || []).filter(m => m.propiedad_id === row.id);
         return buildProperty(row, media);
       }),
     };
@@ -390,7 +397,7 @@ export async function GET(request) {
     let fotosError = 0;
 
     for (const prop of validas) {
-      const media = (mediaAll || []).filter(m => m.ref_propiedad === prop.ref && m.tipo === "foto" && m.url);
+      const media = (mediaAll || []).filter(m => m.propiedad_id === prop.id && m.tipo === "foto" && m.url);
 
       for (const foto of media) {
         try {
