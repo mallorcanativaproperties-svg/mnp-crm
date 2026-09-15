@@ -534,7 +534,6 @@ Gracias.`)}`}
           </div>
         ))}
       </div>
-    </div>
 
       {/* Modal firma agente */}
       {firmaAgenteModal && (
