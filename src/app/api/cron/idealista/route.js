@@ -56,10 +56,11 @@ const FLOOR_MAP = {
 };
 
 const HEAT_MAP = {
-  "Gas central": "centralGas", "Gasoleo central": "centralFuelOil",
-  "Gas individual": "individualGas", "Electrica individual": "individualElectric",
-  "Bomba de calor": "individualAirConditioningHeatPump", "Sin calefaccion": "noHeating",
+  "Gas central": "centralGas", "Gas individual": "individualGas",
+  "Electrica central": "centralElectric", "Electrica individual": "individualElectric",
+  "Bomba de calor": "individualAirConditioningHeatPump",
   "Aerotermia": "centralHeatPump", "Suelo radiante": "centralRadiantFloor",
+  "Sin calefaccion": "noHeating",
 };
 
 // ─── Construir objeto propiedad ────────────────────────────────────────────────
