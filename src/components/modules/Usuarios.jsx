@@ -50,6 +50,9 @@ export default function Usuarios({ currentUser }) {
         role: form.role,
         agente_codigo: form.agente_codigo || null,
         agente_telefono: form.agente_telefono?.trim() || null,
+        email: form.email?.trim() || null,
+        dni: form.dni?.trim() || null,
+        poliza_rc: form.poliza_rc?.trim() || null,
         activo: true,
       });
       if (error) setMsg({ type: "error", text: error.message });
@@ -60,6 +63,9 @@ export default function Usuarios({ currentUser }) {
         role: form.role,
         agente_codigo: form.agente_codigo || null,
         agente_telefono: form.agente_telefono?.trim() || null,
+        email: form.email?.trim() || null,
+        dni: form.dni?.trim() || null,
+        poliza_rc: form.poliza_rc?.trim() || null,
         activo: form.activo,
       };
       if (form.pass_hash?.trim()) update.pass_hash = form.pass_hash.trim();
