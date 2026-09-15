@@ -4,11 +4,12 @@ import { supabase } from "@/lib/supabase";
 
 // Tipos alineados con Propiedades.jsx y schema de Idealista
 const TIPO_GROUPS = [
-  { label: "Piso", items: ["Piso","Estudio","Atico","Atico Duplex","Duplex","Planta baja"] },
-  { label: "Casa/Chalet", items: ["Casa","Chalet","Adosado","Villa"] },
+  { label: "Piso / Apartamento", items: ["Piso","Apartamento","Estudio","Loft","Atico","Atico Duplex","Duplex","Planta baja"] },
+  { label: "Casa / Chalet", items: ["Casa","Chalet","Adosado","Bungalow","Pareado","Villa","Villa de Lujo","Casa Tipo Duplex"] },
   { label: "Finca", items: ["Finca rustica","Finca"] },
-  { label: "Local/Oficina", items: ["Local comercial","Local","Oficina"] },
-  { label: "Otros", items: ["Parking","Garaje","Terreno","Trastero","Edificio"] },
+  { label: "Local / Oficina / Nave", items: ["Local comercial","Oficina","Nave industrial","Almacen","Negocio"] },
+  { label: "Terreno", items: ["Parcela","Solar","Terreno urbano","Terreno urbanizable","Terreno rustico","Terreno rural","Terreno industrial"] },
+  { label: "Otros", items: ["Garaje","Parking","Trastero","Edificio"] },
 ];
 const OPERACIONES = ["Compraventa", "Alquiler", "Traspaso"];
 // Valores alineados con mapeo Idealista en Propiedades.jsx
@@ -486,12 +487,22 @@ export default function FormularioCaptacion() {
 
   // Helper condicionalidad por tipo — después de todos los hooks
   const TIPO_MAP_COND = {
-    Piso:"flat", Estudio:"flat", Atico:"flat", "Atico Duplex":"flat", Duplex:"flat", "Planta baja":"flat",
-    Casa:"house", Chalet:"house", Adosado:"house", Villa:"house",
+    // Piso → flat
+    Piso:"flat", Apartamento:"flat", Estudio:"flat", Loft:"flat",
+    Atico:"flat", "Atico Duplex":"flat", Duplex:"flat", "Planta baja":"flat",
+    // Casa → house
+    Casa:"house", Chalet:"house", Adosado:"house", Bungalow:"house",
+    Pareado:"house", Villa:"house", "Villa de Lujo":"house", "Casa Tipo Duplex":"house",
+    // Finca → rustic
     "Finca rustica":"rustic", Finca:"rustic",
-    "Local comercial":"premises_commercial", Local:"premises_commercial",
-    Oficina:"office", Parking:"garage", Garaje:"garage",
-    Terreno:"land", Trastero:"storage", Edificio:"building",
+    // Local/Nave → premises_commercial
+    "Local comercial":"premises_commercial", Oficina:"office",
+    "Nave industrial":"premises_commercial", Almacen:"premises_commercial", Negocio:"premises_commercial",
+    // Terreno → land
+    Parcela:"land", Solar:"land", "Terreno urbano":"land", "Terreno urbanizable":"land",
+    "Terreno rustico":"land", "Terreno rural":"land", "Terreno industrial":"land",
+    // Otros
+    Garaje:"garage", Parking:"garage", Trastero:"storage", Edificio:"building",
   };
   const ft = TIPO_MAP_COND[tipo] || "flat";
   const esResidencial = ["flat","house","rustic"].includes(ft);

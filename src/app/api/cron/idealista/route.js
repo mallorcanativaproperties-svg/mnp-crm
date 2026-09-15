@@ -18,13 +18,22 @@ const CUSTOMER_CODE = "ilc499e07c0814d8c79fcfe3b09eaad505d8b54e164";
 // ─── Mapeos ────────────────────────────────────────────────────────────────────
 
 const TIPO_MAP = {
-  Piso: "flat", Estudio: "flat", Atico: "flat", "Atico Duplex": "flat",
-  Duplex: "flat", "Planta baja": "flat",
-  Casa: "house", Chalet: "house", Adosado: "house", Villa: "house",
-  "Finca rustica": "rustic", Finca: "rustic",
-  "Local comercial": "premises_commercial", Local: "premises_commercial",
-  Oficina: "office", Parking: "garage", Garaje: "garage",
-  Terreno: "land", Trastero: "storage", Edificio: "building",
+  // flat
+  Piso:"flat", Apartamento:"flat", Estudio:"flat", Loft:"flat",
+  Atico:"flat", "Atico Duplex":"flat", Duplex:"flat", "Planta baja":"flat",
+  // house
+  Casa:"house", Chalet:"house", Adosado:"house", Bungalow:"house",
+  Pareado:"house", Villa:"house", "Villa de Lujo":"house", "Casa Tipo Duplex":"house",
+  // rustic
+  "Finca rustica":"rustic", Finca:"rustic",
+  // premises_commercial / office
+  "Local comercial":"premises_commercial", Oficina:"office",
+  "Nave industrial":"premises_commercial", Almacen:"premises_commercial", Negocio:"premises_commercial",
+  // land
+  Parcela:"land", Solar:"land", "Terreno urbano":"land", "Terreno urbanizable":"land",
+  "Terreno rustico":"land", "Terreno rural":"land", "Terreno industrial":"land",
+  // garage / storage / building
+  Garaje:"garage", Parking:"garage", Trastero:"storage", Edificio:"building",
 };
 
 const CONSERV_MAP = {

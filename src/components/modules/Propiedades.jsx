@@ -68,11 +68,12 @@ function mapJsToDb(p) {
 }
 
 const TIPO_GROUPS = [
-  { label: "Piso", items: ["Apartamento","Atico","Atico Duplex","Duplex","Estudio","Loft","Piso","Planta baja"] },
-  { label: "Casa/Chalet", items: ["Adosado","Bungalow","Casa","Casa Tipo Duplex","Chalet","Pareado","Villa","Villa de Lujo"] },
-  { label: "Local o Nave", items: ["Almacen","Local comercial","Nave industrial","Negocio"] },
-  { label: "Terreno", items: ["Parcela","Solar","Terreno industrial","Terreno rural","Terreno rustico","Terreno urbanizable","Terreno urbano"] },
-  { label: "Otros", items: ["Finca rustica","Oficina","Edificio","Parking","Garaje"] },
+  { label: "Piso / Apartamento", items: ["Piso","Apartamento","Estudio","Loft","Atico","Atico Duplex","Duplex","Planta baja"] },
+  { label: "Casa / Chalet", items: ["Casa","Chalet","Adosado","Bungalow","Pareado","Villa","Villa de Lujo","Casa Tipo Duplex"] },
+  { label: "Finca", items: ["Finca rustica","Finca"] },
+  { label: "Local / Oficina / Nave", items: ["Local comercial","Oficina","Nave industrial","Almacen","Negocio"] },
+  { label: "Terreno", items: ["Parcela","Solar","Terreno urbano","Terreno urbanizable","Terreno rustico","Terreno rural","Terreno industrial"] },
+  { label: "Otros", items: ["Garaje","Parking","Trastero","Edificio"] },
 ];
 
 const ESTADOS = [
@@ -1656,12 +1657,22 @@ REGLAS:
   // Helper condicionalidad por tipo — debe ir después de todos los hooks
   const tipoActual = draft.tipo || p.tipo || "";
   const TIPO_MAP_COND = {
-    Piso:"flat", Estudio:"flat", Atico:"flat", "Atico Duplex":"flat", Duplex:"flat", "Planta baja":"flat",
-    Casa:"house", Chalet:"house", Adosado:"house", Villa:"house",
+    // Piso → flat
+    Piso:"flat", Apartamento:"flat", Estudio:"flat", Loft:"flat",
+    Atico:"flat", "Atico Duplex":"flat", Duplex:"flat", "Planta baja":"flat",
+    // Casa → house
+    Casa:"house", Chalet:"house", Adosado:"house", Bungalow:"house",
+    Pareado:"house", Villa:"house", "Villa de Lujo":"house", "Casa Tipo Duplex":"house",
+    // Finca → rustic
     "Finca rustica":"rustic", Finca:"rustic",
-    "Local comercial":"premises_commercial", Local:"premises_commercial",
-    Oficina:"office", Parking:"garage", Garaje:"garage",
-    Terreno:"land", Trastero:"storage", Edificio:"building",
+    // Local/Nave → premises_commercial
+    "Local comercial":"premises_commercial", Oficina:"office",
+    "Nave industrial":"premises_commercial", Almacen:"premises_commercial", Negocio:"premises_commercial",
+    // Terreno → land
+    Parcela:"land", Solar:"land", "Terreno urbano":"land", "Terreno urbanizable":"land",
+    "Terreno rustico":"land", "Terreno rural":"land", "Terreno industrial":"land",
+    // Otros
+    Garaje:"garage", Parking:"garage", Trastero:"storage", Edificio:"building",
   };
   const ft = TIPO_MAP_COND[tipoActual] || "flat";
   const esResidencial = ["flat","house","rustic"].includes(ft);
@@ -1970,7 +1981,7 @@ REGLAS:
           </div>
 
           <div style={{ ...g2, marginTop: 8 }}>
-            {EFl({label: "Visibilidad direccion en portales", field: "visDir", pub: false})}
+            {EFl({label: "Visibilidad direccion en portales", field: "visDir", pub: false, options: ["Direccion exacta","Solo calle","Ocultar direccion"], type: "select"})}
           </div>
         </Sec>
         <div style={sep} />
@@ -2502,7 +2513,18 @@ function IdealistaJsonButton({ supabase }) {
   const [msg, setMsg] = useState("");
 
   const CUSTOMER_CODE = "ilc499e07c0814d8c79fcfe3b09eaad505d8b54e164";
-  const TIPO_MAP = { Piso:"flat",Estudio:"flat",Atico:"flat","Atico Duplex":"flat",Duplex:"flat","Planta baja":"flat",Casa:"house",Chalet:"house",Adosado:"house",Villa:"house","Finca rustica":"rustic",Finca:"rustic","Local comercial":"premises_commercial",Local:"premises_commercial",Oficina:"office",Parking:"garage",Garaje:"garage",Terreno:"land",Trastero:"storage",Edificio:"building" };
+  const TIPO_MAP = {
+    Piso:"flat", Apartamento:"flat", Estudio:"flat", Loft:"flat",
+    Atico:"flat", "Atico Duplex":"flat", Duplex:"flat", "Planta baja":"flat",
+    Casa:"house", Chalet:"house", Adosado:"house", Bungalow:"house",
+    Pareado:"house", Villa:"house", "Villa de Lujo":"house", "Casa Tipo Duplex":"house",
+    "Finca rustica":"rustic", Finca:"rustic",
+    "Local comercial":"premises_commercial", Oficina:"office",
+    "Nave industrial":"premises_commercial", Almacen:"premises_commercial", Negocio:"premises_commercial",
+    Parcela:"land", Solar:"land", "Terreno urbano":"land", "Terreno urbanizable":"land",
+    "Terreno rustico":"land", "Terreno rural":"land", "Terreno industrial":"land",
+    Garaje:"garage", Parking:"garage", Trastero:"storage", Edificio:"building",
+  };
   const CONSERV_MAP = { "Buen estado":"good",Reformado:"good","A reformar":"toRestore","Obra nueva":"new","En construccion":"new" };
   const HEAT_MAP = { "Individual":"individualAirConditioningHeatPump","Centralizada":"centralGas","No disponible":"noHeating","Gas central":"centralGas","Gasoleo central":"centralFuelOil","Gas individual":"individualGas","Electrica individual":"individualElectric","Bomba de calor":"individualAirConditioningHeatPump","Sin calefaccion":"noHeating" };
   const IMAGE_TAG_MAP = { LIVING_ROOM:"livingRoom",BEDROOM:"room",BATHROOM:"bathroom",KITCHEN:"kitchen",TERRACE:"terrace",SWIMMING_POOL:"pool",GARDEN:"garden",CORRIDOR:"hallway",PLAN:"plan",VIEWS:"view",FACADE:"facade",GARAGE:"garage",STORAGE:"storage",BALCONY:"terrace",DINING:"livingRoom",HALL:"hallway",PATIO:"garden",PORCH:"terrace" };
