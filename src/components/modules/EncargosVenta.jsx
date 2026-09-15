@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 
 const BRONZE = "#AC8A54", PETROL = "#1a2528", CREAM = "#F8F6F1", BORDER = "#E7E1D4";
@@ -52,6 +52,101 @@ const CATEGORIA_TIPOS = {
   traspaso:      [["abierto", "Abierto (Sin Exclusividad)"], ["exclusiva", "Exclusiva"]],
 };
 
+// ── Modal firma del agente ──────────────────────────────────────────────────
+function FirmaAgenteModal({ encargo, onClose, onComplete }) {
+  const canvasRef = useRef(null);
+  const [drawing, setDrawing] = useState(false);
+  const [hasSigned, setHasSigned] = useState(false);
+  const [generando, setGenerando] = useState(false);
+  const [error, setError] = useState("");
+
+  const login = typeof window !== "undefined" ? localStorage.getItem("mnp_user_login") : "";
+
+  function initCanvas(canvas) {
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    ctx.strokeStyle = "#1a2528"; ctx.lineWidth = 2; ctx.lineCap = "round";
+  }
+
+  function startDraw(e) {
+    setDrawing(true);
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+    ctx.beginPath(); ctx.moveTo(x, y);
+  }
+
+  function draw(e) {
+    if (!drawing) return; e.preventDefault();
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+    ctx.lineTo(x, y); ctx.stroke(); setHasSigned(true);
+  }
+
+  async function handleFirmar() {
+    if (!hasSigned) return;
+    setGenerando(true); setError("");
+    const firmaData = canvasRef.current.toDataURL("image/png");
+
+    // Obtener datos del agente desde Supabase
+    const { data: usuario } = await supabase.from("usuarios").select("nombre, email").eq("user_login", login).single();
+
+    const res = await fetch("/api/encargos/pdf", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        encargo_id: encargo.id,
+        firma_agente_data: firmaData,
+        agente_nombre: usuario?.nombre || login || "Agente",
+        agente_email: usuario?.email || null,
+      }),
+    });
+    const data = await res.json();
+    if (data.ok) onComplete(data.pdf_url);
+    else setError(data.error || "Error generando el PDF");
+    setGenerando(false);
+  }
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 1100, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }} onClick={onClose}>
+      <div style={{ background: "#F8F6F1", width: "100%", maxWidth: 520 }} onClick={e => e.stopPropagation()}>
+        <div style={{ background: "#1a2528", padding: "18px 24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <div style={{ fontSize: 9, color: "#AC8A54", letterSpacing: "0.2em", marginBottom: 4 }}>FIRMA DEL AGENTE</div>
+            <div style={{ color: "#F8F6F1", fontSize: 14, fontFamily: "'Libre Baskerville', Georgia, serif" }}>Firmar y generar PDF</div>
+          </div>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "#9A968A", fontSize: 20, cursor: "pointer" }}>✕</button>
+        </div>
+        <div style={{ padding: 24 }}>
+          <div style={{ fontSize: 12, color: "#9A968A", marginBottom: 16, lineHeight: 1.6 }}>
+            Al firmar confirmas el encargo de {encargo.categoria} con {(encargo.encargo_firmantes || []).map(f => f.nombre).join(", ")}.<br />
+            Se generará el PDF y se enviará por email a todas las partes.
+          </div>
+          <canvas ref={el => { canvasRef.current = el; if (el) initCanvas(el); }}
+            width={460} height={150}
+            style={{ width: "100%", height: 150, border: "2px solid #E7E1D4", background: "#FAFAFA", cursor: "crosshair", touchAction: "none", display: "block" }}
+            onMouseDown={startDraw} onMouseMove={draw} onMouseUp={() => setDrawing(false)} onMouseLeave={() => setDrawing(false)}
+            onTouchStart={startDraw} onTouchMove={draw} onTouchEnd={() => setDrawing(false)} />
+          <div style={{ display: "flex", justifyContent: "flex-end", margin: "8px 0 16px" }}>
+            <button onClick={() => { canvasRef.current.getContext("2d").clearRect(0, 0, 460, 150); setHasSigned(false); }}
+              style={{ fontSize: 11, color: "#9A968A", background: "none", border: "1px solid #E7E1D4", padding: "4px 10px", cursor: "pointer" }}>Borrar</button>
+          </div>
+          {error && <div style={{ fontSize: 12, color: "#A23A3A", marginBottom: 12 }}>{error}</div>}
+          <button onClick={handleFirmar} disabled={!hasSigned || generando}
+            style={{ width: "100%", padding: "14px", background: hasSigned && !generando ? "#2C6E52" : "#E7E1D4", border: "none", color: hasSigned && !generando ? "#fff" : "#9A968A", fontSize: 13, fontWeight: 600, cursor: hasSigned && !generando ? "pointer" : "not-allowed", fontFamily: "Inter, sans-serif", letterSpacing: "0.06em" }}>
+            {generando ? "Generando PDF y enviando emails..." : "Firmar y generar PDF"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function EncargosVenta() {
   const [encargos, setEncargos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -59,6 +154,9 @@ export default function EncargosVenta() {
   const [propiedades, setPropiedades] = useState([]);
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(null);
+  const [firmaAgenteModal, setFirmaAgenteModal] = useState(null); // encargo a firmar
+  const [generandoPdf, setGenerandoPdf] = useState(false);
+  const [pdfListo, setPdfListo] = useState(null);
   const [form, setForm] = useState(FORM_INIT);
 
   useEffect(() => { load(); loadProps(); loadCurrentUser(); }, []);
@@ -380,6 +478,20 @@ export default function EncargosVenta() {
                     )}
                   </div>
                 )}
+                {enc.firma_propietario_fecha && !enc.todos_firmado && (
+                  <button onClick={e => { e.stopPropagation(); setFirmaAgenteModal(enc); }}
+                    style={{ marginTop: 8, padding: "6px 14px", background: "#2C6E52", border: "none", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>
+                    ✍ Firmar como agente y generar PDF
+                  </button>
+                )}
+                {enc.todos_firmado && enc.pdf_url && (
+                  <div style={{ marginTop: 6 }}>
+                    <a href={enc.pdf_url} target="_blank" rel="noopener noreferrer"
+                      style={{ fontSize: 11, color: BRONZE, textDecoration: "none", border: `1px solid ${BRONZE}44`, padding: "4px 10px" }}>
+                      ↓ Descargar PDF firmado
+                    </a>
+                  </div>
+                )}
                 {enc.firma_propietario_fecha && (
                   <div style={{ fontSize: 11, color: "#2C6E52", marginTop: 4 }}>
                     ✓ Todos firmaron el {new Date(enc.firma_propietario_fecha).toLocaleDateString("es-ES")}
@@ -422,6 +534,25 @@ Gracias.`)}`}
           </div>
         ))}
       </div>
+    </div>
+
+      {/* Modal firma agente */}
+      {firmaAgenteModal && (
+        <FirmaAgenteModal
+          encargo={firmaAgenteModal}
+          onClose={() => setFirmaAgenteModal(null)}
+          onComplete={(url) => { setPdfListo(url); setFirmaAgenteModal(null); load(); }}
+        />
+      )}
+
+      {/* Notificación PDF listo */}
+      {pdfListo && (
+        <div style={{ position: "fixed", bottom: 24, right: 24, background: "#2C6E52", color: "#fff", padding: "14px 20px", fontSize: 13, fontFamily: "Inter, sans-serif", zIndex: 2000, display: "flex", gap: 12, alignItems: "center" }}>
+          ✓ PDF generado y enviado a todos
+          <a href={pdfListo} target="_blank" rel="noopener noreferrer" style={{ color: "#fff", fontSize: 11 }}>Descargar</a>
+          <button onClick={() => setPdfListo(null)} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.6)", cursor: "pointer", fontSize: 16 }}>✕</button>
+        </div>
+      )}
     </div>
   );
 }
