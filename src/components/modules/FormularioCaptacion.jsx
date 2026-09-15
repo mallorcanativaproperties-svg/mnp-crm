@@ -573,7 +573,6 @@ export default function FormularioCaptacion() {
       terraza, balcon, jardin, piscina, ascensor, armarios, trastero,
       parking: parking || "No",
       n_plazas: Number(nPlazas) || 0,
-      ventanas: ventanas || null,
       cual_neg: cualNeg.filter(Boolean),
       aire_acond: aireAcond,
       ref_cat: refCatCuest || null,

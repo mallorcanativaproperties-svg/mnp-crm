@@ -2620,12 +2620,12 @@ function IdealistaJsonButton({ supabase }) {
     if(row.venta_mobiliario===true) feat.featuresEquippedWithFurniture=true;
     if(row.aire_acond===true||row.aire_acond_tipo&&row.aire_acond_tipo!=="No disponible") feat.featuresConditionedAir=true;
     if(tipo==="house"&&row.tipologia_chalet){
-      const HT_MAP={"Adosado":"semidetached","Pareado":"terraced","Independiente":"detached"};
-      if(HT_MAP[row.tipologia_chalet]) feat.featuresHouseType=HT_MAP[row.tipologia_chalet];
+      const HT_MAP={"Adosado":"terraced","Pareado":"semiDetached","Independiente":"detached","En hilera":"terraced"};
+      if(HT_MAP[row.tipologia_chalet]) feat.featuresHouseSubtype=HT_MAP[row.tipologia_chalet];
     }
-    if(tipo==="house"&&Number(row.plantas_chalet)>0) feat.featuresFloorsProperty=Number(row.plantas_chalet);
+    if(tipo==="house"&&Number(row.plantas_chalet)>0) feat.featuresFloorsBelowGround=Number(row.plantas_chalet);
     if(row.calefaccion&&HEAT_MAP[row.calefaccion]) feat.featuresHeatingType=HEAT_MAP[row.calefaccion];
-    if(row.ventanas==="Exterior") feat.featuresWindowsLocation="exterior";
+    if(row.vent_ext===true) feat.featuresWindowsLocation="exterior";
     if(isStudio) feat.featuresStudio=true;
     if(isPenthouse) feat.featuresPenthouse=true;
     if(isDuplex) feat.featuresDuplex=true;
@@ -2633,7 +2633,7 @@ function IdealistaJsonButton({ supabase }) {
     if(row.ref_cat) feat.featuresCadastralReference=row.ref_cat;
     if(row.cert_energ){if(row.cert_energ==="Exento") feat.featuresEnergyCertificateRating="exempt";else if(/^[A-G]$/.test(row.cert_energ)) feat.featuresEnergyCertificateRating=row.cert_energ;}
     if(row.emisiones_energ&&/^[A-G]$/.test(row.emisiones_energ)) feat.featuresEnergyCertificateEmissionsRating=row.emisiones_energ;
-    if(row.orient){const o=row.orient.toLowerCase();if(o.includes("norte")||o.includes("north")) feat.featuresOrientationNorth=true;if(o.includes("sur")||o.includes("south")) feat.featuresOrientationSouth=true;if(o.includes("este")||o.includes("east")) feat.featuresOrientationEast=true;if(o.includes("oeste")||o.includes("west")) feat.featuresOrientationWest=true;}
+    if(row.orient){const ORIENT_MAP={"Norte":["North"],"Sur":["South"],"Este":["East"],"Oeste":["West"],"Noreste":["North","East"],"Noroeste":["North","West"],"Sureste":["South","East"],"Suroeste":["South","West"]};const dirs=ORIENT_MAP[row.orient]||[];if(dirs.includes("North")) feat.featuresOrientationNorth=true;if(dirs.includes("South")) feat.featuresOrientationSouth=true;if(dirs.includes("East")) feat.featuresOrientationEast=true;if(dirs.includes("West")) feat.featuresOrientationWest=true;}
     property.propertyFeatures=feat;
     const descs=[];
     if(row.desc_texto?.trim()) descs.push({descriptionLanguage:"spanish",descriptionText:row.desc_texto.trim()});
