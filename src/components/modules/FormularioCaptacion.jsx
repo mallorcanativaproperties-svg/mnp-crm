@@ -765,7 +765,7 @@ export default function FormularioCaptacion() {
             <Input label="m2 porche" value={mPorche} onChange={setMPorche} type="number" />
             <div /><div />
           </div>}
-          {ft === "house" && (
+          {(ft === "house" || ft === "rustic") && (
             <div style={g2}>
               <div>
                 <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>Tipologia chalet <span style={{color:"#A23A3A"}}>*</span></label>

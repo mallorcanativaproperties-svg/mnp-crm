@@ -2155,9 +2155,9 @@ REGLAS:
               <div /><div />
             </div>
           )}
-          {ft === "house" && (
+          {(ft === "house" || ft === "rustic") && (
             <div style={{ ...g2, marginTop: 8 }}>
-              {EFl({label: "Tipologia chalet *", field: "tipologiaChalet", pub: true, options: ["Adosado","Pareado","Independiente"], type: "select", req: true})}
+              {EFl({label: "Tipologia chalet *", field: "tipologiaChalet", pub: true, options: ["Adosado","Pareado","Independiente","En hilera"], type: "select", req: true})}
               {EFl({label: "Plantas del chalet *", field: "plantasChalet", pub: true, type: "number", req: true})}
             </div>
           )}
@@ -2619,11 +2619,11 @@ function IdealistaJsonButton({ supabase }) {
     if(row.parking==="Si") feat.featuresParkingAvailable=true;
     if(row.venta_mobiliario===true) feat.featuresEquippedWithFurniture=true;
     if(row.aire_acond===true||row.aire_acond_tipo&&row.aire_acond_tipo!=="No disponible") feat.featuresConditionedAir=true;
-    if(tipo==="house"&&row.tipologia_chalet){
+    if((tipo==="house"||tipo==="rustic")&&row.tipologia_chalet){
       const HT_MAP={"Adosado":"terraced","Pareado":"semiDetached","Independiente":"detached","En hilera":"terraced"};
       if(HT_MAP[row.tipologia_chalet]) feat.featuresHouseSubtype=HT_MAP[row.tipologia_chalet];
     }
-    if(tipo==="house"&&Number(row.plantas_chalet)>0) feat.featuresFloorsBelowGround=Number(row.plantas_chalet);
+    if((tipo==="house"||tipo==="rustic")&&Number(row.plantas_chalet)>0) feat.featuresFloorsBelowGround=Number(row.plantas_chalet);
     if(row.calefaccion&&HEAT_MAP[row.calefaccion]) feat.featuresHeatingType=HEAT_MAP[row.calefaccion];
     if(row.vent_ext===true) feat.featuresWindowsLocation="exterior";
     if(isStudio||row.tipo==="Loft") feat.featuresStudio=true;
