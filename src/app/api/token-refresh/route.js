@@ -1,9 +1,9 @@
 export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 
-const APP_ID = "2152502802264055";
-const APP_SECRET = "32a3294e815b36a846cd7aa1cf9ba610";
-const SYSTEM_USER_ID = "61590319773271";
+const APP_ID = process.env.META_APP_ID || "2152502802264055";
+const APP_SECRET = process.env.META_APP_SECRET || "";
+const SYSTEM_USER_ID = process.env.META_SYSTEM_USER_ID || "61590319773271";
 const VERCEL_TOKEN = process.env.VERCEL_TOKEN;
 const VERCEL_PROJECT_ID = process.env.VERCEL_PROJECT_ID;
 const VERCEL_TEAM_ID = process.env.VERCEL_TEAM_ID;
