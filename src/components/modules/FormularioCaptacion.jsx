@@ -774,6 +774,7 @@ export default function FormularioCaptacion() {
                   <option value="Adosado">Chalet adosado</option>
                   <option value="Pareado">Chalet pareado</option>
                   <option value="Independiente">Chalet independiente</option>
+                  <option value="En hilera">Chalet en hilera</option>
                 </select>
               </div>
               <Input label="Plantas del chalet *" value={plantasChalet} onChange={setPlantasChalet} type="number" placeholder="2" />
@@ -832,7 +833,7 @@ export default function FormularioCaptacion() {
           {tieneAireCalef && <div style={g3}>
             <Select label="Calefaccion" value={calefaccion} onChange={setCalefaccion} options={CALEFACCION_OPTS} />
             {esResidencial && <Select label="Agua caliente" value={aguaCal} onChange={setAguaCal} options={AGUA_CALIENTE} />}
-            {esResidencial && <Select label="Ventanas" value={ventanas} onChange={setVentanas} options={["Interior","Exterior"]} />}
+
           </div>}
         </Sec>}
 

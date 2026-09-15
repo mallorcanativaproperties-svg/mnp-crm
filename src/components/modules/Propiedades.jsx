@@ -1241,7 +1241,6 @@ const SUELOS_OPTS = ["Gres","Gres porcelanico","Marmol","Terrazo","Tarima flotan
 const CARP_EXT_OPTS = ["Aluminio","Aluminio con RPT","PVC","Madera","Climalit","Doble cristal","Triple cristal","Hierro/Forja"];
 const CARP_INT_OPTS = ["Lacado blanco","Roble","Cerezo","Haya","Pino","Wengue","Nogal","DM lacado","Cristal","Corredera","Block"];
 const ORIENTACIONES_OPTS = ["Norte","Sur","Este","Oeste","Noreste","Noroeste","Sureste","Suroeste"];
-const VENTANAS_OPTS = ["Interior","Exterior"];
 const PARKING_OPTS = ["Si","No","Comunitario","Opcional"];
 
 function QualRow({ items, onChange, color, symbol }) {
