@@ -68,20 +68,24 @@ export async function POST(request) {
 
   let y = height - 110;
 
-  // Sección propietarios
+  // Sección propietarios — leer del JSONB propietarios si existe, si no de encargo_firmantes
+  const propietariosData = enc.propietarios?.length ? enc.propietarios : 
+    firmantes.map(f => ({ nombre: f.nombre, dni: f.dni, tel: f.telefono, email: f.email, direccion: null }));
+
   page1.drawRectangle({ x: 40, y: y - 4, width: width - 80, height: 16, color: rgb(0.97, 0.96, 0.95) });
   addText(page1, enc.categoria === "traspaso" ? "DATOS DEL CEDENTE" : "DATOS DEL PROPIETARIO/A", 44, y, { size: 9, font: helveticaBold, color: BRONZE });
   y -= 20;
 
-  for (const f of firmantes) {
-    addText(page1, `Nombre: ${f.nombre || "—"}`, 44, y, { size: 9 });
-    addText(page1, `DNI: ${f.dni || "—"}`, 280, y, { size: 9 });
+  for (const p of propietariosData) {
+    addText(page1, `Nombre: ${p.nombre || "—"}`, 44, y, { size: 9 });
+    addText(page1, `DNI: ${p.dni || "—"}`, 280, y, { size: 9 });
     y -= 14;
-    addText(page1, `Telf: ${f.telefono || "—"}`, 44, y, { size: 9 });
-    addText(page1, `Email: ${f.email || "—"}`, 280, y, { size: 9 });
-    y -= 18;
+    addText(page1, `Telf: ${p.tel || p.telefono || "—"}`, 44, y, { size: 9 });
+    addText(page1, `Email: ${p.email || "—"}`, 280, y, { size: 9 });
+    y -= 14;
+    if (p.direccion) { addText(page1, `Dirección: ${p.direccion}`, 44, y, { size: 9 }); y -= 14; }
+    y -= 4;
   }
-  if (enc.dir_propietarios) { addText(page1, `Dirección: ${enc.dir_propietarios}`, 44, y, { size: 9 }); y -= 18; }
 
   y -= 10;
   page1.drawRectangle({ x: 40, y: y - 4, width: width - 80, height: 16, color: rgb(0.97, 0.96, 0.95) });
