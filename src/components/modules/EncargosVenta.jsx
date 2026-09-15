@@ -446,8 +446,8 @@ export default function EncargosVenta() {
 
                 <div style={{ display: "flex", gap: 10 }}>
                   <button onClick={() => setShowForm(false)} style={{ flex: 1, padding: "12px", background: "none", border: `1px solid ${BORDER}`, color: PETROL, fontSize: 13, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>Cancelar</button>
-                  <button onClick={handleSave} disabled={saving || !form.prop1_nombre}
-                    style={{ flex: 2, padding: "12px", background: saving || !form.prop1_nombre ? "#E7E1D4" : PETROL, border: "none", color: saving || !form.prop1_nombre ? "#9A968A" : CREAM, fontSize: 13, fontWeight: 600, cursor: saving || !form.prop1_nombre ? "not-allowed" : "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.06em" }}>
+                  <button onClick={handleSave} disabled={saving || !form.propietarios[0]?.nombre}
+                    style={{ flex: 2, padding: "12px", background: saving || !form.propietarios[0]?.nombre ? "#E7E1D4" : PETROL, border: "none", color: saving || !form.propietarios[0]?.nombre ? "#9A968A" : CREAM, fontSize: 13, fontWeight: 600, cursor: saving || !form.propietarios[0]?.nombre ? "not-allowed" : "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.06em" }}>
                     {saving ? "Guardando..." : "Crear encargo y generar enlace"}
                   </button>
                 </div>
