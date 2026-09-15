@@ -370,28 +370,51 @@ export default function EncargosVenta() {
                   {enc.importe_publicacion && <span style={{ color: "#9A968A" }}>Precio: {fmtP(enc.importe_publicacion)}</span>}
                   {enc.duracion_meses && <span style={{ color: "#9A968A" }}>{enc.duracion_meses} meses</span>}
                 </div>
-                {enc.otp_codigo && enc.estado === "enviado" && (
-                  <div style={{ fontSize: 11, color: "#9C6E1B", marginTop: 6, background: "rgba(156,110,27,0.08)", padding: "4px 8px", display: "inline-block" }}>
-                    Código verificación: <strong style={{ letterSpacing: 2 }}>{enc.otp_codigo}</strong>
-                    {enc.otp_email && <span style={{ color: "#9A968A" }}> → {enc.otp_email}</span>}
+                {(enc.encargo_firmantes || []).length > 0 && (
+                  <div style={{ fontSize: 11, color: "#9A968A", marginTop: 6 }}>
+                    {enc.encargo_firmantes.filter(f => f.estado === "firmado").length}/{enc.encargo_firmantes.length} firmantes completados
+                    {enc.encargo_firmantes.some(f => f.otp_codigo && f.estado === "otp_enviado") && (
+                      <span style={{ marginLeft: 8, color: "#9C6E1B" }}>
+                        · Código: <strong>{enc.encargo_firmantes.find(f => f.estado === "otp_enviado")?.otp_codigo}</strong>
+                      </span>
+                    )}
                   </div>
                 )}
                 {enc.firma_propietario_fecha && (
-                  <div style={{ fontSize: 11, color: "#2C6E52", marginTop: 6 }}>
-                    ✓ Firmado el {new Date(enc.firma_propietario_fecha).toLocaleDateString("es-ES")}
-                    {enc.ip_firma && <span style={{ color: "#9A968A" }}> · IP: {enc.ip_firma}</span>}
+                  <div style={{ fontSize: 11, color: "#2C6E52", marginTop: 4 }}>
+                    ✓ Todos firmaron el {new Date(enc.firma_propietario_fecha).toLocaleDateString("es-ES")}
                   </div>
                 )}
               </div>
-              <div style={{ display: "flex", gap: 8, flexShrink: 0, flexWrap: "wrap", justifyContent: "flex-end" }}>
-                <button onClick={() => copyLink(enc.token_firma)}
-                  style={{ padding: "6px 14px", background: "none", border: `1px solid ${BORDER}`, color: copied === enc.token_firma ? "#2C6E52" : "#9A968A", fontSize: 11, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>
-                  {copied === enc.token_firma ? "✓ Copiado" : "Copiar enlace"}
-                </button>
-                {enc.prop1_tel && (
+              <div style={{ display: "flex", gap: 8, flexShrink: 0, flexWrap: "wrap", justifyContent: "flex-end", flexDirection: "column", alignItems: "flex-end" }}>
+                {(enc.encargo_firmantes || []).map((f, i) => (
+                  <div key={f.id} style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                    <span style={{ fontSize: 10, color: f.estado === "firmado" ? "#2C6E52" : f.estado === "otp_enviado" ? "#9C6E1B" : "#9A968A" }}>
+                      {f.nombre || `Prop. ${i+1}`} {f.estado === "firmado" ? "✓" : f.estado === "otp_enviado" ? "⏳" : "○"}
+                    </span>
+                    <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/encargo?token=${f.token_firma}`); setCopied(f.token_firma); setTimeout(() => setCopied(null), 2000); }}
+                      style={{ padding: "4px 10px", background: "none", border: `1px solid ${BORDER}`, color: copied === f.token_firma ? "#2C6E52" : "#9A968A", fontSize: 10, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>
+                      {copied === f.token_firma ? "✓" : "Enlace"}
+                    </button>
+                    {f.telefono && (
+                      <a href={`https://wa.me/${f.telefono.replace(/\D/g, "")}?text=${encodeURIComponent(`Hola ${f.nombre || ""},
+
+Te enviamos el encargo de gestión de Mallorca Nativa Properties para que lo revises y firmes desde tu móvil:
+
+https://${typeof window !== "undefined" ? window.location.host : "crm.mallorcanativaproperties.com"}/encargo?token=${f.token_firma}
+
+Gracias.`)}`}
+                        target="_blank" rel="noopener noreferrer"
+                        style={{ padding: "4px 10px", background: PETROL, color: CREAM, fontSize: 10, textDecoration: "none", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
+                        WA
+                      </a>
+                    )}
+                  </div>
+                ))}
+                {(!enc.encargo_firmantes || enc.encargo_firmantes.length === 0) && enc.prop1_tel && (
                   <a href={`https://wa.me/${enc.prop1_tel.replace(/\D/g, "")}?text=${getMsgWA(enc)}`} target="_blank" rel="noopener noreferrer"
                     style={{ padding: "6px 14px", background: PETROL, color: CREAM, fontSize: 11, textDecoration: "none", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
-                    Enviar WhatsApp
+                    WhatsApp
                   </a>
                 )}
               </div>

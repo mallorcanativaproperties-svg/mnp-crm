@@ -6,37 +6,59 @@ function getSupabase() {
   return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 }
 
+// GET — obtener encargo y datos del firmante por token
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const token = searchParams.get("token");
   if (!token) return NextResponse.json({ ok: false, error: "Token requerido" }, { status: 400 });
 
-  const { data, error } = await getSupabase().from("encargos_venta").select("*").eq("token_firma", token).single();
-  if (error || !data) return NextResponse.json({ ok: false, error: "Encargo no encontrado" }, { status: 404 });
-  if (data.estado === "completado") return NextResponse.json({ ok: false, error: "Este encargo ya fue firmado" }, { status: 400 });
+  const supabase = getSupabase();
 
-  return NextResponse.json({ ok: true, data });
+  // Buscar en firmantes individuales
+  const { data: firmante } = await supabase.from("encargo_firmantes")
+    .select("*, encargo:encargo_id(*)").eq("token_firma", token).single();
+
+  if (!firmante) return NextResponse.json({ ok: false, error: "Enlace no válido" }, { status: 404 });
+  if (firmante.estado === "firmado") return NextResponse.json({ ok: false, error: "Ya firmaste este encargo" }, { status: 400 });
+
+  return NextResponse.json({ ok: true, data: firmante.encargo, firmante_id: firmante.id, firmante_nombre: firmante.nombre });
 }
 
+// POST — guardar firma del firmante
 export async function POST(request) {
-  const { token, firma_data, ip, email } = await request.json();
+  const { token, firma_data, ip } = await request.json();
   if (!token || !firma_data) return NextResponse.json({ ok: false, error: "Datos incompletos" }, { status: 400 });
 
   const supabase = getSupabase();
-  const { data: encargo } = await supabase.from("encargos_venta").select("id, otp_verificado").eq("token_firma", token).single();
+  const { data: firmante } = await supabase.from("encargo_firmantes")
+    .select("id, encargo_id, otp_verificado, orden").eq("token_firma", token).single();
 
-  if (!encargo) return NextResponse.json({ ok: false, error: "Encargo no encontrado" }, { status: 404 });
-  if (!encargo.otp_verificado) return NextResponse.json({ ok: false, error: "Email no verificado" }, { status: 403 });
+  if (!firmante) return NextResponse.json({ ok: false, error: "Enlace no válido" }, { status: 404 });
+  if (!firmante.otp_verificado) return NextResponse.json({ ok: false, error: "Email no verificado" }, { status: 403 });
 
-  const { error } = await supabase.from("encargos_venta").update({
-    firma_propietario_data: firma_data,
-    firma_propietario_fecha: new Date().toISOString(),
-    estado: "firmado_propietario",
-    ip_firma: ip || null,
-    timestamp_firma: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  }).eq("id", encargo.id);
+  // Guardar firma del firmante
+  await supabase.from("encargo_firmantes").update({
+    firma_data, firma_fecha: new Date().toISOString(),
+    ip_firma: ip || null, estado: "firmado",
+  }).eq("id", firmante.id);
 
-  if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
-  return NextResponse.json({ ok: true });
+  // Verificar si todos los firmantes han firmado
+  const { data: todosFirmantes } = await supabase.from("encargo_firmantes")
+    .select("estado").eq("encargo_id", firmante.encargo_id);
+
+  const todosFirmaron = todosFirmantes?.every(f => f.estado === "firmado");
+
+  if (todosFirmaron) {
+    await supabase.from("encargos_venta").update({
+      estado: "firmado_propietario",
+      firma_propietario_fecha: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }).eq("id", firmante.encargo_id);
+  } else {
+    await supabase.from("encargos_venta").update({
+      estado: "enviado", updated_at: new Date().toISOString(),
+    }).eq("id", firmante.encargo_id);
+  }
+
+  return NextResponse.json({ ok: true, todos_firmaron: todosFirmaron });
 }
