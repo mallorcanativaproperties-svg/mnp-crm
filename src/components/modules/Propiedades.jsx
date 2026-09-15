@@ -16,7 +16,7 @@ function mapDbToJs(row) {
     parking: row.parking || "", nPlazas: Number(row.n_plazas) || 0,
     suelos: row.suelos || "", carpExt: row.carp_ext || "", carpInt: row.carp_int || "",
     persianasTipo: row.persianas_tipo || "", persianasMat: row.persianas_mat || "",
-    clima: row.clima || "", aguaCal: row.agua_cal || "", aireAcondTipo: row.aire_acond_tipo || "", tipologiaChalet: row.tipologia_chalet || "", plantasChalet: Number(row.plantas_chalet) || 0, calefaccion: row.calefaccion || "", ventanas: row.ventanas || "", emisionesEnerg: row.emisiones_energ || "",
+    clima: row.clima || "", aguaCal: row.agua_cal || "", aireAcondTipo: row.aire_acond_tipo || "", tipologiaChalet: row.tipologia_chalet || "", plantasChalet: Number(row.plantas_chalet) || 0, calefaccion: row.calefaccion || "", emisionesEnerg: row.emisiones_energ || "",
     suministros: row.suministros || [], drenaje: row.drenaje || "",
     elecReformada: row.elec_reformada || false, fontReformada: row.font_reformada || false,
     ventaMobiliario: row.venta_mobiliario || false, ventExt: row.vent_ext || false, iee: row.iee || "", refCatastral: row.ref_cat || "",
@@ -1998,7 +1998,7 @@ REGLAS:
         <Sec title="Datos de venta">
           <div style={g3}>
             {/* Precio condicional según operación */}
-            {d.op !== "Alquiler" && EFl({label: "Precio de venta", req: d.op !== "Alquiler", field: "precioVenta", pub: true, gold: true, type: "number"})}
+            {d.op === "Compraventa" && EFl({label: "Precio de venta", req: true, field: "precioVenta", pub: true, gold: true, type: "number"})}
             {d.op === "Alquiler" && EFl({label: "Renta mensual", req: true, field: "precioAlquiler", pub: true, gold: true, type: "number"})}
             {EFl({label: "Precio propietario", field: "precioProp", pub: false, type: "number"})}
           </div>
@@ -2221,7 +2221,7 @@ REGLAS:
             {esResidencial && EFl({label: "Agua caliente", field: "aguaCal", pub: true, options: AGUA_CALIENTE_OPTS, type: "select"})}
             {EFl({label: "Ventanas exteriores", field: "ventExt", pub: true, type: "bool"})}
           </div>}
-          {esResidencial && <div style={{ ...g3, marginTop: 8 }}>
+          {(esResidencial || esComercial) && <div style={{ ...g3, marginTop: 8 }}>
             {EFl({label: "Incluye mobiliario", field: "ventaMobiliario", pub: true, type: "bool"})}
           </div>}
         </Sec>}
@@ -2240,6 +2240,7 @@ REGLAS:
             {EFl({label: "Armarios empotrados", field: "armarios", pub: true, type: "bool"})}
             {EFl({label: "Trastero", field: "trastero", pub: true, type: "bool"})}
             {tieneAireCalef && EFl({label: "Aire acondicionado", field: "aireAcond", pub: true, type: "bool"})}
+            {tieneAireCalef && d.aireAcond && EFl({label: "Tipo aire acondicionado", field: "aireAcondTipo", pub: true, options: ["Solo frio","Frio/Calor","Preinstalacion"], type: "select"})}
           </div>}
           <div style={{ ...g2, marginTop: 8 }}>
             {EFl({label: "Parking", field: "parking", pub: true, options: ["Si","No","Comunitario","Opcional"], type: "select"})}
@@ -2558,7 +2559,6 @@ function IdealistaJsonButton({ supabase }) {
     // Cert energético: solo residencial
     const residencial=["flat","house","rustic"].includes(tipo);
     if(residencial&&(!row.cert_energ||!VALID_CERT.includes(row.cert_energ))) return false;
-    if(!row.ref_cat) return false;
     if(!Array.isArray(row.destinos)||!row.destinos.includes("Idealista")) return false;
     return true;
   }

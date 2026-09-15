@@ -870,7 +870,7 @@ export default function FormularioCaptacion() {
         <Sec title="Datos de venta">
           <div style={g2}>
             {/* Precio principal condicional */}
-            {op !== "Alquiler" && <Input label="Precio de venta" value={precioVenta} onChange={setPrecioVenta} type="number" placeholder="399000" required={op !== "Alquiler"} />}
+            {op === "Compraventa" && <Input label="Precio de venta" value={precioVenta} onChange={setPrecioVenta} type="number" placeholder="399000" required />}
             {op === "Alquiler" && <Input label="Renta mensual" value={precioAlquiler} onChange={setPrecioAlquiler} type="number" placeholder="1200" required />}
             {op !== "Alquiler" && <Input label="Precio propietario" value={precioProp} onChange={setPrecioProp} type="number" placeholder="0" />}
           </div>
