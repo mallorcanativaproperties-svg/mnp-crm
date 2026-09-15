@@ -390,7 +390,6 @@ export default function FormularioCaptacion() {
   const [trastero, setTrastero] = useState(false);
   const [parking, setParking] = useState("No");
   const [nPlazas, setNPlazas] = useState("");
-  const [ventanas, setVentanas] = useState("");
   const [cualNeg, setCualNeg] = useState(["", "", "", "", "", ""]);
   const [aireAcond, setAireAcond] = useState(false);
   const [aireAcondTipo, setAireAcondTipo] = useState("");
@@ -457,7 +456,7 @@ export default function FormularioCaptacion() {
       mUtil, mConst, mParcela, mTerraza, mBalcon, mPorche,
       habDob, habSim, totalHab, banos, aseos, conserv, anoCon, certE, iee,
       ventaMob, terraza, balcon, jardin, piscina, ascensor, armarios, trastero,
-      parking, nPlazas, ventanas, aireAcond, aireAcondTipo, tipologiaChalet, plantasChalet, suelos, carpExt, carpInt,
+      parking, nPlazas, aireAcond, aireAcondTipo, tipologiaChalet, plantasChalet, suelos, carpExt, carpInt,
       emisionesEnerg, calefaccion, aguaCal, suministros, drenaje,
       ventExt, elecRef, fontRef, notasPriv, propNom, propTel, propEmail, cualPos, cualNeg, refCatCuest]);
   const pv = op === "Alquiler" ? (Number(precioAlquiler)||0) : op === "Traspaso" ? (Number(precioTraspaso)||0) : (Number(precioVenta) || 0);
