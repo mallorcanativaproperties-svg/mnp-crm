@@ -59,6 +59,7 @@ const HEAT_MAP = {
   "Gas central": "centralGas", "Gasoleo central": "centralFuelOil",
   "Gas individual": "individualGas", "Electrica individual": "individualElectric",
   "Bomba de calor": "individualAirConditioningHeatPump", "Sin calefaccion": "noHeating",
+  "Aerotermia": "centralHeatPump", "Suelo radiante": "centralRadiantFloor",
 };
 
 // ─── Construir objeto propiedad ────────────────────────────────────────────────
@@ -76,12 +77,25 @@ function buildProperty(row, media) {
     propertyVisibility: "idealista",
   };
 
-  // Operación
-  const price = Number(row.precio_venta) || 0;
-  const operation = { operationType: row.op === "Alquiler" ? "rent" : "sale" };
+  // Operación — precio dinámico según tipo
+  const isAlquiler = row.op === "Alquiler";
+  const isTraspaso = row.op === "Traspaso";
+  const price = isAlquiler
+    ? Number(row.precio_alquiler) || 0
+    : isTraspaso
+      ? Number(row.precio_traspaso) || 0
+      : Number(row.precio_venta) || 0;
+  const operation = { operationType: isAlquiler ? "rent" : "sale" };
   if (price > 0) operation.operationPrice = price;
   const community = Number(row.comunidad) || 0;
-  if (community > 0) operation.operationPriceCommunity = community;
+  if (community > 0 && !isAlquiler) operation.operationPriceCommunity = community;
+  // Alquiler — campos específicos
+  if (isAlquiler) {
+    if (Number(row.duracion_min_meses) > 0) operation.rentMinimumTerm = Number(row.duracion_min_meses);
+    if (Number(row.fianza_meses) > 0) operation.rentDepositMonths = Number(row.fianza_meses);
+    if (row.mascotas === true || row.mascotas === "true") operation.rentPetsAllowed = true;
+    else if (row.mascotas === false || row.mascotas === "false") operation.rentPetsAllowed = false;
+  }
   property.propertyOperation = operation;
 
   // Contacto
@@ -152,12 +166,24 @@ function buildProperty(row, media) {
   if (row.calefaccion && HEAT_MAP[row.calefaccion]) features.featuresHeatingType = HEAT_MAP[row.calefaccion];
 
   if (row.vent_ext === true) features.featuresWindowsLocation = "exterior";
-  if (isStudio) features.featuresStudio = true;
+  if (isStudio || row.tipo === "Loft") features.featuresStudio = true;
   if (isPenthouse) features.featuresPenthouse = true;
   if (isDuplex) features.featuresDuplex = true;
 
   const conserv = CONSERV_MAP[row.conserv];
   if (conserv) features.featuresConservation = conserv;
+
+  // Chalet — tipología y plantas (opcionales)
+  if (tipo === "house" || tipo === "rustic") {
+    const TIPOLOGIA_MAP = {
+      "Independiente": "detached", "Pareado": "semiDetached",
+      "Adosado": "terraced", "En hilera": "terraced",
+    };
+    if (row.tipologia_chalet && TIPOLOGIA_MAP[row.tipologia_chalet]) {
+      features.featuresHouseSubtype = TIPOLOGIA_MAP[row.tipologia_chalet];
+    }
+    if (Number(row.plantas_chalet) > 0) features.featuresFloorsBelowGround = Number(row.plantas_chalet);
+  }
 
   if (row.cert_energ) {
     if (row.cert_energ === "En tramite") features.featuresEnergyCertificateRating = "inProcess";
@@ -169,11 +195,17 @@ function buildProperty(row, media) {
   }
 
   if (row.orient) {
-    const o = row.orient.toLowerCase();
-    if (o.includes("norte") || o.includes("north")) features.featuresOrientationNorth = true;
-    if (o.includes("sur") || o.includes("south")) features.featuresOrientationSouth = true;
-    if (o.includes("este") || o.includes("east")) features.featuresOrientationEast = true;
-    if (o.includes("oeste") || o.includes("west")) features.featuresOrientationWest = true;
+    // Mapeo exacto desde opciones del select (Norte, Sur, Este, Oeste, Sureste, Suroeste, Noreste, Noroeste)
+    const ORIENT_MAP = {
+      "Norte": ["North"], "Sur": ["South"], "Este": ["East"], "Oeste": ["West"],
+      "Noreste": ["North","East"], "Noroeste": ["North","West"],
+      "Sureste": ["South","East"], "Suroeste": ["South","West"],
+    };
+    const dirs = ORIENT_MAP[row.orient] || [];
+    if (dirs.includes("North")) features.featuresOrientationNorth = true;
+    if (dirs.includes("South")) features.featuresOrientationSouth = true;
+    if (dirs.includes("East")) features.featuresOrientationEast = true;
+    if (dirs.includes("West")) features.featuresOrientationWest = true;
   }
 
   property.propertyFeatures = features;
@@ -200,8 +232,11 @@ function buildProperty(row, media) {
       const relativePath = match ? match[1] : url;
 
       const img = { imageOrder: i + 1, imageUrl: relativePath, imageAiGenerated: photo.ia_generada === true };
+      // Etiqueta obligatoria — usar la asignada o "unknown" como fallback
       if (photo.etiqueta && IMAGE_TAG_MAP[photo.etiqueta]) {
         img.imageLabel = IMAGE_TAG_MAP[photo.etiqueta];
+      } else {
+        img.imageLabel = "unknown";
       }
       return img;
     });
@@ -219,7 +254,12 @@ function buildProperty(row, media) {
 function isValid(row) {
   if (!row.ref || !row.tipo || !row.municipio || !row.dir) return false;
   if (!row.cp && !(row.latitud && row.longitud)) return false;
-  if (!Number(row.precio_venta) || Number(row.precio_venta) <= 0) return false;
+  const opPrice = row.op === "Alquiler"
+    ? Number(row.precio_alquiler)
+    : row.op === "Traspaso"
+      ? Number(row.precio_traspaso)
+      : Number(row.precio_venta);
+  if (!opPrice || opPrice <= 0) return false;
   if (!Number(row.m_const) || Number(row.m_const) <= 0) return false;
   if (!row.op) return false;
   if (!row.desc_texto?.trim()) return false;

@@ -14,12 +14,12 @@ const TIPO_GROUPS = [
 const OPERACIONES = ["Compraventa", "Alquiler", "Traspaso"];
 // Valores alineados con mapeo Idealista en Propiedades.jsx
 const CONSERVACION = ["Buen estado","Reformado","A reformar","Obra nueva","En construccion"];
-const ORIENTACIONES = ["Norte","Sur","Este","Oeste","Noreste","Noroeste","Sureste","Suroeste"];
+const const ORIENTACIONES = ["Norte","Sur","Este","Oeste","Noreste","Noroeste","Sureste","Suroeste"];
 const CERT_ENERG = ["A","B","C","D","E","F","G","Exento"];
 const VIS_DIR = ["Direccion exacta", "Solo calle", "Ocultar direccion"];
 // Opciones alineadas con ficha de propiedad
 const AIRE_ACOND_OPTS = ["No disponible","Solo frio","Frio/Calor","Preinstalacion"];
-const CALEFACCION_OPTS = ["Individual","Centralizada","No disponible"];
+const CALEFACCION_OPTS = ["Gas central","Gas individual","Electrica central","Electrica individual","Bomba de calor","Aerotermia","Suelo radiante","Sin calefaccion"];
 const AGUA_CALIENTE = ["Aerotermia","Biomasa","Bomba de calor","Calentador Butano","Central","Central con contador individual","Gas Ciudad","Gas Natural","Gas Propano","Gasoil","Geotermia","No Tiene","Pellets","Placas Solares","Termo Electrico"];
 const DRENAJE_OPTS = ["Alcantarillado", "Fosa septica"];
 const SUMINISTROS_OPTS = ["Luz", "Placas solares", "Agua comunitaria", "Agua individual", "Pozo"];

@@ -1413,12 +1413,16 @@ function PropDetail({ p, currentUser, onClose, onUpdate, onDelete, onDuplicate }
     const errs = new Set();
     const src = draft;
     const TIPO_MAP_LOCAL = {
-      Piso:"flat", Estudio:"flat", Atico:"flat", "Atico Duplex":"flat", Duplex:"flat", "Planta baja":"flat",
-      Casa:"house", Chalet:"house", Adosado:"house", Villa:"house",
+      Piso:"flat", Apartamento:"flat", Estudio:"flat", Loft:"flat",
+      Atico:"flat", "Atico Duplex":"flat", Duplex:"flat", "Planta baja":"flat",
+      Casa:"house", Chalet:"house", Adosado:"house", Bungalow:"house",
+      Pareado:"house", Villa:"house", "Villa de Lujo":"house", "Casa Tipo Duplex":"house",
       "Finca rustica":"rustic", Finca:"rustic",
-      "Local comercial":"premises_commercial", Local:"premises_commercial",
-      Oficina:"office", Parking:"garage", Garaje:"garage",
-      Terreno:"land", Trastero:"storage", Edificio:"building",
+      "Local comercial":"premises_commercial", Oficina:"office",
+      "Nave industrial":"premises_commercial", Almacen:"premises_commercial", Negocio:"premises_commercial",
+      Parcela:"land", Solar:"land", "Terreno urbano":"land", "Terreno urbanizable":"land",
+      "Terreno rustico":"land", "Terreno rural":"land", "Terreno industrial":"land",
+      Garaje:"garage", Parking:"garage", Trastero:"storage", Edificio:"building",
     };
     const featuresType = TIPO_MAP_LOCAL[src.tipo] || "flat";
     const residencial = ["flat","house","rustic"].includes(featuresType);
@@ -1431,10 +1435,15 @@ function PropDetail({ p, currentUser, onClose, onUpdate, onDelete, onDuplicate }
     if (!src.municipio) errs.add("municipio");
     if (!src.cp && !(src.latitud && src.longitud)) errs.add("cp");
     const precioCheck = src.op === "Alquiler" ? Number(src.precioAlquiler) : src.op === "Traspaso" ? Number(src.precioTraspaso) : Number(src.precioVenta);
-    if (!precioCheck || precioCheck <= 0) errs.add("precioVenta");
-    if (!Number(src.mConst) || Number(src.mConst) <= 0) errs.add("mConst");
+    if (!precioCheck || precioCheck <= 0) errs.add(src.op === "Alquiler" ? "precioAlquiler" : src.op === "Traspaso" ? "precioTraspaso" : "precioVenta");
+    // m² construidos obligatorio excepto terrenos (que requieren m² parcela)
+    if (featuresType !== "land") {
+      if (!Number(src.mConst) || Number(src.mConst) <= 0) errs.add("mConst");
+    } else {
+      if (!Number(src.mParcela) || Number(src.mParcela) <= 0) errs.add("mParcela");
+    }
     if (!src.desc || !src.desc.trim()) errs.add("desc");
-    if (needsBaths && (!Number(src.banos) || Number(src.banos) <= 0)) errs.add("banos");
+    if (needsBaths && (Number(src.banos)||0) + (Number(src.aseos)||0) <= 0) errs.add("banos");
     if (residencial) {
       const CERT_VALIDOS = ["A","B","C","D","E","F","G","Exento"];
       if (!src.certEnerg || !CERT_VALIDOS.includes(src.certEnerg)) errs.add("certEnerg");
