@@ -16,11 +16,12 @@ const S = {
   grid2: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 },
 };
 
+const PROP_INIT = { nombre: "", dni: "", tel: "", email: "" };
+
 const FORM_INIT = {
   tipo: "sin_compromiso",
   propiedad_id: "",
-  prop1_nombre: "", prop1_dni: "", prop1_tel: "", prop1_email: "",
-  prop2_nombre: "", prop2_dni: "", prop2_tel: "", prop2_email: "",
+  propietarios: [{ ...PROP_INIT }],
   dir_propietarios: "",
   prop_direccion: "", prop_tipo: "", prop_garaje: "", prop_trastero: "",
   prop_ref_catastral: "", prop_reg_registral: "", prop_ref: "",
@@ -76,7 +77,7 @@ export default function EncargosVenta() {
   }
 
   async function handleSave() {
-    if (!form.prop1_nombre) return;
+    if (!form.propietarios[0]?.nombre) return;
     setSaving(true);
     const res = await fetch("/api/encargos", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
     const data = await res.json();
@@ -253,8 +254,8 @@ export default function EncargosVenta() {
                   </span>
                 </div>
                 <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 15, color: PETROL, marginBottom: 2 }}>
-                  {enc.prop1_nombre || "Propietario sin nombre"}
-                  {enc.prop2_nombre && ` · ${enc.prop2_nombre}`}
+                  {enc.propietarios?.[0]?.nombre || enc.prop1_nombre || "Propietario sin nombre"}
+                  {enc.propietarios?.length > 1 && ` · ${enc.propietarios[1].nombre}`}
                 </div>
                 <div style={{ fontSize: 12, color: "#9A968A", marginBottom: 4 }}>
                   {enc.prop_direccion || enc.propiedades?.titulo || "Propiedad no especificada"}
