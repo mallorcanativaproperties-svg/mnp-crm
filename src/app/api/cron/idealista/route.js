@@ -402,25 +402,23 @@ export async function GET(request) {
       const jsonFileName = `${CUSTOMER_CODE}.json`;
       await ftpUploadBuffer(client, jsonBuffer, jsonFileName);
 
-      // 4b. Subir las fotos de cada propiedad
+      // 4b. Subir fotos y planos de cada propiedad al FTP
       let fotosSubidas = 0;
       let fotosError = 0;
 
       for (const prop of validas) {
-        const media = (mediaAll || []).filter(m => m.propiedad_id === prop.id && m.tipo === "foto" && m.url);
+        const media = (mediaAll || []).filter(m => m.propiedad_id === prop.id && (m.tipo === "foto" || m.tipo === "plano") && m.url);
 
-        for (const foto of media) {
+        for (const item of media) {
           try {
-            // Descargar foto desde Supabase
-            const response = await fetch(foto.url);
+            const response = await fetch(item.url);
             if (!response.ok) { fotosError++; continue; }
             const arrayBuffer = await response.arrayBuffer();
             const buffer = Buffer.from(arrayBuffer);
 
-            // Path relativo en FTP: REF/foto/archivo.ext
-            const url = foto.url || "";
+            const url = item.url || "";
             const match = url.match(/propiedades-media\/(.+)$/);
-            const remotePath = match ? match[1] : `${prop.ref}/foto/${Date.now()}.jpg`;
+            const remotePath = match ? match[1] : `${prop.ref}/${item.tipo}/${Date.now()}.jpg`;
 
             await ftpUploadBuffer(client, buffer, remotePath);
             fotosSubidas++;

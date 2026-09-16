@@ -2657,7 +2657,7 @@ function IdealistaJsonButton({ supabase }) {
     if(isDuplex) feat.featuresDuplex=true;
     const conserv=CONSERV_MAP[row.conserv]; if(conserv) feat.featuresConservation=conserv;
     if(row.ref_cat) feat.featuresCadastralReference=row.ref_cat;
-    if(row.cert_energ){if(row.cert_energ==="Exento") feat.featuresEnergyCertificateRating="exempt";else if(/^[A-G]$/.test(row.cert_energ)) feat.featuresEnergyCertificateRating=row.cert_energ;}
+    if(row.cert_energ){if(row.cert_energ==="En tramite") feat.featuresEnergyCertificateRating="inProcess";else if(row.cert_energ==="Exento") feat.featuresEnergyCertificateRating="exempt";else if(/^[A-G]$/.test(row.cert_energ)) feat.featuresEnergyCertificateRating=row.cert_energ;}
     if(row.emisiones_energ&&/^[A-G]$/.test(row.emisiones_energ)) feat.featuresEnergyCertificateEmissionsRating=row.emisiones_energ;
     if(row.orient){const ORIENT_MAP={"Norte":["North"],"Sur":["South"],"Este":["East"],"Oeste":["West"],"Noreste":["North","East"],"Noroeste":["North","West"],"Sureste":["South","East"],"Suroeste":["South","West"]};const dirs=ORIENT_MAP[row.orient]||[];if(dirs.includes("North")) feat.featuresOrientationNorth=true;if(dirs.includes("South")) feat.featuresOrientationSouth=true;if(dirs.includes("East")) feat.featuresOrientationEast=true;if(dirs.includes("West")) feat.featuresOrientationWest=true;}
     property.propertyFeatures=feat;
