@@ -56,10 +56,11 @@ function LoginScreen({ onLogin }) {
         .select("*")
         .eq("user_login", user.toLowerCase().trim())
         .eq("pass_hash", pass.trim())
-        .eq("activo", true)
+        .neq("activo", false)
         .single();
       if (error || !data) {
-        setError("Usuario o contraseña incorrectos");
+        const msg = error?.code === "PGRST116" ? "Usuario o contraseña incorrectos" : error ? `Error: ${error.message}` : "Usuario o contraseña incorrectos";
+        setError(msg);
       } else {
         onLogin({ user_login: data.user_login, nombre: data.nombre, role: data.role, agente_codigo: data.agente_codigo, agente_telefono: data.agente_telefono });
       }
