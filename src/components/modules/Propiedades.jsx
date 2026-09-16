@@ -2688,6 +2688,15 @@ function IdealistaJsonButton({ supabase }) {
         return img;
       });
     }
+    // Vídeos
+    const videos=(media||[]).filter(m=>m.tipo==="video"&&m.url).sort((a,b)=>(a.orden||0)-(b.orden||0));
+    if(videos.length>0){
+      property.propertyVideos=videos.map((v,i)=>{
+        const vurl=v.url||"";
+        const vtype=vurl.includes("youtube.com")||vurl.includes("youtu.be")?"youtube":vurl.includes("vimeo.com")?"vimeo":"url";
+        return{videoOrder:i+1,videoUrl:vurl,videoType:vtype};
+      });
+    }
     if(row.tour360?.startsWith("http")) property.propertyVirtualTour={virtualTourUrl:row.tour360};
     return property;
   }
