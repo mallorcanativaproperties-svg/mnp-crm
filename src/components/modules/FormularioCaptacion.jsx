@@ -664,7 +664,7 @@ export default function FormularioCaptacion() {
             La ficha {ref} se ha creado en la cartera de propiedades con estado "Captada". Puedes completar los campos restantes desde el CRM.
           </p>
           <button
-            onClick={() => { setSubmitted(false); }}
+            onClick={() => window.location.reload()}
             style={{ padding: "12px 28px", borderRadius: 0, border: "1px solid #C8A97E", background: "transparent", color: "#AC8A54", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}
           >
             Nuevo formulario

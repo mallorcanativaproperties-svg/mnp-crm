@@ -349,8 +349,9 @@ export default function App() {
               {syncing ? "Sincronizando..." : "↻ Sync Google Sheet"}
             </button>
             <button onClick={() => {
-              navigator.clipboard.writeText("https://crm.mallorcanativaproperties.com/cualificacion");
-              alert("✅ Link copiado: crm.mallorcanativaproperties.com/cualificacion");
+              const url = `${window.location.origin}/cualificacion`;
+              navigator.clipboard.writeText(url);
+              alert(`✅ Link copiado: ${url}`);
             }} style={{ padding: "12px 20px", borderRadius: 0, border: "1px solid #405c6b", background: "transparent", color: "#405c6b", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}>
               🔗 Copiar link formulario
             </button>
