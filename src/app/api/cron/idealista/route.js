@@ -148,7 +148,7 @@ function buildProperty(row, media) {
   if (mUtil > 0) features.featuresAreaUsable = mUtil;
   if ((isHouse || tipo === "land") && mParcela > 0) features.featuresAreaPlot = mParcela;
   if (banos > 0) features.featuresBathroomNumber = banos;
-  const bedrooms = habDobles + habSimples;
+  const bedrooms = Number(row.total_hab) || (habDobles + habSimples);
   if (bedrooms > 0) features.featuresBedroomNumber = bedrooms;
   if (row.ano_construc) {
     const year = parseInt(row.ano_construc);
@@ -178,6 +178,7 @@ function buildProperty(row, media) {
 
   const conserv = CONSERV_MAP[row.conserv];
   if (conserv) features.featuresConservation = conserv;
+  if (row.ref_cat) features.featuresCadastralReference = row.ref_cat;
 
   // Chalet — tipología y plantas (opcionales)
   if (tipo === "house" || tipo === "rustic") {
@@ -223,24 +224,21 @@ function buildProperty(row, media) {
   if (row.desc_de?.trim()) descriptions.push({ descriptionLanguage: "german", descriptionText: row.desc_de.trim() });
   if (descriptions.length > 0) property.propertyDescriptions = descriptions;
 
-  // Imágenes — rutas RELATIVAS para FTP (sin URL, sin dominio)
-  const photos = (media || [])
-    .filter(m => m.tipo === "foto" && m.url)
-    .sort((a, b) => (a.orden || 0) - (b.orden || 0));
+  // Imágenes — rutas RELATIVAS para FTP (fotos + planos)
+  const fotos  = (media || []).filter(m => m.tipo === "foto"  && m.url).sort((a,b) => (a.orden||0)-(b.orden||0));
+  const planos = (media || []).filter(m => m.tipo === "plano" && m.url).sort((a,b) => (a.orden||0)-(b.orden||0));
+  const allImgs = [...fotos, ...planos];
 
-  if (photos.length > 0) {
-    property.propertyImages = photos.map((photo, i) => {
-      // Extraer solo el path relativo desde la URL de Supabase
-      // URL: https://xxx.getSupabase().co/storage/v1/object/public/propiedades-media/REF/foto/archivo.jpg
-      // Path relativo FTP: REF/foto/archivo.jpg
-      const url = photo.url || "";
+  if (allImgs.length > 0) {
+    property.propertyImages = allImgs.map((item, i) => {
+      const url = item.url || "";
       const match = url.match(/propiedades-media\/(.+)$/);
       const relativePath = match ? match[1] : url;
-
-      const img = { imageOrder: i + 1, imageUrl: relativePath, imageAiGenerated: photo.ia_generada === true };
-      // Etiqueta obligatoria — usar la asignada o "unknown" como fallback
-      if (photo.etiqueta && IMAGE_TAG_MAP[photo.etiqueta]) {
-        img.imageLabel = IMAGE_TAG_MAP[photo.etiqueta];
+      const img = { imageOrder: i + 1, imageUrl: relativePath, imageAiGenerated: item.ia_generada === true };
+      if (item.tipo === "plano") {
+        img.imageLabel = "plan";
+      } else if (item.etiqueta && IMAGE_TAG_MAP[item.etiqueta]) {
+        img.imageLabel = IMAGE_TAG_MAP[item.etiqueta];
       } else {
         img.imageLabel = "unknown";
       }

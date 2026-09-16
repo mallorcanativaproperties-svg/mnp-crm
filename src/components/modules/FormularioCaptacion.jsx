@@ -598,6 +598,7 @@ export default function FormularioCaptacion() {
       cual_pos: cualPos.filter(Boolean),
       visitas: 0,
       fotos: 0, videos: 0, planos: 0,
+      destinos: [],
     };
     Object.keys(data).forEach(k => { if (data[k] === null || data[k] === "") delete data[k]; });
     return data;

@@ -2603,8 +2603,8 @@ function IdealistaJsonButton({ supabase }) {
     if(row.op === "Alquiler") {
       if(Number(row.fianza_meses)>0) op.rentDepositMonths = Number(row.fianza_meses);
       if(Number(row.duracion_min_meses)>0) op.rentMinimumTerm = Number(row.duracion_min_meses);
-      if(row.mascotas === true) op.rentPetsAllowed = true;
-      else if(row.mascotas === false) op.rentPetsAllowed = false;
+      if(row.mascotas === true || row.mascotas === "true") op.rentPetsAllowed = true;
+      else if(row.mascotas === false || row.mascotas === "false") op.rentPetsAllowed = false;
     }
     const community=Number(row.comunidad)||0; if(community>0&&row.op!=="Alquiler") op.operationPriceCommunity=community;
     const basuras=Number(row.basuras)||0; if(basuras>0) op.operationPriceUrbanizacion=basuras;
