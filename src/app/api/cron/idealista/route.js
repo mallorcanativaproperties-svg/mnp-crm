@@ -161,7 +161,7 @@ function buildProperty(row, media) {
   if (row.trastero === true) features.featuresStorage = true;
   if (row.terraza === true) features.featuresTerrace = true;
   if (row.armarios === true) features.featuresWardrobes = true;
-  if (row.vent_ext === true || row.ventExt === true) features.featuresWindowsLocation = "exterior";
+  if (row.vent_ext === true) features.featuresWindowsLocation = "exterior";
   if (row.elec_reformada === true) features.featuresRenovatedElectricity = true;
   if (row.font_reformada === true) features.featuresRenovatedPlumbing = true;
   if (row.balcon === true) features.featuresBalcony = true;
@@ -269,13 +269,13 @@ function buildProperty(row, media) {
 function isValid(row) {
   if (!row.ref || !row.tipo || !row.municipio || !row.dir) return false;
   if (!row.cp && !(row.latitud && row.longitud)) return false;
+  if (!row.op) return false;
   const opPrice = row.op === "Alquiler"
     ? Number(row.precio_alquiler)
     : row.op === "Traspaso"
       ? Number(row.precio_traspaso)
       : Number(row.precio_venta);
   if (!opPrice || opPrice <= 0) return false;
-  if (!row.op) return false;
   if (!row.desc_texto?.trim()) return false;
   const tipo = TIPO_MAP[row.tipo];
   if (!tipo) return false;

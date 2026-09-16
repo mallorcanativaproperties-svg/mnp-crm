@@ -58,7 +58,7 @@ function mapJsToDb(p) {
     fotos: p.fotos, videos: p.videos, tour360: p.tour360, planos: p.planos,
     fecha_cap: p.fechaCap, visitas: p.visitas,
     cual_pos: p.cualPos, cual_neg: p.cualNeg,
-    puerta: p.puerta, latitud: p.latitud, longitud: p.longitud, idealista_id: p.idealistaId,
+    puerta: p.puerta, latitud: p.latitud != null ? Number(p.latitud) || null : null, longitud: p.longitud != null ? Number(p.longitud) || null : null, idealista_id: p.idealistaId,
     desc_en: p.descEn, desc_de: p.descDe,
     terraza: p.terraza, piscina: p.piscina, ascensor: p.ascensor,
     jardin: p.jardin, aire_acond: !!(p.aireAcondTipo && p.aireAcondTipo !== "No disponible"), armarios: p.armarios,
