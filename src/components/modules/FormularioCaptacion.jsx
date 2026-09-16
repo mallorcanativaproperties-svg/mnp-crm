@@ -880,14 +880,6 @@ export default function FormularioCaptacion() {
             {op === "Alquiler" && <Input label="Renta mensual" value={precioAlquiler} onChange={setPrecioAlquiler} type="number" placeholder="1200" required />}
             {op !== "Alquiler" && <Input label="Precio propietario" value={precioProp} onChange={setPrecioProp} type="number" placeholder="0" />}
           </div>
-          {/* Reformas */}
-          {(esResidencial || esComercial) && (
-            <div style={g3}>
-              <Toggle label="Electricidad reformada" value={elecRef} onChange={setElecRef} />
-              <Toggle label="Fontaneria reformada" value={fontRef} onChange={setFontRef} />
-            </div>
-          )}
-
           {/* Campos específicos de Alquiler */}
           {op === "Alquiler" && (
             <div style={g3}>
