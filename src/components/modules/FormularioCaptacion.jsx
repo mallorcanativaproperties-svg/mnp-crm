@@ -364,6 +364,8 @@ export default function FormularioCaptacion() {
   const [habSim, setHabSim] = useState("0");
   const [totalHab, setTotalHab] = useState("");
   const [refCatCuest, setRefCatCuest] = useState("");
+  const [latitud, setLatitud] = useState("");
+  const [longitud, setLongitud] = useState("");
   const [tipologiaChalet, setTipologiaChalet] = useState("");
   const [plantasChalet, setPlantasChalet] = useState("");
   const [banos, setBanos] = useState("0");
@@ -458,7 +460,7 @@ export default function FormularioCaptacion() {
       ventaMob, terraza, balcon, jardin, piscina, ascensor, armarios, trastero,
       parking, nPlazas, aireAcond, aireAcondTipo, tipologiaChalet, plantasChalet, suelos, carpExt, carpInt,
       emisionesEnerg, calefaccion, aguaCal, suministros, drenaje,
-      ventExt, elecRef, fontRef, notasPriv, propNom, propTel, propEmail, cualPos, cualNeg, refCatCuest]);
+      ventExt, elecRef, fontRef, notasPriv, propNom, propTel, propEmail, cualPos, cualNeg, refCatCuest, latitud, longitud]);
   const pv = op === "Alquiler" ? (Number(precioAlquiler)||0) : op === "Traspaso" ? (Number(precioTraspaso)||0) : (Number(precioVenta) || 0);
   const pp = Number(precioProp) || 0;
 
@@ -575,6 +577,8 @@ export default function FormularioCaptacion() {
       cual_neg: cualNeg.filter(Boolean),
       aire_acond: aireAcond,
       ref_cat: refCatCuest || null,
+      latitud: latitud !== "" ? Number(latitud) : null,
+      longitud: longitud !== "" ? Number(longitud) : null,
       aire_acond_tipo: aireAcondTipo || null,
       tipologia_chalet: tipologiaChalet || null,
       plantas_chalet: Number(plantasChalet) || null,
@@ -731,6 +735,8 @@ export default function FormularioCaptacion() {
             <Input label="Codigo postal" value={cp} onChange={setCp} placeholder="07007" required />
             <Select label="Municipio" value={municipio} onChange={(v) => { setMunicipio(v); setZona(""); }} options={Object.keys(ZONAS_MAP)} required />
             <Select label="Zona" value={zona} onChange={setZona} options={municipio && ZONAS_MAP[municipio] ? ZONAS_MAP[municipio] : []} />
+            <Input label="Latitud (GPS)" value={latitud} onChange={setLatitud} type="number" placeholder="39.5696" />
+            <Input label="Longitud (GPS)" value={longitud} onChange={setLongitud} type="number" placeholder="2.6502" />
           </div>
           <div style={g3}>
             {esResidencial && <Select label="Orientacion" value={orient} onChange={setOrient} options={ORIENTACIONES} />}

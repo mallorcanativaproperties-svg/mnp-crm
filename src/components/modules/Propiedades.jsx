@@ -1983,6 +1983,8 @@ REGLAS:
             {EFl({label: "Distancia playa", field: "distPlaya", pub: true})}
             {EFl({label: "Planta", field: "planta", pub: true})}
             {EFl({label: "Puerta", field: "puerta", pub: true})}
+            {EFl({label: "Latitud (GPS)", field: "latitud", pub: true, type: "number"})}
+            {EFl({label: "Longitud (GPS)", field: "longitud", pub: true, type: "number"})}
           </div>
 
           <div style={{ ...g2, marginTop: 8 }}>
