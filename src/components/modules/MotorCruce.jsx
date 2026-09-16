@@ -376,7 +376,11 @@ export default function MotorCruce() {
       if (pRes.data) setPROPS(pRes.data.map(r => ({
         id: r.id, ref: r.ref || "", titulo: r.titulo || "", tipo: r.tipo || "",
         op: r.op || "Compraventa",
-        zona: r.zona || "", municipio: r.municipio || "", precioVenta: r.precio_venta || 0,
+        zona: r.zona || "", municipio: r.municipio || "",
+        precioVenta: r.precio_venta || 0,
+        precioAlquiler: r.precio_alquiler || 0,
+        precioTraspaso: r.precio_traspaso || 0,
+        precio: r.op === "Alquiler" ? (r.precio_alquiler || 0) : r.op === "Traspaso" ? (r.precio_traspaso || 0) : (r.precio_venta || 0),
         mConst: r.m_const || 0, habDobles: r.hab_dobles || 0, habSimples: r.hab_simples || 0,
         banos: r.banos || 0, estado: r.estado || "", agente: r.agente || "",
         calidades: r.calidades || [],
@@ -400,9 +404,9 @@ export default function MotorCruce() {
   // Matching logic: presupuesto (±30.000€) + municipio + operacion
   function isMatch(buyer, prop) {
     // 1. Presupuesto: rango ±30.000€ del precio de publicación
-    const precio = Number(prop.precioVenta) || 0;
+    const precio = Number(prop.precio) || Number(prop.precioVenta) || 0;
     const ppto = Number(buyer.ppto) || 0;
-    if (precio > ppto + 30000 || precio < ppto - 30000) return false;
+    if (ppto > 0 && precio > 0 && (precio > ppto + 30000 || precio < ppto - 30000)) return false;
 
     // 2. Zonas: si el comprador tiene zonas deseadas, al menos una debe coincidir con municipio o zona
     if (buyer.zd.length > 0) {
