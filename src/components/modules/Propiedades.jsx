@@ -2606,7 +2606,8 @@ function IdealistaJsonButton({ supabase }) {
       if(row.mascotas === true) op.rentPetsAllowed = true;
       else if(row.mascotas === false) op.rentPetsAllowed = false;
     }
-    const community=Number(row.comunidad)||0; if(community>0) op.operationPriceCommunity=community;
+    const community=Number(row.comunidad)||0; if(community>0&&row.op!=="Alquiler") op.operationPriceCommunity=community;
+    const basuras=Number(row.basuras)||0; if(basuras>0) op.operationPriceUrbanizacion=basuras;
     property.propertyOperation=op;
     property.propertyContact={contactName:"Mallorca Nativa Properties",contactEmail:"mallorcanativaproperties@gmail.com",contactPrimaryPhonePrefix:"34",contactPrimaryPhoneNumber:"655882682"};
     const addr={addressCountry:"Spain"};
@@ -2648,6 +2649,8 @@ function IdealistaJsonButton({ supabase }) {
     }
     if((tipo==="house"||tipo==="rustic")&&Number(row.plantas_chalet)>0) feat.featuresFloorNumber=Number(row.plantas_chalet);
     if(row.calefaccion&&HEAT_MAP[row.calefaccion]) feat.featuresHeatingType=HEAT_MAP[row.calefaccion];
+    if(row.elec_reformada===true) feat.featuresRenovatedElectricity=true;
+    if(row.font_reformada===true) feat.featuresRenovatedPlumbing=true;
     if(row.vent_ext===true) feat.featuresWindowsLocation="exterior";
     if(isStudio||row.tipo==="Loft") feat.featuresStudio=true;
     if(isPenthouse) feat.featuresPenthouse=true;
@@ -2691,7 +2694,10 @@ function IdealistaJsonButton({ supabase }) {
 
   function cleanObj(obj) {
     if(Array.isArray(obj)) return obj.map(cleanObj).filter(v=>v!==null&&v!==undefined);
-    if(obj&&typeof obj==="object") return Object.fromEntries(Object.entries(obj).filter(([,v])=>v!==null&&v!==undefined&&v!=="").map(([k,v])=>[k,cleanObj(v)]));
+    if(obj&&typeof obj==="object") return Object.fromEntries(Object.entries(obj).filter(([,v])=>{
+      if(typeof v==="boolean") return true;
+      return v!==null&&v!==undefined&&v!=="";
+    }).map(([k,v])=>[k,cleanObj(v)]));
     return obj;
   }
 
