@@ -1695,9 +1695,9 @@ REGLAS:
   const tieneElecFont = ["flat","house","rustic","premises_commercial","office"].includes(ft);
   const tieneExtras = ["flat","house","rustic"].includes(ft);
   const tieneAireCalef = ["flat","house","rustic","premises_commercial","office"].includes(ft);
-  const tieneVideos = ["flat","house","rustic","premises_commercial","office","building"].includes(ft);
-  const tienePlanos = ["flat","house","rustic","premises_commercial","office","building","land"].includes(ft);
-  const tieneTour = ["flat","house","rustic","premises_commercial","office","building"].includes(ft);
+  const tieneVideos = ["flat","house","rustic","premises_commercial","office","building","garage","storage"].includes(ft);
+  const tienePlanos = ["flat","house","rustic","premises_commercial","office","building","land","garage","storage"].includes(ft);
+  const tieneTour   = ["flat","house","rustic","premises_commercial","office","building","garage","storage"].includes(ft);
 
   useEffect(() => {
     supabase.from("usuarios").select("nombre,agente_codigo,agente_telefono").eq("activo", true).not("agente_codigo", "is", null)
