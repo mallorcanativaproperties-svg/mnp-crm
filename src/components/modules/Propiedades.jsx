@@ -1977,8 +1977,40 @@ REGLAS:
             {EFl({label: "Direccion", req: true, field: "dir", pub: true})}
             {EFl({label: "Numero", field: "num", pub: true})}
             {EFl({label: "Codigo postal", req: true, field: "cp", pub: true})}
-            {EFl({label: "Municipio", req: true, field: "municipio", pub: true})}
-            {EFl({label: "Zona", field: "zona", pub: true})}
+            {/* Municipio — desplegable con ZONAS_MAP */}
+            {(() => {
+              const hasErr = editMode && idealistaFieldErrors.has("municipio");
+              const inputStyle = { width: "100%", background: "#FFFFFF", border: `1px solid ${hasErr ? "#A23A3A" : "#E7E1D4"}`, borderRadius: 0, color: "#22262E", padding: "6px 8px", fontSize: 13, fontFamily: "Inter, sans-serif" };
+              return (
+                <div style={{ marginBottom: 10 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: hasErr ? "#A23A3A" : "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>Municipio</span>
+                    <span style={{ color: "#A23A3A", fontSize: 14, fontWeight: 700 }}>*</span>
+                  </div>
+                  <select value={d.municipio || ""} onChange={e => { upd("municipio", e.target.value); upd("zona", ""); }} onBlur={() => autoSave({ ...draft, municipio: d.municipio, zona: "" })} style={inputStyle}>
+                    <option value="">-</option>
+                    {Object.keys(ZONAS_MAP).map(m => <option key={m} value={m}>{m}</option>)}
+                  </select>
+                  {hasErr && <div style={{ fontSize: 10, color: "#A23A3A", marginTop: 3 }}>Requerido para Idealista</div>}
+                </div>
+              );
+            })()}
+            {/* Zona — dependiente del municipio seleccionado */}
+            {(() => {
+              const zonaOpts = d.municipio && ZONAS_MAP[d.municipio] ? ZONAS_MAP[d.municipio] : [];
+              const inputStyle = { width: "100%", background: "#FFFFFF", border: "1px solid #E7E1D4", borderRadius: 0, color: "#22262E", padding: "6px 8px", fontSize: 13, fontFamily: "Inter, sans-serif" };
+              return (
+                <div style={{ marginBottom: 10 }}>
+                  <div style={{ marginBottom: 2 }}>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>Zona</span>
+                  </div>
+                  <select value={d.zona || ""} onChange={e => upd("zona", e.target.value)} onBlur={() => autoSave(draft)} style={inputStyle} disabled={zonaOpts.length === 0}>
+                    <option value="">-</option>
+                    {zonaOpts.map(z => <option key={z} value={z}>{z}</option>)}
+                  </select>
+                </div>
+              );
+            })()}
             {esResidencial && EFl({label: "Orientacion", field: "orient", pub: true, options: ["Norte","Sur","Este","Oeste","Noreste","Noroeste","Sureste","Suroeste"], type: "select"})}
             {EFl({label: "Distancia playa", field: "distPlaya", pub: true})}
             {EFl({label: "Planta", field: "planta", pub: true})}
