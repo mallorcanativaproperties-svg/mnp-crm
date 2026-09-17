@@ -1853,7 +1853,7 @@ REGLAS:
             <>
               {/* Fila: REF + Operación + Tipo */}
               {/* Título — primero, igual que en el formulario */}
-              <input type="text" value={d.titulo || ""} onChange={e => upd("titulo", e.target.value)} placeholder="Título de la propiedad"
+              <input type="text" value={d.titulo || ""} onChange={e => upd("titulo", e.target.value)} onBlur={() => autoSave(draft)} placeholder="Título de la propiedad"
                 style={{ width: "100%", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "10px 14px", fontSize: 20, fontFamily: "'Playfair Display', serif", marginBottom: 16, boxSizing: "border-box" }} />
 
               {/* Agente, Referencia, Tipo operación — misma estética que formulario */}
@@ -1869,7 +1869,7 @@ REGLAS:
                       const newRef = await reasignarRef(agente, d.ref);
                       if (newRef) upd("ref", newRef);
                     }
-                  }}
+                  }} onBlur={() => autoSave(draft)}
                     style={{ width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" }}>
                     <option value="">Seleccionar agente...</option>
                     {AGENTES_LIST.map(a => <option key={a} value={a}>{a}</option>)}
@@ -1879,14 +1879,14 @@ REGLAS:
                   <label style={{ fontSize: 10, fontWeight: 600, color: idealistaFieldErrors.has("ref") ? "#A23A3A" : "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
                     Referencia<span style={{ color: "#9C6E1B", marginLeft: 3 }}>*</span>
                   </label>
-                  <input type="text" value={d.ref || ""} onChange={e => upd("ref", e.target.value)}
+                  <input type="text" value={d.ref || ""} onChange={e => upd("ref", e.target.value)} onBlur={() => autoSave(draft)}
                     style={{ width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid " + (d.ref ? "#6AAF8D44" : "#E7E1D4"), borderRadius: 0, color: d.ref ? "#2C6E52" : "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", fontWeight: 700, boxSizing: "border-box" }} />
                 </div>
                 <div style={{ marginBottom: 14 }}>
                   <label style={{ fontSize: 10, fontWeight: 600, color: idealistaFieldErrors.has("op") ? "#A23A3A" : "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
                     Tipo de operacion<span style={{ color: "#9C6E1B", marginLeft: 3 }}>*</span>
                   </label>
-                  <select value={d.op || "Compraventa"} onChange={e => upd("op", e.target.value)}
+                  <select value={d.op || "Compraventa"} onChange={e => upd("op", e.target.value)} onBlur={() => autoSave(draft)}
                     style={{ width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid " + (idealistaFieldErrors.has("op") ? "#A23A3A" : "#2A2926"), borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" }}>
                     {OPS_LIST.map(o => <option key={o} value={o}>{o}</option>)}
                   </select>
@@ -1898,7 +1898,7 @@ REGLAS:
                 <label style={{ fontSize: 10, fontWeight: 600, color: idealistaFieldErrors.has("tipo") ? "#A23A3A" : "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
                   Tipo de propiedad<span style={{ color: "#9C6E1B", marginLeft: 3 }}>*</span>
                 </label>
-                <select value={d.tipo || ""} onChange={e => upd("tipo", e.target.value)}
+                <select value={d.tipo || ""} onChange={e => upd("tipo", e.target.value)} onBlur={() => autoSave(draft)}
                   style={{ width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid " + (idealistaFieldErrors.has("tipo") ? "#A23A3A" : "#2A2926"), borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" }}>
                   <option value="">Seleccionar tipo...</option>
                   {TIPO_GROUPS.map(g => (
