@@ -725,6 +725,7 @@ export default function FormularioCaptacion() {
             setCp={setCp} setMunicipio={setMunicipio} setMConst={setMConst} setAnoCon={setAnoCon}
             setRefCat={setRefCatCuest}
           />
+          <Input label="Referencia catastral" value={refCatCuest} onChange={setRefCatCuest} placeholder="9872023VH5797S0001WX" />
           <div style={g2}>
             <Input label="Direccion (calle/via)" value={dir} onChange={setDir} required placeholder="C/ Ejemplo" />
             <Input label="Numero" value={num} onChange={setNum} placeholder="12" />
