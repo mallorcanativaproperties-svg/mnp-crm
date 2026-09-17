@@ -2208,7 +2208,8 @@ REGLAS:
             {/* Precio condicional según operación */}
             {d.op === "Compraventa" && EFl({label: "Precio de venta", req: true, field: "precioVenta", pub: true, gold: true, type: "number"})}
             {d.op === "Alquiler" && EFl({label: "Renta mensual", req: true, field: "precioAlquiler", pub: true, gold: true, type: "number"})}
-            {EFl({label: "Precio propietario", field: "precioProp", pub: false, type: "number"})}
+            {d.op === "Traspaso" && EFl({label: "Precio traspaso", req: true, field: "precioTraspaso", pub: true, gold: true, type: "number"})}
+            {EFl({label: "Neto propietario (precio que recibe)", field: "precioProp", pub: false, type: "number"})}
           </div>
           {/* Campos específicos de Alquiler */}
           {d.op === "Alquiler" && (
@@ -2216,12 +2217,6 @@ REGLAS:
               {EFl({label: "Fianza (meses)", field: "fianzaMeses", pub: true, type: "number"})}
               {EFl({label: "Duracion minima (meses)", field: "duracionMinMeses", pub: true, type: "number"})}
               {EFl({label: "Mascotas permitidas", field: "mascotas", pub: true, type: "bool"})}
-            </div>
-          )}
-          {/* Campos específicos de Traspaso */}
-          {d.op === "Traspaso" && (
-            <div style={{ ...g3, marginTop: 8 }}>
-              {EFl({label: "Precio traspaso", field: "precioTraspaso", pub: true, type: "number"})}
             </div>
           )}
           <div style={{ ...g3, marginTop: 8 }}>
