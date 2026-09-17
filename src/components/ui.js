@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 
 export function Tag({ children, color }) {
   const c = color || "#AC8A54";
@@ -17,7 +17,7 @@ export function Dot({ green }) {
 }
 
 export function Sec({ title, children, startOpen }) {
-  const [open, setOpen] = __React.useState(startOpen !== false);
+  const [open, setOpen] = useState(startOpen !== false);
   return (
     <div style={{ marginBottom: 22 }}>
       <div onClick={() => setOpen(!open)} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", marginBottom: open ? 12 : 0 }}>
@@ -29,6 +29,4 @@ export function Sec({ title, children, startOpen }) {
   );
 }
 
-// We need to use React from the parent
-let __React;
-export function initReact(React) { __React = React; }
+export function initReact() {} // mantenido por compatibilidad, ya no necesario
