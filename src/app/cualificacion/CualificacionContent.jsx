@@ -493,18 +493,18 @@ export default function CualificacionCompradores() {
           <Field label={t.tel} required>
             <div style={{
               background: "#1a2528",
-              padding: "12px 16px",
+              padding: "10px 14px",
               marginBottom: 10,
               display: "flex",
-              alignItems: "flex-start",
-              gap: 12,
+              alignItems: "center",
+              gap: 10,
+              boxSizing: "border-box",
+              width: "100%",
             }}>
-              <svg width="22" height="22" viewBox="0 0 36 36" fill="none" style={{ flexShrink: 0, marginTop: 1 }}><circle cx="18" cy="18" r="18" fill="#AC8A54"/><path d="M18 7C12.48 7 8 11.48 8 17c0 1.74.47 3.37.92 4.41L7 29l7.59-1.92A9.96 9.96 0 0018 27c5.52 0 10-4.48 10-10S23.52 7 18 7z" fill="white" fillOpacity="0.9"/><path d="M23.5 21.2c-.3.75-1.4 1.4-2.25 1.55-.6.1-1.4.15-4.15-.95C13.7 20.45 11.55 17 11.4 16.8c-.15-.2-1.2-1.6-1.2-3.05 0-1.45.75-2.15 1.05-2.5.3-.3.65-.4.85-.4.2 0 .4 0 .6 0 .2 0 .45-.05.7.5.25.55.85 2 .9 2.15.05.15.1.35 0 .55-.1.25-.15.35-.35.6-.15.2-.35.45-.5.6-.2.2-.4.4-.2.7.2.35.95 1.55 2.05 2.55 1.4 1.25 2.55 1.65 2.9 1.8.35.15.55.1.75-.1.2-.25.95-1.1 1.15-1.4.2-.35.45-.3.75-.2.3.1 1.75.8 2.05.95.3.15.5.2.6.35.1.15.1.85 0 1.3z" fill="#8B6500"/></svg>
-              <div>
-                <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 13, color: "#F8F6F1", fontWeight: 400 }}>
-                  Te enviaremos las oportunidades por WhatsApp
-                </div>
-              </div>
+              <svg width="20" height="20" viewBox="0 0 36 36" fill="none" style={{ flexShrink: 0 }}><circle cx="18" cy="18" r="18" fill="#AC8A54"/><path d="M18 7C12.48 7 8 11.48 8 17c0 1.74.47 3.37.92 4.41L7 29l7.59-1.92A9.96 9.96 0 0018 27c5.52 0 10-4.48 10-10S23.52 7 18 7z" fill="white" fillOpacity="0.9"/><path d="M23.5 21.2c-.3.75-1.4 1.4-2.25 1.55-.6.1-1.4.15-4.15-.95C13.7 20.45 11.55 17 11.4 16.8c-.15-.2-1.2-1.6-1.2-3.05 0-1.45.75-2.15 1.05-2.5.3-.3.65-.4.85-.4.2 0 .4 0 .6 0 .2 0 .45-.05.7.5.25.55.85 2 .9 2.15.05.15.1.35 0 .55-.1.25-.15.35-.35.6-.15.2-.35.45-.5.6-.2.2-.4.4-.2.7.2.35.95 1.55 2.05 2.55 1.4 1.25 2.55 1.65 2.9 1.8.35.15.55.1.75-.1.2-.25.95-1.1 1.15-1.4.2-.35.45-.3.75-.2.3.1 1.75.8 2.05.95.3.15.5.2.6.35.1.15.1.85 0 1.3z" fill="#8B6500"/></svg>
+              <span style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#F8F6F1", flex: 1, minWidth: 0, lineHeight: 1.4 }}>
+                Te enviaremos las oportunidades por WhatsApp
+              </span>
             </div>
             <div style={{ display: "flex", gap: 0 }}>
               <select value={pais} onChange={e => setPais(e.target.value)}
@@ -589,21 +589,28 @@ export default function CualificacionCompradores() {
           )}
 
           {/* Consentimiento RGPD — obligatorio antes del envío */}
-          <label style={{ display: "flex", alignItems: "flex-start", gap: 12, cursor: "pointer", marginBottom: 20, padding: "14px 16px", background: "#F8F6F1", border: "1px solid #E7E1D4", boxSizing: "border-box", width: "100%" }}>
-            <input
-              type="checkbox"
-              checked={rgpdAceptado}
-              onChange={e => setRgpdAceptado(e.target.checked)}
-              style={{ marginTop: 3, accentColor: "#AC8A54", width: 18, height: 18, minWidth: 18, flexShrink: 0, cursor: "pointer" }}
-            />
-            <span style={{ fontSize: 13, color: "#5C5852", lineHeight: 1.6, fontFamily: "Inter, sans-serif", flex: 1, minWidth: 0 }}>
-              {t.rgpd}{" "}
-              <a href="/privacy" target="_blank" rel="noopener noreferrer" style={{ color: "#AC8A54", textDecoration: "underline" }}>
-                {t.privacidad}
-              </a>
-              {" "}{t.rgpdLey}
-            </span>
-          </label>
+          <div style={{ marginBottom: 20, boxSizing: "border-box", width: "100%", overflow: "hidden" }}
+            onClick={() => setRgpdAceptado(v => !v)}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 12, cursor: "pointer", padding: "14px 16px", background: "#F8F6F1", border: "1px solid #E7E1D4", boxSizing: "border-box", width: "100%" }}>
+              <div style={{ marginTop: 2, flexShrink: 0 }}>
+                <input
+                  type="checkbox"
+                  checked={rgpdAceptado}
+                  onChange={e => { e.stopPropagation(); setRgpdAceptado(e.target.checked); }}
+                  style={{ accentColor: "#AC8A54", width: 18, height: 18, cursor: "pointer", display: "block" }}
+                />
+              </div>
+              <p style={{ fontSize: 13, color: "#5C5852", lineHeight: 1.6, fontFamily: "Inter, sans-serif", margin: 0, flex: 1, minWidth: 0, wordBreak: "break-word" }}>
+                {t.rgpd}{" "}
+                <a href="/privacy" target="_blank" rel="noopener noreferrer"
+                  onClick={e => e.stopPropagation()}
+                  style={{ color: "#AC8A54", textDecoration: "underline" }}>
+                  {t.privacidad}
+                </a>
+                {" "}{t.rgpdLey}
+              </p>
+            </div>
+          </div>
 
           <button type="submit" disabled={sending || !camposValidos} style={{
             width: "100%", padding: "17px 24px",
