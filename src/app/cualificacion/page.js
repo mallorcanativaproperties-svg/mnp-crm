@@ -156,7 +156,7 @@ export default function CualificacionCompradores() {
         zona_deseada: zonaDeseada.split(",").map(z => z.trim()).filter(Boolean),
         pais,
         zona_excluida: zonaExcluida.split(",").map(z => z.trim()).filter(Boolean), altura_max: alturaMax, requisitos,
-        estado: "nuevo", origen: "formulario_web",
+        estado: "activo", origen: "formulario_web",
         consentimiento_rgpd: new Date().toISOString(),
         created_at: new Date().toISOString(),
       });

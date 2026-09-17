@@ -2,7 +2,7 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 
-const EST_COLORS = { nuevo:"#AC8A54", contactado:"#2C6E52", cualificado:"#9C6E1B", visita:"#3D577E", negociacion:"#C4A55A", cerrado:"#2C6E52", descartado:"#9A968A" };
+const EST_COLORS = { activo:"#2C6E52", baja:"#9A968A" };
 const PROP_EST_COLORS = { captada:"#AC8A54", publicada:"#2C6E52", reservada:"#9C6E1B", vendida:"#2C6E52", retirada:"#9A968A" };
 
 function fmtP(n) {
@@ -363,7 +363,7 @@ export default function MotorCruce() {
     async function load() {
       setLoading(true);
       const [bRes, pRes, vRes] = await Promise.all([
-        supabase.from("compradores").select("*").order("created_at", { ascending: false }),
+        supabase.from("compradores").select("*").neq("estado", "baja").order("created_at", { ascending: false }),
         supabase.from("propiedades").select("*").in("estado", ["publicada","reservada"]).order("created_at", { ascending: false }),
         supabase.from("propiedades_compradores").select("*"),
       ]);
@@ -371,7 +371,7 @@ export default function MotorCruce() {
       if (bRes.data) setBUYERS(bRes.data.map(r => ({
         id: r.id, nombre: r.nombre || "", ppto: r.presupuesto || 0, fin: r.finalidad || "",
         hab: r.habitaciones || "", zd: r.zona_deseada || [], ze: r.zona_excluida || [],
-        tel: r.telefono || "", st: r.estado || "nuevo", agente: r.agente_asignado || "", pais: r.pais || "España",
+        tel: r.telefono || "", st: r.estado || "activo", agente: r.agente_asignado || "", pais: r.pais || "España",
       })));
       if (pRes.data) setPROPS(pRes.data.map(r => ({
         id: r.id, ref: r.ref || "", titulo: r.titulo || "", tipo: r.tipo || "",

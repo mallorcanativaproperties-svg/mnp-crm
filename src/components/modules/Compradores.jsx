@@ -8,7 +8,7 @@ function mapBuyerDb(row) {
     email: row.email || "", nombre: row.nombre || "", tel: row.telefono || "",
     fin: row.financiacion || "", ppto: row.presupuesto || 0, finalidad: row.finalidad || "",
     hab: row.habitaciones || "", zd: row.zona_deseada || [], ze: row.zona_excluida || [], pais: row.pais || "España",
-    alt: row.altura_max || "", req: row.requisitos || "", st: row.estado || "nuevo",
+    alt: row.altura_max || "", req: row.requisitos || "", st: row.estado || "activo",
     ag: row.agente_asignado || "", notas: row.notas || "", scoring: row.scoring || 0,
     origen: row.origen || "",
   };
@@ -42,13 +42,8 @@ const PAISES = [
 ];
 
 const ESTADOS = [
-  { key: "nuevo", label: "Nuevo", accent: "#AC8A54" },
-  { key: "contactado", label: "Contactado", accent: "#2C6E52" },
-  { key: "cualificado", label: "Cualificado", accent: "#9C6E1B" },
-  { key: "visita", label: "En visitas", accent: "#3D577E" },
-  { key: "negociacion", label: "Negociación", accent: "#C4A55A" },
-  { key: "cerrado", label: "Cerrado", accent: "#2C6E52" },
-  { key: "descartado", label: "Descartado", accent: "#9A968A" },
+  { key: "activo", label: "Activo", accent: "#2C6E52" },
+  { key: "baja", label: "Baja voluntaria", accent: "#9A968A" },
 ];
 
 const FINALIDADES = ["Primera vivienda", "Inversión", "Cambio de vivienda", "Segunda residencia"];
@@ -243,7 +238,7 @@ function Detail({ b, onClose, onSave, onDelete, onWhatsApp }) {
 
 function NewBuyer({ onClose, onAdd }) {
   const [f, setF] = useState({ nombre: "", email: "", tel: "", fin: "Sí", ppto: "", finalidad: "Primera vivienda", hab: "", zd: "", ze: "", alt: "", req: "", ag: "", pais: "España" });
-  const add = () => { onAdd({ ...f, id: Date.now(), ts: new Date().toLocaleDateString("es-ES"), ppto: +f.ppto || 0, zd: f.zd.split(",").map(z => z.trim()).filter(Boolean), ze: f.ze.split(",").map(z => z.trim()).filter(Boolean), st: "nuevo", pais: f.pais || "España" }); onClose(); };
+  const add = () => { onAdd({ ...f, id: Date.now(), ts: new Date().toLocaleDateString("es-ES"), ppto: +f.ppto || 0, zd: f.zd.split(",").map(z => z.trim()).filter(Boolean), ze: f.ze.split(",").map(z => z.trim()).filter(Boolean), st: "activo", pais: f.pais || "España" }); onClose(); };
   const iSt = { width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box", outline: "none" };
   const L = ({ children }) => <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 6, fontFamily: "Inter, sans-serif" }}>{children}</div>;
 
