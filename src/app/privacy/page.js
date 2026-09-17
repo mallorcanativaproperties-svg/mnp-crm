@@ -1,3 +1,4 @@
+import React from "react";
 export const metadata = {
   title: "Política de Privacidad — Mallorca Nativa Properties",
   description: "Política de privacidad de Mallorca Nativa Properties",

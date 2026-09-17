@@ -1,5 +1,6 @@
-"use client";
-import CRMApp from "@/components/CRMApp";
+import dynamic from "next/dynamic";
+
+const CRMApp = dynamic(() => import("@/components/CRMApp"), { ssr: false });
 
 export default function Home() {
   return <CRMApp />;
