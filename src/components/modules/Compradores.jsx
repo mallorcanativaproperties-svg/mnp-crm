@@ -1193,7 +1193,7 @@ export default function App({ currentUser }) {
 
       {showImport && isAdmin && <ImportadorExcel
         compradores={data}
-        onClose={() => setShowImport(false)}
+        onClose={() => { setShowImport(false); loadBuyers(); }}
         onImport={async (nuevos) => {
           const idsInsertados = [];
           for (const n of nuevos) {
@@ -1204,8 +1204,7 @@ export default function App({ currentUser }) {
               idsInsertados.push(ins[0].id);
             }
           }
-          setShowImport(false);
-          loadBuyers();
+          // NO cerrar aquí — el ImportadorExcel muestra el paso 4 de WhatsApp
           return idsInsertados;
         }}
       />}
