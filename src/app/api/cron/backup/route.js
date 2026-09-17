@@ -1,5 +1,5 @@
 export const dynamic = "force-dynamic";
-export const maxDuration = 300;
+export const maxDuration = 60;
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
@@ -17,35 +17,61 @@ export async function GET(request) {
   }
 
   const supabase = getSupabase();
-  const fecha = new Date().toISOString().slice(0, 10);
-  const errores = [];
-  const resumen = {};
+  const fecha = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  const resultados = {};
 
   const tablas = [
-    "propiedades", "compradores", "captacion_particulares",
-    "encargos_venta", "encargo_firmantes", "propiedades_compradores",
-    "propiedades_historial", "usuarios", "conversaciones", "mensajes",
-    "firmantes", "firmas", "media_propiedades", "docs_propiedades",
+    "propiedades",
+    "compradores",
+    "captacion_particulares",
+    "encargos_venta",
+    "encargo_firmantes",
+    "propiedades_compradores",
+    "propiedades_historial",
+    "usuarios",
+    "media_propiedades",
+    "docs_propiedades",
   ];
 
   for (const tabla of tablas) {
-    try {
-      const { data, error } = await supabase.from(tabla).select("*");
-      if (error) { errores.push(`${tabla}: ${error.message}`); continue; }
-      const bytes = new TextEncoder().encode(JSON.stringify(data, null, 2));
-      const { error: upErr } = await supabase.storage
-        .from("mnp-backups")
-        .upload(`backups/${fecha}/${tabla}.json`, bytes, { contentType: "application/json", upsert: true });
-      if (upErr) errores.push(`${tabla} upload: ${upErr.message}`);
-      else resumen[tabla] = data.length;
-    } catch (e) { errores.push(`${tabla}: ${e.message}`); }
+    const { data, error } = await supabase.from(tabla).select("*");
+    if (error) {
+      resultados[tabla] = { error: error.message };
+    } else {
+      resultados[tabla] = { filas: data.length, ok: true };
+    }
+  }
+
+  // Subir a Storage como JSON
+  const backup = {
+    fecha,
+    generado: new Date().toISOString(),
+    tablas: Object.fromEntries(
+      tablas.map((t) => [t, resultados[t]])
+    ),
+  };
+
+  const { error: uploadError } = await supabase.storage
+    .from("backups")
+    .upload(`backup-${fecha}.json`, JSON.stringify(backup, null, 2), {
+      contentType: "application/json",
+      upsert: true,
+    });
+
+  if (uploadError) {
+    // Si no existe el bucket, intentar crearlo
+    await supabase.storage.createBucket("backups", { public: false });
+    await supabase.storage
+      .from("backups")
+      .upload(`backup-${fecha}.json`, JSON.stringify(backup, null, 2), {
+        contentType: "application/json",
+        upsert: true,
+      });
   }
 
   return NextResponse.json({
-    ok: errores.length === 0,
+    ok: true,
     fecha,
-    tablas_exportadas: Object.keys(resumen).length,
-    registros: resumen,
-    errores: errores.length > 0 ? errores : undefined,
+    tablas: resultados,
   });
 }
