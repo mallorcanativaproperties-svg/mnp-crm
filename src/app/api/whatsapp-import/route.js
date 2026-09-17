@@ -4,6 +4,46 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { sendWhatsApp } from "@/lib/evolutionApi";
 
+async function guardarMensajeEnBD(sb, nombre, telefono, pais, texto) {
+  try {
+    // Buscar conversación existente por teléfono
+    const telNorm = telefono.replace(/\D/g, "");
+    const { data: existing } = await sb.from("conversaciones")
+      .select("id").eq("telefono", telNorm).maybeSingle();
+
+    let convId;
+    if (existing) {
+      convId = existing.id;
+      await sb.from("conversaciones").update({ updated_at: new Date().toISOString() }).eq("id", convId);
+    } else {
+      // Crear nueva conversación
+      const { data: newConv } = await sb.from("conversaciones").insert({
+        telefono: telNorm,
+        contacto: nombre || telefono,
+        canal: "whatsapp_masivo",
+        agente_ia: "claudia",
+        estado: "activo",
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }).select().single();
+      convId = newConv?.id;
+    }
+
+    if (convId) {
+      await sb.from("mensajes").insert({
+        conversacion_id: convId,
+        from_who: "claudia",
+        texto,
+        timestamp: new Date().toISOString(),
+        sent_by: "WHATSAPP_MASIVO",
+        created_at: new Date().toISOString(),
+      });
+    }
+  } catch (e) {
+    console.error("Error guardando mensaje en BD:", e.message);
+  }
+}
+
 export const dynamic = "force-dynamic";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://crm.mallorcanativaproperties.com";
@@ -51,6 +91,7 @@ export async function POST(request) {
     const texto = (MENSAJES[idioma] || MENSAJES.es)(formUrl);
     try {
       await sendWhatsApp(tel, texto);
+      await guardarMensajeEnBD(sb, c.nombre, tel, c.pais, texto);
       return NextResponse.json({ ok: true, enviados: 1, sin_telefono: 0, errores: 0 });
     } catch(e) {
       return NextResponse.json({ ok: true, enviados: 0, sin_telefono: 0, errores: 1, error: e.message });
@@ -79,6 +120,7 @@ export async function POST(request) {
     const texto = (MENSAJES[idioma] || MENSAJES.es)(formUrl);
     try {
       await sendWhatsApp(tel, texto);
+      await guardarMensajeEnBD(sb, c.nombre, tel, c.pais, texto);
       resultados.enviados++;
     } catch(e) {
       resultados.errores++;

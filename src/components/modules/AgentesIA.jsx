@@ -689,6 +689,49 @@ export default function AgentesIA() {
   const [editPrompt, setEditPrompt] = useState(null);
   const [loadingClaudia, setLoadingClaudia] = useState(false);
 
+  // Load real ANA conversations from Supabase
+  const loadAnaConvs = useCallback(async () => {
+    setLoadingAna(true);
+    try {
+      const { data: convs } = await supabase
+        .from("conversaciones")
+        .select("*")
+        .eq("agente_ia", "ana")
+        .order("updated_at", { ascending: false });
+
+      if (convs && convs.length > 0) {
+        const convsWithMessages = await Promise.all(
+          convs.map(async (c) => {
+            const { data: msgs } = await supabase
+              .from("mensajes")
+              .select("*")
+              .eq("conversacion_id", c.id)
+              .order("created_at", { ascending: true });
+            return {
+              ...c,
+              mensajes: (msgs || []).map((m) => ({
+                from: m.from_who || "cliente",
+                text: m.texto || "",
+                ts: m.timestamp ? new Date(m.timestamp).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) : "",
+              })),
+              alertas: c.alertas || [],
+              propiedad: c.propiedad || c.referencia || c.canal || "WhatsApp",
+            };
+          })
+        );
+        setAnaConvs(convsWithMessages);
+        if (!anaSelected && convsWithMessages.length > 0) {
+          setAnaSelected(convsWithMessages[0].id);
+        }
+      } else {
+        setAnaConvs([]);
+      }
+    } catch (err) {
+      console.error("Error loading ANA convs:", err);
+    }
+    setLoadingAna(false);
+  }, []);
+
   // Load real CLAUDIA conversations from Supabase
   const loadClaudiaConvs = useCallback(async () => {
     setLoadingClaudia(true);
@@ -732,6 +775,12 @@ export default function AgentesIA() {
   }, []);
 
   // Load on mount and auto-refresh every 10 seconds
+  useEffect(() => {
+    loadAnaConvs();
+    const intervalAna = setInterval(loadAnaConvs, 10000);
+    return () => clearInterval(intervalAna);
+  }, [loadAnaConvs]);
+
   useEffect(() => {
     loadClaudiaConvs();
     const interval = setInterval(loadClaudiaConvs, 10000);

@@ -3,8 +3,6 @@ import { Resend } from "resend";
 
 export const dynamic = "force-dynamic";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 function fmtP(n) {
   if (!n || n === 0) return "—";
   return Number(n).toLocaleString("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
@@ -25,6 +23,7 @@ function seccion(titulo, filas) {
 }
 
 export async function POST(request) {
+  const resend = new Resend(process.env.RESEND_API_KEY);
   try {
     const d = await request.json();
 
