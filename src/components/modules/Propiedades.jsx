@@ -2025,138 +2025,6 @@ REGLAS:
         <div style={sep} />
 
         {/* Datos de venta */}
-        <Sec title="Datos de venta">
-          <div style={g3}>
-            {/* Precio condicional según operación */}
-            {d.op === "Compraventa" && EFl({label: "Precio de venta", req: true, field: "precioVenta", pub: true, gold: true, type: "number"})}
-            {d.op === "Alquiler" && EFl({label: "Renta mensual", req: true, field: "precioAlquiler", pub: true, gold: true, type: "number"})}
-            {EFl({label: "Precio propietario", field: "precioProp", pub: false, type: "number"})}
-          </div>
-          {/* Campos específicos de Alquiler */}
-          {d.op === "Alquiler" && (
-            <div style={{ ...g3, marginTop: 8 }}>
-              {EFl({label: "Fianza (meses)", field: "fianzaMeses", pub: true, type: "number"})}
-              {EFl({label: "Duracion minima (meses)", field: "duracionMinMeses", pub: true, type: "number"})}
-              {EFl({label: "Mascotas permitidas", field: "mascotas", pub: true, type: "bool"})}
-            </div>
-          )}
-          {/* Campos específicos de Traspaso */}
-          {d.op === "Traspaso" && (
-            <div style={{ ...g3, marginTop: 8 }}>
-              {EFl({label: "Precio traspaso", field: "precioTraspaso", pub: true, type: "number"})}
-            </div>
-          )}
-          <div style={{ ...g3, marginTop: 8 }}>
-            {editMode ? (
-              <div style={{ marginBottom: 10 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
-                  
-                  <span style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>Honorarios</span>
-                </div>
-                <div style={{ display: "flex", gap: 4 }}>
-                  <select value={d.honorariosTipo || "porcentaje"} onChange={e => upd("honorariosTipo", e.target.value)}
-                    style={{ width: 100, background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "6px 4px", fontSize: 11, fontFamily: "Inter, sans-serif" }}>
-                    <option value="porcentaje">%</option>
-                    <option value="fijo">Importe</option>
-                  </select>
-                  <input type="number" value={d.honorarios ?? 0} onChange={e => upd("honorarios", Number(e.target.value))} onFocus={e => { if (e.target.value === "0") e.target.select(); }}
-                    style={{ flex: 1, background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "6px 8px", fontSize: 13, fontFamily: "Inter, sans-serif" }} />
-              </div>
-              {/* Hon. neto: editable si fijo, calculado si porcentaje */}
-              <div>
-                <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
-                  
-                  <span style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>Hon. neto</span>
-                </div>
-                {d.honorariosTipo === "fijo" ? (
-                  <input type="number" value={d.honNetoManual ?? 0} onChange={e => upd("honNetoManual", Number(e.target.value))} onFocus={e => { if (e.target.value === "0") e.target.select(); }} onBlur={() => autoSave(draft)}
-                    style={{ width: "100%", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "6px 8px", fontSize: 13, fontFamily: "Inter, sans-serif" }} />
-                ) : (
-                  <div style={{ padding: "6px 8px", background: "#F8F6F1", border: "1px solid #E7E1D4", fontSize: 13, color: "#16294A", fontWeight: 600 }}>
-                    {d.precioVenta > 0 ? fmtP(Math.round(d.precioVenta * ((Number(d.honorarios)||0)/100))) : "—"}
-                  </div>
-                )}
-              </div>
-              <div style={{ display: "none" }}>
-                </div>
-              </div>
-            ) : (
-              <Fl label="Honorarios" value={p.honorariosTipo === "porcentaje" ? p.honorarios + "%" : fmtP(p.honorarios) + " (fijo)"} pub={false} />
-            )}
-            {EFl({label: "IVA Hon %", field: "ivaHon", pub: false, type: "number"})}
-          </div>
-          {/* Motor de cálculo dual — desde precio venta o desde precio propietario */}
-          {(() => {
-            const pv = d.op === "Alquiler" ? (Number(d.precioAlquiler)||0) : d.op === "Traspaso" ? (Number(d.precioTraspaso)||0) : (Number(d.precioVenta)||0);
-            const pp = Number(d.precioProp)||0;
-            const ivaRate = (Number(d.ivaHon)||21) / 100;
-            const pct = (Number(d.honorarios)||0) / 100;
-            let honBase, iva, honTotal, netoVend, precioCalc;
-            if (calcDesde === "propietario" && pp > 0 && d.op !== "Alquiler") {
-              if (d.honorariosTipo === "porcentaje") {
-                precioCalc = pp / (1 - pct*(1+ivaRate));
-                honBase = precioCalc * pct;
-              } else {
-                honBase = Number(d.honNetoManual)||0;
-                precioCalc = pp + honBase + honBase*ivaRate;
-              }
-              netoVend = pp;
-            } else {
-              precioCalc = pv;
-              honBase = d.honorariosTipo === "porcentaje" ? precioCalc * pct : (Number(d.honNetoManual)||0);
-              netoVend = precioCalc - (honBase + honBase*ivaRate);
-            }
-            iva = honBase * ivaRate;
-            honTotal = honBase + iva;
-            return (
-              <div style={{ marginTop: 14, padding: "14px 16px", background: "#F4EEE0", border: "1px solid #E7D9C0" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                  <div style={{ fontSize: 10, color: "#8C6E3F", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>Cálculo automático</div>
-                  {d.op !== "Alquiler" && (
-                    <div style={{ display: "flex", gap: 4 }}>
-                      <button onClick={() => setCalcDesde("venta")} style={{ fontSize: 10, padding: "3px 10px", border: "1px solid #AC8A54", background: calcDesde === "venta" ? "#AC8A54" : "transparent", color: calcDesde === "venta" ? "#fff" : "#AC8A54", cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>Desde precio venta</button>
-                      <button onClick={() => setCalcDesde("propietario")} style={{ fontSize: 10, padding: "3px 10px", border: "1px solid #AC8A54", background: calcDesde === "propietario" ? "#AC8A54" : "transparent", color: calcDesde === "propietario" ? "#fff" : "#AC8A54", cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>Desde precio propietario</button>
-                    </div>
-                  )}
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px 16px" }}>
-                  <div>
-                    <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 2 }}>{d.op === "Alquiler" ? "Renta mensual" : "Precio de venta"}</div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: "#16294A" }}>{fmtP(Math.round(precioCalc))}</div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 2 }}>Hon. neto</div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: "#16294A" }}>{fmtP(Math.round(honBase))}</div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 2 }}>IVA ({Number(d.ivaHon)||21}%)</div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: "#16294A" }}>{fmtP(Math.round(iva))}</div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 2 }}>Hon. total (neto+IVA)</div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: "#AC8A54" }}>{fmtP(Math.round(honTotal))}</div>
-                  </div>
-                  <div style={{ gridColumn: "span 2" }}>
-                    <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 2 }}>Neto propietario</div>
-                    <div style={{ fontSize: 16, fontWeight: 700, color: "#2C6E52" }}>{fmtP(Math.round(netoVend))}</div>
-                  </div>
-                </div>
-                {/* Botón volcar resultados */}
-                <button onClick={() => {
-                  if (d.op !== "Alquiler") upd("precioVenta", Math.round(precioCalc));
-                  else upd("precioAlquiler", Math.round(precioCalc));
-                  upd("precioProp", Math.round(netoVend));
-                  upd("honNetoManual", Math.round(honBase));
-                }} style={{ marginTop: 12, padding: "7px 14px", background: "#AC8A54", border: "none", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.06em" }}>
-                  ↓ Aplicar valores a la ficha
-                </button>
-              </div>
-            );
-          })()}
-        </Sec>
-        <div style={sep} />
-
-        {/* Gastos */}
         <Sec title="Gastos asociados">
           <div style={g3}>
             {tieneIBI && EFl({label: "IBI anual", field: "ibi", pub: true, type: "number"})}
@@ -2322,6 +2190,138 @@ REGLAS:
         
 
         {/* Publicacion */}
+        <Sec title="Datos de venta">
+          <div style={g3}>
+            {/* Precio condicional según operación */}
+            {d.op === "Compraventa" && EFl({label: "Precio de venta", req: true, field: "precioVenta", pub: true, gold: true, type: "number"})}
+            {d.op === "Alquiler" && EFl({label: "Renta mensual", req: true, field: "precioAlquiler", pub: true, gold: true, type: "number"})}
+            {EFl({label: "Precio propietario", field: "precioProp", pub: false, type: "number"})}
+          </div>
+          {/* Campos específicos de Alquiler */}
+          {d.op === "Alquiler" && (
+            <div style={{ ...g3, marginTop: 8 }}>
+              {EFl({label: "Fianza (meses)", field: "fianzaMeses", pub: true, type: "number"})}
+              {EFl({label: "Duracion minima (meses)", field: "duracionMinMeses", pub: true, type: "number"})}
+              {EFl({label: "Mascotas permitidas", field: "mascotas", pub: true, type: "bool"})}
+            </div>
+          )}
+          {/* Campos específicos de Traspaso */}
+          {d.op === "Traspaso" && (
+            <div style={{ ...g3, marginTop: 8 }}>
+              {EFl({label: "Precio traspaso", field: "precioTraspaso", pub: true, type: "number"})}
+            </div>
+          )}
+          <div style={{ ...g3, marginTop: 8 }}>
+            {editMode ? (
+              <div style={{ marginBottom: 10 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
+                  
+                  <span style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>Honorarios</span>
+                </div>
+                <div style={{ display: "flex", gap: 4 }}>
+                  <select value={d.honorariosTipo || "porcentaje"} onChange={e => upd("honorariosTipo", e.target.value)}
+                    style={{ width: 100, background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "6px 4px", fontSize: 11, fontFamily: "Inter, sans-serif" }}>
+                    <option value="porcentaje">%</option>
+                    <option value="fijo">Importe</option>
+                  </select>
+                  <input type="number" value={d.honorarios ?? 0} onChange={e => upd("honorarios", Number(e.target.value))} onFocus={e => { if (e.target.value === "0") e.target.select(); }}
+                    style={{ flex: 1, background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "6px 8px", fontSize: 13, fontFamily: "Inter, sans-serif" }} />
+              </div>
+              {/* Hon. neto: editable si fijo, calculado si porcentaje */}
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
+                  
+                  <span style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>Hon. neto</span>
+                </div>
+                {d.honorariosTipo === "fijo" ? (
+                  <input type="number" value={d.honNetoManual ?? 0} onChange={e => upd("honNetoManual", Number(e.target.value))} onFocus={e => { if (e.target.value === "0") e.target.select(); }} onBlur={() => autoSave(draft)}
+                    style={{ width: "100%", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "6px 8px", fontSize: 13, fontFamily: "Inter, sans-serif" }} />
+                ) : (
+                  <div style={{ padding: "6px 8px", background: "#F8F6F1", border: "1px solid #E7E1D4", fontSize: 13, color: "#16294A", fontWeight: 600 }}>
+                    {d.precioVenta > 0 ? fmtP(Math.round(d.precioVenta * ((Number(d.honorarios)||0)/100))) : "—"}
+                  </div>
+                )}
+              </div>
+              <div style={{ display: "none" }}>
+                </div>
+              </div>
+            ) : (
+              <Fl label="Honorarios" value={p.honorariosTipo === "porcentaje" ? p.honorarios + "%" : fmtP(p.honorarios) + " (fijo)"} pub={false} />
+            )}
+            {EFl({label: "IVA Hon %", field: "ivaHon", pub: false, type: "number"})}
+          </div>
+          {/* Motor de cálculo dual — desde precio venta o desde precio propietario */}
+          {(() => {
+            const pv = d.op === "Alquiler" ? (Number(d.precioAlquiler)||0) : d.op === "Traspaso" ? (Number(d.precioTraspaso)||0) : (Number(d.precioVenta)||0);
+            const pp = Number(d.precioProp)||0;
+            const ivaRate = (Number(d.ivaHon)||21) / 100;
+            const pct = (Number(d.honorarios)||0) / 100;
+            let honBase, iva, honTotal, netoVend, precioCalc;
+            if (calcDesde === "propietario" && pp > 0 && d.op !== "Alquiler") {
+              if (d.honorariosTipo === "porcentaje") {
+                precioCalc = pp / (1 - pct*(1+ivaRate));
+                honBase = precioCalc * pct;
+              } else {
+                honBase = Number(d.honNetoManual)||0;
+                precioCalc = pp + honBase + honBase*ivaRate;
+              }
+              netoVend = pp;
+            } else {
+              precioCalc = pv;
+              honBase = d.honorariosTipo === "porcentaje" ? precioCalc * pct : (Number(d.honNetoManual)||0);
+              netoVend = precioCalc - (honBase + honBase*ivaRate);
+            }
+            iva = honBase * ivaRate;
+            honTotal = honBase + iva;
+            return (
+              <div style={{ marginTop: 14, padding: "14px 16px", background: "#F4EEE0", border: "1px solid #E7D9C0" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                  <div style={{ fontSize: 10, color: "#8C6E3F", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>Cálculo automático</div>
+                  {d.op !== "Alquiler" && (
+                    <div style={{ display: "flex", gap: 4 }}>
+                      <button onClick={() => setCalcDesde("venta")} style={{ fontSize: 10, padding: "3px 10px", border: "1px solid #AC8A54", background: calcDesde === "venta" ? "#AC8A54" : "transparent", color: calcDesde === "venta" ? "#fff" : "#AC8A54", cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>Desde precio venta</button>
+                      <button onClick={() => setCalcDesde("propietario")} style={{ fontSize: 10, padding: "3px 10px", border: "1px solid #AC8A54", background: calcDesde === "propietario" ? "#AC8A54" : "transparent", color: calcDesde === "propietario" ? "#fff" : "#AC8A54", cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>Desde precio propietario</button>
+                    </div>
+                  )}
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px 16px" }}>
+                  <div>
+                    <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 2 }}>{d.op === "Alquiler" ? "Renta mensual" : "Precio de venta"}</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "#16294A" }}>{fmtP(Math.round(precioCalc))}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 2 }}>Hon. neto</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "#16294A" }}>{fmtP(Math.round(honBase))}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 2 }}>IVA ({Number(d.ivaHon)||21}%)</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "#16294A" }}>{fmtP(Math.round(iva))}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 2 }}>Hon. total (neto+IVA)</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "#AC8A54" }}>{fmtP(Math.round(honTotal))}</div>
+                  </div>
+                  <div style={{ gridColumn: "span 2" }}>
+                    <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 2 }}>Neto propietario</div>
+                    <div style={{ fontSize: 16, fontWeight: 700, color: "#2C6E52" }}>{fmtP(Math.round(netoVend))}</div>
+                  </div>
+                </div>
+                {/* Botón volcar resultados */}
+                <button onClick={() => {
+                  if (d.op !== "Alquiler") upd("precioVenta", Math.round(precioCalc));
+                  else upd("precioAlquiler", Math.round(precioCalc));
+                  upd("precioProp", Math.round(netoVend));
+                  upd("honNetoManual", Math.round(honBase));
+                }} style={{ marginTop: 12, padding: "7px 14px", background: "#AC8A54", border: "none", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.06em" }}>
+                  ↓ Aplicar valores a la ficha
+                </button>
+              </div>
+            );
+          })()}
+        </Sec>
+        <div style={sep} />
+
+        {/* Gastos */}
         <Sec title="Publicacion">
           <Fl label="Titulo" value={p.titulo} pub={true} />
           <div style={{ marginTop: 12 }}>
