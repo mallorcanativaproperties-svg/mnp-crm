@@ -2,7 +2,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 
-const ROLES = ["director", "agente", "broker"];
+// director = Suren (acceso total), administrador = Silvia (gestión sin Agentes IA), agente = comerciales
+const ROLES = ["director", "administrador", "agente"];
 const CODIGOS = ["MNSLA", "MNSKB", "MNAQA", "MNJAC", "MNGET"];
 
 export default function Usuarios({ currentUser }) {
@@ -106,14 +107,14 @@ export default function Usuarios({ currentUser }) {
           {usuarios.map(u => (
             <div key={u.id} style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "16px 20px", display: "flex", alignItems: "center", gap: 16, opacity: u.activo ? 1 : 0.5 }}>
               {/* Avatar */}
-              <div style={{ width: 40, height: 40, borderRadius: "50%", background: u.role === "director" ? "#C8A97E22" : "#8FA88A22", border: "1px solid " + (u.role === "director" ? "#C8A97E44" : "#8FA88A44"), display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>
-                {u.role === "director" ? "◆" : u.role === "broker" ? "◈" : "◎"}
+              <div style={{ width: 40, height: 40, borderRadius: "50%", background: u.role === "director" ? "#C8A97E22" : u.role === "administrador" ? "#3D577E22" : "#8FA88A22", border: "1px solid " + (u.role === "director" ? "#C8A97E44" : u.role === "administrador" ? "#3D577E44" : "#8FA88A44"), display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>
+                {u.role === "director" ? "◆" : u.role === "administrador" ? "◈" : "◎"}
               </div>
               {/* Info */}
               <div style={{ flex: 1 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{ fontSize: 14, fontWeight: 600, color: "#22262E" }}>{u.nombre}</span>
-                  <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: u.role === "director" ? "#C8A97E22" : "#8FA88A22", color: u.role === "director" ? "#AC8A54" : "#2C6E52", textTransform: "uppercase", letterSpacing: "0.05em" }}>{u.role}</span>
+                  <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: u.role === "director" ? "#C8A97E22" : u.role === "administrador" ? "#3D577E22" : "#8FA88A22", color: u.role === "director" ? "#AC8A54" : u.role === "administrador" ? "#3D577E" : "#2C6E52", textTransform: "uppercase", letterSpacing: "0.05em" }}>{u.role}</span>
                   {!u.activo && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#D4545422", color: "#A23A3A" }}>Inactivo</span>}
                 </div>
                 <div style={{ fontSize: 11, color: "#9A968A", marginTop: 3 }}>

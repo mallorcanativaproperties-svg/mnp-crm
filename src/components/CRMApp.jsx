@@ -16,31 +16,57 @@ const FirmaElectronica = dynamic(() => import("./modules/FirmaElectronica"), { s
 const Usuarios = dynamic(() => import("./modules/Usuarios"), { ssr: false });
 const SimuladorClaudia = dynamic(() => import("./modules/SimuladorClaudia"), { ssr: false });
 
+// Roles del CRM:
+//   director      → Suren — acceso total
+//   administrador → Silvia — igual que director excepto Agentes IA/Simulador
+//   agente        → comerciales — acceso operativo, sin gestión ni IA
+const ROLES_ADMIN = ["director", "administrador"];
+
 const MODULES = [
-  // Acceso rápido — siempre primero
-  { key: "captacion", label: "Formulario Cualificación", icon: "✎", color: "#AC8A54", roles: ["director", "agente", "broker"], group: null },
+  // Acceso rápido
+  { key: "captacion", label: "Formulario Cualificación", icon: "✎", color: "#AC8A54", roles: ["director", "administrador", "agente"], group: null },
 
   // PROPIEDADES
-  { key: "propiedades", label: "Propiedades", icon: "⌂", color: "#2C6E52", roles: ["director", "agente", "broker"], group: "Propiedades" },
-  { key: "captacion_ana", label: "Prospección Particulares", icon: "◎", color: "#2C6E52", roles: ["director", "agente"], group: "Propiedades" },
-  { key: "encargos", label: "Encargos de Venta", icon: "📋", color: "#2C6E52", roles: ["director", "agente"], group: "Propiedades" },
-  { key: "firma", label: "Firma Electrónica", icon: "✍", color: "#2C6E52", roles: ["director", "agente", "broker"], group: "Propiedades" },
+  { key: "propiedades", label: "Propiedades", icon: "⌂", color: "#2C6E52", roles: ["director", "administrador", "agente"], group: "Propiedades" },
+  { key: "captacion_ana", label: "Prospección Particulares", icon: "◎", color: "#2C6E52", roles: ["director", "administrador", "agente"], group: "Propiedades" },
+  { key: "encargos", label: "Encargos de Venta", icon: "📋", color: "#2C6E52", roles: ["director", "administrador", "agente"], group: "Propiedades" },
+  { key: "firma", label: "Firma Electrónica", icon: "✍", color: "#2C6E52", roles: ["director", "administrador", "agente"], group: "Propiedades" },
 
   // COMPRADORES
-  { key: "compradores", label: "Base Compradores", icon: "◎", color: "#3D577E", roles: ["director", "agente", "broker"], group: "Compradores" },
-  { key: "cruce", label: "Motor de Cruce", icon: "⇌", color: "#3D577E", roles: ["director", "agente", "broker"], group: "Compradores" },
+  { key: "compradores", label: "Base Compradores", icon: "◎", color: "#3D577E", roles: ["director", "administrador", "agente"], group: "Compradores" },
+  { key: "cruce", label: "Motor de Cruce", icon: "⇌", color: "#3D577E", roles: ["director", "administrador", "agente"], group: "Compradores" },
 
   // REDES SOCIALES
-  { key: "redes", label: "Redes Sociales", icon: "◉", color: "#E1306C", roles: ["director", "agente"], group: "Redes Sociales" },
+  { key: "redes", label: "Redes Sociales", icon: "◉", color: "#E1306C", roles: ["director", "administrador", "agente"], group: "Redes Sociales" },
 
-  // AGENTES IA
+  // AGENTES IA — solo director (Suren)
   { key: "agentes", label: "Agentes IA", icon: "◈", color: "#9C6E1B", roles: ["director"], group: "Agentes IA" },
   { key: "simulador", label: "Simulador Claudia", icon: "◈", color: "#9C6E1B", roles: ["director"], group: "Agentes IA" },
 
-  // GESTIÓN
-  { key: "dashboard", label: "Dashboard", icon: "◆", color: "#AC8A54", roles: ["director"], group: "Gestión" },
-  { key: "usuarios", label: "Usuarios", icon: "◎", color: "#AC8A54", roles: ["director"], group: "Gestión" },
+  // GESTIÓN — director y administrador
+  { key: "dashboard", label: "Dashboard", icon: "◆", color: "#AC8A54", roles: ["director", "administrador"], group: "Gestión" },
+  { key: "usuarios", label: "Usuarios", icon: "◎", color: "#AC8A54", roles: ["director", "administrador"], group: "Gestión" },
 ];
+
+// Rate limiting: máx 4 intentos por usuario, bloqueo 15 min en localStorage
+const MAX_INTENTOS = 4;
+const BLOQUEO_MS = 15 * 60 * 1000; // 15 minutos
+
+function getRateLimit(userKey) {
+  try {
+    const raw = localStorage.getItem("mnp_rl_" + userKey);
+    if (!raw) return { intentos: 0, bloqueadoHasta: null };
+    return JSON.parse(raw);
+  } catch { return { intentos: 0, bloqueadoHasta: null }; }
+}
+
+function setRateLimit(userKey, data) {
+  try { localStorage.setItem("mnp_rl_" + userKey, JSON.stringify(data)); } catch {}
+}
+
+function resetRateLimit(userKey) {
+  try { localStorage.removeItem("mnp_rl_" + userKey); } catch {}
+}
 
 function LoginScreen({ onLogin }) {
   const [user, setUser] = useState("");
@@ -50,18 +76,41 @@ function LoginScreen({ onLogin }) {
   const handleLogin = async () => {
     setError("");
     if (!user.trim() || !pass.trim()) { setError("Introduce usuario y contraseña"); return; }
+
+    const userKey = user.toLowerCase().trim();
+    const rl = getRateLimit(userKey);
+    const ahora = Date.now();
+
+    // Comprobar bloqueo activo
+    if (rl.bloqueadoHasta && ahora < rl.bloqueadoHasta) {
+      const minutos = Math.ceil((rl.bloqueadoHasta - ahora) / 60000);
+      setError(`Demasiados intentos fallidos. Espera ${minutos} minuto${minutos !== 1 ? "s" : ""} e inténtalo de nuevo.`);
+      return;
+    }
+
     try {
       const { data, error } = await supabase
         .from("usuarios")
         .select("*")
-        .eq("user_login", user.toLowerCase().trim())
+        .eq("user_login", userKey)
         .eq("pass_hash", pass.trim())
         .neq("activo", false)
         .single();
+
       if (error || !data) {
-        const msg = error?.code === "PGRST116" ? "Usuario o contraseña incorrectos" : error ? `Error: ${error.message}` : "Usuario o contraseña incorrectos";
-        setError(msg);
+        // Sumar intento fallido
+        const intentos = (rl.bloqueadoHasta && ahora >= rl.bloqueadoHasta ? 0 : rl.intentos) + 1;
+        if (intentos >= MAX_INTENTOS) {
+          setRateLimit(userKey, { intentos, bloqueadoHasta: ahora + BLOQUEO_MS });
+          setError(`Has superado ${MAX_INTENTOS} intentos fallidos. Acceso bloqueado 15 minutos.`);
+        } else {
+          setRateLimit(userKey, { intentos, bloqueadoHasta: null });
+          const restantes = MAX_INTENTOS - intentos;
+          const msg = error?.code === "PGRST116" ? `Usuario o contraseña incorrectos. ${restantes} intento${restantes !== 1 ? "s" : ""} restante${restantes !== 1 ? "s" : ""}.` : `Error al acceder. ${restantes} intento${restantes !== 1 ? "s" : ""} restante${restantes !== 1 ? "s" : ""}.`;
+          setError(msg);
+        }
       } else {
+        resetRateLimit(userKey);
         onLogin({ user_login: data.user_login, nombre: data.nombre, role: data.role, agente_codigo: data.agente_codigo, agente_telefono: data.agente_telefono });
       }
     } catch (e) {
@@ -164,7 +213,7 @@ export default function CRMApp() {
 
   // Health check cada 30 minutos
   useEffect(() => {
-    if (!currentUser || currentUser.role !== "director") return;
+    if (!currentUser || !["director", "administrador"].includes(currentUser.role)) return;
     const check = async () => {
       try {
         const res = await fetch("/api/health");
@@ -188,6 +237,7 @@ export default function CRMApp() {
   }
 
   const isDirector = currentUser.role === "director";
+  const isAdmin = ["director", "administrador"].includes(currentUser.role);
   const availableModules = MODULES.filter((m) => m.roles.includes(currentUser.role));
 
   const renderModule = () => {
@@ -347,7 +397,7 @@ export default function CRMApp() {
           {sidebarOpen ? (
             <div>
               <div style={{ fontSize: 12, color: "#FFFFFF", fontWeight: 500 }}>{currentUser.nombre}</div>
-              <div style={{ fontSize: 9, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.08em", marginTop: 2 }}>{isDirector ? "Director" : "Agente"}</div>
+              <div style={{ fontSize: 9, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.08em", marginTop: 2 }}>{currentUser.role === "director" ? "Director" : currentUser.role === "administrador" ? "Administrador" : "Agente"}</div>
               <button onClick={handleLogout} style={{ marginTop: 8, padding: "5px 12px", borderRadius: 0, border: "1px solid #2A2926", background: "transparent", color: "#9A968A", cursor: "pointer", fontSize: 9, textTransform: "uppercase", fontFamily: "Inter, sans-serif", width: "100%" }}>
                 Cerrar sesion
               </button>

@@ -273,6 +273,8 @@ function NewBuyer({ onClose, onAdd }) {
 export default function App() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pagina, setPagina] = useState(1);
+  const PAGE_SIZE = 100;
 
   useEffect(() => { loadBuyers(); }, []);
 
@@ -281,6 +283,7 @@ export default function App() {
     const { data: rows } = await supabase.from("compradores").select("*").order("created_at", { ascending: false });
     if (rows) setData(rows.map(mapBuyerDb));
     setLoading(false);
+    setPagina(1); // volver a la primera página al recargar
   }
   const [q, setQ] = useState("");
   const [fEst, setFEst] = useState("todos");
@@ -290,6 +293,9 @@ export default function App() {
   const [sel, setSel] = useState(null);
   const [showNew, setShowNew] = useState(false);
   const [waBuyer, setWaBuyer] = useState(null);
+
+  // Resetear a página 1 cuando cambian los filtros
+  useEffect(() => { setPagina(1); }, [q, fEst, fFin, fHip, sort]);
 
   const list = useMemo(() => {
     let r = [...data];
@@ -406,12 +412,33 @@ export default function App() {
         <select value={sort} onChange={e => setSort(e.target.value)} style={selSt}><option value="fecha">Más recientes</option><option value="presupuesto">Mayor presupuesto</option><option value="score">Mayor scoring</option><option value="nombre">Nombre A-Z</option></select>
       </div>
 
-      <div style={{ fontSize: 11, color: "#9A968A", marginBottom: 12, letterSpacing: "0.06em" }}>{list.length} de {data.length} compradores</div>
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {list.map(b => <Card key={b.id} b={b} onClick={() => setSel(b)} onWhatsApp={b => setWaBuyer(b)} />)}
-        {list.length === 0 && <div style={{ textAlign: "center", padding: 60, color: "#9A968A", fontSize: 13, fontStyle: "italic" }}>No se encontraron compradores con esos filtros</div>}
-      </div>
+      {/* Paginación — 100 por página */}
+      {(() => {
+        const totalPaginas = Math.ceil(list.length / PAGE_SIZE);
+        const paginados = list.slice((pagina - 1) * PAGE_SIZE, pagina * PAGE_SIZE);
+        return <>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
+            <div style={{ fontSize: 11, color: "#9A968A", letterSpacing: "0.06em" }}>
+              {list.length === data.length ? `${data.length} compradores` : `${list.length} de ${data.length} compradores`}
+              {totalPaginas > 1 && <span style={{ marginLeft: 8, color: "#AC8A54" }}> · Página {pagina} de {totalPaginas}</span>}
+            </div>
+            {totalPaginas > 1 && <div style={{ display: "flex", gap: 6 }}>
+              <button onClick={() => setPagina(p => Math.max(1, p - 1))} disabled={pagina === 1}
+                style={{ padding: "4px 12px", border: "1px solid #2A2926", background: "transparent", color: pagina === 1 ? "#C8C5BC" : "#22262E", cursor: pagina === 1 ? "default" : "pointer", fontSize: 11, fontFamily: "Inter, sans-serif" }}>← Anterior</button>
+              {Array.from({ length: Math.min(totalPaginas, 10) }, (_, i) => i + 1).map(n => (
+                <button key={n} onClick={() => setPagina(n)}
+                  style={{ padding: "4px 10px", border: "1px solid " + (n === pagina ? "#AC8A54" : "#2A2926"), background: n === pagina ? "#AC8A54" : "transparent", color: n === pagina ? "#fff" : "#22262E", cursor: "pointer", fontSize: 11, fontFamily: "Inter, sans-serif" }}>{n}</button>
+              ))}
+              <button onClick={() => setPagina(p => Math.min(totalPaginas, p + 1))} disabled={pagina === totalPaginas}
+                style={{ padding: "4px 12px", border: "1px solid #2A2926", background: "transparent", color: pagina === totalPaginas ? "#C8C5BC" : "#22262E", cursor: pagina === totalPaginas ? "default" : "pointer", fontSize: 11, fontFamily: "Inter, sans-serif" }}>Siguiente →</button>
+            </div>}
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {paginados.map(b => <Card key={b.id} b={b} onClick={() => setSel(b)} onWhatsApp={b => setWaBuyer(b)} />)}
+            {list.length === 0 && <div style={{ textAlign: "center", padding: 60, color: "#9A968A", fontSize: 13, fontStyle: "italic" }}>No se encontraron compradores con esos filtros</div>}
+          </div>
+        </>;
+      })()}
 
       {waBuyer && <WhatsAppPanel buyer={waBuyer} onClose={() => setWaBuyer(null)} />}
       {sel && <Detail b={sel} onClose={() => setSel(null)} onWhatsApp={b => setWaBuyer(b)} onSave={async u => { 
