@@ -645,6 +645,42 @@ export default function FormularioCaptacion() {
         setSaving(false);
         return;
       }
+
+      // Enviar email de notificación a info@mallorcanativaproperties.com
+      try {
+        await fetch("/api/email-captacion", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ref, tipo, op, agente,
+            dir, num, cp, municipio, zona, orient, distPlaya, visDir,
+            precioVenta: Number(precioVenta) || 0,
+            precioProp: Number(precioProp) || 0,
+            precioTraspaso: Number(precioTraspaso) || 0,
+            precioAlquiler: Number(precioAlquiler) || 0,
+            honorariosTipo, honorarios, ivaHon,
+            ibi, basuras, comunidad, extraCom, otrosGastos,
+            mConst, mUtil, mParcela, mTerraza, mBalcon,
+            habDob, habSim, banos, aseos,
+            planta, puerta, anoCon, conserv,
+            suelos, carpExt, carpInt,
+            certE, iee, parking, nPlazas,
+            aireAcond, aireAcondTipo, calefaccion, aguaCal,
+            suministros, drenaje,
+            terraza, balcon, jardin, piscina, ascensor,
+            armarios, trastero, ventaMob, ventExt, elecRef, fontRef,
+            cualPos: cualPos.filter(Boolean),
+            cualNeg: cualNeg.filter(Boolean),
+            notasPriv,
+            propNom, propTel, propEmail,
+            refCatastral: refCatCuest,
+          }),
+        });
+      } catch (emailErr) {
+        console.error("Error enviando email captación:", emailErr);
+        // No bloquear el flujo si falla el email
+      }
+
       setSubmitted(true);
     } catch (e) {
       alert("Error inesperado: " + e.message);
