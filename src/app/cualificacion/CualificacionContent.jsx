@@ -310,24 +310,23 @@ function RadioOption({ value, current, onChange }) {
       padding: "13px 16px", marginBottom: 6,
       background: sel ? DK : WH,
       color: sel ? WH : DK,
-      borderLeft: `3px solid ${sel ? BL : "transparent"}`,
       border: `1px solid ${sel ? DK : BD}`,
       borderLeft: `3px solid ${sel ? BL : BD}`,
       cursor: "pointer",
       fontFamily: "Inter, sans-serif", fontSize: 14,
       lineHeight: 1.4, display: "flex", alignItems: "center", gap: 12,
       WebkitTapHighlightColor: "transparent", userSelect: "none",
-      transition: "all 0.15s",
+      transition: "all 0.15s", boxSizing: "border-box", width: "100%",
     }}>
       <span style={{
-        width: 16, height: 16, borderRadius: "50%", flexShrink: 0,
+        width: 18, height: 18, minWidth: 18, borderRadius: "50%", flexShrink: 0,
         border: `1.5px solid ${sel ? BL : "#9A968A"}`,
         background: sel ? BL : "transparent",
         display: "flex", alignItems: "center", justifyContent: "center",
       }}>
-        {sel && <span style={{ width: 6, height: 6, borderRadius: "50%", background: WH, display: "block" }} />}
+        {sel && <span style={{ width: 7, height: 7, borderRadius: "50%", background: WH, display: "block" }} />}
       </span>
-      {value}
+      <span style={{ flex: 1, minWidth: 0 }}>{value}</span>
     </div>
   );
 }
@@ -524,9 +523,11 @@ export default function CualificacionCompradores() {
           <SectionTitle>{idioma === "de" ? "Ihre finanzielle Situation" : idioma === "nl" ? "Uw financiële situatie" : idioma === "fr" ? "Votre situation financière" : idioma === "en" ? "Your financial situation" : "Tu situación financiera"}</SectionTitle>
 
           <Field label={t.hipoteca} required>
-            {["Sí", "No", "Estoy abierto a que me mejoren condiciones"].map(opt => (
-              <RadioOption key={opt} value={opt} current={financiacion} onChange={setFinanciacion} />
-            ))}
+            <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+              {(t.hipotecaOpts || ["Sí", "No", "Estoy abierto a que me mejoren condiciones"]).map(opt => (
+                <RadioOption key={opt} value={opt} current={financiacion} onChange={setFinanciacion} />
+              ))}
+            </div>
           </Field>
 
           <Field label={t.presupuesto} required hint={idioma === "de" ? "Sie können 300, 300k oder 300.000 schreiben" : idioma === "nl" ? "U kunt 300, 300k of 300.000 schrijven" : idioma === "fr" ? "Vous pouvez écrire 300, 300k ou 300 000" : idioma === "en" ? "You can write 300, 300k or 300,000" : "Puedes escribir 300, 300k o 300.000"}>
@@ -550,9 +551,11 @@ export default function CualificacionCompradores() {
           <SectionTitle>{idioma === "de" ? "Was Sie suchen" : idioma === "nl" ? "Wat u zoekt" : idioma === "fr" ? "Ce que vous cherchez" : idioma === "en" ? "What you're looking for" : "Lo que estás buscando"}</SectionTitle>
 
           <Field label={t.finalidad} required>
-            {(t.finalidadOpts || ["Primera vivienda", "Cambio de vivienda", "Inversión", "Segunda residencia"]).map(opt => (
-              <RadioOption key={opt} value={opt} current={finalidad} onChange={setFinalidad} />
-            ))}
+            <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+              {(t.finalidadOpts || ["Primera vivienda", "Cambio de vivienda", "Inversión", "Segunda residencia"]).map(opt => (
+                <RadioOption key={opt} value={opt} current={finalidad} onChange={setFinalidad} />
+              ))}
+            </div>
           </Field>
 
           <Field label="Número de habitaciones" required>
@@ -586,14 +589,14 @@ export default function CualificacionCompradores() {
           )}
 
           {/* Consentimiento RGPD — obligatorio antes del envío */}
-          <label style={{ display: "flex", alignItems: "flex-start", gap: 12, cursor: "pointer", marginBottom: 20, padding: "14px 16px", background: "#F8F6F1", border: "1px solid #E7E1D4" }}>
+          <label style={{ display: "flex", alignItems: "flex-start", gap: 12, cursor: "pointer", marginBottom: 20, padding: "14px 16px", background: "#F8F6F1", border: "1px solid #E7E1D4", boxSizing: "border-box", width: "100%" }}>
             <input
               type="checkbox"
               checked={rgpdAceptado}
               onChange={e => setRgpdAceptado(e.target.checked)}
-              style={{ marginTop: 2, accentColor: "#AC8A54", width: 16, height: 16, flexShrink: 0, cursor: "pointer" }}
+              style={{ marginTop: 3, accentColor: "#AC8A54", width: 18, height: 18, minWidth: 18, flexShrink: 0, cursor: "pointer" }}
             />
-            <span style={{ fontSize: 12, color: "#5C5852", lineHeight: 1.7, fontFamily: "Inter, sans-serif" }}>
+            <span style={{ fontSize: 13, color: "#5C5852", lineHeight: 1.6, fontFamily: "Inter, sans-serif", flex: 1, minWidth: 0 }}>
               {t.rgpd}{" "}
               <a href="/privacy" target="_blank" rel="noopener noreferrer" style={{ color: "#AC8A54", textDecoration: "underline" }}>
                 {t.privacidad}
