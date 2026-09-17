@@ -24,6 +24,7 @@ const T = {
     enviar: "Enviar solicitud",
     exito: "¡Gracias! Hemos recibido tu solicitud.",
     exitoSub: "Nuestro equipo se pondrá en contacto contigo en breve.",
+    instagram: "Puedes seguirnos en Instagram",
     error: "Por favor, completa los campos obligatorios.",
     errorRgpd: "Debes aceptar la política de privacidad.",
     obligatorio: "Campos obligatorios",
@@ -48,6 +49,7 @@ const T = {
     enviar: "Send request",
     exito: "Thank you! We have received your request.",
     exitoSub: "Our team will contact you shortly.",
+    instagram: "You can follow us on Instagram",
     error: "Please complete all required fields.",
     errorRgpd: "You must accept the privacy policy.",
     obligatorio: "Required fields",
@@ -72,6 +74,7 @@ const T = {
     enviar: "Anfrage senden",
     exito: "Vielen Dank! Wir haben Ihre Anfrage erhalten.",
     exitoSub: "Unser Team wird sich in Kürze bei Ihnen melden.",
+    instagram: "Folgen Sie uns auf Instagram",
     error: "Bitte füllen Sie alle Pflichtfelder aus.",
     errorRgpd: "Sie müssen die Datenschutzerklärung akzeptieren.",
     obligatorio: "Pflichtfelder",
@@ -96,6 +99,7 @@ const T = {
     enviar: "Aanvraag versturen",
     exito: "Dank u! We hebben uw aanvraag ontvangen.",
     exitoSub: "Ons team neemt binnenkort contact met u op.",
+    instagram: "Volg ons op Instagram",
     error: "Vul alle verplichte velden in.",
     errorRgpd: "U moet de privacyverklaring accepteren.",
     obligatorio: "Verplichte velden",
@@ -120,6 +124,7 @@ const T = {
     enviar: "Envoyer la demande",
     exito: "Merci ! Nous avons bien reçu votre demande.",
     exitoSub: "Notre équipe vous contactera sous peu.",
+    instagram: "Suivez-nous sur Instagram",
     error: "Veuillez compléter tous les champs obligatoires.",
     errorRgpd: "Vous devez accepter la politique de confidentialité.",
     obligatorio: "Champs obligatoires",
@@ -403,6 +408,20 @@ export default function CualificacionCompradores() {
         <p style={{ fontSize: 14, color: "#6B7280", lineHeight: 1.8, marginBottom: 36, fontFamily: "Inter, sans-serif" }}>
           {t.exitoSub}
         </p>
+        <div style={{ height: 1, background: BD, marginBottom: 28 }} />
+        {/* Instagram */}
+        <a href="https://www.instagram.com/mallorcanativaproperties/" target="_blank" rel="noopener noreferrer"
+          style={{ display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 24, textDecoration: "none",
+            padding: "10px 20px", border: "1px solid #E7E1D4", background: "#FFFFFF" }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="20" height="20" rx="5" stroke="#AC8A54" strokeWidth="1.5"/>
+            <circle cx="12" cy="12" r="4" stroke="#AC8A54" strokeWidth="1.5"/>
+            <circle cx="17.5" cy="6.5" r="1" fill="#AC8A54"/>
+          </svg>
+          <span style={{ fontSize: 13, color: "#AC8A54", fontFamily: "Inter, sans-serif", fontWeight: 500 }}>
+            {t.instagram || "Síguenos en Instagram"}
+          </span>
+        </a>
         <div style={{ height: 1, background: BD, marginBottom: 28 }} />
         <div style={{ fontSize: 11, color: BL, letterSpacing: "0.18em", marginBottom: 6 }}>MALLORCA NATIVA PROPERTIES</div>
         <a href="https://mallorcanativaproperties.com" style={{ fontSize: 12, color: "#9A968A", textDecoration: "none", fontFamily: "Inter, sans-serif" }}>
