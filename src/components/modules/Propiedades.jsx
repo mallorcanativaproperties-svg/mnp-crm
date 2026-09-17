@@ -3034,12 +3034,43 @@ export default function CRMPropiedades({ currentUser }) {
     }
     try {
       if (prop.id && typeof prop.id === "string" && prop.id.length > 10) {
+        // Registrar historial de cambios de precio y estado
+        try {
+          const { data: anterior } = await supabase.from("propiedades")
+            .select("estado, precio_venta, precio_alquiler, precio_traspaso")
+            .eq("id", prop.id).single();
+          if (anterior) {
+            const user = typeof window !== "undefined" ? localStorage.getItem("mnp_user_login") || "" : "";
+            const cambios = [];
+            if (anterior.estado !== dbData.estado)
+              cambios.push({ propiedad_id: prop.id, campo: "estado", valor_anterior: anterior.estado, valor_nuevo: dbData.estado, usuario: user });
+            if (Number(anterior.precio_venta) !== Number(dbData.precio_venta))
+              cambios.push({ propiedad_id: prop.id, campo: "precio_venta", valor_anterior: String(anterior.precio_venta), valor_nuevo: String(dbData.precio_venta), usuario: user });
+            if (Number(anterior.precio_alquiler) !== Number(dbData.precio_alquiler))
+              cambios.push({ propiedad_id: prop.id, campo: "precio_alquiler", valor_anterior: String(anterior.precio_alquiler), valor_nuevo: String(dbData.precio_alquiler), usuario: user });
+            if (Number(anterior.precio_traspaso) !== Number(dbData.precio_traspaso))
+              cambios.push({ propiedad_id: prop.id, campo: "precio_traspaso", valor_anterior: String(anterior.precio_traspaso), valor_nuevo: String(dbData.precio_traspaso), usuario: user });
+            if (cambios.length > 0)
+              await supabase.from("propiedades_historial").insert(cambios);
+          }
+        } catch(e) { /* historial no crítico — no bloquea el guardado */ }
         const { error } = await supabase.from("propiedades").update(dbData).eq("id", prop.id);
         if (error) {
           alert("Error al guardar:\n\n" + error.message + (error.details ? "\n" + error.details : ""));
           return;
         }
       } else {
+        // Detección de duplicados antes de crear
+        if (dbData.dir && dbData.municipio) {
+          const { data: dups } = await supabase.from("propiedades")
+            .select("id, ref, dir, municipio")
+            .eq("dir", dbData.dir).eq("municipio", dbData.municipio).limit(3);
+          if (dups && dups.length > 0) {
+            const lista = dups.map(d => `${d.ref} — ${d.dir}, ${d.municipio}`).join("\n");
+            const ok = confirm(`⚠️ Ya existe una propiedad con la misma dirección:\n\n${lista}\n\n¿Continuar igualmente?`);
+            if (!ok) return;
+          }
+        }
         const { data: inserted, error } = await supabase.from("propiedades").insert(dbData).select();
         if (error) {
           alert("Error al crear propiedad:\n\n" + error.message + (error.details ? "\n" + error.details : ""));

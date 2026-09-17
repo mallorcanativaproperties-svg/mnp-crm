@@ -110,12 +110,35 @@ function LoadingModule() {
 export default function CRMApp() {
   const [currentUser, setCurrentUser] = useState(null);
 
+  const inactivityTimer = React.useRef(null);
+  const SESSION_TIMEOUT = 60 * 60 * 1000; // 60 minutos
+
+  function resetInactivityTimer() {
+    if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
+    inactivityTimer.current = setTimeout(() => {
+      handleLogout();
+      alert("Sesión cerrada por inactividad (60 minutos). Por favor, vuelve a iniciar sesión.");
+    }, SESSION_TIMEOUT);
+  }
+
+  React.useEffect(() => {
+    if (!currentUser) return;
+    const events = ["mousemove", "keydown", "click", "scroll", "touchstart"];
+    events.forEach(e => window.addEventListener(e, resetInactivityTimer));
+    resetInactivityTimer();
+    return () => {
+      events.forEach(e => window.removeEventListener(e, resetInactivityTimer));
+      if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
+    };
+  }, [currentUser]);
+
   function handleLogin(userData) {
     localStorage.setItem("mnp_user_login", userData.user_login || "");
     setCurrentUser(userData);
   }
 
   function handleLogout() {
+    if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
     localStorage.removeItem("mnp_user_login");
     setCurrentUser(null);
   }
