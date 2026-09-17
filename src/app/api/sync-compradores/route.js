@@ -8,6 +8,21 @@ function getSupabase() {
   return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 }
 
+async function checkAuth(request) {
+  const userLogin = request.headers.get("x-user-login");
+  if (!userLogin) return false;
+  const supabase = getSupabase();
+  const { data } = await supabase
+    .from("usuarios")
+    .select("id")
+    .eq("user_login", userLogin)
+    .neq("activo", false)
+    .single();
+  return !!data;
+}
+
+
+
 // Parse full CSV text properly handling quoted fields with commas and newlines
 function parseFullCsv(text) {
   const rows = [];
@@ -92,7 +107,8 @@ function parsePresupuesto(raw) {
   return 0;
 }
 
-export async function POST() {
+export async function POST(request) {
+  if (!await checkAuth(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const supabase = getSupabase();
 
@@ -207,6 +223,7 @@ export async function POST() {
   }
 }
 
-export async function GET() {
+export async function GET(request) {
+  if (!await checkAuth(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   return NextResponse.json({ status: "ready" });
 }

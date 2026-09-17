@@ -323,7 +323,8 @@ export default function App() {
   async function syncFromSheet() {
     setSyncing(true); setSyncResult(null);
     try {
-      const res = await fetch("/api/sync-compradores", { method: "POST" });
+      const userLogin = localStorage.getItem("mnp_user_login") || "";
+      const res = await fetch("/api/sync-compradores", { method: "POST", headers: { "x-user-login": userLogin } });
       const data = await res.json();
       setSyncResult(data);
       if (data.synced > 0) loadBuyers();
