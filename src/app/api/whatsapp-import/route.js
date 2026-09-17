@@ -66,8 +66,9 @@ export async function POST(request) {
       await sendWhatsApp(tel, texto);
       resultados.enviados++;
       resultados.detalle.push({ nombre: c.nombre, tel, idioma, estado: "enviado" });
-      // Pausa entre envíos para no saturar
-      await new Promise(r => setTimeout(r, 800));
+      // Pausa aleatoria entre 4 y 7 segundos para evitar detección como spam
+      const pausa = 4000 + Math.random() * 3000;
+      await new Promise(r => setTimeout(r, pausa));
     } catch (e) {
       resultados.errores++;
       resultados.detalle.push({ nombre: c.nombre, tel, estado: "error", error: e.message });
