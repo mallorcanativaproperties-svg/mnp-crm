@@ -247,8 +247,8 @@ export default function CRMApp() {
       case "simulador": return <SimuladorClaudia />;
       case "propiedades": return <Propiedades currentUser={currentUser} />;
       case "captacion": return <FormularioCaptacion />;
-      case "compradores": return <Compradores />;
-      case "cruce": return <MotorCruce />;
+      case "compradores": return <Compradores currentUser={currentUser} />;
+      case "cruce": return <MotorCruce currentUser={currentUser} />;
       case "captacion_ana": return <Captacion />;
       case "redes": return <RedesSociales />;
       case "agentes": return <AgentesIA />;

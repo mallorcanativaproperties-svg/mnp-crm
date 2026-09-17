@@ -25,6 +25,7 @@ function mapDbToJs(row) {
     desc: row.desc_texto || "", notasPriv: row.notas_priv || "",
     propNombre: row.prop_nombre || "", propTel: row.prop_tel || "", propEmail: row.prop_email || "",
     agente: row.agente || "", estado: row.estado || "captada",
+    idealistaEstado: row.idealista_estado || "pendiente", idealistaId: row.idealista_id || null, idealistaCheck: row.idealista_ultimo_check || null,
     destinos: row.destinos || [], fotos: Number(row.fotos) || 0, videos: Number(row.videos) || 0, tour360: row.tour360 || "", planos: Number(row.planos) || 0,
     fechaCap: row.fecha_cap || "", visitas: Number(row.visitas) || 0,
     cualPos: row.cual_pos || [], cualNeg: row.cual_neg || [],
@@ -1311,6 +1312,16 @@ function PropCard({ p, onClick }) {
         <span>{p.demandas || 0} demandas</span>
         <span style={{ opacity: 0.3 }}>|</span>
         <span>{p.agente}</span>
+        {/* Badge estado Idealista */}
+        {p.destinos?.includes("Idealista") && (
+          <span style={{ fontSize: 9, padding: "2px 7px", letterSpacing: "0.06em",
+            background: p.idealista_estado === "publicada" ? "#2C6E5218" : p.idealista_estado === "no_publicada" ? "#A23A3A18" : "#AC8A5418",
+            color: p.idealista_estado === "publicada" ? "#2C6E52" : p.idealista_estado === "no_publicada" ? "#A23A3A" : "#AC8A54",
+            border: "1px solid " + (p.idealista_estado === "publicada" ? "#2C6E5244" : p.idealista_estado === "no_publicada" ? "#A23A3A44" : "#AC8A5444")
+          }}>
+            {p.idealista_estado === "publicada" ? "✓ Idealista" : p.idealista_estado === "no_publicada" ? "✗ No en Idealista" : "⟳ Idealista"}
+          </span>
+        )}
         {p.ref && (() => {
           const webUrl = `https://mallorcanativaproperties.com/propiedades/${p.ref.toLowerCase()}/`;
           return (
@@ -1345,10 +1356,24 @@ function PropCard({ p, onClick }) {
 }
 
 function PropDetail({ p, currentUser, onClose, onUpdate, onDelete, onDuplicate }) {
-  // Permisos: editable solo por director o el agente que captó la propiedad
-  const isDirector = !currentUser || currentUser?.role?.toLowerCase() === "director";
+  // ─── SISTEMA DE PERMISOS ─────────────────────────────────────
+  const rol = currentUser?.role?.toLowerCase() || "agente";
+  const isAdmin  = rol === "director" || rol === "administrador"; // director o administrador
+  const isAgente = rol === "agente";
   const esAgentePropietario = currentUser?.nombre === p.agente || currentUser?.agente_codigo === p.agente;
-  const puedeEditar = isDirector || esAgentePropietario;
+
+  // Editar: admin siempre, agente solo si es su propiedad
+  const puedeEditar   = isAdmin || esAgentePropietario;
+  // Eliminar: solo admin
+  const puedeEliminar = isAdmin;
+  // Precios y honorarios: admin siempre, agente solo si es su propiedad
+  const puedeVerPrecios = isAdmin || esAgentePropietario;
+  // Editar precio: admin siempre, agente solo si es su propiedad
+  const puedeEditarPrecio = isAdmin || esAgentePropietario;
+  // Publicar en Idealista: admin siempre, agente solo si es su propiedad
+  const puedePublicar = isAdmin || esAgentePropietario;
+  // ─────────────────────────────────────────────────────────────
+  const isDirector = isAdmin; // alias para compatibilidad con código existente
   const est = ESTADOS.find((e) => e.key === p.estado) || ESTADOS[0];
   const hon = calcHon(p);
   const [aiDesc, setAiDesc] = useState("");
@@ -1799,7 +1824,7 @@ REGLAS:
             {puedeEditar && <button onClick={() => { if (onDuplicate) onDuplicate(p); }} style={{ padding: "8px 20px", borderRadius: 0, border: "1px solid #AC8A5444", background: "transparent", color: "#AC8A54", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
               Duplicar
             </button>}
-            {isDirector && <button onClick={() => { if (onDelete) onDelete(p); }} style={{ padding: "8px 20px", borderRadius: 0, border: "1px solid #D4545433", background: "transparent", color: "#A23A3A", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
+            {puedeEliminar && <button onClick={() => { if (onDelete) onDelete(p); }} style={{ padding: "8px 20px", borderRadius: 0, border: "1px solid #D4545433", background: "transparent", color: "#A23A3A", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
               Eliminar
             </button>}
             {puedeEditar && <button onClick={() => {
@@ -1919,6 +1944,16 @@ REGLAS:
               </div>
               <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 400, color: "#22262E", margin: 0, lineHeight: 1.2 }}>{p.titulo}</h2>
               <div style={{ fontSize: 12, color: "#9A968A", marginTop: 8 }}>Captada {p.fechaCap} · Agente: <strong style={{ color: "#22262E" }}>{p.agente}</strong></div>
+              {p.destinos?.includes("Idealista") && <div style={{ marginTop: 6 }}>
+                <span style={{ fontSize: 10, padding: "3px 10px", letterSpacing: "0.06em",
+                  background: p.idealistaEstado === "publicada" ? "#2C6E5218" : p.idealistaEstado === "no_publicada" ? "#A23A3A18" : "#AC8A5418",
+                  color: p.idealistaEstado === "publicada" ? "#2C6E52" : p.idealistaEstado === "no_publicada" ? "#A23A3A" : "#AC8A54",
+                  border: "1px solid " + (p.idealistaEstado === "publicada" ? "#2C6E5244" : p.idealistaEstado === "no_publicada" ? "#A23A3A44" : "#AC8A5444")
+                }}>
+                  {p.idealistaEstado === "publicada" ? "✓ Confirmado en Idealista" : p.idealistaEstado === "no_publicada" ? "⚠ No encontrado en Idealista — revisar" : "⟳ Pendiente verificación"}
+                  {p.idealistaCheck && <span style={{ color: "#9A968A", marginLeft: 6 }}>· {new Date(p.idealistaCheck).toLocaleDateString("es-ES")}</span>}
+                </span>
+              </div>}
             </>
           )}
         </div>
@@ -2202,8 +2237,8 @@ REGLAS:
 
         
 
-        {/* Publicacion */}
-        <Sec title="Datos de venta">
+        {/* Publicacion — solo visible si puede ver precios */}
+        {puedeVerPrecios && <Sec title="Datos de venta">
           <div style={g2}>
             {d.op === "Compraventa" && EFl({label: "Precio de venta",    req: true, field: "precioVenta",    pub: true,  gold: true, type: "number"})}
             {d.op === "Alquiler"   && EFl({label: "Renta mensual",       req: true, field: "precioAlquiler", pub: true,  gold: true, type: "number"})}
@@ -2310,7 +2345,7 @@ REGLAS:
               </div>
             );
           })()}
-        </Sec>        <div style={sep} />
+        </Sec>}  <div style={sep} />
 
         {/* Gastos */}
         <Sec title="Publicacion">
@@ -2536,7 +2571,7 @@ REGLAS:
           </button>
           <div style={{ display: "flex", gap: 8 }}>
             {puedeEditar && <button onClick={() => { if (onDuplicate) onDuplicate(p); }} style={{ padding: "12px 20px", borderRadius: 0, border: "1px solid #AC8A5444", background: "transparent", color: "#AC8A54", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>Duplicar</button>}
-            {isDirector && <button onClick={() => { if (onDelete) onDelete(p); }} style={{ padding: "12px 20px", borderRadius: 0, border: "1px solid #D4545433", background: "transparent", color: "#A23A3A", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>Eliminar</button>}
+            {puedeEliminar && <button onClick={() => { if (onDelete) onDelete(p); }} style={{ padding: "12px 20px", borderRadius: 0, border: "1px solid #D4545433", background: "transparent", color: "#A23A3A", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>Eliminar</button>}
             {puedeEditar && <button onClick={() => {
               const toSave = { ...draft,
                 suministros: (draft.suministrosText || "").split(",").map(s => s.trim()).filter(Boolean),

@@ -147,13 +147,111 @@ function Card({ b, onClick, onWhatsApp }) {
   </div>;
 }
 
-function Detail({ b, onClose, onSave, onDelete, onWhatsApp }) {
+
+// ═══ MODAL DUPLICADO ════════════════════════════════════════════
+function ModalDuplicado({ nuevo, existente, motivo, isAdmin, onAbrir, onFusionar, onIgnorar, onClose }) {
+  const [fusionData, setFusionData] = useState(null); // null = no iniciado, objeto = datos fusionados
+  const [modofusion, setModoFusion] = useState(false);
+  const campos = ["nombre","email","tel","ppto","zd","req","fin","agente_asignado"];
+  const labels = { nombre: "Nombre", email: "Email", tel: "Teléfono", ppto: "Presupuesto", zd: "Zonas", req: "Requisitos", fin: "Hipoteca", agente_asignado: "Agente" };
+
+  return <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", backdropFilter: "blur(8px)", display: "flex", justifyContent: "center", alignItems: "center", padding: 24, zIndex: 2000 }}>
+    <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", width: "100%", maxWidth: 680, maxHeight: "90vh", overflowY: "auto", padding: "36px 40px", position: "relative" }}>
+      <button onClick={onClose} style={{ position: "absolute", top: 16, right: 20, background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#9A968A" }}>✕</button>
+      <div style={{ fontSize: 10, color: "#E1306C", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 8, fontWeight: 700 }}>⚠ Posible duplicado detectado</div>
+      <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, margin: "0 0 6px" }}>Este comprador ya podría existir</h3>
+      <p style={{ fontSize: 12, color: "#9A968A", margin: "0 0 24px" }}>Coincidencia por {motivo}. El nuevo comprador se ha guardado. Elige qué hacer:</p>
+
+      {/* Comparativa */}
+      {!modofusion ? (
+        <div style={{ display: "grid", gridTemplateColumns: "80px 1fr 1fr", gap: "4px 12px", marginBottom: 24 }}>
+          <div style={{ fontSize: 9, color: "#9A968A", textTransform: "uppercase", paddingBottom: 8, borderBottom: "1px solid #E7E1D4" }}></div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "#3D577E", paddingBottom: 8, borderBottom: "1px solid #E7E1D4" }}>NUEVO (recién creado)</div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "#2C6E52", paddingBottom: 8, borderBottom: "1px solid #E7E1D4" }}>EXISTENTE (en BD)</div>
+          {campos.map(c => {
+            const vn = Array.isArray(nuevo[c]) ? nuevo[c].join(", ") : String(nuevo[c] ?? "—");
+            const ve = Array.isArray(existente[c]) ? existente[c].join(", ") : String(existente[c] ?? "—");
+            const diff = vn !== ve;
+            return [
+              <div key={c+"l"} style={{ fontSize: 10, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.08em", padding: "6px 0", borderBottom: "1px solid #F0EDE7" }}>{labels[c]||c}</div>,
+              <div key={c+"n"} style={{ fontSize: 12, padding: "6px 0", borderBottom: "1px solid #F0EDE7", color: diff ? "#3D577E" : "#22262E", fontWeight: diff ? 600 : 400 }}>{vn}</div>,
+              <div key={c+"e"} style={{ fontSize: 12, padding: "6px 0", borderBottom: "1px solid #F0EDE7", color: diff ? "#2C6E52" : "#22262E", fontWeight: diff ? 600 : 400 }}>{ve}</div>
+            ];
+          })}
+        </div>
+      ) : (
+        /* Modo fusión: elegir campo a campo */
+        <div style={{ marginBottom: 24 }}>
+          <p style={{ fontSize: 12, color: "#9A968A", marginBottom: 16 }}>Haz clic en el valor que quieres conservar en el registro final:</p>
+          {campos.map(c => {
+            const vn = Array.isArray(nuevo[c]) ? nuevo[c].join(", ") : String(nuevo[c] ?? "");
+            const ve = Array.isArray(existente[c]) ? existente[c].join(", ") : String(existente[c] ?? "");
+            const seleccionado = fusionData ? (Array.isArray(fusionData[c]) ? fusionData[c].join(", ") : String(fusionData[c] ?? "")) : null;
+            return <div key={c} style={{ marginBottom: 12 }}>
+              <div style={{ fontSize: 10, color: "#9A968A", textTransform: "uppercase", marginBottom: 4 }}>{labels[c]||c}</div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button onClick={() => setFusionData(f => ({...(f || existente), [c]: nuevo[c]}))}
+                  style={{ flex: 1, padding: "8px 12px", border: "2px solid " + (seleccionado === vn ? "#3D577E" : "#E7E1D4"), background: seleccionado === vn ? "#3D577E11" : "transparent", cursor: "pointer", fontSize: 12, textAlign: "left" }}>
+                  {vn || "—"} <span style={{ fontSize: 10, color: "#9A968A" }}>(nuevo)</span>
+                </button>
+                <button onClick={() => setFusionData(f => ({...(f || nuevo), [c]: existente[c]}))}
+                  style={{ flex: 1, padding: "8px 12px", border: "2px solid " + (seleccionado === ve ? "#2C6E52" : "#E7E1D4"), background: seleccionado === ve ? "#2C6E5211" : "transparent", cursor: "pointer", fontSize: 12, textAlign: "left" }}>
+                  {ve || "—"} <span style={{ fontSize: 10, color: "#9A968A" }}>(existente)</span>
+                </button>
+              </div>
+            </div>;
+          })}
+        </div>
+      )}
+
+      {/* Acciones */}
+      <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+        <button onClick={onAbrir}
+          style={{ padding: "10px 20px", border: "1px solid #3D577E", background: "transparent", color: "#3D577E", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", textTransform: "uppercase" }}>
+          Abrir ficha existente
+        </button>
+        {isAdmin && !modofusion && (
+          <button onClick={() => { setModoFusion(true); setFusionData({...existente}); }}
+            style={{ padding: "10px 20px", border: "1px solid #AC8A54", background: "transparent", color: "#AC8A54", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", textTransform: "uppercase" }}>
+            Fusionar registros
+          </button>
+        )}
+        {isAdmin && modofusion && (
+          <button onClick={() => fusionData && onFusionar({...fusionData, id: existente.id})}
+            style={{ padding: "10px 20px", border: "1px solid #2C6E52", background: "#2C6E52", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", textTransform: "uppercase" }}>
+            Confirmar fusión
+          </button>
+        )}
+        <button onClick={onIgnorar}
+          style={{ padding: "10px 20px", border: "1px solid #9A968A", background: "transparent", color: "#9A968A", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", textTransform: "uppercase" }}>
+          Mantener ambos
+        </button>
+      </div>
+    </div>
+  </div>;
+}
+// ════════════════════════════════════════════════════════════════
+
+function Detail({ b, onClose, onSave, onDelete, onWhatsApp, currentUser, puedeEliminar, puedeVerHistorial }) {
   const [ed, setEd] = useState(false);
   const [f, setF] = useState({ ...b });
   const [autoSaveStatus, setAutoSaveStatus] = useState(null);
+  const [tab, setTab] = useState("ficha"); // "ficha" | "historial"
+  const [historial, setHistorial] = useState([]);
+  const [loadingHistorial, setLoadingHistorial] = useState(false);
+
+  async function cargarHistorial() {
+    if (!puedeVerHistorial) return;
+    setLoadingHistorial(true);
+    const { data } = await supabase.from("compradores_historial")
+      .select("*").eq("comprador_id", b.id).order("created_at", { ascending: false }).limit(50);
+    if (data) setHistorial(data);
+    setLoadingHistorial(false);
+  }
   const s = score(b);
   const est = ESTADOS.find(e => e.key === b.st) || ESTADOS[0];
-  const save = () => { onSave(f); setEd(false); };
+  const [anterior, setAnterior] = useState({ ...b }); // snapshot antes de editar
+  const save = () => { onSave(f, anterior); setAnterior({ ...f }); setEd(false); };
 
   async function autoSave(current) {
     if (!current.id || !ed) return;
@@ -175,9 +273,44 @@ function Detail({ b, onClose, onSave, onDelete, onWhatsApp }) {
   return <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", display: "flex", justifyContent: "center", alignItems: "flex-start", padding: "40px 16px", zIndex: 1000, overflowY: "auto" }}>
     <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, width: "100%", maxWidth: 620, padding: "36px 40px", position: "relative" }}>
       <button onClick={onClose} style={{ position: "absolute", top: 20, right: 24, background: "none", border: "none", color: "#9A968A", fontSize: 20, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>✕</button>
-      <button onClick={() => { if (onDelete) onDelete(b); }} style={{ position: "absolute", top: 22, right: 60, background: "none", border: "1px solid #D4545433", borderRadius: 0, color: "#A23A3A", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "Inter, sans-serif" }}>Eliminar</button>
+      {puedeEliminar && <button onClick={() => { if (onDelete) onDelete(b); }} style={{ position: "absolute", top: 22, right: 60, background: "none", border: "1px solid #D4545433", borderRadius: 0, color: "#A23A3A", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "Inter, sans-serif" }}>Eliminar</button>}
       <button onClick={() => onWhatsApp && onWhatsApp(b)} style={{ position: "absolute", top: 18, right: 110, width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", background: "none", border: "none", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.2))", transition: "transform 0.2s", cursor: "pointer", padding: 0 }} title="Abrir chat WhatsApp" onMouseEnter={e => e.currentTarget.style.transform = "scale(1.12)"} onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}><svg width="34" height="34" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="goldGrad2" cx="40%" cy="35%" r="60%"><stop offset="0%" stopColor="#FFE57A"/><stop offset="40%" stopColor="#D4A017"/><stop offset="100%" stopColor="#8B6500"/></radialGradient><radialGradient id="goldRing2" cx="40%" cy="35%" r="60%"><stop offset="0%" stopColor="#FFD700"/><stop offset="60%" stopColor="#B8860B"/><stop offset="100%" stopColor="#6B4E00"/></radialGradient></defs><circle cx="18" cy="18" r="17" fill="url(#goldRing2)" stroke="#8B6500" strokeWidth="0.5"/><circle cx="18" cy="18" r="14" fill="url(#goldGrad2)"/><path d="M18 8.5C12.75 8.5 8.5 12.75 8.5 18C8.5 19.85 9.02 21.58 9.92 23.05L8.5 27.5L13.1 26.1C14.52 26.92 16.2 27.5 18 27.5C23.25 27.5 27.5 23.25 27.5 18C27.5 12.75 23.25 8.5 18 8.5Z" fill="white" fillOpacity="0.9"/><path d="M23.5 21.2C23.2 21.95 22.1 22.6 21.25 22.75C20.65 22.85 19.85 22.9 17.1 21.8C13.7 20.45 11.55 17 11.4 16.8C11.25 16.6 10.2 15.2 10.2 13.75C10.2 12.3 10.95 11.6 11.25 11.25C11.55 10.95 11.9 10.85 12.1 10.85C12.3 10.85 12.5 10.85 12.7 10.85C12.9 10.85 13.15 10.8 13.4 11.35C13.65 11.9 14.25 13.35 14.3 13.5C14.35 13.65 14.4 13.85 14.3 14.05C14.2 14.3 14.15 14.4 13.95 14.65C13.8 14.85 13.6 15.1 13.45 15.25C13.25 15.45 13.05 15.65 13.25 15.95C13.45 16.3 14.2 17.5 15.3 18.5C16.7 19.75 17.85 20.15 18.2 20.3C18.55 20.45 18.75 20.4 18.95 20.2C19.15 19.95 19.9 19.1 20.1 18.8C20.3 18.45 20.55 18.5 20.85 18.6C21.15 18.7 22.6 19.4 22.9 19.55C23.2 19.7 23.4 19.75 23.5 19.9C23.6 20.05 23.6 20.75 23.5 21.2Z" fill="#B8860B"/></svg></button>
       {ed && autoSaveStatus && <div style={{ position: "absolute", top: 24, left: 40, fontSize: 10, color: autoSaveStatus === "saved" ? "#2C6E52" : autoSaveStatus === "error" ? "#A23A3A" : "#9A968A" }}>{autoSaveStatus === "saving" ? "⏳ Guardando..." : autoSaveStatus === "saved" ? "✓ Guardado" : "✗ Error"}</div>}
+      {/* Pestañas: Ficha | Historial */}
+      {puedeVerHistorial && <div style={{ display: "flex", gap: 0, marginBottom: 24, borderBottom: "1px solid #E7E1D4" }}>
+        {["ficha","historial"].map(t => <button key={t} onClick={() => { setTab(t); if (t === "historial") cargarHistorial(); }}
+          style={{ padding: "8px 20px", background: "none", border: "none", borderBottom: tab === t ? "2px solid #AC8A54" : "2px solid transparent", color: tab === t ? "#AC8A54" : "#9A968A", fontSize: 11, fontWeight: 600, cursor: "pointer", textTransform: "uppercase", letterSpacing: "0.1em", fontFamily: "Inter, sans-serif" }}>
+          {t === "ficha" ? "Ficha" : "Historial"}
+        </button>)}
+      </div>}
+      {tab === "historial" && (
+        /* ─── PESTAÑA HISTORIAL ─── */
+        <div>
+          {loadingHistorial ? <div style={{ textAlign: "center", padding: 40, color: "#9A968A", fontSize: 13 }}>Cargando historial...</div> :
+           historial.length === 0 ? <div style={{ textAlign: "center", padding: 40, color: "#9A968A", fontSize: 13, fontStyle: "italic" }}>Sin cambios registrados aún</div> :
+           <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+             {historial.map((h, i) => (
+               <div key={h.id} style={{ padding: "12px 0", borderBottom: "1px solid #E7E1D4", display: "grid", gridTemplateColumns: "120px 1fr 1fr", gap: 12, alignItems: "start" }}>
+                 <div>
+                   <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600 }}>{h.campo}</div>
+                   <div style={{ fontSize: 10, color: "#9A968A", marginTop: 2 }}>{new Date(h.created_at).toLocaleDateString("es-ES", { day:"2-digit", month:"short", year:"2-digit", hour:"2-digit", minute:"2-digit" })}</div>
+                   <div style={{ fontSize: 10, color: "#9A968A" }}>por {h.usuario}</div>
+                 </div>
+                 <div>
+                   <div style={{ fontSize: 9, color: "#9A968A", textTransform: "uppercase", marginBottom: 2 }}>Antes</div>
+                   <div style={{ fontSize: 12, color: "#A23A3A", background: "#FFF5F5", padding: "4px 8px" }}>{h.valor_anterior || "—"}</div>
+                 </div>
+                 <div>
+                   <div style={{ fontSize: 9, color: "#9A968A", textTransform: "uppercase", marginBottom: 2 }}>Después</div>
+                   <div style={{ fontSize: 12, color: "#2C6E52", background: "#F5FFF8", padding: "4px 8px" }}>{h.valor_nuevo || "—"}</div>
+                 </div>
+               </div>
+             ))}
+           </div>}
+        </div>
+      )}
+      {/* ─── PESTAÑA FICHA ─── */}
+      <div style={{ display: tab === "historial" ? "none" : "block" }}>
       <div style={{ borderBottom: "1px solid #2A2926", paddingBottom: 24, marginBottom: 28 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
           <div>
@@ -233,6 +366,7 @@ function Detail({ b, onClose, onSave, onDelete, onWhatsApp }) {
         >Editar ficha</button>}
       </div>
     </div>
+    </div> {/* fin tab ficha */}
   </div>;
 }
 
@@ -270,7 +404,7 @@ function NewBuyer({ onClose, onAdd }) {
   </div>;
 }
 
-export default function App() {
+export default function App({ currentUser }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pagina, setPagina] = useState(1);
@@ -320,6 +454,14 @@ export default function App() {
   const bySt = ESTADOS.map(s => ({ ...s, n: data.filter(b => b.st === s.key).length })).filter(s => s.n > 0);
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState(null);
+  const [duplicadoPendiente, setDuplicadoPendiente] = useState(null); // {nuevo, existente, motivo}
+
+  // ─── PERMISOS ──────────────────────────────────────────────
+  const rol = currentUser?.role?.toLowerCase() || "agente";
+  const isAdmin  = rol === "director" || rol === "administrador";
+  const puedeEliminar   = isAdmin;
+  const puedeVerHistorial = isAdmin;
+  // ───────────────────────────────────────────────────────────
 
   async function syncFromSheet() {
     setSyncing(true); setSyncResult(null);
@@ -441,19 +583,87 @@ export default function App() {
       })()}
 
       {waBuyer && <WhatsAppPanel buyer={waBuyer} onClose={() => setWaBuyer(null)} />}
-      {sel && <Detail b={sel} onClose={() => setSel(null)} onWhatsApp={b => setWaBuyer(b)} onSave={async u => { 
-        const dbData = mapBuyerToDb(u);
-        const { error } = await supabase.from("compradores").update(dbData).eq("id", u.id); 
-        if (error) { alert("Error al guardar: " + error.message); return; }
-        setData(d => d.map(b => b.id === u.id ? u : b)); setSel(u); 
-      }} onDelete={async (b) => { if (confirm("¿Eliminar este comprador? Esta accion no se puede deshacer.")) { await supabase.from("compradores").delete().eq("id", b.id); setSel(null); setData(d => d.filter(x => x.id !== b.id)); }}} />}
+
+      {/* Modal de duplicado detectado */}
+      {duplicadoPendiente && <ModalDuplicado
+        nuevo={duplicadoPendiente.nuevo}
+        existente={duplicadoPendiente.existente}
+        motivo={duplicadoPendiente.motivo}
+        isAdmin={isAdmin}
+        onAbrir={() => { setSel(duplicadoPendiente.existente); setDuplicadoPendiente(null); setShowNew(false); }}
+        onFusionar={async (resultado) => {
+          // Fusionar: actualizar el existente con los datos del resultado, eliminar el nuevo
+          const dbData = mapBuyerToDb(resultado);
+          await supabase.from("compradores").update(dbData).eq("id", duplicadoPendiente.existente.id);
+          await supabase.from("compradores").delete().eq("id", duplicadoPendiente.nuevo.id);
+          setData(d => d.map(b => b.id === duplicadoPendiente.existente.id ? resultado : b).filter(b => b.id !== duplicadoPendiente.nuevo.id));
+          setDuplicadoPendiente(null); setShowNew(false);
+          setSel(resultado);
+        }}
+        onIgnorar={() => { setDuplicadoPendiente(null); setShowNew(false); loadBuyers(); }}
+        onClose={() => setDuplicadoPendiente(null)}
+      />}
+
+      {sel && <Detail b={sel} currentUser={currentUser} puedeEliminar={puedeEliminar} puedeVerHistorial={puedeVerHistorial}
+        onClose={() => setSel(null)} onWhatsApp={b => setWaBuyer(b)}
+        onSave={async (u, anterior) => {
+          const dbData = mapBuyerToDb(u);
+          const { error } = await supabase.from("compradores").update(dbData).eq("id", u.id);
+          if (error) { alert("Error al guardar: " + error.message); return; }
+          // Registrar historial de cambios
+          if (anterior) {
+            const userLogin = localStorage.getItem("mnp_user_login") || "desconocido";
+            const camposAuditados = ["nombre","email","tel","ppto","zd","st","fin","req","agente_asignado"];
+            const cambios = camposAuditados
+              .filter(c => JSON.stringify(u[c]) !== JSON.stringify(anterior[c]))
+              .map(c => ({ comprador_id: u.id, campo: c, valor_anterior: String(anterior[c] ?? ""), valor_nuevo: String(u[c] ?? ""), usuario: userLogin }));
+            if (cambios.length > 0) {
+              await supabase.from("compradores_historial").insert(cambios);
+            }
+          }
+          setData(d => d.map(b => b.id === u.id ? u : b)); setSel(u);
+        }}
+        onDelete={async (b) => {
+          if (!puedeEliminar) { alert("No tienes permisos para eliminar compradores."); return; }
+          if (confirm("¿Eliminar este comprador? Esta accion no se puede deshacer.")) {
+            await supabase.from("compradores").delete().eq("id", b.id);
+            setSel(null); setData(d => d.filter(x => x.id !== b.id));
+          }
+        }}
+      />}
+
       {showNew && <NewBuyer onClose={() => setShowNew(false)} onAdd={async n => {
         const dbData = mapBuyerToDb(n);
+        // ─── DETECCIÓN DE DUPLICADOS ───────────────────────────
+        const { data: todos } = await supabase.from("compradores").select("id,nombre,email,telefono").eq("activo", true).limit(2000);
+        if (todos) {
+          const nombreN = (n.nombre||"").toLowerCase().trim();
+          const emailN  = (n.email||"").toLowerCase().trim();
+          const telN    = (n.tel||"").replace(/\D/g,"");
+          const dup = todos.find(b => {
+            const nombreB = (b.nombre||"").toLowerCase().trim();
+            const emailB  = (b.email||"").toLowerCase().trim();
+            const telB    = (b.telefono||"").replace(/\D/g,"");
+            return (nombreB === nombreN && emailN && emailB === emailN) ||
+                   (nombreB === nombreN && telN.length >= 6 && telB === telN);
+          });
+          if (dup) {
+            // Insertar de todas formas y luego mostrar aviso
+            const { data: inserted } = await supabase.from("compradores").insert(dbData).select();
+            if (inserted?.[0]) {
+              const nuevo = mapBuyerDb(inserted[0]);
+              const existente = mapBuyerDb(dup);
+              const motivo = emailN && (dup.email||"").toLowerCase() === emailN ? "nombre+email" : "nombre+teléfono";
+              setData(d => [nuevo, ...d]);
+              setDuplicadoPendiente({ nuevo, existente: {...existente, id: dup.id}, motivo });
+            }
+            return;
+          }
+        }
+        // ──────────────────────────────────────────────────────
         const { data: inserted, error } = await supabase.from("compradores").insert(dbData).select();
         if (error) { alert("Error al crear comprador: " + error.message); return; }
-        if (inserted && inserted[0]) {
-          setData(d => [mapBuyerDb(inserted[0]), ...d]);
-        }
+        if (inserted?.[0]) setData(d => [mapBuyerDb(inserted[0]), ...d]);
         setShowNew(false);
       }} />}
     </div>
