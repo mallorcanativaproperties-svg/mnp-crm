@@ -2990,6 +2990,7 @@ function IdealistaImportButton() {
 }
 
 export default function CRMPropiedades({ currentUser }) {
+  const isAdmin = ["director","administrador"].includes(currentUser?.role?.toLowerCase());
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
@@ -3253,8 +3254,8 @@ export default function CRMPropiedades({ currentUser }) {
               </h1>
               <p style={{ fontSize: 12, color: "#9A968A", margin: "10px 0 0", letterSpacing: "0.04em" }}>{data.length} inmuebles - {pub} publicados</p>
             </div>
-            <IdealistaJsonButton supabase={supabase} />
-            <IdealistaImportButton />
+            {isAdmin && <IdealistaJsonButton supabase={supabase} />}
+            {isAdmin && <IdealistaImportButton />}
             <button
               onClick={() => {
                 const newProp = {
