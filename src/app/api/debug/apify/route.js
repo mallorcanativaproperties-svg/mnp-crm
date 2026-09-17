@@ -5,7 +5,10 @@ import { NextResponse } from "next/server";
 const APIFY_TOKEN = process.env.APIFY_TOKEN;
 const ACTOR_ID = "axlymxp~idealista-api-actor";
 
-export async function GET() {
+export async function GET(request) {
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Not available in production" }, { status: 404 });
+  }
   try {
     const runRes = await fetch(
       `https://api.apify.com/v2/acts/${ACTOR_ID}/runs?token=${APIFY_TOKEN}&waitForFinish=90`,

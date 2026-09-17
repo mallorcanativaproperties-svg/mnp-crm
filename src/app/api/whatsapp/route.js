@@ -7,7 +7,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
 );
 
-const VERIFY_TOKEN = "mnp_whatsapp_verify_2026";
+const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN || "mnp_whatsapp_verify_2026";
 const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN;
 const PHONE_ID = process.env.WHATSAPP_PHONE_ID;
 const GRAPH_URL = `https://graph.facebook.com/v21.0/${PHONE_ID}/messages`;

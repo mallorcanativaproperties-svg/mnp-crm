@@ -159,7 +159,11 @@ function detectarChivatos(norm) {
   return chivatos;
 }
 
-export async function GET() {
+export async function GET(request) {
+  const auth = request.headers.get("authorization");
+  if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   try {
     const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
     let totalGuardados = 0, totalSinTelefono = 0, totalEncontrados = 0;
