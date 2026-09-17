@@ -316,11 +316,35 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
   };
 
   // ─── PASO 3: Revisar y confirmar ────────────────────────────
+  const [paso4Wa, setPaso4Wa] = useState(false); // mostrar paso WA
+  const [idsImportados, setIdsImportados] = useState([]);
+  const [envioWa, setEnvioWa] = useState(null); // null | "enviando" | resultado
+  const [enviarWa, setEnviarWa] = useState(true); // checkbox
+
   const ejecutarImport = async () => {
     setImportando(true);
     const aImportar = procesados.filter(r => r.accion === "importar").map(r => r.datos);
-    await onImport(aImportar);
+    const ids = await onImport(aImportar);
+    setIdsImportados(ids || []);
     setImportando(false);
+    setPaso4Wa(true); // mostrar pantalla WA
+  };
+
+  const ejecutarEnvioWa = async () => {
+    if (!enviarWa) { onClose(); return; }
+    setEnvioWa("enviando");
+    const userLogin = localStorage.getItem("mnp_user_login") || "";
+    try {
+      const r = await fetch("/api/whatsapp-import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-user-login": userLogin },
+        body: JSON.stringify({ compradores_ids: idsImportados })
+      });
+      const data = await r.json();
+      setEnvioWa(data);
+    } catch(e) {
+      setEnvioWa({ error: e.message });
+    }
   };
 
   const totalImportar = procesados.filter(r => r.accion === "importar").length;
@@ -483,6 +507,94 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
               {importando ? "Importando..." : `Importar ${totalImportar} comprador${totalImportar !== 1 ? "es" : ""}`}
             </button>
           </div>
+        </div>
+      )}
+
+      {/* ─── PASO 4: WhatsApp ─── */}
+      {paso4Wa && (
+        <div>
+          {!envioWa ? (
+            <>
+              {/* Pantalla de confirmación de envío */}
+              <div style={{ textAlign: "center", padding: "20px 0 28px" }}>
+                <div style={{ fontSize: 40, marginBottom: 12 }}>✅</div>
+                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, marginBottom: 8 }}>
+                  {idsImportados.length} comprador{idsImportados.length !== 1 ? "es" : ""} importado{idsImportados.length !== 1 ? "s" : ""}
+                </div>
+                <div style={{ fontSize: 12, color: "#9A968A" }}>¿Quieres enviarles un WhatsApp con el formulario de cualificación?</div>
+              </div>
+
+              {/* Vista previa del mensaje */}
+              <div style={{ background: "#F0F8F4", border: "1px solid #2C6E5244", padding: "16px 20px", marginBottom: 20, borderRadius: 2 }}>
+                <div style={{ fontSize: 10, color: "#2C6E52", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Vista previa del mensaje (español)</div>
+                <div style={{ fontSize: 12, color: "#22262E", lineHeight: 1.6, whiteSpace: "pre-line" }}>
+                  {`¡Hola! Te escribimos de Mallorca Nativa Properties. Si quieres tener acceso preferente a propiedades antes de que salgan al mercado, puedes completar este formulario. Así podremos enviarte oportunidades que encajen con tus preferencias antes de su publicación.
+
+${(typeof window !== "undefined" ? window.location.origin : "https://crm.mallorcanativaproperties.com")}/cualificacion`}
+                </div>
+                <div style={{ fontSize: 10, color: "#9A968A", marginTop: 10 }}>El mensaje se enviará automáticamente en español, inglés, alemán, holandés o francés según el país del contacto.</div>
+              </div>
+
+              {/* Toggle enviar/no enviar */}
+              <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", marginBottom: 24 }}>
+                <input type="checkbox" checked={enviarWa} onChange={e => setEnviarWa(e.target.checked)}
+                  style={{ width: 16, height: 16, cursor: "pointer" }} />
+                <span style={{ fontSize: 13, color: "#22262E" }}>
+                  Enviar WhatsApp a los contactos que tienen teléfono
+                  <span style={{ fontSize: 11, color: "#9A968A", marginLeft: 6 }}>
+                    ({procesados.filter(r => r.accion === "importar" && (r.datos.tel||"").replace(/\D/g,"").length >= 6).length} de {idsImportados.length})
+                  </span>
+                </span>
+              </label>
+
+              <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+                <button onClick={onClose} style={{ padding: "10px 20px", border: "1px solid #2A2926", background: "none", color: "#9A968A", cursor: "pointer", fontSize: 11, fontFamily: "Inter, sans-serif" }}>
+                  Cerrar sin enviar
+                </button>
+                <button onClick={ejecutarEnvioWa}
+                  style={{ padding: "10px 28px", border: "none", background: enviarWa ? "#25D366" : "#9A968A", color: "#fff", cursor: "pointer", fontSize: 11, fontWeight: 600, fontFamily: "Inter, sans-serif", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                  {enviarWa ? "Enviar WhatsApp →" : "Finalizar sin enviar"}
+                </button>
+              </div>
+            </>
+          ) : envioWa === "enviando" ? (
+            <div style={{ textAlign: "center", padding: "40px 0" }}>
+              <div style={{ fontSize: 32, marginBottom: 12 }}>📲</div>
+              <div style={{ fontSize: 14, color: "#22262E" }}>Enviando mensajes...</div>
+              <div style={{ fontSize: 12, color: "#9A968A", marginTop: 6 }}>Esto puede tardar unos segundos</div>
+            </div>
+          ) : (
+            /* Resultado del envío */
+            <div>
+              <div style={{ textAlign: "center", padding: "20px 0 24px" }}>
+                <div style={{ fontSize: 40, marginBottom: 12 }}>{envioWa.error ? "⚠️" : "✅"}</div>
+                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, marginBottom: 8 }}>
+                  {envioWa.error ? "Error en el envío" : "Mensajes enviados"}
+                </div>
+              </div>
+              {!envioWa.error && (
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 24 }}>
+                  <div style={{ padding: 16, background: "#2C6E5210", border: "1px solid #2C6E5244", textAlign: "center" }}>
+                    <div style={{ fontSize: 28, fontWeight: 700, color: "#2C6E52", fontFamily: "'Playfair Display', serif" }}>{envioWa.enviados || 0}</div>
+                    <div style={{ fontSize: 10, color: "#2C6E52", textTransform: "uppercase", marginTop: 4 }}>Enviados</div>
+                  </div>
+                  <div style={{ padding: 16, background: "#9A968A10", border: "1px solid #9A968A44", textAlign: "center" }}>
+                    <div style={{ fontSize: 28, fontWeight: 700, color: "#9A968A", fontFamily: "'Playfair Display', serif" }}>{envioWa.sin_telefono || 0}</div>
+                    <div style={{ fontSize: 10, color: "#9A968A", textTransform: "uppercase", marginTop: 4 }}>Sin teléfono</div>
+                  </div>
+                  <div style={{ padding: 16, background: envioWa.errores > 0 ? "#A23A3A10" : "#F8F6F1", border: "1px solid " + (envioWa.errores > 0 ? "#A23A3A44" : "#E7E1D4"), textAlign: "center" }}>
+                    <div style={{ fontSize: 28, fontWeight: 700, color: envioWa.errores > 0 ? "#A23A3A" : "#9A968A", fontFamily: "'Playfair Display', serif" }}>{envioWa.errores || 0}</div>
+                    <div style={{ fontSize: 10, color: "#9A968A", textTransform: "uppercase", marginTop: 4 }}>Errores</div>
+                  </div>
+                </div>
+              )}
+              <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                <button onClick={onClose} style={{ padding: "10px 28px", border: "none", background: "#AC8A54", color: "#fff", cursor: "pointer", fontSize: 11, fontWeight: 600, fontFamily: "Inter, sans-serif", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                  Finalizar
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -983,13 +1095,18 @@ export default function App({ currentUser }) {
         compradores={data}
         onClose={() => setShowImport(false)}
         onImport={async (nuevos) => {
+          const idsInsertados = [];
           for (const n of nuevos) {
             const dbData = mapBuyerToDb(n);
             const { data: ins } = await supabase.from("compradores").insert(dbData).select();
-            if (ins?.[0]) setData(d => [mapBuyerDb(ins[0]), ...d]);
+            if (ins?.[0]) {
+              setData(d => [mapBuyerDb(ins[0]), ...d]);
+              idsInsertados.push(ins[0].id);
+            }
           }
           setShowImport(false);
           loadBuyers();
+          return idsInsertados;
         }}
       />}
       {showNew && <NewBuyer onClose={() => setShowNew(false)} onAdd={async n => {
