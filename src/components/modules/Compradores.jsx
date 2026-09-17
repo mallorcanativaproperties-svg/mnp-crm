@@ -148,6 +148,348 @@ function Card({ b, onClick, onWhatsApp }) {
 }
 
 
+
+// ═══ IMPORTADOR EXCEL ═══════════════════════════════════════════════════════
+// Campos del CRM a los que se puede mapear una columna del Excel
+const CAMPOS_CRM = [
+  { key: "nombre",     label: "Nombre completo",     req: true  },
+  { key: "email",      label: "Email",                req: false },
+  { key: "tel",        label: "Teléfono",             req: false },
+  { key: "ppto",       label: "Presupuesto (€)",      req: false },
+  { key: "zd",         label: "Zona deseada",         req: false },
+  { key: "ze",         label: "Zona excluida",        req: false },
+  { key: "fin",        label: "Financiación",         req: false },
+  { key: "finalidad",  label: "Finalidad de compra",  req: false },
+  { key: "hab",        label: "Habitaciones",         req: false },
+  { key: "alt",        label: "Altura máx ascensor",  req: false },
+  { key: "req",        label: "Requisitos",           req: false },
+  { key: "ag",         label: "Agente asignado",      req: false },
+  { key: "notas",      label: "Notas",                req: false },
+  { key: "pais",       label: "País",                 req: false },
+  { key: "_ignorar",   label: "— Ignorar columna —",  req: false },
+];
+
+function parseExcelManual(buffer) {
+  // Parser básico de CSV / Excel exportado como CSV
+  // Para XLS/XLSX reales usamos la librería sheetjs si está disponible
+  const text = new TextDecoder("utf-8").decode(new Uint8Array(buffer));
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  if (lines.length < 2) return { headers: [], rows: [] };
+  
+  const parseCSVLine = (line) => {
+    const result = [];
+    let current = "";
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') { inQuotes = !inQuotes; }
+      else if ((ch === "," || ch === ";") && !inQuotes) { result.push(current.trim()); current = ""; }
+      else { current += ch; }
+    }
+    result.push(current.trim());
+    return result;
+  };
+
+  const headers = parseCSVLine(lines[0]);
+  const rows = lines.slice(1).map(l => {
+    const vals = parseCSVLine(l);
+    const row = {};
+    headers.forEach((h, i) => { row[h] = vals[i] || ""; });
+    return row;
+  }).filter(r => Object.values(r).some(v => v));
+  
+  return { headers, rows };
+}
+
+function autoMapear(headers) {
+  // Intenta mapear automáticamente columnas comunes
+  const map = {};
+  const normalize = s => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+  headers.forEach(h => {
+    const n = normalize(h);
+    if (n.includes("nombre") || n.includes("name") || n === "contacto") map[h] = "nombre";
+    else if (n.includes("email") || n.includes("correo") || n.includes("mail")) map[h] = "email";
+    else if (n.includes("tel") || n.includes("phone") || n.includes("movil") || n.includes("celular")) map[h] = "tel";
+    else if (n.includes("presu") || n.includes("budget") || n.includes("precio") || n.includes("importe")) map[h] = "ppto";
+    else if (n.includes("zona") && !n.includes("exclu")) map[h] = "zd";
+    else if (n.includes("exclu")) map[h] = "ze";
+    else if (n.includes("financi") || n.includes("hipot")) map[h] = "fin";
+    else if (n.includes("finalidad") || n.includes("uso") || n.includes("objetivo")) map[h] = "finalidad";
+    else if (n.includes("hab") || n.includes("habitac") || n.includes("dorm") || n.includes("bedroom")) map[h] = "hab";
+    else if (n.includes("nota") || n.includes("comment") || n.includes("observ")) map[h] = "notas";
+    else if (n.includes("agente") || n.includes("agent") || n.includes("comercial")) map[h] = "ag";
+    else if (n.includes("pais") || n.includes("country") || n.includes("nation")) map[h] = "pais";
+    else if (n.includes("requis")) map[h] = "req";
+    else map[h] = "_ignorar";
+  });
+  return map;
+}
+
+function ImportadorExcel({ compradores, onClose, onImport }) {
+  const [paso, setPaso] = useState(1); // 1: subir, 2: mapear, 3: revisar
+  const [headers, setHeaders] = useState([]);
+  const [rows, setRows] = useState([]);
+  const [mapeo, setMapeo] = useState({}); // colExcel → campoCRM
+  const [procesados, setProcesados] = useState([]); // {datos, duplicado, accion}
+  const [importando, setImportando] = useState(false);
+  const [error, setError] = useState("");
+
+  // ─── PASO 1: Subir archivo ───────────────────────────────────
+  const handleFile = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setError("");
+    
+    // Intentar con SheetJS si está disponible
+    try {
+      const buffer = await file.arrayBuffer();
+      
+      // Intentar SheetJS (si está cargado)
+      if (typeof XLSX !== "undefined") {
+        const wb = XLSX.read(buffer, { type: "array" });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const data = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
+        if (data.length < 2) { setError("El archivo está vacío o solo tiene encabezados."); return; }
+        const hdrs = data[0].map(String);
+        const rowsData = data.slice(1)
+          .map(r => { const o = {}; hdrs.forEach((h,i) => { o[h] = String(r[i] || ""); }); return o; })
+          .filter(r => Object.values(r).some(v => v.trim()));
+        setHeaders(hdrs);
+        setRows(rowsData);
+        setMapeo(autoMapear(hdrs));
+        setPaso(2);
+        return;
+      }
+      
+      // Fallback: CSV
+      const { headers: hdrs, rows: rowsData } = parseExcelManual(buffer);
+      if (!hdrs.length) { setError("No se pudieron leer los encabezados. Prueba a exportar como CSV."); return; }
+      setHeaders(hdrs);
+      setRows(rowsData);
+      setMapeo(autoMapear(hdrs));
+      setPaso(2);
+    } catch (err) {
+      setError("Error al leer el archivo: " + err.message + ". Prueba a exportarlo como CSV desde Excel.");
+    }
+  };
+
+  // ─── PASO 2: Confirmar mapeo ─────────────────────────────────
+  const confirmarMapeo = () => {
+    const nombreMapeado = Object.values(mapeo).includes("nombre");
+    if (!nombreMapeado) { setError("Debes mapear al menos la columna Nombre."); return; }
+    setError("");
+    
+    // Convertir filas según el mapeo y detectar duplicados
+    const resultado = rows.map(row => {
+      const datos = {};
+      Object.entries(mapeo).forEach(([col, campo]) => {
+        if (campo === "_ignorar") return;
+        const val = (row[col] || "").trim();
+        if (campo === "ppto") datos[campo] = Number(val.replace(/[^0-9.,]/g, "").replace(",", ".")) || 0;
+        else if (campo === "zd" || campo === "ze") datos[campo] = val ? val.split(/[,;]/).map(z => z.trim()).filter(Boolean) : [];
+        else datos[campo] = val;
+      });
+      // Completar campos con defaults
+      datos.st = datos.st || "activo";
+      datos.fin = datos.fin || "";
+      datos.finalidad = datos.finalidad || "";
+      datos.zd = datos.zd || [];
+      datos.ze = datos.ze || [];
+
+      // Detectar duplicado
+      const nombreN = (datos.nombre || "").toLowerCase().trim();
+      const emailN  = (datos.email || "").toLowerCase().trim();
+      const telN    = (datos.tel || "").replace(/\D/g, "");
+      const dup = compradores.find(b => {
+        const nb = (b.nombre||"").toLowerCase().trim();
+        const eb = (b.email||"").toLowerCase().trim();
+        const tb = (b.tel||"").replace(/\D/g, "");
+        return (nb === nombreN && emailN && eb === emailN) ||
+               (nb === nombreN && telN.length >= 6 && tb === telN);
+      });
+
+      return { datos, duplicado: dup || null, accion: dup ? "omitir" : "importar" };
+    }).filter(r => r.datos.nombre);
+
+    setProcesados(resultado);
+    setPaso(3);
+  };
+
+  // ─── PASO 3: Revisar y confirmar ────────────────────────────
+  const ejecutarImport = async () => {
+    setImportando(true);
+    const aImportar = procesados.filter(r => r.accion === "importar").map(r => r.datos);
+    await onImport(aImportar);
+    setImportando(false);
+  };
+
+  const totalImportar = procesados.filter(r => r.accion === "importar").length;
+  const totalDups     = procesados.filter(r => r.duplicado).length;
+  const totalOmitir   = procesados.filter(r => r.accion === "omitir").length;
+
+  const iSt = { width: "100%", padding: "8px 12px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 12, fontFamily: "Inter, sans-serif", boxSizing: "border-box" };
+
+  return <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)", display: "flex", justifyContent: "center", alignItems: "flex-start", padding: "24px 16px", zIndex: 1500, overflowY: "auto" }}>
+    <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", width: "100%", maxWidth: 780, padding: "36px 40px", position: "relative" }}>
+      <button onClick={onClose} style={{ position: "absolute", top: 16, right: 20, background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#9A968A" }}>✕</button>
+
+      {/* Header */}
+      <div style={{ marginBottom: 28 }}>
+        <div style={{ fontSize: 10, color: "#3D577E", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 6, fontWeight: 700 }}>Importación de compradores</div>
+        <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, margin: "0 0 16px" }}>
+          {paso === 1 ? "Subir archivo Excel" : paso === 2 ? "Mapear columnas" : "Revisar y confirmar"}
+        </h3>
+        {/* Pasos */}
+        <div style={{ display: "flex", gap: 0, borderBottom: "1px solid #E7E1D4" }}>
+          {["Subir", "Mapear", "Confirmar"].map((s, i) => (
+            <div key={i} style={{ padding: "6px 20px", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em",
+              color: paso === i+1 ? "#3D577E" : paso > i+1 ? "#2C6E52" : "#C8C5BC",
+              borderBottom: paso === i+1 ? "2px solid #3D577E" : "2px solid transparent" }}>
+              {paso > i+1 ? "✓ " : ""}{s}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {error && <div style={{ background: "#FFF5F5", border: "1px solid #D4545433", padding: "10px 16px", marginBottom: 20, fontSize: 12, color: "#A23A3A" }}>{error}</div>}
+
+      {/* ─── PASO 1: Subir ─── */}
+      {paso === 1 && (
+        <div>
+          <p style={{ fontSize: 13, color: "#9A968A", marginBottom: 24, lineHeight: 1.6 }}>
+            Sube un archivo Excel (.xlsx, .xls) o CSV. En el siguiente paso podrás indicar qué columna corresponde a cada campo del CRM.
+          </p>
+          <label style={{ display: "block", border: "2px dashed #C8A97E44", padding: "40px 20px", textAlign: "center", cursor: "pointer", background: "#FDFCFA" }}>
+            <div style={{ fontSize: 32, marginBottom: 12 }}>📂</div>
+            <div style={{ fontSize: 13, color: "#AC8A54", fontWeight: 600, marginBottom: 4 }}>Haz clic para seleccionar el archivo</div>
+            <div style={{ fontSize: 11, color: "#9A968A" }}>Excel (.xlsx, .xls) o CSV — máx 5MB</div>
+            <input type="file" accept=".xlsx,.xls,.csv" onChange={handleFile} style={{ display: "none" }} />
+          </label>
+          <div style={{ marginTop: 16, padding: "12px 16px", background: "#F5F8FF", border: "1px solid #3D577E22", fontSize: 11, color: "#3D577E" }}>
+            💡 <strong>Consejo:</strong> Si tu Excel tiene muchas columnas, puedes ignorar las que no necesitas en el paso siguiente. Solo es obligatorio que haya una columna con el nombre del comprador.
+          </div>
+        </div>
+      )}
+
+      {/* ─── PASO 2: Mapear ─── */}
+      {paso === 2 && (
+        <div>
+          <p style={{ fontSize: 12, color: "#9A968A", marginBottom: 20 }}>
+            Tu Excel tiene <strong style={{ color: "#22262E" }}>{headers.length} columnas</strong> y <strong style={{ color: "#22262E" }}>{rows.length} filas</strong>. Indica qué campo del CRM corresponde a cada columna:
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 20px 1fr", gap: "8px 12px", marginBottom: 24, maxHeight: 400, overflowY: "auto" }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: "#9A968A", textTransform: "uppercase", padding: "4px 0", borderBottom: "1px solid #E7E1D4" }}>Columna en tu Excel</div>
+            <div />
+            <div style={{ fontSize: 10, fontWeight: 700, color: "#9A968A", textTransform: "uppercase", padding: "4px 0", borderBottom: "1px solid #E7E1D4" }}>Campo en el CRM</div>
+            {headers.map(h => (
+              <React.Fragment key={h}>
+                <div style={{ padding: "6px 10px", background: "#F8F6F1", border: "1px solid #E7E1D4", fontSize: 12, color: "#22262E", display: "flex", alignItems: "center" }}>
+                  <span style={{ fontWeight: 600 }}>{h}</span>
+                  <span style={{ fontSize: 10, color: "#9A968A", marginLeft: 8 }}>ej: {rows[0]?.[h] || "—"}</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", color: "#C8A97E", fontSize: 14 }}>→</div>
+                <select value={mapeo[h] || "_ignorar"} onChange={e => setMapeo(m => ({ ...m, [h]: e.target.value }))} style={{ ...iSt, borderColor: mapeo[h] && mapeo[h] !== "_ignorar" ? "#2C6E5244" : "#E7E1D4" }}>
+                  {CAMPOS_CRM.map(c => <option key={c.key} value={c.key}>{c.label}{c.req ? " *" : ""}</option>)}
+                </select>
+              </React.Fragment>
+            ))}
+          </div>
+          <div style={{ fontSize: 11, color: "#9A968A", marginBottom: 20 }}>* El campo Nombre es obligatorio</div>
+          <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+            <button onClick={() => { setPaso(1); setError(""); }} style={{ padding: "10px 20px", border: "1px solid #2A2926", background: "none", color: "#9A968A", cursor: "pointer", fontSize: 11, fontFamily: "Inter, sans-serif" }}>← Volver</button>
+            <button onClick={confirmarMapeo} style={{ padding: "10px 28px", border: "none", background: "#3D577E", color: "#fff", cursor: "pointer", fontSize: 11, fontWeight: 600, fontFamily: "Inter, sans-serif", textTransform: "uppercase", letterSpacing: "0.08em" }}>Continuar →</button>
+          </div>
+        </div>
+      )}
+
+      {/* ─── PASO 3: Revisar ─── */}
+      {paso === 3 && (
+        <div>
+          {/* Resumen */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 24 }}>
+            <div style={{ padding: "16px", background: "#2C6E5210", border: "1px solid #2C6E5244", textAlign: "center" }}>
+              <div style={{ fontSize: 28, fontWeight: 700, color: "#2C6E52", fontFamily: "'Playfair Display', serif" }}>{totalImportar}</div>
+              <div style={{ fontSize: 10, color: "#2C6E52", textTransform: "uppercase", letterSpacing: "0.1em", marginTop: 4 }}>Se importarán</div>
+            </div>
+            <div style={{ padding: "16px", background: "#E1306C10", border: "1px solid #E1306C44", textAlign: "center" }}>
+              <div style={{ fontSize: 28, fontWeight: 700, color: "#E1306C", fontFamily: "'Playfair Display', serif" }}>{totalDups}</div>
+              <div style={{ fontSize: 10, color: "#E1306C", textTransform: "uppercase", letterSpacing: "0.1em", marginTop: 4 }}>Duplicados</div>
+            </div>
+            <div style={{ padding: "16px", background: "#9A968A10", border: "1px solid #9A968A44", textAlign: "center" }}>
+              <div style={{ fontSize: 28, fontWeight: 700, color: "#9A968A", fontFamily: "'Playfair Display', serif" }}>{totalOmitir}</div>
+              <div style={{ fontSize: 10, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginTop: 4 }}>Se omitirán</div>
+            </div>
+          </div>
+
+          {/* Lista de duplicados con decisión */}
+          {totalDups > 0 && (
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "#E1306C", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12 }}>
+                ⚠ Duplicados detectados — decide qué hacer con cada uno:
+              </div>
+              <div style={{ maxHeight: 280, overflowY: "auto", border: "1px solid #E7E1D4" }}>
+                {procesados.map((r, i) => !r.duplicado ? null : (
+                  <div key={i} style={{ padding: "12px 16px", borderBottom: "1px solid #F0EDE7", display: "grid", gridTemplateColumns: "1fr auto", gap: 12, alignItems: "center" }}>
+                    <div>
+                      <div style={{ fontSize: 12, fontWeight: 600 }}>{r.datos.nombre}</div>
+                      <div style={{ fontSize: 11, color: "#9A968A" }}>
+                        {r.datos.email && <span style={{ marginRight: 12 }}>📧 {r.datos.email}</span>}
+                        {r.datos.tel && <span>📱 {r.datos.tel}</span>}
+                      </div>
+                      <div style={{ fontSize: 10, color: "#E1306C", marginTop: 2 }}>
+                        Ya existe: <strong>{r.duplicado.nombre}</strong> — {r.duplicado.email || r.duplicado.tel}
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <button onClick={() => setProcesados(p => p.map((x,j) => j===i ? {...x, accion:"omitir"} : x))}
+                        style={{ padding: "5px 12px", border: "1px solid " + (r.accion==="omitir" ? "#9A968A" : "#E7E1D4"), background: r.accion==="omitir" ? "#9A968A" : "transparent", color: r.accion==="omitir" ? "#fff" : "#9A968A", fontSize: 10, cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
+                        Omitir
+                      </button>
+                      <button onClick={() => setProcesados(p => p.map((x,j) => j===i ? {...x, accion:"importar"} : x))}
+                        style={{ padding: "5px 12px", border: "1px solid " + (r.accion==="importar" ? "#2C6E52" : "#E7E1D4"), background: r.accion==="importar" ? "#2C6E52" : "transparent", color: r.accion==="importar" ? "#fff" : "#2C6E52", fontSize: 10, cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
+                        Importar igualmente
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Vista previa de los primeros registros a importar */}
+          {totalImportar > 0 && (
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "#2C6E52", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>
+                Vista previa ({Math.min(3, totalImportar)} de {totalImportar}):
+              </div>
+              <div style={{ border: "1px solid #E7E1D4", maxHeight: 160, overflowY: "auto" }}>
+                {procesados.filter(r => r.accion === "importar").slice(0, 3).map((r, i) => (
+                  <div key={i} style={{ padding: "8px 14px", borderBottom: "1px solid #F0EDE7", display: "flex", gap: 16, fontSize: 12 }}>
+                    <span style={{ fontWeight: 600, minWidth: 180 }}>{r.datos.nombre}</span>
+                    <span style={{ color: "#9A968A" }}>{r.datos.email || "—"}</span>
+                    <span style={{ color: "#9A968A" }}>{r.datos.tel || "—"}</span>
+                    {r.datos.ppto > 0 && <span style={{ color: "#AC8A54" }}>{Number(r.datos.ppto).toLocaleString("es-ES")} €</span>}
+                  </div>
+                ))}
+                {totalImportar > 3 && <div style={{ padding: "8px 14px", fontSize: 11, color: "#9A968A", fontStyle: "italic" }}>... y {totalImportar - 3} más</div>}
+              </div>
+            </div>
+          )}
+
+          <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+            <button onClick={() => { setPaso(2); setError(""); }} style={{ padding: "10px 20px", border: "1px solid #2A2926", background: "none", color: "#9A968A", cursor: "pointer", fontSize: 11, fontFamily: "Inter, sans-serif" }}>← Volver</button>
+            <button onClick={ejecutarImport} disabled={importando || totalImportar === 0}
+              style={{ padding: "10px 28px", border: "none", background: totalImportar === 0 ? "#C8C5BC" : "#2C6E52", color: "#fff", cursor: totalImportar === 0 ? "default" : "pointer", fontSize: 11, fontWeight: 600, fontFamily: "Inter, sans-serif", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+              {importando ? "Importando..." : `Importar ${totalImportar} comprador${totalImportar !== 1 ? "es" : ""}`}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  </div>;
+}
+// ════════════════════════════════════════════════════════════════
+
 // ═══ MODAL DUPLICADO ════════════════════════════════════════════
 function ModalDuplicado({ nuevo, existente, motivo, isAdmin, onAbrir, onFusionar, onIgnorar, onClose }) {
   const [fusionData, setFusionData] = useState(null); // null = no iniciado, objeto = datos fusionados
@@ -455,6 +797,7 @@ export default function App({ currentUser }) {
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState(null);
   const [duplicadoPendiente, setDuplicadoPendiente] = useState(null); // {nuevo, existente, motivo}
+  const [showImport, setShowImport] = useState(false);
 
   // ─── PERMISOS ──────────────────────────────────────────────
   const rol = currentUser?.role?.toLowerCase() || "agente";
@@ -499,6 +842,10 @@ export default function App({ currentUser }) {
             }} style={{ padding: "12px 20px", borderRadius: 0, border: "1px solid #405c6b", background: "transparent", color: "#405c6b", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}>
               🔗 Copiar link formulario
             </button>
+            {isAdmin && <button onClick={() => setShowImport(true)} style={{ padding: "12px 20px", borderRadius: 0, border: "1px solid #3D577E44", background: "transparent", color: "#3D577E", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}
+              onMouseEnter={e => { e.currentTarget.style.background = "#3D577E"; e.currentTarget.style.color = "#F8F6F1"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#3D577E"; }}
+            >↑ Importar Excel</button>}
             <button onClick={() => setShowNew(true)} style={{ padding: "12px 28px", borderRadius: 0, border: "1px solid #C8A97E", background: "transparent", color: "#AC8A54", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}
               onMouseEnter={e => { e.currentTarget.style.background = "#AC8A54"; e.currentTarget.style.color = "#F8F6F1"; }}
               onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#AC8A54"; }}
@@ -632,6 +979,19 @@ export default function App({ currentUser }) {
         }}
       />}
 
+      {showImport && isAdmin && <ImportadorExcel
+        compradores={data}
+        onClose={() => setShowImport(false)}
+        onImport={async (nuevos) => {
+          for (const n of nuevos) {
+            const dbData = mapBuyerToDb(n);
+            const { data: ins } = await supabase.from("compradores").insert(dbData).select();
+            if (ins?.[0]) setData(d => [mapBuyerDb(ins[0]), ...d]);
+          }
+          setShowImport(false);
+          loadBuyers();
+        }}
+      />}
       {showNew && <NewBuyer onClose={() => setShowNew(false)} onAdd={async n => {
         const dbData = mapBuyerToDb(n);
         // ─── DETECCIÓN DE DUPLICADOS ───────────────────────────
