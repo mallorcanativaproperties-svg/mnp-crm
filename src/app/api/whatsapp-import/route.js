@@ -37,41 +37,51 @@ export async function POST(request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { compradores_ids } = await request.json(); // array de IDs de compradores recién importados
+  const body = await request.json();
+  const formUrl = `${APP_URL}/cualificacion`;
+
+  // Modo contacto directo (enviado uno a uno desde el navegador)
+  if (body.contacto_directo) {
+    const c = body.contacto_directo;
+    const tel = (c.telefono || "").replace(/\D/g, "");
+    if (!tel || tel.length < 6) {
+      return NextResponse.json({ ok: true, enviados: 0, sin_telefono: 1, errores: 0 });
+    }
+    const idioma = paisAIdioma(c.pais);
+    const texto = (MENSAJES[idioma] || MENSAJES.es)(formUrl);
+    try {
+      await sendWhatsApp(tel, texto);
+      return NextResponse.json({ ok: true, enviados: 1, sin_telefono: 0, errores: 0 });
+    } catch(e) {
+      return NextResponse.json({ ok: true, enviados: 0, sin_telefono: 0, errores: 1, error: e.message });
+    }
+  }
+
+  // Modo legacy (por IDs — mantener por compatibilidad)
+  const { compradores_ids } = body;
   if (!compradores_ids?.length) return NextResponse.json({ error: "No hay IDs" }, { status: 400 });
 
-  // Cargar compradores
   const { data: compradores } = await sb.from("compradores")
     .select("id, nombre, telefono, pais")
     .in("id", compradores_ids);
 
   if (!compradores?.length) return NextResponse.json({ error: "No se encontraron compradores" }, { status: 404 });
 
-  const formUrl = `${APP_URL}/cualificacion`;
   const resultados = { enviados: 0, sin_telefono: 0, errores: 0, detalle: [] };
 
   for (const c of compradores) {
     const tel = (c.telefono || "").replace(/\D/g, "");
     if (!tel || tel.length < 6) {
       resultados.sin_telefono++;
-      resultados.detalle.push({ nombre: c.nombre, estado: "sin_telefono" });
       continue;
     }
-
     const idioma = paisAIdioma(c.pais);
-    const mensajeFn = MENSAJES[idioma] || MENSAJES.es;
-    const texto = mensajeFn(formUrl);
-
+    const texto = (MENSAJES[idioma] || MENSAJES.es)(formUrl);
     try {
       await sendWhatsApp(tel, texto);
       resultados.enviados++;
-      resultados.detalle.push({ nombre: c.nombre, tel, idioma, estado: "enviado" });
-      // Pausa aleatoria entre 4 y 7 segundos para evitar detección como spam
-      const pausa = 4000 + Math.random() * 3000;
-      await new Promise(r => setTimeout(r, pausa));
-    } catch (e) {
+    } catch(e) {
       resultados.errores++;
-      resultados.detalle.push({ nombre: c.nombre, tel, estado: "error", error: e.message });
     }
   }
 

@@ -395,6 +395,10 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
         const val = (row[col] || "").trim();
         if (campo === "ppto") datos[campo] = Number(val.replace(/[^0-9.,]/g, "").replace(",", ".")) || 0;
         else if (campo === "zd" || campo === "ze") datos[campo] = val ? val.split(/[,;]/).map(z => z.trim()).filter(Boolean) : [];
+        else if (campo === "nombre" && datos["nombre"]) {
+          // Si nombre ya tiene valor (ej: ya se mapeó "Nombre"), concatenar con espacio (ej: "Apellidos")
+          datos["nombre"] = (datos["nombre"] + " " + val).trim();
+        }
         else datos[campo] = val;
       });
       // Completar campos con defaults
@@ -424,10 +428,11 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
   };
 
   // ─── PASO 3: Revisar y confirmar ────────────────────────────
-  const [paso4Wa, setPaso4Wa] = useState(false); // mostrar paso WA
+  const [paso4Wa, setPaso4Wa] = useState(false);
   const [idsImportados, setIdsImportados] = useState([]);
-  const [envioWa, setEnvioWa] = useState(null); // null | "enviando" | resultado
-  const [enviarWa, setEnviarWa] = useState(true); // checkbox
+  const [envioWa, setEnvioWa] = useState(null); // null | objeto resultado
+  const [enviarWa, setEnviarWa] = useState(true);
+  const [progresoWa, setProgresoWa] = useState({ total: 0, enviados: 0, errores: 0, sinTel: 0, actual: "" });
 
   const ejecutarImport = async () => {
     setImportando(true);
@@ -440,19 +445,47 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
 
   const ejecutarEnvioWa = async () => {
     if (!enviarWa) { onClose(); return; }
-    setEnvioWa("enviando");
     const userLogin = localStorage.getItem("mnp_user_login") || "";
-    try {
-      const r = await fetch("/api/whatsapp-import", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-user-login": userLogin },
-        body: JSON.stringify({ compradores_ids: idsImportados })
-      });
-      const data = await r.json();
-      setEnvioWa(data);
-    } catch(e) {
-      setEnvioWa({ error: e.message });
+
+    // Obtener los compradores con teléfono
+    const conTel = procesados
+      .filter(r => r.accion === "importar" && (r.datos.tel || "").replace(/\D/g, "").length >= 6)
+      .map(r => r.datos);
+    const sinTel = idsImportados.length - conTel.length;
+
+    const prog = { total: conTel.length, enviados: 0, errores: 0, sinTel, actual: "" };
+    setProgresoWa({ ...prog });
+    setEnvioWa("enviando");
+
+    // Enviar de uno en uno desde el navegador — sin riesgo de timeout
+    for (const c of conTel) {
+      prog.actual = c.nombre || c.email || c.tel;
+      setProgresoWa({ ...prog });
+      try {
+        const r = await fetch("/api/whatsapp-import", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-user-login": userLogin },
+          body: JSON.stringify({ compradores_ids: [], contacto_directo: {
+            nombre: c.nombre, telefono: c.tel, pais: c.pais
+          }})
+        });
+        const data = await r.json();
+        if (data.ok && data.enviados > 0) prog.enviados++;
+        else prog.errores++;
+      } catch(e) {
+        prog.errores++;
+      }
+      setProgresoWa({ ...prog });
+      // Pausa aleatoria 4-7 segundos entre mensajes
+      if (prog.enviados + prog.errores < conTel.length) {
+        const pausa = 4000 + Math.random() * 3000;
+        await new Promise(r => setTimeout(r, pausa));
+      }
     }
+
+    prog.actual = "";
+    setProgresoWa({ ...prog });
+    setEnvioWa({ ok: true, enviados: prog.enviados, sin_telefono: sinTel, errores: prog.errores });
   };
 
   const totalImportar = procesados.filter(r => r.accion === "importar").length;
@@ -666,10 +699,32 @@ ${(typeof window !== "undefined" ? window.location.origin : "https://crm.mallorc
               </div>
             </>
           ) : envioWa === "enviando" ? (
-            <div style={{ textAlign: "center", padding: "40px 0" }}>
-              <div style={{ fontSize: 32, marginBottom: 12 }}>📲</div>
-              <div style={{ fontSize: 14, color: "#22262E" }}>Enviando mensajes...</div>
-              <div style={{ fontSize: 12, color: "#9A968A", marginTop: 6 }}>Esto puede tardar unos segundos</div>
+            <div style={{ padding: "20px 0" }}>
+              <div style={{ textAlign: "center", marginBottom: 24 }}>
+                <div style={{ fontSize: 32, marginBottom: 8 }}>📲</div>
+                <div style={{ fontSize: 14, color: "#22262E", fontWeight: 600 }}>Enviando mensajes...</div>
+                <div style={{ fontSize: 12, color: "#9A968A", marginTop: 4 }}>No cierres esta ventana hasta que termine</div>
+              </div>
+              {/* Barra de progreso */}
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#9A968A", marginBottom: 6 }}>
+                  <span>{progresoWa.enviados + progresoWa.errores} de {progresoWa.total}</span>
+                  <span style={{ color: "#2C6E52" }}>{progresoWa.enviados} enviados</span>
+                </div>
+                <div style={{ height: 6, background: "#E7E1D4", borderRadius: 3, overflow: "hidden" }}>
+                  <div style={{ height: "100%", background: "#2C6E52", borderRadius: 3, transition: "width 0.5s", width: progresoWa.total > 0 ? `${Math.round(((progresoWa.enviados + progresoWa.errores) / progresoWa.total) * 100)}%` : "0%" }} />
+                </div>
+              </div>
+              {progresoWa.actual && (
+                <div style={{ fontSize: 11, color: "#AC8A54", textAlign: "center", fontStyle: "italic" }}>
+                  Enviando a {progresoWa.actual}...
+                </div>
+              )}
+              {progresoWa.errores > 0 && (
+                <div style={{ fontSize: 11, color: "#A23A3A", textAlign: "center", marginTop: 6 }}>
+                  {progresoWa.errores} error{progresoWa.errores !== 1 ? "es" : ""}
+                </div>
+              )}
             </div>
           ) : (
             /* Resultado del envío */
