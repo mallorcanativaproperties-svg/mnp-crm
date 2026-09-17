@@ -7,8 +7,16 @@ function getSupabase() {
   return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 }
 
+function checkAuth(request) {
+  const auth = request.headers.get("authorization");
+  const expected = `Bearer ${process.env.INTERNAL_API_KEY || process.env.CRON_SECRET}`;
+  if (auth !== expected) return false;
+  return true;
+}
+
 // GET — listar encargos con firmantes
-export async function GET() {
+export async function GET(request) {
+  if (!checkAuth(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const supabase = getSupabase();
   const { data, error } = await supabase
     .from("encargos_venta")
@@ -20,6 +28,7 @@ export async function GET() {
 
 // POST — crear encargo + firmantes individuales
 export async function POST(request) {
+  if (!checkAuth(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const body = await request.json();
   const supabase = getSupabase();
 
@@ -55,6 +64,7 @@ export async function POST(request) {
 
 // PATCH — actualizar encargo
 export async function PATCH(request) {
+  if (!checkAuth(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id, ...updates } = await request.json();
   const { data, error } = await getSupabase()
     .from("encargos_venta")

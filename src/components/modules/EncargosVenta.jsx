@@ -183,7 +183,8 @@ export default function EncargosVenta() {
   }
 
   async function load() {
-    const res = await fetch("/api/encargos");
+    const apiKey = process.env.NEXT_PUBLIC_INTERNAL_API_KEY || "";
+    const res = await fetch("/api/encargos", { headers: { "Authorization": `Bearer ${apiKey}` } });
     const data = await res.json();
     if (data.ok) setEncargos(data.data);
     setLoading(false);
@@ -217,7 +218,8 @@ export default function EncargosVenta() {
       prop1_nombre: form.propietarios[0]?.nombre,
       prop1_tel: form.propietarios[0]?.tel,
     };
-    const res = await fetch("/api/encargos", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+    const apiKey = process.env.NEXT_PUBLIC_INTERNAL_API_KEY || "";
+    const res = await fetch("/api/encargos", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` }, body: JSON.stringify(payload) });
     const data = await res.json();
     if (data.ok) { setShowForm(false); setForm(FORM_INIT); await load(); }
     setSaving(false);

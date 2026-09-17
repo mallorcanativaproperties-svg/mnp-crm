@@ -20,7 +20,11 @@ const TIPO_MAP = { "0":"Piso","1":"Casa","2":"Finca rustica","3":"Local comercia
 const CERT_MAP = { "1":"A","2":"B","3":"C","4":"D","5":"E","6":"F","7":"G","11":"En tramite","12":"Exento" };
 const FLOOR_MAP = { "bj":"Bajo","en":"Entreplanta","ss":"Semisotano","so":"Sotano" };
 
-export async function GET() {
+export async function GET(request) {
+  const auth = request.headers.get("authorization");
+  if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   try {
     const supabase = getSupabase();
 

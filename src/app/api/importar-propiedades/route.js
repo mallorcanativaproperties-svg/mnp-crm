@@ -28,7 +28,11 @@ async function uploadFoto(imageUrl, ref, index) {
   }
 }
 
-export async function GET() {
+export async function GET(request) {
+  const auth = request.headers.get("authorization");
+  if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   try {
     // 1. Obtener propiedades de WordPress
     const wpRes = await fetch(WP_ENDPOINT);
