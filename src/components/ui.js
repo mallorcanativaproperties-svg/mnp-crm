@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 
 export function Tag({ children, color }) {
   const c = color || "#AC8A54";
