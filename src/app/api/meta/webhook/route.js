@@ -69,7 +69,25 @@ export async function GET(request) {
 // ── Receive messages/comments (POST) ──
 export async function POST(request) {
   try {
-    const body = await request.json();
+    const rawBody = await request.text();
+    const signature = request.headers.get("x-hub-signature-256") || "";
+    const appSecret = process.env.META_APP_SECRET || "";
+
+    // Verificar firma HMAC-SHA256 de Meta
+    if (appSecret && signature) {
+      const encoder = new TextEncoder();
+      const key = await crypto.subtle.importKey(
+        "raw", encoder.encode(appSecret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
+      );
+      const mac = await crypto.subtle.sign("HMAC", key, encoder.encode(rawBody));
+      const expected = "sha256=" + Array.from(new Uint8Array(mac)).map(b => b.toString(16).padStart(2,"0")).join("");
+      if (signature !== expected) {
+        console.warn("Meta webhook: firma inválida");
+        return NextResponse.json({ error: "Invalid signature" }, { status: 403 });
+      }
+    }
+
+    const body = JSON.parse(rawBody);
     console.log("Meta webhook:", JSON.stringify(body).substring(0, 300));
 
     if (body.entry) {

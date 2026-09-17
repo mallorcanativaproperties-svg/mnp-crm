@@ -114,7 +114,11 @@ async function triggerRedeploy() {
 
 // GET /api/token-refresh — verificar estado del token
 // POST /api/token-refresh — forzar renovación
-export async function GET() {
+export async function GET(request) {
+  const auth = request.headers.get("authorization");
+  if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   const check = await verifyCurrentToken();
   return NextResponse.json({
     ok: check.valid,
@@ -124,6 +128,10 @@ export async function GET() {
 }
 
 export async function POST(request) {
+  const auth = request.headers.get("authorization");
+  if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   try {
     const body = await request.json().catch(() => ({}));
     const force = body.force === true;
