@@ -1772,12 +1772,7 @@ REGLAS:
             <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.1 }}>
               Ficha de <em>Propiedad</em>
             </h1>
-            <div style={{ fontSize: 11, color: "#9A968A", marginTop: 8 }}>
-              {puedeEditar
-                ? <><span style={{ color: "#A23A3A", fontSize: 13, fontWeight: 700 }}>*</span> Sincronizado con Idealista</>
-                : <span style={{ color: "#A23A3A", fontWeight: 600 }}>🔒 Solo lectura — no eres el agente de esta propiedad</span>
-              }
-            </div>
+            <p style={{ fontSize: 12, color: "#9A968A", margin: "10px 0 0", letterSpacing: "0.04em" }}>Completa y publica la ficha desde el CRM. Los campos marcados con * se sincronizan con Idealista.</p>
           </div>
           {/* Botones de acción en header */}
           <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
@@ -1857,42 +1852,60 @@ REGLAS:
           {editMode ? (
             <>
               {/* Fila: REF + Operación + Tipo */}
-              <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 12, flexWrap: "wrap" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, background: "#F8F6F1", border: "1px solid " + (idealistaFieldErrors.has("ref") ? "#A23A3A" : "#E7E1D4"), padding: "6px 12px" }}>
-                  <span style={{ fontSize: 9, fontWeight: 700, color: "#AC8A54", letterSpacing: "0.15em", textTransform: "uppercase" }}>Ref</span>
-                  <span style={{ color: "#A23A3A", fontSize: 12 }}>*</span>
-                  <input type="text" value={d.ref || ""} onChange={e => upd("ref", e.target.value)}
-                    style={{ width: 110, background: "transparent", border: "none", outline: "none", color: "#16294A", padding: 0, fontSize: 12, fontFamily: "Inter, sans-serif", fontWeight: 700 }} />
+              {/* Título — primero, igual que en el formulario */}
+              <input type="text" value={d.titulo || ""} onChange={e => upd("titulo", e.target.value)} placeholder="Título de la propiedad"
+                style={{ width: "100%", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "10px 14px", fontSize: 20, fontFamily: "'Playfair Display', serif", marginBottom: 16, boxSizing: "border-box" }} />
+
+              {/* Agente, Referencia, Tipo operación — misma estética que formulario */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0 16px" }}>
+                <div style={{ marginBottom: 14 }}>
+                  <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
+                    Agente captador<span style={{ color: "#9C6E1B", marginLeft: 3 }}>*</span>
+                  </label>
+                  <select value={d.agente || ""} onChange={async e => {
+                    const agente = e.target.value;
+                    upd("agente", agente);
+                    if (agente) {
+                      const newRef = await reasignarRef(agente, d.ref);
+                      if (newRef) upd("ref", newRef);
+                    }
+                  }}
+                    style={{ width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" }}>
+                    <option value="">Seleccionar agente...</option>
+                    {AGENTES_LIST.map(a => <option key={a} value={a}>{a}</option>)}
+                  </select>
                 </div>
-                <select value={d.op || "Compraventa"} onChange={e => upd("op", e.target.value)}
-                  style={{ background: "#FFFFFF", border: "1px solid " + (idealistaFieldErrors.has("op") ? "#A23A3A" : "#E7E1D4"), borderRadius: 0, color: "#22262E", padding: "6px 12px", fontSize: 12, fontFamily: "Inter, sans-serif", cursor: "pointer", fontWeight: 500 }}>
-                  {OPS_LIST.map(o => <option key={o} value={o}>{o}</option>)}
-                </select>
-                <select value={d.tipo || ""} onChange={e => upd("tipo", e.target.value)}
-                  style={{ background: "#FFFFFF", border: "1px solid " + (idealistaFieldErrors.has("tipo") ? "#A23A3A" : "#E7E1D4"), borderRadius: 0, color: "#22262E", padding: "6px 12px", fontSize: 12, fontFamily: "Inter, sans-serif", cursor: "pointer", fontWeight: 500 }}>
-                  <option value="">-- Tipo *</option>
-                  {TIPOS_LIST.map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
+                <div style={{ marginBottom: 14 }}>
+                  <label style={{ fontSize: 10, fontWeight: 600, color: idealistaFieldErrors.has("ref") ? "#A23A3A" : "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
+                    Referencia<span style={{ color: "#9C6E1B", marginLeft: 3 }}>*</span>
+                  </label>
+                  <input type="text" value={d.ref || ""} onChange={e => upd("ref", e.target.value)}
+                    style={{ width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid " + (d.ref ? "#6AAF8D44" : "#E7E1D4"), borderRadius: 0, color: d.ref ? "#2C6E52" : "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", fontWeight: 700, boxSizing: "border-box" }} />
+                </div>
+                <div style={{ marginBottom: 14 }}>
+                  <label style={{ fontSize: 10, fontWeight: 600, color: idealistaFieldErrors.has("op") ? "#A23A3A" : "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
+                    Tipo de operacion<span style={{ color: "#9C6E1B", marginLeft: 3 }}>*</span>
+                  </label>
+                  <select value={d.op || "Compraventa"} onChange={e => upd("op", e.target.value)}
+                    style={{ width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid " + (idealistaFieldErrors.has("op") ? "#A23A3A" : "#2A2926"), borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" }}>
+                    {OPS_LIST.map(o => <option key={o} value={o}>{o}</option>)}
+                  </select>
+                </div>
               </div>
 
-              {/* Título */}
-              <input type="text" value={d.titulo || ""} onChange={e => upd("titulo", e.target.value)} placeholder="Título de la propiedad"
-                style={{ width: "100%", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "10px 14px", fontSize: 20, fontFamily: "'Playfair Display', serif", marginBottom: 12, boxSizing: "border-box" }} />
-
-              {/* Agente */}
-              <div style={{ display: "flex", gap: 10, alignItems: "center", background: "#F8F6F1", border: "1px solid #E7E1D4", padding: "8px 14px" }}>
-                <span style={{ fontSize: 9, fontWeight: 700, color: "#9A968A", letterSpacing: "0.15em", textTransform: "uppercase", flexShrink: 0 }}>Agente captador</span>
-                <select value={d.agente || ""} onChange={async e => {
-                  const agente = e.target.value;
-                  upd("agente", agente);
-                  if (agente) {
-                    const newRef = await reasignarRef(agente, d.ref);
-                    if (newRef) upd("ref", newRef);
-                  }
-                }}
-                  style={{ background: "transparent", border: "none", outline: "none", color: "#22262E", padding: 0, fontSize: 12, fontFamily: "Inter, sans-serif", fontWeight: 600, cursor: "pointer", flex: 1 }}>
-                  <option value="">Seleccionar agente</option>
-                  {AGENTES_LIST.map(a => <option key={a} value={a}>{a}</option>)}
+              {/* Tipo de propiedad — ancho completo con groups, igual que formulario */}
+              <div style={{ marginBottom: 14 }}>
+                <label style={{ fontSize: 10, fontWeight: 600, color: idealistaFieldErrors.has("tipo") ? "#A23A3A" : "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
+                  Tipo de propiedad<span style={{ color: "#9C6E1B", marginLeft: 3 }}>*</span>
+                </label>
+                <select value={d.tipo || ""} onChange={e => upd("tipo", e.target.value)}
+                  style={{ width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid " + (idealistaFieldErrors.has("tipo") ? "#A23A3A" : "#2A2926"), borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" }}>
+                  <option value="">Seleccionar tipo...</option>
+                  {TIPO_GROUPS.map(g => (
+                    <optgroup key={g.label} label={g.label}>
+                      {g.items.map(t => <option key={t} value={t}>{t}</option>)}
+                    </optgroup>
+                  ))}
                 </select>
               </div>
             </>
