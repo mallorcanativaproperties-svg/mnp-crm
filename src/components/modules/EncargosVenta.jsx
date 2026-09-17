@@ -183,8 +183,8 @@ export default function EncargosVenta() {
   }
 
   async function load() {
-    const apiKey = process.env.NEXT_PUBLIC_INTERNAL_API_KEY || "";
-    const res = await fetch("/api/encargos", { headers: { "Authorization": `Bearer ${apiKey}` } });
+    const userLogin = localStorage.getItem("mnp_user_login") || "";
+    const res = await fetch("/api/encargos", { headers: { "x-user-login": userLogin } });
     const data = await res.json();
     if (data.ok) setEncargos(data.data);
     setLoading(false);
@@ -218,8 +218,8 @@ export default function EncargosVenta() {
       prop1_nombre: form.propietarios[0]?.nombre,
       prop1_tel: form.propietarios[0]?.tel,
     };
-    const apiKey = process.env.NEXT_PUBLIC_INTERNAL_API_KEY || "";
-    const res = await fetch("/api/encargos", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` }, body: JSON.stringify(payload) });
+    const userLogin = localStorage.getItem("mnp_user_login") || "";
+    const res = await fetch("/api/encargos", { method: "POST", headers: { "Content-Type": "application/json", "x-user-login": userLogin }, body: JSON.stringify(payload) });
     const data = await res.json();
     if (data.ok) { setShowForm(false); setForm(FORM_INIT); await load(); }
     setSaving(false);

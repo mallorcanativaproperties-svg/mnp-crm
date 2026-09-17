@@ -109,6 +109,16 @@ function LoadingModule() {
 
 export default function CRMApp() {
   const [currentUser, setCurrentUser] = useState(null);
+
+  function handleLogin(userData) {
+    localStorage.setItem("mnp_user_login", userData.user_login || "");
+    setCurrentUser(userData);
+  }
+
+  function handleLogout() {
+    localStorage.removeItem("mnp_user_login");
+    setCurrentUser(null);
+  }
   const [activeModule, setActiveModule] = useState("captacion");
   const [sidebarOpen, setSidebarOpen] = useState(typeof window !== "undefined" ? window.innerWidth > 768 : true);
   const [expandedGroups, setExpandedGroups] = useState({ "Propiedades": true, "Compradores": true, "Redes Sociales": true, "Agentes IA": true, "Gestión": true });
@@ -151,7 +161,7 @@ export default function CRMApp() {
   }, [currentUser]);
 
   if (!currentUser) {
-    return <LoginScreen onLogin={setCurrentUser} />;
+    return <LoginScreen onLogin={handleLogin} />;
   }
 
   const isDirector = currentUser.role === "director";
@@ -315,12 +325,12 @@ export default function CRMApp() {
             <div>
               <div style={{ fontSize: 12, color: "#FFFFFF", fontWeight: 500 }}>{currentUser.nombre}</div>
               <div style={{ fontSize: 9, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.08em", marginTop: 2 }}>{isDirector ? "Director" : "Agente"}</div>
-              <button onClick={() => setCurrentUser(null)} style={{ marginTop: 8, padding: "5px 12px", borderRadius: 0, border: "1px solid #2A2926", background: "transparent", color: "#9A968A", cursor: "pointer", fontSize: 9, textTransform: "uppercase", fontFamily: "Inter, sans-serif", width: "100%" }}>
+              <button onClick={handleLogout} style={{ marginTop: 8, padding: "5px 12px", borderRadius: 0, border: "1px solid #2A2926", background: "transparent", color: "#9A968A", cursor: "pointer", fontSize: 9, textTransform: "uppercase", fontFamily: "Inter, sans-serif", width: "100%" }}>
                 Cerrar sesion
               </button>
             </div>
           ) : (
-            <button onClick={() => setCurrentUser(null)} style={{ background: "none", border: "none", color: "#9A968A", cursor: "pointer", fontSize: 10, width: "100%", textAlign: "center" }} title="Cerrar sesion">✕</button>
+            <button onClick={handleLogout} style={{ background: "none", border: "none", color: "#9A968A", cursor: "pointer", fontSize: 10, width: "100%", textAlign: "center" }} title="Cerrar sesion">✕</button>
           )}
         </div>
       </div>
