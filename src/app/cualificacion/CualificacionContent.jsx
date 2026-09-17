@@ -158,6 +158,87 @@ function interpretarPresupuesto(raw) {
 }
 
 // Componentes fuera del render para evitar re-mount con teclado móvil
+
+// ═══ ZONAS ══════════════════════════════════════════════════════
+const ZONAS_MAP_F = {
+  "Palma": ["Casco Antiguo","Santa Catalina","El Terreno","Son Espanyolet","Son Cotoner","Son Dameto","La Bonanova","Genova","Cala Major","Son Rapinya","La Vileta","Pere Garau","Foners","Plaza de Toros","Son Gotleu","La Soledad","Vivero","Son Oliva","Rafal","Son Cladera","Son Ferriol","Sant Jordi","Can Pastilla","Coll den Rabassa","Nou Llevant","SIndioteria","SAranjassa","Es Pilari","Amanecer","Son Sardina","Establiments","Secar de la Real"],
+  "Calvia": ["Palmanova","Magaluf","Santa Ponsa","Peguera","Illetes","Portals Nous","Bendinat","Calvia Vila","Costa de la Calma","Son Ferrer","El Toro"],
+  "Marratxi": ["Portol","Sa Cabaneta","Pont dInca","Es Figueral","Sa Cabana"],
+  "Inca": ["Centro","Poligono","Afueras"],
+  "Manacor": ["Centro","Porto Cristo","Cala Murada"],
+  "Llucmajor": ["Centro","SArenal","Bahia Grande","Cala Pi","Sa Torre"],
+  "Andratx": ["Puerto de Andratx","Camp de Mar","Sant Elm"],
+  "Soller": ["Centro","Puerto de Soller"],
+  "Alcudia": ["Centro","Puerto de Alcudia"],
+  "Pollensa": ["Centro","Puerto de Pollensa"],
+  "Santa Maria": ["Centro"], "Esporles": ["Centro"], "Alaro": ["Centro"],
+  "Arta": ["Centro","Colonia de Sant Pere"], "Felanitx": ["Centro","Portocolom"],
+  "Santanyi": ["Centro","Cala dOr","Cala Figuera"], "Campos": ["Centro","Sa Rapita"],
+  "Bunyola": ["Centro"], "Algaida": ["Centro"], "Sencelles": ["Centro"],
+  "Binissalem": ["Centro"], "Sineu": ["Centro"], "Consell": ["Centro"], "Lloseta": ["Centro"],
+};
+
+function SelectorZonasForm({ value = [], onChange, tipo = "deseada", idioma = "es" }) {
+  const [muniSel, setMuniSel] = useState("");
+  const accentColor = tipo === "deseada" ? "#AC8A54" : "#A23A3A";
+  const accentBg    = tipo === "deseada" ? "#C8A97E15" : "#D4545415";
+  const prefix      = tipo === "excluida" ? "✕ " : "";
+  const municipios  = Object.keys(ZONAS_MAP_F);
+  const zonasDeMuni = muniSel ? (ZONAS_MAP_F[muniSel] || []) : [];
+
+  const labelMuni = idioma === "de" ? "Gemeinde..." : idioma === "nl" ? "Gemeente..." : idioma === "fr" ? "Commune..." : idioma === "en" ? "Municipality..." : "Municipio...";
+  const labelTodo = idioma === "de" ? "+ Ganz " : idioma === "nl" ? "+ Heel " : idioma === "fr" ? "+ Tout " : idioma === "en" ? "+ All " : "+ Todo ";
+
+  function toggleZona(etiqueta) {
+    if (value.includes(etiqueta)) onChange(value.filter(z => z !== etiqueta));
+    else onChange([...value, etiqueta]);
+  }
+  function addMuni(muni) {
+    if (!value.includes(muni)) onChange([...value, muni]);
+  }
+
+  return (
+    <div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: value.length > 0 ? 10 : 0 }}>
+        {value.map((z, i) => (
+          <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 13, padding: "6px 12px", background: accentBg, color: accentColor, border: "1px solid " + accentColor + "44", cursor: "pointer" }}
+            onClick={() => onChange(value.filter(x => x !== z))}>
+            {prefix}{z} <span style={{ fontWeight: 700, opacity: 0.6 }}>×</span>
+          </span>
+        ))}
+      </div>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
+        <select value={muniSel} onChange={e => setMuniSel(e.target.value)}
+          style={{ flex: 1, minWidth: 140, padding: "12px 16px", background: "#FFFFFF", border: "1px solid #DDD8D0", borderRadius: 0, color: muniSel ? "#1a2528" : "#9A968A", fontSize: 15, fontFamily: "Inter, sans-serif", cursor: "pointer" }}>
+          <option value="">+ {labelMuni}</option>
+          {municipios.map(m => <option key={m} value={m}>{m}</option>)}
+        </select>
+        {muniSel && (
+          <button type="button" onClick={() => addMuni(muniSel)}
+            style={{ padding: "12px 16px", border: "1px solid " + accentColor + "44", background: "transparent", color: accentColor, fontSize: 13, cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600, whiteSpace: "nowrap" }}>
+            {labelTodo}{muniSel}
+          </button>
+        )}
+      </div>
+      {muniSel && zonasDeMuni.length > 0 && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          {zonasDeMuni.map(z => {
+            const etiqueta = muniSel + " · " + z;
+            const sel = value.includes(etiqueta);
+            return (
+              <button key={z} type="button" onClick={() => toggleZona(etiqueta)}
+                style={{ padding: "6px 12px", border: "1px solid " + (sel ? accentColor : "#DDD8D0"), background: sel ? accentBg : "transparent", color: sel ? accentColor : "#6B7280", fontSize: 13, cursor: "pointer", fontFamily: "Inter, sans-serif", transition: "all 0.15s" }}>
+                {sel ? "✓ " : ""}{z}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+// ════════════════════════════════════════════════════════════════
+
 function Divider() {
   return <div style={{ height: 1, background: BD, margin: "32px 0" }} />;
 }
@@ -269,8 +350,8 @@ export default function CualificacionCompradores() {
   const [presupuesto, setPresupuesto]   = useState("");
   const [finalidad, setFinalidad]       = useState("");
   const [habitaciones, setHabitaciones] = useState("");
-  const [zonaDeseada, setZonaDeseada]   = useState("");
-  const [zonaExcluida, setZonaExcluida] = useState("");
+  const [zonaDeseada, setZonaDeseada]   = useState([]);
+  const [zonaExcluida, setZonaExcluida] = useState([]);
   const [alturaMax, setAlturaMax]       = useState("");
   const [requisitos, setRequisitos]     = useState("");
   const [pais, setPais]                 = useState("España");
@@ -278,7 +359,7 @@ export default function CualificacionCompradores() {
 
   const ppto = presupuesto ? interpretarPresupuesto(presupuesto) : 0;
   const camposValidos = email && nombre && telefono && financiacion &&
-    ppto > 0 && finalidad && habitaciones && zonaDeseada && alturaMax && requisitos && rgpdAceptado;
+    ppto > 0 && finalidad && habitaciones && zonaDeseada.length > 0 && alturaMax && requisitos && rgpdAceptado;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -294,9 +375,9 @@ export default function CualificacionCompradores() {
         })(),
         financiacion,
         presupuesto: ppto, finalidad, habitaciones,
-        zona_deseada: zonaDeseada.split(",").map(z => z.trim()).filter(Boolean),
+        zona_deseada: zonaDeseada,
         pais,
-        zona_excluida: zonaExcluida.split(",").map(z => z.trim()).filter(Boolean), altura_max: alturaMax, requisitos,
+        zona_excluida: zonaExcluida, altura_max: alturaMax, requisitos,
         estado: "activo", origen: "formulario_web",
         consentimiento_rgpd: new Date().toISOString(),
         created_at: new Date().toISOString(),
@@ -479,16 +560,12 @@ export default function CualificacionCompradores() {
               placeholder="ej. 2, 3, o mínimo 2" style={INP} />
           </Field>
 
-          <Field label="Zonas donde te gustaría vivir" required hint="Separa las zonas por comas si son varias">
-            <textarea value={zonaDeseada} onChange={e => setZonaDeseada(e.target.value)}
-              placeholder="ej. Palma centro, Portixol, Santa Catalina, Marratxí..."
-              style={{ ...INP, minHeight: 90, resize: "vertical", lineHeight: 1.65 }} />
+          <Field label={idioma === "de" ? "Gewünschte Zonen" : idioma === "nl" ? "Gewenste zones" : idioma === "fr" ? "Zones souhaitées" : idioma === "en" ? "Preferred areas" : "Zonas donde te gustaría vivir"} required>
+            <SelectorZonasForm value={zonaDeseada} onChange={setZonaDeseada} tipo="deseada" idioma={idioma} />
           </Field>
 
-          <Field label="Zonas que descartas" hint="Opcional — separa por comas si son varias">
-            <textarea value={zonaExcluida} onChange={e => setZonaExcluida(e.target.value)}
-              placeholder="ej. Son Gotleu, Corea..."
-              style={{ ...INP, minHeight: 70, resize: "vertical", lineHeight: 1.65 }} />
+          <Field label={idioma === "de" ? "Ausgeschlossene Zonen" : idioma === "nl" ? "Uitgesloten zones" : idioma === "fr" ? "Zones exclues" : idioma === "en" ? "Areas to exclude" : "Zonas que descartas"} hint={idioma === "en" ? "Optional" : idioma === "de" ? "Optional" : idioma === "nl" ? "Optioneel" : idioma === "fr" ? "Optionnel" : "Opcional"}>
+            <SelectorZonasForm value={zonaExcluida} onChange={setZonaExcluida} tipo="excluida" idioma={idioma} />
           </Field>
 
           <Field label="¿Hasta qué planta comprarías sin ascensor?" required>

@@ -408,25 +408,32 @@ export default function MotorCruce() {
     const ppto = Number(buyer.ppto) || 0;
     if (ppto > 0 && precio > 0 && (precio > ppto + 30000 || precio < ppto - 30000)) return false;
 
-    // 2. Zonas: si el comprador tiene zonas deseadas, al menos una debe coincidir con municipio o zona
-    if (buyer.zd.length > 0) {
-      const ml = (prop.municipio || "").toLowerCase();
-      const zl = (prop.zona || "").toLowerCase();
-      const zonaOk = buyer.zd.some((z) => {
-        const bz = z.toLowerCase().trim();
-        return ml.includes(bz) || bz.includes(ml) || zl.includes(bz) || bz.includes(zl);
-      });
+    // Helper: comprueba si una etiqueta de zona del comprador coincide con municipio+zona de la propiedad
+    // Las etiquetas pueden ser "Municipio · Zona" (formato nuevo) o texto libre (retrocompatibilidad)
+    function zonaCoincide(etiqueta, municipio, zona) {
+      const e = etiqueta.toLowerCase().trim();
+      const m = (municipio || "").toLowerCase().trim();
+      const z = (zona || "").toLowerCase().trim();
+      // Formato nuevo: "Municipio · Zona" — match exacto
+      if (e.includes(" · ")) {
+        const [eMuni, eZona] = e.split(" · ").map(s => s.trim());
+        return m === eMuni && (!eZona || z === eZona);
+      }
+      // Solo municipio seleccionado (botón "Todo municipio")
+      if (m === e) return true;
+      // Retrocompatibilidad: texto libre fuzzy
+      return m.includes(e) || e.includes(m) || z.includes(e) || e.includes(z);
+    }
+
+    // 2. Zonas deseadas: al menos una debe coincidir
+    if (buyer.zd && buyer.zd.length > 0) {
+      const zonaOk = buyer.zd.some(z => zonaCoincide(z, prop.municipio, prop.zona));
       if (!zonaOk) return false;
     }
 
-    // 2b. Zonas excluidas
+    // 2b. Zonas excluidas: ninguna debe coincidir
     if (buyer.ze && buyer.ze.length > 0) {
-      const ml = (prop.municipio || "").toLowerCase();
-      const zl = (prop.zona || "").toLowerCase();
-      const excluida = buyer.ze.some((z) => {
-        const bz = z.toLowerCase().trim();
-        return ml.includes(bz) || bz.includes(ml) || zl.includes(bz) || bz.includes(zl);
-      });
+      const excluida = buyer.ze.some(z => zonaCoincide(z, prop.municipio, prop.zona));
       if (excluida) return false;
     }
 

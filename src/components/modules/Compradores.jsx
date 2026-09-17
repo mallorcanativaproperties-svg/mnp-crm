@@ -2,6 +2,114 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 
+
+// ═══ MAPA DE MUNICIPIOS Y ZONAS (igual que en Propiedades) ═══
+const ZONAS_MAP = {
+  "Palma": ["Casco Antiguo","Santa Catalina","El Terreno","Son Espanyolet","Son Cotoner","Son Dameto","La Bonanova","Genova","Cala Major","Son Rapinya","La Vileta","Pere Garau","Foners","Plaza de Toros","Son Gotleu","La Soledad","Vivero","Son Oliva","Rafal","Son Cladera","Son Ferriol","Sant Jordi","Can Pastilla","Coll den Rabassa","Nou Llevant","SIndioteria","SAranjassa","Es Pilari","Amanecer","Son Sardina","Establiments","Secar de la Real"],
+  "Calvia": ["Palmanova","Magaluf","Santa Ponsa","Peguera","Illetes","Portals Nous","Bendinat","Calvia Vila","Costa de la Calma","Son Ferrer","El Toro"],
+  "Marratxi": ["Portol","Sa Cabaneta","Pont dInca","Es Figueral","Sa Cabana"],
+  "Inca": ["Centro","Poligono","Afueras"],
+  "Manacor": ["Centro","Porto Cristo","Cala Murada"],
+  "Llucmajor": ["Centro","SArenal","Bahia Grande","Cala Pi","Sa Torre"],
+  "Andratx": ["Puerto de Andratx","Camp de Mar","Sant Elm"],
+  "Soller": ["Centro","Puerto de Soller"],
+  "Alcudia": ["Centro","Puerto de Alcudia"],
+  "Pollensa": ["Centro","Puerto de Pollensa"],
+  "Santa Maria": ["Centro"],
+  "Esporles": ["Centro"],
+  "Alaro": ["Centro"],
+  "Arta": ["Centro","Colonia de Sant Pere"],
+  "Felanitx": ["Centro","Portocolom"],
+  "Santanyi": ["Centro","Cala dOr","Cala Figuera"],
+  "Campos": ["Centro","Sa Rapita"],
+  "Bunyola": ["Centro"],
+  "Algaida": ["Centro"],
+  "Sencelles": ["Centro"],
+  "Binissalem": ["Centro"],
+  "Sineu": ["Centro"],
+  "Consell": ["Centro"],
+  "Lloseta": ["Centro"],
+};
+const MUNICIPIOS = Object.keys(ZONAS_MAP);
+
+// Selector de zonas con etiquetas — responsive, multiselección por municipio
+function SelectorZonas({ value = [], onChange, tipo = "deseada", disabled = false }) {
+  const [muniSel, setMuniSel] = useState("");
+  const [open, setOpen] = useState(false);
+  const accentColor = tipo === "deseada" ? "#AC8A54" : "#A23A3A";
+  const accentBg    = tipo === "deseada" ? "#C8A97E0D" : "#D4545408";
+  const accentBorder= tipo === "deseada" ? "#C8A97E33" : "#D4545433";
+  const prefix      = tipo === "excluida" ? "✕ " : "";
+
+  const zonasDeMuni = muniSel && ZONAS_MAP[muniSel] ? ZONAS_MAP[muniSel] : [];
+
+  function toggleZona(etiqueta) {
+    if (value.includes(etiqueta)) {
+      onChange(value.filter(z => z !== etiqueta));
+    } else {
+      onChange([...value, etiqueta]);
+    }
+  }
+
+  function addMuni(muni) {
+    if (!value.includes(muni)) onChange([...value, muni]);
+  }
+
+  function removeZona(etiqueta) {
+    onChange(value.filter(z => z !== etiqueta));
+  }
+
+  return (
+    <div style={{ fontFamily: "Inter, sans-serif" }}>
+      {/* Etiquetas seleccionadas */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: value.length > 0 ? 10 : 0 }}>
+        {value.map((z, i) => (
+          <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, padding: "4px 10px", background: accentBg, color: accentColor, border: "1px solid " + accentBorder, cursor: disabled ? "default" : "pointer" }}>
+            {prefix}{z}
+            {!disabled && <span onClick={() => removeZona(z)} style={{ marginLeft: 2, fontWeight: 700, opacity: 0.7, lineHeight: 1 }}>×</span>}
+          </span>
+        ))}
+      </div>
+
+      {!disabled && (
+        <div>
+          {/* Selector de municipio */}
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <select value={muniSel} onChange={e => { setMuniSel(e.target.value); setOpen(true); }}
+              style={{ flex: 1, minWidth: 140, padding: "8px 12px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: muniSel ? "#22262E" : "#9A968A", fontSize: 12, fontFamily: "Inter, sans-serif", cursor: "pointer" }}>
+              <option value="">+ Municipio...</option>
+              {MUNICIPIOS.map(m => <option key={m} value={m}>{m}</option>)}
+            </select>
+            {muniSel && (
+              <button onClick={() => addMuni(muniSel)}
+                style={{ padding: "8px 14px", border: "1px solid " + accentBorder, background: "transparent", color: accentColor, fontSize: 11, cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600, whiteSpace: "nowrap" }}>
+                + Todo {muniSel}
+              </button>
+            )}
+          </div>
+
+          {/* Zonas del municipio seleccionado */}
+          {muniSel && zonasDeMuni.length > 0 && (
+            <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 5 }}>
+              {zonasDeMuni.map(z => {
+                const etiqueta = muniSel + " · " + z;
+                const sel = value.includes(etiqueta);
+                return (
+                  <button key={z} onClick={() => toggleZona(etiqueta)}
+                    style={{ padding: "4px 10px", border: "1px solid " + (sel ? accentColor : "#E7E1D4"), background: sel ? accentBg : "transparent", color: sel ? accentColor : "#9A968A", fontSize: 11, cursor: "pointer", fontFamily: "Inter, sans-serif", transition: "all 0.15s" }}>
+                    {sel ? "✓ " : ""}{z}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+// ════════════════════════════════════════════════════════════════
+
 function mapBuyerDb(row) {
   return {
     id: row.id, ts: row.created_at ? new Date(row.created_at).toLocaleDateString("es-ES") : "", 
@@ -795,18 +903,10 @@ function Detail({ b, onClose, onSave, onDelete, onWhatsApp, currentUser, puedeEl
         <div><L>Estado</L>{ed ? <select value={f.st} onChange={e => setF({ ...f, st: e.target.value })} style={iSt}>{ESTADOS.map(x => <option key={x.key} value={x.key}>{x.label}</option>)}</select> : <Badge color={est.accent}>{est.label}</Badge>}</div>
       </div>
       <div style={{ marginBottom: 20 }}><L>Zonas deseadas</L>
-        {ed
-          ? <input value={(f.zd || []).join(", ")} onChange={e => setF({ ...f, zd: e.target.value.split(",").map(z => z.trim()).filter(Boolean) })} onBlur={e => autoBlur({...f, zd: e.target.value.split(",").map(z => z.trim()).filter(Boolean)})} style={{ ...iSt, width: "100%" }} placeholder="Palma, Marratxí, Inca..." />
-          : <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>{b.zd.map((z, i) => <span key={i} style={{ fontSize: 11, padding: "4px 12px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E22" }}>{z}</span>)}</div>
-        }
+        <SelectorZonas value={ed ? (f.zd || []) : (b.zd || [])} onChange={zd => setF({ ...f, zd })} tipo="deseada" disabled={!ed} />
       </div>
       <div style={{ marginBottom: 20 }}><L>Zonas excluidas</L>
-        {ed
-          ? <input value={(f.ze || []).join(", ")} onChange={e => setF({ ...f, ze: e.target.value.split(",").map(z => z.trim()).filter(Boolean) })} onBlur={e => autoBlur({...f, ze: e.target.value.split(",").map(z => z.trim()).filter(Boolean)})} style={{ ...iSt, width: "100%" }} placeholder="Son Gotleu, Corea..." />
-          : b.ze.length > 0
-            ? <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>{b.ze.map((z, i) => <span key={i} style={{ fontSize: 11, padding: "4px 12px", borderRadius: 0, background: "#D4956A0D", color: "#9C6E1B", border: "1px solid #D4956A22" }}>✕ {z}</span>)}</div>
-            : <div style={{ fontSize: 13, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>—</div>
-        }
+        <SelectorZonas value={ed ? (f.ze || []) : (b.ze || [])} onChange={ze => setF({ ...f, ze })} tipo="excluida" disabled={!ed} />
       </div>
       <div style={{ marginBottom: 20 }}><L>Requisitos especiales</L>{ed ? <textarea value={f.req} onChange={e => setF({ ...f, req: e.target.value })} onBlur={e => autoBlur({...f, req: e.target.value})} style={{ ...iSt, minHeight: 80, resize: "vertical" }} /> : <div style={{ fontSize: 13, color: "#22262E", fontFamily: "Inter, sans-serif", lineHeight: 1.6, background: "#FFFFFF", padding: "14px 18px", borderRadius: 0 }}>{b.req || "—"}</div>}</div>
       <div style={{ marginBottom: 28 }}><L>Agente asignado</L>{ed ? <input value={f.ag} onChange={e => setF({ ...f, ag: e.target.value })} onBlur={e => autoBlur({...f, ag: e.target.value})} style={iSt} placeholder="Nombre del agente" /> : <div style={{ fontSize: 13, color: b.ag ? "#3D577E" : "#9A968A", fontFamily: "Inter, sans-serif" }}>{b.ag || "Sin asignar"}</div>}</div>
@@ -825,8 +925,8 @@ function Detail({ b, onClose, onSave, onDelete, onWhatsApp, currentUser, puedeEl
 }
 
 function NewBuyer({ onClose, onAdd }) {
-  const [f, setF] = useState({ nombre: "", email: "", tel: "", fin: "Sí", ppto: "", finalidad: "Primera vivienda", hab: "", zd: "", ze: "", alt: "", req: "", ag: "", pais: "España" });
-  const add = () => { onAdd({ ...f, id: Date.now(), ts: new Date().toLocaleDateString("es-ES"), ppto: +f.ppto || 0, zd: f.zd.split(",").map(z => z.trim()).filter(Boolean), ze: f.ze.split(",").map(z => z.trim()).filter(Boolean), st: "activo", pais: f.pais || "España" }); onClose(); };
+  const [f, setF] = useState({ nombre: "", email: "", tel: "", fin: "Sí", ppto: "", finalidad: "Primera vivienda", hab: "", zd: [], ze: [], alt: "", req: "", ag: "", pais: "España" });
+  const add = () => { onAdd({ ...f, id: Date.now(), ts: new Date().toLocaleDateString("es-ES"), ppto: +f.ppto || 0, zd: f.zd, ze: f.ze, st: "activo", pais: f.pais || "España" }); onClose(); };
   const iSt = { width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box", outline: "none" };
   const L = ({ children }) => <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 6, fontFamily: "Inter, sans-serif" }}>{children}</div>;
 
@@ -846,8 +946,8 @@ function NewBuyer({ onClose, onAdd }) {
         <div><L>Financiación</L><select value={f.fin} onChange={e => setF({ ...f, fin: e.target.value })} style={{ ...iSt, appearance: "auto" }}>{["Sí","No","Abierto"].map(x => <option key={x}>{x}</option>)}</select></div>
         <div><L>Altura máx.</L><input value={f.alt} onChange={e => setF({ ...f, alt: e.target.value })} style={iSt} /></div>
         <div><L>Agente</L><input value={f.ag} onChange={e => setF({ ...f, ag: e.target.value })} style={iSt} /></div>
-        <div style={{ gridColumn: "span 2" }}><L>Zonas deseadas (comas)</L><input value={f.zd} onChange={e => setF({ ...f, zd: e.target.value })} style={iSt} placeholder="Palma, Marratxí, Inca" /></div>
-        <div style={{ gridColumn: "span 2" }}><L>Zonas excluidas (comas)</L><input value={f.ze} onChange={e => setF({ ...f, ze: e.target.value })} style={iSt} placeholder="Son Gotleu, Corea" /></div>
+        <div style={{ gridColumn: "span 2" }}><L>Zonas deseadas</L><SelectorZonas value={f.zd} onChange={zd => setF({ ...f, zd })} tipo="deseada" /></div>
+        <div style={{ gridColumn: "span 2" }}><L>Zonas excluidas</L><SelectorZonas value={f.ze} onChange={ze => setF({ ...f, ze })} tipo="excluida" /></div>
         <div style={{ gridColumn: "span 2" }}><L>Requisitos</L><textarea value={f.req} onChange={e => setF({ ...f, req: e.target.value })} style={{ ...iSt, minHeight: 60, resize: "vertical" }} /></div>
       </div>
       <div style={{ display: "flex", gap: 12, justifyContent: "flex-end", marginTop: 28, borderTop: "1px solid #2A2926", paddingTop: 20 }}>
