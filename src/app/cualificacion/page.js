@@ -133,10 +133,11 @@ export default function CualificacionCompradores() {
   const [alturaMax, setAlturaMax]       = useState("");
   const [requisitos, setRequisitos]     = useState("");
   const [pais, setPais]                 = useState("España");
+  const [rgpdAceptado, setRgpdAceptado] = useState(false);
 
   const ppto = presupuesto ? interpretarPresupuesto(presupuesto) : 0;
   const camposValidos = email && nombre && telefono && financiacion &&
-    ppto > 0 && finalidad && habitaciones && zonaDeseada && alturaMax && requisitos;
+    ppto > 0 && finalidad && habitaciones && zonaDeseada && alturaMax && requisitos && rgpdAceptado;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -156,6 +157,7 @@ export default function CualificacionCompradores() {
         pais,
         zona_excluida: zonaExcluida.split(",").map(z => z.trim()).filter(Boolean), altura_max: alturaMax, requisitos,
         estado: "nuevo", origen: "formulario_web",
+        consentimiento_rgpd: new Date().toISOString(),
         created_at: new Date().toISOString(),
       });
       if (err) throw err;
@@ -356,6 +358,23 @@ export default function CualificacionCompradores() {
             </div>
           )}
 
+          {/* Consentimiento RGPD — obligatorio antes del envío */}
+          <label style={{ display: "flex", alignItems: "flex-start", gap: 12, cursor: "pointer", marginBottom: 20, padding: "14px 16px", background: "#F8F6F1", border: "1px solid #E7E1D4" }}>
+            <input
+              type="checkbox"
+              checked={rgpdAceptado}
+              onChange={e => setRgpdAceptado(e.target.checked)}
+              style={{ marginTop: 2, accentColor: "#AC8A54", width: 16, height: 16, flexShrink: 0, cursor: "pointer" }}
+            />
+            <span style={{ fontSize: 12, color: "#5C5852", lineHeight: 1.7, fontFamily: "Inter, sans-serif" }}>
+              He leído y acepto la{" "}
+              <a href="/privacy" target="_blank" rel="noopener noreferrer" style={{ color: "#AC8A54", textDecoration: "underline" }}>
+                Política de Privacidad
+              </a>
+              {" "}y consiento el tratamiento de mis datos personales por parte de Mallorca Nativa Properties (Mallorca Nativa S.L., CIF B75396234) con la finalidad de gestionar mi búsqueda inmobiliaria, de conformidad con el Reglamento (UE) 2016/679 (RGPD) y la LOPDGDD.
+            </span>
+          </label>
+
           <button type="submit" disabled={sending || !camposValidos} style={{
             width: "100%", padding: "17px 24px",
             background: (sending || !camposValidos) ? "#C8BFB5" : DK,
@@ -375,7 +394,8 @@ export default function CualificacionCompradores() {
           )}
 
           <p style={{ textAlign: "center", fontSize: 11, color: "#9A968A", marginTop: 20, lineHeight: 1.8, fontFamily: "Inter, sans-serif" }}>
-            Tus datos se tratarán con total confidencialidad y únicamente para ayudarte en tu búsqueda.
+            Puedes ejercer tus derechos de acceso, rectificación, supresión y oposición escribiendo a{" "}
+            <a href="mailto:mallorcanativaproperties@gmail.com" style={{ color: "#9A968A" }}>mallorcanativaproperties@gmail.com</a>
           </p>
         </form>
 
