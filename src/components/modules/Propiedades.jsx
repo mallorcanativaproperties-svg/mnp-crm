@@ -1455,14 +1455,13 @@ function PropDetail({ p, currentUser, onClose, onUpdate, onDelete, onDuplicate }
   const idealistaReady = idealistaFieldErrors.size === 0;
 
   function EFl({ label, field, pub, gold, type = "text", options, req }) {
-    const reqMark = req ? <span style={{color:"#A23A3A",marginLeft:3,fontSize:16,fontWeight:700,verticalAlign:"middle"}}> *</span> : "";
     const hasErr = editMode && idealistaFieldErrors.has(field);
-    const borderColor = hasErr ? "#A23A3A" : "#E7E1D4";
-    const inputStyle = { width: "100%", background: "#FFFFFF", border: "1px solid " + borderColor, borderRadius: 0, color: "#22262E", padding: "6px 8px", fontSize: 13, fontFamily: "Inter, sans-serif" };
+    const borderColor = hasErr ? "#A23A3A" : "#2A2926";
+    const inputStyle = { width: "100%", background: "#FFFFFF", border: "1px solid " + borderColor, borderRadius: 0, color: "#22262E", padding: "10px 14px", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" };
 
     return (
-      <div style={{ marginBottom: 10 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
+      <div style={{ marginBottom: 14 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 5 }}>
           <span style={{ fontSize: 10, fontWeight: 600, color: hasErr ? "#A23A3A" : "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>{label}</span>
           {req && <span style={{ color: "#A23A3A", fontSize: 14, fontWeight: 700 }}>*</span>}
         </div>
@@ -1980,10 +1979,10 @@ REGLAS:
             {/* Municipio — desplegable con ZONAS_MAP */}
             {(() => {
               const hasErr = editMode && idealistaFieldErrors.has("municipio");
-              const inputStyle = { width: "100%", background: "#FFFFFF", border: `1px solid ${hasErr ? "#A23A3A" : "#E7E1D4"}`, borderRadius: 0, color: "#22262E", padding: "6px 8px", fontSize: 13, fontFamily: "Inter, sans-serif" };
+              const inputStyle = { width: "100%", background: "#FFFFFF", border: `1px solid ${hasErr ? "#A23A3A" : "#2A2926"}`, borderRadius: 0, color: "#22262E", padding: "10px 14px", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" };
               return (
-                <div style={{ marginBottom: 10 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 2 }}>
+                <div style={{ marginBottom: 14 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 5 }}>
                     <span style={{ fontSize: 10, fontWeight: 600, color: hasErr ? "#A23A3A" : "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>Municipio</span>
                     <span style={{ color: "#A23A3A", fontSize: 14, fontWeight: 700 }}>*</span>
                   </div>
@@ -1998,10 +1997,10 @@ REGLAS:
             {/* Zona — dependiente del municipio seleccionado */}
             {(() => {
               const zonaOpts = d.municipio && ZONAS_MAP[d.municipio] ? ZONAS_MAP[d.municipio] : [];
-              const inputStyle = { width: "100%", background: "#FFFFFF", border: "1px solid #E7E1D4", borderRadius: 0, color: "#22262E", padding: "6px 8px", fontSize: 13, fontFamily: "Inter, sans-serif" };
+              const inputStyle = { width: "100%", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "10px 14px", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" };
               return (
-                <div style={{ marginBottom: 10 }}>
-                  <div style={{ marginBottom: 2 }}>
+                <div style={{ marginBottom: 14 }}>
+                  <div style={{ marginBottom: 5 }}>
                     <span style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>Zona</span>
                   </div>
                   <select value={d.zona || ""} onChange={e => upd("zona", e.target.value)} onBlur={() => autoSave(draft)} style={inputStyle} disabled={zonaOpts.length === 0}>
