@@ -8,6 +8,7 @@ const CODIGOS = ["MNSLA", "MNSKB", "MNAQA", "MNJAC", "MNGET"];
 
 export default function Usuarios({ currentUser }) {
   const [usuarios, setUsuarios] = useState([]);
+  const [mostrarInactivos, setMostrarInactivos] = useState(false);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(null); // null | "nuevo" | usuario
   const [form, setForm] = useState({});
@@ -79,6 +80,18 @@ export default function Usuarios({ currentUser }) {
 
   async function toggleActivo(u) {
     await supabase.from("usuarios").update({ activo: !u.activo }).eq("id", u.id);
+    setUsuarios(us => us.map(x => x.id === u.id ? { ...x, activo: !u.activo } : x));
+  }
+
+  async function eliminarUsuario(u) {
+    if (u.user_login === currentUser?.user_login) {
+      alert("No puedes eliminar tu propio usuario.");
+      return;
+    }
+    if (!confirm(`¿Eliminar a ${u.nombre}? Esta acción no se puede deshacer.`)) return;
+    const { error } = await supabase.from("usuarios").delete().eq("id", u.id);
+    if (error) { alert("Error al eliminar: " + error.message); return; }
+    setUsuarios(us => us.filter(x => x.id !== u.id));
     fetchUsuarios();
   }
 
@@ -92,7 +105,15 @@ export default function Usuarios({ currentUser }) {
         <div>
           <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.3em", marginBottom: 8 }}>Mallorca Nativa Properties</div>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 400, margin: 0 }}>Gestión de <em>Usuarios</em></h1>
-          <p style={{ fontSize: 12, color: "#9A968A", margin: "8px 0 0" }}>{usuarios.filter(u => u.activo).length} activos · {usuarios.length} total</p>
+          <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 8 }}>
+            <p style={{ fontSize: 12, color: "#9A968A", margin: 0 }}>{usuarios.filter(u => u.activo).length} activos · {usuarios.filter(u => !u.activo).length} inactivos</p>
+            {usuarios.some(u => !u.activo) && (
+              <button onClick={() => setMostrarInactivos(v => !v)}
+                style={{ fontSize: 11, color: "#9A968A", background: "none", border: "1px solid #E7E1D4", padding: "3px 10px", cursor: "pointer", fontFamily: "Inter, sans-serif" }}>
+                {mostrarInactivos ? "Ocultar inactivos" : "Ver inactivos"}
+              </button>
+            )}
+          </div>
         </div>
         <button onClick={abrirNuevo} style={{ padding: "12px 24px", borderRadius: 0, border: "1px solid #C8A97E", background: "transparent", color: "#AC8A54", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}>
           + Nuevo usuario
@@ -104,7 +125,7 @@ export default function Usuarios({ currentUser }) {
         <div style={{ color: "#9A968A", fontSize: 13 }}>Cargando...</div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {usuarios.map(u => (
+          {usuarios.filter(u => mostrarInactivos || u.activo).map(u => (
             <div key={u.id} style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "16px 20px", display: "flex", alignItems: "center", gap: 16, opacity: u.activo ? 1 : 0.5 }}>
               {/* Avatar */}
               <div style={{ width: 40, height: 40, borderRadius: "50%", background: u.role === "director" ? "#C8A97E22" : u.role === "administrador" ? "#3D577E22" : "#8FA88A22", border: "1px solid " + (u.role === "director" ? "#C8A97E44" : u.role === "administrador" ? "#3D577E44" : "#8FA88A44"), display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>
@@ -126,11 +147,14 @@ export default function Usuarios({ currentUser }) {
               {/* Acciones */}
               <div style={{ display: "flex", gap: 8 }}>
                 <button onClick={() => abrirEditar(u)} style={{ background: "transparent", border: "1px solid #2A2926", borderRadius: 0, color: "#9A968A", fontSize: 11, cursor: "pointer", padding: "6px 14px", fontFamily: "Inter, sans-serif" }}>Editar</button>
-                {u.user_login !== currentUser.user_login && (
+                {u.user_login !== currentUser?.user_login && (<>
                   <button onClick={() => toggleActivo(u)} style={{ background: "transparent", border: "1px solid " + (u.activo ? "#A23A3A44" : "#6AAF8D33"), borderRadius: 0, color: u.activo ? "#A23A3A" : "#2C6E52", fontSize: 11, cursor: "pointer", padding: "6px 14px", fontFamily: "Inter, sans-serif" }}>
                     {u.activo ? "Desactivar" : "Activar"}
                   </button>
-                )}
+                  <button onClick={() => eliminarUsuario(u)} style={{ background: "transparent", border: "1px solid #D4545433", borderRadius: 0, color: "#A23A3A", fontSize: 11, cursor: "pointer", padding: "6px 14px", fontFamily: "Inter, sans-serif" }} title="Eliminar usuario definitivamente">
+                    ✕ Eliminar
+                  </button>
+                </>)}
               </div>
             </div>
           ))}
