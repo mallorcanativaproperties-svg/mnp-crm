@@ -24,8 +24,8 @@ const T = {
     enviar: "Enviar solicitud",
     exito: "¡Gracias! Hemos recibido tu solicitud.",
     exitoSub: "Nuestro equipo se pondrá en contacto contigo en breve.",
-    error: t.error,
-    errorRgpd: t.errorRgpd,
+    error: "Por favor, completa los campos obligatorios.",
+    errorRgpd: "Debes aceptar la política de privacidad.",
     obligatorio: "Campos obligatorios",
   },
   en: {
