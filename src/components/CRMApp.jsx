@@ -235,9 +235,9 @@ export default function CRMApp() {
                     style={{
                       display: "flex", alignItems: "center", gap: 10,
                       width: "100%", padding: sidebarOpen ? "10px 16px" : "10px",
-                      background: activeModule === topModule.key ? "#AC8A5422" : "rgba(172,138,84,0.08)",
-                      border: "none", borderLeft: activeModule === topModule.key ? "3px solid #AC8A54" : "3px solid rgba(172,138,84,0.3)",
-                      color: activeModule === topModule.key ? "#AC8A54" : "rgba(172,138,84,0.8)",
+                      background: activeModule === topModule.key ? "#AC8A5422" : "transparent",
+                      border: "none", borderLeft: activeModule === topModule.key ? "3px solid #AC8A54" : "3px solid transparent",
+                      color: activeModule === topModule.key ? "#AC8A54" : "rgba(255,255,255,0.65)",
                       cursor: "pointer", fontSize: 12, fontWeight: 600,
                       fontFamily: "Inter, sans-serif", textAlign: "left",
                       justifyContent: sidebarOpen ? "flex-start" : "center",
