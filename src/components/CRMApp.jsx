@@ -40,8 +40,8 @@ const MODULES = [
   { key: "redes", label: "Redes Sociales", icon: "◉", color: "#E1306C", roles: ["director", "administrador", "agente"], group: "Redes Sociales" },
 
   // AGENTES IA — solo director (Suren)
-  { key: "agentes", label: "Agentes IA", icon: "◈", color: "#9C6E1B", roles: ["director"], group: "Agentes IA" },
-  { key: "simulador", label: "Simulador Claudia", icon: "◈", color: "#9C6E1B", roles: ["director"], group: "Agentes IA" },
+  { key: "agentes", label: "Agentes IA", icon: "◈", color: "#9C6E1B", roles: ["director", "administrador", "agente"], group: "Agentes IA" },
+  { key: "simulador", label: "Simulador Claudia", icon: "◈", color: "#9C6E1B", roles: ["director", "administrador"], group: "Agentes IA" },
 
   // GESTIÓN — director y administrador
   { key: "dashboard", label: "Dashboard", icon: "◆", color: "#AC8A54", roles: ["director", "administrador"], group: "Gestión" },
