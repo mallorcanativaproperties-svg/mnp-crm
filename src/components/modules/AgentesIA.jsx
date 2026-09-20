@@ -680,6 +680,100 @@ function ScanEmailsButton() {
 }
 
 /* ── MAIN ── */
+
+// ═══ PANEL DE SILVIA — Instagram DMs ═══════════════════════════
+function SilviaPanel({ convs, selectedId, setSelectedId }) {
+  const selected = convs.find(c => c.id === selectedId) || convs[0] || null;
+  const IG_PURPLE = "#6B4FA0";
+
+  if (convs.length === 0) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 400, flexDirection: "column", gap: 12 }}>
+        <div style={{ fontSize: 32 }}>📸</div>
+        <div style={{ fontSize: 14, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>No hay conversaciones de Instagram DM aún</div>
+        <div style={{ fontSize: 12, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>Los mensajes directos aparecerán aquí cuando el webhook esté activo</div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: "flex", height: "calc(100vh - 160px)", border: "1px solid #E7E1D4", borderTop: "none" }}>
+      {/* Lista de conversaciones */}
+      <div style={{ width: 300, borderRight: "1px solid #E7E1D4", overflowY: "auto", background: "#FFFFFF" }}>
+        {convs.map(c => {
+          const lastMsg = c.mensajes?.[c.mensajes.length - 1];
+          const sel = c.id === (selected?.id);
+          return (
+            <div key={c.id} onClick={() => setSelectedId(c.id)}
+              style={{ padding: "14px 16px", borderBottom: "1px solid #F0ECE6", cursor: "pointer",
+                background: sel ? IG_PURPLE + "0D" : "#FFFFFF",
+                borderLeft: sel ? "3px solid " + IG_PURPLE : "3px solid transparent" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: "#22262E", fontFamily: "Inter, sans-serif" }}>
+                  {c.sender_name || c.sender_id || "Instagram"}
+                </div>
+                <div style={{ fontSize: 10, color: "#9A968A" }}>
+                  {c.updated_at ? new Date(c.updated_at).toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit" }) : ""}
+                </div>
+              </div>
+              <div style={{ fontSize: 11, color: "#9A968A", fontFamily: "Inter, sans-serif", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                {lastMsg?.text || "—"}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Chat */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "#F8F6F1" }}>
+        {selected ? (
+          <>
+            {/* Header */}
+            <div style={{ padding: "14px 20px", borderBottom: "1px solid #E7E1D4", background: "#FFFFFF", display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ width: 36, height: 36, borderRadius: "50%", background: IG_PURPLE + "22", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>📸</div>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: "#22262E", fontFamily: "Inter, sans-serif" }}>{selected.sender_name || selected.sender_id}</div>
+                <div style={{ fontSize: 11, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>Instagram DM · {selected.estado || "activo"}</div>
+              </div>
+            </div>
+
+            {/* Mensajes */}
+            <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
+              {(selected.mensajes || []).map((m, i) => {
+                const esSilvia = m.from === "silvia" || m.from === "agente";
+                return (
+                  <div key={i} style={{ display: "flex", justifyContent: esSilvia ? "flex-end" : "flex-start" }}>
+                    <div style={{
+                      maxWidth: "70%", padding: "10px 14px",
+                      background: esSilvia ? IG_PURPLE : "#FFFFFF",
+                      color: esSilvia ? "#FFFFFF" : "#22262E",
+                      fontSize: 13, fontFamily: "Inter, sans-serif", lineHeight: 1.5,
+                      border: esSilvia ? "none" : "1px solid #E7E1D4",
+                    }}>
+                      {m.text}
+                      <div style={{ fontSize: 10, opacity: 0.6, marginTop: 4, textAlign: esSilvia ? "right" : "left" }}>{m.ts}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Nota — sin respuesta manual por ahora */}
+            <div style={{ padding: "12px 20px", borderTop: "1px solid #E7E1D4", background: "#FFFFFF", fontSize: 11, color: "#9A968A", fontFamily: "Inter, sans-serif", textAlign: "center" }}>
+              Vista de solo lectura · La respuesta automática se configura en el agente IA de Silvia
+            </div>
+          </>
+        ) : (
+          <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "#9A968A", fontSize: 13 }}>
+            Selecciona una conversación
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+// ════════════════════════════════════════════════════════════════
+
 export default function AgentesIA() {
   const [tab, setTab] = useState("ana");
   const [anaConvs, setAnaConvs] = useState(ANA_CONVS);
@@ -688,6 +782,41 @@ export default function AgentesIA() {
   const [claudiaSelected, setClaudiaSelected] = useState(null);
   const [editPrompt, setEditPrompt] = useState(null);
   const [loadingClaudia, setLoadingClaudia] = useState(false);
+
+  // Load SILVIA conversations from social_conversations (Instagram DMs)
+  const loadSilviaConvs = useCallback(async () => {
+    setLoadingSilvia(true);
+    try {
+      const { data: convs } = await supabase
+        .from("social_conversations")
+        .select("*")
+        .eq("platform", "instagram")
+        .eq("tipo", "dm")
+        .order("updated_at", { ascending: false });
+
+      if (convs && convs.length > 0) {
+        const mapped = convs.map(c => ({
+          ...c,
+          contacto: c.sender_name || c.sender_id || "Instagram",
+          telefono: c.sender_id,
+          mensajes: (c.mensajes || []).map(m => ({
+            from: m.from || "cliente",
+            text: m.text || "",
+            ts: m.ts ? new Date(m.ts).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) : "",
+          })),
+          alertas: [],
+          propiedad: "Instagram DM",
+        }));
+        setSilviaConvs(mapped);
+        if (!silviaSelected && mapped.length > 0) setSilviaSelected(mapped[0].id);
+      } else {
+        setSilviaConvs([]);
+      }
+    } catch (err) {
+      console.error("Error loading SILVIA convs:", err);
+    }
+    setLoadingSilvia(false);
+  }, []);
 
   // Load real ANA conversations from Supabase
   const loadAnaConvs = useCallback(async () => {
@@ -776,6 +905,12 @@ export default function AgentesIA() {
 
   // Load on mount and auto-refresh every 10 seconds
   useEffect(() => {
+    loadSilviaConvs();
+    const intervalSilvia = setInterval(loadSilviaConvs, 10000);
+    return () => clearInterval(intervalSilvia);
+  }, [loadSilviaConvs]);
+
+  useEffect(() => {
     loadAnaConvs();
     const intervalAna = setInterval(loadAnaConvs, 10000);
     return () => clearInterval(intervalAna);
@@ -830,12 +965,18 @@ export default function AgentesIA() {
           <span style={{ marginLeft: 8, fontSize: 10 }}>({claudiaConvs.length})</span>
           {claudiaAlertas > 0 && <span style={{ marginLeft: 6, width: 16, height: 16, borderRadius: "50%", background: "#A23A3A", color: "#fff", fontSize: 9, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>{claudiaAlertas}</span>}
         </button>
+        <button onClick={() => setTab("silvia")} style={tabSt(tab === "silvia", "#6B4FA0")}>
+          Silvia - Instagram
+          <span style={{ marginLeft: 8, fontSize: 10 }}>({silviaConvs.length})</span>
+        </button>
       </div>
 
       {/* Panel */}
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>
         {tab === "ana" ? (
           <AgentPanel convs={anaConvs} setConvs={setAnaConvs} isAna={true} selectedId={anaSelected} setSelectedId={setAnaSelected} />
+        ) : tab === "silvia" ? (
+          <SilviaPanel convs={silviaConvs} selectedId={silviaSelected} setSelectedId={setSilviaSelected} />
         ) : (
           <AgentPanel convs={claudiaConvs} setConvs={setClaudiaConvs} isAna={false} selectedId={claudiaSelected} setSelectedId={setClaudiaSelected} />
         )}
