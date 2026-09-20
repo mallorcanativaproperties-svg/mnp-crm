@@ -776,9 +776,12 @@ function SilviaPanel({ convs, selectedId, setSelectedId }) {
 
 export default function AgentesIA() {
   const [tab, setTab] = useState("ana");
-  const [anaConvs, setAnaConvs] = useState(ANA_CONVS);
+  const [anaConvs, setAnaConvs] = useState([]);
   const [claudiaConvs, setClaudiaConvs] = useState([]);
-  const [anaSelected, setAnaSelected] = useState(1);
+  const [anaSelected, setAnaSelected] = useState(null);
+  const [silviaConvs, setSilviaConvs] = useState([]);
+  const [silviaSelected, setSilviaSelected] = useState(null);
+  const [loadingSilvia, setLoadingSilvia] = useState(false);
   const [claudiaSelected, setClaudiaSelected] = useState(null);
   const [editPrompt, setEditPrompt] = useState(null);
   const [loadingClaudia, setLoadingClaudia] = useState(false);
@@ -817,6 +820,7 @@ export default function AgentesIA() {
     }
     setLoadingSilvia(false);
   }, []);
+
 
   // Load real ANA conversations from Supabase
   const loadAnaConvs = useCallback(async () => {
@@ -910,6 +914,7 @@ export default function AgentesIA() {
     return () => clearInterval(intervalSilvia);
   }, [loadSilviaConvs]);
 
+
   useEffect(() => {
     loadAnaConvs();
     const intervalAna = setInterval(loadAnaConvs, 10000);
@@ -975,6 +980,8 @@ export default function AgentesIA() {
       <div style={{ maxWidth: 1200, margin: "0 auto" }}>
         {tab === "ana" ? (
           <AgentPanel convs={anaConvs} setConvs={setAnaConvs} isAna={true} selectedId={anaSelected} setSelectedId={setAnaSelected} />
+        ) : tab === "silvia" ? (
+          <SilviaPanel convs={silviaConvs} selectedId={silviaSelected} setSelectedId={setSilviaSelected} />
         ) : tab === "silvia" ? (
           <SilviaPanel convs={silviaConvs} selectedId={silviaSelected} setSelectedId={setSilviaSelected} />
         ) : (
