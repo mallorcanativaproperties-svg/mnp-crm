@@ -43,7 +43,7 @@ export async function GET() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        subscribed_fields: "messages,messaging_postbacks,instagram_manage_messages",
+        subscribed_fields: "messages,messaging_postbacks,feed",
         access_token: page.access_token,
       }),
     });
