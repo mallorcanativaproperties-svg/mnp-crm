@@ -88,7 +88,11 @@ export async function POST(request) {
     }
 
     const body = JSON.parse(rawBody);
-    console.log("Meta webhook:", JSON.stringify(body).substring(0, 300));
+    console.log("Meta webhook FULL:", JSON.stringify(body).substring(0, 1000));
+    // Log específico para Instagram
+    if (body.object === "instagram") {
+      console.log("Instagram webhook entry:", JSON.stringify(body.entry?.[0]).substring(0, 500));
+    }
 
     if (body.entry) {
       for (const entry of body.entry) {
@@ -96,6 +100,17 @@ export async function POST(request) {
           for (const event of entry.messaging) {
             if (event.message && !event.message.is_echo) {
               await handleMessage(event, "messenger");
+            }
+          }
+        }
+
+        // Instagram DMs — pueden llegar por entry.messaging (formato estándar)
+        if (entry.messaging) {
+          for (const event of entry.messaging) {
+            if (event.message && !event.message.is_echo) {
+              // Detectar si es Instagram (tiene ig_ en sender.id o viene de IG_USER_ID)
+              const platform = entry.id === IG_USER_ID || (event.sender?.id && !entry.id?.startsWith("1")) ? "instagram" : "messenger";
+              await handleMessage(event, platform);
             }
           }
         }
@@ -109,8 +124,20 @@ export async function POST(request) {
               await handleComment(value, "instagram");
             } else if (change.field === "feed" && value.item === "comment") {
               await handleComment(value, "facebook");
-            } else if (change.field === "messages" && value.sender && value.message) {
-              await handleMessage({ sender: value.sender, message: { text: value.message?.text, mid: value.id } }, "instagram");
+            } else if (change.field === "messages") {
+              // Formato alternativo de Instagram DM
+              if (value.sender && value.message) {
+                await handleMessage({ 
+                  sender: value.sender, 
+                  message: { text: value.message?.text || value.message?.attachments?.[0]?.payload?.url || "", mid: value.message?.mid || value.id } 
+                }, "instagram");
+              } else if (value.messaging) {
+                for (const event of value.messaging) {
+                  if (event.message && !event.message.is_echo) {
+                    await handleMessage(event, "instagram");
+                  }
+                }
+              }
             }
           }
         }
