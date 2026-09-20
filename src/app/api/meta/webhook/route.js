@@ -95,8 +95,21 @@ export async function POST(request) {
     }
 
     if (body.entry) {
+      const isInstagram = body.object === "instagram";
+      const isMessenger = body.object === "page";
+
       for (const entry of body.entry) {
-        if (entry.messaging) {
+        // Instagram DMs — llegan por entry.messaging cuando object="instagram"
+        if (isInstagram && entry.messaging) {
+          for (const event of entry.messaging) {
+            if (event.message && !event.message.is_echo) {
+              await handleMessage(event, "instagram");
+            }
+          }
+        }
+
+        // Messenger DMs — llegan por entry.messaging cuando object="page"
+        if (isMessenger && entry.messaging) {
           for (const event of entry.messaging) {
             if (event.message && !event.message.is_echo) {
               await handleMessage(event, "messenger");
@@ -104,39 +117,23 @@ export async function POST(request) {
           }
         }
 
-        // Instagram DMs — pueden llegar por entry.messaging (formato estándar)
-        if (entry.messaging) {
-          for (const event of entry.messaging) {
-            if (event.message && !event.message.is_echo) {
-              // Detectar si es Instagram (tiene ig_ en sender.id o viene de IG_USER_ID)
-              const platform = entry.id === IG_USER_ID || (event.sender?.id && !entry.id?.startsWith("1")) ? "instagram" : "messenger";
-              await handleMessage(event, platform);
-            }
-          }
-        }
-
+        // Cambios (comentarios, feed, etc.)
         if (entry.changes) {
           for (const change of entry.changes) {
             const value = change.value;
             if (!value) continue;
-            
+
             if (change.field === "comments") {
               await handleComment(value, "instagram");
             } else if (change.field === "feed" && value.item === "comment") {
               await handleComment(value, "facebook");
             } else if (change.field === "messages") {
-              // Formato alternativo de Instagram DM
+              // Formato alternativo — algunos webhooks de Instagram usan changes
               if (value.sender && value.message) {
-                await handleMessage({ 
-                  sender: value.sender, 
-                  message: { text: value.message?.text || value.message?.attachments?.[0]?.payload?.url || "", mid: value.message?.mid || value.id } 
+                await handleMessage({
+                  sender: value.sender,
+                  message: { text: value.message?.text || "", mid: value.message?.mid || value.id }
                 }, "instagram");
-              } else if (value.messaging) {
-                for (const event of value.messaging) {
-                  if (event.message && !event.message.is_echo) {
-                    await handleMessage(event, "instagram");
-                  }
-                }
               }
             }
           }
