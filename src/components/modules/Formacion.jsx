@@ -635,22 +635,28 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
               const rDone = rList.filter(r=>progreso[r.id]).length;
               const tPct  = rList.length > 0 ? Math.round((rDone/rList.length)*100) : 0;
               const p = pal(idx);
+              const proximamente = rList.length === 0;
               return (
-                <div key={tema.id} style={{ background:WHITE, border:`1px solid ${p.border}`, borderRadius:3, overflow:"hidden", display:"flex", transition:"box-shadow 0.2s" }}
-                  onMouseEnter={e=>e.currentTarget.style.boxShadow=`0 4px 16px rgba(172,138,84,0.12)`}
+                <div key={tema.id} style={{ background: proximamente ? CREAM2 : WHITE, border:`1px solid ${proximamente ? BORDER : p.border}`, borderRadius:3, overflow:"hidden", display:"flex", transition:"box-shadow 0.2s", opacity: proximamente ? 0.7 : 1 }}
+                  onMouseEnter={e=>{ if(!proximamente) e.currentTarget.style.boxShadow=`0 4px 16px rgba(172,138,84,0.12)`; }}
                   onMouseLeave={e=>e.currentTarget.style.boxShadow="none"}>
                   {/* Número */}
-                  <div style={{ width:52, background:`${p.numBg}22`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, borderRight:`1px solid ${p.border}` }}>
-                    <span style={{ fontSize:18, fontWeight:700, color:p.accent, fontFamily:"'Playfair Display', Georgia, serif" }}>{idx+1}</span>
+                  <div style={{ width:52, background: proximamente ? `${BORDER}55` : `${p.numBg}22`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, borderRight:`1px solid ${BORDER}` }}>
+                    <span style={{ fontSize:18, fontWeight:700, color: proximamente ? MUTED : p.accent, fontFamily:"'Playfair Display', Georgia, serif" }}>{idx+1}</span>
                   </div>
                   {/* Contenido */}
-                  <div style={{ flex:1, padding:"16px 20px", cursor:"pointer" }} onClick={() => { setTemaActivo(tema); setVista("recursos"); }}>
-                    <div style={{ fontSize:14, fontWeight:700, color:TEXT, marginBottom:4, fontFamily:"Inter, sans-serif" }}>{tema.titulo}</div>
-                    {tema.descripcion && <div style={{ fontSize:12, color:MUTED, marginBottom:10, lineHeight:1.4 }}>{tema.descripcion}</div>}
-                    <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-                      <div style={{ flex:1, maxWidth:180 }}><BarProg pct={tPct} /></div>
-                      <span style={{ fontSize:11, color:GOLD }}>{rDone}/{rList.length} recursos</span>
+                  <div style={{ flex:1, padding:"16px 20px", cursor: proximamente ? "default" : "pointer" }} onClick={() => { if(!proximamente){ setTemaActivo(tema); setVista("recursos"); } }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:4 }}>
+                      <div style={{ fontSize:14, fontWeight:700, color: proximamente ? MUTED : TEXT, fontFamily:"Inter, sans-serif" }}>{tema.titulo}</div>
+                      {proximamente && <span style={{ fontSize:9, fontWeight:700, color:MUTED, background:BORDER, padding:"2px 8px", borderRadius:10, letterSpacing:"0.1em", flexShrink:0 }}>PRÓXIMAMENTE</span>}
                     </div>
+                    {tema.descripcion && <div style={{ fontSize:12, color:MUTED, lineHeight:1.4, marginBottom: proximamente ? 0 : 10 }}>{tema.descripcion}</div>}
+                    {!proximamente && (
+                      <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+                        <div style={{ flex:1, maxWidth:180 }}><BarProg pct={tPct} /></div>
+                        <span style={{ fontSize:11, color:GOLD }}>{rDone}/{rList.length} recursos</span>
+                      </div>
+                    )}
                   </div>
                   {/* Acciones */}
                   <div style={{ display:"flex", alignItems:"center", padding:"0 16px", gap:8, flexShrink:0 }}>
@@ -660,7 +666,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                         <button onClick={async e => { e.stopPropagation(); if(confirm(`¿Eliminar el tema "${tema.titulo}" y todos sus recursos?`)) { await supabase.from("formacion_temas").update({ activo:false }).eq("id", tema.id); cargarTodo(); }}} style={{ background:"transparent", border:"1px solid #A23A3A44", color:"#A23A3A", padding:"5px 8px", cursor:"pointer", borderRadius:2, display:"flex", alignItems:"center" }}><TrashIcon style={{ width:14, height:14 }} /></button>
                       </>
                     )}
-                    <span style={{ color:GOLD, fontSize:16, cursor:"pointer" }} onClick={() => { setTemaActivo(tema); setVista("recursos"); }}>›</span>
+                    {!proximamente && <span style={{ color:GOLD, fontSize:16, cursor:"pointer" }} onClick={() => { setTemaActivo(tema); setVista("recursos"); }}>›</span>}
                   </div>
                 </div>
               );
