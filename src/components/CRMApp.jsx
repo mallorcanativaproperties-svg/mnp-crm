@@ -22,6 +22,7 @@ const AgentesIA = dynamic(() => import("./modules/AgentesIA"), { ssr: false });
 const FirmaElectronica = dynamic(() => import("./modules/FirmaElectronica"), { ssr: false });
 const Usuarios = dynamic(() => import("./modules/Usuarios"), { ssr: false });
 const SimuladorClaudia = dynamic(() => import("./modules/SimuladorClaudia"), { ssr: false });
+const AsistenteIA = dynamic(() => import("./modules/AsistenteIA"), { ssr: false });
 
 // Roles del CRM:
 //   director      → Suren — acceso total
@@ -277,7 +278,7 @@ export default function CRMApp() {
       case "captacion": return <FormularioCaptacion />;
       case "formacion_agentes": return <Formacion key="agentes" currentUser={currentUser} defaultSubseccion="agentes" />;
       case "formacion_direccion": return <Formacion key="direccion" currentUser={currentUser} defaultSubseccion="direccion" />;
-      case "formacion_asistente": return <Formacion key="asistente" currentUser={currentUser} defaultSubseccion="asistente" />;
+      case "formacion_asistente": return <AsistenteIA currentUser={currentUser} />;
       case "compradores": return <Compradores currentUser={currentUser} />;
       case "cruce": return <MotorCruce currentUser={currentUser} />;
       case "captacion_ana": return <Captacion />;
