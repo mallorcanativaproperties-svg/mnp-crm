@@ -120,8 +120,25 @@ function trocear(secciones, articulosPedidos) {
   return trozos;
 }
 
+/**
+ * El secreto vive en ia_config, no en una variable de entorno: rotarlo es un
+ * UPDATE en Supabase y no obliga a redesplegar. La tabla solo es accesible con
+ * la service key.
+ */
+async function autorizado(request) {
+  const enviado = request.headers.get("x-ingesta-secret");
+  if (!enviado) return false;
+  if (process.env.INGESTA_SECRET && enviado === process.env.INGESTA_SECRET) return true;
+  const { data } = await sbAdmin
+    .from("ia_config")
+    .select("valor")
+    .eq("clave", "ingesta_secret")
+    .single();
+  return Boolean(data?.valor) && enviado === data.valor;
+}
+
 export async function POST(request) {
-  if (request.headers.get("x-ingesta-secret") !== (process.env.INGESTA_SECRET || process.env.CRON_SECRET)) {
+  if (!(await autorizado(request))) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
@@ -274,7 +291,7 @@ export async function POST(request) {
 
 /** Inventario del corpus. */
 export async function GET(request) {
-  if (request.headers.get("x-ingesta-secret") !== (process.env.INGESTA_SECRET || process.env.CRON_SECRET)) {
+  if (!(await autorizado(request))) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
   const { data } = await sbAdmin
