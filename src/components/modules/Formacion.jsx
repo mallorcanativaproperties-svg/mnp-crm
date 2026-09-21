@@ -453,6 +453,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                     {isAdmin && (
                       <div style={{ position:"absolute", top:8, left:8, display:"flex", gap:6 }} onClick={e=>e.stopPropagation()}>
                         <button onClick={() => setEditMod(mod)} style={{ width:28, height:28, border:`1px solid ${GOLD}66`, background:WHITE+"CC", color:GOLD, cursor:"pointer", borderRadius:2, display:"flex", alignItems:"center", justifyContent:"center", padding:4 }}><PencilSquareIcon style={{ width:16, height:16 }} /></button>
+                        <button onClick={async () => { if(confirm(`¿Eliminar el módulo "${mod.titulo}" y todo su contenido?`)) { await supabase.from("formacion_modulos").update({ activo:false }).eq("id", mod.id); cargarTodo(); }}} style={{ width:28, height:28, border:"1px solid #A23A3A66", background:WHITE+"CC", color:"#A23A3A", cursor:"pointer", borderRadius:2, display:"flex", alignItems:"center", justifyContent:"center", padding:4 }}><TrashIcon style={{ width:16, height:16 }} /></button>
                       </div>
                     )}
                   </div>
@@ -592,7 +593,10 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                   {/* Acciones */}
                   <div style={{ display:"flex", alignItems:"center", padding:"0 16px", gap:8, flexShrink:0 }}>
                     {isAdmin && (
-                      <button onClick={() => setEditTema(tema)} style={{ background:"transparent", border:`1px solid ${BORDER}`, color:MUTED, padding:"5px 8px", cursor:"pointer", borderRadius:2, display:"flex", alignItems:"center" }}><PencilSquareIcon style={{ width:14, height:14 }} /></button>
+                      <>
+                        <button onClick={() => setEditTema(tema)} style={{ background:"transparent", border:`1px solid ${BORDER}`, color:MUTED, padding:"5px 8px", cursor:"pointer", borderRadius:2, display:"flex", alignItems:"center" }}><PencilSquareIcon style={{ width:14, height:14 }} /></button>
+                        <button onClick={async e => { e.stopPropagation(); if(confirm(`¿Eliminar el tema "${tema.titulo}" y todos sus recursos?`)) { await supabase.from("formacion_temas").update({ activo:false }).eq("id", tema.id); cargarTodo(); }}} style={{ background:"transparent", border:"1px solid #A23A3A44", color:"#A23A3A", padding:"5px 8px", cursor:"pointer", borderRadius:2, display:"flex", alignItems:"center" }}><TrashIcon style={{ width:14, height:14 }} /></button>
+                      </>
                     )}
                     <span style={{ color:GOLD, fontSize:16, cursor:"pointer" }} onClick={() => { setTemaActivo(tema); setVista("recursos"); }}>›</span>
                   </div>
