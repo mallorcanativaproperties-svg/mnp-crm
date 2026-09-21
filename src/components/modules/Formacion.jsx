@@ -558,28 +558,38 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
     return (
       <div style={{ background: CREAM, minHeight:"100vh", fontFamily:"Inter, sans-serif" }}>
 
-        {/* Hero del curso — banda con imagen de portada */}
-        <div style={{ position:"relative", overflow:"hidden", minHeight:180 }}>
-          {/* Imagen de fondo o gradiente */}
+        {/* Hero del curso — 33vh con imagen completa */}
+        <div style={{ position:"relative", height:"33vh", minHeight:220, maxHeight:400, overflow:"hidden" }}>
+          {/* Imagen completa o gradiente */}
           {moduloActivo?.imagen_portada
-            ? <img src={moduloActivo.imagen_portada} style={{ position:"absolute", inset:0, width:"100%", height:"100%", objectFit:"cover" }} />
-            : <div style={{ position:"absolute", inset:0, background:`linear-gradient(135deg, ${GOLD_XL} 0%, ${CREAM2} 100%)` }} />
+            ? <img src={moduloActivo.imagen_portada} style={{ width:"100%", height:"100%", objectFit:"contain", objectPosition:"center", background: DARK }} />
+            : <div style={{ width:"100%", height:"100%", background:`linear-gradient(135deg, ${GOLD_XL} 0%, ${CREAM2} 100%)`, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                <span style={{ fontSize:64, opacity:0.3 }}>{moduloActivo?.icono || "🎓"}</span>
+              </div>
           }
-          {/* Overlay oscuro para legibilidad */}
-          <div style={{ position:"absolute", inset:0, background: moduloActivo?.imagen_portada ? "rgba(26,37,40,0.55)" : "rgba(172,138,84,0.08)" }} />
-          {/* Contenido sobre la imagen */}
-          <div style={{ position:"relative", zIndex:1, padding:"24px 40px 28px" }}>
-            <button onClick={() => setVista("modulos")} style={{ background:"transparent", border:"none", color: moduloActivo?.imagen_portada ? "rgba(255,255,255,0.75)" : MUTED, fontSize:12, cursor:"pointer", padding:0, marginBottom:18, fontFamily:"Inter, sans-serif" }}>
-              ← Volver a cursos
-            </button>
-            <div style={{ fontSize:10, color: moduloActivo?.imagen_portada ? "rgba(255,255,255,0.6)" : GOLD, letterSpacing:"0.18em", fontWeight:700, marginBottom:6 }}>
+          {/* Overlay degradado solo en la parte inferior para el texto */}
+          <div style={{ position:"absolute", inset:0, background: moduloActivo?.imagen_portada
+            ? "linear-gradient(to bottom, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0) 40%, rgba(26,37,40,0.75) 100%)"
+            : "linear-gradient(to bottom, transparent 50%, rgba(172,138,84,0.12) 100%)"
+          }} />
+          {/* Botón volver arriba izquierda */}
+          <button onClick={() => setVista("modulos")} style={{
+            position:"absolute", top:16, left:24, background:"rgba(0,0,0,0.3)", border:"none",
+            color:WHITE, fontSize:12, cursor:"pointer", padding:"6px 14px", borderRadius:2,
+            fontFamily:"Inter, sans-serif", backdropFilter:"blur(4px)"
+          }}>
+            ← Volver a cursos
+          </button>
+          {/* Texto sobre la imagen — anclado abajo */}
+          <div style={{ position:"absolute", bottom:0, left:0, right:0, padding:"16px 40px 20px", zIndex:1 }}>
+            <div style={{ fontSize:10, color: moduloActivo?.imagen_portada ? "rgba(255,255,255,0.65)" : GOLD, letterSpacing:"0.18em", fontWeight:700, marginBottom:4 }}>
               {subseccion === "direccion" ? "FORMACIÓN DIRECCIÓN" : subseccion === "asistente" ? "ASISTENTE IA" : "FORMACIÓN AGENTES"}
             </div>
-            <h2 style={{ fontSize:24, fontWeight:400, color: moduloActivo?.imagen_portada ? WHITE : TEXT, margin:"0 0 6px", fontFamily:"'Playfair Display', Georgia, serif" }}>
+            <h2 style={{ fontSize:26, fontWeight:400, color: moduloActivo?.imagen_portada ? WHITE : TEXT, margin:"0 0 4px", fontFamily:"'Playfair Display', Georgia, serif", textShadow: moduloActivo?.imagen_portada ? "0 1px 4px rgba(0,0,0,0.4)" : "none" }}>
               {moduloActivo?.titulo}
             </h2>
             {moduloActivo?.descripcion && (
-              <p style={{ fontSize:12, color: moduloActivo?.imagen_portada ? "rgba(255,255,255,0.7)" : MUTED, margin:"0 0 16px", lineHeight:1.5, maxWidth:600 }}>
+              <p style={{ fontSize:12, color: moduloActivo?.imagen_portada ? "rgba(255,255,255,0.75)" : MUTED, margin:0, lineHeight:1.5, maxWidth:600, textShadow: moduloActivo?.imagen_portada ? "0 1px 3px rgba(0,0,0,0.3)" : "none" }}>
                 {moduloActivo.descripcion}
               </p>
             )}
