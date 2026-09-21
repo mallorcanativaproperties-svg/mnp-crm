@@ -81,15 +81,29 @@ function numeroDeArticulo(encabezado) {
   return m ? m[1].replace(/\s+/g, " ").trim().toLowerCase() : null;
 }
 
+/**
+ * El filtro acepta números de artículo ("35", "41 bis") y también trozos de
+ * encabezado ("disposición transitoria novena"): en fiscalidad los regímenes
+ * transitorios pesan tanto como el articulado.
+ */
 function trocear(secciones, articulosPedidos) {
-  const filtro = articulosPedidos?.length
-    ? new Set(articulosPedidos.map((a) => String(a).toLowerCase().trim()))
-    : null;
+  const hayFiltro = Boolean(articulosPedidos?.length);
+  const numeros = new Set();
+  const textos = [];
+  for (const a of articulosPedidos || []) {
+    const s = String(a).toLowerCase().trim();
+    if (/^\d/.test(s)) numeros.add(s);
+    else if (s) textos.push(s);
+  }
 
   const trozos = [];
   for (const sec of secciones) {
     const num = numeroDeArticulo(sec.encabezado);
-    if (filtro && (!num || !filtro.has(num))) continue;
+    if (hayFiltro) {
+      const enc = (sec.encabezado || "").toLowerCase();
+      const coincide = (num && numeros.has(num)) || textos.some((t) => enc.includes(t));
+      if (!coincide) continue;
+    }
     if (sec.cuerpo.length < 60) continue;
 
     if (sec.cuerpo.length <= MAX_CHARS) {
