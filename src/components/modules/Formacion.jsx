@@ -693,7 +693,16 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                             style={{ background:"transparent", border:`1px solid #A23A3A33`, color:"#A23A3A", padding:"4px 6px", cursor:"pointer", borderRadius:2, display:"flex", alignItems:"center" }}><TrashIcon style={{ width:12, height:12 }} /></button>
                         </>
                       )}
-                      <button onClick={()=>setVisor(rec)}
+                      <button onClick={async () => {
+                          window.open(rec.url, "_blank", "noopener,noreferrer");
+                          if (!hecho) {
+                            await supabase.from("formacion_progreso").upsert(
+                              { user_login: userLogin, recurso_id: rec.id, completado: true, completado_at: new Date().toISOString() },
+                              { onConflict: "user_login,recurso_id" }
+                            );
+                            cargarTodo();
+                          }
+                        }}
                         style={{ padding:"6px 14px", background:"transparent", border:`1px solid ${GOLD}`, color:GOLD, fontSize:11, fontWeight:600, cursor:"pointer", fontFamily:"Inter, sans-serif", borderRadius:2, whiteSpace:"nowrap" }}>
                         Abrir →
                       </button>
