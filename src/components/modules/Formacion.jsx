@@ -328,6 +328,8 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
   const userLogin = currentUser?.user_login || "";
 
   const [subseccion, setSubseccion]       = useState(defaultSubseccion);
+  // Si viene desde el sidebar con subsección fija, no permitir cambio de pestaña
+  const subseccionFija = !!defaultSubseccion;
   const [modulos, setModulos]             = useState([]);
   const [temas, setTemas]                 = useState({});
   const [recursos, setRecursos]           = useState({});
@@ -399,7 +401,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
           <div>
             <div style={{ fontSize: 10, color: GOLD, letterSpacing: "0.2em", fontWeight: 700, marginBottom: 4 }}>NATIVA PROPERTIES</div>
             <h1 style={{ fontSize: 26, color: TEXT, fontWeight: 400, margin: 0, fontFamily: "'Playfair Display', Georgia, serif" }}>
-              Academia de Formación
+              {subseccion === "direccion" ? "Dirección y Asistente IA" : "Formación de Agentes"}
             </h1>
           </div>
           {isAdmin && (
@@ -410,23 +412,25 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
           )}
         </div>
 
-        {/* Tabs */}
-        <div style={{ display: "flex", gap: 0, marginTop: 24 }}>
-          {[
-            { key: "agentes", label: "Formación de Agentes", Icon: AcademicCapIcon },
-            ...(isAdmin ? [{ key: "direccion", label: "Dirección y Asistente IA", Icon: StarIcon }] : []),
-          ].map(s => (
-            <button key={s.key} onClick={() => setSubseccion(s.key)} style={{
-              padding: "12px 24px", background: "transparent", border: "none",
-              borderBottom: subseccion === s.key ? `2px solid ${GOLD}` : "2px solid transparent",
-              color: subseccion === s.key ? GOLD : MUTED,
-              fontSize: 13, cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600,
-              letterSpacing: "0.06em", marginBottom: -1, transition: "all 0.2s"
-            }}>
-              {s.Icon && <s.Icon style={{ width:16, height:16, marginRight:6, verticalAlign:"middle" }} />}{s.label}
-            </button>
-          ))}
-        </div>
+        {/* Tabs — solo si NO viene subsección fija desde el sidebar */}
+        {!subseccionFija && (
+          <div style={{ display: "flex", gap: 0, marginTop: 24 }}>
+            {[
+              { key: "agentes", label: "Formación de Agentes", Icon: AcademicCapIcon },
+              ...(isAdmin ? [{ key: "direccion", label: "Dirección y Asistente IA", Icon: StarIcon }] : []),
+            ].map(s => (
+              <button key={s.key} onClick={() => setSubseccion(s.key)} style={{
+                padding: "12px 24px", background: "transparent", border: "none",
+                borderBottom: subseccion === s.key ? `2px solid ${GOLD}` : "2px solid transparent",
+                color: subseccion === s.key ? GOLD : MUTED,
+                fontSize: 13, cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600,
+                letterSpacing: "0.06em", marginBottom: -1, transition: "all 0.2s"
+              }}>
+                {s.Icon && <s.Icon style={{ width:16, height:16, marginRight:6, verticalAlign:"middle" }} />}{s.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Grid */}
