@@ -191,7 +191,7 @@ function ScoreBar({ value }) {
 
 
 // ═══ WHATSAPP PANEL — Chat con comprador via Claudia ═════════════
-const CLAUDIA_PROMPT_SHORT = `Eres Claudia, secretaria coordinadora de Mallorca Nativa Properties. Recibes leads de compradores por WhatsApp. Cualifica al comprador, entiende su necesidad y deriva al agente correcto.`;
+const CLAUDIA_PROMPT_SHORT = `Eres Claudia, secretaria coordinadora de Nativa Properties. Recibes leads de compradores por WhatsApp. Cualifica al comprador, entiende su necesidad y deriva al agente correcto.`;
 
 function Card({ b, onClick, onWhatsApp }) {
   const s = score(b);
@@ -669,7 +669,7 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
               <div style={{ background: "#F0F8F4", border: "1px solid #2C6E5244", padding: "16px 20px", marginBottom: 20, borderRadius: 2 }}>
                 <div style={{ fontSize: 10, color: "#2C6E52", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Vista previa del mensaje (español)</div>
                 <div style={{ fontSize: 12, color: "#22262E", lineHeight: 1.6, whiteSpace: "pre-line" }}>
-                  {`¡Hola! Te escribimos de Mallorca Nativa Properties. Si quieres tener acceso preferente a propiedades antes de que salgan al mercado, puedes completar este formulario. Así podremos enviarte oportunidades que encajen con tus preferencias antes de su publicación.
+                  {`¡Hola! Te escribimos de Nativa Properties. Si quieres tener acceso preferente a propiedades antes de que salgan al mercado, puedes completar este formulario. Así podremos enviarte oportunidades que encajen con tus preferencias antes de su publicación.
 
 ${(typeof window !== "undefined" ? window.location.origin : "https://crm.mallorcanativaproperties.com")}/cualificacion`}
                 </div>
@@ -1094,7 +1094,7 @@ export default function App({ currentUser }) {
       <div style={{ marginBottom: 40, borderBottom: "1px solid #2A2926", paddingBottom: 32 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 16 }}>
           <div>
-            <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Mallorca Nativa Properties</div>
+            <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Nativa Properties</div>
             <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 400, margin: 0, lineHeight: 1.1 }}>Base de <em style={{ fontStyle: "italic" }}>Compradores</em></h1>
             <p style={{ fontSize: 12, color: "#9A968A", margin: "10px 0 0", letterSpacing: "0.04em" }}>Formulario Instagram · Mallorca · {data.length} registros</p>
           </div>

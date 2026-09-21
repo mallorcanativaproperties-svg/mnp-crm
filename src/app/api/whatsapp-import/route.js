@@ -50,11 +50,11 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://crm.mallorcanativapr
 
 // Mensajes por idioma
 const MENSAJES = {
-  es: (url) => `¡Hola! Te escribimos de Mallorca Nativa Properties. Si quieres tener acceso preferente a propiedades antes de que salgan al mercado, puedes completar este formulario. Así podremos enviarte oportunidades que encajen con tus preferencias antes de su publicación.\n\n${url}`,
-  en: (url) => `Hi! We're contacting you from Mallorca Nativa Properties. If you'd like priority access to properties before they go on the market, you can complete this form. We'll send you opportunities that match your preferences before they're listed.\n\n${url}`,
-  de: (url) => `Hallo! Wir schreiben Ihnen von Mallorca Nativa Properties. Wenn Sie bevorzugten Zugang zu Immobilien erhalten möchten, bevor sie auf den Markt kommen, können Sie dieses Formular ausfüllen. So können wir Ihnen passende Angebote zusenden, bevor sie veröffentlicht werden.\n\n${url}`,
-  nl: (url) => `Hallo! We nemen contact met u op vanuit Mallorca Nativa Properties. Als u voorrangsacces wilt tot woningen voordat ze op de markt komen, kunt u dit formulier invullen. Dan sturen we u kansen die bij uw voorkeuren passen voordat ze worden gepubliceerd.\n\n${url}`,
-  fr: (url) => `Bonjour ! Nous vous contactons de la part de Mallorca Nativa Properties. Si vous souhaitez avoir accès en priorité à des propriétés avant leur mise sur le marché, vous pouvez compléter ce formulaire. Nous vous enverrons ainsi des opportunités correspondant à vos préférences avant leur publication.\n\n${url}`,
+  es: (url) => `¡Hola! Te escribimos de Nativa Properties. Si quieres tener acceso preferente a propiedades antes de que salgan al mercado, puedes completar este formulario. Así podremos enviarte oportunidades que encajen con tus preferencias antes de su publicación.\n\n${url}`,
+  en: (url) => `Hi! We're contacting you from Nativa Properties. If you'd like priority access to properties before they go on the market, you can complete this form. We'll send you opportunities that match your preferences before they're listed.\n\n${url}`,
+  de: (url) => `Hallo! Wir schreiben Ihnen von Nativa Properties. Wenn Sie bevorzugten Zugang zu Immobilien erhalten möchten, bevor sie auf den Markt kommen, können Sie dieses Formular ausfüllen. So können wir Ihnen passende Angebote zusenden, bevor sie veröffentlicht werden.\n\n${url}`,
+  nl: (url) => `Hallo! We nemen contact met u op vanuit Nativa Properties. Als u voorrangsacces wilt tot woningen voordat ze op de markt komen, kunt u dit formulier invullen. Dan sturen we u kansen die bij uw voorkeuren passen voordat ze worden gepubliceerd.\n\n${url}`,
+  fr: (url) => `Bonjour ! Nous vous contactons de la part de Nativa Properties. Si vous souhaitez avoir accès en priorité à des propriétés avant leur mise sur le marché, vous pouvez compléter ce formulaire. Nous vous enverrons ainsi des opportunités correspondant à vos préférences avant leur publication.\n\n${url}`,
 };
 
 // Mapear país → código de idioma

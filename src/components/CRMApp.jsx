@@ -127,7 +127,7 @@ function LoginScreen({ onLogin }) {
     <div style={{ background: "#F8F6F1", minHeight: "100vh", color: "#22262E", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
       <div style={{ width: "100%", maxWidth: 400 }}>
         <div style={{ textAlign: "center", marginBottom: 44 }}>
-          <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.3em", marginBottom: 8, fontWeight: 500 }}>Mallorca Nativa Properties</div>
+          <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.3em", marginBottom: 8, fontWeight: 500 }}>Nativa Properties</div>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 38, fontWeight: 400, margin: 0 }}><em>CRM</em></h1>
           <p style={{ fontSize: 12, color: "#9A968A", marginTop: 10 }}>Gestion inmobiliaria + Marketing + IA</p>
         </div>
@@ -289,7 +289,7 @@ export default function CRMApp() {
         <div style={{ padding: sidebarOpen ? "20px 16px" : "20px 10px", borderBottom: "1px solid #2A2926" }}>
           {sidebarOpen ? (
             <div>
-              <div style={{ fontSize: 9, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", fontWeight: 500 }}>Mallorca Nativa</div>
+              <div style={{ fontSize: 9, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", fontWeight: 500 }}>Nativa Properties</div>
               <div style={{ fontSize: 16, fontFamily: "'Playfair Display', serif", color: "#FFFFFF", marginTop: 2 }}><em>CRM</em></div>
             </div>
           ) : (
@@ -419,7 +419,7 @@ export default function CRMApp() {
         {isMobile && (
           <div style={{ background: "#16294A", padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, position: "sticky", top: 0, zIndex: 98 }}>
             <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{ background: "none", border: "none", color: "#AC8A54", fontSize: 20, cursor: "pointer", padding: 0, lineHeight: 1 }}>☰</button>
-            <div style={{ fontSize: 9, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", fontWeight: 500 }}>Mallorca Nativa</div>
+            <div style={{ fontSize: 9, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", fontWeight: 500 }}>Nativa Properties</div>
             <div style={{ fontSize: 14, fontFamily: "'Playfair Display', serif", color: "#FFFFFF" }}><em>CRM</em></div>
           </div>
         )}

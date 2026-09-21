@@ -242,15 +242,15 @@ export async function POST(request) {
                   Authorization: `Bearer ${resendKey}`,
                 },
                 body: JSON.stringify({
-                  from: "Mallorca Nativa Properties <onboarding@resend.dev>",
+                  from: "Nativa Properties <onboarding@resend.dev>",
                   to: [email],
-                  subject: "Documento firmado - Mallorca Nativa Properties",
+                  subject: "Documento firmado - Nativa Properties",
                   html: `
                     <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:30px;">
-                      <h2>Mallorca Nativa Properties</h2>
+                      <h2>Nativa Properties</h2>
                       <p>El documento <strong>${firmante.firmas.pdf_nombre}</strong> ha sido firmado por todos los intervinientes.</p>
                       <p>Puede consultar el estado y descargar el documento firmado desde su enlace original.</p>
-                      <p style="color:#888;font-size:12px;margin-top:30px;">Mallorca Nativa SL - Calle Gremi Sabaters 21 local A37, Palma de Mallorca</p>
+                      <p style="color:#888;font-size:12px;margin-top:30px;">Nativa Properties - Calle Gremi Sabaters 21 local A37, Palma de Mallorca</p>
                     </div>
                   `,
                 }),

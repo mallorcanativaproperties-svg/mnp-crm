@@ -200,7 +200,7 @@ export async function POST(request) {
   // Footer evidencias
   page2.drawRectangle({ x: 40, y: 40, width: width - 80, height: 50, color: rgb(0.97, 0.96, 0.95) });
   addText(page2, "EVIDENCIAS DE FIRMA ELECTRÓNICA", 44, 76, { size: 7, font: helveticaBold, color: GRAY });
-  addText(page2, `Documento generado: ${new Date().toISOString()}   ·   Sistema: Mallorca Nativa CRM   ·   Verificación: OTP por email`, 44, 60, { size: 7, color: GRAY });
+  addText(page2, `Documento generado: ${new Date().toISOString()}   ·   Sistema: Nativa Properties CRM   ·   Verificación: OTP por email`, 44, 60, { size: 7, color: GRAY });
   addText(page2, "La autenticidad de este documento puede verificarse contactando con info@mallorcanativaproperties.com", 44, 48, { size: 7, color: GRAY });
 
   // Generar PDF buffer
@@ -222,7 +222,7 @@ export async function POST(request) {
     const destinatarios = [
       ...firmantes.filter(f => f.email).map(f => ({ email: f.email, nombre: f.nombre })),
       ...(agente_email ? [{ email: agente_email, nombre: agente_nombre }] : []),
-      { email: "info@mallorcanativaproperties.com", nombre: "Mallorca Nativa" },
+      { email: "info@mallorcanativaproperties.com", nombre: "Nativa Properties" },
     ];
 
     for (const dest of destinatarios) {
@@ -231,7 +231,7 @@ export async function POST(request) {
           method: "POST",
           headers: { "Content-Type": "application/json", "Authorization": `Bearer ${resendKey}` },
           body: JSON.stringify({
-            from: "Mallorca Nativa Properties <onboarding@resend.dev>",
+            from: "Nativa Properties <onboarding@resend.dev>",
             to: [dest.email],
             subject: `Encargo de gestión firmado — ${enc.prop_direccion || enc.prop_ref || ""}`,
             html: `<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:40px 20px">

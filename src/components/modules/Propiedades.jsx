@@ -1585,7 +1585,7 @@ ESTILO DE ESCRITURA OBLIGATORIO:
 
 ESTRUCTURA (7 parrafos, texto continuo sin titulos):
 
-Parrafo 1: "Mallorca Nativa Properties presenta este/a [tipo] en [zona], [caracteristica principal de la zona o propiedad]." + Si tiene parking/trastero mencionarlos + Si NO tiene ascensor mencionarlo. Segunda frase: para quien es ideal esta propiedad y que estilo de vida ofrece.
+Parrafo 1: "Nativa Properties presenta este/a [tipo] en [zona], [caracteristica principal de la zona o propiedad]." + Si tiene parking/trastero mencionarlos + Si NO tiene ascensor mencionarlo. Segunda frase: para quien es ideal esta propiedad y que estilo de vida ofrece.
 
 Parrafo 2: Descripcion inmersiva del interior. El lector debe sentirse caminando por la vivienda. Describe el salon, la luz, la distribucion, las sensaciones. Conecta los espacios entre si con transiciones naturales. Menciona vistas si las hay.
 
@@ -1793,7 +1793,7 @@ REGLAS:
         {/* Header pantalla completa — estilo cuestionario */}
         <div style={{ marginBottom: 36, borderBottom: "1px solid #E7E1D4", paddingBottom: 28, display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
           <div>
-            <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Mallorca Nativa Properties</div>
+            <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Nativa Properties</div>
             <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.1 }}>
               Ficha de <em>Propiedad</em>
             </h1>
@@ -3248,7 +3248,7 @@ export default function CRMPropiedades({ currentUser }) {
         <div style={{ marginBottom: 40, borderBottom: "1px solid #2A2926", paddingBottom: 32 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 16 }}>
             <div>
-              <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Mallorca Nativa Properties</div>
+              <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Nativa Properties</div>
               <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 400, margin: 0, lineHeight: 1.1 }}>
                 Cartera de <em>Propiedades</em>
               </h1>

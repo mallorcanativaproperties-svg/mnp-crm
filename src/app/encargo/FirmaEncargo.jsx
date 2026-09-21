@@ -119,7 +119,7 @@ export default function FirmaEncargo({ token }) {
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: 32, color: "#A23A3A", marginBottom: 12 }}>✕</div>
         <div style={{ fontSize: 16, marginBottom: 8 }}>{error}</div>
-        <div style={{ fontSize: 12, color: "#9A968A" }}>Contacta con Mallorca Nativa Properties</div>
+        <div style={{ fontSize: 12, color: "#9A968A" }}>Contacta con Nativa Properties</div>
       </div>
     </div>
   );
@@ -129,7 +129,7 @@ export default function FirmaEncargo({ token }) {
       <div style={{ textAlign: "center", maxWidth: 480 }}>
         <div style={{ fontSize: 48, color: "#2C6E52", marginBottom: 16 }}>✓</div>
         <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 24, fontWeight: 400, marginBottom: 12 }}>Encargo firmado</div>
-        <div style={{ fontSize: 14, color: "#9A968A", lineHeight: 1.6 }}>Tu firma ha sido registrada correctamente junto con tu verificación de email. Recibirás una copia por parte de Mallorca Nativa Properties.</div>
+        <div style={{ fontSize: 14, color: "#9A968A", lineHeight: 1.6 }}>Tu firma ha sido registrada correctamente junto con tu verificación de email. Recibirás una copia por parte de Nativa Properties.</div>
         <div style={{ marginTop: 24, fontSize: 11, color: BRONZE, letterSpacing: "0.1em" }}>MALLORCA NATIVA PROPERTIES</div>
       </div>
     </div>

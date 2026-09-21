@@ -3,14 +3,14 @@ import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { supabase } from "../../lib/supabase";
 
 /* ── SYSTEM PROMPTS ── */
-const ANA_PROMPT = `Eres Ana, agente comercial de Mallorca Nativa Properties. Contactas por WhatsApp a particulares que publican propiedades en venta.
+const ANA_PROMPT = `Eres Ana, agente comercial de Nativa Properties. Contactas por WhatsApp a particulares que publican propiedades en venta.
 
 PERSONALIDAD: Cercana, directa, breve, natural. Escribes como persona real por WhatsApp: mensajes cortos, sin parrafos, sin formalidades. Tuteas siempre. Nunca robotica. Tono como el de una conocida que te escribe, no como vendedora.
 
-REGLA PRINCIPAL: HABLAS POCO. Solo haces comentarios cortos y preguntas sobre SU piso y SU situacion. NUNCA explicas nada de Mallorca Nativa ni de lo que hacemos hasta que el cliente este caliente y PREGUNTE. El interes lo despiertas con lo que ves en su anuncio, no con lo que nosotros hacemos. El cliente tiene que ser quien pida informacion, no tu quien la ofrezca.
+REGLA PRINCIPAL: HABLAS POCO. Solo haces comentarios cortos y preguntas sobre SU piso y SU situacion. NUNCA explicas nada de Nativa Properties ni de lo que hacemos hasta que el cliente este caliente y PREGUNTE. El interes lo despiertas con lo que ves en su anuncio, no con lo que nosotros hacemos. El cliente tiene que ser quien pida informacion, no tu quien la ofrezca.
 
 FILOSOFIA:
-- Nunca muestras necesidad. Mallorca Nativa elige con quien trabaja. "Tendriamos que verlo para saber si nos interesa" invierte la dinamica
+- Nunca muestras necesidad. Nativa Properties elige con quien trabaja. "Tendriamos que verlo para saber si nos interesa" invierte la dinamica
 - Hemos vendido pisos por TODAS las zonas. Si podemos tener compradores interesados en cualquier zona pero no podemos verificarlo sin ver la propiedad y hablar con el vendedor. Por eso la visita es imprescindible
 - Nunca eres portadora de problemas. Los problemas SIEMPRE los causan terceros (bancos que tasan por debajo, portales que no posicionan, compradores sin filtrar). Tu ofreces la solucion
 - Nunca provocas disparadores mentales negativos. Nunca digas nada que el vendedor interprete como "lo estas haciendo mal", "tu piso vale menos" o "vas a tener un problema"
@@ -92,7 +92,7 @@ Cuando cierres cita, envia resumen a Silvia (655882682): conversacion completa +
 
 IMPORTANTE: Respuestas MUY cortas. 1-2 lineas maximo. Pregunta mas de lo que explicas. Nunca seas robotica ni uses estructuras de vendedora. Escribe como escribiria Silvia en el ejemplo real.`;
 
-const CLAUDIA_PROMPT = `Eres Claudia, secretaria coordinadora de Mallorca Nativa Properties. Recibes leads de compradores por WhatsApp.
+const CLAUDIA_PROMPT = `Eres Claudia, secretaria coordinadora de Nativa Properties. Recibes leads de compradores por WhatsApp.
 
 PERSONALIDAD: Cercana, servicial, profesional. Mensajes cortos, naturales. Tuteas siempre. NUNCA mientes.
 
@@ -947,7 +947,7 @@ export default function AgentesIA() {
       <div style={{ padding: "16px 24px", borderBottom: "1px solid #2A2926" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
           <div>
-            <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", fontWeight: 500 }}>Mallorca Nativa Properties</div>
+            <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", fontWeight: 500 }}>Nativa Properties</div>
             <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 400, margin: "4px 0 0" }}>Agentes <em>IA</em></h1>
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>

@@ -233,7 +233,7 @@ export default function EncargosVenta() {
   function getMsgWA(enc) {
     const link = getLinkFirma(enc.token_firma);
     const tipo = enc.tipo === "premium" ? "Premium (con exclusividad)" : "Sin Compromiso";
-    return encodeURIComponent(`Hola${enc.prop1_nombre ? " " + enc.prop1_nombre : ""},\n\nTe enviamos el Encargo de Venta *${tipo}* de Mallorca Nativa Properties para que lo revises y firmes desde tu móvil:\n\n${link}\n\nSi tienes cualquier duda, estamos a tu disposición. ¡Gracias!`);
+    return encodeURIComponent(`Hola${enc.prop1_nombre ? " " + enc.prop1_nombre : ""},\n\nTe enviamos el Encargo de Venta *${tipo}* de Nativa Properties para que lo revises y firmes desde tu móvil:\n\n${link}\n\nSi tienes cualquier duda, estamos a tu disposición. ¡Gracias!`);
   }
 
   function copyLink(token) {
@@ -537,7 +537,7 @@ export default function EncargosVenta() {
                     {f.telefono && (
                       <a href={`https://wa.me/${f.telefono.replace(/\D/g, "")}?text=${encodeURIComponent(`Hola ${f.nombre || ""},
 
-Te enviamos el encargo de gestión de Mallorca Nativa Properties para que lo revises y firmes desde tu móvil:
+Te enviamos el encargo de gestión de Nativa Properties para que lo revises y firmes desde tu móvil:
 
 https://${typeof window !== "undefined" ? window.location.host : "crm.mallorcanativaproperties.com"}/encargo?token=${f.token_firma}
 

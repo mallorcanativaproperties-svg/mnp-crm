@@ -113,7 +113,7 @@ async function callClaude(conversationHistory, convData, propertyInfo) {
 CAMPOS QUE NUNCA PUEDES COMPARTIR: dirección exacta, número, precio propietario, honorarios, datos del propietario, notas privadas, cualificaciones internas.
 Si el cliente pregunta por algo que NO está en la ficha de la propiedad: "Esa información te la dará ${agente?.nombre || "el agente"} que es quien gestiona la propiedad."`;
 
-  const systemPrompt = `Eres Claudia, secretaria coordinadora de Mallorca Nativa Properties. Recibes leads de compradores por WhatsApp.
+  const systemPrompt = `Eres Claudia, secretaria coordinadora de Nativa Properties. Recibes leads de compradores por WhatsApp.
 
 PERSONALIDAD:
 - Cercana, servicial, profesional. Mensajes cortos, naturales. Tuteas siempre. NUNCA mientes
@@ -585,7 +585,7 @@ export async function POST(request) {
           }
         } else if (!existingConv) {
           // Generic welcome for non-Idealista
-          const welcome = "Hola, gracias por contactar con Mallorca Nativa Properties. Un agente te atenderá en breve.";
+          const welcome = "Hola, gracias por contactar con Nativa Properties. Un agente te atenderá en breve.";
           await sendWhatsApp(from, welcome);
           if (conv?.id) {
             await supabase.from("mensajes").insert({

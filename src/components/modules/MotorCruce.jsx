@@ -39,7 +39,7 @@ function WhatsAppCrucePanel({ buyer, prop, onClose }) {
     ? `https://mallorcanativaproperties.com/propiedades/${prop.ref.toLowerCase()}/`
     : null;
 
-  const msgInicial = `Hola!\nTe escribimos de Mallorca Nativa y según tus preferencias, esta propiedad podría interesarte. Si quieres hacer visita, coméntanos tu disponibilidad.${propUrl ? "\n\n" + propUrl : ""}`;
+  const msgInicial = `Hola!\nTe escribimos de Nativa Properties y según tus preferencias, esta propiedad podría interesarte. Si quieres hacer visita, coméntanos tu disponibilidad.${propUrl ? "\n\n" + propUrl : ""}`;
 
   useEffect(() => {
     async function loadConv() {
@@ -575,7 +575,7 @@ export default function MotorCruce() {
 
         {/* Header */}
         <div style={{ marginBottom: 40, borderBottom: "1px solid #2A2926", paddingBottom: 32 }}>
-          <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Mallorca Nativa Properties</div>
+          <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Nativa Properties</div>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 400, margin: 0, lineHeight: 1.1 }}>
             Motor de <em>Cruce</em>
           </h1>

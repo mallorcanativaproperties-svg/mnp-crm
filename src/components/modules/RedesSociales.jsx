@@ -1334,7 +1334,7 @@ export default function RedesSociales() {
       <div style={S.container}>
         {/* Header */}
         <div style={{ marginBottom: 28, borderBottom: "1px solid #2A2926", paddingBottom: 20 }}>
-          <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Mallorca Nativa Properties</div>
+          <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Nativa Properties</div>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 400, margin: 0, lineHeight: 1.1 }}>Redes <em>Sociales</em></h1>
           <p style={{ fontSize: 12, color: "#9A968A", margin: "10px 0 0", letterSpacing: "0.04em" }}>Publicar, responder, automatizar — Instagram, Facebook, LinkedIn, TikTok, YouTube</p>
         </div>

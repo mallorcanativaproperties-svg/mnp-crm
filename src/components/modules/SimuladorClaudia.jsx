@@ -90,7 +90,7 @@ export default function SimuladorClaudia() {
   return (
     <div style={{ padding: "40px 48px", maxWidth: 960, margin: "0 auto" }}>
       <div style={{ marginBottom: 32 }}>
-        <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.3em", marginBottom: 8 }}>Mallorca Nativa Properties</div>
+        <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.3em", marginBottom: 8 }}>Nativa Properties</div>
         <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 400, margin: 0 }}>Simulador <em>Claudia</em></h1>
         <p style={{ fontSize: 12, color: "#9A968A", margin: "8px 0 0" }}>Prueba cómo responde Claudia ante un lead entrante — sin afectar datos reales</p>
       </div>

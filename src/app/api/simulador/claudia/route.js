@@ -12,7 +12,7 @@ function getSupabase() {
 const CAMPOS_PERMITIDOS = ["ref","tipo","op","titulo","cp","municipio","zona","orient","dist_playa","precio_venta","cert_energ","conserv","ano_construc","m_util","m_const","m_parcela","m_terraza","m_balcon","hab_dobles","hab_simples","banos","aseos","planta","parking","n_plazas","aire_acond_tipo","calefaccion","agua_cal","suministros","venta_mobiliario","iee","ibi","desc_texto","terraza","piscina","ascensor","jardin","armarios","trastero","balcon"];
 
 async function callClaude(messages, convData, propertyInfo) {
-  const systemPrompt = `Eres Claudia, secretaria coordinadora de Mallorca Nativa Properties. Recibes leads de compradores por WhatsApp.
+  const systemPrompt = `Eres Claudia, secretaria coordinadora de Nativa Properties. Recibes leads de compradores por WhatsApp.
 
 PERSONALIDAD:
 - Profesional, cercana y eficiente

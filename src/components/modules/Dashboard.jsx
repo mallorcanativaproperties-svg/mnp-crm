@@ -66,7 +66,7 @@ function LoginScreen({ users, onLogin }) {
     <div style={{ fontFamily: "Inter, sans-serif", background: "#F8F6F1", minHeight: "100vh", color: "#22262E", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
       <div style={{ width: "100%", maxWidth: 380 }}>
         <div style={{ textAlign: "center", marginBottom: 40 }}>
-          <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.25em", marginBottom: 12, fontWeight: 500 }}>Mallorca Nativa Properties</div>
+          <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.25em", marginBottom: 12, fontWeight: 500 }}>Nativa Properties</div>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 400, margin: 0, lineHeight: 1.2 }}>
             <em>CRM</em>
           </h1>
@@ -122,7 +122,7 @@ function LoginScreen({ users, onLogin }) {
         </div>
 
         <div style={{ textAlign: "center", marginTop: 20, fontSize: 10, color: "#7A787055" }}>
-          Mallorca Nativa SL - CRM v1.0
+          Nativa Properties - CRM v1.0
         </div>
       </div>
     </div>
@@ -317,7 +317,7 @@ function DashboardContent({ currentUser, onLogout, users, setUsers }) {
         <div style={{ marginBottom: 36, borderBottom: "1px solid #2A2926", paddingBottom: 28 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
             <div>
-              <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Mallorca Nativa Properties</div>
+              <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Nativa Properties</div>
               <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 400, margin: 0, lineHeight: 1.1 }}>
                 {isDirector ? <span><em>Dashboard</em> General</span> : <span>Mi <em>Dashboard</em></span>}
               </h1>

@@ -1,7 +1,7 @@
 import React from "react";
 export const metadata = {
-  title: "Política de Privacidad — Mallorca Nativa Properties",
-  description: "Política de privacidad de Mallorca Nativa Properties",
+  title: "Política de Privacidad — Nativa Properties",
+  description: "Política de privacidad de Nativa Properties",
 };
 
 export default function Privacy() {
@@ -44,7 +44,7 @@ export default function Privacy() {
 
       <h2 style={{ fontSize: 18, fontWeight: 400, marginTop: 36, marginBottom: 12 }}>7. Uso de plataformas de Meta</h2>
       <p style={{ fontSize: 15, marginBottom: 16 }}>
-        Mallorca Nativa Properties utiliza la API de Meta (Facebook e Instagram) únicamente para publicar contenido propio en sus redes sociales y gestionar las comunicaciones con clientes que han iniciado contacto previamente. No almacenamos datos de terceros obtenidos a través de estas plataformas más allá de lo necesario para la gestión comercial.
+        Nativa Properties utiliza la API de Meta (Facebook e Instagram) únicamente para publicar contenido propio en sus redes sociales y gestionar las comunicaciones con clientes que han iniciado contacto previamente. No almacenamos datos de terceros obtenidos a través de estas plataformas más allá de lo necesario para la gestión comercial.
       </p>
 
       <div style={{ marginTop: 60, paddingTop: 24, borderTop: "1px solid #E7E1D4", fontSize: 12, color: "#9A968A" }}>

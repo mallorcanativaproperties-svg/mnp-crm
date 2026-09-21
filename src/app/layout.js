@@ -2,7 +2,7 @@ import React from "react";
 import "./globals.css";
 
 export const metadata = {
-  title: "CRM - Mallorca Nativa Properties",
+  title: "CRM - Nativa Properties",
   description: "Gestion inmobiliaria + Marketing + IA",
 };
 

@@ -181,7 +181,7 @@ async function generarCertificado(nombreAgente, nombreModulo) {
   doc.setDrawColor(172, 138, 84); doc.setLineWidth(1.5); doc.rect(12, 12, 273, 186);
   doc.setLineWidth(0.5); doc.rect(15, 15, 267, 180);
   doc.setTextColor(172, 138, 84); doc.setFont("helvetica", "bold"); doc.setFontSize(10);
-  doc.text("MALLORCA NATIVA PROPERTIES", 148.5, 42, { align: "center" });
+  doc.text("NATIVA PROPERTIES", 148.5, 42, { align: "center" });
   doc.setTextColor(44, 42, 38); doc.setFontSize(26);
   doc.text("CERTIFICADO DE FORMACIÓN", 148.5, 64, { align: "center" });
   doc.setFont("helvetica", "normal"); doc.setFontSize(13); doc.setTextColor(154, 150, 138);
@@ -371,7 +371,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
       <div style={{ background: WHITE, borderBottom: `1px solid ${BORDER}`, padding: "28px 40px 0" }}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 4 }}>
           <div>
-            <div style={{ fontSize: 10, color: GOLD, letterSpacing: "0.2em", fontWeight: 700, marginBottom: 4 }}>MALLORCA NATIVA PROPERTIES</div>
+            <div style={{ fontSize: 10, color: GOLD, letterSpacing: "0.2em", fontWeight: 700, marginBottom: 4 }}>NATIVA PROPERTIES</div>
             <h1 style={{ fontSize: 26, color: TEXT, fontWeight: 400, margin: 0, fontFamily: "'Playfair Display', Georgia, serif" }}>
               Academia de Formación
             </h1>

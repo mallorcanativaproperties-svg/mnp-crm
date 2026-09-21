@@ -103,7 +103,7 @@ export default function Usuarios({ currentUser }) {
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 40 }}>
         <div>
-          <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.3em", marginBottom: 8 }}>Mallorca Nativa Properties</div>
+          <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.3em", marginBottom: 8 }}>Nativa Properties</div>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 400, margin: 0 }}>Gestión de <em>Usuarios</em></h1>
           <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 8 }}>
             <p style={{ fontSize: 12, color: "#9A968A", margin: 0 }}>{usuarios.filter(u => u.activo).length} activos · {usuarios.filter(u => !u.activo).length} inactivos</p>

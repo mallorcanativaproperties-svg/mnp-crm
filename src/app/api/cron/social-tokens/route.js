@@ -41,12 +41,12 @@ export async function GET(request) {
       if (daysLeft <= 0) {
         warnings.push({ platform: acc.platform, daysLeft, status: "expired" });
         await sendWhatsApp(SILVIA_PHONE,
-          `⚠️ *CRM Mallorca Nativa*\n\nEl token de *${acc.platform.toUpperCase()}* ha *caducado*. Las publicaciones fallarán hasta que lo renueves.\n\n${acc.platform === "linkedin" ? `Renueva aquí: ${LINKEDIN_RENEWAL_URL}` : "Ve a Redes Sociales → Cuentas para reconectar."}`
+          `⚠️ *CRM Nativa Properties*\n\nEl token de *${acc.platform.toUpperCase()}* ha *caducado*. Las publicaciones fallarán hasta que lo renueves.\n\n${acc.platform === "linkedin" ? `Renueva aquí: ${LINKEDIN_RENEWAL_URL}` : "Ve a Redes Sociales → Cuentas para reconectar."}`
         );
       } else if (daysLeft <= 7) {
         warnings.push({ platform: acc.platform, daysLeft, status: "warning" });
         await sendWhatsApp(SILVIA_PHONE,
-          `🔔 *CRM Mallorca Nativa*\n\nEl token de *${acc.platform.toUpperCase()}* caduca en *${daysLeft} día${daysLeft === 1 ? "" : "s"}*.\n\n${acc.platform === "linkedin" ? `Renueva con un clic: ${LINKEDIN_RENEWAL_URL}` : "Ve a Redes Sociales → Cuentas para reconectar."}`
+          `🔔 *CRM Nativa Properties*\n\nEl token de *${acc.platform.toUpperCase()}* caduca en *${daysLeft} día${daysLeft === 1 ? "" : "s"}*.\n\n${acc.platform === "linkedin" ? `Renueva con un clic: ${LINKEDIN_RENEWAL_URL}` : "Ve a Redes Sociales → Cuentas para reconectar."}`
         );
       }
     }

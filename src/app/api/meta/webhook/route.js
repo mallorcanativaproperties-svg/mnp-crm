@@ -18,7 +18,7 @@ async function getToken() {
   return META_TOKEN;
 }
 
-const SILVIA_PROMPT = `Eres Silvia, community manager de Mallorca Nativa Properties, una agencia inmobiliaria boutique en Mallorca.
+const SILVIA_PROMPT = `Eres Silvia, community manager de Nativa Properties, una agencia inmobiliaria boutique en Mallorca.
 
 PERSONALIDAD:
 - Amable, coloquial pero siempre educada

@@ -81,7 +81,7 @@ function buildSystemPrompt(agente, propertyInfo, convData) {
   const agenteNombre = agente?.nombre || "el agente";
   const agenteTelefono = agente?.telefono || "";
 
-  return `Eres Claudia, coordinadora de Mallorca Nativa Properties. Gestionas y derivas clientes compradores por WhatsApp.
+  return `Eres Claudia, coordinadora de Nativa Properties. Gestionas y derivas clientes compradores por WhatsApp.
 
 Hay dos situaciones de partida:
 SITUACIÓN 1: Claudia inicia la conversación porque ha llegado un email de Idealista con los datos del lead.
@@ -91,7 +91,7 @@ PERSONALIDAD:
 - Cercana, servicial, profesional. Mensajes cortos, naturales. Tuteas siempre. NUNCA mientes.
 - Escribes como persona real por WhatsApp: mensajes cortos de 1-3 líneas máximo.
 - CERO emoticonos, CERO emojis. Ni uno.
-- NUNCA te presentes como IA, asistente virtual ni nada similar. Eres Claudia, coordinadora de Mallorca Nativa.
+- NUNCA te presentes como IA, asistente virtual ni nada similar. Eres Claudia, coordinadora de Nativa Properties.
 - Nada de expresiones artificiales tipo "estoy aquí para ayudarte", "no dudes en preguntar".
 - NUNCA digas "según la ficha", "según los datos", "según la información". Responde como si conocieras la propiedad de primera mano.
 - Nunca especules ni enumeres posibilidades ante una duda.
@@ -351,7 +351,7 @@ export async function POST(request) {
 
         // ── Primer contacto: enviar botones ──
         if (!yaSaludo) {
-          const bienvenida = "Hola! Has contactado con Mallorca Nativa, ¿en qué podemos ayudarte?";
+          const bienvenida = "Hola! Has contactado con Nativa Properties, ¿en qué podemos ayudarte?";
           try {
             await sendButtons(phoneWith34, bienvenida, [
               { id: "comprar", title: "Quiero comprar" },
@@ -371,7 +371,7 @@ export async function POST(request) {
         // ── Quiere vender o hipotecas: derivar a MNSLA ──
         if (quiereVender || quiereHipoteca) {
           const motivo = quiereVender ? "vender su propiedad" : "información sobre hipotecas";
-          const msgCliente = "Gracias por contactar con Mallorca Nativa, hemos derivado su petición a la persona responsable, en breves se pondrá en contacto con usted.";
+          const msgCliente = "Gracias por contactar con Nativa Properties, hemos derivado su petición a la persona responsable, en breves se pondrá en contacto con usted.";
           await sendWhatsApp(phoneWith34, msgCliente);
           await supabase.from("mensajes").insert({
             conversacion_id: conv.id, from_who: "claudia",

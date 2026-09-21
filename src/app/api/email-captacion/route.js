@@ -139,7 +139,7 @@ export async function POST(request) {
 </html>`;
 
     await resend.emails.send({
-      from: "CRM Mallorca Nativa <onboarding@resend.dev>",
+      from: "CRM Nativa Properties <onboarding@resend.dev>",
       to: "info@mallorcanativaproperties.com",
       subject: `Nueva captación: ${d.ref || "Sin ref"} · ${d.tipo || ""} en ${d.municipio || ""} · Agente: ${d.agente || ""}`,
       html,

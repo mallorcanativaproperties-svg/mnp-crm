@@ -144,7 +144,7 @@ function FichaModal({ item, onClose, onUpdate, onAna }) {
                 style={{ flex: 1, padding: "10px 14px", border: `1px solid ${BORDER}`, background: "#fff", color: PETROL, fontSize: 13, fontFamily: "Inter, sans-serif", outline: "none" }} />
               {telEdit && (
                 <>
-                  <a href={`https://wa.me/${telEdit.replace(/\D/g, "")}?text=${encodeURIComponent(`Hola! Soy de Mallorca Nativa Properties. He visto tu anuncio en Fotocasa y me gustaría hablar contigo.`)}`}
+                  <a href={`https://wa.me/${telEdit.replace(/\D/g, "")}?text=${encodeURIComponent(`Hola! Soy de Nativa Properties. He visto tu anuncio en Fotocasa y me gustaría hablar contigo.`)}`}
                     target="_blank" rel="noopener noreferrer"
                     style={{ padding: "10px 14px", background: "#2C6E52", color: CREAM, fontSize: 11, textDecoration: "none", fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center" }}>
                     WhatsApp

@@ -20,7 +20,7 @@ const T = {
     requisitos: "Requisitos o comentarios adicionales", requisitosPh: "Piscina, garage, jardín...",
     rgpd: "Acepto el tratamiento de mis datos según la",
     privacidad: "política de privacidad",
-    rgpdLey: "conforme al RGPD y la LOPDGDD. Puedo ejercer mis derechos de acceso, rectificación y supresión contactando con Mallorca Nativa Properties.",
+    rgpdLey: "conforme al RGPD y la LOPDGDD. Puedo ejercer mis derechos de acceso, rectificación y supresión contactando con Nativa Properties.",
     enviar: "Enviar solicitud",
     exito: "¡Gracias! Hemos recibido tu solicitud.",
     exitoSub: "Nuestro equipo se pondrá en contacto contigo en breve.",
@@ -45,7 +45,7 @@ const T = {
     requisitos: "Additional requirements or comments", requisitosPh: "Pool, garage, garden...",
     rgpd: "I accept the processing of my data according to the",
     privacidad: "privacy policy",
-    rgpdLey: "in accordance with GDPR. I can exercise my rights of access, rectification and deletion by contacting Mallorca Nativa Properties.",
+    rgpdLey: "in accordance with GDPR. I can exercise my rights of access, rectification and deletion by contacting Nativa Properties.",
     enviar: "Send request",
     exito: "Thank you! We have received your request.",
     exitoSub: "Our team will contact you shortly.",
@@ -70,7 +70,7 @@ const T = {
     requisitos: "Weitere Anforderungen oder Kommentare", requisitosPh: "Pool, Garage, Garten...",
     rgpd: "Ich stimme der Verarbeitung meiner Daten gemäß der",
     privacidad: "Datenschutzerklärung",
-    rgpdLey: "gemäß DSGVO zu. Ich kann meine Rechte auf Auskunft, Berichtigung und Löschung durch Kontaktaufnahme mit Mallorca Nativa Properties ausüben.",
+    rgpdLey: "gemäß DSGVO zu. Ich kann meine Rechte auf Auskunft, Berichtigung und Löschung durch Kontaktaufnahme mit Nativa Properties ausüben.",
     enviar: "Anfrage senden",
     exito: "Vielen Dank! Wir haben Ihre Anfrage erhalten.",
     exitoSub: "Unser Team wird sich in Kürze bei Ihnen melden.",
@@ -95,7 +95,7 @@ const T = {
     requisitos: "Aanvullende vereisten of opmerkingen", requisitosPh: "Zwembad, garage, tuin...",
     rgpd: "Ik ga akkoord met de verwerking van mijn gegevens volgens de",
     privacidad: "privacyverklaring",
-    rgpdLey: "conform de AVG. Ik kan mijn rechten van inzage, rectificatie en verwijdering uitoefenen door contact op te nemen met Mallorca Nativa Properties.",
+    rgpdLey: "conform de AVG. Ik kan mijn rechten van inzage, rectificatie en verwijdering uitoefenen door contact op te nemen met Nativa Properties.",
     enviar: "Aanvraag versturen",
     exito: "Dank u! We hebben uw aanvraag ontvangen.",
     exitoSub: "Ons team neemt binnenkort contact met u op.",
@@ -120,7 +120,7 @@ const T = {
     requisitos: "Exigences ou commentaires supplémentaires", requisitosPh: "Piscine, garage, jardin...",
     rgpd: "J'accepte le traitement de mes données selon la",
     privacidad: "politique de confidentialité",
-    rgpdLey: "conformément au RGPD. Je peux exercer mes droits d'accès, de rectification et de suppression en contactant Mallorca Nativa Properties.",
+    rgpdLey: "conformément au RGPD. Je peux exercer mes droits d'accès, de rectification et de suppression en contactant Nativa Properties.",
     enviar: "Envoyer la demande",
     exito: "Merci ! Nous avons bien reçu votre demande.",
     exitoSub: "Notre équipe vous contactera sous peu.",
@@ -141,7 +141,7 @@ function detectarIdioma() {
   return "es";
 }
 
-// ── Paleta Mallorca Nativa ──────────────────────────────────────
+// ── Paleta Nativa Properties ──────────────────────────────────────
 const B  = "#8f7141";   // bronze oscuro — firma
 const BL = "#AC8A54";   // bronze claro — acento
 const P  = "#405c6b";   // petróleo

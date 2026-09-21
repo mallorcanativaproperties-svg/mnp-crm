@@ -267,7 +267,7 @@ export default function FirmarPage() {
       <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
       <div style={{ textAlign: "center", marginBottom: 8, marginTop: 12 }}>
-        <div style={{ fontSize: 18, fontWeight: 700, color: "#1a1a1a", letterSpacing: "0.12em", textTransform: "uppercase" }}>Mallorca Nativa</div>
+        <div style={{ fontSize: 18, fontWeight: 700, color: "#1a1a1a", letterSpacing: "0.12em", textTransform: "uppercase" }}>Nativa Properties</div>
         <div style={{ fontSize: 10, color: "#C8A97E", letterSpacing: "0.3em", textTransform: "uppercase", marginTop: 2 }}>Properties</div>
       </div>
 

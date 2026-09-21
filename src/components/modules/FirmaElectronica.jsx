@@ -113,7 +113,7 @@ export default function FirmaElectronica() {
     const firma = firmaData.firma;
     const firmantes = firmaData.firmantes || [];
     const hashDoc = firma.hash_documento || "-";
-    const footerText = `Fichero verificado por Mallorca Nativa Properties - ${hashDoc}`;
+    const footerText = `Fichero verificado por Nativa Properties - ${hashDoc}`;
 
     // 1. Fetch the original PDF
     let originalPdfBytes;
@@ -325,7 +325,7 @@ export default function FirmaElectronica() {
         <div style={{ marginBottom: 40, borderBottom: "1px solid #2A2926", paddingBottom: 32 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 16 }}>
             <div>
-              <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Mallorca Nativa Properties</div>
+              <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Nativa Properties</div>
               <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 400, margin: 0, lineHeight: 1.1 }}>
                 Firma <em>Electronica</em>
               </h1>

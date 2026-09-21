@@ -30,7 +30,7 @@ export async function POST(request) {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${resendKey}` },
         body: JSON.stringify({
-          from: "Mallorca Nativa Properties <onboarding@resend.dev>",
+          from: "Nativa Properties <onboarding@resend.dev>",
           to: [email],
           subject: "Código de verificación — Encargo de gestión",
           html: `<div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:40px 20px">
