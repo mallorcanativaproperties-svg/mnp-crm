@@ -68,9 +68,9 @@ export async function POST(request) {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
+        // Opus 5 rechaza `temperature`: el parametro esta deprecado para este modelo
         model: agente.modelo || "claude-opus-5",
         max_tokens: agente.max_tokens || 4000,
-        temperature: Number(agente.temperatura ?? 0.15),
         // El prompt de sistema es fijo por agente: cachearlo abarata cada consulta
         system: [
           {
