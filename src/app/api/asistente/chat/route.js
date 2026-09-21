@@ -87,7 +87,9 @@ export async function POST(request) {
     if (!upstream.ok) {
       const txt = await upstream.text();
       console.error("[asistente/chat] anthropic", upstream.status, txt);
-      return NextResponse.json({ error: "Error del modelo" }, { status: 502 });
+      let detalle = txt;
+      try { detalle = JSON.parse(txt)?.error?.message || txt; } catch (e) { /* texto crudo */ }
+      return NextResponse.json({ error: "Error del modelo", detalle, status: upstream.status }, { status: 502 });
     }
 
     // 4. Reemitimos como SSE propio y persistimos al cerrar
