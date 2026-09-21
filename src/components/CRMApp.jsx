@@ -41,6 +41,7 @@ const ICON_MAP = {
   agentes:             <CpuChipIcon style={{ width: 18, height: 18 }} />,
   formacion_agentes:   <AcademicCapIcon style={{ width: 18, height: 18 }} />,
   formacion_direccion: <StarIcon style={{ width: 18, height: 18 }} />,
+  formacion_asistente: <CpuChipIcon style={{ width: 18, height: 18 }} />,
   simulador:           <WrenchScrewdriverIcon style={{ width: 18, height: 18 }} />,
   dashboard:           <ChartBarIcon style={{ width: 18, height: 18 }} />,
   usuarios:            <UserGroupIcon style={{ width: 18, height: 18 }} />,
@@ -66,7 +67,8 @@ const MODULES = [
   // AGENTES IA — solo director (Suren)
   { key: "agentes", label: "Agentes IA", icon: "agentes", color: "#9C6E1B", roles: ["director", "administrador", "agente"], group: "Agentes IA" },
   { key: "formacion_agentes", label: "Formación Agentes", icon: "formacion_agentes", color: "#AC8A54", roles: ["director", "administrador", "agente"], group: "Formación" },
-  { key: "formacion_direccion", label: "Dirección y Asistente IA", icon: "formacion_direccion", color: "#AC8A54", roles: ["director", "administrador"], group: "Formación" },
+  { key: "formacion_direccion", label: "Formación Dirección", icon: "formacion_direccion", color: "#AC8A54", roles: ["director", "administrador"], group: "Formación" },
+  { key: "formacion_asistente", label: "Asistente IA", icon: "formacion_asistente", color: "#9C6E1B", roles: ["director", "administrador"], group: "Formación" },
   { key: "simulador", label: "Simulador Claudia", icon: "simulador", color: "#9C6E1B", roles: ["director", "administrador"], group: "Agentes IA" },
 
   // GESTIÓN — director y administrador
@@ -275,6 +277,7 @@ export default function CRMApp() {
       case "captacion": return <FormularioCaptacion />;
       case "formacion_agentes": return <Formacion currentUser={currentUser} defaultSubseccion="agentes" />;
       case "formacion_direccion": return <Formacion currentUser={currentUser} defaultSubseccion="direccion" />;
+      case "formacion_asistente": return <Formacion currentUser={currentUser} defaultSubseccion="asistente" />;
       case "compradores": return <Compradores currentUser={currentUser} />;
       case "cruce": return <MotorCruce currentUser={currentUser} />;
       case "captacion_ana": return <Captacion />;

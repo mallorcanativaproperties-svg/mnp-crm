@@ -238,7 +238,8 @@ function EditorModulo({ modulo, onSave, onClose }) {
           <div><L c="Subsección" />
             <select value={f.subseccion} onChange={e => setF({...f, subseccion: e.target.value})} style={{...ISt, cursor:"pointer"}}>
               <option value="agentes">Formación de Agentes</option>
-              <option value="direccion">Dirección y Asistente IA</option>
+              <option value="direccion">Formación Dirección</option>
+              <option value="asistente">Asistente IA</option>
             </select>
           </div>
           <div><L c="Icono" /><input value={f.icono} onChange={e => setF({...f, icono: e.target.value})} style={ISt} placeholder="📚" /></div>
@@ -401,7 +402,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
           <div>
             <div style={{ fontSize: 10, color: GOLD, letterSpacing: "0.2em", fontWeight: 700, marginBottom: 4 }}>NATIVA PROPERTIES</div>
             <h1 style={{ fontSize: 26, color: TEXT, fontWeight: 400, margin: 0, fontFamily: "'Playfair Display', Georgia, serif" }}>
-              {subseccion === "direccion" ? "Dirección y Asistente IA" : "Formación de Agentes"}
+              {subseccion === "direccion" ? "Formación Dirección" : subseccion === "asistente" ? "Asistente IA" : "Formación de Agentes"}
             </h1>
           </div>
           {isAdmin && (
@@ -572,7 +573,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
               ← Volver a cursos
             </button>
             <div style={{ fontSize:10, color: moduloActivo?.imagen_portada ? "rgba(255,255,255,0.6)" : GOLD, letterSpacing:"0.18em", fontWeight:700, marginBottom:6 }}>
-              {subseccion === "direccion" ? "DIRECCIÓN Y ASISTENTE IA" : "FORMACIÓN AGENTES"}
+              {subseccion === "direccion" ? "FORMACIÓN DIRECCIÓN" : subseccion === "asistente" ? "ASISTENTE IA" : "FORMACIÓN AGENTES"}
             </div>
             <h2 style={{ fontSize:24, fontWeight:400, color: moduloActivo?.imagen_portada ? WHITE : TEXT, margin:"0 0 6px", fontFamily:"'Playfair Display', Georgia, serif" }}>
               {moduloActivo?.titulo}
