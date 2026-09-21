@@ -126,6 +126,7 @@ function VisorRecurso({ recurso, userLogin, onClose, onCompletado }) {
         <button onClick={toggleCompletado} style={{ padding: "8px 18px", border: `1px solid ${completado ? GOLD : BORDER}`, background: completado ? GOLD : "transparent", color: completado ? WHITE : MUTED, fontSize: 12, cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600, borderRadius: 2, transition: "all 0.2s" }}>
           {completado ? "✓ Completado" : "Marcar completado"}
         </button>
+        <button onClick={onClose} style={{ padding:"8px 16px", border:`1px solid ${BORDER}`, background:"transparent", color:MUTED, fontSize:12, cursor:"pointer", fontFamily:"Inter, sans-serif", borderRadius:2, marginRight:4 }}>← Volver</button>
         <button onClick={onClose} style={{ background: "transparent", border: "none", color: MUTED, fontSize: 22, cursor: "pointer", lineHeight: 1 }}>✕</button>
       </div>
 
@@ -631,6 +632,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
             <span>›</span>
             <span style={{ color:GOLD, fontWeight:600 }}>{temaActivo?.titulo}</span>
           </div>
+          <button onClick={()=>setVista("temas")} style={{ background:"transparent", border:"none", color:MUTED, fontSize:12, cursor:"pointer", padding:0, marginBottom:4, fontFamily:"Inter, sans-serif" }}>← Volver a temas</button>
           <h2 style={{ fontSize:20, fontWeight:400, color:TEXT, margin:"0 0 4px", fontFamily:"'Playfair Display', Georgia, serif" }}>{temaActivo?.titulo}</h2>
           {temaActivo?.descripcion && <p style={{ fontSize:12, color:MUTED, margin:0, lineHeight:1.5 }}>{temaActivo.descripcion}</p>}
         </div>
