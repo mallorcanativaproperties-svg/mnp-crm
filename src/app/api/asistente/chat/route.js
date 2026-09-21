@@ -1,5 +1,7 @@
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+// Opus 5 con respuesta en dos partes ronda el minuto: margen amplio para no
+// cortar el stream a mitad de la Parte 2.
+export const maxDuration = 300;
 
 import { NextResponse } from "next/server";
 import {
