@@ -184,7 +184,13 @@ function VisorRecurso({ recurso, userLogin, onClose, onCompletado }) {
 }
 
 // ─── Certificado PDF ─────────────────────────────────────────────
-async function generarCertificado(nombreAgente, nombreModulo) {
+function calcProgresoCurso(moduloId) {
+  let total=0, done=0;
+  (temas[moduloId]||[]).forEach(t => (recursos[t.id]||[]).forEach(r => { total++; if(progreso[r.id]) done++; }));
+  return { total, done, completo: total > 0 && done === total };
+}
+
+async function generarCertificado(nombreAgente, nombreCurso, nombreModuloInterno) {
   const { jsPDF } = await import("jspdf");
   const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
   doc.setFillColor(248, 246, 241); doc.rect(0, 0, 297, 210, "F");
@@ -335,7 +341,17 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
   const [editTema, setEditTema]           = useState(null);
   const [loading, setLoading]             = useState(true);
 
+  const [datosUsuario, setDatosUsuario] = useState(null);
+
   useEffect(() => { setVista("modulos"); setModuloActivo(null); setTemaActivo(null); cargarTodo(); }, [subseccion]);
+
+  useEffect(() => {
+    async function cargarUsuario() {
+      const { data } = await supabase.from("usuarios").select("nombre,numero_registro,poliza_rc").eq("user_login", userLogin).single();
+      setDatosUsuario(data);
+    }
+    if (userLogin) cargarUsuario();
+  }, [userLogin]);
 
   async function cargarTodo() {
     setLoading(true);
@@ -479,7 +495,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                       </span>
                       <div style={{ display:"flex", gap:8 }}>
                         {completo && (
-                          <button onClick={e => { e.stopPropagation(); generarCertificado(currentUser?.nombre||userLogin, mod.titulo); }}
+                          <button onClick={e => { e.stopPropagation(); generarCertificado(currentUser?.nombre||userLogin, mod.titulo, ""); }}
                             style={{ padding:"6px 12px", background:GOLD, border:"none", color:WHITE, fontSize:10, fontWeight:700, cursor:"pointer", fontFamily:"Inter, sans-serif", borderRadius:2 }}>
                             Certificado
                           </button>
@@ -521,40 +537,81 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
     const tList = temas[moduloActivo?.id] || [];
     const { total, done, pct } = calcProg(moduloActivo?.id);
     const completo = total > 0 && done === total;
+    const tieneRegistro = !!(datosUsuario?.numero_registro?.trim());
+    const tienePoliza = !!(datosUsuario?.poliza_rc?.trim());
+    const puedeDescargar = completo && tieneRegistro && tienePoliza;
+
+    // Tooltip para el botón deshabilitado
+    const motivoBloqueado = !completo
+      ? "Completa todos los módulos primero"
+      : !tieneRegistro && !tienePoliza
+      ? "Añade tu nº de registro de agente y póliza RC en tu perfil"
+      : !tieneRegistro
+      ? "Añade tu nº de registro de agente inmobiliario en tu perfil"
+      : "Añade tu póliza RC en tu perfil";
+
     return (
       <div style={{ background: CREAM, minHeight:"100vh", fontFamily:"Inter, sans-serif" }}>
 
-        {/* Hero */}
-        <div style={{ background: WHITE, borderBottom: `1px solid ${BORDER}` }}>
-          <div style={{ padding: "20px 40px" }}>
-            <button onClick={() => setVista("modulos")} style={{ background:"transparent", border:"none", color:MUTED, fontSize:12, cursor:"pointer", padding:0, marginBottom:16, fontFamily:"Inter, sans-serif" }}>
-              ← Volver a módulos
+        {/* Hero del curso — banda con imagen de portada */}
+        <div style={{ position:"relative", overflow:"hidden", minHeight:180 }}>
+          {/* Imagen de fondo o gradiente */}
+          {moduloActivo?.imagen_portada
+            ? <img src={moduloActivo.imagen_portada} style={{ position:"absolute", inset:0, width:"100%", height:"100%", objectFit:"cover" }} />
+            : <div style={{ position:"absolute", inset:0, background:`linear-gradient(135deg, ${GOLD_XL} 0%, ${CREAM2} 100%)` }} />
+          }
+          {/* Overlay oscuro para legibilidad */}
+          <div style={{ position:"absolute", inset:0, background: moduloActivo?.imagen_portada ? "rgba(26,37,40,0.55)" : "rgba(172,138,84,0.08)" }} />
+          {/* Contenido sobre la imagen */}
+          <div style={{ position:"relative", zIndex:1, padding:"24px 40px 28px" }}>
+            <button onClick={() => setVista("modulos")} style={{ background:"transparent", border:"none", color: moduloActivo?.imagen_portada ? "rgba(255,255,255,0.75)" : MUTED, fontSize:12, cursor:"pointer", padding:0, marginBottom:18, fontFamily:"Inter, sans-serif" }}>
+              ← Volver a cursos
             </button>
-            <div style={{ display:"flex", gap:24, alignItems:"flex-start" }}>
-              {moduloActivo?.imagen_portada && (
-                <img src={moduloActivo.imagen_portada} style={{ width:80, height:60, objectFit:"cover", borderRadius:3, border:`1px solid ${BORDER}`, flexShrink:0 }} />
-              )}
-              <div style={{ flex:1 }}>
-                <div style={{ fontSize:10, color:GOLD, letterSpacing:"0.15em", fontWeight:700, marginBottom:4 }}>{subseccion === "direccion" ? "DIRECCIÓN Y ASISTENTE IA" : "FORMACIÓN AGENTES"}</div>
-                <h2 style={{ fontSize:22, fontWeight:400, color:TEXT, margin:"0 0 6px", fontFamily:"'Playfair Display', Georgia, serif" }}>{moduloActivo?.titulo}</h2>
-                {moduloActivo?.descripcion && <p style={{ fontSize:12, color:MUTED, margin:"0 0 14px", lineHeight:1.5 }}>{moduloActivo.descripcion}</p>}
-                <div style={{ display:"flex", alignItems:"center", gap:20 }}>
-                  <div style={{ flex:1, maxWidth:280 }}>
-                    <div style={{ display:"flex", justifyContent:"space-between", fontSize:11, color:MUTED, marginBottom:5 }}>
-                      <span>{done} de {total} completados</span>
-                      <span style={{ color:GOLD, fontWeight:700 }}>{pct}%</span>
-                    </div>
-                    <BarProg pct={pct} />
-                  </div>
-                  {completo && (
-                    <button onClick={() => generarCertificado(currentUser?.nombre||userLogin, moduloActivo?.titulo)}
-                      style={{ padding:"9px 18px", background:GOLD, border:"none", color:WHITE, fontSize:11, fontWeight:700, cursor:"pointer", fontFamily:"Inter, sans-serif", borderRadius:2 }}>
-                      Descargar certificado
-                    </button>
-                  )}
-                </div>
-              </div>
+            <div style={{ fontSize:10, color: moduloActivo?.imagen_portada ? "rgba(255,255,255,0.6)" : GOLD, letterSpacing:"0.18em", fontWeight:700, marginBottom:6 }}>
+              {subseccion === "direccion" ? "DIRECCIÓN Y ASISTENTE IA" : "FORMACIÓN AGENTES"}
             </div>
+            <h2 style={{ fontSize:24, fontWeight:400, color: moduloActivo?.imagen_portada ? WHITE : TEXT, margin:"0 0 6px", fontFamily:"'Playfair Display', Georgia, serif" }}>
+              {moduloActivo?.titulo}
+            </h2>
+            {moduloActivo?.descripcion && (
+              <p style={{ fontSize:12, color: moduloActivo?.imagen_portada ? "rgba(255,255,255,0.7)" : MUTED, margin:"0 0 16px", lineHeight:1.5, maxWidth:600 }}>
+                {moduloActivo.descripcion}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Barra de progreso + diploma — separada del hero */}
+        <div style={{ background:WHITE, borderBottom:`1px solid ${BORDER}`, padding:"16px 40px", display:"flex", alignItems:"center", gap:24 }}>
+          <div style={{ flex:1, maxWidth:320 }}>
+            <div style={{ display:"flex", justifyContent:"space-between", fontSize:11, color:MUTED, marginBottom:5 }}>
+              <span>{done} de {total} contenidos completados</span>
+              <span style={{ color:pct===100?GOLD:MUTED, fontWeight:700 }}>{pct}%</span>
+            </div>
+            <BarProg pct={pct} />
+          </div>
+          <div style={{ position:"relative" }}>
+            <button
+              disabled={!puedeDescargar}
+              onClick={() => puedeDescargar && generarCertificado(currentUser?.nombre||userLogin, moduloActivo?.titulo, "")}
+              title={!puedeDescargar ? motivoBloqueado : "Descargar diploma"}
+              style={{
+                padding:"9px 20px", border:`1px solid ${puedeDescargar ? GOLD : BORDER}`,
+                background: puedeDescargar ? GOLD : CREAM2,
+                color: puedeDescargar ? WHITE : MUTED,
+                fontSize:11, fontWeight:700, cursor: puedeDescargar ? "pointer" : "not-allowed",
+                fontFamily:"Inter, sans-serif", borderRadius:2,
+                opacity: puedeDescargar ? 1 : 0.6, transition:"all 0.2s",
+                display:"flex", alignItems:"center", gap:6
+              }}>
+              <AcademicCapIcon style={{ width:15, height:15 }} />
+              Descargar diploma
+            </button>
+            {!puedeDescargar && (
+              <div style={{ position:"absolute", bottom:"calc(100% + 6px)", left:"50%", transform:"translateX(-50%)", background:DARK, color:CREAM, fontSize:10, padding:"5px 10px", borderRadius:3, whiteSpace:"nowrap", pointerEvents:"none", zIndex:10 }}>
+                {motivoBloqueado}
+              </div>
+            )}
           </div>
         </div>
 
@@ -563,7 +620,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
           {isAdmin && (
             <button onClick={() => setEditTema({ titulo:"", descripcion:"", orden: tList.length })}
               style={{ marginBottom:20, padding:"8px 18px", border:`1px dashed ${GOLD}`, background:"transparent", color:GOLD, fontSize:11, cursor:"pointer", fontFamily:"Inter, sans-serif", fontWeight:600, borderRadius:2 }}>
-              + Añadir tema
+              + Añadir módulo
             </button>
           )}
           {tList.length === 0 && <div style={{ color:MUTED, textAlign:"center", padding:60, fontFamily:"Inter, sans-serif" }}>No hay temas disponibles aún.</div>}
@@ -610,7 +667,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
         {editTema && (
           <div style={{ position:"fixed", inset:0, background:"rgba(26,37,40,0.7)", zIndex:900, display:"flex", alignItems:"center", justifyContent:"center" }}>
             <div style={{ background:WHITE, width:"100%", maxWidth:480, padding:32, borderRadius:4, border:`1px solid ${BORDER}` }}>
-              <div style={{ fontSize:16, fontWeight:700, color:TEXT, fontFamily:"Inter, sans-serif", marginBottom:20 }}>{editTema.id?"Editar tema":"Nuevo tema"}</div>
+              <div style={{ fontSize:16, fontWeight:700, color:TEXT, fontFamily:"Inter, sans-serif", marginBottom:20 }}>{editTema.id?"Editar módulo":"Nuevo módulo"}</div>
               {[["Título","titulo"],["Descripción","descripcion"]].map(([label,key])=>(
                 <div key={key} style={{ marginBottom:14 }}>
                   <div style={{ fontSize:10, color:MUTED, fontWeight:700, letterSpacing:"0.1em", marginBottom:5, textTransform:"uppercase", fontFamily:"Inter, sans-serif" }}>{label}</div>
@@ -618,6 +675,16 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                     style={{ width:"100%", padding:"10px 14px", background:CREAM, border:`1px solid ${BORDER}`, color:TEXT, fontSize:13, fontFamily:"Inter, sans-serif", borderRadius:2, outline:"none", boxSizing:"border-box" }} />
                 </div>
               ))}
+              <div style={{ marginBottom:16 }}>
+                <div style={{ fontSize:10, color:MUTED, fontWeight:700, letterSpacing:"0.1em", marginBottom:6, textTransform:"uppercase", fontFamily:"Inter, sans-serif" }}>Imagen de portada</div>
+                <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+                  {editTema.imagen_portada && <img src={editTema.imagen_portada} style={{ width:60, height:40, objectFit:"cover", borderRadius:2, border:`1px solid ${BORDER}` }} />}
+                  <Uploader label="Subir imagen" accept=".jpg,.jpeg,.png,.webp"
+                    bucketPath={`portadas/modulo_${Date.now()}`}
+                    onUrl={(url) => setEditTema({...editTema, imagen_portada: url})} />
+                  {editTema.imagen_portada && <button onClick={() => setEditTema({...editTema, imagen_portada:""})} style={{ fontSize:11, color:MUTED, background:"transparent", border:"none", cursor:"pointer" }}>Quitar</button>}
+                </div>
+              </div>
               <div style={{ display:"flex", gap:10, justifyContent:"flex-end" }}>
                 <button onClick={()=>setEditTema(null)} style={{ padding:"10px 20px", border:`1px solid ${BORDER}`, background:"transparent", color:MUTED, cursor:"pointer", fontFamily:"Inter, sans-serif", borderRadius:2 }}>Cancelar</button>
                 <button onClick={()=>guardarTema(editTema)} style={{ padding:"10px 24px", background:DARK, border:"none", color:WHITE, cursor:"pointer", fontFamily:"Inter, sans-serif", fontWeight:600, borderRadius:2 }}>Guardar</button>
@@ -655,7 +722,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
           {isAdmin && (
             <button onClick={()=>setEditRec({})}
               style={{ marginBottom:20, padding:"8px 18px", border:`1px dashed ${GOLD}`, background:"transparent", color:GOLD, fontSize:11, cursor:"pointer", fontFamily:"Inter, sans-serif", fontWeight:600, borderRadius:2 }}>
-              + Añadir recurso
+              + Añadir contenido
             </button>
           )}
           {rList.length === 0 && <div style={{ color:MUTED, textAlign:"center", padding:60 }}>No hay recursos en este tema.</div>}

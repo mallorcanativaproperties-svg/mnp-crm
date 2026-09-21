@@ -26,7 +26,7 @@ export default function Usuarios({ currentUser }) {
   }
 
   function abrirNuevo() {
-    setForm({ user_login: "", pass_hash: "", nombre: "", role: "agente", agente_codigo: "", agente_telefono: "", email: "", dni: "", poliza_rc: "", activo: true });
+    setForm({ user_login: "", pass_hash: "", nombre: "", role: "agente", agente_codigo: "", agente_telefono: "", email: "", dni: "", poliza_rc: "", numero_registro: "", activo: true });
     setModal("nuevo");
     setMsg(null);
   }
@@ -56,6 +56,7 @@ export default function Usuarios({ currentUser }) {
         email: form.email?.trim() || null,
         dni: form.dni?.trim() || null,
         poliza_rc: form.poliza_rc?.trim() || null,
+        numero_registro: form.numero_registro?.trim() || null,
         activo: true,
       });
       if (error) setMsg({ type: "error", text: error.message });
@@ -69,6 +70,7 @@ export default function Usuarios({ currentUser }) {
         email: form.email?.trim() || null,
         dni: form.dni?.trim() || null,
         poliza_rc: form.poliza_rc?.trim() || null,
+        numero_registro: form.numero_registro?.trim() || null,
         activo: form.activo,
       };
       if (form.pass_hash?.trim()) update.pass_hash = form.pass_hash.trim();
@@ -143,6 +145,7 @@ export default function Usuarios({ currentUser }) {
                   @{u.user_login}
                   {u.agente_codigo && <span style={{ marginLeft: 10, color: "#3D577E" }}>{u.agente_codigo}</span>}
                   {u.agente_telefono && <span style={{ marginLeft: 10 }}>📱 {u.agente_telefono}</span>}
+                  {u.numero_registro && <span style={{ marginLeft: 10, fontSize:11, color:"#2C6E52" }}>🏛 Reg. {u.numero_registro}</span>}
                 </div>
               </div>
               {/* Acciones */}
@@ -206,6 +209,7 @@ export default function Usuarios({ currentUser }) {
                 <input style={iSt} value={form.email || ""} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="Email del agente" />
                 <input style={iSt} value={form.dni || ""} onChange={e => setForm(f => ({ ...f, dni: e.target.value }))} placeholder="DNI/NIE del agente" />
                 <input style={iSt} value={form.poliza_rc || ""} onChange={e => setForm(f => ({ ...f, poliza_rc: e.target.value }))} placeholder="Número de póliza RC (para encargos)" />
+                <input style={iSt} value={form.numero_registro || ""} onChange={e => setForm(f => ({ ...f, numero_registro: e.target.value }))} placeholder="Nº registro agente inmobiliario (ROAI Baleares)" />
               </div>
               {modal !== "nuevo" && (
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
