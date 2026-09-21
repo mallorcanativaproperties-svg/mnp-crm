@@ -575,6 +575,8 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
           }
           <div style={{ position:"absolute", top:0, left:0, right:0, height:50, background:"linear-gradient(to bottom, rgba(26,37,40,1) 0%, rgba(26,37,40,0) 100%)" }} />
           <div style={{ position:"absolute", bottom:0, left:0, right:0, height:50, background:"linear-gradient(to top, rgba(26,37,40,1) 0%, rgba(26,37,40,0) 100%)" }} />
+          <div style={{ position:"absolute", top:0, bottom:0, left:0, width:80, background:"linear-gradient(to right, rgba(26,37,40,1) 0%, rgba(26,37,40,0) 100%)" }} />
+          <div style={{ position:"absolute", top:0, bottom:0, right:0, width:80, background:"linear-gradient(to left, rgba(26,37,40,1) 0%, rgba(26,37,40,0) 100%)" }} />
         </div>
         {/* Banda inferior — título */}
         <div style={{ background:DARK, padding:"14px 32px 20px" }}>
@@ -737,6 +739,8 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
           }
           <div style={{ position:"absolute", top:0, left:0, right:0, height:50, background:"linear-gradient(to bottom, rgba(26,37,40,1) 0%, rgba(26,37,40,0) 100%)" }} />
           <div style={{ position:"absolute", bottom:0, left:0, right:0, height:50, background:"linear-gradient(to top, rgba(26,37,40,1) 0%, rgba(26,37,40,0) 100%)" }} />
+          <div style={{ position:"absolute", top:0, bottom:0, left:0, width:80, background:"linear-gradient(to right, rgba(26,37,40,1) 0%, rgba(26,37,40,0) 100%)" }} />
+          <div style={{ position:"absolute", top:0, bottom:0, right:0, width:80, background:"linear-gradient(to left, rgba(26,37,40,1) 0%, rgba(26,37,40,0) 100%)" }} />
         </div>
         {/* Banda inferior — título */}
         <div style={{ background:DARK, padding:"14px 32px 20px" }}>
