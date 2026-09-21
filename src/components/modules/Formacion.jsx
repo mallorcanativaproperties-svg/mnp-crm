@@ -558,46 +558,34 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
     return (
       <div style={{ background: CREAM, minHeight:"100vh", fontFamily:"Inter, sans-serif" }}>
 
-        {/* Hero del curso — 33vh, imagen centrada, degradados arriba y abajo */}
-        <div style={{ position:"relative", height:"33vh", minHeight:220, maxHeight:400, overflow:"hidden", background: moduloActivo?.imagen_portada ? DARK : `linear-gradient(135deg, ${GOLD_XL} 0%, ${CREAM2} 100%)` }}>
-          {/* Imagen centrada y completa */}
+        {/* Banda superior — breadcrumb */}
+        <div style={{ background:DARK, padding:"12px 32px", display:"flex", alignItems:"center", gap:8, fontSize:11 }}>
+          <button onClick={() => setVista("modulos")} style={{ background:"transparent", border:"none", color:"rgba(255,255,255,0.5)", cursor:"pointer", padding:0, fontFamily:"Inter, sans-serif" }}>Academia</button>
+          <span style={{ color:"rgba(255,255,255,0.25)" }}>›</span>
+          <span style={{ color:"rgba(255,255,255,0.9)", fontWeight:600 }}>{moduloActivo?.titulo}</span>
+        </div>
+        {/* Imagen con degradados de integración */}
+        <div style={{ position:"relative", height:"33vh", minHeight:200, maxHeight:380, overflow:"hidden",
+          background: moduloActivo?.imagen_portada ? DARK : `linear-gradient(135deg, ${GOLD_XL} 0%, ${CREAM2} 100%)` }}>
           {moduloActivo?.imagen_portada
             ? <img src={moduloActivo.imagen_portada} style={{ position:"absolute", inset:0, width:"100%", height:"100%", objectFit:"contain", objectPosition:"center" }} />
             : <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                <span style={{ fontSize:64, opacity:0.25 }}>{moduloActivo?.icono || "🎓"}</span>
+                <span style={{ fontSize:64, opacity:0.2 }}>{moduloActivo?.icono || "🎓"}</span>
               </div>
           }
-          {/* Degradado superior — breadcrumb legible */}
-          <div style={{ position:"absolute", top:0, left:0, right:0, height:"40%",
-            background:"linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 100%)"
-          }} />
-          {/* Degradado inferior — título legible */}
-          <div style={{ position:"absolute", bottom:0, left:0, right:0, height:"45%",
-            background:"linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0) 100%)"
-          }} />
-          {/* Arriba: breadcrumb */}
-          <div style={{ position:"absolute", top:0, left:0, right:0, padding:"16px 32px", zIndex:1, display:"flex", alignItems:"center", gap:6, fontSize:11 }}>
-            <button onClick={() => setVista("modulos")} style={{ background:"transparent", border:"none", color:"rgba(255,255,255,0.75)", cursor:"pointer", padding:0, fontFamily:"Inter, sans-serif" }}>
-              Academia
-            </button>
-            <span style={{ color:"rgba(255,255,255,0.4)" }}>›</span>
-            <span style={{ color:"rgba(255,255,255,0.95)", fontWeight:600 }}>{moduloActivo?.titulo}</span>
+          <div style={{ position:"absolute", top:0, left:0, right:0, height:50, background:"linear-gradient(to bottom, rgba(26,37,40,1) 0%, rgba(26,37,40,0) 100%)" }} />
+          <div style={{ position:"absolute", bottom:0, left:0, right:0, height:50, background:"linear-gradient(to top, rgba(26,37,40,1) 0%, rgba(26,37,40,0) 100%)" }} />
+        </div>
+        {/* Banda inferior — título */}
+        <div style={{ background:DARK, padding:"14px 32px 20px" }}>
+          <button onClick={() => setVista("modulos")} style={{ background:"transparent", border:"none", color:"rgba(255,255,255,0.45)", fontSize:11, cursor:"pointer", padding:0, marginBottom:8, fontFamily:"Inter, sans-serif", display:"block" }}>← Volver a cursos</button>
+          <div style={{ fontSize:10, color:"rgba(255,255,255,0.4)", letterSpacing:"0.18em", fontWeight:700, marginBottom:4 }}>
+            {subseccion === "direccion" ? "FORMACIÓN DIRECCIÓN" : subseccion === "asistente" ? "ASISTENTE IA" : "FORMACIÓN AGENTES"}
           </div>
-          {/* Abajo: etiqueta + título */}
-          <div style={{ position:"absolute", bottom:0, left:0, right:0, padding:"14px 32px 20px", zIndex:1 }}>
-            <div style={{ fontSize:10, color:"rgba(255,255,255,0.55)", letterSpacing:"0.18em", fontWeight:700, marginBottom:4 }}>
-              {subseccion === "direccion" ? "FORMACIÓN DIRECCIÓN" : subseccion === "asistente" ? "ASISTENTE IA" : "FORMACIÓN AGENTES"}
-            </div>
-            <h2 style={{ fontSize:22, fontWeight:400, color:WHITE, margin:0, fontFamily:"'Playfair Display', Georgia, serif" }}>
-              {moduloActivo?.titulo}
-            </h2>
-          </div>
-          {/* Botón volver — sobre el degradado superior */}
-          <button onClick={() => setVista("modulos")} style={{
-            position:"absolute", top:38, left:30, background:"transparent", border:"none",
-            color:"rgba(255,255,255,0.65)", fontSize:11, cursor:"pointer", padding:0,
-            fontFamily:"Inter, sans-serif", zIndex:2
-          }}>← Volver a cursos</button>
+          <h2 style={{ fontSize:22, fontWeight:400, color:WHITE, margin:0, fontFamily:"'Playfair Display', Georgia, serif" }}>
+            {moduloActivo?.titulo}
+          </h2>
+          {moduloActivo?.descripcion && <p style={{ fontSize:12, color:"rgba(255,255,255,0.5)", margin:"4px 0 0", lineHeight:1.5 }}>{moduloActivo.descripcion}</p>}
         </div>
 
         {/* Barra de progreso + diploma — separada del hero */}
@@ -730,46 +718,36 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
     return (
       <div style={{ background:CREAM, minHeight:"100vh", fontFamily:"Inter, sans-serif" }}>
 
-        {/* Hero del módulo — 33vh, imagen centrada, degradados arriba y abajo */}
-        <div style={{ position:"relative", height:"33vh", minHeight:220, maxHeight:400, overflow:"hidden", background: temaActivo?.imagen_portada ? DARK : `linear-gradient(135deg, ${GOLD_XL} 0%, ${CREAM2} 100%)` }}>
-          {/* Imagen centrada y completa */}
+        {/* Banda superior — breadcrumb */}
+        <div style={{ background:DARK, padding:"12px 32px", display:"flex", alignItems:"center", gap:8, fontSize:11 }}>
+          <button onClick={()=>setVista("modulos")} style={{ background:"transparent", border:"none", color:"rgba(255,255,255,0.45)", cursor:"pointer", padding:0, fontFamily:"Inter, sans-serif" }}>Academia</button>
+          <span style={{ color:"rgba(255,255,255,0.2)" }}>›</span>
+          <button onClick={()=>setVista("temas")} style={{ background:"transparent", border:"none", color:"rgba(255,255,255,0.45)", cursor:"pointer", padding:0, fontFamily:"Inter, sans-serif" }}>{moduloActivo?.titulo}</button>
+          <span style={{ color:"rgba(255,255,255,0.2)" }}>›</span>
+          <span style={{ color:"rgba(255,255,255,0.9)", fontWeight:600 }}>{temaActivo?.titulo}</span>
+        </div>
+        {/* Imagen con degradados de integración */}
+        <div style={{ position:"relative", height:"33vh", minHeight:200, maxHeight:380, overflow:"hidden",
+          background: temaActivo?.imagen_portada ? DARK : `linear-gradient(135deg, ${GOLD_XL} 0%, ${CREAM2} 100%)` }}>
           {temaActivo?.imagen_portada
             ? <img src={temaActivo.imagen_portada} style={{ position:"absolute", inset:0, width:"100%", height:"100%", objectFit:"contain", objectPosition:"center" }} />
             : <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                <span style={{ fontSize:56, fontWeight:700, color:GOLD, opacity:0.2, fontFamily:"'Playfair Display', Georgia, serif" }}>{temaActivo?.orden || ""}</span>
+                <span style={{ fontSize:56, fontWeight:700, color:GOLD, opacity:0.18, fontFamily:"'Playfair Display', Georgia, serif" }}>{temaActivo?.orden || ""}</span>
               </div>
           }
-          {/* Degradado superior */}
-          <div style={{ position:"absolute", top:0, left:0, right:0, height:"40%",
-            background:"linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 100%)"
-          }} />
-          {/* Degradado inferior */}
-          <div style={{ position:"absolute", bottom:0, left:0, right:0, height:"45%",
-            background:"linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0) 100%)"
-          }} />
-          {/* Arriba: breadcrumb completo */}
-          <div style={{ position:"absolute", top:0, left:0, right:0, padding:"16px 32px", zIndex:1, display:"flex", alignItems:"center", gap:6, fontSize:11 }}>
-            <button onClick={()=>setVista("modulos")} style={{ background:"transparent", border:"none", color:"rgba(255,255,255,0.65)", cursor:"pointer", padding:0, fontFamily:"Inter, sans-serif" }}>Academia</button>
-            <span style={{ color:"rgba(255,255,255,0.35)" }}>›</span>
-            <button onClick={()=>setVista("temas")} style={{ background:"transparent", border:"none", color:"rgba(255,255,255,0.65)", cursor:"pointer", padding:0, fontFamily:"Inter, sans-serif" }}>{moduloActivo?.titulo}</button>
-            <span style={{ color:"rgba(255,255,255,0.35)" }}>›</span>
-            <span style={{ color:"rgba(255,255,255,0.95)", fontWeight:600 }}>{temaActivo?.titulo}</span>
+          <div style={{ position:"absolute", top:0, left:0, right:0, height:50, background:"linear-gradient(to bottom, rgba(26,37,40,1) 0%, rgba(26,37,40,0) 100%)" }} />
+          <div style={{ position:"absolute", bottom:0, left:0, right:0, height:50, background:"linear-gradient(to top, rgba(26,37,40,1) 0%, rgba(26,37,40,0) 100%)" }} />
+        </div>
+        {/* Banda inferior — título */}
+        <div style={{ background:DARK, padding:"14px 32px 20px" }}>
+          <button onClick={()=>setVista("temas")} style={{ background:"transparent", border:"none", color:"rgba(255,255,255,0.45)", fontSize:11, cursor:"pointer", padding:0, marginBottom:8, fontFamily:"Inter, sans-serif", display:"block" }}>← Volver a módulos</button>
+          <div style={{ fontSize:10, color:"rgba(255,255,255,0.4)", letterSpacing:"0.18em", fontWeight:700, marginBottom:4 }}>
+            {subseccion === "direccion" ? "FORMACIÓN DIRECCIÓN" : subseccion === "asistente" ? "ASISTENTE IA" : "FORMACIÓN AGENTES"}
           </div>
-          {/* Botón volver */}
-          <button onClick={()=>setVista("temas")} style={{
-            position:"absolute", top:38, left:30, background:"transparent", border:"none",
-            color:"rgba(255,255,255,0.65)", fontSize:11, cursor:"pointer", padding:0,
-            fontFamily:"Inter, sans-serif", zIndex:2
-          }}>← Volver a módulos</button>
-          {/* Abajo: etiqueta + título */}
-          <div style={{ position:"absolute", bottom:0, left:0, right:0, padding:"14px 32px 20px", zIndex:1 }}>
-            <div style={{ fontSize:10, color:"rgba(255,255,255,0.55)", letterSpacing:"0.18em", fontWeight:700, marginBottom:4 }}>
-              {subseccion === "direccion" ? "FORMACIÓN DIRECCIÓN" : subseccion === "asistente" ? "ASISTENTE IA" : "FORMACIÓN AGENTES"} · {temaActivo?.titulo}
-            </div>
-            <h2 style={{ fontSize:20, fontWeight:400, color:WHITE, margin:0, fontFamily:"'Playfair Display', Georgia, serif" }}>
-              {temaActivo?.titulo}
-            </h2>
-          </div>
+          <h2 style={{ fontSize:22, fontWeight:400, color:WHITE, margin:0, fontFamily:"'Playfair Display', Georgia, serif" }}>
+            {temaActivo?.titulo}
+          </h2>
+          {temaActivo?.descripcion && <p style={{ fontSize:12, color:"rgba(255,255,255,0.5)", margin:"4px 0 0", lineHeight:1.5 }}>{temaActivo.descripcion}</p>}
         </div>
 
         <div style={{ padding:"28px 40px" }}>
