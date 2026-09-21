@@ -44,18 +44,27 @@ export async function recuperarContexto(agente, consulta) {
   const embedding = await generarEmbedding(consulta, "query");
   if (!embedding) return [];
 
-  const { data, error } = await sbAdmin.rpc("match_ia_chunks", {
+  // Híbrida: el vector entiende la pregunta, el índice de texto encuentra
+  // literalmente "plazo de presentación". Por separado cada uno falla la mitad.
+  const args = {
     p_agente_slug: agente.slug,
     p_embedding: embedding,
+    p_consulta: consulta.slice(0, 900),
     p_match_count: agente.top_k_chunks || 16,
     p_min_similitud: Number(agente.umbral_similitud ?? 0.25),
-  });
+  };
 
-  if (error) {
-    console.error("[rag] match_ia_chunks", error.message);
+  const { data, error } = await sbAdmin.rpc("match_ia_chunks_hibrido", args);
+  if (!error) return data || [];
+
+  console.error("[rag] híbrida falló, vuelvo a la semántica", error.message);
+  const { p_consulta, ...soloVector } = args;
+  const { data: d2, error: e2 } = await sbAdmin.rpc("match_ia_chunks", soloVector);
+  if (e2) {
+    console.error("[rag] match_ia_chunks", e2.message);
     return [];
   }
-  return data || [];
+  return d2 || [];
 }
 
 /** Bloque <conocimiento> que se inyecta pegado a la ultima consulta. */
