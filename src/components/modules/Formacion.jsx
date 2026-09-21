@@ -655,15 +655,60 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
             </button>
           )}
           {rList.length === 0 && <div style={{ color:MUTED, textAlign:"center", padding:60 }}>No hay recursos en este tema.</div>}
-          <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+          <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
             {rList.map((rec, idx) => {
               const hecho = progreso[rec.id];
+              const esEnlace = rec.tipo === "enlace";
+              const esVideo = rec.tipo === "video";
+
+              if (esEnlace) {
+                // ── Enlace externo — estilo compacto y diferenciado ──────────
+                return (
+                  <div key={rec.id} style={{
+                    background: hecho ? `${GOLD}08` : CREAM,
+                    border: `1px solid ${BORDER}`,
+                    borderLeft: `3px solid ${hecho ? GOLD : GOLD_LIGHT}`,
+                    borderRadius: 3, padding:"12px 16px",
+                    display:"flex", alignItems:"center", gap:12, transition:"all 0.2s"
+                  }}
+                    onMouseEnter={e=>{ e.currentTarget.style.borderLeftColor=GOLD; e.currentTarget.style.background=`${GOLD}0D`; }}
+                    onMouseLeave={e=>{ e.currentTarget.style.borderLeftColor=hecho?GOLD:GOLD_LIGHT; e.currentTarget.style.background=hecho?`${GOLD}08`:CREAM; }}>
+                    <div style={{ color: GOLD, flexShrink:0, display:"flex" }}>{TIPO_ICON[rec.tipo]}</div>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div style={{ fontSize:13, fontWeight:600, color:hecho?GOLD:TEXT, fontFamily:"Inter, sans-serif", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{rec.titulo}</div>
+                      <div style={{ fontSize:11, color:MUTED, marginTop:2 }}>
+                        Enlace externo{rec.duracion_min ? ` · ${fmt(rec.duracion_min)} lectura` : ""}
+                        {hecho && <span style={{ color:GOLD, fontWeight:600, marginLeft:8 }}>✓ Visitado</span>}
+                      </div>
+                    </div>
+                    <div style={{ display:"flex", gap:8, alignItems:"center", flexShrink:0 }}>
+                      {isAdmin && (
+                        <>
+                          <button onClick={()=>setEditRec(rec)} style={{ background:"transparent", border:`1px solid ${BORDER}`, color:MUTED, padding:"4px 6px", cursor:"pointer", borderRadius:2, display:"flex", alignItems:"center" }}><PencilSquareIcon style={{ width:12, height:12 }} /></button>
+                          <button onClick={async()=>{ if(confirm("¿Eliminar?")){ await supabase.from("formacion_recursos").update({activo:false}).eq("id",rec.id); cargarTodo(); }}}
+                            style={{ background:"transparent", border:`1px solid #A23A3A33`, color:"#A23A3A", padding:"4px 6px", cursor:"pointer", borderRadius:2, display:"flex", alignItems:"center" }}><TrashIcon style={{ width:12, height:12 }} /></button>
+                        </>
+                      )}
+                      <button onClick={()=>setVisor(rec)}
+                        style={{ padding:"6px 14px", background:"transparent", border:`1px solid ${GOLD}`, color:GOLD, fontSize:11, fontWeight:600, cursor:"pointer", fontFamily:"Inter, sans-serif", borderRadius:2, whiteSpace:"nowrap" }}>
+                        Abrir →
+                      </button>
+                    </div>
+                  </div>
+                );
+              }
+
+              // ── PDF / Presentación / Vídeo — tarjeta completa ───────────
               const p = pal(idx);
               return (
-                <div key={rec.id} style={{ background:WHITE, border:`1px solid ${hecho?GOLD:p.border}`, borderRadius:3, padding:"18px 22px", display:"flex", alignItems:"center", gap:16, transition:"all 0.2s" }}
+                <div key={rec.id} style={{
+                  background: WHITE, border:`1px solid ${hecho?GOLD:p.border}`,
+                  borderRadius:3, padding:"18px 22px",
+                  display:"flex", alignItems:"center", gap:16, transition:"all 0.2s"
+                }}
                   onMouseEnter={e=>e.currentTarget.style.boxShadow=`0 4px 16px rgba(172,138,84,0.12)`}
                   onMouseLeave={e=>e.currentTarget.style.boxShadow="none"}>
-                  <div style={{ fontSize:26, flexShrink:0 }}>{TIPO_ICON[rec.tipo]}</div>
+                  <div style={{ color: GOLD, flexShrink:0, display:"flex" }}>{TIPO_ICON[rec.tipo]}</div>
                   <div style={{ flex:1 }}>
                     <div style={{ fontSize:14, fontWeight:700, color:hecho?GOLD:TEXT, marginBottom:3, fontFamily:"Inter, sans-serif" }}>{rec.titulo}</div>
                     <div style={{ display:"flex", gap:10, fontSize:11, color:MUTED }}>
