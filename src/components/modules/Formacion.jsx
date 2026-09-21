@@ -558,42 +558,46 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
     return (
       <div style={{ background: CREAM, minHeight:"100vh", fontFamily:"Inter, sans-serif" }}>
 
-        {/* Hero del curso — 33vh con imagen completa */}
-        <div style={{ position:"relative", height:"33vh", minHeight:220, maxHeight:400, overflow:"hidden" }}>
-          {/* Imagen completa o gradiente */}
+        {/* Hero del curso — 33vh, imagen centrada, degradados arriba y abajo */}
+        <div style={{ position:"relative", height:"33vh", minHeight:220, maxHeight:400, overflow:"hidden", background: moduloActivo?.imagen_portada ? DARK : `linear-gradient(135deg, ${GOLD_XL} 0%, ${CREAM2} 100%)` }}>
+          {/* Imagen centrada y completa */}
           {moduloActivo?.imagen_portada
-            ? <img src={moduloActivo.imagen_portada} style={{ width:"100%", height:"100%", objectFit:"contain", objectPosition:"center", background: DARK }} />
-            : <div style={{ width:"100%", height:"100%", background:`linear-gradient(135deg, ${GOLD_XL} 0%, ${CREAM2} 100%)`, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                <span style={{ fontSize:64, opacity:0.3 }}>{moduloActivo?.icono || "🎓"}</span>
+            ? <img src={moduloActivo.imagen_portada} style={{ position:"absolute", inset:0, width:"100%", height:"100%", objectFit:"contain", objectPosition:"center" }} />
+            : <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                <span style={{ fontSize:64, opacity:0.25 }}>{moduloActivo?.icono || "🎓"}</span>
               </div>
           }
-          {/* Overlay degradado solo en la parte inferior para el texto */}
-          <div style={{ position:"absolute", inset:0, background: moduloActivo?.imagen_portada
-            ? "linear-gradient(to bottom, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0) 40%, rgba(26,37,40,0.75) 100%)"
-            : "linear-gradient(to bottom, transparent 50%, rgba(172,138,84,0.12) 100%)"
+          {/* Degradado superior — breadcrumb legible */}
+          <div style={{ position:"absolute", top:0, left:0, right:0, height:"40%",
+            background:"linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 100%)"
           }} />
-          {/* Botón volver arriba izquierda */}
-          <button onClick={() => setVista("modulos")} style={{
-            position:"absolute", top:16, left:24, background:"rgba(0,0,0,0.3)", border:"none",
-            color:WHITE, fontSize:12, cursor:"pointer", padding:"6px 14px", borderRadius:2,
-            fontFamily:"Inter, sans-serif", backdropFilter:"blur(4px)"
-          }}>
-            ← Volver a cursos
-          </button>
-          {/* Texto sobre la imagen — anclado abajo */}
-          <div style={{ position:"absolute", bottom:0, left:0, right:0, padding:"16px 40px 20px", zIndex:1 }}>
-            <div style={{ fontSize:10, color: moduloActivo?.imagen_portada ? "rgba(255,255,255,0.65)" : GOLD, letterSpacing:"0.18em", fontWeight:700, marginBottom:4 }}>
+          {/* Degradado inferior — título legible */}
+          <div style={{ position:"absolute", bottom:0, left:0, right:0, height:"45%",
+            background:"linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0) 100%)"
+          }} />
+          {/* Arriba: breadcrumb */}
+          <div style={{ position:"absolute", top:0, left:0, right:0, padding:"16px 32px", zIndex:1, display:"flex", alignItems:"center", gap:6, fontSize:11 }}>
+            <button onClick={() => setVista("modulos")} style={{ background:"transparent", border:"none", color:"rgba(255,255,255,0.75)", cursor:"pointer", padding:0, fontFamily:"Inter, sans-serif" }}>
+              Academia
+            </button>
+            <span style={{ color:"rgba(255,255,255,0.4)" }}>›</span>
+            <span style={{ color:"rgba(255,255,255,0.95)", fontWeight:600 }}>{moduloActivo?.titulo}</span>
+          </div>
+          {/* Abajo: etiqueta + título */}
+          <div style={{ position:"absolute", bottom:0, left:0, right:0, padding:"14px 32px 20px", zIndex:1 }}>
+            <div style={{ fontSize:10, color:"rgba(255,255,255,0.55)", letterSpacing:"0.18em", fontWeight:700, marginBottom:4 }}>
               {subseccion === "direccion" ? "FORMACIÓN DIRECCIÓN" : subseccion === "asistente" ? "ASISTENTE IA" : "FORMACIÓN AGENTES"}
             </div>
-            <h2 style={{ fontSize:26, fontWeight:400, color: moduloActivo?.imagen_portada ? WHITE : TEXT, margin:"0 0 4px", fontFamily:"'Playfair Display', Georgia, serif", textShadow: moduloActivo?.imagen_portada ? "0 1px 4px rgba(0,0,0,0.4)" : "none" }}>
+            <h2 style={{ fontSize:22, fontWeight:400, color:WHITE, margin:0, fontFamily:"'Playfair Display', Georgia, serif" }}>
               {moduloActivo?.titulo}
             </h2>
-            {moduloActivo?.descripcion && (
-              <p style={{ fontSize:12, color: moduloActivo?.imagen_portada ? "rgba(255,255,255,0.75)" : MUTED, margin:0, lineHeight:1.5, maxWidth:600, textShadow: moduloActivo?.imagen_portada ? "0 1px 3px rgba(0,0,0,0.3)" : "none" }}>
-                {moduloActivo.descripcion}
-              </p>
-            )}
           </div>
+          {/* Botón volver — sobre el degradado superior */}
+          <button onClick={() => setVista("modulos")} style={{
+            position:"absolute", top:38, left:30, background:"transparent", border:"none",
+            color:"rgba(255,255,255,0.65)", fontSize:11, cursor:"pointer", padding:0,
+            fontFamily:"Inter, sans-serif", zIndex:2
+          }}>← Volver a cursos</button>
         </div>
 
         {/* Barra de progreso + diploma — separada del hero */}
@@ -726,44 +730,45 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
     return (
       <div style={{ background:CREAM, minHeight:"100vh", fontFamily:"Inter, sans-serif" }}>
 
-        {/* Hero del módulo — 33vh con imagen completa */}
-        <div style={{ position:"relative", height:"33vh", minHeight:220, maxHeight:400, overflow:"hidden" }}>
+        {/* Hero del módulo — 33vh, imagen centrada, degradados arriba y abajo */}
+        <div style={{ position:"relative", height:"33vh", minHeight:220, maxHeight:400, overflow:"hidden", background: temaActivo?.imagen_portada ? DARK : `linear-gradient(135deg, ${GOLD_XL} 0%, ${CREAM2} 100%)` }}>
+          {/* Imagen centrada y completa */}
           {temaActivo?.imagen_portada
-            ? <img src={temaActivo.imagen_portada} style={{ width:"100%", height:"100%", objectFit:"contain", objectPosition:"center", background:DARK }} />
-            : <div style={{ width:"100%", height:"100%", background:`linear-gradient(135deg, ${GOLD_XL} 0%, ${CREAM2} 100%)`, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                <span style={{ fontSize:64, fontWeight:700, color:GOLD, opacity:0.25, fontFamily:"'Playfair Display', Georgia, serif" }}>{temaActivo?.orden || ""}</span>
+            ? <img src={temaActivo.imagen_portada} style={{ position:"absolute", inset:0, width:"100%", height:"100%", objectFit:"contain", objectPosition:"center" }} />
+            : <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                <span style={{ fontSize:56, fontWeight:700, color:GOLD, opacity:0.2, fontFamily:"'Playfair Display', Georgia, serif" }}>{temaActivo?.orden || ""}</span>
               </div>
           }
-          {/* Degradado inferior para legibilidad del texto */}
-          <div style={{ position:"absolute", inset:0, background: temaActivo?.imagen_portada
-            ? "linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0) 40%, rgba(26,37,40,0.75) 100%)"
-            : "linear-gradient(to bottom, transparent 50%, rgba(172,138,84,0.12) 100%)"
+          {/* Degradado superior */}
+          <div style={{ position:"absolute", top:0, left:0, right:0, height:"40%",
+            background:"linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 100%)"
           }} />
-          {/* Breadcrumb flotante arriba */}
-          <div style={{ position:"absolute", top:14, left:24, display:"flex", gap:6, alignItems:"center", fontSize:11 }}>
-            <button onClick={()=>setVista("modulos")} style={{ background:"rgba(0,0,0,0.28)", border:"none", color:"rgba(255,255,255,0.85)", cursor:"pointer", padding:"4px 10px", borderRadius:2, fontFamily:"Inter, sans-serif", backdropFilter:"blur(4px)" }}>Academia</button>
-            <span style={{ color:"rgba(255,255,255,0.5)" }}>›</span>
-            <button onClick={()=>setVista("temas")} style={{ background:"rgba(0,0,0,0.28)", border:"none", color:"rgba(255,255,255,0.85)", cursor:"pointer", padding:"4px 10px", borderRadius:2, fontFamily:"Inter, sans-serif", backdropFilter:"blur(4px)" }}>{moduloActivo?.titulo}</button>
+          {/* Degradado inferior */}
+          <div style={{ position:"absolute", bottom:0, left:0, right:0, height:"45%",
+            background:"linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0) 100%)"
+          }} />
+          {/* Arriba: breadcrumb completo */}
+          <div style={{ position:"absolute", top:0, left:0, right:0, padding:"16px 32px", zIndex:1, display:"flex", alignItems:"center", gap:6, fontSize:11 }}>
+            <button onClick={()=>setVista("modulos")} style={{ background:"transparent", border:"none", color:"rgba(255,255,255,0.65)", cursor:"pointer", padding:0, fontFamily:"Inter, sans-serif" }}>Academia</button>
+            <span style={{ color:"rgba(255,255,255,0.35)" }}>›</span>
+            <button onClick={()=>setVista("temas")} style={{ background:"transparent", border:"none", color:"rgba(255,255,255,0.65)", cursor:"pointer", padding:0, fontFamily:"Inter, sans-serif" }}>{moduloActivo?.titulo}</button>
+            <span style={{ color:"rgba(255,255,255,0.35)" }}>›</span>
+            <span style={{ color:"rgba(255,255,255,0.95)", fontWeight:600 }}>{temaActivo?.titulo}</span>
           </div>
           {/* Botón volver */}
           <button onClick={()=>setVista("temas")} style={{
-            position:"absolute", top:50, left:24, background:"rgba(0,0,0,0.3)", border:"none",
-            color:WHITE, fontSize:12, cursor:"pointer", padding:"5px 12px", borderRadius:2,
-            fontFamily:"Inter, sans-serif", backdropFilter:"blur(4px)"
+            position:"absolute", top:38, left:30, background:"transparent", border:"none",
+            color:"rgba(255,255,255,0.65)", fontSize:11, cursor:"pointer", padding:0,
+            fontFamily:"Inter, sans-serif", zIndex:2
           }}>← Volver a módulos</button>
-          {/* Título anclado abajo */}
-          <div style={{ position:"absolute", bottom:0, left:0, right:0, padding:"14px 40px 18px", zIndex:1 }}>
-            <div style={{ fontSize:10, color: temaActivo?.imagen_portada ? "rgba(255,255,255,0.6)" : GOLD, letterSpacing:"0.18em", fontWeight:700, marginBottom:4 }}>
-              {subseccion === "direccion" ? "FORMACIÓN DIRECCIÓN" : subseccion === "asistente" ? "ASISTENTE IA" : "FORMACIÓN AGENTES"}
+          {/* Abajo: etiqueta + título */}
+          <div style={{ position:"absolute", bottom:0, left:0, right:0, padding:"14px 32px 20px", zIndex:1 }}>
+            <div style={{ fontSize:10, color:"rgba(255,255,255,0.55)", letterSpacing:"0.18em", fontWeight:700, marginBottom:4 }}>
+              {subseccion === "direccion" ? "FORMACIÓN DIRECCIÓN" : subseccion === "asistente" ? "ASISTENTE IA" : "FORMACIÓN AGENTES"} · {temaActivo?.titulo}
             </div>
-            <h2 style={{ fontSize:22, fontWeight:400, color: temaActivo?.imagen_portada ? WHITE : TEXT, margin:"0 0 4px", fontFamily:"'Playfair Display', Georgia, serif", textShadow: temaActivo?.imagen_portada ? "0 1px 4px rgba(0,0,0,0.4)" : "none" }}>
+            <h2 style={{ fontSize:20, fontWeight:400, color:WHITE, margin:0, fontFamily:"'Playfair Display', Georgia, serif" }}>
               {temaActivo?.titulo}
             </h2>
-            {temaActivo?.descripcion && (
-              <p style={{ fontSize:12, color: temaActivo?.imagen_portada ? "rgba(255,255,255,0.75)" : MUTED, margin:0, lineHeight:1.5, textShadow: temaActivo?.imagen_portada ? "0 1px 3px rgba(0,0,0,0.3)" : "none" }}>
-                {temaActivo.descripcion}
-              </p>
-            )}
           </div>
         </div>
 
