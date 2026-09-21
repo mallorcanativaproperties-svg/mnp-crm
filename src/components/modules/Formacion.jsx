@@ -724,9 +724,28 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
             <span>›</span>
             <span style={{ color:GOLD, fontWeight:600 }}>{temaActivo?.titulo}</span>
           </div>
-          <button onClick={()=>setVista("temas")} style={{ background:"transparent", border:"none", color:MUTED, fontSize:12, cursor:"pointer", padding:0, marginBottom:4, fontFamily:"Inter, sans-serif" }}>← Volver a temas</button>
-          <h2 style={{ fontSize:20, fontWeight:400, color:TEXT, margin:"0 0 4px", fontFamily:"'Playfair Display', Georgia, serif" }}>{temaActivo?.titulo}</h2>
-          {temaActivo?.descripcion && <p style={{ fontSize:12, color:MUTED, margin:0, lineHeight:1.5 }}>{temaActivo.descripcion}</p>}
+          <button onClick={()=>setVista("temas")} style={{ background:"transparent", border:"none", color:MUTED, fontSize:12, cursor:"pointer", padding:0, marginBottom:12, fontFamily:"Inter, sans-serif" }}>← Volver a módulos</button>
+          <div style={{ display:"flex", gap:20, alignItems:"flex-start" }}>
+            {/* Thumbnail del módulo */}
+            <div style={{ width:80, height:60, borderRadius:3, overflow:"hidden", flexShrink:0, border:`1px solid ${BORDER}` }}>
+              {temaActivo?.imagen_portada
+                ? <img src={temaActivo.imagen_portada} style={{ width:"100%", height:"100%", objectFit:"cover" }} />
+                : <div style={{ width:"100%", height:"100%", background:`linear-gradient(135deg, ${GOLD_XL} 0%, ${CREAM2} 100%)`, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                    <span style={{ fontSize:20, fontWeight:700, color:GOLD, fontFamily:"'Playfair Display', Georgia, serif" }}>
+                      {(temaActivo?.orden || "")}
+                    </span>
+                  </div>
+              }
+            </div>
+            {/* Título y descripción */}
+            <div style={{ flex:1 }}>
+              <div style={{ fontSize:10, color:GOLD, letterSpacing:"0.15em", fontWeight:700, marginBottom:4 }}>
+                {subseccion === "direccion" ? "FORMACIÓN DIRECCIÓN" : subseccion === "asistente" ? "ASISTENTE IA" : "FORMACIÓN AGENTES"}
+              </div>
+              <h2 style={{ fontSize:20, fontWeight:400, color:TEXT, margin:"0 0 4px", fontFamily:"'Playfair Display', Georgia, serif" }}>{temaActivo?.titulo}</h2>
+              {temaActivo?.descripcion && <p style={{ fontSize:12, color:MUTED, margin:0, lineHeight:1.5 }}>{temaActivo.descripcion}</p>}
+            </div>
+          </div>
         </div>
 
         <div style={{ padding:"28px 40px" }}>
