@@ -725,36 +725,45 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
     const rList = recursos[temaActivo?.id] || [];
     return (
       <div style={{ background:CREAM, minHeight:"100vh", fontFamily:"Inter, sans-serif" }}>
-        <div style={{ background:WHITE, borderBottom:`1px solid ${BORDER}`, padding:"16px 40px" }}>
-          {/* Breadcrumb */}
-          <div style={{ display:"flex", gap:6, alignItems:"center", fontSize:12, color:MUTED, marginBottom:14 }}>
-            <button onClick={()=>setVista("modulos")} style={{ background:"transparent", border:"none", color:MUTED, cursor:"pointer", padding:0, fontFamily:"Inter, sans-serif" }}>Academia</button>
-            <span>›</span>
-            <button onClick={()=>setVista("temas")} style={{ background:"transparent", border:"none", color:MUTED, cursor:"pointer", padding:0, fontFamily:"Inter, sans-serif" }}>{moduloActivo?.titulo}</button>
-            <span>›</span>
-            <span style={{ color:GOLD, fontWeight:600 }}>{temaActivo?.titulo}</span>
-          </div>
-          <button onClick={()=>setVista("temas")} style={{ background:"transparent", border:"none", color:MUTED, fontSize:12, cursor:"pointer", padding:0, marginBottom:12, fontFamily:"Inter, sans-serif" }}>← Volver a módulos</button>
-          <div style={{ display:"flex", gap:20, alignItems:"flex-start" }}>
-            {/* Thumbnail del módulo */}
-            <div style={{ width:80, height:60, borderRadius:3, overflow:"hidden", flexShrink:0, border:`1px solid ${BORDER}` }}>
-              {temaActivo?.imagen_portada
-                ? <img src={temaActivo.imagen_portada} style={{ width:"100%", height:"100%", objectFit:"cover" }} />
-                : <div style={{ width:"100%", height:"100%", background:`linear-gradient(135deg, ${GOLD_XL} 0%, ${CREAM2} 100%)`, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                    <span style={{ fontSize:20, fontWeight:700, color:GOLD, fontFamily:"'Playfair Display', Georgia, serif" }}>
-                      {(temaActivo?.orden || "")}
-                    </span>
-                  </div>
-              }
-            </div>
-            {/* Título y descripción */}
-            <div style={{ flex:1 }}>
-              <div style={{ fontSize:10, color:GOLD, letterSpacing:"0.15em", fontWeight:700, marginBottom:4 }}>
-                {subseccion === "direccion" ? "FORMACIÓN DIRECCIÓN" : subseccion === "asistente" ? "ASISTENTE IA" : "FORMACIÓN AGENTES"}
+
+        {/* Hero del módulo — 33vh con imagen completa */}
+        <div style={{ position:"relative", height:"33vh", minHeight:220, maxHeight:400, overflow:"hidden" }}>
+          {temaActivo?.imagen_portada
+            ? <img src={temaActivo.imagen_portada} style={{ width:"100%", height:"100%", objectFit:"contain", objectPosition:"center", background:DARK }} />
+            : <div style={{ width:"100%", height:"100%", background:`linear-gradient(135deg, ${GOLD_XL} 0%, ${CREAM2} 100%)`, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                <span style={{ fontSize:64, fontWeight:700, color:GOLD, opacity:0.25, fontFamily:"'Playfair Display', Georgia, serif" }}>{temaActivo?.orden || ""}</span>
               </div>
-              <h2 style={{ fontSize:20, fontWeight:400, color:TEXT, margin:"0 0 4px", fontFamily:"'Playfair Display', Georgia, serif" }}>{temaActivo?.titulo}</h2>
-              {temaActivo?.descripcion && <p style={{ fontSize:12, color:MUTED, margin:0, lineHeight:1.5 }}>{temaActivo.descripcion}</p>}
+          }
+          {/* Degradado inferior para legibilidad del texto */}
+          <div style={{ position:"absolute", inset:0, background: temaActivo?.imagen_portada
+            ? "linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0) 40%, rgba(26,37,40,0.75) 100%)"
+            : "linear-gradient(to bottom, transparent 50%, rgba(172,138,84,0.12) 100%)"
+          }} />
+          {/* Breadcrumb flotante arriba */}
+          <div style={{ position:"absolute", top:14, left:24, display:"flex", gap:6, alignItems:"center", fontSize:11 }}>
+            <button onClick={()=>setVista("modulos")} style={{ background:"rgba(0,0,0,0.28)", border:"none", color:"rgba(255,255,255,0.85)", cursor:"pointer", padding:"4px 10px", borderRadius:2, fontFamily:"Inter, sans-serif", backdropFilter:"blur(4px)" }}>Academia</button>
+            <span style={{ color:"rgba(255,255,255,0.5)" }}>›</span>
+            <button onClick={()=>setVista("temas")} style={{ background:"rgba(0,0,0,0.28)", border:"none", color:"rgba(255,255,255,0.85)", cursor:"pointer", padding:"4px 10px", borderRadius:2, fontFamily:"Inter, sans-serif", backdropFilter:"blur(4px)" }}>{moduloActivo?.titulo}</button>
+          </div>
+          {/* Botón volver */}
+          <button onClick={()=>setVista("temas")} style={{
+            position:"absolute", top:50, left:24, background:"rgba(0,0,0,0.3)", border:"none",
+            color:WHITE, fontSize:12, cursor:"pointer", padding:"5px 12px", borderRadius:2,
+            fontFamily:"Inter, sans-serif", backdropFilter:"blur(4px)"
+          }}>← Volver a módulos</button>
+          {/* Título anclado abajo */}
+          <div style={{ position:"absolute", bottom:0, left:0, right:0, padding:"14px 40px 18px", zIndex:1 }}>
+            <div style={{ fontSize:10, color: temaActivo?.imagen_portada ? "rgba(255,255,255,0.6)" : GOLD, letterSpacing:"0.18em", fontWeight:700, marginBottom:4 }}>
+              {subseccion === "direccion" ? "FORMACIÓN DIRECCIÓN" : subseccion === "asistente" ? "ASISTENTE IA" : "FORMACIÓN AGENTES"}
             </div>
+            <h2 style={{ fontSize:22, fontWeight:400, color: temaActivo?.imagen_portada ? WHITE : TEXT, margin:"0 0 4px", fontFamily:"'Playfair Display', Georgia, serif", textShadow: temaActivo?.imagen_portada ? "0 1px 4px rgba(0,0,0,0.4)" : "none" }}>
+              {temaActivo?.titulo}
+            </h2>
+            {temaActivo?.descripcion && (
+              <p style={{ fontSize:12, color: temaActivo?.imagen_portada ? "rgba(255,255,255,0.75)" : MUTED, margin:0, lineHeight:1.5, textShadow: temaActivo?.imagen_portada ? "0 1px 3px rgba(0,0,0,0.3)" : "none" }}>
+                {temaActivo.descripcion}
+              </p>
+            )}
           </div>
         </div>
 
