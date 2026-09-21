@@ -1,4 +1,5 @@
 "use client";
+import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "../../lib/supabase";
 
@@ -11,7 +12,7 @@ const REDES = [
 ];
 const TIPOS_POST = ["Post", "Reel", "Carousel", "Video", "Short"];
 const TABS = [
-  { key: "publicar", label: "Publicar", icon: "✎" },
+  { key: "publicar", label: "Publicar", Icon: PencilSquareIcon },
   { key: "automations", label: "Automatizaciones", icon: "⚡" },
   { key: "silvia", label: "Silvia IA", icon: "🤖" },
   { key: "cuentas", label: "Cuentas", icon: "◉" },
@@ -316,7 +317,7 @@ function TabPublicar() {
       </div>
       {loading ? <EmptyState text="Cargando posts..." icon="◌" /> : view === "lista" ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {filtered.length === 0 && <EmptyState text="Sin publicaciones" icon="✎" />}
+          {filtered.length === 0 && <EmptyState text="Sin publicaciones" icon={<PencilSquareIcon style={{ width:16, height:16 }} />} />}
           {filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).map((p) => {
             const ec = p.estado === "publicado" ? "#2C6E52" : p.estado === "programado" ? "#AC8A54" : p.estado === "error" ? "#A23A3A" : "#9A968A";
             return (

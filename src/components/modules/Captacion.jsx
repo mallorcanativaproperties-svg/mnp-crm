@@ -1,4 +1,5 @@
 "use client";
+import { MagnifyingGlassIcon, ArrowRightIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 

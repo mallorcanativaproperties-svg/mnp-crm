@@ -1,4 +1,10 @@
 "use client";
+import {
+  HomeIcon, BuildingOfficeIcon, MagnifyingGlassIcon, ClipboardDocumentListIcon,
+  PencilSquareIcon, UsersIcon, ArrowsRightLeftIcon, ShareIcon,
+  CpuChipIcon, AcademicCapIcon, StarIcon, PresentationChartLineIcon,
+  ChartBarIcon, UserGroupIcon, ShieldCheckIcon, WrenchScrewdriverIcon
+} from "@heroicons/react/24/outline";
 import React, { useState, useEffect, Suspense } from "react";
 import dynamic from "next/dynamic";
 import { supabase } from "@/lib/supabase";
@@ -23,32 +29,49 @@ const SimuladorClaudia = dynamic(() => import("./modules/SimuladorClaudia"), { s
 //   agente        → comerciales — acceso operativo, sin gestión ni IA
 const ROLES_ADMIN = ["director", "administrador"];
 
+const ICON_MAP = {
+  captacion:           <PencilSquareIcon style={{ width: 18, height: 18 }} />,
+  propiedades:         <BuildingOfficeIcon style={{ width: 18, height: 18 }} />,
+  captacion_ana:       <MagnifyingGlassIcon style={{ width: 18, height: 18 }} />,
+  encargos:            <ClipboardDocumentListIcon style={{ width: 18, height: 18 }} />,
+  firma:               <ShieldCheckIcon style={{ width: 18, height: 18 }} />,
+  compradores:         <UsersIcon style={{ width: 18, height: 18 }} />,
+  cruce:               <ArrowsRightLeftIcon style={{ width: 18, height: 18 }} />,
+  redes:               <ShareIcon style={{ width: 18, height: 18 }} />,
+  agentes:             <CpuChipIcon style={{ width: 18, height: 18 }} />,
+  formacion_agentes:   <AcademicCapIcon style={{ width: 18, height: 18 }} />,
+  formacion_direccion: <StarIcon style={{ width: 18, height: 18 }} />,
+  simulador:           <WrenchScrewdriverIcon style={{ width: 18, height: 18 }} />,
+  dashboard:           <ChartBarIcon style={{ width: 18, height: 18 }} />,
+  usuarios:            <UserGroupIcon style={{ width: 18, height: 18 }} />,
+};
+
 const MODULES = [
   // Acceso rápido
-  { key: "captacion", label: "Formulario Cualificación", icon: "✎", color: "#AC8A54", roles: ["director", "administrador", "agente"], group: null },
+  { key: "captacion", label: "Formulario Cualificación", icon: "captacion", color: "#AC8A54", roles: ["director", "administrador", "agente"], group: null },
 
   // PROPIEDADES
-  { key: "propiedades", label: "Propiedades", icon: "⌂", color: "#2C6E52", roles: ["director", "administrador", "agente"], group: "Propiedades" },
-  { key: "captacion_ana", label: "Prospección Particulares", icon: "◎", color: "#2C6E52", roles: ["director", "administrador", "agente"], group: "Propiedades" },
-  { key: "encargos", label: "Encargos de Venta", icon: "📋", color: "#2C6E52", roles: ["director", "administrador", "agente"], group: "Propiedades" },
-  { key: "firma", label: "Firma Electrónica", icon: "✍", color: "#2C6E52", roles: ["director", "administrador", "agente"], group: "Propiedades" },
+  { key: "propiedades", label: "Propiedades", icon: "propiedades", color: "#2C6E52", roles: ["director", "administrador", "agente"], group: "Propiedades" },
+  { key: "captacion_ana", label: "Prospección Particulares", icon: "captacion_ana", color: "#2C6E52", roles: ["director", "administrador", "agente"], group: "Propiedades" },
+  { key: "encargos", label: "Encargos de Venta", icon: "encargos", color: "#2C6E52", roles: ["director", "administrador", "agente"], group: "Propiedades" },
+  { key: "firma", label: "Firma Electrónica", icon: "firma", color: "#2C6E52", roles: ["director", "administrador", "agente"], group: "Propiedades" },
 
   // COMPRADORES
-  { key: "compradores", label: "Base Compradores", icon: "◎", color: "#3D577E", roles: ["director", "administrador", "agente"], group: "Compradores" },
-  { key: "cruce", label: "Motor de Cruce", icon: "⇌", color: "#3D577E", roles: ["director", "administrador", "agente"], group: "Compradores" },
+  { key: "compradores", label: "Base Compradores", icon: "compradores", color: "#3D577E", roles: ["director", "administrador", "agente"], group: "Compradores" },
+  { key: "cruce", label: "Motor de Cruce", icon: "cruce", color: "#3D577E", roles: ["director", "administrador", "agente"], group: "Compradores" },
 
   // REDES SOCIALES
-  { key: "redes", label: "Redes Sociales", icon: "◉", color: "#E1306C", roles: ["director", "administrador", "agente"], group: "Redes Sociales" },
+  { key: "redes", label: "Redes Sociales", icon: "redes", color: "#E1306C", roles: ["director", "administrador", "agente"], group: "Redes Sociales" },
 
   // AGENTES IA — solo director (Suren)
-  { key: "agentes", label: "Agentes IA", icon: "◈", color: "#9C6E1B", roles: ["director", "administrador", "agente"], group: "Agentes IA" },
-  { key: "formacion_agentes", label: "Formación Agentes", icon: "🎯", color: "#AC8A54", roles: ["director", "administrador", "agente"], group: "Formación" },
-  { key: "formacion_direccion", label: "Dirección y Asistente IA", icon: "👑", color: "#AC8A54", roles: ["director", "administrador"], group: "Formación" },
-  { key: "simulador", label: "Simulador Claudia", icon: "◈", color: "#9C6E1B", roles: ["director", "administrador"], group: "Agentes IA" },
+  { key: "agentes", label: "Agentes IA", icon: "agentes", color: "#9C6E1B", roles: ["director", "administrador", "agente"], group: "Agentes IA" },
+  { key: "formacion_agentes", label: "Formación Agentes", icon: "formacion_agentes", color: "#AC8A54", roles: ["director", "administrador", "agente"], group: "Formación" },
+  { key: "formacion_direccion", label: "Dirección y Asistente IA", icon: "formacion_direccion", color: "#AC8A54", roles: ["director", "administrador"], group: "Formación" },
+  { key: "simulador", label: "Simulador Claudia", icon: "simulador", color: "#9C6E1B", roles: ["director", "administrador"], group: "Agentes IA" },
 
   // GESTIÓN — director y administrador
-  { key: "dashboard", label: "Dashboard", icon: "◆", color: "#AC8A54", roles: ["director", "administrador"], group: "Gestión" },
-  { key: "usuarios", label: "Usuarios", icon: "◎", color: "#AC8A54", roles: ["director", "administrador"], group: "Gestión" },
+  { key: "dashboard", label: "Dashboard", icon: "dashboard", color: "#AC8A54", roles: ["director", "administrador"], group: "Gestión" },
+  { key: "usuarios", label: "Usuarios", icon: "usuarios", color: "#AC8A54", roles: ["director", "administrador"], group: "Gestión" },
 ];
 
 // Rate limiting: máx 4 intentos por usuario, bloqueo 15 min en localStorage
@@ -332,7 +355,7 @@ export default function CRMApp() {
                       letterSpacing: "0.04em",
                     }}
                   >
-                    <span style={{ fontSize: 16 }}>{topModule.icon}</span>
+                    <span style={{ display:"flex", alignItems:"center" }}>{ICON_MAP[topModule.icon] || topModule.icon}</span>
                     {sidebarOpen && <span>{topModule.label}</span>}
                   </button>
                 </div>
@@ -385,7 +408,7 @@ export default function CRMApp() {
                             justifyContent: sidebarOpen ? "flex-start" : "center",
                           }}
                         >
-                          <span style={{ fontSize: 14 }}>{mod.icon}</span>
+                          <span style={{ display:"flex", alignItems:"center" }}>{ICON_MAP[mod.icon] || mod.icon}</span>
                           {sidebarOpen && <span>{mod.label}</span>}
                         </button>
                       );

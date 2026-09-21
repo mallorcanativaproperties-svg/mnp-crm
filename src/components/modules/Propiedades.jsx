@@ -1,4 +1,5 @@
 "use client";
+import { PlusIcon, MagnifyingGlassIcon, PencilSquareIcon, TrashIcon, PhotoIcon, GlobeAltIcon, ArrowUpTrayIcon } from "@heroicons/react/24/outline";
 import { useState, useMemo, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 
@@ -1116,7 +1117,7 @@ function DocsSection({ propiedadId, propRef }) {
     if (mimeType?.startsWith("image/")) return "🖼️";
     if (mimeType?.includes("word") || nombre?.endsWith(".docx") || nombre?.endsWith(".doc")) return "📘";
     if (mimeType?.includes("spreadsheet") || nombre?.endsWith(".xlsx") || nombre?.endsWith(".xls")) return "📗";
-    return "📄";
+    return null;
   }
 
   const groupedDocs = {};

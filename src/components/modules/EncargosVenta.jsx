@@ -1,4 +1,5 @@
 "use client";
+import { PlusIcon, PencilSquareIcon, TrashIcon, LinkIcon, EnvelopeIcon, DocumentTextIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 
@@ -120,7 +121,7 @@ function FirmaAgenteModal({ encargo, onClose, onComplete }) {
             <div style={{ fontSize: 9, color: "#AC8A54", letterSpacing: "0.2em", marginBottom: 4 }}>FIRMA DEL AGENTE</div>
             <div style={{ color: "#F8F6F1", fontSize: 14, fontFamily: "'Libre Baskerville', Georgia, serif" }}>Firmar y generar PDF</div>
           </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: "#9A968A", fontSize: 20, cursor: "pointer" }}>✕</button>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "#9A968A", fontSize: 20, cursor: "pointer" }}><XMarkIcon style={{ width:14, height:14 }} /></button>
         </div>
         <div style={{ padding: 24 }}>
           <div style={{ fontSize: 12, color: "#9A968A", marginBottom: 16, lineHeight: 1.6 }}>
@@ -274,7 +275,7 @@ export default function EncargosVenta() {
                   <div style={{ fontSize: 10, color: BRONZE, letterSpacing: "0.2em", marginBottom: 4 }}>NUEVO ENCARGO</div>
                   <div style={{ color: CREAM, fontSize: 15, fontFamily: "'Libre Baskerville', Georgia, serif", fontWeight: 400 }}>Hoja de Encargo de Venta</div>
                 </div>
-                <button onClick={() => setShowForm(false)} style={{ background: "none", border: "none", color: "#9A968A", fontSize: 20, cursor: "pointer" }}>✕</button>
+                <button onClick={() => setShowForm(false)} style={{ background: "none", border: "none", color: "#9A968A", fontSize: 20, cursor: "pointer" }}><XMarkIcon style={{ width:14, height:14 }} /></button>
               </div>
 
               <div style={{ padding: "24px" }}>
@@ -323,7 +324,7 @@ export default function EncargosVenta() {
                       <div style={S.sectionTitle}>Propietario {idx + 1}</div>
                       {idx > 0 && (
                         <button onClick={() => setForm(f => ({ ...f, propietarios: f.propietarios.filter((_, i) => i !== idx) }))}
-                          style={{ background: "none", border: "none", color: "#A23A3A", cursor: "pointer", fontSize: 18, padding: 0 }}>✕</button>
+                          style={{ background: "none", border: "none", color: "#A23A3A", cursor: "pointer", fontSize: 18, padding: 0 }}><XMarkIcon style={{ width:14, height:14 }} /></button>
                       )}
                     </div>
                     <div style={S.grid2}>
@@ -575,7 +576,7 @@ Gracias.`)}`}
         <div style={{ position: "fixed", bottom: 24, right: 24, background: "#2C6E52", color: "#fff", padding: "14px 20px", fontSize: 13, fontFamily: "Inter, sans-serif", zIndex: 2000, display: "flex", gap: 12, alignItems: "center" }}>
           ✓ PDF generado y enviado a todos
           <a href={pdfListo} target="_blank" rel="noopener noreferrer" style={{ color: "#fff", fontSize: 11 }}>Descargar</a>
-          <button onClick={() => setPdfListo(null)} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.6)", cursor: "pointer", fontSize: 16 }}>✕</button>
+          <button onClick={() => setPdfListo(null)} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.6)", cursor: "pointer", fontSize: 16 }}><XMarkIcon style={{ width:14, height:14 }} /></button>
         </div>
       )}
     </div>

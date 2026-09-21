@@ -1,4 +1,5 @@
 "use client";
+import { ArrowsRightLeftIcon, LinkIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 
@@ -186,7 +187,7 @@ function WhatsAppCrucePanel({ buyer, prop, onClose }) {
             <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <span style={{ fontSize: 11, color: "rgba(248,246,241,0.5)", wordBreak: "break-all", flex: 1 }}>{propUrl}</span>
               <button
-                onClick={e => { navigator.clipboard.writeText(propUrl); e.currentTarget.textContent = "✓"; setTimeout(() => { if(e.currentTarget) e.currentTarget.textContent = "Copiar"; }, 2000); }}
+                onClick={e => { navigator.clipboard.writeText(propUrl); e.currentTarget.textContent = "✓"; setTimeout(() => { if(e.currentTarget) e.currentTarget.innerHTML = `<span style="display:flex;align-items:center;gap:4px"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"2\" stroke=\"currentColor\" style=\"width:13px;height:13px\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244\"/></svg>Copiar</span>`; }, 2000); }}
                 style={{ fontSize: 10, color: BRONZE, background: "none", border: `1px solid ${BRONZE}44`, padding: "2px 8px", cursor: "pointer", flexShrink: 0, fontFamily: "Raleway, Inter, sans-serif", letterSpacing: "0.06em" }}>
                 Copiar
               </button>

@@ -1,4 +1,5 @@
 "use client";
+import { ChartBarIcon, BuildingOfficeIcon, UsersIcon, DocumentTextIcon, CpuChipIcon, AcademicCapIcon } from "@heroicons/react/24/outline";
 import { supabase } from "@/lib/supabase";
 import { useState, useMemo } from "react";
 

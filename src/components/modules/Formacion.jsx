@@ -1,5 +1,10 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import {
+  DocumentTextIcon, PresentationChartBarIcon, PlayCircleIcon, LinkIcon,
+  AcademicCapIcon, StarIcon, CheckCircleIcon, ArrowLeftIcon,
+  PlusIcon, PencilSquareIcon, TrashIcon, XMarkIcon
+} from "@heroicons/react/24/outline";
 import { supabase } from "@/lib/supabase";
 
 // ═══ PALETA ══════════════════════════════════════════════════════
@@ -15,7 +20,12 @@ const TEXT       = "#2C2A26";
 const MUTED      = "#9A968A";
 const BORDER     = "#E7E1D4";
 
-const TIPO_ICON  = { pdf: "📄", presentacion: "📊", video: "▶", enlace: "🔗" };
+const TIPO_ICON  = {
+  pdf:          <DocumentTextIcon style={{ width:22, height:22 }} />,
+  presentacion: <PresentationChartBarIcon style={{ width:22, height:22 }} />,
+  video:        <PlayCircleIcon style={{ width:22, height:22 }} />,
+  enlace:       <LinkIcon style={{ width:22, height:22 }} />,
+};
 const TIPO_LABEL = { pdf: "PDF", presentacion: "Presentación", video: "Vídeo YouTube", enlace: "Enlace externo" };
 
 // Paletas de cards oro/crema/blanco — una por posición
@@ -127,7 +137,7 @@ function VisorRecurso({ recurso, userLogin, onClose, onCompletado }) {
           {completado ? "✓ Completado" : "Marcar completado"}
         </button>
         <button onClick={onClose} style={{ padding:"8px 16px", border:`1px solid ${BORDER}`, background:"transparent", color:MUTED, fontSize:12, cursor:"pointer", fontFamily:"Inter, sans-serif", borderRadius:2, marginRight:4 }}>← Volver</button>
-        <button onClick={onClose} style={{ background: "transparent", border: "none", color: MUTED, fontSize: 22, cursor: "pointer", lineHeight: 1 }}>✕</button>
+        <button onClick={onClose} style={{ background: "transparent", border: "none", color: MUTED, cursor: "pointer", display:"flex", alignItems:"center", padding:4 }}><XMarkIcon style={{ width:22, height:22 }} /></button>
       </div>
 
       {/* Cuerpo */}
@@ -143,7 +153,7 @@ function VisorRecurso({ recurso, userLogin, onClose, onCompletado }) {
           )}
           {recurso.tipo === "enlace" && (
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: 20 }}>
-              <div style={{ fontSize: 52 }}>🔗</div>
+              <LinkIcon style={{ width:52, height:52, color:"#AC8A54" }} />
               <div style={{ fontSize: 18, color: WHITE, fontFamily: "'Playfair Display', Georgia, serif" }}>{recurso.titulo}</div>
               <a href={recurso.url} target="_blank" rel="noopener noreferrer"
                 style={{ padding: "14px 32px", background: GOLD, color: WHITE, fontSize: 14, fontWeight: 700, textDecoration: "none", fontFamily: "Inter, sans-serif", borderRadius: 2 }}>
@@ -387,8 +397,8 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
         {/* Tabs */}
         <div style={{ display: "flex", gap: 0, marginTop: 24 }}>
           {[
-            { key: "agentes", label: "Formación de Agentes", icon: "🎯" },
-            ...(isAdmin ? [{ key: "direccion", label: "Dirección y Asistente IA", icon: "👑" }] : []),
+            { key: "agentes", label: "Formación de Agentes", Icon: AcademicCapIcon },
+            ...(isAdmin ? [{ key: "direccion", label: "Dirección y Asistente IA", Icon: StarIcon }] : []),
           ].map(s => (
             <button key={s.key} onClick={() => setSubseccion(s.key)} style={{
               padding: "12px 24px", background: "transparent", border: "none",
@@ -397,7 +407,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
               fontSize: 13, cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600,
               letterSpacing: "0.06em", marginBottom: -1, transition: "all 0.2s"
             }}>
-              {s.icon} {s.label}
+              {s.Icon && <s.Icon style={{ width:16, height:16, marginRight:6, verticalAlign:"middle" }} />}{s.label}
             </button>
           ))}
         </div>
@@ -442,7 +452,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                     )}
                     {isAdmin && (
                       <div style={{ position:"absolute", top:8, left:8, display:"flex", gap:6 }} onClick={e=>e.stopPropagation()}>
-                        <button onClick={() => setEditMod(mod)} style={{ width:28, height:28, border:`1px solid ${GOLD}66`, background:WHITE+"CC", color:GOLD, fontSize:12, cursor:"pointer", borderRadius:2, display:"flex", alignItems:"center", justifyContent:"center" }}>✎</button>
+                        <button onClick={() => setEditMod(mod)} style={{ width:28, height:28, border:`1px solid ${GOLD}66`, background:WHITE+"CC", color:GOLD, cursor:"pointer", borderRadius:2, display:"flex", alignItems:"center", justifyContent:"center", padding:4 }}><PencilSquareIcon style={{ width:16, height:16 }} /></button>
                       </div>
                     )}
                   </div>
@@ -470,7 +480,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                         {completo && (
                           <button onClick={e => { e.stopPropagation(); generarCertificado(currentUser?.nombre||userLogin, mod.titulo); }}
                             style={{ padding:"6px 12px", background:GOLD, border:"none", color:WHITE, fontSize:10, fontWeight:700, cursor:"pointer", fontFamily:"Inter, sans-serif", borderRadius:2 }}>
-                            🎓 Certificado
+                            Certificado
                           </button>
                         )}
                         <span style={{ fontSize:12, color:GOLD, fontWeight:700 }}>→</span>
@@ -490,7 +500,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
               }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor=GOLD; e.currentTarget.style.background=CREAM; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor=GOLD_XL; e.currentTarget.style.background=WHITE; }}>
-                <div style={{ fontSize:28, color:GOLD_XL }}>+</div>
+                <PlusIcon style={{ width:28, height:28, color:GOLD_XL }} />
                 <div style={{ fontSize:12, color:MUTED, fontFamily:"Inter, sans-serif" }}>Nuevo módulo</div>
               </div>
             )}
@@ -538,7 +548,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                   {completo && (
                     <button onClick={() => generarCertificado(currentUser?.nombre||userLogin, moduloActivo?.titulo)}
                       style={{ padding:"9px 18px", background:GOLD, border:"none", color:WHITE, fontSize:11, fontWeight:700, cursor:"pointer", fontFamily:"Inter, sans-serif", borderRadius:2 }}>
-                      🎓 Descargar certificado
+                      Descargar certificado
                     </button>
                   )}
                 </div>
@@ -582,7 +592,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                   {/* Acciones */}
                   <div style={{ display:"flex", alignItems:"center", padding:"0 16px", gap:8, flexShrink:0 }}>
                     {isAdmin && (
-                      <button onClick={() => setEditTema(tema)} style={{ background:"transparent", border:`1px solid ${BORDER}`, color:MUTED, fontSize:11, padding:"5px 10px", cursor:"pointer", borderRadius:2 }}>✎</button>
+                      <button onClick={() => setEditTema(tema)} style={{ background:"transparent", border:`1px solid ${BORDER}`, color:MUTED, padding:"5px 8px", cursor:"pointer", borderRadius:2, display:"flex", alignItems:"center" }}><PencilSquareIcon style={{ width:14, height:14 }} /></button>
                     )}
                     <span style={{ color:GOLD, fontSize:16, cursor:"pointer" }} onClick={() => { setTemaActivo(tema); setVista("recursos"); }}>›</span>
                   </div>
@@ -665,9 +675,9 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                   <div style={{ display:"flex", gap:10, alignItems:"center", flexShrink:0 }}>
                     {isAdmin && (
                       <>
-                        <button onClick={()=>setEditRec(rec)} style={{ background:"transparent", border:`1px solid ${BORDER}`, color:MUTED, fontSize:11, padding:"6px 12px", cursor:"pointer", borderRadius:2 }}>✎</button>
+                        <button onClick={()=>setEditRec(rec)} style={{ background:"transparent", border:`1px solid ${BORDER}`, color:MUTED, padding:"6px 8px", cursor:"pointer", borderRadius:2, display:"flex", alignItems:"center" }}><PencilSquareIcon style={{ width:14, height:14 }} /></button>
                         <button onClick={async()=>{ if(confirm("¿Eliminar?")){ await supabase.from("formacion_recursos").update({activo:false}).eq("id",rec.id); cargarTodo(); }}}
-                          style={{ background:"transparent", border:`1px solid #A23A3A44`, color:"#A23A3A", fontSize:11, padding:"6px 12px", cursor:"pointer", borderRadius:2 }}>✕</button>
+                          style={{ background:"transparent", border:`1px solid #A23A3A44`, color:"#A23A3A", padding:"6px 8px", cursor:"pointer", borderRadius:2, display:"flex", alignItems:"center" }}><TrashIcon style={{ width:14, height:14 }} /></button>
                       </>
                     )}
                     <button onClick={()=>setVisor(rec)}

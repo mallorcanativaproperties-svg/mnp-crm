@@ -1,4 +1,5 @@
 "use client";
+import { PlusIcon, MagnifyingGlassIcon, FunnelIcon, ArrowDownTrayIcon, PencilSquareIcon, TrashIcon, XMarkIcon, CheckIcon } from "@heroicons/react/24/outline";
 import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 
@@ -1116,7 +1117,7 @@ export default function App({ currentUser }) {
             <button onClick={() => setShowNew(true)} style={{ padding: "12px 28px", borderRadius: 0, border: "1px solid #C8A97E", background: "transparent", color: "#AC8A54", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}
               onMouseEnter={e => { e.currentTarget.style.background = "#AC8A54"; e.currentTarget.style.color = "#F8F6F1"; }}
               onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#AC8A54"; }}
-            >+ Nuevo comprador</button>
+            ><PlusIcon style={{ width:15, height:15, marginRight:6, verticalAlign:"middle" }} />Nuevo comprador</button>
           </div>
         </div>
       </div>
