@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 const Dashboard = dynamic(() => import("./modules/Dashboard"), { ssr: false });
 const Propiedades = dynamic(() => import("./modules/Propiedades"), { ssr: false });
 const FormularioCaptacion = dynamic(() => import("./modules/FormularioCaptacion"), { ssr: false });
+const Formacion = dynamic(() => import("./modules/Formacion"), { ssr: false });
 const Compradores = dynamic(() => import("./modules/Compradores"), { ssr: false });
 const MotorCruce = dynamic(() => import("./modules/MotorCruce"), { ssr: false });
 const EncargosVenta = dynamic(() => import("./modules/EncargosVenta"), { ssr: false });
@@ -41,6 +42,8 @@ const MODULES = [
 
   // AGENTES IA — solo director (Suren)
   { key: "agentes", label: "Agentes IA", icon: "◈", color: "#9C6E1B", roles: ["director", "administrador", "agente"], group: "Agentes IA" },
+  { key: "formacion_agentes", label: "Formación Agentes", icon: "🎯", color: "#AC8A54", roles: ["director", "administrador", "agente"], group: "Formación" },
+  { key: "formacion_direccion", label: "Dirección y Asistente IA", icon: "👑", color: "#AC8A54", roles: ["director", "administrador"], group: "Formación" },
   { key: "simulador", label: "Simulador Claudia", icon: "◈", color: "#9C6E1B", roles: ["director", "administrador"], group: "Agentes IA" },
 
   // GESTIÓN — director y administrador
@@ -247,6 +250,8 @@ export default function CRMApp() {
       case "simulador": return <SimuladorClaudia />;
       case "propiedades": return <Propiedades currentUser={currentUser} />;
       case "captacion": return <FormularioCaptacion />;
+      case "formacion_agentes": return <Formacion currentUser={currentUser} defaultSubseccion="agentes" />;
+      case "formacion_direccion": return <Formacion currentUser={currentUser} defaultSubseccion="direccion" />;
       case "compradores": return <Compradores currentUser={currentUser} />;
       case "cruce": return <MotorCruce currentUser={currentUser} />;
       case "captacion_ana": return <Captacion />;
