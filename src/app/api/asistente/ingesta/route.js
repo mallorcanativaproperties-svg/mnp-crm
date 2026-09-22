@@ -228,9 +228,14 @@ export async function POST(request) {
     }
 
     // 3. Documento
+    // La identidad de un documento es su origen, NO su título: si el hash
+    // dependiera del título, retitular una recarga crearía un duplicado en vez
+    // de reemplazarla. (Pasó con las páginas de la ATIB.)
     const hash = crypto
       .createHash("sha256")
-      .update(`${b.agenteSlug}|${b.titulo}|${b.url || "texto"}|${(b.articulos || []).join(",")}`)
+      .update(
+        `${b.agenteSlug}|${b.url || `texto:${b.titulo}`}|${(b.articulos || []).join(",")}`
+      )
       .digest("hex");
 
     await sbAdmin.from("ia_documentos").delete().eq("hash", hash); // recarga limpia
