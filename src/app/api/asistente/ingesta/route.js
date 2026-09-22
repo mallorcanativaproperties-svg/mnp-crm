@@ -52,7 +52,9 @@ function limpiarHtml(html) {
 
 /** Corta el texto en secciones encabezadas por "Artículo N" o por una disposición. */
 function partirPorArticulos(texto) {
-  const re = /(?:^|\n)\s*((?:Art[íi]culo|Disposici[óo]n\s+(?:adicional|transitoria|final|derogatoria)[^\n.]{0,60})[^\n]{0,140})/gi;
+  // Normativa: "Artículo N" y disposiciones. Documentos internos: encabezados
+  // markdown y secciones numeradas ("4.3. Bonificación del 100%").
+  const re = /(?:^|\n)\s*(#{1,4}\s+[^\n]{1,140}|\d{1,2}(?:\.\d{1,2})*\.\s+[A-ZÁÉÍÓÚÑ¿⚠][^\n]{0,140}|(?:Art[íi]culo|Disposici[óo]n\s+(?:adicional|transitoria|final|derogatoria))[^\n]{0,140})/g;
   const cortes = [];
   let m;
   while ((m = re.exec(texto)) !== null) {
