@@ -343,6 +343,8 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
   const [editRec, setEditRec]             = useState(null);
   const [editTema, setEditTema]           = useState(null);
   const [loading, setLoading]             = useState(true);
+  const [dragIdx, setDragIdx]             = useState(null);
+  const [dragOver, setDragOver]           = useState(null);
 
   const [datosUsuario, setDatosUsuario] = useState(null);
 
@@ -381,6 +383,15 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
     let total=0, done=0;
     (temas[moduloId]||[]).forEach(t => { (recursos[t.id]||[]).forEach(r => { total++; if(progreso[r.id]) done++; }); });
     return { total, done, pct: total>0 ? Math.round((done/total)*100) : 0 };
+  }
+
+  async function reordenarRecursos(temaId, lista) {
+    // Actualizar orden en BD para todos los recursos del tema
+    await Promise.all(lista.map((r, i) =>
+      supabase.from("formacion_recursos").update({ orden: i + 1 }).eq("id", r.id)
+    ));
+    // Actualizar estado local inmediatamente sin recargar todo
+    setRecursos(prev => ({ ...prev, [temaId]: lista }));
   }
 
   async function guardarTema(f) {
@@ -764,6 +775,8 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
           {rList.length === 0 && <div style={{ color:MUTED, textAlign:"center", padding:60 }}>No hay recursos en este tema.</div>}
           <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
             {rList.map((rec, idx) => {
+              const isDragging = dragIdx === idx;
+              const isOver = dragOver === idx;
               const hecho = progreso[rec.id];
               const esEnlace = rec.tipo === "enlace";
               const esVideo = rec.tipo === "video";
@@ -771,15 +784,32 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
               if (esEnlace) {
                 // ── Enlace externo — estilo compacto y diferenciado ──────────
                 return (
-                  <div key={rec.id} style={{
-                    background: hecho ? `${GOLD}08` : CREAM,
-                    border: `1px solid ${BORDER}`,
-                    borderLeft: `3px solid ${hecho ? GOLD : GOLD_LIGHT}`,
-                    borderRadius: 3, padding:"12px 16px",
-                    display:"flex", alignItems:"center", gap:12, transition:"all 0.2s"
-                  }}
-                    onMouseEnter={e=>{ e.currentTarget.style.borderLeftColor=GOLD; e.currentTarget.style.background=`${GOLD}0D`; }}
+                  <div key={rec.id}
+                    draggable={isAdmin}
+                    onDragStart={() => setDragIdx(idx)}
+                    onDragOver={e => { e.preventDefault(); setDragOver(idx); }}
+                    onDragEnd={() => { setDragIdx(null); setDragOver(null); }}
+                    onDrop={() => {
+                      if (dragIdx === null || dragIdx === idx) return;
+                      const nueva = [...rList];
+                      const [moved] = nueva.splice(dragIdx, 1);
+                      nueva.splice(idx, 0, moved);
+                      reordenarRecursos(temaActivo.id, nueva);
+                      setDragIdx(null); setDragOver(null);
+                    }}
+                    style={{
+                      background: hecho ? `${GOLD}08` : CREAM,
+                      border: `1px solid ${isOver ? GOLD : BORDER}`,
+                      borderLeft: `3px solid ${isOver ? GOLD : hecho ? GOLD : GOLD_LIGHT}`,
+                      borderRadius: 3, padding:"12px 16px",
+                      display:"flex", alignItems:"center", gap:12, transition:"all 0.2s",
+                      opacity: isDragging ? 0.4 : 1,
+                      transform: isOver ? "translateY(-2px)" : "none",
+                      cursor: isAdmin ? "grab" : "default"
+                    }}
+                    onMouseEnter={e=>{ if(!isAdmin){ e.currentTarget.style.borderLeftColor=GOLD; e.currentTarget.style.background=`${GOLD}0D`; }}}
                     onMouseLeave={e=>{ e.currentTarget.style.borderLeftColor=hecho?GOLD:GOLD_LIGHT; e.currentTarget.style.background=hecho?`${GOLD}08`:CREAM; }}>
+                    {isAdmin && <div style={{ color:MUTED, flexShrink:0, cursor:"grab", fontSize:14, lineHeight:1 }}>⠿</div>}
                     <div style={{ color: GOLD, flexShrink:0, display:"flex" }}>{TIPO_ICON[rec.tipo]}</div>
                     <div style={{ flex:1, minWidth:0 }}>
                       <div style={{ fontSize:13, fontWeight:600, color:hecho?GOLD:TEXT, fontFamily:"Inter, sans-serif", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{rec.titulo}</div>
@@ -817,13 +847,30 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
               // ── PDF / Presentación / Vídeo — tarjeta completa ───────────
               const p = pal(idx);
               return (
-                <div key={rec.id} style={{
-                  background: WHITE, border:`1px solid ${hecho?GOLD:p.border}`,
-                  borderRadius:3, padding:"18px 22px",
-                  display:"flex", alignItems:"center", gap:16, transition:"all 0.2s"
-                }}
-                  onMouseEnter={e=>e.currentTarget.style.boxShadow=`0 4px 16px rgba(172,138,84,0.12)`}
+                <div key={rec.id}
+                  draggable={isAdmin}
+                  onDragStart={() => setDragIdx(idx)}
+                  onDragOver={e => { e.preventDefault(); setDragOver(idx); }}
+                  onDragEnd={() => { setDragIdx(null); setDragOver(null); }}
+                  onDrop={() => {
+                    if (dragIdx === null || dragIdx === idx) return;
+                    const nueva = [...rList];
+                    const [moved] = nueva.splice(dragIdx, 1);
+                    nueva.splice(idx, 0, moved);
+                    reordenarRecursos(temaActivo.id, nueva);
+                    setDragIdx(null); setDragOver(null);
+                  }}
+                  style={{
+                    background: WHITE, border:`1px solid ${isOver ? GOLD : hecho?GOLD:p.border}`,
+                    borderRadius:3, padding:"18px 22px",
+                    display:"flex", alignItems:"center", gap:16, transition:"all 0.2s",
+                    opacity: isDragging ? 0.4 : 1,
+                    transform: isOver ? "translateY(-2px)" : "none",
+                    cursor: isAdmin ? "grab" : "default"
+                  }}
+                  onMouseEnter={e=>{ if(!isDragging) e.currentTarget.style.boxShadow=`0 4px 16px rgba(172,138,84,0.12)`; }}
                   onMouseLeave={e=>e.currentTarget.style.boxShadow="none"}>
+                  {isAdmin && <div style={{ color:MUTED, flexShrink:0, cursor:"grab", fontSize:14, lineHeight:1 }}>⠿</div>}
                   <div style={{ color: GOLD, flexShrink:0, display:"flex" }}>{TIPO_ICON[rec.tipo]}</div>
                   <div style={{ flex:1 }}>
                     <div style={{ fontSize:14, fontWeight:700, color:hecho?GOLD:TEXT, marginBottom:3, fontFamily:"Inter, sans-serif" }}>{rec.titulo}</div>
