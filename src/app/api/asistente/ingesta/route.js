@@ -52,14 +52,26 @@ function limpiarHtml(html) {
 
 /** Corta el texto en secciones encabezadas por "Artículo N" o por una disposición. */
 function partirPorArticulos(texto) {
-  // Normativa: "Artículo N" y disposiciones. Documentos internos: encabezados
-  // markdown y secciones numeradas ("4.3. Bonificación del 100%").
-  const re = /(?:^|\n)\s*(#{1,4}\s+[^\n]{1,140}|\d{1,2}(?:\.\d{1,2})*\.\s+[A-ZÁÉÍÓÚÑ¿⚠][^\n]{0,140}|(?:Art[íi]culo|Disposici[óo]n\s+(?:adicional|transitoria|final|derogatoria))[^\n]{0,140})/g;
-  const cortes = [];
-  let m;
-  while ((m = re.exec(texto)) !== null) {
-    cortes.push({ inicio: m.index + m[0].indexOf(m[1]), encabezado: m[1].trim() });
-  }
+  // Un texto legal se corta SOLO por "Artículo N" y disposiciones. Los apartados
+  // numerados internos ("2. Los rendimientos netos...") no son encabezados: si se
+  // tratan como tales, el artículo se parte y el filtro por artículo deja de verlo.
+  // El patrón amplio (markdown, secciones numeradas) se reserva para documentos
+  // internos, que no tienen articulado.
+  const reLegal = /(?:^|\n)\s*((?:Art[íi]culo|Disposici[óo]n\s+(?:adicional|transitoria|final|derogatoria))[^\n]{0,140})/gi;
+  const reLibre = /(?:^|\n)\s*(#{1,4}\s+[^\n]{1,140}|\d{1,2}(?:\.\d{1,2})*\.\s+[A-ZÁÉÍÓÚÑ][^\n]{0,140})/g;
+
+  const recoger = (re) => {
+    const out = [];
+    let m;
+    re.lastIndex = 0;
+    while ((m = re.exec(texto)) !== null) {
+      out.push({ inicio: m.index + m[0].indexOf(m[1]), encabezado: m[1].trim() });
+    }
+    return out;
+  };
+
+  let cortes = recoger(reLegal);
+  if (cortes.length < 3) cortes = recoger(reLibre);
   if (cortes.length === 0) return [{ encabezado: null, cuerpo: texto }];
 
   const secciones = [];
