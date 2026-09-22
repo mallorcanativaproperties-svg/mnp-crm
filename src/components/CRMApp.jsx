@@ -165,9 +165,9 @@ function LoginScreen({ onLogin }) {
       {/* Card del formulario */}
       <div style={{ width: "100%", maxWidth: 400, position: "relative", zIndex: 1 }}>
         <div style={{ textAlign: "center", marginBottom: 36 }}>
-          <div style={{ fontSize: 10, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.3em", marginBottom: 8, fontWeight: 600 }}>Nativa Properties</div>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 38, fontWeight: 400, margin: 0, color: "#FFFFFF" }}><em>CRM</em></h1>
-          <p style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", marginTop: 10 }}>Gestión inmobiliaria · Marketing · IA</p>
+          <div style={{ fontSize: 12, color: "#E7D5B8", textTransform: "uppercase", letterSpacing: "0.35em", marginBottom: 10, fontWeight: 700, textShadow: "0 1px 10px rgba(0,0,0,0.8)" }}>Nativa Properties</div>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 54, fontWeight: 400, margin: 0, color: "#FFFFFF", textShadow: "0 2px 20px rgba(0,0,0,0.8)", letterSpacing: "0.05em" }}><em>CRM</em></h1>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.9)", marginTop: 12, letterSpacing: "0.08em", textShadow: "0 1px 10px rgba(0,0,0,0.8)" }}>Gestión inmobiliaria · Marketing · IA</p>
         </div>
         <div style={{ background: "rgba(255,255,255,0.97)", padding: "36px 32px" }}>
           <div style={{ marginBottom: 20 }}>
