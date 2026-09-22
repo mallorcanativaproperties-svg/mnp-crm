@@ -150,24 +150,36 @@ function LoginScreen({ onLogin }) {
   const iSt = { width: "100%", padding: "12px 16px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 14, fontFamily: "Inter, sans-serif", boxSizing: "border-box", outline: "none" };
 
   return (
-    <div style={{ background: "#F8F6F1", minHeight: "100vh", color: "#22262E", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
-      <div style={{ width: "100%", maxWidth: 400 }}>
-        <div style={{ textAlign: "center", marginBottom: 44 }}>
-          <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.3em", marginBottom: 8, fontWeight: 500 }}>Nativa Properties</div>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 38, fontWeight: 400, margin: 0 }}><em>CRM</em></h1>
-          <p style={{ fontSize: 12, color: "#9A968A", marginTop: 10 }}>Gestion inmobiliaria + Marketing + IA</p>
+    <div style={{
+      minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
+      padding: "40px 24px", position: "relative", overflow: "hidden"
+    }}>
+      {/* Imagen de fondo */}
+      <div style={{
+        position: "absolute", inset: 0,
+        backgroundImage: `url(https://cbcxysyopwnbkydkmvuw.supabase.co/storage/v1/object/public/formacion/portadas/login.png)`,
+        backgroundSize: "cover", backgroundPosition: "center", backgroundRepeat: "no-repeat"
+      }} />
+      {/* Overlay oscuro para legibilidad */}
+      <div style={{ position: "absolute", inset: 0, background: "rgba(22,41,74,0.55)" }} />
+      {/* Card del formulario */}
+      <div style={{ width: "100%", maxWidth: 400, position: "relative", zIndex: 1 }}>
+        <div style={{ textAlign: "center", marginBottom: 36 }}>
+          <div style={{ fontSize: 10, color: "#C8A97E", textTransform: "uppercase", letterSpacing: "0.3em", marginBottom: 8, fontWeight: 600 }}>Nativa Properties</div>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 38, fontWeight: 400, margin: 0, color: "#FFFFFF" }}><em>CRM</em></h1>
+          <p style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", marginTop: 10 }}>Gestión inmobiliaria · Marketing · IA</p>
         </div>
-        <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "36px 32px" }}>
+        <div style={{ background: "rgba(255,255,255,0.97)", padding: "36px 32px" }}>
           <div style={{ marginBottom: 20 }}>
-            <label style={{ fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 6 }}>Usuario</label>
+            <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 6 }}>Usuario</label>
             <input type="text" value={user} onChange={(e) => { setUser(e.target.value); setError(""); }} onKeyDown={(e) => { if (e.key === "Enter") handleLogin(); }} placeholder="tu usuario" style={iSt} />
           </div>
           <div style={{ marginBottom: 26 }}>
-            <label style={{ fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 6 }}>Contrasena</label>
-            <input type="password" value={pass} onChange={(e) => { setPass(e.target.value); setError(""); }} onKeyDown={(e) => { if (e.key === "Enter") handleLogin(); }} placeholder="tu contrasena" style={iSt} />
+            <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 6 }}>Contraseña</label>
+            <input type="password" value={pass} onChange={(e) => { setPass(e.target.value); setError(""); }} onKeyDown={(e) => { if (e.key === "Enter") handleLogin(); }} placeholder="tu contraseña" style={iSt} />
           </div>
-          {error && <div style={{ marginBottom: 16, padding: "10px 14px", background: "#D4545412", borderRadius: 0, border: "1px solid #D4545433", fontSize: 12, color: "#A23A3A", textAlign: "center" }}>{error}</div>}
-          <button onClick={handleLogin} style={{ width: "100%", padding: "14px", borderRadius: 0, border: "none", background: "#16294A", color: "#F8F6F1", cursor: "pointer", fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>Acceder</button>
+          {error && <div style={{ marginBottom: 16, padding: "10px 14px", background: "#D4545412", border: "1px solid #D4545433", fontSize: 12, color: "#A23A3A", textAlign: "center" }}>{error}</div>}
+          <button onClick={handleLogin} style={{ width: "100%", padding: "14px", border: "none", background: "#16294A", color: "#F8F6F1", cursor: "pointer", fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>Acceder</button>
         </div>
       </div>
     </div>
