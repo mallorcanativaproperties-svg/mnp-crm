@@ -897,8 +897,7 @@ export default function Visitas({ currentUser }) {
   const [nvNotas, setNvNotas] = useState("");
   const [nvHora, setNvHora] = useState(new Date().toISOString().slice(0,16));
   const [nvGuardando, setNvGuardando] = useState(false);
-  const [busqProps, setBusqProps] = useState([]);
-  const [qProp, setQProp] = useState("");
+  const [propsAgente, setPropsAgente] = useState([]);
 
   async function crearVisitaGlobal() {
     if (!nvPropiedad || !nvComprador) return;
@@ -930,11 +929,13 @@ export default function Visitas({ currentUser }) {
   }
 
   useEffect(() => {
-    if (qProp.length < 2) { setBusqProps([]); return; }
-    supabase.from("propiedades").select("id,ref,dir,municipio").or(
-      `ref.ilike.%${qProp}%,dir.ilike.%${qProp}%,municipio.ilike.%${qProp}%`
-    ).limit(8).then(({ data }) => setBusqProps(data || []));
-  }, [qProp]);
+    // Cargar propiedades del agente al abrir el modal
+    if (!modalNuevaVisita) return;
+    let q = supabase.from("propiedades").select("id,ref,dir,municipio,agente,estado")
+      .neq("estado", "vendida").neq("estado", "caida").order("created_at", { ascending: false });
+    if (!isAdmin) q = q.eq("agente", currentUser?.nombre || currentUser?.user_login);
+    q.then(({ data }) => setPropsAgente(data || []));
+  }, [modalNuevaVisita]);
 
   const cargar = useCallback(async () => {
     setLoading(true);
@@ -1078,40 +1079,23 @@ export default function Visitas({ currentUser }) {
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div>
               <L c="Propiedad" req />
-              {nvPropiedad ? (
-                <div style={{ background: CREAM2, border: `1px solid ${GOLD}`, padding: "10px 14px",
-                  display: "flex", justifyContent: "space-between", alignItems: "center", borderRadius: 2 }}>
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: TEXT, fontFamily: "Inter, sans-serif" }}>
-                      {nvPropiedad.ref} — {nvPropiedad.dir}
-                    </div>
-                    <div style={{ fontSize: 11, color: MUTED, fontFamily: "Inter, sans-serif" }}>{nvPropiedad.municipio}</div>
-                  </div>
-                  <button onClick={() => setNvPropiedad(null)} style={{ background: "transparent", border: "none", color: MUTED, cursor: "pointer" }}>
-                    <XMarkIcon style={{ width: 14, height: 14 }} />
-                  </button>
-                </div>
-              ) : (
-                <div style={{ position: "relative" }}>
-                  <input value={qProp} onChange={e => setQProp(e.target.value)}
-                    placeholder="Buscar por ref, dirección o municipio..."
-                    style={iSt} />
-                  {busqProps.length > 0 && (
-                    <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 10,
-                      background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 2,
-                      maxHeight: 200, overflowY: "auto", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
-                      {busqProps.map(p => (
-                        <div key={p.id} onClick={() => { setNvPropiedad(p); setQProp(""); setBusqProps([]); }}
-                          style={{ padding: "10px 14px", cursor: "pointer", borderBottom: `1px solid ${BORDER}`,
-                            fontFamily: "Inter, sans-serif" }}
-                          onMouseEnter={e => e.currentTarget.style.background = CREAM}
-                          onMouseLeave={e => e.currentTarget.style.background = WHITE}>
-                          <div style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>{p.ref} — {p.dir}</div>
-                          <div style={{ fontSize: 11, color: MUTED }}>{p.municipio}</div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+              <select
+                value={nvPropiedad?.id || ""}
+                onChange={e => {
+                  const p = propsAgente.find(x => x.id === e.target.value) || null;
+                  setNvPropiedad(p);
+                }}
+                style={{ ...iSt, cursor: "pointer" }}>
+                <option value="">— Selecciona una propiedad —</option>
+                {propsAgente.map(p => (
+                  <option key={p.id} value={p.id}>
+                    {p.ref ? `[${p.ref}] ` : ""}{p.dir}{p.municipio ? ` — ${p.municipio}` : ""}
+                  </option>
+                ))}
+              </select>
+              {propsAgente.length === 0 && (
+                <div style={{ fontSize: 11, color: MUTED, marginTop: 4, fontFamily: "Inter, sans-serif" }}>
+                  Cargando propiedades...
                 </div>
               )}
             </div>
