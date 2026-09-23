@@ -244,23 +244,38 @@ export default function EncargosVenta() {
   }
 
   async function handleSave() {
-    if (!form.propietarios[0]?.nombre) return;
-    const payload = {
-      ...form,
-      prop1_nombre: form.propietarios[0]?.nombre,
-      prop1_tel: form.propietarios[0]?.tel,
-    };
-    const userLogin = localStorage.getItem("mnp_user_login") || "";
-    const res = await fetch("/api/encargos", { method: "POST", headers: { "Content-Type": "application/json", "x-user-login": userLogin }, body: JSON.stringify(payload) });
-    const data = await res.json();
-    if (data.ok) {
-      setShowForm(false);
-      setForm(FORM_INIT);
-      await load();
-      // Restaurar datos del consultor para el próximo encargo
-      loadCurrentUser();
+    if (!form.propietarios[0]?.nombre) {
+      alert("Introduce al menos el nombre del propietario.");
+      return;
     }
-    setSaving(false);
+    setSaving(true);
+    try {
+      const payload = {
+        ...form,
+        propietarios: form.propietarios, // array completo para encargo_firmantes
+        prop1_nombre: form.propietarios[0]?.nombre || "",
+        prop1_tel:    form.propietarios[0]?.tel    || "",
+      };
+      const userLogin = localStorage.getItem("mnp_user_login") || "";
+      const res = await fetch("/api/encargos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-user-login": userLogin },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setShowForm(false);
+        setForm(FORM_INIT);
+        await load();
+        loadCurrentUser();
+      } else {
+        alert("Error al guardar el encargo:\n" + (data.error || "Error desconocido"));
+      }
+    } catch (e) {
+      alert("Error de conexión al guardar:\n" + e.message);
+    } finally {
+      setSaving(false);
+    }
   }
 
   function getLinkFirma(token) {
@@ -304,7 +319,12 @@ export default function EncargosVenta() {
 
         {/* Formulario modal */}
         {showForm && (
-          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", zIndex: 1000, overflowY: "auto", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "32px 16px" }} onClick={() => setShowForm(false)}>
+          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", zIndex: 1000, overflowY: "auto", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "32px 16px" }} onClick={e => {
+              if (e.target !== e.currentTarget) return; // solo si click directo en overlay
+              if (saving) return;
+              if (form.propietarios[0]?.nombre && !confirm("¿Cerrar sin guardar? Se perderán los datos introducidos.")) return;
+              setShowForm(false);
+            }}>
             <div style={{ background: CREAM, width: "100%", maxWidth: 720 }} onClick={e => e.stopPropagation()}>
 
               <div style={{ background: PETROL, padding: "20px 24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
