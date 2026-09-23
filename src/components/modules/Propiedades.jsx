@@ -1663,24 +1663,44 @@ REGLAS:
     setTranslating(true);
     setTranslateError("");
     try {
-      const response = await fetch("/api/claude", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-haiku-4-5-20251001",
-          max_tokens: 4096,
-          system: `Eres un traductor profesional especializado en textos inmobiliarios de lujo. Traduce el texto que te proporcionen manteniendo exactamente el mismo tono, estructura y estilo narrativo. No añadas ni elimines información. IMPORTANTE: Responde ÚNICAMENTE con el JSON válido, sin texto adicional, sin markdown, sin explicaciones. El JSON debe estar completo y bien formado. Formato exacto: {"en": "traducción completa en inglés", "de": "traducción completa en alemán"}`,
-          messages: [{ role: "user", content: "Traduce este texto inmobiliario al inglés y alemán. Responde solo con el JSON:\n\n" + textoEs.slice(0, 3000) }],
+      const texto = textoEs.slice(0, 4000);
+      const sistema = "Eres un traductor profesional de textos inmobiliarios de lujo. Traduce el texto manteniendo el mismo tono y estilo. Responde ÚNICAMENTE con la traducción, sin explicaciones ni texto adicional.";
+
+      // Dos llamadas separadas — una por idioma
+      const [resEn, resDe] = await Promise.all([
+        fetch("/api/claude", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "claude-haiku-4-5-20251001",
+            max_tokens: 4096,
+            system: sistema,
+            messages: [{ role: "user", content: "Traduce al inglés este texto inmobiliario:\n\n" + texto }],
+          }),
         }),
-      });
-      const data = await response.json();
-      if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
-      const text = data.content?.filter(i => i.type === "text").map(i => i.text).join("") || "";
-      const clean = text.replace(/```json|```/g, "").trim();
-      const parsed = JSON.parse(clean);
-      if (parsed.en) { upd("descEn", parsed.en); draft.descEn = parsed.en; }
-      if (parsed.de) { upd("descDe", parsed.de); draft.descDe = parsed.de; }
-      await autoSave({...draft, descEn: parsed.en || draft.descEn, descDe: parsed.de || draft.descDe});
+        fetch("/api/claude", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "claude-haiku-4-5-20251001",
+            max_tokens: 4096,
+            system: sistema,
+            messages: [{ role: "user", content: "Traduce al alemán este texto inmobiliario:\n\n" + texto }],
+          }),
+        }),
+      ]);
+
+      const dataEn = await resEn.json();
+      const dataDe = await resDe.json();
+      if (dataEn.error) throw new Error(dataEn.error.message || JSON.stringify(dataEn.error));
+      if (dataDe.error) throw new Error(dataDe.error.message || JSON.stringify(dataDe.error));
+
+      const descEn = dataEn.content?.filter(i => i.type === "text").map(i => i.text).join("").trim() || "";
+      const descDe = dataDe.content?.filter(i => i.type === "text").map(i => i.text).join("").trim() || "";
+
+      if (descEn) { upd("descEn", descEn); draft.descEn = descEn; }
+      if (descDe) { upd("descDe", descDe); draft.descDe = descDe; }
+      await autoSave({...draft, descEn: descEn || draft.descEn, descDe: descDe || draft.descDe});
     } catch(e) {
       setTranslateError("Error al traducir: " + e.message);
     } finally {
