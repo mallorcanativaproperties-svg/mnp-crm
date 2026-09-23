@@ -369,8 +369,21 @@ function GeneradorDoc({ visita, propiedad, agente, onGuardado, onClose }) {
       ? visita.visita_compradores.sort((a,b) => a.orden - b.orden).map(vc => vc.compradores).filter(Boolean)
       : visita?.compradores ? [visita.compradores] : [];
 
-    // La API de documento carga propiedad desde BD usando propiedad_id de la visita
-    // Solo guardamos metadatos mínimos en contenido JSONB como referencia
+    // Guardar los datos completos de propiedad en el contenido JSONB
+    // Esto garantiza que el PDF se genere correctamente aunque propiedad_id esté null
+    const propObj = propiedad || {};
+    const anexos = [];
+    if (propObj.trastero === true) anexos.push("trastero incluido");
+    if (propObj.parking === "Si") {
+      const plazas = (propObj.n_plazas || 0) > 1
+        ? `${propObj.n_plazas} plazas de garaje incluidas`
+        : "plaza de garaje incluida";
+      anexos.push(plazas);
+    }
+    const dirBase = [propObj.dir, propObj.num].filter(Boolean).join(" ");
+    const dirCompleta = [dirBase, propObj.municipio].filter(Boolean).join(", ")
+      + (anexos.length > 0 ? ` — con ${anexos.join(" y ")}` : "");
+
     const contenido = {
       agente: {
         nombre: agente?.nombre || "",
@@ -382,6 +395,17 @@ function GeneradorDoc({ visita, propiedad, agente, onGuardado, onClose }) {
         dni: c?.dni || "",
         telefono: c?.telefono || "",
       })),
+      propiedad: {
+        direccion:          dirCompleta,
+        ref_interna:        propObj.ref || "",
+        ref_catastral:      propObj.ref_cat || "",
+        tipo:               propObj.tipo || "",
+        precio_publicacion: propObj.precio_venta || propObj.precio_alquiler || 0,
+        precio_prop:        propObj.precio_prop || 0,
+        honorarios:         propObj.honorarios || 0,
+        honorarios_tipo:    propObj.honorarios_tipo || "porcentaje",
+        iva_hon:            propObj.iva_hon || 21,
+      },
       precio_oferta: tipo !== "hoja_visita" ? precioOferta : null,
       condiciones_particulares: condicionesParticulares || null,
       fecha_documento: new Date().toISOString(),
@@ -1192,7 +1216,7 @@ export default function Visitas({ currentUser }) {
     const propIds = [...new Set(vData.map(v => v.propiedad_id).filter(Boolean))];
     if (propIds.length > 0) {
       const { data: props } = await supabase.from("propiedades")
-        .select("id,ref,dir,municipio,precio_venta")
+        .select("id,ref,dir,num,municipio,tipo,precio_venta,precio_alquiler,precio_prop,honorarios,honorarios_tipo,iva_hon,ref_cat,trastero,parking,n_plazas")
         .in("id", propIds);
       const pMap = {};
       (props || []).forEach(p => { pMap[p.id] = p; });

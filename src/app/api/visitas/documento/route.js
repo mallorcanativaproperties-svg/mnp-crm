@@ -32,7 +32,6 @@ function fmtPrecioLargo(n) {
   } catch { return ""; }
 }
 
-// Rellenar plantilla DOCX con los datos
 async function rellenarDocx(tipo, contenido) {
   const plantillaDir = path.join(process.cwd(), "src/app/api/visitas/documento");
   const plantillaPath = path.join(plantillaDir, PLANTILLAS[tipo] || PLANTILLAS.hoja_visita);
@@ -75,7 +74,7 @@ async function rellenarDocx(tipo, contenido) {
     telefono_comprador_1: c1.telefono || "",
     nombre_comprador_2:   nombre2 || "",
     dni_comprador_2:      nombre2 ? (c2.dni || "") : "",
-    // Precio oferta — usa el precio introducido en la visita, o el de publicación como fallback
+    // Precio oferta
     precio_oferta_largo:  contenido.precio_oferta
       ? fmtPrecioLargo(contenido.precio_oferta)
       : (prop.precio_publicacion ? fmtPrecioLargo(prop.precio_publicacion) : ""),
@@ -86,111 +85,125 @@ async function rellenarDocx(tipo, contenido) {
   return doc.getZip().generate({ type: "nodebuffer" });
 }
 
-// Convertir DOCX a PDF via Gotenberg
 async function docxAPdf(docxBytes) {
   const GOTENBERG_URL = process.env.GOTENBERG_URL || "https://gotenberg-production-bcc0.up.railway.app";
-
   const formData = new FormData();
   formData.append("files", new Blob([docxBytes], {
     type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
   }), "documento.docx");
-
   const res = await fetch(`${GOTENBERG_URL}/forms/libreoffice/convert`, {
     method: "POST",
     body: formData,
   });
-
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Gotenberg error ${res.status}: ${err}`);
-  }
-
+  if (!res.ok) throw new Error(`Gotenberg error ${res.status}: ${await res.text()}`);
   return Buffer.from(await res.arrayBuffer());
 }
 
-// GET — generar y servir el PDF
 export async function GET(req) {
   const supabase = sb();
   const { searchParams } = new URL(req.url);
   const docId = searchParams.get("id");
   if (!docId) return NextResponse.json({ error: "Falta id" }, { status: 400 });
 
-  const { data: doc } = await supabase.from("visita_documentos")
-    .select("*, visitas(*, agente_login, compradores(nombre,apellidos,dni,telefono), visita_compradores(orden, compradores(nombre,apellidos,dni,telefono)), propiedades(ref,dir,num,municipio,tipo,precio_venta,precio_alquiler,precio_prop,honorarios,honorarios_tipo,iva_hon,ref_cat,trastero,parking,n_plazas))")
-    .eq("id", docId).single();
+  // 1. Cargar el documento con la visita
+  const { data: doc } = await supabase
+    .from("visita_documentos")
+    .select("*, visitas(id, agente_login, propiedad_id, comprador_id, visita_compradores(orden, compradores(nombre,apellidos,dni,telefono)))")
+    .eq("id", docId)
+    .single();
 
   if (!doc) return NextResponse.json({ error: "Documento no encontrado" }, { status: 404 });
 
   const visita = doc.visitas;
-  const prop   = visita?.propiedades;
-  const compradores = visita?.visita_compradores?.length > 0
-    ? visita.visita_compradores.sort((a, b) => a.orden - b.orden).map(vc => vc.compradores).filter(Boolean)
-    : visita?.compradores ? [visita.compradores] : [];
 
-  let nombreAgente = doc.contenido?.agente?.nombre || "";
-  let dniAgente = doc.contenido?.agente?.dni || "";
-  let polizaRcAgente = doc.contenido?.agente?.poliza_rc || "";
+  // 2. Cargar propiedad directamente desde BD si hay propiedad_id
+  let propDB = null;
+  if (visita?.propiedad_id) {
+    const { data: p } = await supabase
+      .from("propiedades")
+      .select("ref,dir,num,municipio,tipo,precio_venta,precio_alquiler,precio_prop,honorarios,honorarios_tipo,iva_hon,ref_cat,trastero,parking,n_plazas")
+      .eq("id", visita.propiedad_id)
+      .maybeSingle();
+    propDB = p;
+  }
+
+  // 3. Cargar DNI y póliza RC del agente desde usuarios
+  let agenteDB = null;
   if (visita?.agente_login) {
-    const { data: ag } = await supabase.from("usuarios")
+    const { data: ag } = await supabase
+      .from("usuarios")
       .select("nombre, dni, poliza_rc, numero_registro")
       .eq("user_login", visita.agente_login)
       .maybeSingle();
-    if (ag) {
-      if (!nombreAgente) nombreAgente = ag.nombre || visita.agente_login;
-      dniAgente    = ag.dni || "";
-      polizaRcAgente = ag.poliza_rc || "";
-    }
+    agenteDB = ag;
   }
 
-  // Precio de publicación: venta o alquiler según operación
-  const precioPublicacion = prop?.precio_venta || prop?.precio_alquiler || 0;
+  // 4. Compradores desde visita_compradores (orden correcto)
+  const compradoresDB = visita?.visita_compradores?.length > 0
+    ? visita.visita_compradores
+        .sort((a, b) => a.orden - b.orden)
+        .map(vc => vc.compradores)
+        .filter(Boolean)
+    : [];
 
-  // Dirección completa incluyendo número, tipo y anexos
-  let direccionCompleta = "";
-  let anexosStr = "";
-  if (prop) {
-    const partes = [prop.dir, prop.num].filter(Boolean).join(" ");
-    const municipio = prop.municipio || "";
-    direccionCompleta = [partes, municipio].filter(Boolean).join(", ");
-    // Anexos: trastero y plaza de garaje si están marcados en la ficha
+  // 5. Construir datos de propiedad:
+  //    Primero desde BD (más fresco), fallback al contenido JSONB guardado al crear el doc
+  const propContenido = doc.contenido?.propiedad || {};
+
+  let direccionCompleta = propContenido.direccion || "";
+  if (propDB) {
+    // Reconstruir desde BD con datos frescos
+    const dirBase = [propDB.dir, propDB.num].filter(Boolean).join(" ");
+    const municipio = propDB.municipio || "";
+    const partes = [dirBase, municipio].filter(Boolean).join(", ");
     const anexos = [];
-    if (prop.trastero === true) anexos.push("trastero incluido");
-    if (prop.parking === "Si") {
-      const plazas = prop.n_plazas > 1 ? `${prop.n_plazas} plazas de garaje incluidas` : "plaza de garaje incluida";
-      anexos.push(plazas);
+    if (propDB.trastero === true) anexos.push("trastero incluido");
+    if (propDB.parking === "Si") {
+      const nPlazas = propDB.n_plazas || 0;
+      anexos.push(nPlazas > 1 ? `${nPlazas} plazas de garaje incluidas` : "plaza de garaje incluida");
     }
-    if (anexos.length > 0) {
-      anexosStr = anexos.join(" y ");
-      direccionCompleta += ` — con ${anexosStr}`;
-    }
+    direccionCompleta = partes + (anexos.length > 0 ? ` — con ${anexos.join(" y ")}` : "");
   }
+
+  const propiedad = {
+    direccion:          direccionCompleta,
+    ref_interna:        propDB?.ref          || propContenido.ref_interna        || "",
+    ref_catastral:      propDB?.ref_cat      || propContenido.ref_catastral      || "",
+    tipo:               propDB?.tipo         || propContenido.tipo               || "",
+    precio_publicacion: propDB?.precio_venta || propDB?.precio_alquiler
+                          || propContenido.precio_publicacion || 0,
+    precio_prop:        propDB?.precio_prop  || propContenido.precio_prop        || 0,
+    honorarios:         propDB?.honorarios   || propContenido.honorarios         || 0,
+    honorarios_tipo:    propDB?.honorarios_tipo || propContenido.honorarios_tipo || "porcentaje",
+    iva_hon:            propDB?.iva_hon      || propContenido.iva_hon            || 21,
+  };
+
+  // 6. Agente: BD tiene prioridad (datos siempre actualizados)
+  const agenteContenido = doc.contenido?.agente || {};
+  const agente = {
+    nombre:    agenteDB?.nombre    || agenteContenido.nombre    || visita?.agente_login || "",
+    dni:       agenteDB?.dni       || "",
+    poliza_rc: agenteDB?.poliza_rc || "",
+  };
+
+  // 7. Compradores: BD si hay, sino los del contenido JSONB
+  const compradores = compradoresDB.length > 0
+    ? compradoresDB
+    : (doc.contenido?.compradores || doc.contenido?.comprador ? [doc.contenido?.comprador || doc.contenido?.compradores?.[0]] : []);
 
   const contenido = {
     ...doc.contenido,
     fecha_documento: doc.created_at,
-    propiedad: {
-      direccion:          direccionCompleta,
-      ref_catastral:      prop?.ref_cat || "",
-      ref_interna:        prop?.ref || "",
-      tipo:               prop?.tipo || "",
-      precio_publicacion: precioPublicacion,
-      honorarios:         prop?.honorarios || 0,
-      honorarios_tipo:    prop?.honorarios_tipo || "porcentaje",
-      iva_hon:            prop?.iva_hon || 21,
-      precio_prop:        prop?.precio_prop || 0,
-    },
-    agente: { nombre: nombreAgente, dni: dniAgente, poliza_rc: polizaRcAgente },
-    compradores: compradores.length > 0 ? compradores : (doc.contenido?.compradores || []),
+    propiedad,
+    agente,
+    compradores,
+    condiciones_particulares: doc.condiciones_particulares || doc.contenido?.condiciones_particulares || "",
   };
 
   try {
-    // 1. Rellenar DOCX con los datos
     const docxBytes = await rellenarDocx(doc.tipo, contenido);
+    const pdfBytes  = await docxAPdf(docxBytes);
 
-    // 2. Convertir a PDF con Gotenberg
-    const pdfBytes = await docxAPdf(docxBytes);
-
-    // 3. Guardar en Storage
     const storagePath = `documentos_visita/${docId}.pdf`;
     await supabase.storage.from("formacion").upload(storagePath, pdfBytes, {
       contentType: "application/pdf", upsert: true
@@ -198,7 +211,12 @@ export async function GET(req) {
     const { data: urlData } = supabase.storage.from("formacion").getPublicUrl(storagePath);
     await supabase.from("visita_documentos").update({ pdf_url: urlData.publicUrl }).eq("id", docId);
 
-    const TIPO_NOMBRES = { hoja_visita: "Hoja_Visita", oferta: "Propuesta_Compra", reserva: "Reserva_Exclusiva", contraoferta: "Contraoferta" };
+    const TIPO_NOMBRES = {
+      hoja_visita: "Hoja_Visita",
+      oferta:      "Propuesta_Compra",
+      reserva:     "Reserva_Exclusiva",
+      contraoferta:"Contraoferta",
+    };
 
     return new NextResponse(pdfBytes, {
       headers: {
@@ -212,7 +230,6 @@ export async function GET(req) {
   }
 }
 
-// POST — registrar firma
 export async function POST(req) {
   const supabase = sb();
   const { docId, firmante, firmaData } = await req.json();
