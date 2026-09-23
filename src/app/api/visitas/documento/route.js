@@ -2,14 +2,10 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { exec } from "child_process";
-import { promisify } from "util";
-import { readFile, writeFile, mkdir, rm } from "fs/promises";
-import { existsSync } from "fs";
+import { readFile } from "fs/promises";
 import path from "path";
-import os from "os";
-
-const execAsync = promisify(exec);
+import PizZip from "pizzip";
+import Docxtemplater from "docxtemplater";
 
 function getSupabase() {
   return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
@@ -22,21 +18,23 @@ const PLANTILLAS = {
   contraoferta: "2_Propuesta_de_Compra_Oferta.docx",
 };
 
-const MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+const MESES = ["enero","febrero","marzo","abril","mayo","junio",
+               "julio","agosto","septiembre","octubre","noviembre","diciembre"];
 
 function fmtPrecioLargo(n) {
   try {
     const num = parseInt(parseFloat(n));
-    const formatted = num.toLocaleString("es-ES");
-    return `${formatted} EUROS (${formatted} €)`;
-  } catch { return String(n); }
+    const fmt = num.toLocaleString("es-ES");
+    return `${fmt} EUROS (${fmt} €)`;
+  } catch { return String(n || ""); }
 }
 
 function fmtPrecio(n) {
-  try { return `${parseInt(parseFloat(n)).toLocaleString("es-ES")} €`; } catch { return ""; }
+  try { return `${parseInt(parseFloat(n)).toLocaleString("es-ES")} €`; }
+  catch { return ""; }
 }
 
-async function generarPDF(tipo, contenido) {
+async function generarDocx(tipo, contenido) {
   const plantillaDir = path.join(process.cwd(), "src/app/api/visitas/documento");
   const plantillaPath = path.join(plantillaDir, PLANTILLAS[tipo] || PLANTILLAS.hoja_visita);
 
@@ -46,105 +44,43 @@ async function generarPDF(tipo, contenido) {
   const agente = contenido.agente || {};
   const prop = contenido.propiedad || {};
   const fecha = contenido.fecha_documento ? new Date(contenido.fecha_documento) : new Date();
+
   const nombre1 = `${c1.nombre || ""} ${c1.apellidos || ""}`.trim();
   const nombre2 = `${c2.nombre || ""} ${c2.apellidos || ""}`.trim();
 
-  // Directorio temporal
-  const tmpDir = await mkdir(path.join(os.tmpdir(), `visita_${Date.now()}`), { recursive: true }).then(d => d || path.join(os.tmpdir(), `visita_${Date.now()}`));
-  const tmpDirPath = path.join(os.tmpdir(), `visita_${Date.now()}`);
-  await mkdir(tmpDirPath, { recursive: true });
-  const unpackDir = path.join(tmpDirPath, "unpacked");
-  const outDocx   = path.join(tmpDirPath, "out.docx");
-  const outPdf    = path.join(tmpDirPath, "out.pdf");
+  // Leer plantilla
+  const content = await readFile(plantillaPath);
+  const zip = new PizZip(content);
+  const doc = new Docxtemplater(zip, {
+    paragraphLoop: true,
+    linebreaks: true,
+    delimiters: { start: "{", end: "}" },
+  });
 
-  try {
-    // Desempaquetar plantilla
-    await execAsync(`unzip -q "${plantillaPath}" -d "${unpackDir}"`);
+  // Rellenar variables
+  doc.render({
+    ciudad: "Palma de Mallorca",
+    dia: String(fecha.getDate()).padStart(2, "0"),
+    mes: MESES[fecha.getMonth()],
+    anyo: String(fecha.getFullYear()),
+    nombre_agente: agente.nombre || "",
+    direccion: prop.direccion || "",
+    ref_catastral: prop.ref_catastral || "",
+    ref_interna: prop.ref_interna || "",
+    precio_publicacion: prop.precio_publicacion ? fmtPrecio(prop.precio_publicacion) : "",
+    nombre_comprador_1: nombre1,
+    dni_comprador_1: c1.dni || "",
+    telefono_comprador_1: c1.telefono || "",
+    nombre_comprador_2: nombre2 || "",
+    dni_comprador_2: c2.dni || "",
+    precio_oferta_largo: contenido.precio_oferta ? fmtPrecioLargo(contenido.precio_oferta) : (prop.precio_publicacion ? fmtPrecioLargo(prop.precio_publicacion) : ""),
+    condiciones_particulares: contenido.condiciones_particulares ? `\n${contenido.condiciones_particulares}` : "",
+  });
 
-    const xmlPath = path.join(unpackDir, "word", "document.xml");
-    let xml = await readFile(xmlPath, "utf-8");
-
-    // ── Sustituciones ────────────────────────────────────────────────
-    // Fecha: ciudad, día, mes, año — los …… son marcadores únicos
-    xml = xml.replace("…………………", "Palma de Mallorca");
-    xml = xml.replace("……", String(fecha.getDate()).padStart(2, "0"));
-    xml = xml.replace("……………………", MESES[fecha.getMonth()]);
-    xml = xml.replace("…………", String(fecha.getFullYear()));
-
-    // Agente
-    xml = xml.replace(
-      "…………………………………………………………………………………………, actuando como ",
-      `${agente.nombre || ""}, actuando como `
-    );
-
-    // Función para insertar valor después de un label "Label:" en el mismo párrafo
-    function insertarTrasLabel(xml, label, valor) {
-      if (!valor) return xml;
-      // El patrón: <w:t>Label:</w:t> seguido de un run (puede estar vacío)
-      // Insertamos un run con el valor
-      const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const re = new RegExp(`(<w:t[^>]*>${escaped}</w:t></w:r>)`, "");
-      return xml.replace(re, `$1<w:r><w:rPr><w:b/></w:rPr><w:t xml:space="preserve"> ${valor}</w:t></w:r>`);
-    }
-
-    xml = insertarTrasLabel(xml, "Dirección:", prop.direccion || "");
-    xml = insertarTrasLabel(xml, "Referencia catastral:", prop.ref_catastral || "");
-    xml = insertarTrasLabel(xml, "Referencia Interna:", prop.ref_interna || "");
-    xml = insertarTrasLabel(xml, "Precio publicación:", prop.precio_publicacion ? fmtPrecio(prop.precio_publicacion) : "");
-
-    // Compradores — primer comprador
-    xml = insertarTrasLabel(xml, "Nombre y Apellidos:", nombre1);
-    xml = insertarTrasLabel(xml, "DNI/NIE:", c1.dni || "");
-    xml = insertarTrasLabel(xml, "Teléfono:", c1.telefono || "");
-    // Segundo comprador
-    if (nombre2) {
-      xml = insertarTrasLabel(xml, "Nombre y Apellidos:", nombre2);
-      xml = insertarTrasLabel(xml, "DNI/NIE:", c2.dni || "");
-    }
-
-    // Precio oferta (oferta/reserva)
-    if (contenido.precio_oferta && ["oferta","reserva","contraoferta"].includes(tipo)) {
-      xml = xml.replace(
-        "………………………………………………………………………………………………………………………… EUROS (…………………………………… €)",
-        fmtPrecioLargo(contenido.precio_oferta)
-      );
-    }
-
-    // Concepto bancario
-    if (["oferta","reserva","contraoferta"].includes(tipo)) {
-      xml = xml.replace("Nombre completo del comprador", nombre1);
-    }
-
-    // Condiciones particulares
-    if (contenido.condiciones_particulares) {
-      xml = xml.replace(
-        " (VOLUNTARIO)",
-        ` (VOLUNTARIO)\n${contenido.condiciones_particulares}`
-      );
-    }
-
-    await writeFile(xmlPath, xml, "utf-8");
-
-    // Reempaquetar
-    await execAsync(`cd "${unpackDir}" && zip -Xr "${outDocx}" .`);
-
-    // Convertir a PDF
-    await execAsync(`soffice --headless --convert-to pdf --outdir "${tmpDirPath}" "${outDocx}"`);
-
-    if (existsSync(outPdf)) {
-      const pdfBytes = await readFile(outPdf);
-      return { bytes: pdfBytes, mime: "application/pdf", ext: "pdf" };
-    } else {
-      // Fallback: devolver docx
-      const docxBytes = await readFile(outDocx);
-      return { bytes: docxBytes, mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", ext: "docx" };
-    }
-  } finally {
-    await rm(tmpDirPath, { recursive: true, force: true });
-  }
+  return doc.getZip().generate({ type: "nodebuffer" });
 }
 
-// GET — generar y servir el documento
+// GET — generar y servir el documento como DOCX (abre directo en Word/Drive)
 export async function GET(req) {
   const sb = getSupabase();
   const { searchParams } = new URL(req.url);
@@ -163,7 +99,7 @@ export async function GET(req) {
     ? visita.visita_compradores.sort((a, b) => a.orden - b.orden).map(vc => vc.compradores).filter(Boolean)
     : visita?.compradores ? [visita.compradores] : [];
 
-  // Cargar nombre del agente
+  // Nombre del agente
   let nombreAgente = doc.contenido?.agente?.nombre || "";
   if (visita?.agente_login && !nombreAgente) {
     const { data: ag } = await sb.from("usuarios")
@@ -175,7 +111,7 @@ export async function GET(req) {
     ...doc.contenido,
     fecha_documento: doc.created_at,
     propiedad: {
-      direccion: prop ? `${prop.dir || ""}, ${prop.municipio || ""}`.replace(/^,\s*|,\s*$/g, "").trim() : "",
+      direccion: prop ? `${prop.dir || ""}, ${prop.municipio || ""}`.replace(/(^,\s*|,\s*$)/g, "").trim() : "",
       ref_catastral: prop?.ref_cat || "",
       ref_interna: prop?.ref || "",
       precio_publicacion: prop?.precio_venta || 0,
@@ -185,22 +121,28 @@ export async function GET(req) {
   };
 
   try {
-    const { bytes, mime, ext } = await generarPDF(doc.tipo, contenido);
+    const docxBytes = await generarDocx(doc.tipo, contenido);
 
-    // Subir a Storage para reutilizar
-    const storagePath = `documentos_visita/${docId}.${ext}`;
-    await sb.storage.from("formacion").upload(storagePath, bytes, { contentType: mime, upsert: true });
+    // Guardar en Storage
+    const storagePath = `documentos_visita/${docId}.docx`;
+    await sb.storage.from("formacion").upload(storagePath, docxBytes, {
+      contentType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      upsert: true
+    });
     const { data: urlData } = sb.storage.from("formacion").getPublicUrl(storagePath);
     await sb.from("visita_documentos").update({ pdf_url: urlData.publicUrl }).eq("id", docId);
 
-    return new NextResponse(bytes, {
+    const TIPO_NOMBRES = { hoja_visita: "Hoja_Visita", oferta: "Propuesta_Compra", reserva: "Reserva_Exclusiva", contraoferta: "Contraoferta" };
+    const nombre = TIPO_NOMBRES[doc.tipo] || "Documento";
+
+    return new NextResponse(docxBytes, {
       headers: {
-        "Content-Type": mime,
-        "Content-Disposition": `inline; filename="documento_${doc.tipo}.${ext}"`,
+        "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "Content-Disposition": `inline; filename="${nombre}_Nativa_Properties.docx"`,
       },
     });
   } catch (err) {
-    console.error("Error generando PDF:", err);
+    console.error("Error generando documento:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
@@ -228,11 +170,13 @@ export async function POST(req) {
   await sb.from("visita_documentos").update(updates).eq("id", docId);
 
   // Notificar al agente
-  await fetch(`${process.env.NEXT_PUBLIC_APP_URL || "https://crm.mallorcanativaproperties.com"}/api/visitas/notificar-firma`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ docId, firmante }),
-  });
+  try {
+    await fetch(`${process.env.NEXT_PUBLIC_APP_URL || "https://crm.mallorcanativaproperties.com"}/api/visitas/notificar-firma`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ docId, firmante }),
+    });
+  } catch (e) { /* no bloquear */ }
 
   return NextResponse.json({ ok: true });
 }
