@@ -5,15 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-const PROMPT_MEJORA = `Professional real estate photo enhancement. Transform this photo into a top-tier real estate listing image:
-
-REMOVE completely: all clutter, personal items, cables, bins, cleaning supplies, clothes, boxes, bags, toys, excess decorative items, anything that looks messy or out of place.
-
-KEEP exactly as-is: all furniture (sofas, beds, tables, chairs), all structural elements (walls, floors, ceilings, doors, windows, columns), room layout and dimensions.
-
-ENHANCE: maximize natural light and brightness, make walls appear clean and white, improve color vibrancy, ensure perfectly straight horizontal and vertical lines, wide-angle perspective.
-
-The result must look like the same room photographed by a professional real estate photographer after a thorough clean-up. Photorealistic, high resolution, 16:9 horizontal.`;
+const PROMPT_MEJORA = `Realiza una reproducción hiperrealista mejorando los ángulos de la fotografía, tiene que estar la imagen recta, en gran angular y en horizontal 16:9, si necesitas imaginar parte de la fotografía hazlo. Haz las estancias muy luminosas, no quites mobiliario ni enseres. No puedes modificar la distribución de los espacios ni puertas ni columnas ni nada que pertenezca a estructura y tamaños. Quiero que las fotografías tengan tanta luz que las paredes se vean muy claritas. Las fotografías tienen que ser las mejores de idealista. Tienen que estar en alta definición. Quiero que la imagen se vea recta y centrada. Es una propiedad premium por lo que las fotografías tienen que verse de impacto y preciosas. Retira enseres y desorden. IMPORTANTE: el resultado debe ser absolutamente fotorrealista, como si fuera una fotografía real tomada con cámara profesional, no un render ni una ilustración ni una imagen generada por ordenador. Texturas reales, materiales reales, iluminación natural real. Si hay fotografías de exteriores mantén el cielo real y los edificios reales del entorno.`;
 
 const PROMPT_HOME_STAGING = (estilo) => `Actúa como un diseñador de interiores profesional. Realiza una reproducción hiperrealista rediseñando los materiales y la decoración del espacio, manteniendo la distribución de los espacios, ventanas, puertas, columnas… no puedes modificar nada que pertenezca a estructura y tamaños. Realiza una reforma visual con un estilo ${estilo}, no quiero que haya demasiado mobiliario y decoración, tiene que verse sencillo pero atractivo y no quiero que sea el típico render hecho por chatgpt que tiene todo el mundo, ten algo de creatividad. La imagen tiene que ser fotorrealista en alta definición, vista amplia y perspectiva natural, no puede parecer un render.`;
 
