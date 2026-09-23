@@ -1068,25 +1068,92 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
         </div>
       )}
 
-            {lightbox && (
-        <div
-          onClick={() => setLightbox(null)}
-          style={{
-            position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", backdropFilter: "blur(12px)",
-            display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000, cursor: "pointer",
-          }}
-        >
-          <div onClick={(e) => e.stopPropagation()} style={{ position: "relative", maxWidth: "90vw", maxHeight: "90vh" }}>
-            <button onClick={() => setLightbox(null)} style={{ position: "absolute", top: -30, right: 0, background: "none", border: "none", color: "#22262E", fontSize: 18, cursor: "pointer" }}>✕</button>
-            {lightbox.tipo === "video" ? (
-              <video src={lightbox.url} controls autoPlay style={{ maxWidth: "90vw", maxHeight: "85vh", borderRadius: 0 }} />
-            ) : (
-              <img src={lightbox.url} alt={lightbox.nombre} style={{ maxWidth: "90vw", maxHeight: "85vh", borderRadius: 0, objectFit: "contain" }} />
+            {lightbox && (() => {
+        const itemsNav = media.filter(m => m.tipo === lightbox.tipo);
+        const idxActual = itemsNav.findIndex(m => m.id === lightbox.id);
+        const irA = (nuevoIdx) => {
+          const next = itemsNav[(nuevoIdx + itemsNav.length) % itemsNav.length];
+          if (next) setLightbox(next);
+        };
+        return (
+          <div
+            onClick={() => setLightbox(null)}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowRight") irA(idxActual + 1);
+              if (e.key === "ArrowLeft")  irA(idxActual - 1);
+              if (e.key === "Escape")     setLightbox(null);
+            }}
+            tabIndex={0}
+            ref={el => el && el.focus()}
+            style={{
+              position: "fixed", inset: 0, background: "rgba(0,0,0,0.92)", backdropFilter: "blur(12px)",
+              display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000, cursor: "pointer",
+              outline: "none",
+            }}
+          >
+            {/* Flecha izquierda */}
+            {itemsNav.length > 1 && (
+              <button
+                onClick={(e) => { e.stopPropagation(); irA(idxActual - 1); }}
+                style={{ position: "fixed", left: 20, top: "50%", transform: "translateY(-50%)",
+                  background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)",
+                  color: "#fff", fontSize: 22, width: 48, height: 48, borderRadius: 0,
+                  cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                  backdropFilter: "blur(4px)", transition: "background 0.2s", zIndex: 2001 }}
+                onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.25)"}
+                onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.12)"}>
+                ‹
+              </button>
             )}
-            <div style={{ textAlign: "center", marginTop: 8, fontSize: 11, color: "#9A968A" }}>{lightbox.nombre}</div>
+
+            <div onClick={(e) => e.stopPropagation()} style={{ position: "relative", maxWidth: "90vw", maxHeight: "90vh" }}>
+              {/* Cerrar */}
+              <button onClick={() => setLightbox(null)}
+                style={{ position: "absolute", top: -36, right: 0, background: "none", border: "none",
+                  color: "#fff", fontSize: 20, cursor: "pointer", opacity: 0.7, padding: "4px 8px" }}>✕</button>
+
+              {/* Contador */}
+              {itemsNav.length > 1 && (
+                <div style={{ position: "absolute", top: -36, left: 0, fontSize: 11,
+                  color: "rgba(255,255,255,0.6)", fontFamily: "Inter, sans-serif" }}>
+                  {idxActual + 1} / {itemsNav.length}
+                </div>
+              )}
+
+              {/* Contenido */}
+              {lightbox.tipo === "video" ? (
+                <video src={lightbox.url} controls autoPlay
+                  style={{ maxWidth: "90vw", maxHeight: "85vh", borderRadius: 0 }} />
+              ) : (
+                <img src={lightbox.url} alt={lightbox.nombre}
+                  style={{ maxWidth: "90vw", maxHeight: "85vh", borderRadius: 0, objectFit: "contain",
+                    display: "block" }} />
+              )}
+
+              {/* Nombre */}
+              <div style={{ textAlign: "center", marginTop: 8, fontSize: 11,
+                color: "rgba(255,255,255,0.5)", fontFamily: "Inter, sans-serif" }}>
+                {lightbox.nombre}
+              </div>
+            </div>
+
+            {/* Flecha derecha */}
+            {itemsNav.length > 1 && (
+              <button
+                onClick={(e) => { e.stopPropagation(); irA(idxActual + 1); }}
+                style={{ position: "fixed", right: 20, top: "50%", transform: "translateY(-50%)",
+                  background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)",
+                  color: "#fff", fontSize: 22, width: 48, height: 48, borderRadius: 0,
+                  cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                  backdropFilter: "blur(4px)", transition: "background 0.2s", zIndex: 2001 }}
+                onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.25)"}
+                onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.12)"}>
+                ›
+              </button>
+            )}
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }
