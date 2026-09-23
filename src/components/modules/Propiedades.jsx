@@ -1154,9 +1154,8 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
           </div>
         );
       })()}
-    </div>
 
-    {/* Modal selección fotos a mejorar */}
+      {/* Modal selección fotos a mejorar */}
     {showModalMejora && (() => {
       const fotosDisp = media.filter(m => m.tipo === "foto");
       return (
@@ -1246,6 +1245,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
         </div>
       );
     })()}
+    </div>
   );
 }
 
