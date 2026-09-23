@@ -1032,13 +1032,16 @@ export default function Visitas({ currentUser }) {
             placeholder="Buscar por referencia o dirección..."
             style={{ ...iSt, paddingLeft: 32 }} />
         </div>
-        <button onClick={() => setModalNuevaVisita(true)}
-          style={{ padding: "9px 20px", background: DARK, border: "none", color: WHITE,
-            cursor: "pointer", borderRadius: 2, fontSize: 12, fontWeight: 700,
-            fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 8,
-            whiteSpace: "nowrap", flexShrink: 0 }}>
-          <PlusIcon style={{ width: 15, height: 15 }} /> Nueva visita
-        </button>
+        {/* Botón solo visible cuando ya hay visitas */}
+        {visitas.length > 0 && (
+          <button onClick={() => setModalNuevaVisita(true)}
+            style={{ padding: "9px 20px", background: DARK, border: "none", color: WHITE,
+              cursor: "pointer", borderRadius: 2, fontSize: 12, fontWeight: 700,
+              fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 8,
+              whiteSpace: "nowrap", flexShrink: 0 }}>
+            <PlusIcon style={{ width: 15, height: 15 }} /> Nueva visita
+          </button>
+        )}
       </div>
 
       {/* Contenido */}
