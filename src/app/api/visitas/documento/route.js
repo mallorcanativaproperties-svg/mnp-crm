@@ -24,13 +24,13 @@ const MESES = ["enero","febrero","marzo","abril","mayo","junio",
                "julio","agosto","septiembre","octubre","noviembre","diciembre"];
 
 function fmtPrecio(n) {
-  try { return `${parseInt(parseFloat(n)).toLocaleString("es-ES")} €`; } catch { return ""; }
+  try { return `${parseInt(parseFloat(n)).toLocaleString("es-ES")} EUR`; } catch { return ""; }
 }
 function fmtPrecioLargo(n) {
   try {
     const num = parseInt(parseFloat(n));
     const fmt = num.toLocaleString("es-ES");
-    return `${fmt} EUROS (${fmt} €)`;
+    return `${fmt} EUROS (${fmt} EUR)`;
   } catch { return ""; }
 }
 
@@ -102,7 +102,7 @@ async function generarPDF(tipo, contenido) {
 
   function piePagina() {
     page.drawLine({ start: { x: M, y: 26 }, end: { x: W - M, y: 26 }, thickness: 0.3, color: C.border });
-    page.drawText("Nativa Properties — Mallorca Nativa, S.L. — CIF B75396234 — info@mallorcanativaproperties.com — 655 88 26 82",
+    page.drawText("Nativa Properties - Mallorca Nativa, S.L. - CIF B75396234 - info@mallorcanativaproperties.com - 655 88 26 82",
       { x: M, y: 14, font, size: 6.5, color: C.gray });
   }
 
@@ -127,7 +127,7 @@ async function generarPDF(tipo, contenido) {
     hoja_visita:  { t: "REGISTRO DE CLIENTE Y HOJA DE VISITA", sub: "Registro de visita e interés en el inmueble" },
     oferta:       { t: "PROPUESTA DE COMPRA",                  sub: "Propuesta formal de adquisición del inmueble" },
     reserva:      { t: "RESERVA EXCLUSIVA",                    sub: "Reserva en firme al precio de publicación del inmueble" },
-    contraoferta: { t: "PROPUESTA DE COMPRA — CONTRAOFERTA",   sub: "Propuesta modificada de adquisición del inmueble" },
+    contraoferta: { t: "PROPUESTA DE COMPRA - CONTRAOFERTA",   sub: "Propuesta modificada de adquisición del inmueble" },
   };
   const tit = TITULOS[tipo] || TITULOS.hoja_visita;
 
@@ -210,7 +210,7 @@ async function generarPDF(tipo, contenido) {
     }
     y = y - pBoxH - 6;
 
-    y = drawWrapped(page, `Con el fin de ${tipo === "reserva" ? "formalizar esta reserva" : "acreditar la seriedad y firmeza de esta oferta"}, la Parte Compradora entrega en este acto a la Agencia, en concepto de reserva del inmueble, la cantidad de MIL EUROS (1.000,00 €). Al formalizarse el contrato privado de arras penitenciales, la Parte Compradora entregará a la Parte Vendedora la cantidad equivalente al DIEZ POR CIENTO (10%) del importe ofertado.`, M, y, font, 8.5, C.black, TW, 13);
+    y = drawWrapped(page, `Con el fin de ${tipo === "reserva" ? "formalizar esta reserva" : "acreditar la seriedad y firmeza de esta oferta"}, la Parte Compradora entrega en este acto a la Agencia, en concepto de reserva del inmueble, la cantidad de MIL EUROS (1.000,00 EUR). Al formalizarse el contrato privado de arras penitenciales, la Parte Compradora entregará a la Parte Vendedora la cantidad equivalente al DIEZ POR CIENTO (10%) del importe ofertado.`, M, y, font, 8.5, C.black, TW, 13);
     y -= 8;
 
     // Datos bancarios
@@ -243,7 +243,7 @@ async function generarPDF(tipo, contenido) {
     for (const cond of conds) {
       checkPage(30);
       const before = y;
-      y = drawWrapped(page, `—  ${cond}`, M + 4, y, font, 8, C.black, TW - 4, 12);
+      y = drawWrapped(page, `-  ${cond}`, M + 4, y, font, 8, C.black, TW - 4, 12);
       y -= 3;
     }
     y -= 4;
