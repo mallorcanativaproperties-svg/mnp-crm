@@ -688,49 +688,85 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {docs.map(doc => {
                   const td = TIPO_DOC[doc.tipo] || { label: doc.tipo, icon: "📄" };
-                  const estadoSiguiente = {
-                    borrador: "enviado", enviado: "firmado_comprador",
-                    firmado_comprador: TIPO_DOC[doc.tipo]?.firmVendedor ? "deposito_recibido" : "completado",
-                    deposito_recibido: "firmado_vendedor", firmado_vendedor: "completado",
-                  }[doc.estado];
+                  const esOfResv = ["oferta","reserva","contraoferta"].includes(doc.tipo);
+
+                  async function verDocumento() {
+                    window.open(`/api/visitas/documento?id=${doc.id}`, "_blank");
+                  }
+
+                  async function enviarFirma(destinatario) {
+                    const res = await fetch("/api/visitas/enviar-firma", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ docId: doc.id, destinatario }),
+                    });
+                    const data = await res.json();
+                    if (data.ok) {
+                      alert(`✅ Link de firma enviado por WhatsApp al ${destinatario === "vendedor" ? "propietario" : "comprador"}.`);
+                      onActualizado();
+                    } else {
+                      alert(`Error: ${data.error}`);
+                    }
+                  }
 
                   return (
                     <div key={doc.id} style={{ background: WHITE, border: `1px solid ${BORDER}`,
-                      padding: "12px 16px", borderRadius: 2 }}>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between",
-                        gap: 10, flexWrap: "wrap" }}>
+                      borderRadius: 2, overflow: "hidden" }}>
+                      {/* Cabecera del documento */}
+                      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center",
+                        justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                          <span style={{ fontSize: 18 }}>{td.icon}</span>
+                          <span style={{ fontSize: 20 }}>{td.icon}</span>
                           <div>
-                            <div style={{ fontSize: 13, fontWeight: 600, color: TEXT,
-                              fontFamily: "Inter, sans-serif" }}>{td.label}</div>
-                            {doc.contenido?.precio_oferta && (
-                              <div style={{ fontSize: 11, color: GOLD, fontFamily: "Inter, sans-serif" }}>
-                                Oferta: {Number(doc.contenido.precio_oferta).toLocaleString("es-ES")} €
-                              </div>
-                            )}
-                            {doc.condiciones_particulares && (
-                              <div style={{ fontSize: 10, color: MUTED, marginTop: 2,
-                                fontFamily: "Inter, sans-serif", fontStyle: "italic" }}>
-                                Condición: {doc.condiciones_particulares.slice(0, 60)}...
-                              </div>
-                            )}
+                            <div style={{ fontSize: 13, fontWeight: 600, color: TEXT, fontFamily: "Inter, sans-serif" }}>{td.label}</div>
+                            <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 3 }}>
+                              <BadgeEstado estado={doc.estado} />
+                              {doc.contenido?.precio_oferta && (
+                                <span style={{ fontSize: 11, color: GOLD, fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
+                                  {Number(doc.contenido.precio_oferta).toLocaleString("es-ES")} €
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                          <BadgeEstado estado={doc.estado} />
-                          {puedeEditar && estadoSiguiente && doc.estado !== "completado" && (
-                            <button onClick={() => cambiarEstadoDoc(doc.id, estadoSiguiente)}
-                              style={{ padding: "5px 12px", border: `1px solid ${GOLD}`,
-                                background: "transparent", color: GOLD, cursor: "pointer",
-                                borderRadius: 2, fontSize: 10, fontWeight: 700,
-                                fontFamily: "Inter, sans-serif" }}>
-                              → {ESTADO_DOC[estadoSiguiente]?.label}
+                        {/* Acciones */}
+                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+                          {/* Ver PDF */}
+                          <button onClick={verDocumento}
+                            style={{ padding: "6px 12px", border: `1px solid ${BORDER}`, background: WHITE,
+                              color: TEXT, cursor: "pointer", borderRadius: 2, fontSize: 11,
+                              fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 4 }}>
+                            <DocumentTextIcon style={{ width: 13, height: 13 }} /> Ver documento
+                          </button>
+
+                          {/* Enviar a firma — comprador */}
+                          {puedeEditar && doc.estado === "borrador" && (
+                            <button onClick={() => enviarFirma("comprador")}
+                              style={{ padding: "6px 12px", background: DARK, border: "none",
+                                color: WHITE, cursor: "pointer", borderRadius: 2, fontSize: 11,
+                                fontWeight: 600, fontFamily: "Inter, sans-serif",
+                                display: "flex", alignItems: "center", gap: 4 }}>
+                              <PaperAirplaneIcon style={{ width: 13, height: 13 }} />
+                              Enviar a comprador
                             </button>
                           )}
-                          {puedeEditar && ["oferta", "reserva"].includes(doc.tipo) && (
+
+                          {/* Enviar a firma — vendedor (solo si comprador ya firmó y es oferta/reserva) */}
+                          {puedeEditar && esOfResv && doc.estado === "firmado_comprador" && (
+                            <button onClick={() => enviarFirma("vendedor")}
+                              style={{ padding: "6px 12px", background: SUCCESS, border: "none",
+                                color: WHITE, cursor: "pointer", borderRadius: 2, fontSize: 11,
+                                fontWeight: 600, fontFamily: "Inter, sans-serif",
+                                display: "flex", alignItems: "center", gap: 4 }}>
+                              <PaperAirplaneIcon style={{ width: 13, height: 13 }} />
+                              Enviar a propietario
+                            </button>
+                          )}
+
+                          {/* Contraoferta */}
+                          {puedeEditar && esOfResv && (
                             <button onClick={() => duplicarComoContraoferta(doc)}
-                              style={{ padding: "5px 10px", border: `1px solid ${BORDER}`,
+                              style={{ padding: "6px 10px", border: `1px solid ${BORDER}`,
                                 background: "transparent", color: MUTED, cursor: "pointer",
                                 borderRadius: 2, fontSize: 10, fontFamily: "Inter, sans-serif",
                                 display: "flex", alignItems: "center", gap: 4 }}>
@@ -739,13 +775,36 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
                           )}
                         </div>
                       </div>
-                      {/* Datos bancarios si es oferta/reserva con transferencia */}
-                      {["oferta", "reserva"].includes(doc.tipo) && doc.deposito_tipo === "transferencia"
-                        && doc.estado === "enviado" && (
-                        <div style={{ marginTop: 10, padding: "8px 12px", background: CREAM2,
-                          border: `1px solid ${BORDER}`, borderRadius: 2, fontSize: 11,
-                          color: TEXT, fontFamily: "Inter, sans-serif" }}>
-                          Datos para depósito: ES30 0081 0268 2700 0248 1851 · Concepto: {comp?.nombre} {comp?.apellidos}
+
+                      {/* Datos bancarios */}
+                      {esOfResv && doc.deposito_tipo === "transferencia" && doc.estado === "enviado" && (
+                        <div style={{ padding: "8px 16px", background: CREAM2,
+                          borderTop: `1px solid ${BORDER}`, fontSize: 11, color: TEXT,
+                          fontFamily: "Inter, sans-serif" }}>
+                          💳 Datos depósito: <strong>ES30 0081 0268 2700 0248 1851</strong> · Concepto: {comp?.nombre} {comp?.apellidos}
+                        </div>
+                      )}
+
+                      {/* Condiciones particulares */}
+                      {doc.condiciones_particulares && (
+                        <div style={{ padding: "8px 16px", background: `${GOLD}08`,
+                          borderTop: `1px solid ${GOLD}22`, fontSize: 11, color: TEXT,
+                          fontFamily: "Inter, sans-serif", fontStyle: "italic" }}>
+                          📋 Condición: {doc.condiciones_particulares}
+                        </div>
+                      )}
+
+                      {/* Estado de firmas */}
+                      {(doc.firmado_comprador_at || doc.firmado_vendedor_at) && (
+                        <div style={{ padding: "8px 16px", background: `${SUCCESS}08`,
+                          borderTop: `1px solid ${SUCCESS}22`, display: "flex", gap: 16,
+                          fontSize: 11, fontFamily: "Inter, sans-serif" }}>
+                          {doc.firmado_comprador_at && (
+                            <span style={{ color: SUCCESS }}>✓ Comprador firmó {new Date(doc.firmado_comprador_at).toLocaleDateString("es-ES")}</span>
+                          )}
+                          {doc.firmado_vendedor_at && (
+                            <span style={{ color: SUCCESS }}>✓ Propietario firmó {new Date(doc.firmado_vendedor_at).toLocaleDateString("es-ES")}</span>
+                          )}
                         </div>
                       )}
                     </div>
