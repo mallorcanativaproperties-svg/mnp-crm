@@ -1668,7 +1668,8 @@ REGLAS:
         .replace(/[ --]/g, "")  // chars de control excepto \t \n \r
         .replace(/
 /g, "\n")
-        .replace(//g, "\n");
+        .replace(/
+/g, "\n");
       const sistema = "Eres un traductor profesional de textos inmobiliarios de lujo. Traduce el texto manteniendo el mismo tono y estilo. Responde UNICAMENTE con la traduccion, sin explicaciones ni texto adicional.";
 
       // Dos llamadas separadas — una por idioma
@@ -1695,8 +1696,14 @@ REGLAS:
         }),
       ]);
 
-      const dataEn = await resEn.json();
-      const dataDe = await resDe.json();
+      // Leer como texto primero para detectar errores HTML de Next.js
+      const rawEn = await resEn.text();
+      const rawDe = await resDe.text();
+
+      let dataEn, dataDe;
+      try { dataEn = JSON.parse(rawEn); } catch { throw new Error("Respuesta inválida EN: " + rawEn.slice(0, 100)); }
+      try { dataDe = JSON.parse(rawDe); } catch { throw new Error("Respuesta inválida DE: " + rawDe.slice(0, 100)); }
+
       if (dataEn.error) throw new Error(dataEn.error);
       if (dataDe.error) throw new Error(dataDe.error);
 
