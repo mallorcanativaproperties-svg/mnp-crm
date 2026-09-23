@@ -1653,67 +1653,88 @@ REGLAS:
 
   const [agentesDB, setAgentesDB] = useState([]);
 
-  async function traducirDescripcion() {
-    const textoEs = draft.desc || "";
-    if (!textoEs.trim()) {
-      setTranslateError("Escribe primero la descripción en español.");
-      return;
+  const [translatingEn, setTranslatingEn] = useState(false);
+  const [translatingDe, setTranslatingDe] = useState(false);
+
+  // Comprime el texto español a máx 3500 chars manteniendo el sentido completo
+  function comprimirTexto(texto, maxChars) {
+    if (texto.length <= maxChars) return texto;
+    // Cortar por párrafos completos intentando no superar el límite
+    const parrafos = texto.split(/
+
++/);
+    let resultado = "";
+    for (const p of parrafos) {
+      if ((resultado + "
+
+" + p).trim().length <= maxChars) {
+        resultado = resultado ? resultado + "
+
+" + p : p;
+      } else {
+        break;
+      }
     }
-    setTranslating(true);
+    return resultado || texto.slice(0, maxChars);
+  }
+
+  async function traducirAIngles() {
+    const textoEs = draft.desc || "";
+    if (!textoEs.trim()) { setTranslateError("Escribe primero la descripción en español."); return; }
+    setTranslatingEn(true);
     setTranslateError("");
     try {
-      const texto = textoEs.slice(0, 4000);
-      const sistema = "Eres un traductor profesional de textos inmobiliarios de lujo. Traduce el texto manteniendo el mismo tono y estilo. Responde UNICAMENTE con la traduccion, sin explicaciones ni texto adicional.";
-
-      // Dos llamadas separadas — una por idioma
-      const [resEn, resDe] = await Promise.all([
-        fetch("/api/claude", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            model: "claude-haiku-4-5-20251001",
-            max_tokens: 4096,
-            system: sistema,
-            messages: [{ role: "user", content: "Traduce al inglés este texto inmobiliario:\n\n" + texto }],
-          }),
+      const texto = comprimirTexto(textoEs, 3500);
+      const res = await fetch("/api/claude", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-haiku-4-5-20251001",
+          max_tokens: 4096,
+          system: "Eres un traductor profesional especializado en textos inmobiliarios de lujo en Mallorca. Traduce al inglés manteniendo exactamente el mismo tono, estilo narrativo y estructura. El resultado debe caber en 3500 caracteres. Responde SOLO con la traducción, sin explicaciones.",
+          messages: [{ role: "user", content: "Traduce al inglés este texto inmobiliario:\n\n" + texto }],
         }),
-        fetch("/api/claude", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            model: "claude-haiku-4-5-20251001",
-            max_tokens: 4096,
-            system: sistema,
-            messages: [{ role: "user", content: "Traduce al alemán este texto inmobiliario:\n\n" + texto }],
-          }),
-        }),
-      ]);
-
-      // Leer como texto primero para detectar errores HTML de Next.js
-      const rawEn = await resEn.text();
-      const rawDe = await resDe.text();
-
-      let dataEn, dataDe;
-      try { dataEn = JSON.parse(rawEn); } catch(pe) {
-        throw new Error("EN parse error pos " + pe.message + " | raw: " + rawEn.slice(0, 200));
-      }
-      try { dataDe = JSON.parse(rawDe); } catch(pe) {
-        throw new Error("DE parse error pos " + pe.message + " | raw: " + rawDe.slice(0, 200));
-      }
-
-      if (dataEn.error) throw new Error(dataEn.error);
-      if (dataDe.error) throw new Error(dataDe.error);
-
-      const descEn = (dataEn.text || "").trim();
-      const descDe = (dataDe.text || "").trim();
-
-      if (descEn) { upd("descEn", descEn); draft.descEn = descEn; }
-      if (descDe) { upd("descDe", descDe); draft.descDe = descDe; }
-      await autoSave({...draft, descEn: descEn || draft.descEn, descDe: descDe || draft.descDe});
+      });
+      const raw = await res.text();
+      let data;
+      try { data = JSON.parse(raw); } catch { throw new Error("Respuesta inesperada del servidor: " + raw.slice(0, 120)); }
+      if (data.error) throw new Error(data.error);
+      const descEn = (data.text || "").trim().slice(0, 3500);
+      if (descEn) { upd("descEn", descEn); draft.descEn = descEn; await autoSave({...draft, descEn}); }
     } catch(e) {
-      setTranslateError("Error al traducir: " + e.message);
+      setTranslateError("Error al traducir al inglés: " + e.message);
     } finally {
-      setTranslating(false);
+      setTranslatingEn(false);
+    }
+  }
+
+  async function traducirAAleman() {
+    const textoEs = draft.desc || "";
+    if (!textoEs.trim()) { setTranslateError("Escribe primero la descripción en español."); return; }
+    setTranslatingDe(true);
+    setTranslateError("");
+    try {
+      const texto = comprimirTexto(textoEs, 3500);
+      const res = await fetch("/api/claude", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-haiku-4-5-20251001",
+          max_tokens: 4096,
+          system: "Eres un traductor profesional especializado en textos inmobiliarios de lujo en Mallorca. Traduce al alemán manteniendo exactamente el mismo tono, estilo narrativo y estructura. El resultado debe caber en 3500 caracteres. Responde SOLO con la traducción, sin explicaciones.",
+          messages: [{ role: "user", content: "Traduce al alemán este texto inmobiliario:\n\n" + texto }],
+        }),
+      });
+      const raw = await res.text();
+      let data;
+      try { data = JSON.parse(raw); } catch { throw new Error("Respuesta inesperada del servidor: " + raw.slice(0, 120)); }
+      if (data.error) throw new Error(data.error);
+      const descDe = (data.text || "").trim().slice(0, 3500);
+      if (descDe) { upd("descDe", descDe); draft.descDe = descDe; await autoSave({...draft, descDe}); }
+    } catch(e) {
+      setTranslateError("Error al traducir al alemán: " + e.message);
+    } finally {
+      setTranslatingDe(false);
     }
   }
 
@@ -2437,13 +2458,15 @@ REGLAS:
             {idealistaFieldErrors.has("desc") && <div style={{ fontSize: 10, color: "#A23A3A", marginTop: 3 }}>Requerido para Idealista</div>}
           </div>
 
-          {/* Botón traducir */}
-          <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 12 }}>
-            <button onClick={traducirDescripcion} disabled={translating}
-              style={{ padding: "9px 20px", borderRadius: 0, border: "1px solid #405c6b", background: translating ? "#E7E1D4" : "transparent", color: translating ? "#9A968A" : "#405c6b", cursor: translating ? "default" : "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 8 }}>
-              {translating ? (
-                <><span style={{ display: "inline-block", width: 12, height: 12, border: "2px solid #9A968A", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />Traduciendo...</>
-              ) : "Traducir EN / DE con IA"}
+          {/* Botones de traducción */}
+          <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <button onClick={traducirAIngles} disabled={translatingEn || translatingDe}
+              style={{ padding: "9px 18px", borderRadius: 0, border: "1px solid #405c6b", background: translatingEn ? "#E7E1D4" : "transparent", color: translatingEn ? "#9A968A" : "#405c6b", cursor: (translatingEn || translatingDe) ? "default" : "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 8 }}>
+              {translatingEn ? (<><span style={{ display: "inline-block", width: 12, height: 12, border: "2px solid #9A968A", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />Traduciendo...</>) : "✦ Traducir al inglés"}
+            </button>
+            <button onClick={traducirAAleman} disabled={translatingEn || translatingDe}
+              style={{ padding: "9px 18px", borderRadius: 0, border: "1px solid #405c6b", background: translatingDe ? "#E7E1D4" : "transparent", color: translatingDe ? "#9A968A" : "#405c6b", cursor: (translatingEn || translatingDe) ? "default" : "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 8 }}>
+              {translatingDe ? (<><span style={{ display: "inline-block", width: 12, height: 12, border: "2px solid #9A968A", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />Traduciendo...</>) : "✦ Traducir al alemán"}
             </button>
             {translateError && <span style={{ fontSize: 11, color: "#A23A3A" }}>{translateError}</span>}
           </div>
