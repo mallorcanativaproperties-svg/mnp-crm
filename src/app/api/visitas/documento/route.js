@@ -69,7 +69,7 @@ async function rellenarDocx(tipo, contenido) {
     dni_comprador_1:      c1.dni || "",
     telefono_comprador_1: c1.telefono || "",
     nombre_comprador_2:   nombre2 || "",
-    dni_comprador_2:      c2.dni || "",
+    dni_comprador_2:      nombre2 ? (c2.dni || "") : "",
     precio_oferta_largo:  contenido.precio_oferta
       ? fmtPrecioLargo(contenido.precio_oferta)
       : (prop.precio_publicacion ? fmtPrecioLargo(prop.precio_publicacion) : ""),
