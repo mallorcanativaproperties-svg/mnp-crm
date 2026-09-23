@@ -192,24 +192,48 @@ export default function EncargosVenta() {
   }
 
   async function loadProps() {
-    const { data, error } = await supabase.from("propiedades").select("id, ref, dir, municipio, precio_venta, precio_alquiler, tipo").order("created_at", { ascending: false }).limit(100);
+    const { data, error } = await supabase.from("propiedades").select("id, ref, dir, num, municipio, tipo, precio_venta, precio_alquiler, precio_prop, honorarios, honorarios_tipo, iva_hon, ref_cat, trastero, parking, n_plazas").order("created_at", { ascending: false }).limit(100);
     console.log("Propiedades cargadas:", data?.length, "error:", error?.message);
     setPropiedades(data || []);
   }
 
   function handlePropChange(propId) {
     const prop = propiedades.find(p => p.id === propId);
-    if (prop) setForm(f => ({
-      ...f,
-      propiedad_id: propId,
-      prop_ref: prop.ref || "",
-      prop_direccion: prop.dir || "",
-      prop_tipo: prop.tipo || "",
-      // Pre-rellenar condiciones económicas desde la propiedad
-      importe_publicacion: prop.precio_venta || f.importe_publicacion,
-      renta_mensual: prop.precio_alquiler || f.renta_mensual,
-    }));
-    else setForm(f => ({ ...f, propiedad_id: propId }));
+    if (prop) {
+      // Dirección completa con número y municipio
+      const dirBase = [prop.dir, prop.num].filter(Boolean).join(" ");
+      const dirCompleta = [dirBase, prop.municipio].filter(Boolean).join(", ");
+
+      // Anexos: trastero y garaje
+      const trasteroVal = prop.trastero === true ? "Sí" : "";
+      const garajeVal   = prop.parking === "Si"
+        ? (prop.n_plazas > 1 ? `${prop.n_plazas} plazas` : "1 plaza")
+        : "";
+
+      // Honorarios calculados desde la ficha
+      let honorariosCalc = prop.honorarios || "";
+      let ivaHonCalc = prop.iva_hon || "";
+      let importePropietarioCalc = prop.precio_prop || "";
+
+      setForm(f => ({
+        ...f,
+        propiedad_id:        propId,
+        prop_ref:            prop.ref          || "",
+        prop_direccion:      dirCompleta,
+        prop_tipo:           prop.tipo         || "",
+        prop_ref_catastral:  prop.ref_cat      || "",
+        prop_trastero:       trasteroVal,
+        prop_garaje:         garajeVal,
+        // Condiciones económicas desde la ficha
+        importe_publicacion: prop.precio_venta || prop.precio_alquiler || f.importe_publicacion,
+        importe_propietario: importePropietarioCalc || f.importe_propietario,
+        honorarios:          honorariosCalc    || f.honorarios,
+        iva_honorarios:      ivaHonCalc        || f.iva_honorarios,
+        renta_mensual:       prop.precio_alquiler || f.renta_mensual,
+      }));
+    } else {
+      setForm(f => ({ ...f, propiedad_id: propId }));
+    }
   }
 
   async function handleSave() {
