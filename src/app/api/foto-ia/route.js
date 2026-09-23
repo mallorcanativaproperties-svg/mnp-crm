@@ -5,7 +5,16 @@ import { createClient } from "@supabase/supabase-js";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-const PROMPT_MEJORA = `Realiza una reproducción hiperrealista mejorando los ángulos de la fotografía, tiene que estar la imagen recta, en gran angular y en horizontal 16:9, si necesitas imaginar parte de la fotografía hazlo. Haz las estancias muy luminosas, no quites mobiliario ni enseres. No puedes modificar la distribución de los espacios ni puertas ni columnas ni nada que pertenezca a estructura y tamaños. Quiero que las fotografías tengan tanta luz que las paredes se vean muy claritas. Las fotografías tienen que ser las mejores de idealista. Tienen que estar en alta definición. Quiero que la imagen se vea recta y centrada. Es una propiedad premium por lo que las fotografías tienen que verse de impacto y preciosas. Retira enseres y desorden.`;
+const PROMPT_MEJORA = `This is a real estate photograph. Enhance it with these STRICT rules:
+- Keep the scene EXACTLY as photographed — same room, same furniture, same objects, same layout
+- Only improve: brightness, contrast, white balance, sharpness, color saturation
+- Make walls look brighter and whiter by increasing exposure
+- Straighten the horizon if tilted
+- Remove only minor clutter and small disordered objects
+- Do NOT redecorate, do NOT change furniture, do NOT add or remove structural elements
+- The result must look like the SAME photograph professionally retouched, NOT a render or illustration
+- Output must be photorealistic, high resolution, 16:9 horizontal format
+- Style: professional real estate photography, similar to top Idealista listings`;
 
 const PROMPT_HOME_STAGING = (estilo) => `Actúa como un diseñador de interiores profesional. Realiza una reproducción hiperrealista rediseñando los materiales y la decoración del espacio, manteniendo la distribución de los espacios, ventanas, puertas, columnas… no puedes modificar nada que pertenezca a estructura y tamaños. Realiza una reforma visual con un estilo ${estilo}, no quiero que haya demasiado mobiliario y decoración, tiene que verse sencillo pero atractivo y no quiero que sea el típico render hecho por chatgpt que tiene todo el mundo, ten algo de creatividad. La imagen tiene que ser fotorrealista en alta definición, vista amplia y perspectiva natural, no puede parecer un render.`;
 
@@ -67,6 +76,7 @@ export async function POST(request) {
     formData.append("n", "1");
     formData.append("size", "auto");
     formData.append("quality", "high");
+    formData.append("output_format", "png");
 
     const openaiCtrl = new AbortController();
     const openaiTimeout = setTimeout(() => openaiCtrl.abort(), 90000);
