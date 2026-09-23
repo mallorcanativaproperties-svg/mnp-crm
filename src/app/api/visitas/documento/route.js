@@ -261,7 +261,7 @@ async function generarPDF(tipo, contenido) {
     if (tipo === "oferta" || tipo === "contraoferta") {
       checkPage(40);
       y = drawSeccion(page, "RESPUESTA DE LA PARTE VENDEDORA", y, bold, W, M);
-      page.drawText("☐  Acepta la propuesta          ☐  No acepta la propuesta          ☐  La somete a valoración junto con otras propuestas recibidas",
+      page.drawText("[ ] Acepta la propuesta          [ ] No acepta la propuesta          [ ] La somete a valoracion junto con otras propuestas recibidas",
         { x: M + 4, y, font, size: 9, color: C.black });
       y -= 18;
     }
