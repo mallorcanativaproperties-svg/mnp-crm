@@ -1512,10 +1512,11 @@ function PropCard({ p, onClick }) {
       <div style={{ position: "absolute", top: 0, left: 0, width: 3, height: "100%", background: est.accent, opacity: 0.6 }} />
       <div style={{ display: "flex", gap: 16, alignItems: "stretch" }}>
         {/* Foto portada */}
-        <div style={{ flexShrink: 0, width: 100, minHeight: 80, background: "#F0EDE8",
-          overflow: "hidden", alignSelf: "stretch", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ flexShrink: 0, width: 160, background: "#F0EDE8",
+          overflow: "hidden", alignSelf: "stretch", display: "flex", alignItems: "center", justifyContent: "center",
+          aspectRatio: "16/9" }}>
           {p.portadaUrl ? (
-            <img src={p.portadaUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", minHeight: 80 }} />
+            <img src={p.portadaUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
           ) : (
             <span style={{ fontSize: 22, opacity: 0.25 }}>🏠</span>
           )}
