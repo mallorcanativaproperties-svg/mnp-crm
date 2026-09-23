@@ -45,22 +45,27 @@ export async function POST(request) {
 
     const prompt = tipo === "mejora" ? PROMPT_MEJORA : PROMPT_HOME_STAGING(estilo || "nórdico");
 
-    // Descargar imagen original con timeout
+    // Descargar imagen original con timeout — preservar formato original
     const downloadCtrl = new AbortController();
     const downloadTimeout = setTimeout(() => downloadCtrl.abort(), 30000);
     const imgRes = await fetch(imageUrl, { signal: downloadCtrl.signal });
     clearTimeout(downloadTimeout);
     if (!imgRes.ok) throw new Error("No se pudo descargar la imagen original");
     const imgBuffer = await imgRes.arrayBuffer();
-    const imgBlob = new Blob([imgBuffer], { type: "image/jpeg" });
+    // Detectar tipo MIME real de la imagen para no recomprimir
+    const contentType = imgRes.headers.get("content-type") || "image/jpeg";
+    const isPng = contentType.includes("png") || imageUrl.toLowerCase().endsWith(".png");
+    const mimeType = isPng ? "image/png" : "image/jpeg";
+    const ext = isPng ? "original.png" : "original.jpg";
+    const imgBlob = new Blob([imgBuffer], { type: mimeType });
 
-    // Llamada a OpenAI
+    // Llamada a OpenAI — auto size respeta las proporciones originales
     const formData = new FormData();
     formData.append("model", "gpt-image-1");
-    formData.append("image", imgBlob, "original.jpg");
+    formData.append("image", imgBlob, ext);
     formData.append("prompt", prompt);
     formData.append("n", "1");
-    formData.append("size", "1536x1024");
+    formData.append("size", "auto");
     formData.append("quality", "high");
 
     const openaiCtrl = new AbortController();
