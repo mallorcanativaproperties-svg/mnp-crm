@@ -1628,13 +1628,12 @@ REGLAS:
       const data = await response.json();
       
       if (data.error) {
-        setAiError("Error API: " + (data.error.message || JSON.stringify(data.error)));
+        setAiError("Error API: " + data.error);
         return;
       }
       
-      if (!data.content || !Array.isArray(data.content)) {
+      if (!data.text && (!data.content || !Array.isArray(data.content))) {
         setAiError("Respuesta inesperada de la API. Revisa la clave API en Vercel.");
-        console.error("API response:", JSON.stringify(data));
         return;
       }
       
@@ -1692,11 +1691,11 @@ REGLAS:
 
       const dataEn = await resEn.json();
       const dataDe = await resDe.json();
-      if (dataEn.error) throw new Error(dataEn.error.message || JSON.stringify(dataEn.error));
-      if (dataDe.error) throw new Error(dataDe.error.message || JSON.stringify(dataDe.error));
+      if (dataEn.error) throw new Error(dataEn.error);
+      if (dataDe.error) throw new Error(dataDe.error);
 
-      const descEn = dataEn.content?.filter(i => i.type === "text").map(i => i.text).join("").trim() || "";
-      const descDe = dataDe.content?.filter(i => i.type === "text").map(i => i.text).join("").trim() || "";
+      const descEn = (dataEn.text || "").trim();
+      const descDe = (dataDe.text || "").trim();
 
       if (descEn) { upd("descEn", descEn); draft.descEn = descEn; }
       if (descDe) { upd("descDe", descDe); draft.descDe = descDe; }
