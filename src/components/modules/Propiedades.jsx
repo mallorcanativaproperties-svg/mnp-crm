@@ -1668,9 +1668,9 @@ REGLAS:
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "claude-haiku-4-5-20251001",
-          max_tokens: 2000,
-          system: `Eres un traductor profesional especializado en textos inmobiliarios de lujo. Traduce el texto que te proporcionen manteniendo exactamente el mismo tono, estructura y estilo narrativo. No añadas ni elimines información. Responde SOLO con el JSON, sin explicaciones. Formato: {"en": "traducción en inglés", "de": "traducción en alemán"}`,
-          messages: [{ role: "user", content: "Traduce este texto inmobiliario al inglés y alemán:\n\n" + textoEs }],
+          max_tokens: 4096,
+          system: `Eres un traductor profesional especializado en textos inmobiliarios de lujo. Traduce el texto que te proporcionen manteniendo exactamente el mismo tono, estructura y estilo narrativo. No añadas ni elimines información. IMPORTANTE: Responde ÚNICAMENTE con el JSON válido, sin texto adicional, sin markdown, sin explicaciones. El JSON debe estar completo y bien formado. Formato exacto: {"en": "traducción completa en inglés", "de": "traducción completa en alemán"}`,
+          messages: [{ role: "user", content: "Traduce este texto inmobiliario al inglés y alemán. Responde solo con el JSON:\n\n" + textoEs.slice(0, 3000) }],
         }),
       });
       const data = await response.json();
