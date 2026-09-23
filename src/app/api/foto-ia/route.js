@@ -70,7 +70,6 @@ export async function POST(request) {
     formData.append("size", "auto");
     formData.append("quality", "high");
     formData.append("output_format", "png");
-    formData.append("input_fidelity", "high");
 
     const openaiCtrl = new AbortController();
     const openaiTimeout = setTimeout(() => openaiCtrl.abort(), 120000);
