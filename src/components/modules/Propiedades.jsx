@@ -1656,25 +1656,23 @@ REGLAS:
   const [translatingEn, setTranslatingEn] = useState(false);
   const [translatingDe, setTranslatingDe] = useState(false);
 
-  // Comprime el texto español a máx 3500 chars manteniendo el sentido completo
+  // Comprime el texto español a máx chars manteniendo párrafos completos
   function comprimirTexto(texto, maxChars) {
     if (texto.length <= maxChars) return texto;
-    // Cortar por párrafos completos intentando no superar el límite
-    const parrafos = texto.split(/\n\n+/);
+    const sep = "\n\n";
+    const parrafos = texto.split(sep);
     let resultado = "";
     for (const p of parrafos) {
-      if ((resultado + "
-
-" + p).trim().length <= maxChars) {
-        resultado = resultado ? resultado + "
-
-" + p : p;
+      const candidato = resultado ? resultado + sep + p : p;
+      if (candidato.trim().length <= maxChars) {
+        resultado = candidato;
       } else {
         break;
       }
     }
     return resultado || texto.slice(0, maxChars);
   }
+
 
   async function traducirAIngles() {
     const textoEs = draft.desc || "";
