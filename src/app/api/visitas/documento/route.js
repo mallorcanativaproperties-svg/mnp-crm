@@ -60,16 +60,22 @@ async function rellenarDocx(tipo, contenido) {
     dia:                  String(fecha.getDate()).padStart(2, "0"),
     mes:                  MESES[fecha.getMonth()],
     anyo:                 String(fecha.getFullYear()),
+    // Agente
     nombre_agente:        agente.nombre || "",
+    dni_agente:           agente.dni || "",
+    poliza_rc_agente:     agente.poliza_rc || "",
+    // Propiedad
     direccion:            prop.direccion || "",
     ref_catastral:        prop.ref_catastral || "",
     ref_interna:          prop.ref_interna || "",
     precio_publicacion:   prop.precio_publicacion ? fmtPrecio(prop.precio_publicacion) : "",
+    // Compradores
     nombre_comprador_1:   nombre1,
     dni_comprador_1:      c1.dni || "",
     telefono_comprador_1: c1.telefono || "",
     nombre_comprador_2:   nombre2 || "",
     dni_comprador_2:      nombre2 ? (c2.dni || "") : "",
+    // Precio oferta — usa el precio introducido en la visita, o el de publicación como fallback
     precio_oferta_largo:  contenido.precio_oferta
       ? fmtPrecioLargo(contenido.precio_oferta)
       : (prop.precio_publicacion ? fmtPrecioLargo(prop.precio_publicacion) : ""),
@@ -110,7 +116,7 @@ export async function GET(req) {
   if (!docId) return NextResponse.json({ error: "Falta id" }, { status: 400 });
 
   const { data: doc } = await supabase.from("visita_documentos")
-    .select("*, visitas(*, agente_login, compradores(nombre,apellidos,dni,telefono), visita_compradores(orden, compradores(nombre,apellidos,dni,telefono)), propiedades(ref,dir,municipio,precio_venta,ref_cat))")
+    .select("*, visitas(*, agente_login, compradores(nombre,apellidos,dni,telefono), visita_compradores(orden, compradores(nombre,apellidos,dni,telefono)), propiedades(ref,dir,num,municipio,tipo,precio_venta,precio_alquiler,precio_prop,honorarios,honorarios_tipo,iva_hon,ref_cat))")
     .eq("id", docId).single();
 
   if (!doc) return NextResponse.json({ error: "Documento no encontrado" }, { status: 404 });
@@ -122,22 +128,47 @@ export async function GET(req) {
     : visita?.compradores ? [visita.compradores] : [];
 
   let nombreAgente = doc.contenido?.agente?.nombre || "";
-  if (visita?.agente_login && !nombreAgente) {
+  let dniAgente = doc.contenido?.agente?.dni || "";
+  let polizaRcAgente = doc.contenido?.agente?.poliza_rc || "";
+  if (visita?.agente_login) {
     const { data: ag } = await supabase.from("usuarios")
-      .select("nombre").eq("user_login", visita.agente_login).single();
-    nombreAgente = ag?.nombre || visita.agente_login;
+      .select("nombre, dni, poliza_rc, numero_registro")
+      .eq("user_login", visita.agente_login)
+      .maybeSingle();
+    if (ag) {
+      if (!nombreAgente) nombreAgente = ag.nombre || visita.agente_login;
+      dniAgente    = ag.dni || "";
+      polizaRcAgente = ag.poliza_rc || "";
+    }
+  }
+
+  // Precio de publicación: venta o alquiler según operación
+  const precioPublicacion = prop?.precio_venta || prop?.precio_alquiler || 0;
+
+  // Dirección completa incluyendo número y tipo de propiedad
+  let direccionCompleta = "";
+  if (prop) {
+    const partes = [prop.dir, prop.num].filter(Boolean).join(" ");
+    const municipio = prop.municipio || "";
+    direccionCompleta = [partes, municipio].filter(Boolean).join(", ");
+    if (prop.tipo) direccionCompleta += ` (${prop.tipo})`;
   }
 
   const contenido = {
     ...doc.contenido,
     fecha_documento: doc.created_at,
     propiedad: {
-      direccion:          prop ? `${prop.dir || ""}, ${prop.municipio || ""}`.replace(/(^,\s*|,\s*$)/g, "").trim() : "",
+      direccion:          direccionCompleta,
       ref_catastral:      prop?.ref_cat || "",
       ref_interna:        prop?.ref || "",
-      precio_publicacion: prop?.precio_venta || 0,
+      tipo:               prop?.tipo || "",
+      precio_publicacion: precioPublicacion,
+      honorarios:         prop?.honorarios || 0,
+      honorarios_tipo:    prop?.honorarios_tipo || "porcentaje",
+      iva_hon:            prop?.iva_hon || 21,
+      precio_prop:        prop?.precio_prop || 0,
     },
-    agente: { nombre: nombreAgente },
+    agente: { nombre: nombreAgente, dni: dniAgente, poliza_rc: polizaRcAgente },
     compradores: compradores.length > 0 ? compradores : (doc.contenido?.compradores || []),
   };
 
