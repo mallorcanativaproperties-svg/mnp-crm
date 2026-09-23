@@ -1155,6 +1155,97 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
         );
       })()}
     </div>
+
+    {/* Modal selección fotos a mejorar */}
+    {showModalMejora && (() => {
+      const fotosDisp = media.filter(m => m.tipo === "foto");
+      return (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 2000,
+          display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+          <div style={{ background: "#fff", border: "1px solid #2A2926", maxWidth: 680, width: "100%",
+            maxHeight: "85vh", display: "flex", flexDirection: "column", borderRadius: 0 }}>
+            <div style={{ padding: "20px 24px 16px", borderBottom: "1px solid #E7E1D4" }}>
+              <div style={{ fontSize: 10, color: "#AC8A54", letterSpacing: "0.2em",
+                textTransform: "uppercase", fontFamily: "Inter, sans-serif", marginBottom: 4 }}>
+                Nativa Properties · IA
+              </div>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 400 }}>
+                Mejorar <em>fotografías</em>
+              </div>
+              <div style={{ fontSize: 11, color: "#9A968A", marginTop: 6, fontFamily: "Inter, sans-serif" }}>
+                Selecciona las fotografías que quieres mejorar. Se procesarán en secuencia.
+              </div>
+            </div>
+            <div style={{ padding: "10px 24px", borderBottom: "1px solid #E7E1D4",
+              display: "flex", gap: 12, alignItems: "center" }}>
+              <button onClick={() => setFotosSeleccionadas(new Set(fotosDisp.map(f => f.id)))}
+                style={{ fontSize: 11, color: "#405c6b", background: "none", border: "1px solid #405c6b",
+                  padding: "4px 12px", cursor: "pointer", fontFamily: "Inter, sans-serif", borderRadius: 0 }}>
+                Seleccionar todas
+              </button>
+              <button onClick={() => setFotosSeleccionadas(new Set())}
+                style={{ fontSize: 11, color: "#9A968A", background: "none", border: "1px solid #E7E1D4",
+                  padding: "4px 12px", cursor: "pointer", fontFamily: "Inter, sans-serif", borderRadius: 0 }}>
+                Deseleccionar todas
+              </button>
+              <span style={{ marginLeft: "auto", fontSize: 11, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>
+                {fotosSeleccionadas.size} de {fotosDisp.length} seleccionadas
+              </span>
+            </div>
+            <div style={{ overflowY: "auto", padding: "16px 24px", flex: 1 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 10 }}>
+                {fotosDisp.map((foto, i) => {
+                  const sel = fotosSeleccionadas.has(foto.id);
+                  return (
+                    <div key={foto.id}
+                      onClick={() => {
+                        const next = new Set(fotosSeleccionadas);
+                        if (sel) next.delete(foto.id); else next.add(foto.id);
+                        setFotosSeleccionadas(next);
+                      }}
+                      style={{ position: "relative", cursor: "pointer",
+                        border: sel ? "2px solid #C8A97E" : "2px solid #E7E1D4",
+                        transition: "border-color 0.15s" }}>
+                      <img src={foto.url} alt=""
+                        style={{ width: "100%", height: 100, objectFit: "cover", display: "block" }} />
+                      <div style={{ position: "absolute", top: 4, left: 4, background: "rgba(0,0,0,0.55)",
+                        color: "#fff", fontSize: 9, fontWeight: 700, padding: "1px 5px",
+                        fontFamily: "Inter, sans-serif" }}>
+                        {i + 1}
+                      </div>
+                      <div style={{ position: "absolute", top: 4, right: 4, width: 20, height: 20,
+                        borderRadius: "50%", background: sel ? "#C8A97E" : "rgba(255,255,255,0.85)",
+                        border: sel ? "none" : "2px solid #ccc",
+                        display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        {sel && <span style={{ color: "#fff", fontSize: 12, fontWeight: 700, lineHeight: 1 }}>✓</span>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            <div style={{ padding: "14px 24px", borderTop: "1px solid #E7E1D4",
+              display: "flex", justifyContent: "flex-end", gap: 10 }}>
+              <button onClick={() => setShowModalMejora(false)}
+                style={{ padding: "9px 20px", border: "1px solid #E7E1D4", background: "transparent",
+                  color: "#9A968A", cursor: "pointer", fontSize: 11, fontFamily: "Inter, sans-serif",
+                  fontWeight: 600, borderRadius: 0 }}>
+                Cancelar
+              </button>
+              <button onClick={mejorarTodasFotos} disabled={fotosSeleccionadas.size === 0}
+                style={{ padding: "9px 24px", border: "1px solid #C8A97E",
+                  background: fotosSeleccionadas.size === 0 ? "#F8F6F1" : "#1a2528",
+                  color: fotosSeleccionadas.size === 0 ? "#9A968A" : "#C8A97E",
+                  cursor: fotosSeleccionadas.size === 0 ? "not-allowed" : "pointer",
+                  fontSize: 11, fontFamily: "Inter, sans-serif", fontWeight: 600,
+                  letterSpacing: "0.08em", textTransform: "uppercase", borderRadius: 0 }}>
+                ✦ Mejorar {fotosSeleccionadas.size} foto{fotosSeleccionadas.size !== 1 ? "s" : ""}
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    })()}
   );
 }
 
