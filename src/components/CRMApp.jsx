@@ -24,6 +24,7 @@ const FirmaElectronica = dynamic(() => import("./modules/FirmaElectronica"), { s
 const Usuarios = dynamic(() => import("./modules/Usuarios"), { ssr: false });
 const SimuladorClaudia = dynamic(() => import("./modules/SimuladorClaudia"), { ssr: false });
 const AsistenteIA = dynamic(() => import("./modules/AsistenteIA"), { ssr: false });
+const PanelErrores = dynamic(() => import("./PanelErrores"), { ssr: false });
 
 // Roles del CRM:
 //   director      → Suren — acceso total
@@ -484,6 +485,7 @@ export default function CRMApp() {
           {renderModule()}
         </Suspense>
       </div>
+          <PanelErrores userRole={currentUser?.role} />
     </div>
   );
 }

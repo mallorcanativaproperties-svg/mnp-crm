@@ -226,6 +226,15 @@ export async function GET(req) {
     });
   } catch (err) {
     console.error("Error generando PDF:", err);
+    // Registrar en crm_errores
+    try {
+      await supabase.from("crm_errores").insert({
+        modulo: "Visitas",
+        accion: "Generar PDF documento",
+        mensaje: err.message,
+        detalle: err.stack?.slice(0, 500) || null,
+      });
+    } catch {}
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

@@ -47,7 +47,15 @@ export async function POST(request) {
     .insert({ ...rest, token_firma: token, estado: "borrador", prop1_nombre: propietarios?.[0]?.nombre || "" })
     .select().single();
 
-  if (encError) return NextResponse.json({ ok: false, error: encError.message }, { status: 500 });
+  if (encError) {
+    try {
+      await supabase.from("crm_errores").insert({
+        modulo: "Encargos", accion: "Crear encargo (API)",
+        mensaje: encError.message, detalle: encError.details || null,
+      });
+    } catch {}
+    return NextResponse.json({ ok: false, error: encError.message }, { status: 500 });
+  }
 
   // Crear firmante por cada propietario
   if (propietarios?.length) {

@@ -1,4 +1,5 @@
 "use client";
+import { reportarError } from "@/lib/reportarError";
 import { PlusIcon, PencilSquareIcon, TrashIcon, LinkIcon, EnvelopeIcon, DocumentTextIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
@@ -269,9 +270,12 @@ export default function EncargosVenta() {
         await load();
         loadCurrentUser();
       } else {
-        alert("Error al guardar el encargo:\n" + (data.error || "Error desconocido"));
+        const msg = data.error || "Error desconocido";
+      await reportarError({ modulo: "Encargos", accion: "Crear encargo", mensaje: msg });
+      alert("Error al guardar el encargo:\n" + msg);
       }
     } catch (e) {
+      await reportarError({ modulo: "Encargos", accion: "Crear encargo", error: e });
       alert("Error de conexión al guardar:\n" + e.message);
     } finally {
       setSaving(false);
