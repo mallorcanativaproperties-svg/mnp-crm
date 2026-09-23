@@ -14,6 +14,7 @@ const Propiedades = dynamic(() => import("./modules/Propiedades"), { ssr: false 
 const FormularioCaptacion = dynamic(() => import("./modules/FormularioCaptacion"), { ssr: false });
 const Formacion = dynamic(() => import("./modules/Formacion"), { ssr: false });
 const Compradores = dynamic(() => import("./modules/Compradores"), { ssr: false });
+const Visitas = dynamic(() => import("./modules/Visitas"), { ssr: false });
 const MotorCruce = dynamic(() => import("./modules/MotorCruce"), { ssr: false });
 const EncargosVenta = dynamic(() => import("./modules/EncargosVenta"), { ssr: false });
 const RedesSociales = dynamic(() => import("./modules/RedesSociales"), { ssr: false });
@@ -43,6 +44,7 @@ const ICON_MAP = {
   formacion_agentes:   <AcademicCapIcon style={{ width: 18, height: 18 }} />,
   formacion_direccion: <StarIcon style={{ width: 18, height: 18 }} />,
   formacion_asistente: <CpuChipIcon style={{ width: 18, height: 18 }} />,
+  visitas:             <ClipboardDocumentListIcon style={{ width: 18, height: 18 }} />,
   simulador:           <WrenchScrewdriverIcon style={{ width: 18, height: 18 }} />,
   dashboard:           <ChartBarIcon style={{ width: 18, height: 18 }} />,
   usuarios:            <UserGroupIcon style={{ width: 18, height: 18 }} />,
@@ -61,6 +63,7 @@ const MODULES = [
   // COMPRADORES
   { key: "compradores", label: "Base Compradores", icon: "compradores", color: "#3D577E", roles: ["director", "administrador", "agente"], group: "Compradores" },
   { key: "cruce", label: "Motor de Cruce", icon: "cruce", color: "#3D577E", roles: ["director", "administrador", "agente"], group: "Compradores" },
+  { key: "visitas", label: "Visitas", icon: "visitas", color: "#AC8A54", roles: ["director", "administrador", "agente"], group: "Compradores" },
 
   // REDES SOCIALES
   { key: "redes", label: "Redes Sociales", icon: "redes", color: "#E1306C", roles: ["director", "administrador", "agente"], group: "Redes Sociales" },
@@ -293,6 +296,7 @@ export default function CRMApp() {
       case "formacion_asistente": return <AsistenteIA currentUser={currentUser} />;
       case "compradores": return <Compradores currentUser={currentUser} />;
       case "cruce": return <MotorCruce currentUser={currentUser} />;
+      case "visitas": return <Visitas key="visitas" currentUser={currentUser} />;
       case "captacion_ana": return <Captacion />;
       case "redes": return <RedesSociales />;
       case "agentes": return <AgentesIA />;
