@@ -89,8 +89,7 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
   const [q, setQ] = useState("");
   const [results, setResults] = useState([]);
   const [showNew, setShowNew] = useState(false);
-  const [nuevoNombre, setNuevoNombre] = useState("");
-  const [nuevoApellidos, setNuevoApellidos] = useState("");
+  const [nuevoNombre, setNuevoNombre] = useState(""); // nombre completo
   const [nuevoTel, setNuevoTel] = useState("");
   const [nuevoEmail, setNuevoEmail] = useState("");
   const [nuevoDni, setNuevoDni] = useState("");
@@ -116,28 +115,27 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
     if (!nuevoTel.trim()) { alert("El teléfono es obligatorio."); return; }
     setSaving(true);
 
+    // Separar nombre completo en nombre + apellidos
+    const partes = nuevoNombre.trim().split(" ");
+    const nombreParte = partes[0] || "";
+    const apellidosParte = partes.slice(1).join(" ");
+
     if (compradorExistenteId) {
-      // Ya existe — actualizar datos si cambiaron y seleccionar
-      const { data } = await supabase.from("compradores").update({
-        apellidos: nuevoApellidos.trim() || undefined,
+      // Ya existe — actualizar solo DNI y teléfono si faltaban
+      await supabase.from("compradores").update({
         telefono: nuevoTel.trim(),
-        email: nuevoEmail.trim() || undefined,
         dni: nuevoDni.trim(),
-        pais: nuevaNac || undefined,
+        ...(nuevoEmail.trim() ? { email: nuevoEmail.trim() } : {}),
         updated_at: new Date().toISOString(),
-      }).eq("id", compradorExistenteId).select().single();
-      if (data) onChange(data);
-      else {
-        // Si no devuelve datos, buscar el registro
-        const { data: existing } = await supabase.from("compradores")
-          .select("*").eq("id", compradorExistenteId).single();
-        if (existing) onChange(existing);
-      }
+      }).eq("id", compradorExistenteId);
+      const { data: existing } = await supabase.from("compradores")
+        .select("*").eq("id", compradorExistenteId).single();
+      if (existing) onChange(existing);
     } else {
       // Nuevo comprador — insertar
       const { data } = await supabase.from("compradores").insert({
-        nombre: nuevoNombre.trim(), apellidos: nuevoApellidos.trim(),
-        telefono: nuevoTel.trim(), email: nuevoEmail.trim(),
+        nombre: nombreParte, apellidos: apellidosParte || null,
+        telefono: nuevoTel.trim(), email: nuevoEmail.trim() || null,
         dni: nuevoDni.trim(), pais: nuevaNac, activo: true,
         created_at: new Date().toISOString(),
       }).select().single();
@@ -147,6 +145,7 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
     setSaving(false);
     setShowNew(false);
     setCompradorExistenteId(null);
+    setNuevoNombre(""); setNuevoDni(""); setNuevoTel(""); setNuevoEmail(""); setNuevaNac("España");
   }
 
   if (value) return (
@@ -269,8 +268,8 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
             </div>
           )}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            <div style={{ position: "relative" }}>
-              <L c="Nombre" req />
+            <div style={{ position: "relative", gridColumn: "1 / -1" }}>
+              <L c="Nombre completo" req />
               <input style={iSt} value={nuevoNombre}
                 onChange={async e => {
                   const v = e.target.value;
@@ -299,8 +298,7 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
                   {sugerencias.map(s => (
                     <div key={s.id}
                       onClick={() => {
-                        setNuevoNombre(s.nombre || "");
-                        setNuevoApellidos(s.apellidos || "");
+                        setNuevoNombre(`${s.nombre || ""} ${s.apellidos || ""}`.trim());
                         setNuevoDni(s.dni || "");
                         setNuevoTel(s.telefono || "");
                         setNuevoEmail(s.email || "");
@@ -332,7 +330,7 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
                 </div>
               )}
             </div>
-            <div><L c="Apellidos" /><input style={iSt} value={nuevoApellidos} onChange={e => setNuevoApellidos(e.target.value)} /></div>
+
             <div><L c="DNI / NIE" req /><input style={iSt} value={nuevoDni} onChange={e => setNuevoDni(e.target.value)} placeholder="12345678A" /></div>
             <div><L c="Nacionalidad" /><input style={iSt} value={nuevaNac} onChange={e => setNuevaNac(e.target.value)} /></div>
             <div><L c="Teléfono" req /><input style={iSt} value={nuevoTel} onChange={e => setNuevoTel(e.target.value)} placeholder="+34 600 000 000" /></div>
