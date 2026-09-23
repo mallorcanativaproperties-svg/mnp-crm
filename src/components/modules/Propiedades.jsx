@@ -316,7 +316,9 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
   const [iaEstilo, setIaEstilo] = useState("nórdico");
   const [iaVariaciones, setIaVariaciones] = useState([]); // hasta
   const [mejorandoTodas, setMejorandoTodas] = useState(false);
-  const [mejoraBatchProgreso, setMejoraBatchProgreso] = useState(null); // { actual, total } 3 variaciones generadas
+  const [mejoraBatchProgreso, setMejoraBatchProgreso] = useState(null); // { actual, total }
+  const [showModalMejora, setShowModalMejora] = useState(false);
+  const [fotosSeleccionadas, setFotosSeleccionadas] = useState(new Set()); // ids seleccionados 3 variaciones generadas
   const [iaLoading, setIaLoading] = useState(false);
   const [iaSeleccionada, setIaSeleccionada] = useState(null); // variación elegida
 
@@ -588,11 +590,18 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
     }
   }
 
-  // Mejora todas las fotos en secuencia
-  async function mejorarTodasFotos() {
+  // Abre el modal de selección de fotos a mejorar
+  function abrirModalMejora() {
     const fotos = media.filter(m => m.tipo === "foto");
+    setFotosSeleccionadas(new Set(fotos.map(f => f.id)));
+    setShowModalMejora(true);
+  }
+
+  // Procesa las fotos seleccionadas en secuencia
+  async function mejorarTodasFotos() {
+    const fotos = media.filter(m => m.tipo === "foto" && fotosSeleccionadas.has(m.id));
     if (!fotos.length) return;
-    if (!confirm(`¿Mejorar con IA las ${fotos.length} fotografías? El proceso puede tardar varios minutos.`)) return;
+    setShowModalMejora(false);
     setMejorandoTodas(true);
     setMejoraBatchProgreso({ actual: 0, total: fotos.length });
     let ok = 0, err = 0;
@@ -615,6 +624,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
     await loadMedia(false);
     setMejorandoTodas(false);
     setMejoraBatchProgreso(null);
+    setFotosSeleccionadas(new Set());
     alert(`Mejora completada: ${ok} fotos mejoradas${err > 0 ? `, ${err} con error` : ""}.`);
   }
 
@@ -700,7 +710,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
         })}
         {activeTab === "foto" && media.filter(m => m.tipo === "foto").length > 0 && (
           <button
-            onClick={mejorarTodasFotos}
+            onClick={abrirModalMejora}
             disabled={mejorandoTodas || iaLoading}
             style={{
               marginLeft: "auto", padding: "6px 16px", border: "1px solid #C8A97E",
