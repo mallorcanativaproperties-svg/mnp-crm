@@ -80,80 +80,6 @@ function Modal({ title, onClose, children, width = 560 }) {
         </div>
         <div style={{ padding: 24 }}>{children}</div>
       </div>
-      {/* Modal nueva visita global */}
-      {modalNuevaVisita && (
-        <Modal title="Registrar nueva visita" onClose={() => setModalNuevaVisita(false)} width={540}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            {/* Selector propiedad */}
-            <div>
-              <L c="Propiedad" req />
-              {nvPropiedad ? (
-                <div style={{ background: CREAM2, border: `1px solid ${GOLD}`, padding: "10px 14px",
-                  display: "flex", justifyContent: "space-between", alignItems: "center", borderRadius: 2 }}>
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: TEXT, fontFamily: "Inter, sans-serif" }}>
-                      {nvPropiedad.ref} — {nvPropiedad.dir}
-                    </div>
-                    <div style={{ fontSize: 11, color: MUTED, fontFamily: "Inter, sans-serif" }}>{nvPropiedad.municipio}</div>
-                  </div>
-                  <button onClick={() => setNvPropiedad(null)} style={{ background: "transparent", border: "none", color: MUTED, cursor: "pointer" }}>
-                    <XMarkIcon style={{ width: 14, height: 14 }} />
-                  </button>
-                </div>
-              ) : (
-                <div style={{ position: "relative" }}>
-                  <input value={qProp} onChange={e => setQProp(e.target.value)}
-                    placeholder="Buscar por referencia o dirección..."
-                    style={iSt} />
-                  {busqProps.length > 0 && (
-                    <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 10,
-                      background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 2, maxHeight: 200, overflowY: "auto" }}>
-                      {busqProps.map(p => (
-                        <div key={p.id} onClick={() => { setNvPropiedad(p); setQProp(""); setBusqProps([]); }}
-                          style={{ padding: "10px 14px", cursor: "pointer", borderBottom: `1px solid ${BORDER}`,
-                            fontFamily: "Inter, sans-serif" }}
-                          onMouseEnter={e => e.currentTarget.style.background = CREAM}
-                          onMouseLeave={e => e.currentTarget.style.background = WHITE}>
-                          <div style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>{p.ref} — {p.dir}</div>
-                          <div style={{ fontSize: 11, color: MUTED }}>{p.municipio}</div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-            {/* Selector comprador */}
-            <div>
-              <L c="Comprador" req />
-              <SelectorComprador value={nvComprador} onChange={setNvComprador} />
-            </div>
-            {/* Fecha/hora */}
-            <div>
-              <L c="Fecha y hora de la visita" />
-              <input type="datetime-local" value={nvHora} onChange={e => setNvHora(e.target.value)} style={iSt} />
-            </div>
-            {/* Notas */}
-            <div>
-              <L c="Notas" />
-              <textarea rows={3} value={nvNotas} onChange={e => setNvNotas(e.target.value)}
-                style={{ ...iSt, resize: "vertical" }}
-                placeholder="Impresión del comprador, interés mostrado, preguntas relevantes..." />
-            </div>
-            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", paddingTop: 8, borderTop: `1px solid ${BORDER}` }}>
-              <button onClick={() => setModalNuevaVisita(false)} style={{ padding: "9px 18px",
-                border: `1px solid ${BORDER}`, background: "transparent", color: MUTED,
-                cursor: "pointer", borderRadius: 2, fontFamily: "Inter, sans-serif" }}>Cancelar</button>
-              <button onClick={crearVisitaGlobal} disabled={!nvPropiedad || !nvComprador || nvGuardando}
-                style={{ padding: "9px 22px", background: DARK, border: "none", color: WHITE,
-                  cursor: "pointer", borderRadius: 2, fontWeight: 700, fontFamily: "Inter, sans-serif",
-                  opacity: (!nvPropiedad || !nvComprador) ? 0.5 : 1 }}>
-                {nvGuardando ? "Guardando..." : "Registrar visita"}
-              </button>
-            </div>
-          </div>
-        </Modal>
-      )}
     </div>
   );
 }
@@ -1146,6 +1072,77 @@ export default function Visitas({ currentUser }) {
           })
         )}
       </div>
+      {/* Modal nueva visita global */}
+      {modalNuevaVisita && (
+        <Modal title="Registrar nueva visita" onClose={() => setModalNuevaVisita(false)} width={540}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div>
+              <L c="Propiedad" req />
+              {nvPropiedad ? (
+                <div style={{ background: CREAM2, border: `1px solid ${GOLD}`, padding: "10px 14px",
+                  display: "flex", justifyContent: "space-between", alignItems: "center", borderRadius: 2 }}>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: TEXT, fontFamily: "Inter, sans-serif" }}>
+                      {nvPropiedad.ref} — {nvPropiedad.dir}
+                    </div>
+                    <div style={{ fontSize: 11, color: MUTED, fontFamily: "Inter, sans-serif" }}>{nvPropiedad.municipio}</div>
+                  </div>
+                  <button onClick={() => setNvPropiedad(null)} style={{ background: "transparent", border: "none", color: MUTED, cursor: "pointer" }}>
+                    <XMarkIcon style={{ width: 14, height: 14 }} />
+                  </button>
+                </div>
+              ) : (
+                <div style={{ position: "relative" }}>
+                  <input value={qProp} onChange={e => setQProp(e.target.value)}
+                    placeholder="Buscar por ref, dirección o municipio..."
+                    style={iSt} />
+                  {busqProps.length > 0 && (
+                    <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 10,
+                      background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 2,
+                      maxHeight: 200, overflowY: "auto", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+                      {busqProps.map(p => (
+                        <div key={p.id} onClick={() => { setNvPropiedad(p); setQProp(""); setBusqProps([]); }}
+                          style={{ padding: "10px 14px", cursor: "pointer", borderBottom: `1px solid ${BORDER}`,
+                            fontFamily: "Inter, sans-serif" }}
+                          onMouseEnter={e => e.currentTarget.style.background = CREAM}
+                          onMouseLeave={e => e.currentTarget.style.background = WHITE}>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>{p.ref} — {p.dir}</div>
+                          <div style={{ fontSize: 11, color: MUTED }}>{p.municipio}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+            <div>
+              <L c="Comprador" req />
+              <SelectorComprador value={nvComprador} onChange={setNvComprador} />
+            </div>
+            <div>
+              <L c="Fecha y hora de la visita" />
+              <input type="datetime-local" value={nvHora} onChange={e => setNvHora(e.target.value)} style={iSt} />
+            </div>
+            <div>
+              <L c="Notas" />
+              <textarea rows={3} value={nvNotas} onChange={e => setNvNotas(e.target.value)}
+                style={{ ...iSt, resize: "vertical" }}
+                placeholder="Impresión del comprador, interés mostrado, preguntas relevantes..." />
+            </div>
+            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", paddingTop: 8, borderTop: `1px solid ${BORDER}` }}>
+              <button onClick={() => setModalNuevaVisita(false)} style={{ padding: "9px 18px",
+                border: `1px solid ${BORDER}`, background: "transparent", color: MUTED,
+                cursor: "pointer", borderRadius: 2, fontFamily: "Inter, sans-serif" }}>Cancelar</button>
+              <button onClick={crearVisitaGlobal} disabled={!nvPropiedad || !nvComprador || nvGuardando}
+                style={{ padding: "9px 22px", background: DARK, border: "none", color: WHITE,
+                  cursor: "pointer", borderRadius: 2, fontWeight: 700, fontFamily: "Inter, sans-serif",
+                  opacity: (!nvPropiedad || !nvComprador) ? 0.5 : 1 }}>
+                {nvGuardando ? "Guardando..." : "Registrar visita"}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
