@@ -1,11 +1,10 @@
 export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-
-const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 const CUALIF_URL = "https://crm.mallorcanativaproperties.com/cualificacion";
 
 export async function GET() {
+  const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
   try {
     // Cargar tareas pendientes cuya hora ya ha llegado
     const { data: tareas } = await sb.from("tareas_programadas")
