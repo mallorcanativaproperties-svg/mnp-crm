@@ -1662,8 +1662,14 @@ REGLAS:
     setTranslating(true);
     setTranslateError("");
     try {
-      const texto = textoEs.slice(0, 4000);
-      const sistema = "Eres un traductor profesional de textos inmobiliarios de lujo. Traduce el texto manteniendo el mismo tono y estilo. Responde ÚNICAMENTE con la traducción, sin explicaciones ni texto adicional.";
+      // Sanitizar texto: eliminar caracteres de control que rompen el JSON
+      const texto = textoEs
+        .slice(0, 4000)
+        .replace(/[ --]/g, "")  // chars de control excepto \t \n \r
+        .replace(/
+/g, "\n")
+        .replace(//g, "\n");
+      const sistema = "Eres un traductor profesional de textos inmobiliarios de lujo. Traduce el texto manteniendo el mismo tono y estilo. Responde UNICAMENTE con la traduccion, sin explicaciones ni texto adicional.";
 
       // Dos llamadas separadas — una por idioma
       const [resEn, resDe] = await Promise.all([

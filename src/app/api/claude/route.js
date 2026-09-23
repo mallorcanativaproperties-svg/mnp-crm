@@ -3,7 +3,14 @@ import { NextResponse } from "next/server";
 
 export async function POST(request) {
   try {
-    const body = await request.json();
+    // Leer como texto primero para evitar errores de parseo con caracteres especiales
+    const rawBody = await request.text();
+    let body;
+    try {
+      body = JSON.parse(rawBody);
+    } catch {
+      return NextResponse.json({ error: "Body JSON inválido" }, { status: 400 });
+    }
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -33,9 +40,7 @@ export async function POST(request) {
       return NextResponse.json({ error: data.error?.message || "Error de API" }, { status: 500 });
     }
 
-    // Extraer solo el texto — así nunca hay problemas de JSON grande en el cliente
     const text = data.content?.filter(i => i.type === "text").map(i => i.text).join("") || "";
-
     return NextResponse.json({ text, content: data.content });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
