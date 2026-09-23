@@ -107,9 +107,14 @@ export async function POST(request) {
     const openaiData = await openaiRes.json();
     if (openaiData.error) throw new Error(openaiData.error.message || JSON.stringify(openaiData.error));
 
+    // Log estructura para debug
+    console.log("OpenAI /responses respuesta estructura:", JSON.stringify(Object.keys(openaiData)));
+    console.log("output:", JSON.stringify(openaiData.output?.slice(0,1)));
+
     const b64 = openaiData.output?.find(o => o.type === "image")?.data
+      || openaiData.output?.find(o => o.type === "image_generation_call")?.result?.data
       || openaiData.data?.[0]?.b64_json;
-    if (!b64) throw new Error("OpenAI no devolvió imagen: " + JSON.stringify(openaiData).slice(0, 200));
+    if (!b64) throw new Error("Sin imagen. Estructura: " + JSON.stringify(openaiData).slice(0, 500));
 
     const binaryStr = atob(b64);
     const bytes = new Uint8Array(binaryStr.length);
