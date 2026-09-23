@@ -16,6 +16,23 @@ export default function Usuarios({ currentUser }) {
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState(null);
 
+  const rolActual = currentUser?.role?.toLowerCase();
+  const esAdministrador = rolActual === "administrador";
+  const esDirector = rolActual === "director";
+
+  // Administrador puede editar a todos. Director puede editar agentes y administradores pero NO al administrador.
+  function puedeEditar(u) {
+    if (esAdministrador) return true; // administrador puede editar a todos
+    if (esDirector) return u.role !== "administrador"; // director NO puede editar al administrador
+    return false;
+  }
+  function puedeEliminar(u) {
+    if (u.user_login === currentUser?.user_login) return false;
+    if (esAdministrador) return true;
+    if (esDirector) return u.role === "agente"; // director solo elimina agentes
+    return false;
+  }
+
   useEffect(() => { fetchUsuarios(); }, []);
 
   async function fetchUsuarios() {
@@ -64,7 +81,8 @@ export default function Usuarios({ currentUser }) {
     } else {
       const update = {
         nombre: form.nombre.trim(),
-        role: form.role,
+        // Director no puede asignar rol administrador
+        role: (esDirector && form.role === "administrador") ? "agente" : form.role,
         agente_codigo: form.agente_codigo || null,
         agente_telefono: form.agente_telefono?.trim() || null,
         email: form.email?.trim() || null,
@@ -150,14 +168,20 @@ export default function Usuarios({ currentUser }) {
               </div>
               {/* Acciones */}
               <div style={{ display: "flex", gap: 8 }}>
-                <button onClick={() => abrirEditar(u)} style={{ background: "transparent", border: "1px solid #2A2926", borderRadius: 0, color: "#9A968A", fontSize: 11, cursor: "pointer", padding: "6px 14px", fontFamily: "Inter, sans-serif" }}>Editar</button>
+                {puedeEditar(u) && (
+                  <button onClick={() => abrirEditar(u)} style={{ background: "transparent", border: "1px solid #2A2926", borderRadius: 0, color: "#9A968A", fontSize: 11, cursor: "pointer", padding: "6px 14px", fontFamily: "Inter, sans-serif" }}>Editar</button>
+                )}
                 {u.user_login !== currentUser?.user_login && (<>
-                  <button onClick={() => toggleActivo(u)} style={{ background: "transparent", border: "1px solid " + (u.activo ? "#A23A3A44" : "#6AAF8D33"), borderRadius: 0, color: u.activo ? "#A23A3A" : "#2C6E52", fontSize: 11, cursor: "pointer", padding: "6px 14px", fontFamily: "Inter, sans-serif" }}>
-                    {u.activo ? "Desactivar" : "Activar"}
-                  </button>
-                  <button onClick={() => eliminarUsuario(u)} style={{ background: "transparent", border: "1px solid #D4545433", borderRadius: 0, color: "#A23A3A", fontSize: 11, cursor: "pointer", padding: "6px 14px", fontFamily: "Inter, sans-serif" }} title="Eliminar usuario definitivamente">
-                    ✕ Eliminar
-                  </button>
+                  {puedeEditar(u) && (
+                    <button onClick={() => toggleActivo(u)} style={{ background: "transparent", border: "1px solid " + (u.activo ? "#A23A3A44" : "#6AAF8D33"), borderRadius: 0, color: u.activo ? "#A23A3A" : "#2C6E52", fontSize: 11, cursor: "pointer", padding: "6px 14px", fontFamily: "Inter, sans-serif" }}>
+                      {u.activo ? "Desactivar" : "Activar"}
+                    </button>
+                  )}
+                  {puedeEliminar(u) && (
+                    <button onClick={() => eliminarUsuario(u)} style={{ background: "transparent", border: "1px solid #D4545433", borderRadius: 0, color: "#A23A3A", fontSize: 11, cursor: "pointer", padding: "6px 14px", fontFamily: "Inter, sans-serif" }} title="Eliminar usuario definitivamente">
+                      x Eliminar
+                    </button>
+                  )}
                 </>)}
               </div>
             </div>
@@ -192,7 +216,7 @@ export default function Usuarios({ currentUser }) {
                 <div>
                   <label style={lSt}>Rol *</label>
                   <select style={iSt} value={form.role || "agente"} onChange={e => setForm(f => ({ ...f, role: e.target.value }))}>
-                    {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+                    {ROLES.filter(r => esAdministrador || r !== "administrador").map(r => <option key={r} value={r}>{r}</option>)}
                   </select>
                 </div>
                 <div>
