@@ -365,27 +365,28 @@ function GeneradorDoc({ visita, propiedad, agente, onGuardado, onClose }) {
 
   async function guardar() {
     setSaving(true);
+
+    // Compradores: usar visita_compradores si existe, si no el comprador principal
+    const todosComps = visita?.visita_compradores?.length > 0
+      ? visita.visita_compradores.sort((a,b) => a.orden - b.orden).map(vc => vc.compradores).filter(Boolean)
+      : visita?.compradores ? [visita.compradores] : [];
+
+    // La API de documento carga propiedad desde BD usando propiedad_id de la visita
+    // Solo guardamos metadatos mínimos en contenido JSONB como referencia
     const contenido = {
-      propiedad: {
-        direccion: propiedad?.dir || "",
-        ref_catastral: propiedad?.ref_catastral || "",
-        ref_interna: propiedad?.ref || "",
-        precio_publicacion: propiedad?.precio_venta || 0,
-      },
       agente: {
         nombre: agente?.nombre || "",
         user_login: agente?.user_login || "",
       },
-      comprador: {
-        nombre: visita?.compradores?.nombre || "",
-        apellidos: visita?.compradores?.apellidos || "",
-        dni: visita?.compradores?.dni || "",
-        telefono: visita?.compradores?.telefono || "",
-      },
+      compradores: todosComps.map(c => ({
+        nombre: c?.nombre || "",
+        apellidos: c?.apellidos || "",
+        dni: c?.dni || "",
+        telefono: c?.telefono || "",
+      })),
       precio_oferta: tipo !== "hoja_visita" ? precioOferta : null,
       condiciones_particulares: condicionesParticulares || null,
-      fecha_documento: new Date().toLocaleDateString("es-ES", { day: "numeric", month: "long", year: "numeric" }),
-      ciudad: "Palma de Mallorca",
+      fecha_documento: new Date().toISOString(),
     };
 
     await supabase.from("visita_documentos").insert({
@@ -397,6 +398,15 @@ function GeneradorDoc({ visita, propiedad, agente, onGuardado, onClose }) {
       deposito_tipo: tipo !== "hoja_visita" ? depositoTipo : null,
       created_at: new Date().toISOString(),
     });
+
+    // Notificar al director/admin si es oferta o reserva
+    if (tipo === "oferta" || tipo === "reserva") {
+      await fetch("/api/visitas/notificar-admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ visitaId: visita.id, tipo, propiedad: { nombre: propiedad?.nombre || propiedad?.id } }),
+      });
+    }
 
     setSaving(false);
     onGuardado();

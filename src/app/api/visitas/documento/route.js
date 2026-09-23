@@ -242,7 +242,7 @@ export async function GET(req) {
   if (!docId) return NextResponse.json({ error: "Falta id" }, { status: 400 });
 
   const { data: doc } = await sb.from("visita_documentos")
-    .select("*, visitas(*, compradores(nombre,apellidos,dni,telefono), visita_compradores(orden, compradores(nombre,apellidos,dni,telefono)), propiedades(ref,dir,municipio,precio_venta,ref_catastral), usuarios:agente_login(nombre))")
+    .select("*, visitas(*, agente_login, compradores(nombre,apellidos,dni,telefono), visita_compradores(orden, compradores(nombre,apellidos,dni,telefono)), propiedades(ref,dir,municipio,precio_venta,ref_catastral))")
     .eq("id", docId).single();
 
   if (!doc) return NextResponse.json({ error: "Documento no encontrado" }, { status: 404 });
@@ -253,16 +253,24 @@ export async function GET(req) {
     ? visita.visita_compradores.sort((a, b) => a.orden - b.orden).map(vc => vc.compradores).filter(Boolean)
     : visita?.compradores ? [visita.compradores] : [];
 
+  // Cargar nombre del agente por separado (no hay FK declarada en Supabase)
+  let nombreAgente = doc.contenido?.agente?.nombre || "";
+  if (visita?.agente_login && !nombreAgente) {
+    const { data: agenteDatos } = await sb.from("usuarios")
+      .select("nombre").eq("user_login", visita.agente_login).single();
+    nombreAgente = agenteDatos?.nombre || visita.agente_login;
+  }
+
   const contenido = {
     ...doc.contenido,
     fecha_documento: doc.created_at,
     propiedad: {
-      direccion: prop ? `${prop.dir || ""}, ${prop.municipio || ""}`.trim() : doc.contenido?.propiedad?.direccion || "",
-      ref_catastral: prop?.ref_catastral || doc.contenido?.propiedad?.ref_catastral || "",
-      ref_interna: prop?.ref || doc.contenido?.propiedad?.ref_interna || "",
-      precio_publicacion: prop?.precio_venta || doc.contenido?.propiedad?.precio_publicacion || 0,
+      direccion: prop ? `${prop.dir || ""}, ${prop.municipio || ""}`.trim().replace(/^,\s*|,\s*$/, "") : "",
+      ref_catastral: prop?.ref_catastral || "",
+      ref_interna: prop?.ref || "",
+      precio_publicacion: prop?.precio_venta || 0,
     },
-    agente: { nombre: visita?.usuarios?.nombre || doc.contenido?.agente?.nombre || "" },
+    agente: { nombre: nombreAgente },
     compradores: compradores.length > 0 ? compradores : (doc.contenido?.compradores || []),
   };
 
