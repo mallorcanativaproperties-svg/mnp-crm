@@ -79,11 +79,15 @@ const TIPO_GROUPS = [
 ];
 
 const ESTADOS = [
-  { key: "captada", label: "Captada", accent: "#AC8A54" },
-  { key: "publicada", label: "Publicada", accent: "#2C6E52" },
-  { key: "reservada", label: "Reservada", accent: "#9C6E1B" },
-  { key: "vendida", label: "Vendida", accent: "#2C6E52" },
-  { key: "retirada", label: "Retirada", accent: "#9A968A" },
+  { key: "captada",        label: "Captada",          accent: "#AC8A54" },
+  { key: "publicada",      label: "Publicada",         accent: "#2C6E52" },
+  { key: "reservada",      label: "Reservada",         accent: "#9C6E1B" },
+  { key: "oferta_aceptada",label: "Oferta aceptada",   accent: "#C8820A" },
+  { key: "arras",          label: "Arras",             accent: "#B05D00" },
+  { key: "notaria",        label: "Notaría",           accent: "#185FA5" },
+  { key: "vendida",        label: "Vendida",           accent: "#2C6E52" },
+  { key: "caida",          label: "Caída",             accent: "#A23A3A" },
+  { key: "retirada",       label: "Retirada",          accent: "#9A968A" },
 ];
 
 const DESTINOS = ["Web propia", "Idealista", "Marketplace Facebook", "Catalogo WhatsApp"];
@@ -2594,7 +2598,149 @@ REGLAS:
           </div>
         </div>
 
+        {/* ── Tab Visitas — solo lectura ────────────────────────────── */}
+        {p.id && <TabVisitasReadOnly propiedadId={p.id} />}
+
       </div>
+    </div>
+  );
+}
+
+// ─── Tab Visitas solo lectura en ficha de propiedad ───────────────────────────
+function TabVisitasReadOnly({ propiedadId }) {
+  const [visitas, setVisitas] = useState([]);
+  const [informes, setInformes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState(false);
+
+  const GOLD = "#AC8A54"; const BORDER = "#E7E1D4"; const MUTED = "#9A968A";
+  const TEXT = "#22262E"; const CREAM = "#F8F6F1"; const WHITE = "#FFFFFF";
+
+  const ESTADO_DOC = {
+    borrador:           { label: "Borrador",            color: MUTED    },
+    enviado:            { label: "Enviado",             color: "#185FA5" },
+    firmado_comprador:  { label: "Firmado comprador",   color: GOLD     },
+    deposito_recibido:  { label: "Depósito recibido",   color: "#9C6E1B" },
+    firmado_vendedor:   { label: "Firmado vendedor",    color: "#2C6E52" },
+    completado:         { label: "Completado",          color: "#2C6E52" },
+  };
+  const TIPO_DOC = {
+    hoja_visita:  "Hoja de visita",
+    oferta:       "Propuesta / Oferta",
+    reserva:      "Reserva exclusiva",
+    contraoferta: "Contraoferta",
+  };
+
+  useEffect(() => {
+    if (!open) return;
+    async function cargar() {
+      setLoading(true);
+      const { data: vis } = await supabase.from("visitas")
+        .select("*, compradores(nombre, apellidos), visita_documentos(*)")
+        .eq("propiedad_id", propiedadId).eq("activo", true)
+        .order("fecha_visita", { ascending: false });
+      const { data: inf } = await supabase.from("visita_informes")
+        .select("*").eq("propiedad_id", propiedadId)
+        .order("fecha_informe", { ascending: false });
+      setVisitas(vis || []);
+      setInformes(inf || []);
+      setLoading(false);
+    }
+    cargar();
+  }, [propiedadId, open]);
+
+  const totalVisitas = visitas.length;
+  const totalDocs = visitas.reduce((acc, v) => acc + (v.visita_documentos?.length || 0), 0);
+
+  return (
+    <div style={{ marginTop: 32, borderTop: `2px solid ${GOLD}33` }}>
+      <button onClick={() => setOpen(o => !o)} style={{
+        width: "100%", padding: "16px 0", background: "transparent", border: "none",
+        display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer"
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <span style={{ fontSize: 10, color: GOLD, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}>
+            Visitas y documentos
+          </span>
+          {totalVisitas > 0 && (
+            <span style={{ fontSize: 10, background: `${GOLD}18`, color: GOLD, padding: "2px 8px", borderRadius: 10, fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
+              {totalVisitas} visita{totalVisitas !== 1 ? "s" : ""} · {totalDocs} doc{totalDocs !== 1 ? "s" : ""}
+            </span>
+          )}
+        </div>
+        <span style={{ color: MUTED, fontSize: 12 }}>{open ? "▲" : "▼"}</span>
+      </button>
+
+      {open && (
+        <div style={{ paddingBottom: 24 }}>
+          {loading ? (
+            <div style={{ color: MUTED, fontSize: 12, padding: "12px 0", fontFamily: "Inter, sans-serif" }}>Cargando visitas...</div>
+          ) : visitas.length === 0 ? (
+            <div style={{ color: MUTED, fontSize: 12, padding: "12px 0", fontFamily: "Inter, sans-serif" }}>
+              No hay visitas registradas. Las visitas se gestionan desde la sección <strong>Visitas</strong>.
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {visitas.map(v => {
+                const comprador = v.compradores;
+                const docs = v.visita_documentos || [];
+                const fecha = new Date(v.fecha_visita).toLocaleDateString("es-ES", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+                return (
+                  <div key={v.id} style={{ background: WHITE, border: `1px solid ${BORDER}`, padding: "14px 18px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: TEXT, fontFamily: "Inter, sans-serif" }}>
+                          {comprador ? `${comprador.nombre} ${comprador.apellidos || ""}`.trim() : "Comprador sin nombre"}
+                        </div>
+                        <div style={{ fontSize: 11, color: MUTED, marginTop: 2, fontFamily: "Inter, sans-serif" }}>
+                          {fecha} · Agente: {v.agente_login}
+                        </div>
+                        {v.notas && <div style={{ fontSize: 11, color: TEXT, marginTop: 4, fontStyle: "italic" }}>{v.notas}</div>}
+                      </div>
+                      {v.resumen_ia && (
+                        <span style={{ fontSize: 10, background: "#2C6E5218", color: "#2C6E52", padding: "2px 8px", borderRadius: 10, whiteSpace: "nowrap", flexShrink: 0 }}>✓ Resumen IA</span>
+                      )}
+                    </div>
+                    {docs.length > 0 && (
+                      <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 6 }}>
+                        {docs.map(doc => {
+                          const est = ESTADO_DOC[doc.estado] || { label: doc.estado, color: MUTED };
+                          return (
+                            <div key={doc.id} style={{ fontSize: 10, border: `1px solid ${est.color}44`, color: est.color, padding: "3px 10px", borderRadius: 10, fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
+                              {TIPO_DOC[doc.tipo] || doc.tipo} · {est.label}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Informes enviados al propietario */}
+          {informes.length > 0 && (
+            <div style={{ marginTop: 20 }}>
+              <div style={{ fontSize: 10, color: GOLD, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", marginBottom: 8 }}>
+                Informes enviados al propietario
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {informes.map(inf => (
+                  <div key={inf.id} style={{ background: CREAM, border: `1px solid ${BORDER}`, padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div style={{ fontSize: 12, color: TEXT, fontFamily: "Inter, sans-serif" }}>
+                      Informe del {new Date(inf.fecha_informe).toLocaleDateString("es-ES", { day: "2-digit", month: "long", year: "numeric" })}
+                    </div>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: inf.estado === "enviado" ? "#2C6E52" : inf.estado === "confirmado" ? GOLD : MUTED, fontFamily: "Inter, sans-serif" }}>
+                      {inf.estado === "enviado" ? "✓ Enviado" : inf.estado === "confirmado" ? "Confirmado" : "Borrador"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
