@@ -69,42 +69,52 @@ export async function POST(request) {
     const imgBlob = new Blob([imgBuffer], { type: mimeType });
 
     // Llamada a OpenAI — auto size respeta las proporciones originales
-    const formData = new FormData();
-    formData.append("model", "gpt-image-2");
-    formData.append("image", imgBlob, ext);
-    formData.append("prompt", prompt);
-    formData.append("n", "1");
-    formData.append("size", "auto");
-    formData.append("quality", "high");
-    formData.append("output_format", "png");
+    // Convertir imagen a base64 para enviarla en el mensaje
+    const imgBase64 = Buffer.from(imgBuffer).toString("base64");
 
+    // Usar /responses con gpt-4o — mismo pipeline que ChatGPT web con visión
     const openaiCtrl = new AbortController();
-    const openaiTimeout = setTimeout(() => openaiCtrl.abort(), 90000);
-    const openaiRes = await fetch("https://api.openai.com/v1/images/edits", {
+    const openaiTimeout = setTimeout(() => openaiCtrl.abort(), 120000);
+    const openaiRes = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
-      headers: { Authorization: `Bearer ${OPENAI_API_KEY}` },
-      body: formData,
+      headers: {
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-image-2",
+        input: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "input_image",
+                image_url: `data:${mimeType};base64,${imgBase64}`,
+              },
+              {
+                type: "input_text",
+                text: prompt,
+              },
+            ],
+          },
+        ],
+        output: [{ type: "image", format: "png", quality: "high", size: "auto" }],
+      }),
       signal: openaiCtrl.signal,
     });
     clearTimeout(openaiTimeout);
 
     const openaiData = await openaiRes.json();
-    if (openaiData.error) throw new Error(openaiData.error.message);
+    if (openaiData.error) throw new Error(openaiData.error.message || JSON.stringify(openaiData.error));
 
-    const b64 = openaiData.data?.[0]?.b64_json;
-    const resultUrl = openaiData.data?.[0]?.url;
-    if (!b64 && !resultUrl) throw new Error("OpenAI no devolvió imagen");
+    const b64 = openaiData.output?.find(o => o.type === "image")?.data
+      || openaiData.data?.[0]?.b64_json;
+    if (!b64) throw new Error("OpenAI no devolvió imagen: " + JSON.stringify(openaiData).slice(0, 200));
 
-    let finalBuffer;
-    if (b64) {
-      const binaryStr = atob(b64);
-      const bytes = new Uint8Array(binaryStr.length);
-      for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
-      finalBuffer = bytes.buffer;
-    } else {
-      const r = await fetch(resultUrl);
-      finalBuffer = await r.arrayBuffer();
-    }
+    const binaryStr = atob(b64);
+    const bytes = new Uint8Array(binaryStr.length);
+    for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
+    let finalBuffer = bytes.buffer;
 
     const ts = Date.now();
     const oldPath = imageUrl.split("/propiedades-media/")[1];
