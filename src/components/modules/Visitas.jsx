@@ -926,8 +926,8 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
             </Modal>
           )}
 
-          {/* Acciones */}
-          {puedeEditar && (
+          {/* Acciones — solo administrador puede eliminar */}
+          {currentUser?.role?.toLowerCase() === "administrador" && (
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
               <button onClick={eliminarVisita} style={{ padding: "5px 12px", border: "1px solid #A23A3A33",
                 background: "transparent", color: DANGER, cursor: "pointer", borderRadius: 2,
