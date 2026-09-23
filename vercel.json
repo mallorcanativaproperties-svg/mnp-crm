@@ -26,6 +26,10 @@
     {
       "path": "/api/cron/visitas",
       "schedule": "*/30 * * * *"
+    },
+    {
+      "path": "/api/cron/mejora-fotos",
+      "schedule": "*/10 * * * *"
     }
   ],
   "headers": [

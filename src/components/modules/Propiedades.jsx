@@ -597,7 +597,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
     setShowModalMejora(true);
   }
 
-  // Envía las fotos al servidor para procesarlas en background
+  // Inserta las fotos en la cola de mejora — el cron las procesa sin límite de tiempo
   async function mejorarTodasFotos() {
     const fotos = media.filter(m => m.tipo === "foto" && fotosSeleccionadas.has(m.id));
     if (!fotos.length) return;
@@ -617,16 +617,16 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
       const data = await res.json();
       if (!data.ok) throw new Error(data.error);
     } catch (e) {
-      alert("Error al lanzar la mejora: " + e.message);
+      alert("Error al añadir a la cola: " + e.message);
       return;
     }
 
     setFotosSeleccionadas(new Set());
-    alert(`✦ Mejora en proceso
+    alert(`✦ Mejora en cola
 
-${fotos.length} foto${fotos.length !== 1 ? "s" : ""} enviada${fotos.length !== 1 ? "s" : ""} al servidor.
+${fotos.length} foto${fotos.length !== 1 ? "s" : ""} añadida${fotos.length !== 1 ? "s" : ""} a la cola de procesamiento.
 
-Puedes seguir trabajando — cuando termine recibirás un WhatsApp con el resultado.`);
+El servidor las irá mejorando de forma automática. Recibirás un WhatsApp cuando termine.`);
   }
 
   // Home Staging: genera variación sin reemplazar la original (previewOnly)
