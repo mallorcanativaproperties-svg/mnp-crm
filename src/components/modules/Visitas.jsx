@@ -97,6 +97,7 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
   const [nuevaNac, setNuevaNac] = useState("España");
   const [saving, setSaving] = useState(false);
   const [sugerencias, setSugerencias] = useState([]);
+  const [compradorExistenteId, setCompradorExistenteId] = useState(null);
   const [completarDatos, setCompletarDatos] = useState(null); // comprador que necesita DNI/tel
   const [completarDni, setCompletarDni] = useState("");
   const [completarTel, setCompletarTel] = useState("");
@@ -114,15 +115,38 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
     if (!nuevoDni.trim()) { alert("El DNI / NIE es obligatorio."); return; }
     if (!nuevoTel.trim()) { alert("El teléfono es obligatorio."); return; }
     setSaving(true);
-    const { data } = await supabase.from("compradores").insert({
-      nombre: nuevoNombre.trim(), apellidos: nuevoApellidos.trim(),
-      telefono: nuevoTel.trim(), email: nuevoEmail.trim(),
-      dni: nuevoDni.trim(), pais: nuevaNac, activo: true,
-      created_at: new Date().toISOString(),
-    }).select().single();
-    if (data) onChange(data);
+
+    if (compradorExistenteId) {
+      // Ya existe — actualizar datos si cambiaron y seleccionar
+      const { data } = await supabase.from("compradores").update({
+        apellidos: nuevoApellidos.trim() || undefined,
+        telefono: nuevoTel.trim(),
+        email: nuevoEmail.trim() || undefined,
+        dni: nuevoDni.trim(),
+        pais: nuevaNac || undefined,
+        updated_at: new Date().toISOString(),
+      }).eq("id", compradorExistenteId).select().single();
+      if (data) onChange(data);
+      else {
+        // Si no devuelve datos, buscar el registro
+        const { data: existing } = await supabase.from("compradores")
+          .select("*").eq("id", compradorExistenteId).single();
+        if (existing) onChange(existing);
+      }
+    } else {
+      // Nuevo comprador — insertar
+      const { data } = await supabase.from("compradores").insert({
+        nombre: nuevoNombre.trim(), apellidos: nuevoApellidos.trim(),
+        telefono: nuevoTel.trim(), email: nuevoEmail.trim(),
+        dni: nuevoDni.trim(), pais: nuevaNac, activo: true,
+        created_at: new Date().toISOString(),
+      }).select().single();
+      if (data) onChange(data);
+    }
+
     setSaving(false);
     setShowNew(false);
+    setCompradorExistenteId(null);
   }
 
   if (value) return (
@@ -237,6 +261,13 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
       )}
       {showNew && (
         <Modal title="Nuevo comprador" onClose={() => setShowNew(false)} width={480}>
+          {compradorExistenteId && (
+            <div style={{ marginBottom: 12, padding: "8px 12px", background: `${GOLD}12`,
+              border: `1px solid ${GOLD}`, borderRadius: 2, fontSize: 11,
+              color: GOLD, fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
+              ✓ Comprador ya existe en la BD — se actualizarán sus datos si has modificado algún campo
+            </div>
+          )}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <div style={{ position: "relative" }}>
               <L c="Nombre" req />
@@ -274,6 +305,7 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
                         setNuevoTel(s.telefono || "");
                         setNuevoEmail(s.email || "");
                         setNuevaNac(s.pais || "España");
+                        setCompradorExistenteId(s.id);
                         setSugerencias([]);
                       }}
                       style={{ padding: "9px 12px", cursor: "pointer", borderBottom: `1px solid ${BORDER}`,
@@ -307,14 +339,14 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
             <div><L c="Email" /><input style={iSt} value={nuevoEmail} onChange={e => setNuevoEmail(e.target.value)} /></div>
           </div>
           <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 20 }}>
-            <button onClick={() => setShowNew(false)} style={{ padding: "9px 18px", border: `1px solid ${BORDER}`,
+            <button onClick={() => { setShowNew(false); setCompradorExistenteId(null); }} style={{ padding: "9px 18px", border: `1px solid ${BORDER}`,
               background: "transparent", color: MUTED, cursor: "pointer", borderRadius: 2, fontFamily: "Inter, sans-serif" }}>
               Cancelar
             </button>
             <button onClick={crearNuevo} disabled={saving} style={{ padding: "9px 22px", background: DARK,
               border: "none", color: WHITE, cursor: "pointer", borderRadius: 2, fontWeight: 600,
               fontFamily: "Inter, sans-serif" }}>
-              {saving ? "Guardando..." : "Crear y seleccionar"}
+              {saving ? "Guardando..." : compradorExistenteId ? "Guardar y seleccionar" : "Crear y seleccionar"}
             </button>
           </div>
         </Modal>
