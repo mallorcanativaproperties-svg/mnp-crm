@@ -1701,8 +1701,12 @@ REGLAS:
       const rawDe = await resDe.text();
 
       let dataEn, dataDe;
-      try { dataEn = JSON.parse(rawEn); } catch { throw new Error("Respuesta inválida EN: " + rawEn.slice(0, 100)); }
-      try { dataDe = JSON.parse(rawDe); } catch { throw new Error("Respuesta inválida DE: " + rawDe.slice(0, 100)); }
+      try { dataEn = JSON.parse(rawEn); } catch(pe) {
+        throw new Error("EN parse error pos " + pe.message + " | raw: " + rawEn.slice(0, 200));
+      }
+      try { dataDe = JSON.parse(rawDe); } catch(pe) {
+        throw new Error("DE parse error pos " + pe.message + " | raw: " + rawDe.slice(0, 200));
+      }
 
       if (dataEn.error) throw new Error(dataEn.error);
       if (dataDe.error) throw new Error(dataDe.error);
