@@ -1510,6 +1510,18 @@ function PropCard({ p, onClick }) {
       onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#E7E1D4"; e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.background = "#FFFFFF"; }}
     >
       <div style={{ position: "absolute", top: 0, left: 0, width: 3, height: "100%", background: est.accent, opacity: 0.6 }} />
+      <div style={{ display: "flex", gap: 16, alignItems: "stretch" }}>
+        {/* Foto portada */}
+        <div style={{ flexShrink: 0, width: 100, minHeight: 80, background: "#F0EDE8",
+          overflow: "hidden", alignSelf: "stretch", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          {p.portadaUrl ? (
+            <img src={p.portadaUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", minHeight: 80 }} />
+          ) : (
+            <span style={{ fontSize: 22, opacity: 0.25 }}>🏠</span>
+          )}
+        </div>
+        {/* Contenido */}
+        <div style={{ flex: 1, minWidth: 0 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
         <div style={{ minWidth: 0, flex: 1 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
@@ -1573,6 +1585,8 @@ function PropCard({ p, onClick }) {
         {p.armarios && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E15" }}>Armarios empotrados</span>}
         {p.trastero && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E15" }}>Trastero</span>}
         {p.parking === "Si" && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E15" }}>Parking</span>}
+      </div>
+        </div>
       </div>
     </div>
   );
@@ -3433,11 +3447,19 @@ export default function CRMPropiedades({ currentUser }) {
     // Count real media from media_propiedades
     let mediaMap = {};
     if (ids.length > 0) {
-      const { data: allMedia } = await supabase.from("media_propiedades").select("propiedad_id, tipo").in("propiedad_id", ids);
+      const { data: allMedia } = await supabase.from("media_propiedades").select("propiedad_id, tipo, url, es_portada, orden").in("propiedad_id", ids);
       if (allMedia) {
         allMedia.forEach(m => {
-          if (!mediaMap[m.propiedad_id]) mediaMap[m.propiedad_id] = { foto: 0, video: 0, plano: 0 };
+          if (!mediaMap[m.propiedad_id]) mediaMap[m.propiedad_id] = { foto: 0, video: 0, plano: 0, portada: null };
           mediaMap[m.propiedad_id][m.tipo] = (mediaMap[m.propiedad_id][m.tipo] || 0) + 1;
+          // Guardar URL de portada (es_portada=true, o primera foto si no hay portada marcada)
+          if (m.tipo === "foto") {
+            if (m.es_portada) {
+              mediaMap[m.propiedad_id].portada = m.url;
+            } else if (!mediaMap[m.propiedad_id].portada) {
+              mediaMap[m.propiedad_id].portada = m.url;
+            }
+          }
         });
       }
     }
@@ -3447,6 +3469,7 @@ export default function CRMPropiedades({ currentUser }) {
       return { 
         ...mapDbToJs(r), 
         demandas: demandasMap[r.ref] || 0,
+        portadaUrl: mc.portada || null,
         fotos: mc.foto || r.fotos || 0,
         videos: mc.video || r.videos || 0,
         planos: mc.plano || r.planos || 0,
