@@ -213,15 +213,16 @@ function generarHTML(tipo, contenido) {
 async function htmlAPdf(html) {
   let browser;
   try {
-    // En Vercel usamos @sparticuz/chromium
-    const chromium = (await import("@sparticuz/chromium")).default;
-    const puppeteer = (await import("puppeteer-core")).default;
+    const { default: chromium } = await import("@sparticuz/chromium");
+    const { default: puppeteer } = await import("puppeteer-core");
+
+    const execPath = await chromium.executablePath();
 
     browser = await puppeteer.launch({
-      args: chromium.args,
-      defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath(),
-      headless: chromium.headless,
+      args: [...chromium.args, "--no-sandbox", "--disable-setuid-sandbox"],
+      defaultViewport: { width: 1200, height: 900 },
+      executablePath: execPath,
+      headless: "new",
     });
 
     const page = await browser.newPage();
