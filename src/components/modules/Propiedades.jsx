@@ -1660,9 +1660,7 @@ REGLAS:
   function comprimirTexto(texto, maxChars) {
     if (texto.length <= maxChars) return texto;
     // Cortar por párrafos completos intentando no superar el límite
-    const parrafos = texto.split(/
-
-+/);
+    const parrafos = texto.split(/\n\n+/);
     let resultado = "";
     for (const p of parrafos) {
       if ((resultado + "
