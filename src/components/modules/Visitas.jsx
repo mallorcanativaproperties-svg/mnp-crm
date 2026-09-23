@@ -85,7 +85,7 @@ function Modal({ title, onClose, children, width = 560 }) {
 }
 
 // ── Selector de comprador ─────────────────────────────────────────────────────
-function SelectorComprador({ value, onChange }) {
+function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, email o teléfono..." }) {
   const [q, setQ] = useState("");
   const [results, setResults] = useState([]);
   const [showNew, setShowNew] = useState(false);
@@ -140,7 +140,7 @@ function SelectorComprador({ value, onChange }) {
   return (
     <div>
       <div style={{ display: "flex", gap: 8 }}>
-        <input value={q} onChange={e => setQ(e.target.value)} placeholder="Buscar por nombre, email o teléfono..."
+        <input value={q} onChange={e => setQ(e.target.value)} placeholder={placeholder}
           style={{ ...iSt, flex: 1 }} />
         <button onClick={() => setShowNew(true)} style={{ padding: "9px 14px", background: DARK,
           border: "none", color: WHITE, cursor: "pointer", borderRadius: 2, display: "flex",
@@ -532,8 +532,8 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
           </div>
           <div style={{ fontSize: 11, color: MUTED, marginTop: 3, fontFamily: "Inter, sans-serif" }}>
             {fecha} · {visita.agente_login}
-            {comp?.dni ? ` · DNI: ${comp.dni}` : ""}
-            {comp?.telefono ? ` · ${comp.telefono}` : ""}
+            {todosCompradores.filter(c => c.dni).map(c => ` · DNI: ${c.dni}`).join("")}
+            {todosCompradores.length > 1 && <span style={{ color: GOLD, marginLeft: 6, fontWeight: 600 }}>{todosCompradores.length} personas</span>}
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -893,37 +893,43 @@ export default function Visitas({ currentUser }) {
   const [filtroFecha, setFiltroFecha] = useState("");
   const [modalNuevaVisita, setModalNuevaVisita] = useState(false);
   const [nvPropiedad, setNvPropiedad] = useState(null);
-  const [nvComprador, setNvComprador] = useState(null);
-  const [nvNotas, setNvNotas] = useState("");
+  const [nvCompradores, setNvCompradores] = useState([]);
   const [nvHora, setNvHora] = useState(new Date().toISOString().slice(0,16));
   const [nvGuardando, setNvGuardando] = useState(false);
   const [propsAgente, setPropsAgente] = useState([]);
 
   async function crearVisitaGlobal() {
-    if (!nvPropiedad || !nvComprador) return;
+    if (!nvPropiedad || nvCompradores.length === 0) return;
     setNvGuardando(true);
-    await supabase.from("visitas").insert({
+    // Crear la visita con el primer comprador como referencia principal
+    const { data: visita } = await supabase.from("visitas").insert({
       propiedad_id: nvPropiedad.id,
       agente_login: currentUser.user_login,
-      comprador_id: nvComprador.id,
+      comprador_id: nvCompradores[0].id,
       fecha_visita: new Date(nvHora).toISOString(),
-      notas: nvNotas || null,
       activo: true,
-    });
-    // Programar cualificación a las 3 horas
-    await fetch("/api/visitas/programar-cualificacion", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        compradorId: nvComprador.id,
-        compradorTel: nvComprador.telefono,
-        propiedadId: nvPropiedad.id,
-        fecha: new Date(nvHora).toISOString(),
-      }),
-    });
+    }).select().single();
+
+    // Insertar todos los compradores en visita_compradores
+    if (visita) {
+      await supabase.from("visita_compradores").insert(
+        nvCompradores.map((c, i) => ({ visita_id: visita.id, comprador_id: c.id, orden: i + 1 }))
+      );
+      // Programar cualificación a las 3 horas para cada comprador
+      for (const c of nvCompradores) {
+        await fetch("/api/visitas/programar-cualificacion", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            compradorId: c.id, compradorTel: c.telefono,
+            propiedadId: nvPropiedad.id, fecha: new Date(nvHora).toISOString(),
+          }),
+        });
+      }
+    }
     setNvGuardando(false);
     setModalNuevaVisita(false);
-    setNvPropiedad(null); setNvComprador(null); setNvNotas(""); 
+    setNvPropiedad(null); setNvCompradores([]);
     setNvHora(new Date().toISOString().slice(0,16));
     cargar();
   }
@@ -940,7 +946,7 @@ export default function Visitas({ currentUser }) {
   const cargar = useCallback(async () => {
     setLoading(true);
     let q = supabase.from("visitas")
-      .select("*, compradores(id,nombre,apellidos,dni,telefono,email,pais), visita_documentos(*)")
+      .select("*, compradores(id,nombre,apellidos,dni,telefono,email,pais), visita_documentos(*), visita_compradores(*, compradores(id,nombre,apellidos,dni,telefono,email,pais))")
       .eq("activo", true)
       .order("fecha_visita", { ascending: false });
 
@@ -1103,28 +1109,47 @@ export default function Visitas({ currentUser }) {
               )}
             </div>
             <div>
-              <L c="Comprador" req />
-              <SelectorComprador value={nvComprador} onChange={setNvComprador} />
+              <L c={`Compradores${nvCompradores.length > 0 ? ` (${nvCompradores.length})` : ""}`} req />
+              {/* Lista de compradores añadidos */}
+              {nvCompradores.length > 0 && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 8 }}>
+                  {nvCompradores.map((c, i) => (
+                    <div key={c.id} style={{ background: CREAM2, border: `1px solid ${GOLD}`,
+                      padding: "8px 12px", display: "flex", justifyContent: "space-between",
+                      alignItems: "center", borderRadius: 2 }}>
+                      <div>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: TEXT, fontFamily: "Inter, sans-serif" }}>
+                          {i === 0 && <span style={{ fontSize: 9, color: GOLD, marginRight: 6, fontWeight: 700 }}>PRINCIPAL</span>}
+                          {c.nombre} {c.apellidos || ""}
+                        </span>
+                        {c.dni && <span style={{ fontSize: 11, color: MUTED, marginLeft: 8 }}>DNI: {c.dni}</span>}
+                      </div>
+                      <button onClick={() => setNvCompradores(nvCompradores.filter(x => x.id !== c.id))}
+                        style={{ background: "transparent", border: "none", color: MUTED, cursor: "pointer", padding: 2 }}>
+                        <XMarkIcon style={{ width: 13, height: 13 }} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {/* Añadir otro comprador */}
+              <SelectorComprador value={null}
+                onChange={c => { if (c && !nvCompradores.find(x => x.id === c.id)) setNvCompradores([...nvCompradores, c]); }}
+                placeholder={nvCompradores.length === 0 ? "Buscar o crear comprador principal..." : "Añadir otro comprador a la visita..."} />
             </div>
             <div>
               <L c="Fecha y hora de la visita" />
               <input type="datetime-local" value={nvHora} onChange={e => setNvHora(e.target.value)} style={iSt} />
             </div>
-            <div>
-              <L c="Notas" />
-              <textarea rows={3} value={nvNotas} onChange={e => setNvNotas(e.target.value)}
-                style={{ ...iSt, resize: "vertical" }}
-                placeholder="Impresión del comprador, interés mostrado, preguntas relevantes..." />
-            </div>
             <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", paddingTop: 8, borderTop: `1px solid ${BORDER}` }}>
               <button onClick={() => setModalNuevaVisita(false)} style={{ padding: "9px 18px",
                 border: `1px solid ${BORDER}`, background: "transparent", color: MUTED,
                 cursor: "pointer", borderRadius: 2, fontFamily: "Inter, sans-serif" }}>Cancelar</button>
-              <button onClick={crearVisitaGlobal} disabled={!nvPropiedad || !nvComprador || nvGuardando}
+              <button onClick={crearVisitaGlobal} disabled={!nvPropiedad || nvCompradores.length === 0 || nvGuardando}
                 style={{ padding: "9px 22px", background: DARK, border: "none", color: WHITE,
                   cursor: "pointer", borderRadius: 2, fontWeight: 700, fontFamily: "Inter, sans-serif",
-                  opacity: (!nvPropiedad || !nvComprador) ? 0.5 : 1 }}>
-                {nvGuardando ? "Guardando..." : "Registrar visita"}
+                  opacity: (!nvPropiedad || nvCompradores.length === 0) ? 0.5 : 1 }}>
+                {nvGuardando ? "Guardando..." : `Registrar visita${nvCompradores.length > 1 ? ` (${nvCompradores.length} personas)` : ""}`}
               </button>
             </div>
           </div>
