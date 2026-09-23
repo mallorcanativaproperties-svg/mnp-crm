@@ -597,35 +597,36 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
     setShowModalMejora(true);
   }
 
-  // Procesa las fotos seleccionadas en secuencia
+  // Envía las fotos al servidor para procesarlas en background
   async function mejorarTodasFotos() {
     const fotos = media.filter(m => m.tipo === "foto" && fotosSeleccionadas.has(m.id));
     if (!fotos.length) return;
     setShowModalMejora(false);
-    setMejorandoTodas(true);
-    setMejoraBatchProgreso({ actual: 0, total: fotos.length });
-    let ok = 0, err = 0;
-    for (let i = 0; i < fotos.length; i++) {
-      setMejoraBatchProgreso({ actual: i + 1, total: fotos.length });
-      try {
-        const ctrl = new AbortController();
-        const t = setTimeout(() => ctrl.abort(), 120000);
-        const res = await fetch("/api/foto-ia", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ mediaId: fotos[i].id, tipo: "mejora", estilo: null, imageUrl: fotos[i].url }),
-          signal: ctrl.signal,
-        });
-        clearTimeout(t);
-        const data = await res.json();
-        if (data.ok) ok++; else err++;
-      } catch { err++; }
+
+    const login = typeof window !== "undefined" ? localStorage.getItem("mnp_user_login") || "" : "";
+    try {
+      const res = await fetch("/api/foto-ia/batch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mediaIds: fotos.map(f => f.id),
+          propiedadRef: propRef || propiedadId,
+          agenteLogin: login,
+        }),
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error);
+    } catch (e) {
+      alert("Error al lanzar la mejora: " + e.message);
+      return;
     }
-    await loadMedia(false);
-    setMejorandoTodas(false);
-    setMejoraBatchProgreso(null);
+
     setFotosSeleccionadas(new Set());
-    alert(`Mejora completada: ${ok} fotos mejoradas${err > 0 ? `, ${err} con error` : ""}.`);
+    alert(`✦ Mejora en proceso
+
+${fotos.length} foto${fotos.length !== 1 ? "s" : ""} enviada${fotos.length !== 1 ? "s" : ""} al servidor.
+
+Puedes seguir trabajando — cuando termine recibirás un WhatsApp con el resultado.`);
   }
 
   // Home Staging: genera variación sin reemplazar la original (previewOnly)
