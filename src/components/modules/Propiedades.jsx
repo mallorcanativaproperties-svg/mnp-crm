@@ -824,6 +824,15 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                   Portada
                 </div>
               )}
+              {(item.nombre?.startsWith("ia-") || item.ia_generada) && (
+                <div style={{
+                  position: "absolute", top: item.es_portada ? 28 : 6, left: 6, zIndex: 2,
+                  background: "#1a2528", color: "#C8A97E", fontSize: 9, fontWeight: 700,
+                  padding: "2px 8px", borderRadius: 0, letterSpacing: "0.08em", textTransform: "uppercase",
+                }}>
+                  ✦ IA
+                </div>
+              )}
 
               {/* Thumbnail */}
               {activeTab === "video" ? (
