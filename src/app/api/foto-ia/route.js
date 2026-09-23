@@ -70,7 +70,7 @@ export async function POST(request) {
 
     // Llamada a OpenAI — auto size respeta las proporciones originales
     const formData = new FormData();
-    formData.append("model", "gpt-image-1");
+    formData.append("model", "gpt-image-2");
     formData.append("image", imgBlob, ext);
     formData.append("prompt", prompt);
     formData.append("n", "1");
