@@ -5,16 +5,15 @@ import { createClient } from "@supabase/supabase-js";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-const PROMPT_MEJORA = `This is a real estate photograph. Enhance it with these STRICT rules:
-- Keep the scene EXACTLY as photographed — same room, same furniture, same objects, same layout
-- Only improve: brightness, contrast, white balance, sharpness, color saturation
-- Make walls look brighter and whiter by increasing exposure
-- Straighten the horizon if tilted
-- Remove only minor clutter and small disordered objects
-- Do NOT redecorate, do NOT change furniture, do NOT add or remove structural elements
-- The result must look like the SAME photograph professionally retouched, NOT a render or illustration
-- Output must be photorealistic, high resolution, 16:9 horizontal format
-- Style: professional real estate photography, similar to top Idealista listings`;
+const PROMPT_MEJORA = `Professional real estate photo enhancement. Transform this photo into a top-tier real estate listing image:
+
+REMOVE completely: all clutter, personal items, cables, bins, cleaning supplies, clothes, boxes, bags, toys, excess decorative items, anything that looks messy or out of place.
+
+KEEP exactly as-is: all furniture (sofas, beds, tables, chairs), all structural elements (walls, floors, ceilings, doors, windows, columns), room layout and dimensions.
+
+ENHANCE: maximize natural light and brightness, make walls appear clean and white, improve color vibrancy, ensure perfectly straight horizontal and vertical lines, wide-angle perspective.
+
+The result must look like the same room photographed by a professional real estate photographer after a thorough clean-up. Photorealistic, high resolution, 16:9 horizontal.`;
 
 const PROMPT_HOME_STAGING = (estilo) => `Actúa como un diseñador de interiores profesional. Realiza una reproducción hiperrealista rediseñando los materiales y la decoración del espacio, manteniendo la distribución de los espacios, ventanas, puertas, columnas… no puedes modificar nada que pertenezca a estructura y tamaños. Realiza una reforma visual con un estilo ${estilo}, no quiero que haya demasiado mobiliario y decoración, tiene que verse sencillo pero atractivo y no quiero que sea el típico render hecho por chatgpt que tiene todo el mundo, ten algo de creatividad. La imagen tiene que ser fotorrealista en alta definición, vista amplia y perspectiva natural, no puede parecer un render.`;
 
@@ -69,37 +68,24 @@ export async function POST(request) {
     const imgBlob = new Blob([imgBuffer], { type: mimeType });
 
     // Llamada a OpenAI — auto size respeta las proporciones originales
-    // Convertir imagen a base64 para enviarla en el mensaje
-    const imgBase64 = Buffer.from(imgBuffer).toString("base64");
 
-    // Usar /responses con gpt-5.5 + image_generation tool — mismo pipeline que ChatGPT web
+    // /images/edits con gpt-image-2 — edición directa sobre la foto
+    const formData = new FormData();
+    formData.append("model", "gpt-image-2");
+    formData.append("image", imgBlob, ext);
+    formData.append("prompt", prompt);
+    formData.append("n", "1");
+    formData.append("size", "auto");
+    formData.append("quality", "high");
+    formData.append("output_format", "png");
+    formData.append("input_fidelity", "high");
+
     const openaiCtrl = new AbortController();
     const openaiTimeout = setTimeout(() => openaiCtrl.abort(), 120000);
-    const openaiRes = await fetch("https://api.openai.com/v1/responses", {
+    const openaiRes = await fetch("https://api.openai.com/v1/images/edits", {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-4o",
-        input: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "input_image",
-                image_url: `data:${mimeType};base64,${imgBase64}`,
-              },
-              {
-                type: "input_text",
-                text: prompt,
-              },
-            ],
-          },
-        ],
-        tools: [{ type: "image_generation", quality: "high", size: "auto", output_format: "png" }],
-      }),
+      headers: { Authorization: `Bearer ${OPENAI_API_KEY}` },
+      body: formData,
       signal: openaiCtrl.signal,
     });
     clearTimeout(openaiTimeout);
@@ -107,18 +93,20 @@ export async function POST(request) {
     const openaiData = await openaiRes.json();
     if (openaiData.error) throw new Error(openaiData.error.message || JSON.stringify(openaiData.error));
 
-    // La imagen viene en output como image_generation_call
-    const imgOutput = openaiData.output?.find(o => o.type === "image_generation_call");
-    const b64 = imgOutput?.result
-      || openaiData.output?.find(o => o.type === "image")?.data
-      || openaiData.data?.[0]?.b64_json;
+    const b64 = openaiData.data?.[0]?.b64_json;
+    const resultUrl = openaiData.data?.[0]?.url;
+    if (!b64 && !resultUrl) throw new Error("OpenAI no devolvió imagen");
 
-    if (!b64) throw new Error("Sin imagen. Respuesta: " + JSON.stringify(openaiData).slice(0, 400));
-
-    const binaryStr = atob(b64);
-    const bytes = new Uint8Array(binaryStr.length);
-    for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
-    let finalBuffer = bytes.buffer;
+    let finalBuffer;
+    if (b64) {
+      const binaryStr = atob(b64);
+      const bytes = new Uint8Array(binaryStr.length);
+      for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
+      finalBuffer = bytes.buffer;
+    } else {
+      const r = await fetch(resultUrl);
+      finalBuffer = await r.arrayBuffer();
+    }
 
     const ts = Date.now();
     const oldPath = imageUrl.split("/propiedades-media/")[1];
