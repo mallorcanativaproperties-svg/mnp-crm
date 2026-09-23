@@ -210,10 +210,17 @@ export default function EncargosVenta() {
         ? (prop.n_plazas > 1 ? `${prop.n_plazas} plazas` : "1 plaza")
         : "";
 
-      // Honorarios calculados desde la ficha
-      let honorariosCalc = prop.honorarios || "";
-      let ivaHonCalc = prop.iva_hon || "";
-      let importePropietarioCalc = prop.precio_prop || "";
+      // Honorarios en EUROS calculados desde porcentaje de la ficha
+      const precio = prop.precio_venta || prop.precio_alquiler || 0;
+      const pctHon = parseFloat(prop.honorarios) || 0;
+      const pctIva = parseFloat(prop.iva_hon) || 21;
+      const honorariosEuros = pctHon > 0 && precio > 0
+        ? Math.round(precio * pctHon / 100)
+        : "";
+      const ivaEuros = honorariosEuros
+        ? Math.round(honorariosEuros * pctIva / 100)
+        : "";
+      const importePropietarioCalc = prop.precio_prop || "";
 
       setForm(f => ({
         ...f,
@@ -227,8 +234,8 @@ export default function EncargosVenta() {
         // Condiciones económicas desde la ficha
         importe_publicacion: prop.precio_venta || prop.precio_alquiler || f.importe_publicacion,
         importe_propietario: importePropietarioCalc || f.importe_propietario,
-        honorarios:          honorariosCalc    || f.honorarios,
-        iva_honorarios:      ivaHonCalc        || f.iva_honorarios,
+        honorarios:          honorariosEuros   || f.honorarios,
+        iva_honorarios:      ivaEuros          || f.iva_honorarios,
         renta_mensual:       prop.precio_alquiler || f.renta_mensual,
       }));
     } else {
@@ -246,7 +253,13 @@ export default function EncargosVenta() {
     const userLogin = localStorage.getItem("mnp_user_login") || "";
     const res = await fetch("/api/encargos", { method: "POST", headers: { "Content-Type": "application/json", "x-user-login": userLogin }, body: JSON.stringify(payload) });
     const data = await res.json();
-    if (data.ok) { setShowForm(false); setForm(FORM_INIT); await load(); }
+    if (data.ok) {
+      setShowForm(false);
+      setForm(FORM_INIT);
+      await load();
+      // Restaurar datos del consultor para el próximo encargo
+      loadCurrentUser();
+    }
     setSaving(false);
   }
 
@@ -282,7 +295,7 @@ export default function EncargosVenta() {
           <div style={{ fontSize: 10, color: BRONZE, letterSpacing: "0.2em", marginBottom: 8 }}>MALLORCA NATIVA · CAPTACIÓN</div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 16 }}>
             <h1 style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: "clamp(22px,5vw,30px)", fontWeight: 400, color: PETROL, margin: 0 }}>Encargos de Venta</h1>
-            <button onClick={() => setShowForm(true)}
+            <button onClick={() => { setShowForm(true); loadCurrentUser(); }}
               style={{ padding: "10px 20px", background: PETROL, border: "none", color: CREAM, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.08em" }}>
               + Nuevo encargo
             </button>
