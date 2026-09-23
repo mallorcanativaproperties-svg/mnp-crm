@@ -6,6 +6,9 @@ const nextConfig = {
   },
   experimental: {
     missingSuspenseWithCSRBailout: false,
+    outputFileTracingIncludes: {
+      "/api/visitas/documento": ["./src/app/api/visitas/documento/*.docx"],
+    },
   },
 };
 
