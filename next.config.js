@@ -6,17 +6,6 @@ const nextConfig = {
   },
   experimental: {
     missingSuspenseWithCSRBailout: false,
-    serverComponentsExternalPackages: ["@sparticuz/chromium", "puppeteer-core"],
-  },
-  webpack: (config, { isServer }) => {
-    if (isServer) {
-      config.externals = [
-        ...(Array.isArray(config.externals) ? config.externals : [config.externals]),
-        "@sparticuz/chromium",
-        "puppeteer-core",
-      ];
-    }
-    return config;
   },
 };
 
