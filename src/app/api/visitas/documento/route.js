@@ -116,7 +116,7 @@ export async function GET(req) {
   if (!docId) return NextResponse.json({ error: "Falta id" }, { status: 400 });
 
   const { data: doc } = await supabase.from("visita_documentos")
-    .select("*, visitas(*, agente_login, compradores(nombre,apellidos,dni,telefono), visita_compradores(orden, compradores(nombre,apellidos,dni,telefono)), propiedades(ref,dir,num,municipio,tipo,precio_venta,precio_alquiler,precio_prop,honorarios,honorarios_tipo,iva_hon,ref_cat))")
+    .select("*, visitas(*, agente_login, compradores(nombre,apellidos,dni,telefono), visita_compradores(orden, compradores(nombre,apellidos,dni,telefono)), propiedades(ref,dir,num,municipio,tipo,precio_venta,precio_alquiler,precio_prop,honorarios,honorarios_tipo,iva_hon,ref_cat,trastero,parking,n_plazas))")
     .eq("id", docId).single();
 
   if (!doc) return NextResponse.json({ error: "Documento no encontrado" }, { status: 404 });
@@ -145,13 +145,24 @@ export async function GET(req) {
   // Precio de publicación: venta o alquiler según operación
   const precioPublicacion = prop?.precio_venta || prop?.precio_alquiler || 0;
 
-  // Dirección completa incluyendo número y tipo de propiedad
+  // Dirección completa incluyendo número, tipo y anexos
   let direccionCompleta = "";
+  let anexosStr = "";
   if (prop) {
     const partes = [prop.dir, prop.num].filter(Boolean).join(" ");
     const municipio = prop.municipio || "";
     direccionCompleta = [partes, municipio].filter(Boolean).join(", ");
-    if (prop.tipo) direccionCompleta += ` (${prop.tipo})`;
+    // Anexos: trastero y plaza de garaje si están marcados en la ficha
+    const anexos = [];
+    if (prop.trastero === true) anexos.push("trastero incluido");
+    if (prop.parking === "Si") {
+      const plazas = prop.n_plazas > 1 ? `${prop.n_plazas} plazas de garaje incluidas` : "plaza de garaje incluida";
+      anexos.push(plazas);
+    }
+    if (anexos.length > 0) {
+      anexosStr = anexos.join(" y ");
+      direccionCompleta += ` — con ${anexosStr}`;
+    }
   }
 
   const contenido = {
