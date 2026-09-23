@@ -96,6 +96,7 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
   const [nuevoDni, setNuevoDni] = useState("");
   const [nuevaNac, setNuevaNac] = useState("España");
   const [saving, setSaving] = useState(false);
+  const [sugerencias, setSugerencias] = useState([]);
   const [completarDatos, setCompletarDatos] = useState(null); // comprador que necesita DNI/tel
   const [completarDni, setCompletarDni] = useState("");
   const [completarTel, setCompletarTel] = useState("");
@@ -237,7 +238,68 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
       {showNew && (
         <Modal title="Nuevo comprador" onClose={() => setShowNew(false)} width={480}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            <div><L c="Nombre" req /><input style={iSt} value={nuevoNombre} onChange={e => setNuevoNombre(e.target.value)} /></div>
+            <div style={{ position: "relative" }}>
+              <L c="Nombre" req />
+              <input style={iSt} value={nuevoNombre}
+                onChange={async e => {
+                  const v = e.target.value;
+                  setNuevoNombre(v);
+                  if (v.length >= 2) {
+                    const { data } = await supabase.from("compradores")
+                      .select("id,nombre,apellidos,dni,telefono,email,pais")
+                      .or(`nombre.ilike.%${v}%,apellidos.ilike.%${v}%`)
+                      .limit(5);
+                    setSugerencias(data || []);
+                  } else {
+                    setSugerencias([]);
+                  }
+                }}
+                placeholder="Nombre del comprador..."
+                autoComplete="off" />
+              {sugerencias.length > 0 && (
+                <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 20,
+                  background: WHITE, border: `1px solid ${GOLD}`, borderRadius: 2,
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)", maxHeight: 200, overflowY: "auto" }}>
+                  <div style={{ padding: "6px 12px", fontSize: 10, color: GOLD, fontWeight: 700,
+                    letterSpacing: "0.1em", borderBottom: `1px solid ${BORDER}`,
+                    fontFamily: "Inter, sans-serif", background: `${GOLD}08` }}>
+                    YA EXISTE EN LA BASE DE CLIENTES
+                  </div>
+                  {sugerencias.map(s => (
+                    <div key={s.id}
+                      onClick={() => {
+                        setNuevoNombre(s.nombre || "");
+                        setNuevoApellidos(s.apellidos || "");
+                        setNuevoDni(s.dni || "");
+                        setNuevoTel(s.telefono || "");
+                        setNuevoEmail(s.email || "");
+                        setNuevaNac(s.pais || "España");
+                        setSugerencias([]);
+                      }}
+                      style={{ padding: "9px 12px", cursor: "pointer", borderBottom: `1px solid ${BORDER}`,
+                        fontFamily: "Inter, sans-serif" }}
+                      onMouseEnter={e => e.currentTarget.style.background = CREAM}
+                      onMouseLeave={e => e.currentTarget.style.background = WHITE}>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>
+                        {s.nombre} {s.apellidos || ""}
+                        {(!s.dni || !s.telefono) && (
+                          <span style={{ fontSize: 10, color: DANGER, marginLeft: 8, fontWeight: 700 }}>
+                            {!s.dni && !s.telefono ? "· Falta DNI y tel." : !s.dni ? "· Falta DNI" : "· Falta tel."}
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ fontSize: 11, color: MUTED, marginTop: 2 }}>
+                        {s.telefono || "Sin teléfono"}{s.email ? ` · ${s.email}` : ""}{s.dni ? ` · DNI: ${s.dni}` : ""}
+                      </div>
+                    </div>
+                  ))}
+                  <div style={{ padding: "7px 12px", fontSize: 11, color: MUTED, fontStyle: "italic",
+                    fontFamily: "Inter, sans-serif", borderTop: `1px solid ${BORDER}` }}>
+                    Selecciona para autorellenar o continúa escribiendo para crear nuevo
+                  </div>
+                </div>
+              )}
+            </div>
             <div><L c="Apellidos" /><input style={iSt} value={nuevoApellidos} onChange={e => setNuevoApellidos(e.target.value)} /></div>
             <div><L c="DNI / NIE" req /><input style={iSt} value={nuevoDni} onChange={e => setNuevoDni(e.target.value)} placeholder="12345678A" /></div>
             <div><L c="Nacionalidad" /><input style={iSt} value={nuevaNac} onChange={e => setNuevaNac(e.target.value)} /></div>
