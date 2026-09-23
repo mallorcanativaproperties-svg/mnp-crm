@@ -274,9 +274,9 @@ function GeneradorDoc({ visita, propiedad, agente, onGuardado, onClose }) {
     const contenido = {
       propiedad: {
         direccion: propiedad?.dir || "",
-        ref_catastral: propiedad?.refCatastral || "",
+        ref_catastral: propiedad?.ref_catastral || "",
         ref_interna: propiedad?.ref || "",
-        precio_publicacion: propiedad?.precioVenta || 0,
+        precio_publicacion: propiedad?.precio_venta || 0,
       },
       agente: {
         nombre: agente?.nombre || "",
@@ -526,7 +526,10 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
   const esPropia = visita.agente_login === currentUser?.user_login;
   const puedeEditar = isAdmin || esPropia;
 
-  const comp = visita.compradores;
+  const todosCompradores = visita.visita_compradores?.length > 0
+    ? visita.visita_compradores.sort((a,b) => a.orden - b.orden).map(vc => vc.compradores).filter(Boolean)
+    : visita.compradores ? [visita.compradores] : [];
+  const comp = todosCompradores[0];
   const docs = visita.visita_documentos || [];
   const fecha = new Date(visita.fecha_visita).toLocaleDateString("es-ES", {
     day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
@@ -582,7 +585,9 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
         <div style={{ flex: 1 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <span style={{ fontSize: 14, fontWeight: 700, color: TEXT, fontFamily: "Inter, sans-serif" }}>
-              {comp ? `${comp.nombre} ${comp.apellidos || ""}`.trim() : "Sin comprador"}
+              {todosCompradores.length > 0
+                ? todosCompradores.map(c => `${c.nombre} ${c.apellidos || ""}`.trim()).join(" · ")
+                : "Sin comprador"}
             </span>
             {docs.length > 0 && (
               <span style={{ fontSize: 10, background: `${GOLD}18`, color: GOLD, padding: "2px 8px",
@@ -1026,7 +1031,7 @@ export default function Visitas({ currentUser }) {
     const propIds = [...new Set(vData.map(v => v.propiedad_id).filter(Boolean))];
     if (propIds.length > 0) {
       const { data: props } = await supabase.from("propiedades")
-        .select("id,ref,dir,municipio,refCatastral,precioVenta")
+        .select("id,ref,dir,municipio,precio_venta")
         .in("id", propIds);
       const pMap = {};
       (props || []).forEach(p => { pMap[p.id] = p; });
