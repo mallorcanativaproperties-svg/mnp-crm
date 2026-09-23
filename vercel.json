@@ -22,6 +22,10 @@
     {
       "path": "/api/idealista/check-estado",
       "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/visitas",
+      "schedule": "*/30 * * * *"
     }
   ],
   "headers": [
