@@ -4,7 +4,7 @@ export const maxDuration = 300;
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-const BATCH_SIZE = 3;
+const BATCH_SIZE = 5;
 
 export async function GET() {
   const supabase = createClient(
