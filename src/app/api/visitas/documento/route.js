@@ -242,7 +242,7 @@ export async function GET(req) {
   if (!docId) return NextResponse.json({ error: "Falta id" }, { status: 400 });
 
   const { data: doc } = await sb.from("visita_documentos")
-    .select("*, visitas(*, agente_login, compradores(nombre,apellidos,dni,telefono), visita_compradores(orden, compradores(nombre,apellidos,dni,telefono)), propiedades(ref,dir,municipio,precio_venta,ref_catastral))")
+    .select("*, visitas(*, agente_login, compradores(nombre,apellidos,dni,telefono), visita_compradores(orden, compradores(nombre,apellidos,dni,telefono)), propiedades(ref,dir,municipio,precio_venta,ref_cat))")
     .eq("id", docId).single();
 
   if (!doc) return NextResponse.json({ error: "Documento no encontrado" }, { status: 404 });
@@ -266,7 +266,7 @@ export async function GET(req) {
     fecha_documento: doc.created_at,
     propiedad: {
       direccion: prop ? `${prop.dir || ""}, ${prop.municipio || ""}`.trim().replace(/^,\s*|,\s*$/, "") : "",
-      ref_catastral: prop?.ref_catastral || "",
+      ref_catastral: prop?.ref_cat || "",
       ref_interna: prop?.ref || "",
       precio_publicacion: prop?.precio_venta || 0,
     },
