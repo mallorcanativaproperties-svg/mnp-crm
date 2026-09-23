@@ -314,7 +314,9 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
   const [dragOverItem, setDragOverItem] = useState(null);
   const [iaModal, setIaModal] = useState(null); // { item, tipo } — foto seleccionada para IA
   const [iaEstilo, setIaEstilo] = useState("nórdico");
-  const [iaVariaciones, setIaVariaciones] = useState([]); // hasta 3 variaciones generadas
+  const [iaVariaciones, setIaVariaciones] = useState([]); // hasta
+  const [mejorandoTodas, setMejorandoTodas] = useState(false);
+  const [mejoraBatchProgreso, setMejoraBatchProgreso] = useState(null); // { actual, total } 3 variaciones generadas
   const [iaLoading, setIaLoading] = useState(false);
   const [iaSeleccionada, setIaSeleccionada] = useState(null); // variación elegida
 
@@ -586,6 +588,36 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
     }
   }
 
+  // Mejora todas las fotos en secuencia
+  async function mejorarTodasFotos() {
+    const fotos = media.filter(m => m.tipo === "foto");
+    if (!fotos.length) return;
+    if (!confirm(`¿Mejorar con IA las ${fotos.length} fotografías? El proceso puede tardar varios minutos.`)) return;
+    setMejorandoTodas(true);
+    setMejoraBatchProgreso({ actual: 0, total: fotos.length });
+    let ok = 0, err = 0;
+    for (let i = 0; i < fotos.length; i++) {
+      setMejoraBatchProgreso({ actual: i + 1, total: fotos.length });
+      try {
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), 120000);
+        const res = await fetch("/api/foto-ia", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mediaId: fotos[i].id, tipo: "mejora", estilo: null, imageUrl: fotos[i].url }),
+          signal: ctrl.signal,
+        });
+        clearTimeout(t);
+        const data = await res.json();
+        if (data.ok) ok++; else err++;
+      } catch { err++; }
+    }
+    await loadMedia(false);
+    setMejorandoTodas(false);
+    setMejoraBatchProgreso(null);
+    alert(`Mejora completada: ${ok} fotos mejoradas${err > 0 ? `, ${err} con error` : ""}.`);
+  }
+
   // Home Staging: genera variación sin reemplazar la original (previewOnly)
   async function generarVariacionIA(item, estilo) {
     setIaLoading(true);
@@ -666,6 +698,24 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
             </button>
           );
         })}
+        {activeTab === "foto" && media.filter(m => m.tipo === "foto").length > 0 && (
+          <button
+            onClick={mejorarTodasFotos}
+            disabled={mejorandoTodas || iaLoading}
+            style={{
+              marginLeft: "auto", padding: "6px 16px", border: "1px solid #C8A97E",
+              background: mejorandoTodas ? "#F8F6F1" : "transparent",
+              color: mejorandoTodas ? "#9A968A" : "#AC8A54",
+              cursor: (mejorandoTodas || iaLoading) ? "not-allowed" : "pointer",
+              fontSize: 10, fontWeight: 600, letterSpacing: "0.1em",
+              textTransform: "uppercase", fontFamily: "Inter, sans-serif",
+              borderRadius: 0, whiteSpace: "nowrap",
+            }}>
+            {mejorandoTodas
+              ? `✦ Mejorando ${mejoraBatchProgreso?.actual || 0}/${mejoraBatchProgreso?.total || 0}...`
+              : "✦ Mejorar fotografías"}
+          </button>
+        )}
       </div>
 
       {/* Drag hint */}
