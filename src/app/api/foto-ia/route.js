@@ -72,7 +72,7 @@ export async function POST(request) {
     // Convertir imagen a base64 para enviarla en el mensaje
     const imgBase64 = Buffer.from(imgBuffer).toString("base64");
 
-    // Usar /responses con gpt-4o — mismo pipeline que ChatGPT web con visión
+    // Usar /responses con gpt-5.5 + image_generation tool — mismo pipeline que ChatGPT web
     const openaiCtrl = new AbortController();
     const openaiTimeout = setTimeout(() => openaiCtrl.abort(), 120000);
     const openaiRes = await fetch("https://api.openai.com/v1/responses", {
@@ -82,7 +82,7 @@ export async function POST(request) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-image-2",
+        model: "gpt-4o",
         input: [
           {
             role: "user",
@@ -98,7 +98,7 @@ export async function POST(request) {
             ],
           },
         ],
-        output: [{ type: "image", format: "png", quality: "high", size: "auto" }],
+        tools: [{ type: "image_generation", quality: "high", size: "auto", output_format: "png" }],
       }),
       signal: openaiCtrl.signal,
     });
@@ -107,14 +107,13 @@ export async function POST(request) {
     const openaiData = await openaiRes.json();
     if (openaiData.error) throw new Error(openaiData.error.message || JSON.stringify(openaiData.error));
 
-    // Log estructura para debug
-    console.log("OpenAI /responses respuesta estructura:", JSON.stringify(Object.keys(openaiData)));
-    console.log("output:", JSON.stringify(openaiData.output?.slice(0,1)));
-
-    const b64 = openaiData.output?.find(o => o.type === "image")?.data
-      || openaiData.output?.find(o => o.type === "image_generation_call")?.result?.data
+    // La imagen viene en output como image_generation_call
+    const imgOutput = openaiData.output?.find(o => o.type === "image_generation_call");
+    const b64 = imgOutput?.result
+      || openaiData.output?.find(o => o.type === "image")?.data
       || openaiData.data?.[0]?.b64_json;
-    if (!b64) throw new Error("Sin imagen. Estructura: " + JSON.stringify(openaiData).slice(0, 500));
+
+    if (!b64) throw new Error("Sin imagen. Respuesta: " + JSON.stringify(openaiData).slice(0, 400));
 
     const binaryStr = atob(b64);
     const bytes = new Uint8Array(binaryStr.length);
