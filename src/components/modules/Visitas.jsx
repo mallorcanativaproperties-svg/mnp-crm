@@ -96,6 +96,10 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
   const [nuevoDni, setNuevoDni] = useState("");
   const [nuevaNac, setNuevaNac] = useState("España");
   const [saving, setSaving] = useState(false);
+  const [completarDatos, setCompletarDatos] = useState(null); // comprador que necesita DNI/tel
+  const [completarDni, setCompletarDni] = useState("");
+  const [completarTel, setCompletarTel] = useState("");
+  const [completarGuardando, setCompletarGuardando] = useState(false);
 
   useEffect(() => {
     if (q.length < 2) { setResults([]); return; }
@@ -106,6 +110,8 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
 
   async function crearNuevo() {
     if (!nuevoNombre.trim()) return;
+    if (!nuevoDni.trim()) { alert("El DNI / NIE es obligatorio."); return; }
+    if (!nuevoTel.trim()) { alert("El teléfono es obligatorio."); return; }
     setSaving(true);
     const { data } = await supabase.from("compradores").insert({
       nombre: nuevoNombre.trim(), apellidos: nuevoApellidos.trim(),
@@ -151,30 +157,91 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
       </div>
       {results.length > 0 && (
         <div style={{ border: `1px solid ${BORDER}`, background: WHITE, marginTop: 4, borderRadius: 2 }}>
-          {results.map(c => (
-            <div key={c.id} onClick={() => { onChange(c); setQ(""); setResults([]); }}
-              style={{ padding: "10px 14px", cursor: "pointer", borderBottom: `1px solid ${BORDER}`,
-                fontFamily: "Inter, sans-serif" }}
-              onMouseEnter={e => e.currentTarget.style.background = CREAM}
-              onMouseLeave={e => e.currentTarget.style.background = WHITE}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>
-                {c.nombre} {c.apellidos || ""}
+          {results.map(c => {
+            const faltaDni = !c.dni?.trim();
+            const faltaTel = !c.telefono?.trim();
+            const faltaAlgo = faltaDni || faltaTel;
+            return (
+              <div key={c.id} onClick={() => {
+                if (faltaAlgo) {
+                  setCompletarDatos(c); setCompletarDni(c.dni||""); setCompletarTel(c.telefono||"");
+                  setQ(""); setResults([]);
+                } else { onChange(c); setQ(""); setResults([]); }
+              }}
+                style={{ padding: "10px 14px", cursor: "pointer", borderBottom: `1px solid ${BORDER}`,
+                  fontFamily: "Inter, sans-serif" }}
+                onMouseEnter={e => e.currentTarget.style.background = CREAM}
+                onMouseLeave={e => e.currentTarget.style.background = WHITE}>
+                <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>
+                    {c.nombre} {c.apellidos || ""}
+                  </span>
+                  {faltaAlgo && (
+                    <span style={{ fontSize:10, color:DANGER, fontWeight:700, background:`${DANGER}15`,
+                      padding:"1px 7px", borderRadius:10 }}>
+                      {faltaDni && faltaTel ? "Falta DNI y tel." : faltaDni ? "Falta DNI" : "Falta tel."}
+                    </span>
+                  )}
+                </div>
+                <div style={{ fontSize: 11, color: MUTED }}>
+                  {c.telefono || <span style={{color:DANGER}}>Sin teléfono</span>}
+                  {c.email ? ` · ${c.email}` : ""}
+                  {c.dni ? ` · DNI: ${c.dni}` : <span style={{color:DANGER}}> · Sin DNI</span>}
+                </div>
               </div>
-              <div style={{ fontSize: 11, color: MUTED }}>
-                {c.telefono || ""}{c.email ? ` · ${c.email}` : ""}{c.dni ? ` · ${c.dni}` : ""}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
+      )}
+      {completarDatos && (
+        <Modal title="Completar datos del comprador" onClose={() => setCompletarDatos(null)} width={420}>
+          <div style={{ fontSize: 13, color: TEXT, fontFamily: "Inter, sans-serif", marginBottom: 16 }}>
+            <strong>{completarDatos.nombre} {completarDatos.apellidos || ""}</strong> necesita DNI y teléfono para continuar.
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div>
+              <L c="DNI / NIE" req />
+              <input style={iSt} value={completarDni} onChange={e => setCompletarDni(e.target.value)}
+                placeholder="12345678A" autoFocus />
+            </div>
+            <div>
+              <L c="Teléfono" req />
+              <input style={iSt} value={completarTel} onChange={e => setCompletarTel(e.target.value)}
+                placeholder="+34 600 000 000" />
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 20 }}>
+            <button onClick={() => setCompletarDatos(null)} style={{ padding: "9px 18px",
+              border: `1px solid ${BORDER}`, background: "transparent", color: MUTED,
+              cursor: "pointer", borderRadius: 2, fontFamily: "Inter, sans-serif" }}>Cancelar</button>
+            <button disabled={!completarDni.trim() || !completarTel.trim() || completarGuardando}
+              onClick={async () => {
+                if (!completarDni.trim() || !completarTel.trim()) return;
+                setCompletarGuardando(true);
+                await supabase.from("compradores").update({
+                  dni: completarDni.trim(), telefono: completarTel.trim(),
+                  updated_at: new Date().toISOString()
+                }).eq("id", completarDatos.id);
+                const actualizado = { ...completarDatos, dni: completarDni.trim(), telefono: completarTel.trim() };
+                onChange(actualizado);
+                setCompletarDatos(null); setCompletarGuardando(false);
+              }}
+              style={{ padding: "9px 22px", background: DARK, border: "none", color: WHITE,
+                cursor: "pointer", borderRadius: 2, fontWeight: 600, fontFamily: "Inter, sans-serif",
+                opacity: (!completarDni.trim() || !completarTel.trim()) ? 0.5 : 1 }}>
+              {completarGuardando ? "Guardando..." : "Guardar y añadir"}
+            </button>
+          </div>
+        </Modal>
       )}
       {showNew && (
         <Modal title="Nuevo comprador" onClose={() => setShowNew(false)} width={480}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <div><L c="Nombre" req /><input style={iSt} value={nuevoNombre} onChange={e => setNuevoNombre(e.target.value)} /></div>
             <div><L c="Apellidos" /><input style={iSt} value={nuevoApellidos} onChange={e => setNuevoApellidos(e.target.value)} /></div>
-            <div><L c="DNI / NIE" /><input style={iSt} value={nuevoDni} onChange={e => setNuevoDni(e.target.value)} /></div>
+            <div><L c="DNI / NIE" req /><input style={iSt} value={nuevoDni} onChange={e => setNuevoDni(e.target.value)} placeholder="12345678A" /></div>
             <div><L c="Nacionalidad" /><input style={iSt} value={nuevaNac} onChange={e => setNuevaNac(e.target.value)} /></div>
-            <div><L c="Teléfono" /><input style={iSt} value={nuevoTel} onChange={e => setNuevoTel(e.target.value)} /></div>
+            <div><L c="Teléfono" req /><input style={iSt} value={nuevoTel} onChange={e => setNuevoTel(e.target.value)} placeholder="+34 600 000 000" /></div>
             <div><L c="Email" /><input style={iSt} value={nuevoEmail} onChange={e => setNuevoEmail(e.target.value)} /></div>
           </div>
           <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 20 }}>
