@@ -816,8 +816,10 @@ El servidor las irá mejorando de forma automática. Recibirás un WhatsApp cuan
               style={{
                 position: "relative", borderRadius: 0, overflow: "hidden",
                 border: dragOverItem === item.id ? "2px solid " + currentTipo.color :
+                        fotosSeleccionadas.has(item.id) ? "2px solid #AC8A54" :
                         item.es_portada ? "2px solid #C8A97E" : "1px solid #2A2926",
-                background: dragOverItem === item.id ? currentTipo.color + "0A" : "#FFFFFF",
+                background: dragOverItem === item.id ? currentTipo.color + "0A" :
+                            fotosSeleccionadas.has(item.id) ? "#AC8A5411" : "#FFFFFF",
                 transition: "all 0.15s",
                 opacity: dragItem && dragItem.id === item.id ? 0.4 : 1,
                 cursor: "grab",
@@ -874,20 +876,21 @@ El servidor las irá mejorando de forma automática. Recibirás un WhatsApp cuan
                     style={{ width: "100%", height: 140, objectFit: "cover", display: "block" }}
                     loading="lazy"
                   />
-                  {/* Checkbox selección — solo en tab fotos */}
+                  {/* Checkbox selección — solo en tab fotos, esquina inferior izquierda */}
                   {activeTab === "foto" && (
                     <div
                       onClick={e => { e.stopPropagation(); const next = new Set(fotosSeleccionadas); fotosSeleccionadas.has(item.id) ? next.delete(item.id) : next.add(item.id); setFotosSeleccionadas(next); }}
                       style={{
-                        position: "absolute", top: 6, left: 6,
-                        width: 20, height: 20,
-                        background: fotosSeleccionadas.has(item.id) ? "#AC8A54" : "rgba(0,0,0,0.55)",
-                        border: `2px solid ${fotosSeleccionadas.has(item.id) ? "#AC8A54" : "rgba(255,255,255,0.6)"}`,
+                        position: "absolute", bottom: 6, left: 6, zIndex: 3,
+                        width: 22, height: 22,
+                        background: fotosSeleccionadas.has(item.id) ? "#AC8A54" : "rgba(0,0,0,0.6)",
+                        border: `2px solid ${fotosSeleccionadas.has(item.id) ? "#fff" : "rgba(255,255,255,0.7)"}`,
                         display: "flex", alignItems: "center", justifyContent: "center",
                         cursor: "pointer", transition: "all 0.15s",
+                        boxShadow: "0 1px 4px rgba(0,0,0,0.4)",
                       }}
                     >
-                      {fotosSeleccionadas.has(item.id) && <span style={{ color: "#fff", fontSize: 12, lineHeight: 1 }}>✓</span>}
+                      {fotosSeleccionadas.has(item.id) && <span style={{ color: "#fff", fontSize: 13, lineHeight: 1, fontWeight: 700 }}>✓</span>}
                     </div>
                   )}
                 </div>
