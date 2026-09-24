@@ -2733,12 +2733,49 @@ REGLAS:
         
 
         {/* Publicacion — solo visible si puede ver precios */}
-        {puedeVerPrecios && <Sec title="Datos de venta">
+        {puedeVerPrecios && (() => {
+          // Calcular previews para campos condicionados por calcDesde
+          const _pv2 = d.op === "Alquiler" ? (Number(d.precioAlquiler)||0) : (Number(d.precioVenta)||0);
+          const _pp2 = Number(d.precioProp)||0;
+          const _ivaR2 = (Number(d.ivaHon)||21) / 100;
+          const _pct2 = (Number(d.honorarios)||0) / 100;
+          let precioCalcPreview = 0, netoVendPreview = 0;
+          if (calcDesde === "propietario" && _pp2 > 0 && d.op !== "Alquiler") {
+            precioCalcPreview = d.honorariosTipo === "porcentaje"
+              ? _pp2 / (1 - _pct2*(1+_ivaR2))
+              : _pp2 + (Number(d.honNetoManual)||0) * (1 + _ivaR2);
+            netoVendPreview = _pp2;
+          } else {
+            precioCalcPreview = _pv2;
+            const _hb2 = d.honorariosTipo === "porcentaje" ? _pv2 * _pct2 : (Number(d.honNetoManual)||0);
+            netoVendPreview = Math.max(0, _pv2 - (_hb2 + _hb2 * _ivaR2));
+          }
+          return (          <Sec title="Datos de venta">
           <div style={g2}>
-            {d.op === "Compraventa" && EFl({label: "Precio de venta",    req: true, field: "precioVenta",    pub: true,  gold: true, type: "number"})}
-            {d.op === "Alquiler"   && EFl({label: "Renta mensual",       req: true, field: "precioAlquiler", pub: true,  gold: true, type: "number"})}
-            {d.op === "Traspaso"   && EFl({label: "Precio traspaso",     req: true, field: "precioTraspaso", pub: true,  gold: true, type: "number"})}
-            {d.op !== "Alquiler"   && EFl({label: "Precio propietario",            field: "precioProp",     pub: false,             type: "number"})}
+            {/* Precio de venta: editable si calcDesde="venta", calculado si calcDesde="propietario" */}
+            {d.op === "Compraventa" && (
+              !editMode || calcDesde === "venta"
+                ? EFl({label: "Precio de venta *", req: true, field: "precioVenta", pub: true, gold: true, type: "number"})
+                : <div>
+                    <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 5 }}>Precio de venta (calculado)</div>
+                    <div style={{ padding: "10px 14px", background: "#F8F6F1", border: "1px solid #E7E1D4", fontSize: 15, color: "#16294A", fontWeight: 700 }}>
+                      {precioCalcPreview > 0 ? fmtP(Math.round(precioCalcPreview)) : "—"}
+                    </div>
+                  </div>
+            )}
+            {d.op === "Alquiler" && EFl({label: "Renta mensual *", req: true, field: "precioAlquiler", pub: true, gold: true, type: "number"})}
+            {d.op === "Traspaso" && EFl({label: "Precio traspaso *", req: true, field: "precioTraspaso", pub: true, gold: true, type: "number"})}
+            {/* Precio propietario: editable si calcDesde="propietario", calculado si calcDesde="venta" */}
+            {d.op !== "Alquiler" && (
+              !editMode || calcDesde === "propietario"
+                ? EFl({label: "Precio propietario *", field: "precioProp", pub: false, type: "number"})
+                : <div>
+                    <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 5 }}>Precio propietario (calculado)</div>
+                    <div style={{ padding: "10px 14px", background: "#F8F6F1", border: "1px solid #E7E1D4", fontSize: 15, color: "#2C6E52", fontWeight: 700 }}>
+                      {netoVendPreview > 0 ? fmtP(Math.round(netoVendPreview)) : "—"}
+                    </div>
+                  </div>
+            )}
           </div>
 
           {d.op === "Alquiler" && (
@@ -2841,7 +2878,10 @@ REGLAS:
               </div>
             );
           })()}
-        </Sec>}  <div style={sep} />
+          </Sec>
+          );
+        })()}
+        <div style={sep} />
 
         {/* Gastos */}
         <Sec title="Publicacion">

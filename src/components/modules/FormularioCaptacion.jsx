@@ -914,10 +914,28 @@ export default function FormularioCaptacion() {
         {/* 10. Datos de venta */}
         <Sec title="Datos de venta">
           <div style={g2}>
-            {/* Precio principal condicional */}
-            {op === "Compraventa" && <Input label="Precio de venta" value={precioVenta} onChange={setPrecioVenta} type="number" placeholder="399000" required />}
-            {op === "Alquiler" && <Input label="Renta mensual" value={precioAlquiler} onChange={setPrecioAlquiler} type="number" placeholder="1200" required />}
-            {op !== "Alquiler" && <Input label="Precio propietario" value={precioProp} onChange={setPrecioProp} type="number" placeholder="0" />}
+            {/* Desde precio venta: editable. Desde propietario: calculado (solo lectura) */}
+            {op === "Compraventa" && (
+              calcDesde === "venta"
+                ? <Input label="Precio de venta *" value={precioVenta} onChange={setPrecioVenta} type="number" placeholder="399000" required />
+                : <div>
+                    <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Precio de venta (calculado)</div>
+                    <div style={{ padding: "9px 12px", background: "#F8F6F1", border: "1px solid #E7E1D4", fontSize: 13, color: "#16294A", fontWeight: 700 }}>
+                      {precioCalc > 0 ? fmtP(Math.round(precioCalc)) : "—"}
+                    </div>
+                  </div>
+            )}
+            {op === "Alquiler" && <Input label="Renta mensual *" value={precioAlquiler} onChange={setPrecioAlquiler} type="number" placeholder="1200" required />}
+            {op !== "Alquiler" && (
+              calcDesde === "propietario"
+                ? <Input label="Precio propietario *" value={precioProp} onChange={setPrecioProp} type="number" placeholder="0" />
+                : <div>
+                    <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Precio propietario (calculado)</div>
+                    <div style={{ padding: "9px 12px", background: "#F8F6F1", border: "1px solid #E7E1D4", fontSize: 13, color: "#2C6E52", fontWeight: 700 }}>
+                      {netoProp > 0 ? fmtP(Math.round(netoProp)) : "—"}
+                    </div>
+                  </div>
+            )}
           </div>
           {/* Campos específicos de Alquiler */}
           {op === "Alquiler" && (
