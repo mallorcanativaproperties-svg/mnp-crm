@@ -1,5 +1,10 @@
 "use client";
-import { notificarGuardado } from "@/lib/notificarGuardado";
+// notificarGuardado inline para evitar problemas de code splitting
+function notificarGuardado(msg) {
+  if (typeof window !== "undefined") {
+    try { window.dispatchEvent(new CustomEvent("mnp:guardado", { detail: { msg: msg || "Guardado correctamente" } })); } catch {}
+  }
+}
 import PropietariosEditor, { PROPIETARIO_VACIO } from "@/components/PropietariosEditor";
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";

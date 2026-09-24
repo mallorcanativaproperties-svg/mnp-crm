@@ -1,6 +1,11 @@
 "use client";
 import { reportarError } from "@/lib/reportarError";
-import { notificarGuardado } from "@/lib/notificarGuardado";
+// notificarGuardado inline para evitar problemas de code splitting
+function notificarGuardado(msg) {
+  if (typeof window !== "undefined") {
+    try { window.dispatchEvent(new CustomEvent("mnp:guardado", { detail: { msg: msg || "Guardado correctamente" } })); } catch {}
+  }
+}
 import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import {

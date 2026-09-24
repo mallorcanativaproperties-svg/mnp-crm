@@ -1,6 +1,11 @@
 "use client";
 import { reportarError } from "@/lib/reportarError";
-import { notificarGuardado } from "@/lib/notificarGuardado";
+// notificarGuardado inline para evitar problemas de code splitting
+function notificarGuardado(msg) {
+  if (typeof window !== "undefined") {
+    try { window.dispatchEvent(new CustomEvent("mnp:guardado", { detail: { msg: msg || "Guardado correctamente" } })); } catch {}
+  }
+}
 import PropietariosEditor, { PROPIETARIO_VACIO } from "@/components/PropietariosEditor";
 import { PlusIcon, PencilSquareIcon, TrashIcon, LinkIcon, EnvelopeIcon, DocumentTextIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useState, useEffect, useRef } from "react";

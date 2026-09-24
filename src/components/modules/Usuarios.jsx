@@ -1,5 +1,10 @@
 "use client";
-import { notificarGuardado } from "@/lib/notificarGuardado";
+// notificarGuardado inline para evitar problemas de code splitting
+function notificarGuardado(msg) {
+  if (typeof window !== "undefined") {
+    try { window.dispatchEvent(new CustomEvent("mnp:guardado", { detail: { msg: msg || "Guardado correctamente" } })); } catch {}
+  }
+}
 import { UserPlusIcon, PencilSquareIcon, TrashIcon, UserGroupIcon } from "@heroicons/react/24/outline";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";

@@ -1,5 +1,10 @@
 "use client";
-import { notificarGuardado } from "@/lib/notificarGuardado";
+// Función local para no depender de imports en chunks separados
+function notificarGuardado(msg) {
+  if (typeof window !== "undefined") {
+    try { window.dispatchEvent(new CustomEvent("mnp:guardado", { detail: { msg: msg || "Guardado correctamente" } })); } catch {}
+  }
+}
 import { reportarError } from "@/lib/reportarError";
 import PropietariosEditor, { PROPIETARIO_VACIO } from "@/components/PropietariosEditor";
 import dynamic from "next/dynamic";
