@@ -27,7 +27,8 @@ function mapDbToJs(row) {
     desc: row.desc_texto || "", notasPriv: row.notas_priv || "",
     propNombre: row.prop_nombre || "", propTel: row.prop_tel || "", propEmail: row.prop_email || "",
     propietarios: Array.isArray(row.propietarios) && row.propietarios.length > 0 ? row.propietarios : [{ ...PROPIETARIO_VACIO }],
-    agente: row.agente || "", estado: row.estado || "captada",
+    agente: row.agente || "", estado: row.estado === "oferta_aceptada" ? "reservada" : (row.estado || "captada"),
+    precioCierre: Number(row.precio_cierre) || 0, fechaPublicacion: row.fecha_publicacion || null,
     idealistaEstado: row.idealista_estado || "pendiente", idealistaId: row.idealista_id || null, idealistaCheck: row.idealista_ultimo_check || null,
     destinos: row.destinos || [], fotos: Number(row.fotos) || 0, videos: Number(row.videos) || 0, tour360: row.tour360 || "", planos: Number(row.planos) || 0,
     fechaCap: row.fecha_cap || "", visitas: Number(row.visitas) || 0,
@@ -60,6 +61,7 @@ function mapJsToDb(p) {
     prop_nombre: p.propNombre, prop_tel: p.propTel, prop_email: p.propEmail,
     propietarios: p.propietarios || [],
     agente: p.agente, estado: p.estado, destinos: p.estado === "publicada" ? (p.destinos || []) : [],
+    precio_cierre: p.precioCierre || null, fecha_publicacion: p.fechaPublicacion || null,
     fotos: p.fotos, videos: p.videos, tour360: p.tour360, planos: p.planos,
     fecha_cap: p.fechaCap, visitas: p.visitas,
     cual_pos: p.cualPos, cual_neg: p.cualNeg,
@@ -82,15 +84,14 @@ const TIPO_GROUPS = [
 ];
 
 const ESTADOS = [
-  { key: "captada",        label: "Captada",          accent: "#AC8A54" },
-  { key: "publicada",      label: "Publicada",         accent: "#2C6E52" },
-  { key: "reservada",      label: "Reservada",         accent: "#9C6E1B" },
-  { key: "oferta_aceptada",label: "Oferta aceptada",   accent: "#C8820A" },
-  { key: "arras",          label: "Arras",             accent: "#B05D00" },
-  { key: "notaria",        label: "Notaría",           accent: "#185FA5" },
-  { key: "vendida",        label: "Vendida",           accent: "#2C6E52" },
-  { key: "caida",          label: "Caída",             accent: "#A23A3A" },
-  { key: "retirada",       label: "Retirada",          accent: "#9A968A" },
+  { key: "captada",   label: "Captada",   accent: "#AC8A54" },
+  { key: "publicada", label: "Publicada", accent: "#2C6E52" },
+  { key: "reservada", label: "Reservada", accent: "#9C6E1B" },
+  { key: "arras",     label: "Arras",     accent: "#B05D00" },
+  { key: "notaria",   label: "Notaría",   accent: "#185FA5" },
+  { key: "vendida",   label: "Vendida",   accent: "#2C6E52" },
+  { key: "caida",     label: "Caída",     accent: "#A23A3A" },
+  { key: "retirada",  label: "Retirada",  accent: "#9A968A" },
 ];
 
 const DESTINOS = ["Web propia", "Idealista", "Marketplace Facebook", "Catalogo WhatsApp"];
@@ -252,17 +253,81 @@ function Tag({ children, color }) {
   );
 }
 
-function Sec({ title, children, startOpen }) {
-  const [open, setOpen] = useState(startOpen !== false);
+function Sec({ title, children, startOpen, forceOpen }) {
+  const [openLocal, setOpenLocal] = useState(startOpen !== false);
+  const open = forceOpen !== undefined ? forceOpen : openLocal;
   return (
     <div style={{ marginBottom: 0 }}>
-      <div onClick={() => setOpen(!open)} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", padding: "10px 0", borderBottom: open ? "none" : "1px solid #E7E1D4", marginBottom: open ? 12 : 0 }}>
+      <div onClick={() => { if (forceOpen === undefined) setOpenLocal(o => !o); else setOpenLocal(o => !o); }}
+        style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", padding: "10px 0", borderBottom: open ? "none" : "1px solid #E7E1D4", marginBottom: open ? 12 : 0 }}>
         <span style={{ fontSize: 9, color: "#AC8A54", transform: open ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s", display: "inline-block" }}>▶</span>
         <span style={{ fontSize: 10.5, fontWeight: 600, color: "#8C6E3F", textTransform: "uppercase", letterSpacing: "0.12em" }}>{title}</span>
       </div>
       {open && <div style={{ paddingBottom: 16, borderBottom: "1px solid #E7E1D4", marginBottom: 4 }}>{children}</div>}
     </div>
   );
+}
+
+
+// ── Sección grande (contenedor de nivel 1) ────────────────────────────────────
+// Las secciones grandes agrupan las subsecciones Sec.
+// defaultOpen: estado inicial; el usuario siempre puede abrirla/cerrarla manualmente.
+function SeccionGrande({ title, badge, badgeColor, children, defaultOpen = true, accentColor = "#1a2528" }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div style={{ marginBottom: 4 }}>
+      <div
+        onClick={() => setOpen(o => !o)}
+        style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          cursor: "pointer", padding: "14px 20px",
+          background: accentColor, borderBottom: open ? "none" : "none",
+          userSelect: "none",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{
+            fontSize: 11, color: open ? "#C8A97E" : "#C8A97E88",
+            transform: open ? "rotate(90deg)" : "rotate(0deg)",
+            transition: "transform 0.2s", display: "inline-block",
+          }}>▶</span>
+          <span style={{
+            fontSize: 11, fontWeight: 700, color: "#F8F6F1",
+            textTransform: "uppercase", letterSpacing: "0.16em",
+            fontFamily: "Inter, sans-serif",
+          }}>{title}</span>
+          {badge && (
+            <span style={{
+              fontSize: 9, fontWeight: 700, color: badgeColor || "#C8A97E",
+              background: (badgeColor || "#C8A97E") + "22",
+              padding: "2px 8px", letterSpacing: "0.1em",
+              border: `1px solid ${(badgeColor || "#C8A97E")}44`,
+            }}>{badge}</span>
+          )}
+        </div>
+        <span style={{ fontSize: 11, color: "#C8A97E88" }}>{open ? "—" : "+"}</span>
+      </div>
+      {open && (
+        <div style={{
+          padding: "0 20px", background: "#F8F6F1",
+          borderLeft: `3px solid ${accentColor}`,
+        }}>
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Devuelve qué secciones grandes van abiertas por defecto según el estado
+function seccionesPorEstado(estado) {
+  const e = estado || "captada";
+  return {
+    informacion:  ["captada", "caida", "retirada", "vendida"].includes(e),
+    visitas:      ["publicada", "reservada"].includes(e),
+    arras:        e === "arras",
+    notaria:      e === "notaria",
+  };
 }
 
 function Fl({ label, value, pub, gold, req }) {
@@ -2333,8 +2398,19 @@ REGLAS:
 
         <div style={sep} />
 
-        {/* Resumen */}
-        <Sec title="Resumen de la propiedad">
+        {/* ══ SECCIONES GRANDES ══ */}
+        {(() => {
+          const secs = seccionesPorEstado(editMode ? draft.estado : p.estado);
+          return (
+            <>
+            {/* ── INFORMACIÓN DE LA PROPIEDAD ── */}
+            <SeccionGrande
+              title="Información de la propiedad"
+              defaultOpen={secs.informacion}
+              accentColor="#1a2528"
+            >
+              <div style={{ paddingTop: 8 }} />
+              <Sec title="Resumen de la propiedad">
           <div style={g3}>
             <Fl label="Referencia" value={p.ref} req={true} />
             <Fl label="Tipo de operacion" value={p.op} req={true} />
@@ -2346,6 +2422,38 @@ REGLAS:
               <span style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>Estado de la propiedad</span>
             </div>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {/* ── Semáforo de precio — solo cuando está publicada ── */}
+              {(editMode ? draft.estado : p.estado) === "publicada" && (() => {
+                const diasMercado = p.fechaPublicacion
+                  ? Math.floor((Date.now() - new Date(p.fechaPublicacion)) / 86400000)
+                  : p.fecha_cap ? Math.floor((Date.now() - new Date(p.fecha_cap)) / 86400000) : 0;
+                // totalVisitasCount vendrá del prop si está disponible, si no se omite
+                const semaforo = diasMercado >= 45
+                  ? { color: "#A23A3A", icon: "🔴", label: `${diasMercado} días en mercado — Revisar precio`, msg: "Solicita valoración actualizada a tu Agente de Referencia." }
+                  : diasMercado >= 30
+                  ? { color: "#C8820A", icon: "🟡", label: `${diasMercado} días en mercado — Atención`, msg: "Considera revisar la estrategia de precio." }
+                  : { color: "#2C6E52", icon: "🟢", label: `${diasMercado} días en mercado`, msg: null };
+                return (
+                  <div style={{
+                    gridColumn: "1/-1", padding: "10px 14px", marginBottom: 8,
+                    background: semaforo.color + "12", border: `1px solid ${semaforo.color}33`,
+                    display: "flex", alignItems: "flex-start", gap: 10,
+                  }}>
+                    <span style={{ fontSize: 16 }}>{semaforo.icon}</span>
+                    <div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: semaforo.color, fontFamily: "Inter, sans-serif" }}>
+                        {semaforo.label}
+                      </div>
+                      {semaforo.msg && (
+                        <div style={{ fontSize: 11, color: semaforo.color, fontFamily: "Inter, sans-serif", marginTop: 2, opacity: 0.85 }}>
+                          {semaforo.msg}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
+
               {ESTADOS.map((e) => {
                 const active = (editMode ? draft.estado : p.estado) === e.key;
                 return (
@@ -2353,7 +2461,8 @@ REGLAS:
                     key={e.key}
                     onClick={() => {
                       if (e.key === "publicada") {
-                        setDraft(prev => ({ ...prev, estado: "publicada", destinos: [] }));
+                        setDraft(prev => ({ ...prev, estado: "publicada", destinos: [],
+                          fechaPublicacion: prev.fechaPublicacion || new Date().toISOString() }));
                         if (!editMode) setEditMode(true);
                         setTimeout(() => {
                           const el = document.getElementById("seccion-exportar-portales");
@@ -2361,7 +2470,13 @@ REGLAS:
                         }, 100);
                       } else {
                         // Al cambiar a otro estado, limpiar destinos
-                        setDraft(prev => ({ ...prev, estado: e.key, destinos: [] }));
+                        setDraft(prev => ({
+                          ...prev,
+                          estado: e.key,
+                          destinos: [],
+                          // Al pasar a arras, retirar de portales automáticamente
+                          ...(e.key === "arras" ? { destinos: [] } : {}),
+                        }));
                       }
                     }}
                     style={{
@@ -2932,6 +3047,49 @@ REGLAS:
             </div>
           </div>
         </Sec>
+
+            </SeccionGrande>{/* fin INFORMACIÓN DE LA PROPIEDAD */}
+
+            {/* ── VISITAS Y DOCUMENTOS ── */}
+            <SeccionGrande
+              title="Visitas y documentos"
+              defaultOpen={secs.visitas}
+              accentColor="#2C4A3E"
+            >
+              <div style={{ padding: "20px 0" }}>
+                <VisitasResumen propiedadId={p.id} />
+              </div>
+            </SeccionGrande>
+
+            {/* ── RESERVA A ARRAS ── */}
+            <SeccionGrande
+              title="Reserva a arras"
+              defaultOpen={secs.arras}
+              accentColor="#5C3D00"
+              badge="Próximamente"
+              badgeColor="#C8820A"
+            >
+              <div style={{ padding: "32px 0", textAlign: "center", color: "#9A968A", fontSize: 13, fontFamily: "Inter, sans-serif" }}>
+                Esta sección se habilitará cuando la reserva esté completada (firmada por comprador, vendedor y pago confirmado).
+              </div>
+            </SeccionGrande>
+
+            {/* ── ARRAS A NOTARÍA ── */}
+            <SeccionGrande
+              title="Arras a notaría"
+              defaultOpen={secs.notaria}
+              accentColor="#0D2E54"
+              badge="Próximamente"
+              badgeColor="#185FA5"
+            >
+              <div style={{ padding: "32px 0", textAlign: "center", color: "#9A968A", fontSize: 13, fontFamily: "Inter, sans-serif" }}>
+                Esta sección se habilitará cuando las arras estén firmadas por todas las partes.
+              </div>
+            </SeccionGrande>
+
+            </>
+          );
+        })()}
 
         {/* Barra de acciones inferior */}
         <div style={{ borderTop: "1px solid #E7E1D4", paddingTop: 28, marginTop: 12, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>

@@ -27,20 +27,59 @@ export async function POST(req) {
     const transcripcion = whisperData.text || "";
 
     // Generar resumen con Claude
+    // Generar resumen + feedback estructurado con Claude
     const claudeRes = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-api-key": process.env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 500, messages: [{ role: "user", content: `Eres un asistente de una agencia inmobiliaria premium. Genera un resumen profesional y conciso (máximo 4 líneas) de esta visita a una propiedad, indicando: interés mostrado por el comprador, preguntas o dudas relevantes, y sensación general. Sé objetivo y profesional.\n\nTranscripción:\n${transcripcion}` }] })
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1000,
+        messages: [{
+          role: "user",
+          content: `Eres el asistente interno de una agencia inmobiliaria premium en Mallorca.
+Analiza la transcripción de esta visita y devuelve un JSON con exactamente esta estructura, sin markdown ni texto adicional:
+
+{
+  "resumen": "Resumen profesional en 3-4 líneas: interés mostrado, preguntas relevantes, sensación general",
+  "nivel_interes": <número del 1 al 5 donde 1=sin interés, 2=bajo, 3=moderado quiere pensar, 4=alto pide info, 5=muy interesado listo para avanzar>,
+  "objeciones": [<lista de strings solo con los detectados: "Precio alto", "Estado / reforma necesaria", "Zona o ubicación", "Tamaño o distribución", "Sin parking / trastero", "Financiación pendiente", "Comparando con otras propiedades", "Sin objeciones">],
+  "valoracion_precio": <uno de exactamente: "Precio aceptable", "Precio alto, pediría rebaja", "Precio muy fuera de mercado">,
+  "siguiente_paso": <uno de: "Sin acción", "Reenviar documentación", "Segunda visita", "Presentar oferta", "Espera respuesta del comprador", "Descartada">
+}
+
+Transcripción:
+${transcripcion}`
+        }]
+      })
     });
     const claudeData = await claudeRes.json();
-    const resumen = claudeData.content?.[0]?.text || "";
+    const rawText = claudeData.content?.[0]?.text || "{}";
+
+    let resumen = "";
+    let feedback = null;
+    try {
+      const parsed = JSON.parse(rawText.replace(/```json|```/g, "").trim());
+      resumen = parsed.resumen || "";
+      feedback = {
+        nivel_interes:    parsed.nivel_interes    || null,
+        objeciones:       parsed.objeciones       || [],
+        valoracion_precio: parsed.valoracion_precio || null,
+        siguiente_paso:   parsed.siguiente_paso   || null,
+      };
+    } catch {
+      // Si no parsea JSON, usar el texto como resumen libre
+      resumen = rawText.slice(0, 500);
+    }
 
     // Guardar en BD
     await sb.from("visitas").update({
-      transcripcion, resumen_ia: resumen, updated_at: new Date().toISOString()
+      transcripcion,
+      resumen_ia: resumen,
+      feedback,
+      updated_at: new Date().toISOString(),
     }).eq("id", visitaId);
 
-    return NextResponse.json({ ok: true, resumen });
+    return NextResponse.json({ ok: true, resumen, feedback });
   } catch (e) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }

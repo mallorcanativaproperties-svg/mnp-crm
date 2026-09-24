@@ -774,6 +774,48 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
           )}
 
           {/* Resumen IA */}
+          {visita.feedback && (() => {
+            const fb = visita.feedback;
+            const NIVEL_LABEL = ["","Sin interés","Interés bajo","Interés moderado","Interés alto","Muy interesado"];
+            const NIVEL_COLOR = ["",DANGER,DANGER,GOLD,GOLD,SUCCESS];
+            return (
+              <div style={{ marginBottom: 14, background: WHITE, border: `1px solid ${BORDER}`, borderLeft: `3px solid ${GOLD}`, padding: "10px 14px" }}>
+                <div style={{ fontSize: 9, color: GOLD, fontWeight: 700, letterSpacing: "0.12em", marginBottom: 8, textTransform: "uppercase" }}>✦ Análisis IA de la visita</div>
+                <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+                  {fb.nivel_interes && (
+                    <div>
+                      <div style={{ fontSize: 9, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 3 }}>Interés</div>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: NIVEL_COLOR[fb.nivel_interes] }}>
+                        {"★".repeat(fb.nivel_interes)}{"☆".repeat(5 - fb.nivel_interes)} {NIVEL_LABEL[fb.nivel_interes]}
+                      </span>
+                    </div>
+                  )}
+                  {fb.valoracion_precio && (
+                    <div>
+                      <div style={{ fontSize: 9, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 3 }}>Precio</div>
+                      <span style={{ fontSize: 11, color: fb.valoracion_precio === "Precio aceptable" ? SUCCESS : fb.valoracion_precio === "Precio muy fuera de mercado" ? DANGER : GOLD, fontWeight: 600 }}>
+                        {fb.valoracion_precio}
+                      </span>
+                    </div>
+                  )}
+                  {fb.siguiente_paso && fb.siguiente_paso !== "Sin acción" && (
+                    <div>
+                      <div style={{ fontSize: 9, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 3 }}>Siguiente paso</div>
+                      <span style={{ fontSize: 11, color: BLUE, fontWeight: 600 }}>{fb.siguiente_paso}</span>
+                    </div>
+                  )}
+                </div>
+                {fb.objeciones?.length > 0 && !fb.objeciones.includes("Sin objeciones") && (
+                  <div style={{ marginTop: 8, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    {fb.objeciones.map(o => (
+                      <span key={o} style={{ fontSize: 10, color: DANGER, background: DANGER + "12", padding: "2px 8px", border: `1px solid ${DANGER}22` }}>{o}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+
           {visita.resumen_ia && (
             <div style={{ marginBottom: 14, padding: "10px 14px", background: WHITE,
               border: `1px solid ${BORDER}`, borderLeft: `3px solid ${SUCCESS}`, borderRadius: 2 }}>
