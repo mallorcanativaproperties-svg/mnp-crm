@@ -346,6 +346,10 @@ export default function FormularioCaptacion() {
   const [fianzaMeses, setFianzaMeses] = useState("1");
   const [duracionMinMeses, setDuracionMinMeses] = useState("11");
   const [mascotas, setMascotas] = useState(false);
+  const [alqEquipamiento,  setAlqEquipamiento]  = useState("");
+  const [alqTipoOperacion, setAlqTipoOperacion] = useState("residencia");
+  const [alqMaxInquilinos, setAlqMaxInquilinos] = useState("");
+  const [alqAptoNinos,     setAlqAptoNinos]     = useState(null);
   const [honorariosTipo, setHonorariosTipo] = useState("porcentaje");
   const [honNetoManual, setHonNetoManual] = useState("");
   const [calcDesde, setCalcDesde] = useState("venta");
@@ -465,7 +469,8 @@ export default function FormularioCaptacion() {
       ventaMob, terraza, balcon, jardin, piscina, ascensor, armarios, trastero,
       parking, nPlazas, aireAcond, aireAcondTipo, tipologiaChalet, plantasChalet, suelos, carpExt, carpInt,
       emisionesEnerg, calefaccion, aguaCal, suministros, drenaje,
-      ventExt, elecRef, fontRef, notasPriv, propietarios, cualPos, cualNeg, refCatCuest, latitud, longitud]);
+      ventExt, elecRef, fontRef, notasPriv, propietarios, cualPos, cualNeg, refCatCuest, latitud, longitud,
+      alqEquipamiento, alqTipoOperacion, alqMaxInquilinos, alqAptoNinos]);
   const pv = op === "Alquiler" ? (Number(precioAlquiler)||0) : op === "Traspaso" ? (Number(precioTraspaso)||0) : (Number(precioVenta) || 0);
   const pp = Number(precioProp) || 0;
 
@@ -557,6 +562,10 @@ export default function FormularioCaptacion() {
       fianza_meses: Number(fianzaMeses) || 1,
       duracion_min_meses: Number(duracionMinMeses) || 11,
       mascotas: mascotas,
+      alq_equipamiento:   alqEquipamiento   || null,
+      alq_tipo_operacion: alqTipoOperacion  || null,
+      alq_max_inquilinos: Number(alqMaxInquilinos) || null,
+      alq_apto_ninos:     alqAptoNinos      ?? null,
       honorarios: Number(honorarios) || 5,
       hon_neto_manual: Number(honNetoManual) || 0,
       honorarios_tipo: honorariosTipo,
@@ -632,6 +641,7 @@ export default function FormularioCaptacion() {
     if (op === "Compraventa" && (!precioVenta || Number(precioVenta) <= 0)) errores.push("Precio de venta");
     if (op === "Alquiler" && (!precioAlquiler || Number(precioAlquiler) <= 0)) errores.push("Renta mensual");
     if (op === "Traspaso" && (!precioTraspaso || Number(precioTraspaso) <= 0)) errores.push("Precio traspaso");
+    if (op === "Alquiler" && esResidencial && !alqEquipamiento) errores.push("Equipamiento (cocina/mobiliario)");
     if (op === "Traspaso" && (!precioTraspaso || Number(precioTraspaso) <= 0)) errores.push("Precio de traspaso");
     if (!esTerreno && !esGaraje && (!mConst || Number(mConst) <= 0)) errores.push("m² construidos");
     if (tieneHab && (Number(banos)||0) + (Number(aseos)||0) <= 0) errores.push("Baños");
@@ -954,13 +964,31 @@ export default function FormularioCaptacion() {
             {op === "Traspaso" && <Input label="Precio traspaso *" value={precioTraspaso} onChange={setPrecioTraspaso} type="number" placeholder="0" required />}
             {op === "Traspaso" && <Input label="Precio propietario" value={precioProp} onChange={setPrecioProp} type="number" placeholder="0" />}
           </div>
-          {/* ALQUILER: fianza, duración mínima, mascotas */}
+          {/* ALQUILER: campos específicos Idealista */}
           {op === "Alquiler" && (
-            <div style={g3}>
-              <Input label="Fianza (meses)" value={fianzaMeses} onChange={setFianzaMeses} type="number" placeholder="1" />
-              <Input label="Duracion minima (meses)" value={duracionMinMeses} onChange={setDuracionMinMeses} type="number" placeholder="11" />
-              <Toggle label="Mascotas permitidas" value={mascotas} onChange={setMascotas} />
-            </div>
+            <>
+              <div style={g3}>
+                <Input label="Fianza (meses)" value={fianzaMeses} onChange={setFianzaMeses} type="number" placeholder="1" />
+                <Input label="Duración mínima (meses)" value={duracionMinMeses} onChange={setDuracionMinMeses} type="number" placeholder="11" />
+                <Input label="Nº máx. inquilinos" value={alqMaxInquilinos} onChange={setAlqMaxInquilinos} type="number" placeholder="2" />
+              </div>
+              <div style={g3}>
+                <Select label="Tipo de alquiler" value={alqTipoOperacion} onChange={setAlqTipoOperacion}
+                  options={["residencia", "temporada"]} />
+                <Toggle label="Mascotas permitidas" value={mascotas} onChange={setMascotas} />
+                <Toggle label="Apto para niños" value={alqAptoNinos === true} onChange={v => setAlqAptoNinos(v)} />
+              </div>
+              {esResidencial && (
+                <Select label="Equipamiento *" value={alqEquipamiento} onChange={setAlqEquipamiento}
+                  options={[
+                    "",
+                    "Cocina con electrodomésticos y casa amueblada",
+                    "Cocina con electrodomésticos y casa sin amueblar",
+                    "Cocina vacía y casa sin amueblar",
+                    "No lo sé",
+                  ]} />
+              )}
+            </>
           )}
           <div style={g3}>
             <Select label="Tipo honorarios" value={honorariosTipo} onChange={setHonorariosTipo} options={["porcentaje", "fijo"]} />

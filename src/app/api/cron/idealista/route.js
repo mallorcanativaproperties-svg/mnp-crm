@@ -98,6 +98,28 @@ function buildProperty(row, media) {
     if (Number(row.fianza_meses) > 0) operation.rentDepositMonths = Number(row.fianza_meses);
     if (row.mascotas === true || row.mascotas === "true") operation.rentPetsAllowed = true;
     else if (row.mascotas === false || row.mascotas === "false") operation.rentPetsAllowed = false;
+
+    // Tipo de operación: residencia o temporada
+    if (row.alq_tipo_operacion === "temporada") operation.rentSubtype = "shortTerm";
+    else operation.rentSubtype = "longTerm";
+
+    // Número máximo de inquilinos
+    if (Number(row.alq_max_inquilinos) > 0) operation.rentMaxTenants = Number(row.alq_max_inquilinos);
+
+    // Apto para niños
+    if (row.alq_apto_ninos === true) operation.rentChildrenAllowed = true;
+    else if (row.alq_apto_ninos === false) operation.rentChildrenAllowed = false;
+
+    // Equipamiento cocina/mobiliario
+    const EQUIP_MAP = {
+      "Cocina con electrodomésticos y casa amueblada":     "furnished",
+      "Cocina con electrodomésticos y casa sin amueblar":  "kitchenEquipped",
+      "Cocina vacía y casa sin amueblar":                  "unfurnished",
+      "No lo sé":                                          "unknown",
+    };
+    if (row.alq_equipamiento && EQUIP_MAP[row.alq_equipamiento]) {
+      operation.rentFurnished = EQUIP_MAP[row.alq_equipamiento];
+    }
   }
   property.propertyOperation = operation;
 
