@@ -198,57 +198,58 @@ export default function EncargosVenta() {
     setPropiedades(data || []);
   }
 
-  function handlePropChange(propId) {
-    const prop = propiedades.find(p => p.id === propId);
-    if (prop) {
-      // Dirección completa con número y municipio
-      const dirBase = [prop.dir, prop.num].filter(Boolean).join(" ");
-      const dirCompleta = [dirBase, prop.municipio].filter(Boolean).join(", ");
+  async function handlePropChange(propId) {
+    // Primero actualizar el id para que el select muestre la selección
+    setForm(f => ({ ...f, propiedad_id: propId }));
+    if (!propId) return;
 
-      // Anexos: trastero y garaje según valores reales del desplegable de la ficha
-      const trasteroVal = prop.trastero === true ? "Sí" : "";
-      let garajeVal = "";
-      if (prop.parking && prop.parking !== "No") {
-        const plazasTxt = (prop.n_plazas || 0) > 1 ? ` (${prop.n_plazas} plazas)` : "";
-        const tipoTxt = {
-          "Si":          "Plaza de garaje incluida",
-          "Comunitario": "Parking comunitario",
-          "Opcional":    "Plaza de garaje opcional",
-        }[prop.parking] || prop.parking;
-        garajeVal = tipoTxt + plazasTxt;
-      }
-
-      // Honorarios en EUROS calculados desde porcentaje de la ficha
-      const precio = prop.precio_venta || prop.precio_alquiler || 0;
-      const pctHon = parseFloat(prop.honorarios) || 0;
-      const pctIva = parseFloat(prop.iva_hon) || 21;
-      const honorariosEuros = pctHon > 0 && precio > 0
-        ? Math.round(precio * pctHon / 100)
-        : "";
-      const ivaEuros = honorariosEuros
-        ? Math.round(honorariosEuros * pctIva / 100)
-        : "";
-      const importePropietarioCalc = prop.precio_prop || "";
-
-      setForm(f => ({
-        ...f,
-        propiedad_id:        propId,
-        prop_ref:            prop.ref          || "",
-        prop_direccion:      dirCompleta,
-        prop_tipo:           prop.tipo         || "",
-        prop_ref_catastral:  prop.ref_cat      || "",
-        prop_trastero:       trasteroVal,
-        prop_garaje:         garajeVal,
-        // Condiciones económicas desde la ficha
-        importe_publicacion: prop.precio_venta || prop.precio_alquiler || f.importe_publicacion,
-        importe_propietario: importePropietarioCalc || f.importe_propietario,
-        honorarios:          honorariosEuros   || f.honorarios,
-        iva_honorarios:      ivaEuros          || f.iva_honorarios,
-        renta_mensual:       prop.precio_alquiler || f.renta_mensual,
-      }));
-    } else {
-      setForm(f => ({ ...f, propiedad_id: propId }));
+    // Buscar en memoria primero, si no releer de BD (más fiable)
+    let prop = propiedades.find(p => p.id === propId);
+    if (!prop) {
+      const { data } = await supabase
+        .from("propiedades")
+        .select("id,ref,dir,num,municipio,tipo,precio_venta,precio_alquiler,precio_prop,honorarios,honorarios_tipo,iva_hon,ref_cat,trastero,parking,n_plazas")
+        .eq("id", propId)
+        .single();
+      prop = data;
     }
+    if (!prop) return;
+
+    // Dirección completa con número y municipio
+    const dirBase = [prop.dir, prop.num].filter(Boolean).join(" ");
+    const dirCompleta = [dirBase, prop.municipio].filter(Boolean).join(", ");
+
+    // Garaje según valores reales del desplegable
+    const trasteroVal = prop.trastero === true ? "Sí" : "";
+    let garajeVal = "";
+    if (prop.parking && prop.parking !== "No") {
+      const plazasTxt = (prop.n_plazas || 0) > 1 ? ` (${prop.n_plazas} plazas)` : "";
+      const tipos = { "Si": "Plaza de garaje incluida", "Comunitario": "Parking comunitario", "Opcional": "Plaza de garaje opcional" };
+      garajeVal = (tipos[prop.parking] || prop.parking) + plazasTxt;
+    }
+
+    // Honorarios en euros calculados desde % de la ficha
+    const precio    = parseFloat(prop.precio_venta || prop.precio_alquiler || 0);
+    const pctHon    = parseFloat(prop.honorarios) || 0;
+    const pctIva    = parseFloat(prop.iva_hon) || 21;
+    const honEuros  = pctHon > 0 && precio > 0 ? Math.round(precio * pctHon / 100) : "";
+    const ivaEuros  = honEuros ? Math.round(honEuros * pctIva / 100) : "";
+
+    setForm(f => ({
+      ...f,
+      propiedad_id:        propId,
+      prop_ref:            prop.ref        || "",
+      prop_direccion:      dirCompleta,
+      prop_tipo:           prop.tipo       || "",
+      prop_ref_catastral:  prop.ref_cat    || "",
+      prop_trastero:       trasteroVal,
+      prop_garaje:         garajeVal,
+      importe_publicacion: precio          || f.importe_publicacion,
+      importe_propietario: prop.precio_prop || f.importe_propietario,
+      honorarios:          honEuros        || f.honorarios,
+      iva_honorarios:      ivaEuros        || f.iva_honorarios,
+      renta_mensual:       parseFloat(prop.precio_alquiler) || f.renta_mensual,
+    }));
   }
 
   async function handleSave() {
