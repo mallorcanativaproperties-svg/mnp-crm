@@ -482,6 +482,20 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
     await loadMedia(true);
   }
 
+  async function handleDeleteSeleccionadas() {
+    const fotos = media.filter(m => fotosSeleccionadas.has(m.id));
+    if (!fotos.length) return;
+    if (!confirm(`¿Eliminar ${fotos.length} foto${fotos.length !== 1 ? "s" : ""} seleccionada${fotos.length !== 1 ? "s" : ""}? Esta acción no se puede deshacer.`)) return;
+    // Borrar archivos del storage
+    const paths = fotos.map(f => f.url.split("/propiedades-media/")[1]).filter(Boolean).map(p => decodeURIComponent(p));
+    if (paths.length) await supabase.storage.from("propiedades-media").remove(paths);
+    // Borrar registros de BD
+    const ids = fotos.map(f => f.id);
+    await supabase.from("media_propiedades").delete().in("id", ids);
+    setFotosSeleccionadas(new Set());
+    await loadMedia(true);
+  }
+
   async function handleSetPortada(item) {
     await supabase.from("media_propiedades").update({ es_portada: false }).eq("propiedad_id", propiedadId).eq("tipo", "foto");
     await supabase.from("media_propiedades").update({ es_portada: true }).eq("id", item.id);
@@ -853,12 +867,30 @@ El servidor las irá mejorando de forma automática. Recibirás un WhatsApp cuan
                   <span style={{ fontSize: 10, color: "#9A968A" }}>PDF</span>
                 </div>
               ) : (
-                <img
-                  src={item.url}
-                  alt={item.nombre}
-                  style={{ width: "100%", height: 140, objectFit: "cover", display: "block", pointerEvents: "none" }}
-                  loading="lazy"
-                />
+                <div style={{ position: "relative" }}>
+                  <img
+                    src={item.url}
+                    alt={item.nombre}
+                    style={{ width: "100%", height: 140, objectFit: "cover", display: "block" }}
+                    loading="lazy"
+                  />
+                  {/* Checkbox selección — solo en tab fotos */}
+                  {activeTab === "foto" && (
+                    <div
+                      onClick={e => { e.stopPropagation(); const next = new Set(fotosSeleccionadas); fotosSeleccionadas.has(item.id) ? next.delete(item.id) : next.add(item.id); setFotosSeleccionadas(next); }}
+                      style={{
+                        position: "absolute", top: 6, left: 6,
+                        width: 20, height: 20,
+                        background: fotosSeleccionadas.has(item.id) ? "#AC8A54" : "rgba(0,0,0,0.55)",
+                        border: `2px solid ${fotosSeleccionadas.has(item.id) ? "#AC8A54" : "rgba(255,255,255,0.6)"}`,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        cursor: "pointer", transition: "all 0.15s",
+                      }}
+                    >
+                      {fotosSeleccionadas.has(item.id) && <span style={{ color: "#fff", fontSize: 12, lineHeight: 1 }}>✓</span>}
+                    </div>
+                  )}
+                </div>
               )}
 
               {/* Etiqueta de estancia — solo fotos */}
