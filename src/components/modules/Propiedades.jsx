@@ -273,6 +273,149 @@ function Sec({ title, children, startOpen, forceOpen }) {
 }
 
 
+
+// ── Panel de datos de venta ─────────────────────────────────────────────────
+// Componente separado para evitar IIFEs y re-renders problemáticos dentro del JSX
+function DatosVentaPanel({ d, editMode, calcDesde, setCalcDesde, EFl, upd, draft, autoSave }) {
+  // Todos los cálculos aquí, fuera del JSX
+  const pv  = d.op === "Alquiler" ? (Number(d.precioAlquiler)||0)
+             : d.op === "Traspaso" ? (Number(d.precioTraspaso)||0)
+             : (Number(d.precioVenta)||0);
+  const pp       = Number(d.precioProp)||0;
+  const ivaRate  = (Number(d.ivaHon)||21) / 100;
+  const pct      = (Number(d.honorarios)||0) / 100;
+  const esAlq    = d.op === "Alquiler";
+  const desProp  = calcDesde === "propietario" && pp > 0 && !esAlq;
+
+  let precioCalc, honBase, netoVend;
+  if (desProp) {
+    if (d.honorariosTipo === "porcentaje") {
+      precioCalc = pct > 0 ? pp / (1 - pct*(1+ivaRate)) : pp;
+      honBase    = precioCalc * pct;
+    } else {
+      honBase    = Number(d.honNetoManual)||0;
+      precioCalc = pp + honBase + honBase*ivaRate;
+    }
+    netoVend = pp;
+  } else {
+    precioCalc = pv;
+    honBase    = d.honorariosTipo === "porcentaje" ? pv * pct : (Number(d.honNetoManual)||0);
+    netoVend   = Math.max(0, pv - (honBase + honBase*ivaRate));
+  }
+  const iva      = honBase * ivaRate;
+  const honTotal = honBase + iva;
+
+  const g2  = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 };
+  const g3  = { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 };
+
+  // Etiqueta para campo calculado
+  function CampoCalc({ label, value, color = "#16294A" }) {
+    return (
+      <div>
+        <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 5 }}>
+          {label}
+        </div>
+        <div style={{ padding: "10px 14px", background: "#F8F6F1", border: "1px solid #E7E1D4", fontSize: 14, color, fontWeight: 700, minHeight: 40, display: "flex", alignItems: "center" }}>
+          {value || "—"}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {/* Fila 1: precio venta / precio propietario */}
+      <div style={g2}>
+        {d.op === "Compraventa" && (
+          desProp && editMode
+            ? <CampoCalc label="Precio de venta (calculado)" value={fmtP(Math.round(precioCalc))} />
+            : EFl({label: "Precio de venta", req: true, field: "precioVenta", pub: true, gold: true, type: "number"})
+        )}
+        {d.op === "Alquiler" && EFl({label: "Renta mensual", req: true, field: "precioAlquiler", pub: true, gold: true, type: "number"})}
+        {d.op === "Traspaso" && EFl({label: "Precio traspaso", req: true, field: "precioTraspaso", pub: true, gold: true, type: "number"})}
+
+        {!esAlq && (
+          !desProp && editMode
+            ? <CampoCalc label="Neto propietario (calculado)" value={fmtP(Math.round(netoVend))} color="#2C6E52" />
+            : EFl({label: "Precio propietario", field: "precioProp", pub: false, type: "number"})
+        )}
+      </div>
+
+      {/* Alquiler: fianza, duración, mascotas */}
+      {esAlq && (
+        <div style={{ ...g3, marginBottom: 14 }}>
+          {EFl({label: "Fianza (meses)",          field: "fianzaMeses",      pub: true, type: "number"})}
+          {EFl({label: "Duracion minima (meses)", field: "duracionMinMeses", pub: true, type: "number"})}
+          {EFl({label: "Mascotas permitidas",     field: "mascotas",         pub: true, type: "bool"})}
+        </div>
+      )}
+
+      {/* Traspaso */}
+      {d.op === "Traspaso" && <div style={{ marginBottom: 14 }}>{EFl({label: "Precio traspaso", req: true, field: "precioTraspaso", pub: true, type: "number"})}</div>}
+
+      {/* Fila 2: tipo honorarios + campo principal + IVA */}
+      <div style={{ ...g3, marginBottom: 14 }}>
+        {EFl({label: "Tipo honorarios", field: "honorariosTipo", pub: false, type: "select", options: ["porcentaje","fijo"]})}
+        {d.honorariosTipo === "porcentaje"
+          ? EFl({label: "Honorarios (%)", field: "honorarios", pub: false, type: "number"})
+          : EFl({label: "Hon. neto — base imponible (€)", field: "honNetoManual", pub: false, type: "number"})
+        }
+        {EFl({label: "IVA honorarios (%)", field: "ivaHon", pub: false, type: "number"})}
+      </div>
+
+      {/* Panel resumen de cálculo */}
+      <div style={{ padding: "14px 18px", background: "#F4EEE0", border: "1px solid #E7D9C0", marginBottom: 8 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
+          <div style={{ fontSize: 10, color: "#8C6E3F", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>Cálculo automático</div>
+          {!esAlq && (
+            <div style={{ display: "flex", gap: 6 }}>
+              <button onClick={() => setCalcDesde("venta")}
+                style={{ fontSize: 10, padding: "5px 12px", border: "1px solid #AC8A54", borderRadius: 0, background: calcDesde === "venta" ? "#AC8A54" : "transparent", color: calcDesde === "venta" ? "#fff" : "#AC8A54", cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
+                Desde precio venta
+              </button>
+              <button onClick={() => setCalcDesde("propietario")}
+                style={{ fontSize: 10, padding: "5px 12px", border: "1px solid #AC8A54", borderRadius: 0, background: calcDesde === "propietario" ? "#AC8A54" : "transparent", color: calcDesde === "propietario" ? "#fff" : "#AC8A54", cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
+                Desde precio propietario
+              </button>
+            </div>
+          )}
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "10px 20px" }}>
+          {[
+            { label: esAlq ? "Renta mensual" : "Precio de venta", value: desProp ? precioCalc : pv,  color: "#16294A" },
+            { label: "Hon. neto",                                  value: honBase,                     color: "#16294A" },
+            { label: `IVA (${Number(d.ivaHon)||21}%)`,            value: iva,                         color: "#16294A" },
+            { label: "Hon. total (neto+IVA)",                      value: honTotal,                    color: "#AC8A54" },
+          ].map(({ label, value, color }) => (
+            <div key={label}>
+              <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 4 }}>{label}</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color }}>{value > 0 ? fmtP(Math.round(value)) : "—"}</div>
+            </div>
+          ))}
+          <div style={{ gridColumn: "span 2" }}>
+            <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 4 }}>Neto propietario</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "#2C6E52" }}>{netoVend > 0 ? fmtP(Math.round(netoVend)) : "—"}</div>
+          </div>
+        </div>
+        {editMode && (
+          <button onClick={() => {
+            const updates = {
+              ...(d.op !== "Alquiler" ? { precioVenta: Math.round(desProp ? precioCalc : pv) } : {}),
+              ...(d.op === "Alquiler" ? { precioAlquiler: Math.round(pv) } : {}),
+              precioProp:    Math.round(netoVend),
+              honNetoManual: Math.round(honBase),
+            };
+            Object.entries(updates).forEach(([k, v]) => upd(k, v));
+            setTimeout(() => autoSave({ ...draft, ...updates }), 100);
+          }} style={{ marginTop: 14, padding: "8px 16px", background: "#AC8A54", border: "none", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.06em" }}>
+            ↓ Aplicar valores a la ficha
+          </button>
+        )}
+      </div>
+    </>
+  );
+}
+
 // ── Sección grande (contenedor de nivel 1) ────────────────────────────────────
 // Las secciones grandes agrupan las subsecciones Sec.
 // defaultOpen: estado inicial; el usuario siempre puede abrirla/cerrarla manualmente.
@@ -2736,154 +2879,21 @@ REGLAS:
         
 
         {/* Publicacion — solo visible si puede ver precios */}
-        {puedeVerPrecios && (() => {
-          // Calcular previews para campos condicionados por calcDesde
-          const _pv2 = d.op === "Alquiler" ? (Number(d.precioAlquiler)||0) : (Number(d.precioVenta)||0);
-          const _pp2 = Number(d.precioProp)||0;
-          const _ivaR2 = (Number(d.ivaHon)||21) / 100;
-          const _pct2 = (Number(d.honorarios)||0) / 100;
-          let precioCalcPreview = 0, netoVendPreview = 0;
-          if (calcDesde === "propietario" && _pp2 > 0 && d.op !== "Alquiler") {
-            precioCalcPreview = d.honorariosTipo === "porcentaje"
-              ? _pp2 / (1 - _pct2*(1+_ivaR2))
-              : _pp2 + (Number(d.honNetoManual)||0) * (1 + _ivaR2);
-            netoVendPreview = _pp2;
-          } else {
-            precioCalcPreview = _pv2;
-            const _hb2 = d.honorariosTipo === "porcentaje" ? _pv2 * _pct2 : (Number(d.honNetoManual)||0);
-            netoVendPreview = Math.max(0, _pv2 - (_hb2 + _hb2 * _ivaR2));
-          }
-          return (          <Sec title="Datos de venta">
-          <div style={g2}>
-            {/* Precio de venta: editable si calcDesde="venta", calculado si calcDesde="propietario" */}
-            {d.op === "Compraventa" && (
-              !editMode || calcDesde === "venta"
-                ? EFl({label: "Precio de venta *", req: true, field: "precioVenta", pub: true, gold: true, type: "number"})
-                : <div>
-                    <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 5 }}>Precio de venta (calculado)</div>
-                    <div style={{ padding: "10px 14px", background: "#F8F6F1", border: "1px solid #E7E1D4", fontSize: 15, color: "#16294A", fontWeight: 700 }}>
-                      {precioCalcPreview > 0 ? fmtP(Math.round(precioCalcPreview)) : "—"}
-                    </div>
-                  </div>
-            )}
-            {d.op === "Alquiler" && EFl({label: "Renta mensual *", req: true, field: "precioAlquiler", pub: true, gold: true, type: "number"})}
-            {d.op === "Traspaso" && EFl({label: "Precio traspaso *", req: true, field: "precioTraspaso", pub: true, gold: true, type: "number"})}
-            {/* Precio propietario: editable si calcDesde="propietario", calculado si calcDesde="venta" */}
-            {d.op !== "Alquiler" && (
-              !editMode || calcDesde === "propietario"
-                ? EFl({label: "Precio propietario *", field: "precioProp", pub: false, type: "number"})
-                : <div>
-                    <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 5 }}>Precio propietario (calculado)</div>
-                    <div style={{ padding: "10px 14px", background: "#F8F6F1", border: "1px solid #E7E1D4", fontSize: 15, color: "#2C6E52", fontWeight: 700 }}>
-                      {netoVendPreview > 0 ? fmtP(Math.round(netoVendPreview)) : "—"}
-                    </div>
-                  </div>
-            )}
-          </div>
+        {puedeVerPrecios && <Sec title="Datos de venta">
+          {/* Precios — editable/calculado según calcDesde */}
+          <DatosVentaPanel
+            d={d}
+            editMode={editMode}
+            calcDesde={calcDesde}
+            setCalcDesde={setCalcDesde}
+            EFl={EFl}
+            upd={upd}
+            draft={draft}
+            autoSave={autoSave}
+          />
+        </Sec>}
 
-          {d.op === "Alquiler" && (
-            <div style={{ ...g3, marginTop: 8 }}>
-              {EFl({label: "Fianza (meses)",          field: "fianzaMeses",      pub: true, type: "number"})}
-              {EFl({label: "Duracion minima (meses)", field: "duracionMinMeses", pub: true, type: "number"})}
-              {EFl({label: "Mascotas permitidas",     field: "mascotas",         pub: true, type: "bool"})}
-            </div>
-          )}
-
-          <div style={{ ...g3, marginTop: 8 }}>
-            {EFl({label: "Tipo honorarios", field: "honorariosTipo", pub: false, type: "select", options: ["porcentaje","fijo"]})}
-            {d.honorariosTipo === "porcentaje"
-              ? EFl({label: "Honorarios (%)", field: "honorarios", pub: false, type: "number"})
-              : EFl({label: "Hon. neto — base imponible (€)", field: "honNetoManual", pub: false, type: "number"})
-            }
-            {EFl({label: "IVA honorarios (%)", field: "ivaHon", pub: false, type: "number"})}
-          </div>
-
-          {d.honorariosTipo === "porcentaje" && (
-            <div style={{ marginTop: 4, marginBottom: 8 }}>
-              <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 5 }}>Hon. neto (calculado)</div>
-              <div style={{ padding: "10px 14px", background: "#F8F6F1", border: "1px solid #E7E1D4", fontSize: 13, color: "#16294A", fontWeight: 600 }}>
-                {Number(d.precioVenta) > 0 ? fmtP(Math.round(Number(d.precioVenta) * ((Number(d.honorarios)||0)/100))) : "—"}
-              </div>
-            </div>
-          )}
-
-          {(() => {
-            const pv = d.op === "Alquiler" ? (Number(d.precioAlquiler)||0) : d.op === "Traspaso" ? (Number(d.precioTraspaso)||0) : (Number(d.precioVenta)||0);
-            const pp = Number(d.precioProp)||0;
-            const ivaRate = (Number(d.ivaHon)||21) / 100;
-            const pct = (Number(d.honorarios)||0) / 100;
-            let honBase, iva, honTotal, netoVend, precioCalc;
-            if (calcDesde === "propietario" && pp > 0 && d.op !== "Alquiler") {
-              if (d.honorariosTipo === "porcentaje") {
-                precioCalc = pp / (1 - pct*(1+ivaRate));
-                honBase = precioCalc * pct;
-              } else {
-                honBase = Number(d.honNetoManual)||0;
-                precioCalc = pp + honBase + honBase*ivaRate;
-              }
-              netoVend = pp;
-            } else {
-              precioCalc = pv;
-              honBase = d.honorariosTipo === "porcentaje" ? precioCalc * pct : (Number(d.honNetoManual)||0);
-              netoVend = precioCalc - (honBase + honBase*ivaRate);
-            }
-            iva = honBase * ivaRate;
-            honTotal = honBase + iva;
-            netoVend = Math.max(0, netoVend); // nunca negativo
-            return (
-              <div style={{ padding: "16px 18px", background: "#F4EEE0", border: "1px solid #E7D9C0", marginTop: 8 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
-                  <div style={{ fontSize: 10, color: "#8C6E3F", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>Cálculo Automático</div>
-                  {d.op !== "Alquiler" && (
-                    <div style={{ display: "flex", gap: 6 }}>
-                      <button onClick={() => setCalcDesde("venta")}       style={{ fontSize: 10, padding: "5px 12px", border: "1px solid #AC8A54", borderRadius: 0, background: calcDesde === "venta"       ? "#AC8A54" : "transparent", color: calcDesde === "venta"       ? "#fff" : "#AC8A54", cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>Desde precio venta</button>
-                      <button onClick={() => setCalcDesde("propietario")} style={{ fontSize: 10, padding: "5px 12px", border: "1px solid #AC8A54", borderRadius: 0, background: calcDesde === "propietario" ? "#AC8A54" : "transparent", color: calcDesde === "propietario" ? "#fff" : "#AC8A54", cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>Desde precio propietario</button>
-                    </div>
-                  )}
-                </div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "12px 20px" }}>
-                  <div>
-                    <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 4 }}>{d.op === "Alquiler" ? "Renta mensual" : "Precio de venta"}</div>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: "#16294A" }}>{pv > 0 || precioCalc > 0 ? fmtP(Math.round(calcDesde === "propietario" && precioCalc > 0 ? precioCalc : pv)) : "—"}</div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 4 }}>Hon. neto</div>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: "#16294A" }}>{honBase > 0 ? fmtP(Math.round(honBase)) : "—"}</div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 4 }}>IVA ({Number(d.ivaHon)||21}%)</div>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: "#16294A" }}>{iva > 0 ? fmtP(Math.round(iva)) : "—"}</div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 4 }}>Hon. total (neto+IVA)</div>
-                    <div style={{ fontSize: 15, fontWeight: 700, color: "#AC8A54" }}>{honTotal > 0 ? fmtP(Math.round(honTotal)) : "—"}</div>
-                  </div>
-                  <div style={{ gridColumn: "span 2" }}>
-                    <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 4 }}>Neto propietario</div>
-                    <div style={{ fontSize: 17, fontWeight: 700, color: "#2C6E52" }}>{netoVend > 0 ? fmtP(Math.round(netoVend)) : "—"}</div>
-                  </div>
-                </div>
-                <button onClick={() => {
-                  if (d.op !== "Alquiler") upd("precioVenta", Math.round(precioCalc));
-                  else upd("precioAlquiler", Math.round(precioCalc));
-                  upd("precioProp", Math.round(netoVend));
-                  upd("honNetoManual", Math.round(honBase));
-                  setTimeout(() => autoSave({ ...draft,
-                    precioVenta:    d.op !== "Alquiler" ? Math.round(precioCalc) : draft.precioVenta,
-                    precioAlquiler: d.op === "Alquiler"  ? Math.round(precioCalc) : draft.precioAlquiler,
-                    precioProp:     Math.round(netoVend),
-                    honNetoManual:  Math.round(honBase),
-                  }), 100);
-                }} style={{ marginTop: 14, padding: "8px 16px", background: "#AC8A54", border: "none", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.06em" }}>
-                  ↓ Aplicar valores a la ficha
-                </button>
-              </div>
-            );
-          })()}
-          </Sec>
-          );
-        })()}
-        <div style={sep} />
+                <div style={sep} />
 
         {/* Gastos */}
         <Sec title="Publicacion">
