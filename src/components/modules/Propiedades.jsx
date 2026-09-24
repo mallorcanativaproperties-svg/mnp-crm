@@ -727,22 +727,39 @@ El servidor las irá mejorando de forma automática. Recibirás un WhatsApp cuan
           );
         })}
         {activeTab === "foto" && media.filter(m => m.tipo === "foto").length > 0 && (
-          <button
-            onClick={abrirModalMejora}
-            disabled={mejorandoTodas || iaLoading}
-            style={{
-              marginLeft: "auto", padding: "6px 16px", border: "1px solid #C8A97E",
-              background: mejorandoTodas ? "#F8F6F1" : "transparent",
-              color: mejorandoTodas ? "#9A968A" : "#AC8A54",
-              cursor: (mejorandoTodas || iaLoading) ? "not-allowed" : "pointer",
-              fontSize: 10, fontWeight: 600, letterSpacing: "0.1em",
-              textTransform: "uppercase", fontFamily: "Inter, sans-serif",
-              borderRadius: 0, whiteSpace: "nowrap",
-            }}>
-            {mejorandoTodas
-              ? `✦ Mejorando ${mejoraBatchProgreso?.actual || 0}/${mejoraBatchProgreso?.total || 0}...`
-              : "✦ Mejorar fotografías"}
-          </button>
+          <div style={{ marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" }}>
+            {/* Botón eliminar seleccionadas — solo cuando hay selección */}
+            {fotosSeleccionadas.size > 0 && (
+              <button
+                onClick={handleDeleteSeleccionadas}
+                style={{
+                  padding: "6px 14px", border: "1px solid #A23A3A",
+                  background: "#A23A3A", color: "#fff",
+                  cursor: "pointer", fontSize: 10, fontWeight: 600,
+                  letterSpacing: "0.1em", textTransform: "uppercase",
+                  fontFamily: "Inter, sans-serif", borderRadius: 0, whiteSpace: "nowrap",
+                }}>
+                ✕ Eliminar {fotosSeleccionadas.size} foto{fotosSeleccionadas.size !== 1 ? "s" : ""}
+              </button>
+            )}
+            {/* Botón mejorar */}
+            <button
+              onClick={abrirModalMejora}
+              disabled={mejorandoTodas || iaLoading}
+              style={{
+                padding: "6px 16px", border: "1px solid #C8A97E",
+                background: mejorandoTodas ? "#F8F6F1" : "transparent",
+                color: mejorandoTodas ? "#9A968A" : "#AC8A54",
+                cursor: (mejorandoTodas || iaLoading) ? "not-allowed" : "pointer",
+                fontSize: 10, fontWeight: 600, letterSpacing: "0.1em",
+                textTransform: "uppercase", fontFamily: "Inter, sans-serif",
+                borderRadius: 0, whiteSpace: "nowrap",
+              }}>
+              {mejorandoTodas
+                ? `✦ Mejorando ${mejoraBatchProgreso?.actual || 0}/${mejoraBatchProgreso?.total || 0}...`
+                : "✦ Mejorar fotografías"}
+            </button>
+          </div>
         )}
       </div>
 
