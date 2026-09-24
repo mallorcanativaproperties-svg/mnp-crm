@@ -521,10 +521,16 @@ export default function FormularioCaptacion() {
   const tieneHab = ["flat","house","rustic"].includes(ft);
   const tieneCert = ["flat","house","rustic"].includes(ft);
   const tieneExtras = ["flat","house","rustic"].includes(ft);
-  const tieneComunidad = ["flat","house","premises_commercial","office","garage","storage"].includes(ft);
-  const tieneIBI = true;
-  const tieneBasuras = true;
-  const tieneDerrama = ["flat","house"].includes(ft);
+  // Gastos condicionados por operación Y tipo de propiedad
+  const esCompraventa = op === "Compraventa";
+  const esAlquilerOp  = op === "Alquiler";
+  const esTraspasoOp  = op === "Traspaso";
+
+  const tieneIBI = esCompraventa || esTraspasoOp;
+  const tienesComunidadTipo = ["flat","house","premises_commercial","office","garage","storage"].includes(ft);
+  const tieneComunidad = tienesComunidadTipo && (esCompraventa || esTraspasoOp || (esAlquilerOp && esResidencial));
+  const tieneBasuras = esCompraventa || esTraspasoOp;
+  const tieneDerrama = esCompraventa && ["flat","house"].includes(ft);
   const tieneInstalaciones = ["flat","house","rustic","premises_commercial","office","building"].includes(ft);
   const tieneElecFont = ["flat","house","rustic","premises_commercial","office"].includes(ft);
   const tieneAireCalef = ["flat","house","rustic","premises_commercial","office"].includes(ft);

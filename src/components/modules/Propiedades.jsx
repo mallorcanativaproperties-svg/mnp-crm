@@ -2320,10 +2320,24 @@ REGLAS:
   const esTerreno = ft === "land";
   const tieneHab = ["flat","house","rustic"].includes(ft);
   const tieneCert = ["flat","house","rustic"].includes(ft);
-  const tieneComunidad = ["flat","house","premises_commercial","office","garage","storage"].includes(ft);
-  const tieneBasuras = true;
-  const tieneIBI = true;
-  const tieneDerrama = ["flat","house"].includes(ft);
+  // Gastos asociados — condicionados por tipo de operación Y tipo de propiedad
+  const opActual = d.op || "Compraventa";
+  const esCompraventa = opActual === "Compraventa";
+  const esAlquiler    = opActual === "Alquiler";
+  const esTraspaso    = opActual === "Traspaso";
+
+  // IBI: solo compraventa y traspaso (el comprador/nuevo titular lo asumirá)
+  const tieneIBI = esCompraventa || esTraspaso;
+
+  // Comunidad: compraventa+traspaso para tipos que la tienen; alquiler solo en residencial (puede ir incluida)
+  const tienesComunidadTipo = ["flat","house","premises_commercial","office","garage","storage"].includes(ft);
+  const tieneComunidad = tienesComunidadTipo && (esCompraventa || esTraspaso || (esAlquiler && esResidencial));
+
+  // Basuras: compraventa y traspaso únicamente
+  const tieneBasuras = esCompraventa || esTraspaso;
+
+  // Derramas: solo compraventa, solo piso/casa
+  const tieneDerrama = esCompraventa && ["flat","house"].includes(ft);
   const tieneInstalaciones = ["flat","house","rustic","premises_commercial","office","building"].includes(ft);
   const tieneElecFont = ["flat","house","rustic","premises_commercial","office"].includes(ft);
   const tieneExtras = ["flat","house","rustic"].includes(ft);
