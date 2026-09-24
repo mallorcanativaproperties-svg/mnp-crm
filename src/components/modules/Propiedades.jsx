@@ -2787,23 +2787,22 @@ REGLAS:
           )}
 
           <div style={{ ...g3, marginTop: 8 }}>
-            {EFl({label: "Tipo honorarios",                                                               field: "honorariosTipo", pub: false, type: "select", options: ["porcentaje","fijo"]})}
-            {EFl({label: d.honorariosTipo === "fijo" ? "Honorarios (EUR)" : "Honorarios (%)",             field: "honorarios",     pub: false, type: "number"})}
-            {EFl({label: "IVA honorarios (%)",                                                            field: "ivaHon",         pub: false, type: "number"})}
+            {EFl({label: "Tipo honorarios", field: "honorariosTipo", pub: false, type: "select", options: ["porcentaje","fijo"]})}
+            {d.honorariosTipo === "porcentaje"
+              ? EFl({label: "Honorarios (%)", field: "honorarios", pub: false, type: "number"})
+              : EFl({label: "Hon. neto — base imponible (€)", field: "honNetoManual", pub: false, type: "number"})
+            }
+            {EFl({label: "IVA honorarios (%)", field: "ivaHon", pub: false, type: "number"})}
           </div>
 
-          <div style={{ ...g3, marginTop: 4 }}>
-            {d.honorariosTipo === "fijo" ? (
-              EFl({label: "Hon. neto (introducir manualmente)", field: "honNetoManual", pub: false, type: "number"})
-            ) : (
-              <div style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 5 }}>Hon. neto (calculado)</div>
-                <div style={{ padding: "10px 14px", background: "#F8F6F1", border: "1px solid #E7E1D4", fontSize: 13, color: "#16294A", fontWeight: 600 }}>
-                  {Number(d.precioVenta) > 0 ? fmtP(Math.round(Number(d.precioVenta) * ((Number(d.honorarios)||0)/100))) : "—"}
-                </div>
+          {d.honorariosTipo === "porcentaje" && (
+            <div style={{ marginTop: 4, marginBottom: 8 }}>
+              <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 5 }}>Hon. neto (calculado)</div>
+              <div style={{ padding: "10px 14px", background: "#F8F6F1", border: "1px solid #E7E1D4", fontSize: 13, color: "#16294A", fontWeight: 600 }}>
+                {Number(d.precioVenta) > 0 ? fmtP(Math.round(Number(d.precioVenta) * ((Number(d.honorarios)||0)/100))) : "—"}
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {(() => {
             const pv = d.op === "Alquiler" ? (Number(d.precioAlquiler)||0) : d.op === "Traspaso" ? (Number(d.precioTraspaso)||0) : (Number(d.precioVenta)||0);

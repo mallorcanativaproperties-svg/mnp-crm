@@ -951,19 +951,18 @@ export default function FormularioCaptacion() {
           )}
           <div style={g3}>
             <Select label="Tipo honorarios" value={honorariosTipo} onChange={setHonorariosTipo} options={["porcentaje", "fijo"]} />
-            <Input label={honorariosTipo === "porcentaje" ? "Honorarios (%)" : "Honorarios (EUR)"} value={honorarios} onChange={setHonorarios} type="number" placeholder={honorariosTipo === "porcentaje" ? "5" : "15000"} />
+            {honorariosTipo === "porcentaje"
+              ? <Input label="Honorarios (%)" value={honorarios} onChange={setHonorarios} type="number" placeholder="5" />
+              : <Input label="Hon. neto — base imponible (€)" value={honNetoManual} onChange={setHonNetoManual} type="number" placeholder="15000" />
+            }
             <Input label="IVA honorarios (%)" value={ivaHon} onChange={setIvaHon} type="number" placeholder="21" />
           </div>
-          <div style={g3}>
-            {honorariosTipo === "fijo" ? (
-              <Input label="Hon. neto (introducir manualmente)" value={honNetoManual} onChange={setHonNetoManual} type="number" placeholder="0" />
-            ) : (
-              <div>
-                <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Hon. neto (calculado)</div>
-                <div style={{ padding: "9px 12px", background: "#F8F6F1", border: "1px solid #E7E1D4", fontSize: 13, color: "#16294A", fontWeight: 600 }}>{(pv > 0 || pp > 0) ? fmtP(Math.round(honNeto)) : "—"}</div>
-              </div>
-            )}
-          </div>
+          {honorariosTipo === "porcentaje" && (
+            <div style={{ marginBottom: 8 }}>
+              <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Hon. neto (calculado)</div>
+              <div style={{ padding: "9px 12px", background: "#F8F6F1", border: "1px solid #E7E1D4", fontSize: 13, color: "#16294A", fontWeight: 600 }}>{(pv > 0 || pp > 0) ? fmtP(Math.round(honNeto)) : "—"}</div>
+            </div>
+          )}
           {/* Panel cálculo automático — siempre visible */}
           <div style={{ padding: "16px 18px", background: "#F4EEE0", border: "1px solid #E7D9C0", marginTop: 8, marginBottom: 4 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
