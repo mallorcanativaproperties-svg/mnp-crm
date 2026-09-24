@@ -375,11 +375,10 @@ function GeneradorDoc({ visita, propiedad, agente, onGuardado, onClose }) {
     const propObj = propiedad || {};
     const anexos = [];
     if (propObj.trastero === true) anexos.push("trastero incluido");
-    if (propObj.parking === "Si") {
-      const plazas = (propObj.n_plazas || 0) > 1
-        ? `${propObj.n_plazas} plazas de garaje incluidas`
-        : "plaza de garaje incluida";
-      anexos.push(plazas);
+    if (propObj.parking && propObj.parking !== "No") {
+      const plazasTxt = (propObj.n_plazas || 0) > 1 ? ` (${propObj.n_plazas} plazas)` : "";
+      const tipos = { "Si": "Plaza de garaje incluida", "Comunitario": "Parking comunitario", "Opcional": "Plaza de garaje opcional" };
+      anexos.push((tipos[propObj.parking] || propObj.parking) + plazasTxt);
     }
     const dirBase = [propObj.dir, propObj.num].filter(Boolean).join(" ");
     const dirCompleta = [dirBase, propObj.municipio].filter(Boolean).join(", ")

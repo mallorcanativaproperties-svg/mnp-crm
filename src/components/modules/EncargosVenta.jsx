@@ -205,11 +205,18 @@ export default function EncargosVenta() {
       const dirBase = [prop.dir, prop.num].filter(Boolean).join(" ");
       const dirCompleta = [dirBase, prop.municipio].filter(Boolean).join(", ");
 
-      // Anexos: trastero y garaje
+      // Anexos: trastero y garaje según valores reales del desplegable de la ficha
       const trasteroVal = prop.trastero === true ? "Sí" : "";
-      const garajeVal   = prop.parking === "Si"
-        ? (prop.n_plazas > 1 ? `${prop.n_plazas} plazas` : "1 plaza")
-        : "";
+      let garajeVal = "";
+      if (prop.parking && prop.parking !== "No") {
+        const plazasTxt = (prop.n_plazas || 0) > 1 ? ` (${prop.n_plazas} plazas)` : "";
+        const tipoTxt = {
+          "Si":          "Plaza de garaje incluida",
+          "Comunitario": "Parking comunitario",
+          "Opcional":    "Plaza de garaje opcional",
+        }[prop.parking] || prop.parking;
+        garajeVal = tipoTxt + plazasTxt;
+      }
 
       // Honorarios en EUROS calculados desde porcentaje de la ficha
       const precio = prop.precio_venta || prop.precio_alquiler || 0;

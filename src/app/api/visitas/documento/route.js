@@ -158,9 +158,11 @@ export async function GET(req) {
     const partes = [dirBase, municipio].filter(Boolean).join(", ");
     const anexos = [];
     if (propDB.trastero === true) anexos.push("trastero incluido");
-    if (propDB.parking === "Si") {
+    if (propDB.parking && propDB.parking !== "No") {
       const nPlazas = propDB.n_plazas || 0;
-      anexos.push(nPlazas > 1 ? `${nPlazas} plazas de garaje incluidas` : "plaza de garaje incluida");
+      const plazasTxt = nPlazas > 1 ? ` (${nPlazas} plazas)` : "";
+      const tipos = { "Si": "Plaza de garaje incluida", "Comunitario": "Parking comunitario", "Opcional": "Plaza de garaje opcional" };
+      anexos.push((tipos[propDB.parking] || propDB.parking) + plazasTxt);
     }
     direccionCompleta = partes + (anexos.length > 0 ? ` — con ${anexos.join(" y ")}` : "");
   }
