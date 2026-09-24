@@ -1316,6 +1316,7 @@ El servidor las irá mejorando de forma automática. Recibirás un WhatsApp cuan
 
 const DOC_TIPOS = [
   { key: "nota_simple", label: "Nota Simple", icon: "📋" },
+  { key: "descripcion_catastral", label: "Descripción Catastral", icon: "🗺️" },
   { key: "hoja_encargo", label: "Hoja de Encargo", icon: "📝" },
   { key: "escritura", label: "Escritura", icon: "📜" },
   { key: "ibi_recibo", label: "Recibo IBI", icon: "🏛️" },
