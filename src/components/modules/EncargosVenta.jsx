@@ -1,5 +1,6 @@
 "use client";
 import { reportarError } from "@/lib/reportarError";
+import PropietariosEditor, { PROPIETARIO_VACIO } from "@/components/PropietariosEditor";
 import { PlusIcon, PencilSquareIcon, TrashIcon, LinkIcon, EnvelopeIcon, DocumentTextIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
@@ -235,6 +236,11 @@ export default function EncargosVenta() {
     const honEuros  = pctHon > 0 && precio > 0 ? Math.round(precio * pctHon / 100) : "";
     const ivaEuros  = honEuros ? Math.round(honEuros * pctIva / 100) : "";
 
+    // Sincronizar propietarios desde la ficha si los tiene
+    const propietariosSinc = Array.isArray(prop.propietarios) && prop.propietarios.length > 0
+      ? prop.propietarios
+      : null;
+
     setForm(f => ({
       ...f,
       propiedad_id:        propId,
@@ -249,6 +255,8 @@ export default function EncargosVenta() {
       honorarios:          honEuros        || f.honorarios,
       iva_honorarios:      ivaEuros        || f.iva_honorarios,
       renta_mensual:       parseFloat(prop.precio_alquiler) || f.renta_mensual,
+      // Propietarios desde la ficha si los hay
+      ...(propietariosSinc ? { propietarios: propietariosSinc } : {}),
     }));
   }
 
@@ -387,33 +395,13 @@ export default function EncargosVenta() {
                 </div>
 
                 {/* Propietarios dinámicos */}
-                {form.propietarios.map((prop, idx) => (
-                  <div key={idx} style={S.section}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-                      <div style={S.sectionTitle}>Propietario {idx + 1}</div>
-                      {idx > 0 && (
-                        <button onClick={() => setForm(f => ({ ...f, propietarios: f.propietarios.filter((_, i) => i !== idx) }))}
-                          style={{ background: "none", border: "none", color: "#A23A3A", cursor: "pointer", fontSize: 18, padding: 0 }}><XMarkIcon style={{ width:14, height:14 }} /></button>
-                      )}
-                    </div>
-                    <div style={S.grid2}>
-                      <div><label style={S.label}>Nombre completo</label>
-                        <input value={prop.nombre} onChange={e => setForm(f => ({ ...f, propietarios: f.propietarios.map((p, i) => i === idx ? { ...p, nombre: e.target.value } : p) }))} style={S.input} /></div>
-                      <div><label style={S.label}>DNI/NIE</label>
-                        <input value={prop.dni} onChange={e => setForm(f => ({ ...f, propietarios: f.propietarios.map((p, i) => i === idx ? { ...p, dni: e.target.value } : p) }))} style={S.input} /></div>
-                      <div><label style={S.label}>Teléfono</label>
-                        <input value={prop.tel} onChange={e => setForm(f => ({ ...f, propietarios: f.propietarios.map((p, i) => i === idx ? { ...p, tel: e.target.value } : p) }))} style={S.input} /></div>
-                      <div style={{ gridColumn: "1/-1" }}><label style={S.label}>Email</label>
-                        <input value={prop.email} onChange={e => setForm(f => ({ ...f, propietarios: f.propietarios.map((p, i) => i === idx ? { ...p, email: e.target.value } : p) }))} style={S.input} /></div>
-                      <div style={{ gridColumn: "1/-1" }}><label style={S.label}>Dirección</label>
-                        <input value={prop.direccion} onChange={e => setForm(f => ({ ...f, propietarios: f.propietarios.map((p, i) => i === idx ? { ...p, direccion: e.target.value } : p) }))} style={S.input} placeholder="Dirección completa del propietario" /></div>
-                    </div>
-                  </div>
-                ))}
-                <button onClick={() => setForm(f => ({ ...f, propietarios: [...f.propietarios, { ...PROP_INIT }] }))}
-                  style={{ width: "100%", padding: "10px", background: "none", border: `1px dashed ${BORDER}`, color: BRONZE, fontSize: 12, cursor: "pointer", fontFamily: "Inter, sans-serif", marginBottom: 14 }}>
-                  + Añadir propietario
-                </button>
+                <div style={S.section}>
+                  <div style={S.sectionTitle}>Datos del propietario</div>
+                  <PropietariosEditor
+                    propietarios={form.propietarios}
+                    onChange={val => setForm(f => ({ ...f, propietarios: val }))}
+                  />
+                </div>
 
                 {/* Campos específicos Arrendamiento */}
                 {form.categoria === "arrendamiento" && (

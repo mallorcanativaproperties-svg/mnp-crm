@@ -1,4 +1,5 @@
 "use client";
+import PropietariosEditor, { PROPIETARIO_VACIO } from "@/components/PropietariosEditor";
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 
@@ -408,10 +409,8 @@ export default function FormularioCaptacion() {
 
   // Publicacion
 
-  // Propietario
-  const [propNom, setPropNom] = useState("");
-  const [propTel, setPropTel] = useState("");
-  const [propEmail, setPropEmail] = useState("");
+  // Propietarios (array dinámico)
+  const [propietarios, setPropietarios] = useState([{ ...PROPIETARIO_VACIO }]);
   const [notasPriv, setNotasPriv] = useState("");
 
   // Cualificacion
@@ -596,9 +595,10 @@ export default function FormularioCaptacion() {
       notas_priv: notasPriv || null,
       estado: "captada",
       fecha_cap: new Date().toISOString().split("T")[0],
-      prop_nombre: propNom || null,
-      prop_tel: propTel || null,
-      prop_email: propEmail || null,
+      prop_nombre: propietarios[0]?.nombre || null,
+      prop_tel:    propietarios[0]?.tel    || null,
+      prop_email:  propietarios[0]?.email  || null,
+      propietarios: propietarios,
       cual_pos: cualPos.filter(Boolean),
       visitas: 0,
       fotos: 0, videos: 0, planos: 0,
@@ -987,11 +987,10 @@ export default function FormularioCaptacion() {
               <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#A23A3A" }} />
               <span style={{ fontSize: 10, fontWeight: 600, color: "#A23A3A", textTransform: "uppercase", letterSpacing: "0.1em" }}>Datos internos - no se publican</span>
             </div>
-            <div style={g2}>
-              <Input label="Nombre propietario" value={propNom} onChange={setPropNom} />
-              <Input label="Telefono" value={propTel} onChange={setPropTel} />
-            </div>
-            <Input label="Email" value={propEmail} onChange={setPropEmail} type="email" />
+            <PropietariosEditor
+              propietarios={propietarios}
+              onChange={setPropietarios}
+            />
             <Textarea label="Notas privadas" value={notasPriv} onChange={setNotasPriv} rows={3} />
           </div>
         </Sec>

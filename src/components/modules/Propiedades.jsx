@@ -1,4 +1,5 @@
 "use client";
+import PropietariosEditor, { PROPIETARIO_VACIO } from "@/components/PropietariosEditor";
 import { PlusIcon, MagnifyingGlassIcon, PencilSquareIcon, TrashIcon, PhotoIcon, GlobeAltIcon, ArrowUpTrayIcon } from "@heroicons/react/24/outline";
 import { useState, useMemo, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
@@ -25,6 +26,7 @@ function mapDbToJs(row) {
     ibi: Number(row.ibi) || 0, basuras: Number(row.basuras) || 0, comunidad: Number(row.comunidad) || 0, extraComunidad: Number(row.extra_comunidad) || 0, otrosGastos: row.otros_gastos || "",
     desc: row.desc_texto || "", notasPriv: row.notas_priv || "",
     propNombre: row.prop_nombre || "", propTel: row.prop_tel || "", propEmail: row.prop_email || "",
+    propietarios: Array.isArray(row.propietarios) && row.propietarios.length > 0 ? row.propietarios : [{ ...PROPIETARIO_VACIO }],
     agente: row.agente || "", estado: row.estado || "captada",
     idealistaEstado: row.idealista_estado || "pendiente", idealistaId: row.idealista_id || null, idealistaCheck: row.idealista_ultimo_check || null,
     destinos: row.destinos || [], fotos: Number(row.fotos) || 0, videos: Number(row.videos) || 0, tour360: row.tour360 || "", planos: Number(row.planos) || 0,
@@ -56,6 +58,7 @@ function mapJsToDb(p) {
     ibi: Number(p.ibi) || 0, basuras: Number(p.basuras) || 0, comunidad: Number(p.comunidad) || 0, extra_comunidad: Number(p.extraComunidad) || 0, otros_gastos: p.otrosGastos,
     desc_texto: p.desc, notas_priv: p.notasPriv,
     prop_nombre: p.propNombre, prop_tel: p.propTel, prop_email: p.propEmail,
+    propietarios: p.propietarios || [],
     agente: p.agente, estado: p.estado, destinos: p.estado === "publicada" ? (p.destinos || []) : [],
     fotos: p.fotos, videos: p.videos, tour360: p.tour360, planos: p.planos,
     fecha_cap: p.fechaCap, visitas: p.visitas,
@@ -2828,11 +2831,10 @@ REGLAS:
               
               <span style={{ fontSize: 10, fontWeight: 600, color: "#A23A3A", textTransform: "uppercase", letterSpacing: "0.1em" }}>No se publica</span>
             </div>
-            <div style={g2}>
-              {EFl({label: "Propietario", field: "propNombre", pub: false})}
-              {EFl({label: "Telefono", field: "propTel", pub: false})}
-            </div>
-            {EFl({label: "Email", field: "propEmail", pub: false})}
+            <PropietariosEditor
+              propietarios={d.propietarios || [{ ...PROPIETARIO_VACIO }]}
+              onChange={val => setData(prev => ({ ...prev, propietarios: val }))}
+            />
             <div style={{ marginTop: 8 }}>
               {EFl({label: "Notas privadas", field: "notasPriv", pub: false, type: "textarea"})}
             </div>
