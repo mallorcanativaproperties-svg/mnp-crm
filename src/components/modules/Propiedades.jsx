@@ -93,6 +93,7 @@ const TIPO_GROUPS = [
 ];
 
 const ESTADOS = [
+  { key: "borrador",  label: "Borrador",  accent: "#9A968A" },
   { key: "captada",   label: "Captada",   accent: "#AC8A54" },
   { key: "publicada", label: "Publicada", accent: "#2C6E52" },
   { key: "reservada", label: "Reservada", accent: "#9C6E1B" },
@@ -485,7 +486,7 @@ function SeccionGrande({ title, badge, badgeColor, children, defaultOpen = true,
 function seccionesPorEstado(estado) {
   const e = estado || "captada";
   return {
-    informacion:  ["captada", "caida", "retirada", "vendida"].includes(e),
+    informacion:  ["captada", "borrador", "caida", "retirada", "vendida"].includes(e),
     visitas:      ["publicada", "reservada"].includes(e),
     arras:        e === "arras",
     notaria:      e === "notaria",
@@ -2016,6 +2017,11 @@ function PropDetail({ p, currentUser, onClose, onUpdate, onDelete, onDuplicate }
     if (featuresType === "land" && (!Number(src.mParcela) || Number(src.mParcela) <= 0)) errs.add("mParcela");
     if (!src.desc || !src.desc.trim()) errs.add("desc");
     if (needsBaths && (Number(src.banos)||0) + (Number(src.aseos)||0) <= 0) errs.add("banos");
+    // Alquiler — campos específicos Idealista
+    if (src.op === "Alquiler") {
+      if (!Number(src.fianzaMeses) || Number(src.fianzaMeses) <= 0) errs.add("fianzaMeses");
+      if (!Number(src.duracionMinMeses) || Number(src.duracionMinMeses) <= 0) errs.add("duracionMinMeses");
+    }
     if (residencial) {
       const CERT_VALIDOS = ["A","B","C","D","E","F","G","Exento"];
       if (!src.certEnerg || !CERT_VALIDOS.includes(src.certEnerg)) errs.add("certEnerg");
@@ -2370,7 +2376,7 @@ REGLAS:
           };
           // Validar campos obligatorios — comportamiento según estado
           if (idealistaFieldErrors.size > 0) {
-            const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético","refCatastral":"Referencia catastral"};
+            const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","precioAlquiler":"Renta mensual","precioTraspaso":"Precio traspaso","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético","refCatastral":"Referencia catastral","fianzaMeses":"Fianza (meses)","duracionMinMeses":"Duración mínima (meses)"};
             const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join("\n• ");
             const esPublicada = (draft.estado || p.estado) === "publicada";
             if (esPublicada) {
@@ -2409,7 +2415,7 @@ REGLAS:
             )}
             <button onClick={() => {
               if (idealistaFieldErrors.size > 0) {
-                const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético","refCatastral":"Referencia catastral"};
+                const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","precioAlquiler":"Renta mensual","precioTraspaso":"Precio traspaso","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético","refCatastral":"Referencia catastral","fianzaMeses":"Fianza (meses)","duracionMinMeses":"Duración mínima (meses)"};
                 const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join("\n• ");
                 if (!confirm("⚠️ Campos con * sin completar:\n\n• " + faltantes + "\n\n¿Volver sin guardar igualmente?")) return;
               }
@@ -2431,7 +2437,7 @@ REGLAS:
                 destinos: draft.destinos || [],
               };
               if (idealistaFieldErrors.size > 0) {
-                const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético","refCatastral":"Referencia catastral"};
+                const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","precioAlquiler":"Renta mensual","precioTraspaso":"Precio traspaso","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético","refCatastral":"Referencia catastral","fianzaMeses":"Fianza (meses)","duracionMinMeses":"Duración mínima (meses)"};
                 const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join("\n• ");
                 const esPublicada = (draft.estado || p.estado) === "publicada";
                 if (esPublicada) {
@@ -3177,7 +3183,7 @@ REGLAS:
                 destinos: draft.destinos || [],
               };
               if (idealistaFieldErrors.size > 0) {
-                const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético","refCatastral":"Referencia catastral"};
+                const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","precioAlquiler":"Renta mensual","precioTraspaso":"Precio traspaso","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético","refCatastral":"Referencia catastral","fianzaMeses":"Fianza (meses)","duracionMinMeses":"Duración mínima (meses)"};
                 const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join("\n• ");
                 const esPublicada = (draft.estado || p.estado) === "publicada";
                 if (esPublicada) { alert("🚫 Propiedad PUBLICADA. Completa los campos * antes de guardar."); return; }
