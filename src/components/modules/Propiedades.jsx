@@ -1353,33 +1353,50 @@ function DocsSection({ propiedadId, propRef }) {
   async function handleUpload(files) {
     if (!files || files.length === 0) return;
     setUploading(true);
+    let errores = 0;
 
     for (const file of files) {
-      const ext = file.name.split(".").pop();
-      const path = `${propRef || propiedadId}/docs/${selectedTipo}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      try {
+        const ext = file.name.split(".").pop();
+        const path = `${propRef || propiedadId}/docs/${selectedTipo}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from("propiedades-media")
-        .upload(path, file, { cacheControl: "3600", upsert: false });
+        const { error: uploadError } = await supabase.storage
+          .from("propiedades-media")
+          .upload(path, file, { cacheControl: "3600", upsert: false });
 
-      if (uploadError) { console.error("Upload error:", uploadError); continue; }
+        if (uploadError) {
+          console.error("Upload storage error:", uploadError);
+          await reportarError({ modulo: "Propiedades – Documentos", accion: "Subir documento", mensaje: uploadError.message });
+          errores++;
+          continue;
+        }
 
-      const { data: urlData } = supabase.storage.from("propiedades-media").getPublicUrl(path);
-      const url = urlData?.publicUrl;
+        const { data: urlData } = supabase.storage.from("propiedades-media").getPublicUrl(path);
+        const url = urlData?.publicUrl;
 
-      if (url) {
-        await supabase.from("docs_propiedades").insert({
-          propiedad_id: propiedadId,
-          tipo: selectedTipo,
-          url,
-          nombre: file.name,
-          tamano: file.size,
-          mime_type: file.type,
-        });
+        if (url) {
+          const { error: dbError } = await supabase.from("docs_propiedades").insert({
+            propiedad_id: propiedadId,
+            tipo: selectedTipo,
+            url,
+            nombre: file.name,
+            tamano: file.size,
+            mime_type: file.type,
+          });
+          if (dbError) {
+            console.error("DB insert error:", dbError);
+            await reportarError({ modulo: "Propiedades – Documentos", accion: "Guardar documento en BD", mensaje: dbError.message });
+            errores++;
+          }
+        }
+      } catch (e) {
+        await reportarError({ modulo: "Propiedades – Documentos", accion: "Subir documento", error: e });
+        errores++;
       }
     }
 
     setUploading(false);
+    if (errores > 0) alert(`Error al subir ${errores} documento${errores !== 1 ? "s" : ""}. Revisa la consola o el panel de errores.`);
     await loadDocs();
   }
 
