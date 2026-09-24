@@ -1398,6 +1398,7 @@ function DocsSection({ propiedadId, propRef }) {
 
     setUploading(false);
     if (errores > 0) alert(`Error al subir ${errores} documento${errores !== 1 ? "s" : ""}. Revisa la consola o el panel de errores.`);
+    else notificarGuardado("Documento subido");
     await loadDocs();
   }
 
@@ -3614,6 +3615,7 @@ export default function CRMPropiedades({ currentUser }) {
           alert("Error al guardar:\n\n" + error.message + (error.details ? "\n" + error.details : ""));
           return;
         }
+        notificarGuardado("Ficha guardada");
       } else {
         // Detección de duplicados antes de crear
         if (dbData.dir && dbData.municipio) {
@@ -3633,6 +3635,7 @@ export default function CRMPropiedades({ currentUser }) {
         }
         if (inserted && inserted[0]) {
           prop.id = inserted[0].id;
+          notificarGuardado("Propiedad creada");
           alert("Propiedad creada correctamente. Ya puedes subir fotos y documentos.");
         }
       }

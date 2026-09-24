@@ -1,4 +1,5 @@
 "use client";
+import { notificarGuardado } from "@/lib/notificarGuardado";
 import PropietariosEditor, { PROPIETARIO_VACIO } from "@/components/PropietariosEditor";
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
@@ -645,6 +646,7 @@ export default function FormularioCaptacion() {
         setSaving(false);
         return;
       }
+      notificarGuardado(fichaId ? "Ficha actualizada" : "Ficha creada");
 
       // Enviar email de notificación a info@mallorcanativaproperties.com
       try {

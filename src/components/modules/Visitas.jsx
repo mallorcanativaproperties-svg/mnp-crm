@@ -1,5 +1,6 @@
 "use client";
 import { reportarError } from "@/lib/reportarError";
+import { notificarGuardado } from "@/lib/notificarGuardado";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import {
@@ -431,6 +432,7 @@ function GeneradorDoc({ visita, propiedad, agente, onGuardado, onClose }) {
     }
 
     setSaving(false);
+    notificarGuardado("Documento guardado");
     onGuardado();
   }
 
@@ -589,6 +591,7 @@ function EditorInforme({ informe, propiedadNombre, onGuardado, onClose }) {
       contenido_borrador: contenido, updated_at: new Date().toISOString()
     }).eq("id", informe.id);
     setGuardando(false);
+    notificarGuardado("Informe guardado");
     onGuardado();
   }
 
@@ -611,6 +614,7 @@ function EditorInforme({ informe, propiedadNombre, onGuardado, onClose }) {
     }).eq("id", informe.id);
 
     setEnviando(false);
+    notificarGuardado("Informe enviado");
     onGuardado();
     onClose();
   }

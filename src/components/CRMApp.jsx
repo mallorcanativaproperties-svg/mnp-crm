@@ -24,7 +24,8 @@ const FirmaElectronica = dynamic(() => import("./modules/FirmaElectronica"), { s
 const Usuarios = dynamic(() => import("./modules/Usuarios"), { ssr: false });
 const SimuladorClaudia = dynamic(() => import("./modules/SimuladorClaudia"), { ssr: false });
 const AsistenteIA = dynamic(() => import("./modules/AsistenteIA"), { ssr: false });
-const PanelErrores = dynamic(() => import("./PanelErrores"), { ssr: false });
+const PanelErrores    = dynamic(() => import("./PanelErrores"),    { ssr: false });
+const ToastGuardado   = dynamic(() => import("./ToastGuardado"),   { ssr: false });
 
 // Roles del CRM:
 //   director      → Suren — acceso total
@@ -486,6 +487,7 @@ export default function CRMApp() {
         </Suspense>
       </div>
           <PanelErrores userRole={currentUser?.role} />
+      <ToastGuardado />
     </div>
   );
 }

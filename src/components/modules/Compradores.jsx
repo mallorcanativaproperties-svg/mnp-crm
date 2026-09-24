@@ -1,4 +1,5 @@
 "use client";
+import { notificarGuardado } from "@/lib/notificarGuardado";
 import { PlusIcon, MagnifyingGlassIcon, FunnelIcon, ArrowDownTrayIcon, PencilSquareIcon, TrashIcon, XMarkIcon, CheckIcon } from "@heroicons/react/24/outline";
 import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/lib/supabase";

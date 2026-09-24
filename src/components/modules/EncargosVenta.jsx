@@ -1,5 +1,6 @@
 "use client";
 import { reportarError } from "@/lib/reportarError";
+import { notificarGuardado } from "@/lib/notificarGuardado";
 import PropietariosEditor, { PROPIETARIO_VACIO } from "@/components/PropietariosEditor";
 import { PlusIcon, PencilSquareIcon, TrashIcon, LinkIcon, EnvelopeIcon, DocumentTextIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useState, useEffect, useRef } from "react";
@@ -285,6 +286,7 @@ export default function EncargosVenta() {
         setForm(FORM_INIT);
         await load();
         loadCurrentUser();
+        notificarGuardado("Encargo guardado");
       } else {
         const msg = data.error || "Error desconocido";
       await reportarError({ modulo: "Encargos", accion: "Crear encargo", mensaje: msg });

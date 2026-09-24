@@ -1,4 +1,5 @@
 "use client";
+import { notificarGuardado } from "@/lib/notificarGuardado";
 import { UserPlusIcon, PencilSquareIcon, TrashIcon, UserGroupIcon } from "@heroicons/react/24/outline";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
@@ -77,7 +78,7 @@ export default function Usuarios({ currentUser }) {
         activo: true,
       });
       if (error) setMsg({ type: "error", text: error.message });
-      else { setMsg({ type: "ok", text: "Usuario creado correctamente" }); fetchUsuarios(); setTimeout(() => setModal(null), 1200); }
+      else { setMsg({ type: "ok", text: "Usuario creado correctamente" }); notificarGuardado("Usuario creado"); fetchUsuarios(); setTimeout(() => setModal(null), 1200); }
     } else {
       const update = {
         nombre: form.nombre.trim(),
@@ -94,7 +95,7 @@ export default function Usuarios({ currentUser }) {
       if (form.pass_hash?.trim()) update.pass_hash = form.pass_hash.trim();
       const { error } = await supabase.from("usuarios").update(update).eq("id", modal);
       if (error) setMsg({ type: "error", text: error.message });
-      else { setMsg({ type: "ok", text: "Usuario actualizado" }); fetchUsuarios(); setTimeout(() => setModal(null), 1200); }
+      else { setMsg({ type: "ok", text: "Usuario actualizado" }); notificarGuardado("Usuario actualizado"); fetchUsuarios(); setTimeout(() => setModal(null), 1200); }
     }
     setSaving(false);
   }
