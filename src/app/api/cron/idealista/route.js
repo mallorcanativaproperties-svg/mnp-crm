@@ -165,7 +165,15 @@ function buildProperty(row, media) {
   if (row.elec_reformada === true) features.featuresRenovatedElectricity = true;
   if (row.font_reformada === true) features.featuresRenovatedPlumbing = true;
   if (row.balcon === true) features.featuresBalcony = true;
-  if (row.parking === "Si") features.featuresParkingAvailable = true;
+  // Parking — todos los valores positivos
+  if (row.parking === "Si") {
+    features.featuresParkingAvailable = true;
+    if (Number(row.n_plazas) > 0) features.featuresParkingSpacesNumber = Number(row.n_plazas);
+  } else if (row.parking === "Comunitario") {
+    features.featuresCommunalParkingAvailable = true;
+  } else if (row.parking === "Opcional") {
+    features.featuresParkingAvailable = true; // opcional = disponible
+  }
   if (row.venta_mobiliario === true) features.featuresEquippedWithFurniture = true;
 
   if (row.aire_acond_tipo && row.aire_acond_tipo !== "No disponible") features.featuresConditionedAir = true;

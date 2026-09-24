@@ -625,6 +625,7 @@ export default function FormularioCaptacion() {
     if (!cp) errores.push("Código postal");
     if (op === "Compraventa" && (!precioVenta || Number(precioVenta) <= 0)) errores.push("Precio de venta");
     if (op === "Alquiler" && (!precioAlquiler || Number(precioAlquiler) <= 0)) errores.push("Renta mensual");
+    if (op === "Traspaso" && (!precioTraspaso || Number(precioTraspaso) <= 0)) errores.push("Precio traspaso");
     if (op === "Traspaso" && (!precioTraspaso || Number(precioTraspaso) <= 0)) errores.push("Precio de traspaso");
     if (!esTerreno && !esGaraje && (!mConst || Number(mConst) <= 0)) errores.push("m² construidos");
     if (tieneHab && (Number(banos)||0) + (Number(aseos)||0) <= 0) errores.push("Baños");
@@ -919,7 +920,7 @@ export default function FormularioCaptacion() {
         {/* 10. Datos de venta */}
         <Sec title="Datos de venta">
           <div style={g2}>
-            {/* Desde precio venta: editable. Desde propietario: calculado (solo lectura) */}
+            {/* COMPRAVENTA: precio venta (editable o calculado) + precio propietario */}
             {op === "Compraventa" && (
               calcDesde === "venta"
                 ? <Input label="Precio de venta *" value={precioVenta} onChange={setPrecioVenta} type="number" placeholder="399000" required />
@@ -930,8 +931,7 @@ export default function FormularioCaptacion() {
                     </div>
                   </div>
             )}
-            {op === "Alquiler" && <Input label="Renta mensual *" value={precioAlquiler} onChange={setPrecioAlquiler} type="number" placeholder="1200" required />}
-            {op !== "Alquiler" && (
+            {op === "Compraventa" && (
               calcDesde === "propietario"
                 ? <Input label="Precio propietario *" value={precioProp} onChange={setPrecioProp} type="number" placeholder="0" />
                 : <div>
@@ -941,18 +941,20 @@ export default function FormularioCaptacion() {
                     </div>
                   </div>
             )}
+            {/* ALQUILER: renta mensual + precio neto propietario */}
+            {op === "Alquiler" && <Input label="Renta mensual *" value={precioAlquiler} onChange={setPrecioAlquiler} type="number" placeholder="1200" required />}
+            {op === "Alquiler" && <Input label="Renta neta propietario" value={precioProp} onChange={setPrecioProp} type="number" placeholder="0" />}
+            {/* TRASPASO: precio traspaso + precio propietario */}
+            {op === "Traspaso" && <Input label="Precio traspaso *" value={precioTraspaso} onChange={setPrecioTraspaso} type="number" placeholder="0" required />}
+            {op === "Traspaso" && <Input label="Precio propietario" value={precioProp} onChange={setPrecioProp} type="number" placeholder="0" />}
           </div>
-          {/* Campos específicos de Alquiler */}
+          {/* ALQUILER: fianza, duración mínima, mascotas */}
           {op === "Alquiler" && (
             <div style={g3}>
               <Input label="Fianza (meses)" value={fianzaMeses} onChange={setFianzaMeses} type="number" placeholder="1" />
               <Input label="Duracion minima (meses)" value={duracionMinMeses} onChange={setDuracionMinMeses} type="number" placeholder="11" />
               <Toggle label="Mascotas permitidas" value={mascotas} onChange={setMascotas} />
             </div>
-          )}
-          {/* Campos específicos de Traspaso */}
-          {op === "Traspaso" && (
-            <Input label="Precio traspaso" value={precioTraspaso} onChange={setPrecioTraspaso} type="number" />
           )}
           <div style={g3}>
             <Select label="Tipo honorarios" value={honorariosTipo} onChange={setHonorariosTipo} options={["porcentaje", "fijo"]} />

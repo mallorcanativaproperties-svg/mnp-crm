@@ -330,24 +330,30 @@ function DatosVentaPanel({ d, editMode, calcDesde, setCalcDesde, EFl, upd, draft
 
   return (
     <>
-      {/* Fila 1: precio venta / precio propietario */}
+      {/* Fila 1: precios según operación */}
       <div style={g2}>
+        {/* Compraventa: precio venta + neto propietario */}
         {d.op === "Compraventa" && (
           desProp && editMode
             ? <CampoCalc label="Precio de venta (calculado)" value={fmtP(Math.round(precioCalc))} />
             : EFl({label: "Precio de venta", req: true, field: "precioVenta", pub: true, gold: true, type: "number"})
         )}
-        {d.op === "Alquiler" && EFl({label: "Renta mensual", req: true, field: "precioAlquiler", pub: true, gold: true, type: "number"})}
-        {d.op === "Traspaso" && EFl({label: "Precio traspaso", req: true, field: "precioTraspaso", pub: true, gold: true, type: "number"})}
-
-        {!esAlq && (
+        {d.op === "Compraventa" && (
           !desProp && editMode
             ? <CampoCalc label="Neto propietario (calculado)" value={fmtP(Math.round(netoVend))} color="#2C6E52" />
             : EFl({label: "Precio propietario", field: "precioProp", pub: false, type: "number"})
         )}
+
+        {/* Alquiler: renta mensual + precio propietario */}
+        {d.op === "Alquiler" && EFl({label: "Renta mensual", req: true, field: "precioAlquiler", pub: true, gold: true, type: "number"})}
+        {d.op === "Alquiler" && EFl({label: "Renta neta propietario", field: "precioProp", pub: false, type: "number"})}
+
+        {/* Traspaso: precio traspaso (no hay neto propietario estándar) */}
+        {d.op === "Traspaso" && EFl({label: "Precio traspaso", req: true, field: "precioTraspaso", pub: true, gold: true, type: "number"})}
+        {d.op === "Traspaso" && EFl({label: "Precio propietario", field: "precioProp", pub: false, type: "number"})}
       </div>
 
-      {/* Alquiler: fianza, duración, mascotas */}
+      {/* Alquiler: fianza, duración mínima, mascotas */}
       {esAlq && (
         <div style={{ ...g3, marginBottom: 14 }}>
           {EFl({label: "Fianza (meses)",          field: "fianzaMeses",      pub: true, type: "number"})}
@@ -355,9 +361,6 @@ function DatosVentaPanel({ d, editMode, calcDesde, setCalcDesde, EFl, upd, draft
           {EFl({label: "Mascotas permitidas",     field: "mascotas",         pub: true, type: "bool"})}
         </div>
       )}
-
-      {/* Traspaso */}
-      {d.op === "Traspaso" && <div style={{ marginBottom: 14 }}>{EFl({label: "Precio traspaso", req: true, field: "precioTraspaso", pub: true, type: "number"})}</div>}
 
       {/* Fila 2: tipo honorarios + campo principal + IVA */}
       <div style={{ ...g3, marginBottom: 14 }}>
@@ -373,7 +376,7 @@ function DatosVentaPanel({ d, editMode, calcDesde, setCalcDesde, EFl, upd, draft
       <div style={{ padding: "14px 18px", background: "#F4EEE0", border: "1px solid #E7D9C0", marginBottom: 8 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
           <div style={{ fontSize: 10, color: "#8C6E3F", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>Cálculo automático</div>
-          {!esAlq && (
+          {!esAlq && d.op !== "Traspaso" && (
             <div style={{ display: "flex", gap: 6 }}>
               <button onClick={() => setCalcDesde("venta")}
                 style={{ fontSize: 10, padding: "5px 12px", border: "1px solid #AC8A54", borderRadius: 0, background: calcDesde === "venta" ? "#AC8A54" : "transparent", color: calcDesde === "venta" ? "#fff" : "#AC8A54", cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
@@ -2010,7 +2013,11 @@ function PropDetail({ p, currentUser, onClose, onUpdate, onDelete, onDuplicate }
     if (!src.municipio) errs.add("municipio");
     if (!src.cp && !(src.latitud && src.longitud)) errs.add("cp");
     const precioCheck = src.op === "Alquiler" ? Number(src.precioAlquiler) : src.op === "Traspaso" ? Number(src.precioTraspaso) : Number(src.precioVenta);
-    if (!precioCheck || precioCheck <= 0) errs.add(src.op === "Alquiler" ? "precioAlquiler" : src.op === "Traspaso" ? "precioTraspaso" : "precioVenta");
+    if (!precioCheck || precioCheck <= 0) {
+      if (src.op === "Alquiler") errs.add("precioAlquiler");
+      else if (src.op === "Traspaso") errs.add("precioTraspaso");
+      else errs.add("precioVenta");
+    }
     // m² construidos obligatorio excepto terrenos (que requieren m² parcela)
     const needsMConst = !["land","garage","storage"].includes(featuresType);
     if (needsMConst && (!Number(src.mConst) || Number(src.mConst) <= 0)) errs.add("mConst");
