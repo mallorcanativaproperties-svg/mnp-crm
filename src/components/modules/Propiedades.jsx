@@ -1,5 +1,7 @@
 "use client";
 import PropietariosEditor, { PROPIETARIO_VACIO } from "@/components/PropietariosEditor";
+import dynamic from "next/dynamic";
+const VisitasResumen = dynamic(() => import("@/components/VisitasResumen"), { ssr: false });
 import { PlusIcon, MagnifyingGlassIcon, PencilSquareIcon, TrashIcon, PhotoIcon, GlobeAltIcon, ArrowUpTrayIcon } from "@heroicons/react/24/outline";
 import { useState, useMemo, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
