@@ -459,7 +459,7 @@ export default function FormularioCaptacion() {
       ventaMob, terraza, balcon, jardin, piscina, ascensor, armarios, trastero,
       parking, nPlazas, aireAcond, aireAcondTipo, tipologiaChalet, plantasChalet, suelos, carpExt, carpInt,
       emisionesEnerg, calefaccion, aguaCal, suministros, drenaje,
-      ventExt, elecRef, fontRef, notasPriv, propNom, propTel, propEmail, cualPos, cualNeg, refCatCuest, latitud, longitud]);
+      ventExt, elecRef, fontRef, notasPriv, propietarios, cualPos, cualNeg, refCatCuest, latitud, longitud]);
   const pv = op === "Alquiler" ? (Number(precioAlquiler)||0) : op === "Traspaso" ? (Number(precioTraspaso)||0) : (Number(precioVenta) || 0);
   const pp = Number(precioProp) || 0;
 
@@ -672,7 +672,7 @@ export default function FormularioCaptacion() {
             cualPos: cualPos.filter(Boolean),
             cualNeg: cualNeg.filter(Boolean),
             notasPriv,
-            propNom, propTel, propEmail,
+            propNom: propietarios[0]?.nombre || "", propTel: propietarios[0]?.tel || "", propEmail: propietarios[0]?.email || "",
             refCatastral: refCatCuest,
           }),
         });
