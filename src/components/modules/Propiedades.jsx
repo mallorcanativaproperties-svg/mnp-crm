@@ -1,4 +1,6 @@
 "use client";
+import { notificarGuardado } from "@/lib/notificarGuardado";
+import { reportarError } from "@/lib/reportarError";
 import PropietariosEditor, { PROPIETARIO_VACIO } from "@/components/PropietariosEditor";
 import dynamic from "next/dynamic";
 const VisitasResumen = dynamic(() => import("@/components/VisitasResumen"), { ssr: false });
@@ -570,6 +572,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
     const ids = fotos.map(f => f.id);
     await supabase.from("media_propiedades").delete().in("id", ids);
     setFotosSeleccionadas(new Set());
+    notificarGuardado(`${fotos.length} foto${fotos.length !== 1 ? "s" : ""} eliminada${fotos.length !== 1 ? "s" : ""}`);
     await loadMedia(true);
   }
 
