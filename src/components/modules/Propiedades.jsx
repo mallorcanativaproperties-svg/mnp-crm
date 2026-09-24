@@ -274,45 +274,55 @@ function Sec({ title, children, startOpen, forceOpen }) {
 // ── Sección grande (contenedor de nivel 1) ────────────────────────────────────
 // Las secciones grandes agrupan las subsecciones Sec.
 // defaultOpen: estado inicial; el usuario siempre puede abrirla/cerrarla manualmente.
-function SeccionGrande({ title, badge, badgeColor, children, defaultOpen = true, accentColor = "#1a2528" }) {
+function SeccionGrande({ title, badge, badgeColor, children, defaultOpen = true, accentColor = "#AC8A54" }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div style={{ marginBottom: 4 }}>
+    <div style={{ marginBottom: 2 }}>
+      {/* Cabecera de sección grande */}
       <div
         onClick={() => setOpen(o => !o)}
         style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          cursor: "pointer", padding: "14px 20px",
-          background: accentColor, borderBottom: open ? "none" : "none",
-          userSelect: "none",
+          cursor: "pointer", padding: "13px 20px",
+          background: open ? "#F0EAE0" : "#F5F0E8",
+          borderTop: "1px solid #E0D9CE",
+          borderBottom: open ? "1px solid #E0D9CE" : "1px solid #E0D9CE",
+          borderLeft: `3px solid ${accentColor}`,
+          userSelect: "none", transition: "background 0.15s",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{
-            fontSize: 11, color: open ? "#C8A97E" : "#C8A97E88",
+            fontSize: 9, color: accentColor,
             transform: open ? "rotate(90deg)" : "rotate(0deg)",
             transition: "transform 0.2s", display: "inline-block",
           }}>▶</span>
           <span style={{
-            fontSize: 11, fontWeight: 700, color: "#F8F6F1",
-            textTransform: "uppercase", letterSpacing: "0.16em",
+            fontSize: 10, fontWeight: 700, color: "#5C4A2A",
+            textTransform: "uppercase", letterSpacing: "0.18em",
             fontFamily: "Inter, sans-serif",
           }}>{title}</span>
           {badge && (
             <span style={{
-              fontSize: 9, fontWeight: 700, color: badgeColor || "#C8A97E",
-              background: (badgeColor || "#C8A97E") + "22",
-              padding: "2px 8px", letterSpacing: "0.1em",
-              border: `1px solid ${(badgeColor || "#C8A97E")}44`,
+              fontSize: 9, fontWeight: 600,
+              color: badgeColor || accentColor,
+              background: (badgeColor || accentColor) + "15",
+              padding: "2px 8px", letterSpacing: "0.08em",
+              border: `1px solid ${(badgeColor || accentColor)}30`,
+              fontFamily: "Inter, sans-serif",
             }}>{badge}</span>
           )}
         </div>
-        <span style={{ fontSize: 11, color: "#C8A97E88" }}>{open ? "—" : "+"}</span>
+        <span style={{ fontSize: 14, color: accentColor, opacity: 0.6, lineHeight: 1 }}>
+          {open ? "−" : "+"}
+        </span>
       </div>
+      {/* Contenido */}
       {open && (
         <div style={{
-          padding: "0 20px", background: "#F8F6F1",
-          borderLeft: `3px solid ${accentColor}`,
+          padding: "4px 0 0 0",
+          background: "#F8F6F1",
+          borderLeft: `3px solid ${accentColor}22`,
         }}>
           {children}
         </div>
@@ -2409,7 +2419,7 @@ REGLAS:
             <SeccionGrande
               title="Información de la propiedad"
               defaultOpen={secs.informacion}
-              accentColor="#1a2528"
+              accentColor="#AC8A54"
             >
               <div style={{ paddingTop: 8 }} />
               <Sec title="Resumen de la propiedad">
@@ -3056,7 +3066,7 @@ REGLAS:
             <SeccionGrande
               title="Visitas y documentos"
               defaultOpen={secs.visitas}
-              accentColor="#2C4A3E"
+              accentColor="#2C6E52"
             >
               <div style={{ padding: "20px 0" }}>
                 <VisitasResumen propiedadId={p.id} />
@@ -3067,7 +3077,7 @@ REGLAS:
             <SeccionGrande
               title="Reserva a arras"
               defaultOpen={secs.arras}
-              accentColor="#5C3D00"
+              accentColor="#9C6E1B"
               badge="Próximamente"
               badgeColor="#C8820A"
             >
@@ -3080,7 +3090,7 @@ REGLAS:
             <SeccionGrande
               title="Arras a notaría"
               defaultOpen={secs.notaria}
-              accentColor="#0D2E54"
+              accentColor="#185FA5"
               badge="Próximamente"
               badgeColor="#185FA5"
             >
