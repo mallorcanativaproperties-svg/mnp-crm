@@ -291,6 +291,48 @@ function buildProperty(row, media) {
     property.propertyVirtualTour = { virtualTourUrl: row.tour360 };
   }
 
+  // PREMISES: Local / Nave comercial
+  const isPremises = ["Local comercial","Nave industrial","Almacen","Negocio","Local","Nave"].includes(row.tipo);
+  if (isPremises) {
+    const actividades = row.local_actividad || [];
+    const hosteleria = ["Bar","Restaurante","Cafetería","Discoteca / pub / sala","Hotel / hostal","Otros hostelería"];
+    const comercio = ["Alimentación","Moda y complementos","Electrónica","Mobiliario y decoración","Farmacia / parafarmacia","Joyería / relojería","Papelería / librería","Juguetería","Otros comercio"];
+    const servicios = ["Peluquería / estética","Lavandería / tintorería","Agencia de viajes","Inmobiliaria","Financiero / seguros","Clínica / centro médico","Centro de formación","Gimnasio / deporte","Otros servicios"];
+    const industria = ["Taller / reparación","Almacén / logística","Industria ligera"];
+    let featuresCommercialActivity = null;
+    if (actividades.some(a => hosteleria.includes(a))) featuresCommercialActivity = "1";
+    else if (actividades.some(a => comercio.includes(a))) featuresCommercialActivity = "2";
+    else if (actividades.some(a => servicios.includes(a))) featuresCommercialActivity = "3";
+    else if (actividades.some(a => industria.includes(a))) featuresCommercialActivity = "4";
+    else if (actividades.length) featuresCommercialActivity = "5";
+    const locUbicMap = {
+      pie_calle:"streetLevel", centro_comercial:"shoppingCentre",
+      entreplanta:"mezzanine", sotano:"basement", planta_superior:"upperFloor",
+    };
+    const premises = {};
+    if (featuresCommercialActivity) premises.featuresCommercialActivity = featuresCommercialActivity;
+    if (row.local_ubicacion && locUbicMap[row.local_ubicacion]) premises.featuresPropertyLocation = locUbicMap[row.local_ubicacion];
+    if (row.local_n_escaparates) premises.featuresShowWindows = Number(row.local_n_escaparates);
+    if (row.local_n_plantas) premises.featuresFloorsProperty = Number(row.local_n_plantas);
+    if (row.local_salida_humos) premises.featuresSmokeExtractor = true;
+    if (row.local_cocina_equipada) premises.featuresKitchen = true;
+    if (row.local_ac) premises.featuresAirConditioning = true;
+    if (row.local_calefaccion) premises.featuresHeating = true;
+    if (row.local_alarma) premises.featuresAlarmSystem = true;
+    if (row.local_cctv) premises.featuresCCTV = true;
+    if (row.local_almacen) premises.featuresWarehouseInBuilding = true;
+    if (row.local_hace_esquina) premises.featuresCornerProperty = true;
+    if (row.local_entrada_auxiliar) premises.featuresAuxiliaryEntrance = true;
+    if (row.local_tiene_oficina) premises.featuresOfficeInPremise = true;
+    if (row.local_puerta_seguridad) premises.featuresSecurityDoor = true;
+    if (row.op === "Traspaso") {
+      if (row.local_alquiler_mes) premises.transferRentPrice = Number(row.local_alquiler_mes);
+      if (row.local_fianza_meses) premises.transferDepositMonths = Number(row.local_fianza_meses);
+      if (row.local_fin_contrato) premises.transferContractEndDate = row.local_fin_contrato;
+    }
+    if (Object.keys(premises).length > 0) property.propertyPremises = premises;
+  }
+
   return property;
 }
 
