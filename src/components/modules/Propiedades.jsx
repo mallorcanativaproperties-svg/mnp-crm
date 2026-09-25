@@ -2977,7 +2977,7 @@ REGLAS:
           )}
           {!tieneHab && esComercial && (
             <div style={{ ...g2, marginTop: 8 }}>
-              {EFl({label: "Aseos / Banos", field: "banos", pub: true, type: "number"})}
+              {EFl({label: "Banos", field: "banos", pub: true, type: "number"})}
               {EFl({label: "Aseos", field: "aseos", pub: true, type: "number"})}
             </div>
           )}
