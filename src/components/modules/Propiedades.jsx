@@ -47,6 +47,24 @@ function mapDbToJs(row) {
     terraza: row.terraza || false, piscina: row.piscina || false, ascensor: row.ascensor || false,
     jardin: row.jardin || false, aireAcond: row.aire_acond || false, armarios: row.armarios || false,
     trastero: row.trastero || false, balcon: row.balcon || false,
+    localUbicacion: row.local_ubicacion || "",
+    localActividad: row.local_actividad || [],
+    localAlquilerMes: row.local_alquiler_mes || "",
+    localFianzaMeses: row.local_fianza_meses || "",
+    localFinContrato: row.local_fin_contrato || "",
+    localNEscaparates: row.local_n_escaparates || "",
+    localNPlantas: row.local_n_plantas || "",
+    localCalefaccion: row.local_calefaccion || false,
+    localAC: row.local_ac || false,
+    localSalidaHumos: row.local_salida_humos || false,
+    localCocinaEquipada: row.local_cocina_equipada || false,
+    localPuertaSeguridad: row.local_puerta_seguridad || false,
+    localAlarma: row.local_alarma || false,
+    localCCTV: row.local_cctv || false,
+    localAlmacen: row.local_almacen || false,
+    localHaceEsquina: row.local_hace_esquina || false,
+    localEntradaAuxiliar: row.local_entrada_auxiliar || false,
+    localTieneOficina: row.local_tiene_oficina || false,
   };
 }
 
@@ -79,6 +97,24 @@ function mapJsToDb(p) {
     terraza: p.terraza, piscina: p.piscina, ascensor: p.ascensor,
     jardin: p.jardin, aire_acond: !!(p.aireAcondTipo && p.aireAcondTipo !== "No disponible"), armarios: p.armarios,
     trastero: p.trastero, balcon: p.balcon,
+    local_ubicacion: p.localUbicacion || null,
+    local_actividad: p.localActividad?.length ? p.localActividad : null,
+    local_alquiler_mes: p.localAlquilerMes ? Number(p.localAlquilerMes) : null,
+    local_fianza_meses: p.localFianzaMeses ? Number(p.localFianzaMeses) : null,
+    local_fin_contrato: p.localFinContrato || null,
+    local_n_escaparates: p.localNEscaparates ? Number(p.localNEscaparates) : null,
+    local_n_plantas: p.localNPlantas ? Number(p.localNPlantas) : null,
+    local_calefaccion: p.localCalefaccion || null,
+    local_ac: p.localAC || null,
+    local_salida_humos: p.localSalidaHumos || null,
+    local_cocina_equipada: p.localCocinaEquipada || null,
+    local_puerta_seguridad: p.localPuertaSeguridad || null,
+    local_alarma: p.localAlarma || null,
+    local_cctv: p.localCCTV || null,
+    local_almacen: p.localAlmacen || null,
+    local_hace_esquina: p.localHaceEsquina || null,
+    local_entrada_auxiliar: p.localEntradaAuxiliar || null,
+    local_tiene_oficina: p.localTieneOficina || null,
     updated_at: new Date().toISOString(),
   };
 }
@@ -352,6 +388,113 @@ function DatosVentaPanel({ d, editMode, calcDesde, setCalcDesde, EFl, upd, draft
         {d.op === "Traspaso" && EFl({label: "Precio traspaso", req: true, field: "precioTraspaso", pub: true, gold: true, type: "number"})}
         {d.op === "Traspaso" && EFl({label: "Precio propietario", field: "precioProp", pub: false, type: "number"})}
       </div>
+
+      {/* Local / Nave: campos específicos */}
+      {(d.tipo === "Local comercial" || d.tipo === "Nave industrial" || d.tipo === "Local" || d.tipo === "Nave" || d.tipo === "Almacen" || d.tipo === "Negocio") && (
+        <div className="mt-4 space-y-4">
+          <h4 className="font-semibold text-gray-700">Local / Nave</h4>
+
+          {/* Ubicación */}
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-1">Ubicación</label>
+            <select
+              value={d.localUbicacion || ""}
+              onChange={e => upd("localUbicacion", e.target.value)}
+              className="w-full border rounded px-3 py-2 text-sm"
+            >
+              <option value="">— Sin especificar —</option>
+              <option value="pie_calle">Pie de calle</option>
+              <option value="centro_comercial">Centro comercial</option>
+              <option value="entreplanta">Entreplanta</option>
+              <option value="sotano">Sótano</option>
+              <option value="planta_superior">Planta superior</option>
+              <option value="otros">Otros</option>
+            </select>
+          </div>
+
+          {/* Nº escaparates y plantas */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">Nº escaparates</label>
+              <input type="number" min="0" value={d.localNEscaparates || ""} onChange={e => upd("localNEscaparates", e.target.value)} className="w-full border rounded px-3 py-2 text-sm" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1">Nº plantas</label>
+              <input type="number" min="1" value={d.localNPlantas || ""} onChange={e => upd("localNPlantas", e.target.value)} className="w-full border rounded px-3 py-2 text-sm" />
+            </div>
+          </div>
+
+          {/* Actividad comercial */}
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-2">Actividad comercial</label>
+            {[
+              { grupo: "Hostelería", opciones: ["Bar","Restaurante","Cafetería","Discoteca / pub / sala","Hotel / hostal","Otros hostelería"] },
+              { grupo: "Comercio", opciones: ["Alimentación","Moda y complementos","Electrónica","Mobiliario y decoración","Farmacia / parafarmacia","Joyería / relojería","Papelería / librería","Juguetería","Otros comercio"] },
+              { grupo: "Servicios", opciones: ["Peluquería / estética","Lavandería / tintorería","Agencia de viajes","Inmobiliaria","Financiero / seguros","Clínica / centro médico","Centro de formación","Gimnasio / deporte","Otros servicios"] },
+              { grupo: "Otras actividades", opciones: ["Taller / reparación","Almacén / logística","Industria ligera"] },
+            ].map(({ grupo, opciones }) => (
+              <div key={grupo} className="mb-3">
+                <p className="text-xs font-semibold text-gray-500 uppercase mb-1">{grupo}</p>
+                <div className="flex flex-wrap gap-1">
+                  {opciones.map(op => {
+                    const sel = (d.localActividad || []).includes(op);
+                    return (
+                      <button key={op} type="button"
+                        onClick={() => {
+                          const act = d.localActividad || [];
+                          upd("localActividad", sel ? act.filter(a => a !== op) : [...act, op]);
+                        }}
+                        className={`px-2 py-1 rounded text-xs border ${sel ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-700 border-gray-300 hover:border-blue-400"}`}
+                      >{op}</button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Equipamiento */}
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-2">Equipamiento</label>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+              {[
+                ["localCalefaccion","Calefacción"],["localAC","Aire acondicionado"],
+                ["localSalidaHumos","Salida de humos"],["localCocinaEquipada","Cocina equipada"],
+                ["localPuertaSeguridad","Puerta de seguridad"],["localAlarma","Alarma"],
+                ["localCCTV","CCTV"],["localAlmacen","Almacén en edificio"],
+                ["localHaceEsquina","Hace esquina"],["localEntradaAuxiliar","Entrada auxiliar"],
+                ["localTieneOficina","Oficina en local"],
+              ].map(([key, label]) => (
+                <label key={key} className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input type="checkbox" checked={!!d[key]} onChange={e => upd(key, e.target.checked)} className="rounded" />
+                  {label}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Datos traspaso */}
+          {d.op === "Traspaso" && (
+            <div className="space-y-3 border-t pt-3">
+              <h5 className="text-sm font-semibold text-gray-600">Datos del contrato (traspaso)</h5>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">Alquiler/mes (€)</label>
+                  <input type="number" value={d.localAlquilerMes || ""} onChange={e => upd("localAlquilerMes", e.target.value)} className="w-full border rounded px-3 py-2 text-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">Fianza (meses)</label>
+                  <input type="number" value={d.localFianzaMeses || ""} onChange={e => upd("localFianzaMeses", e.target.value)} className="w-full border rounded px-3 py-2 text-sm" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">Fin de contrato</label>
+                <input type="date" value={d.localFinContrato || ""} onChange={e => upd("localFinContrato", e.target.value)} className="w-full border rounded px-3 py-2 text-sm" />
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Alquiler: campos específicos */}
       {esAlq && (
