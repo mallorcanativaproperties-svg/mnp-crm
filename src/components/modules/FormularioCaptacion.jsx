@@ -937,6 +937,101 @@ export default function FormularioCaptacion() {
             {esResidencial && <Select label="Agua caliente" value={aguaCal} onChange={setAguaCal} options={AGUA_CALIENTE} />}
 
           </div>}
+
+          {/* Local / Nave: características específicas */}
+          {esComercial && (() => {
+            const LBL = { fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 };
+            const INP = { width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" };
+            const SEL = { ...INP, appearance: "none", WebkitAppearance: "none" };
+            return (
+              <div style={{ marginTop: 16 }}>
+                {/* Ubicación + Nº escaparates + Nº plantas */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14, marginBottom: 14 }}>
+                  <div>
+                    <label style={LBL}>Ubicación</label>
+                    <select value={localUbicacion} onChange={e => setLocalUbicacion(e.target.value)} style={SEL}>
+                      <option value="">— Sin especificar —</option>
+                      <option value="pie_calle">Pie de calle</option>
+                      <option value="centro_comercial">Centro comercial</option>
+                      <option value="entreplanta">Entreplanta</option>
+                      <option value="sotano">Sótano</option>
+                      <option value="planta_superior">Planta superior</option>
+                      <option value="otros">Otros</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={LBL}>Nº escaparates</label>
+                    <input type="number" min="0" value={localNEscaparates} onChange={e => setLocalNEscaparates(e.target.value)} style={INP} />
+                  </div>
+                  <div>
+                    <label style={LBL}>Nº plantas</label>
+                    <input type="number" min="1" value={localNPlantas} onChange={e => setLocalNPlantas(e.target.value)} style={INP} />
+                  </div>
+                </div>
+
+                {/* Actividad comercial */}
+                <div style={{ marginBottom: 16 }}>
+                  <label style={LBL}>Actividad comercial</label>
+                  {[
+                    { grupo: "Hostelería", opciones: ["Bar","Restaurante","Cafetería","Discoteca / pub / sala","Hotel / hostal","Otros hostelería"] },
+                    { grupo: "Comercio", opciones: ["Alimentación","Moda y complementos","Electrónica","Mobiliario y decoración","Farmacia / parafarmacia","Joyería / relojería","Papelería / librería","Juguetería","Otros comercio"] },
+                    { grupo: "Servicios", opciones: ["Peluquería / estética","Lavandería / tintorería","Agencia de viajes","Inmobiliaria","Financiero / seguros","Clínica / centro médico","Centro de formación","Gimnasio / deporte","Otros servicios"] },
+                    { grupo: "Otras actividades", opciones: ["Taller / reparación","Almacén / logística","Industria ligera"] },
+                  ].map(({ grupo, opciones }) => (
+                    <div key={grupo} style={{ marginBottom: 10 }}>
+                      <div style={{ fontSize: 9, fontWeight: 700, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>{grupo}</div>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                        {opciones.map(opt => {
+                          const sel = localActividad.includes(opt);
+                          return (
+                            <button key={opt} type="button"
+                              onClick={() => setLocalActividad(sel ? localActividad.filter(a => a !== opt) : [...localActividad, opt])}
+                              style={{
+                                padding: "5px 10px", fontSize: 11, fontFamily: "Inter, sans-serif",
+                                border: sel ? "2px solid #AC8A54" : "1px solid #D5CFC4",
+                                background: sel ? "#FBF6EC" : "#FFFFFF",
+                                color: sel ? "#7A5C2E" : "#5C5850",
+                                fontWeight: sel ? 600 : 400,
+                                cursor: "pointer", borderRadius: 0,
+                                boxShadow: sel ? "0 0 0 1px #AC8A54" : "none",
+                                transition: "all 0.15s",
+                              }}
+                            >{opt}</button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Equipamiento */}
+                <div style={{ marginBottom: 8 }}>
+                  <label style={LBL}>Equipamiento</label>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 24px" }}>
+                    {[
+                      [localCalefaccion, setLocalCalefaccion, "Calefacción"],
+                      [localAC, setLocalAC, "Aire acondicionado"],
+                      [localSalidaHumos, setLocalSalidaHumos, "Salida de humos"],
+                      [localCocinaEquipada, setLocalCocinaEquipada, "Cocina equipada"],
+                      [localPuertaSeguridad, setLocalPuertaSeguridad, "Puerta de seguridad"],
+                      [localAlarma, setLocalAlarma, "Alarma"],
+                      [localCCTV, setLocalCCTV, "CCTV"],
+                      [localAlmacen, setLocalAlmacen, "Almacén en edificio"],
+                      [localHaceEsquina, setLocalHaceEsquina, "Hace esquina"],
+                      [localEntradaAuxiliar, setLocalEntradaAuxiliar, "Entrada auxiliar"],
+                      [localTieneOficina, setLocalTieneOficina, "Oficina en local"],
+                    ].map(([val, setter, lbl]) => (
+                      <label key={lbl} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#3A3731", cursor: "pointer" }}>
+                        <input type="checkbox" checked={!!val} onChange={e => setter(e.target.checked)}
+                          style={{ accentColor: "#AC8A54", width: 14, height: 14 }} />
+                        {lbl}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </Sec>}
 
         {/* 6b. Extras y dotaciones */}
@@ -1002,125 +1097,29 @@ export default function FormularioCaptacion() {
             {op === "Traspaso" && <Input label="Precio propietario" value={precioProp} onChange={setPrecioProp} type="number" placeholder="0" />}
           </div>
 
-          {/* LOCAL / NAVE: campos específicos */}
-          {(tipo === "Local comercial" || tipo === "Nave industrial" || tipo === "Local" || tipo === "Nave" || tipo === "Almacen" || tipo === "Negocio") && (() => {
+          {/* LOCAL / NAVE: datos del contrato traspaso */}
+          {esComercial && op === "Traspaso" && (() => {
             const LBL = { fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 };
             const INP = { width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" };
-            const SEL = { ...INP, appearance: "none", WebkitAppearance: "none" };
             return (
-              <div style={{ marginTop: 20 }}>
-                {/* Cabecera sección */}
-                <div style={{ fontSize: 10, fontWeight: 700, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.12em", borderBottom: "1px solid #E7E1D4", paddingBottom: 6, marginBottom: 16 }}>
-                  Local / Nave — Características
+              <div style={{ borderTop: "1px solid #E7E1D4", paddingTop: 14, marginTop: 16 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 12 }}>
+                  Datos del contrato (traspaso)
                 </div>
-
-                {/* Ubicación + Nº escaparates + Nº plantas */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14, marginBottom: 14 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
                   <div>
-                    <label style={LBL}>Ubicación</label>
-                    <select value={localUbicacion} onChange={e => setLocalUbicacion(e.target.value)} style={SEL}>
-                      <option value="">— Sin especificar —</option>
-                      <option value="pie_calle">Pie de calle</option>
-                      <option value="centro_comercial">Centro comercial</option>
-                      <option value="entreplanta">Entreplanta</option>
-                      <option value="sotano">Sótano</option>
-                      <option value="planta_superior">Planta superior</option>
-                      <option value="otros">Otros</option>
-                    </select>
+                    <label style={LBL}>Alquiler / mes (€)</label>
+                    <input type="number" value={localAlquilerMes} onChange={e => setLocalAlquilerMes(e.target.value)} style={INP} placeholder="0" />
                   </div>
                   <div>
-                    <label style={LBL}>Nº escaparates</label>
-                    <input type="number" min="0" value={localNEscaparates} onChange={e => setLocalNEscaparates(e.target.value)} style={INP} />
+                    <label style={LBL}>Fianza (meses)</label>
+                    <input type="number" value={localFianzaMeses} onChange={e => setLocalFianzaMeses(e.target.value)} style={INP} placeholder="2" />
                   </div>
                   <div>
-                    <label style={LBL}>Nº plantas</label>
-                    <input type="number" min="1" value={localNPlantas} onChange={e => setLocalNPlantas(e.target.value)} style={INP} />
+                    <label style={LBL}>Fin de contrato</label>
+                    <input type="date" value={localFinContrato} onChange={e => setLocalFinContrato(e.target.value)} style={INP} />
                   </div>
                 </div>
-
-                {/* Actividad comercial */}
-                <div style={{ marginBottom: 16 }}>
-                  <label style={LBL}>Actividad comercial</label>
-                  {[
-                    { grupo: "Hostelería", opciones: ["Bar","Restaurante","Cafetería","Discoteca / pub / sala","Hotel / hostal","Otros hostelería"] },
-                    { grupo: "Comercio", opciones: ["Alimentación","Moda y complementos","Electrónica","Mobiliario y decoración","Farmacia / parafarmacia","Joyería / relojería","Papelería / librería","Juguetería","Otros comercio"] },
-                    { grupo: "Servicios", opciones: ["Peluquería / estética","Lavandería / tintorería","Agencia de viajes","Inmobiliaria","Financiero / seguros","Clínica / centro médico","Centro de formación","Gimnasio / deporte","Otros servicios"] },
-                    { grupo: "Otras actividades", opciones: ["Taller / reparación","Almacén / logística","Industria ligera"] },
-                  ].map(({ grupo, opciones }) => (
-                    <div key={grupo} style={{ marginBottom: 10 }}>
-                      <div style={{ fontSize: 9, fontWeight: 700, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>{grupo}</div>
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                        {opciones.map(opt => {
-                          const sel = localActividad.includes(opt);
-                          return (
-                            <button key={opt} type="button"
-                              onClick={() => setLocalActividad(sel ? localActividad.filter(a => a !== opt) : [...localActividad, opt])}
-                              style={{
-                                padding: "5px 10px", fontSize: 11, fontFamily: "Inter, sans-serif",
-                                border: sel ? "2px solid #AC8A54" : "1px solid #D5CFC4",
-                                background: sel ? "#FBF6EC" : "#FFFFFF",
-                                color: sel ? "#7A5C2E" : "#5C5850",
-                                fontWeight: sel ? 600 : 400,
-                                cursor: "pointer", borderRadius: 0,
-                                boxShadow: sel ? "0 0 0 1px #AC8A54" : "none",
-                                transition: "all 0.15s",
-                              }}
-                            >{opt}</button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Equipamiento */}
-                <div style={{ marginBottom: 16 }}>
-                  <label style={LBL}>Equipamiento</label>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 24px" }}>
-                    {[
-                      [localCalefaccion, setLocalCalefaccion, "Calefacción"],
-                      [localAC, setLocalAC, "Aire acondicionado"],
-                      [localSalidaHumos, setLocalSalidaHumos, "Salida de humos"],
-                      [localCocinaEquipada, setLocalCocinaEquipada, "Cocina equipada"],
-                      [localPuertaSeguridad, setLocalPuertaSeguridad, "Puerta de seguridad"],
-                      [localAlarma, setLocalAlarma, "Alarma"],
-                      [localCCTV, setLocalCCTV, "CCTV"],
-                      [localAlmacen, setLocalAlmacen, "Almacén en edificio"],
-                      [localHaceEsquina, setLocalHaceEsquina, "Hace esquina"],
-                      [localEntradaAuxiliar, setLocalEntradaAuxiliar, "Entrada auxiliar"],
-                      [localTieneOficina, setLocalTieneOficina, "Oficina en local"],
-                    ].map(([val, setter, lbl]) => (
-                      <label key={lbl} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#3A3731", cursor: "pointer" }}>
-                        <input type="checkbox" checked={!!val} onChange={e => setter(e.target.checked)}
-                          style={{ accentColor: "#AC8A54", width: 14, height: 14 }} />
-                        {lbl}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Datos traspaso */}
-                {op === "Traspaso" && (
-                  <div style={{ borderTop: "1px solid #E7E1D4", paddingTop: 14, marginTop: 4 }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 12 }}>
-                      Datos del contrato (traspaso)
-                    </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
-                      <div>
-                        <label style={LBL}>Alquiler / mes (€)</label>
-                        <input type="number" value={localAlquilerMes} onChange={e => setLocalAlquilerMes(e.target.value)} style={INP} placeholder="0" />
-                      </div>
-                      <div>
-                        <label style={LBL}>Fianza (meses)</label>
-                        <input type="number" value={localFianzaMeses} onChange={e => setLocalFianzaMeses(e.target.value)} style={INP} placeholder="2" />
-                      </div>
-                      <div>
-                        <label style={LBL}>Fin de contrato</label>
-                        <input type="date" value={localFinContrato} onChange={e => setLocalFinContrato(e.target.value)} style={INP} />
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
             );
           })()}
