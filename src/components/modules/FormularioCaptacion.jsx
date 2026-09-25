@@ -416,6 +416,25 @@ export default function FormularioCaptacion() {
   const [elecRef, setElecRef] = useState(false);
   const [fontRef, setFontRef] = useState(false);
 
+  // Local / Nave
+  const [localUbicacion, setLocalUbicacion] = useState("");
+  const [localActividad, setLocalActividad] = useState([]);
+  const [localAlquilerMes, setLocalAlquilerMes] = useState("");
+  const [localFianzaMeses, setLocalFianzaMeses] = useState("");
+  const [localFinContrato, setLocalFinContrato] = useState("");
+  const [localNEscaparates, setLocalNEscaparates] = useState("");
+  const [localNPlantas, setLocalNPlantas] = useState("");
+  const [localCalefaccion, setLocalCalefaccion] = useState(false);
+  const [localAC, setLocalAC] = useState(false);
+  const [localSalidaHumos, setLocalSalidaHumos] = useState(false);
+  const [localCocinaEquipada, setLocalCocinaEquipada] = useState(false);
+  const [localPuertaSeguridad, setLocalPuertaSeguridad] = useState(false);
+  const [localAlarma, setLocalAlarma] = useState(false);
+  const [localCCTV, setLocalCCTV] = useState(false);
+  const [localAlmacen, setLocalAlmacen] = useState(false);
+  const [localHaceEsquina, setLocalHaceEsquina] = useState(false);
+  const [localEntradaAuxiliar, setLocalEntradaAuxiliar] = useState(false);
+  const [localTieneOficina, setLocalTieneOficina] = useState(false);
 
   // Publicacion
 
@@ -613,6 +632,24 @@ export default function FormularioCaptacion() {
       vent_ext: ventExt,
       elec_reformada: elecRef,
       font_reformada: fontRef,
+      local_ubicacion: localUbicacion || null,
+      local_actividad: localActividad.length ? localActividad : null,
+      local_alquiler_mes: localAlquilerMes ? Number(localAlquilerMes) : null,
+      local_fianza_meses: localFianzaMeses ? Number(localFianzaMeses) : null,
+      local_fin_contrato: localFinContrato || null,
+      local_n_escaparates: localNEscaparates ? Number(localNEscaparates) : null,
+      local_n_plantas: localNPlantas ? Number(localNPlantas) : null,
+      local_calefaccion: localCalefaccion || null,
+      local_ac: localAC || null,
+      local_salida_humos: localSalidaHumos || null,
+      local_cocina_equipada: localCocinaEquipada || null,
+      local_puerta_seguridad: localPuertaSeguridad || null,
+      local_alarma: localAlarma || null,
+      local_cctv: localCCTV || null,
+      local_almacen: localAlmacen || null,
+      local_hace_esquina: localHaceEsquina || null,
+      local_entrada_auxiliar: localEntradaAuxiliar || null,
+      local_tiene_oficina: localTieneOficina || null,
       notas_priv: notasPriv || null,
       estado: "captada",
       fecha_cap: new Date().toISOString().split("T")[0],
@@ -964,6 +1001,112 @@ export default function FormularioCaptacion() {
             {op === "Traspaso" && <Input label="Precio traspaso *" value={precioTraspaso} onChange={setPrecioTraspaso} type="number" placeholder="0" required />}
             {op === "Traspaso" && <Input label="Precio propietario" value={precioProp} onChange={setPrecioProp} type="number" placeholder="0" />}
           </div>
+
+          {/* LOCAL / NAVE: campos específicos */}
+          {(tipo === "Local comercial" || tipo === "Nave industrial" || tipo === "Local" || tipo === "Nave" || tipo === "Almacen" || tipo === "Negocio") && (
+            <div className="mt-4 space-y-4">
+              <h4 className="font-semibold text-gray-700">Local / Nave</h4>
+
+              {/* Ubicación */}
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1">Ubicación</label>
+                <select value={localUbicacion} onChange={e => setLocalUbicacion(e.target.value)} className="w-full border rounded px-3 py-2 text-sm">
+                  <option value="">— Sin especificar —</option>
+                  <option value="pie_calle">Pie de calle</option>
+                  <option value="centro_comercial">Centro comercial</option>
+                  <option value="entreplanta">Entreplanta</option>
+                  <option value="sotano">Sótano</option>
+                  <option value="planta_superior">Planta superior</option>
+                  <option value="otros">Otros</option>
+                </select>
+              </div>
+
+              {/* Nº escaparates y plantas */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">Nº escaparates</label>
+                  <input type="number" min="0" value={localNEscaparates} onChange={e => setLocalNEscaparates(e.target.value)} className="w-full border rounded px-3 py-2 text-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-1">Nº plantas</label>
+                  <input type="number" min="1" value={localNPlantas} onChange={e => setLocalNPlantas(e.target.value)} className="w-full border rounded px-3 py-2 text-sm" />
+                </div>
+              </div>
+
+              {/* Actividad comercial */}
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-2">Actividad comercial</label>
+                {[
+                  { grupo: "Hostelería", opciones: ["Bar","Restaurante","Cafetería","Discoteca / pub / sala","Hotel / hostal","Otros hostelería"] },
+                  { grupo: "Comercio", opciones: ["Alimentación","Moda y complementos","Electrónica","Mobiliario y decoración","Farmacia / parafarmacia","Joyería / relojería","Papelería / librería","Juguetería","Otros comercio"] },
+                  { grupo: "Servicios", opciones: ["Peluquería / estética","Lavandería / tintorería","Agencia de viajes","Inmobiliaria","Financiero / seguros","Clínica / centro médico","Centro de formación","Gimnasio / deporte","Otros servicios"] },
+                  { grupo: "Otras actividades", opciones: ["Taller / reparación","Almacén / logística","Industria ligera"] },
+                ].map(({ grupo, opciones }) => (
+                  <div key={grupo} className="mb-3">
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">{grupo}</p>
+                    <div className="flex flex-wrap gap-1">
+                      {opciones.map(opt => {
+                        const sel = localActividad.includes(opt);
+                        return (
+                          <button key={opt} type="button"
+                            onClick={() => setLocalActividad(sel ? localActividad.filter(a => a !== opt) : [...localActividad, opt])}
+                            className={`px-2 py-1 rounded text-xs border ${sel ? "bg-blue-600 text-white border-blue-600" : "bg-white text-gray-700 border-gray-300 hover:border-blue-400"}`}
+                          >{opt}</button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Equipamiento */}
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-2">Equipamiento</label>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                  {[
+                    [localCalefaccion, setLocalCalefaccion, "Calefacción"],
+                    [localAC, setLocalAC, "Aire acondicionado"],
+                    [localSalidaHumos, setLocalSalidaHumos, "Salida de humos"],
+                    [localCocinaEquipada, setLocalCocinaEquipada, "Cocina equipada"],
+                    [localPuertaSeguridad, setLocalPuertaSeguridad, "Puerta de seguridad"],
+                    [localAlarma, setLocalAlarma, "Alarma"],
+                    [localCCTV, setLocalCCTV, "CCTV"],
+                    [localAlmacen, setLocalAlmacen, "Almacén en edificio"],
+                    [localHaceEsquina, setLocalHaceEsquina, "Hace esquina"],
+                    [localEntradaAuxiliar, setLocalEntradaAuxiliar, "Entrada auxiliar"],
+                    [localTieneOficina, setLocalTieneOficina, "Oficina en local"],
+                  ].map(([val, setter, label]) => (
+                    <label key={label} className="flex items-center gap-2 text-sm cursor-pointer">
+                      <input type="checkbox" checked={!!val} onChange={e => setter(e.target.checked)} className="rounded" />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Datos traspaso */}
+              {op === "Traspaso" && (
+                <div className="space-y-3 border-t pt-3">
+                  <h5 className="text-sm font-semibold text-gray-600">Datos del contrato (traspaso)</h5>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600 mb-1">Alquiler/mes (€)</label>
+                      <input type="number" value={localAlquilerMes} onChange={e => setLocalAlquilerMes(e.target.value)} className="w-full border rounded px-3 py-2 text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600 mb-1">Fianza (meses)</label>
+                      <input type="number" value={localFianzaMeses} onChange={e => setLocalFianzaMeses(e.target.value)} className="w-full border rounded px-3 py-2 text-sm" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-1">Fin de contrato</label>
+                    <input type="date" value={localFinContrato} onChange={e => setLocalFinContrato(e.target.value)} className="w-full border rounded px-3 py-2 text-sm" />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* ALQUILER: campos específicos Idealista */}
           {op === "Alquiler" && (
             <>
