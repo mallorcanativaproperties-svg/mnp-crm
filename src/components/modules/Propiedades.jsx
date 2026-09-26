@@ -993,6 +993,8 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
     // Procesar foto a foto directamente desde el cliente (sin cola ni cron)
     let procesadas = 0;
     for (const foto of fotos) {
+      // Mostrar cuál se está procesando ANTES de la llamada
+      setMejoraBatchProgreso({ actual: procesadas, total, procesando: procesadas + 1 });
       try {
         const res = await fetch("/api/foto-ia", {
           method: "POST",
@@ -1005,7 +1007,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
         console.warn("Error mejorando foto", foto.id, e.message);
       }
       procesadas++;
-      setMejoraBatchProgreso({ actual: procesadas, total });
+      setMejoraBatchProgreso({ actual: procesadas, total, procesando: procesadas + 1 });
     }
 
     setMejorandoTodas(false);
@@ -1125,7 +1127,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                 borderRadius: 0, whiteSpace: "nowrap",
               }}>
               {mejorandoTodas
-                ? `✦ Mejorando ${mejoraBatchProgreso?.actual || 0}/${mejoraBatchProgreso?.total || 0}...`
+                ? `✦ Mejorando ${mejoraBatchProgreso?.procesando || 1}/${mejoraBatchProgreso?.total || 0}...`
                 : "✦ Mejorar fotografías"}
             </button>
           </div>
@@ -1141,7 +1143,9 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
         }}>
           <span style={{ fontSize: 13, color: "#AC8A54" }}>✦</span>
           <span style={{ fontSize: 12, color: "#5C5347", fontFamily: "Inter, sans-serif", fontWeight: 500 }}>
-            Mejorando fotografías con IA — {mejoraBatchProgreso.actual} de {mejoraBatchProgreso.total} completadas
+            {mejoraBatchProgreso.procesando <= mejoraBatchProgreso.total
+              ? `Mejorando fotografía ${mejoraBatchProgreso.procesando} de ${mejoraBatchProgreso.total}...`
+              : `${mejoraBatchProgreso.actual} de ${mejoraBatchProgreso.total} completadas`}
           </span>
           <div style={{ flex: 1, height: 3, background: "#E7E1D4", borderRadius: 2 }}>
             <div style={{
