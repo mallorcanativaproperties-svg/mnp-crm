@@ -3646,7 +3646,8 @@ function IdealistaJsonButton({ supabase }) {
     if(row.balcon===true) feat.featuresBalcony=true;
     if(row.parking==="Si") feat.featuresParkingAvailable=true;
     if(row.venta_mobiliario===true) feat.featuresEquippedWithFurniture=true;
-    if(row.aire_acond===true||row.aire_acond_tipo&&row.aire_acond_tipo!=="No disponible") feat.featuresConditionedAir=true;
+    const AIRE_MAP={"No disponible":"notAvailable","Solo frio":"cold","Frio/Calor":"cold/heat","Preinstalacion":"preInstallation"};
+    if(row.aire_acond_tipo&&AIRE_MAP[row.aire_acond_tipo]){feat.featuresConditionedAirType=AIRE_MAP[row.aire_acond_tipo];if(row.aire_acond_tipo!=="No disponible") feat.featuresConditionedAir=true;}
     if((tipo==="house"||tipo==="rustic")&&row.tipologia_chalet){
       const HT_MAP={"Adosado":"terraced","Pareado":"semiDetached","Independiente":"detached","En hilera":"terraced"};
       if(HT_MAP[row.tipologia_chalet]) feat.featuresHouseSubtype=HT_MAP[row.tipologia_chalet];
