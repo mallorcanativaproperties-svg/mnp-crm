@@ -121,18 +121,18 @@ function buildProperty(row, media) {
       : Number(row.precio_venta) || 0;
 
   const operation = { operationType: isAlquiler ? "rent" : "sale" };
-  if (price > 0) operation.operationPrice = price;
+  if (price > 0) operation.operationPrice = Math.round(price);
   const community = Number(row.comunidad) || 0;
   if (community > 0 && community <= 9999 && !isAlquiler) operation.operationPriceCommunity = community;
   // Precio garaje aparte — solo para tipos residenciales/comerciales
   const tiposConPrecioParking = ["flat","house","rustic","premises_commercial","premises_industrial","office","building"];
   if ((row.parking === "Si" || row.parking === "Opcional") &&
       Number(row.precio_parking) > 0 && tiposConPrecioParking.includes(tipo)) {
-    operation.operationPriceParking = Number(row.precio_parking);
+    operation.operationPriceParking = Math.round(Number(row.precio_parking));
   }
   // operationPriceTransfer — para traspasos de locales
   if (isTraspaso && Number(row.precio_traspaso) > 0) {
-    operation.operationPriceTransfer = Number(row.precio_traspaso);
+    operation.operationPriceTransfer = Math.round(Number(row.precio_traspaso));
   }
   // Depósito
   if (isAlquiler && Number(row.fianza_meses) > 0) {
@@ -204,7 +204,7 @@ function buildProperty(row, media) {
   // featuresAreaBuildable: solo land
   if (isLand && Number(row.m_edificable) > 0) features.featuresAreaBuildable = Number(row.m_edificable);
   // featuresAreaHeight: solo storage
-  if (isStorage && Number(row.trastero_altura) > 0) features.featuresAreaHeight = Number(row.trastero_altura);
+  if (isStorage && Number(row.trastero_altura) > 0) features.featuresAreaHeight = Math.min(Number(row.trastero_altura), 9); // schema max 9
 
   // featuresBathroomNumber: homes, premises, offices (no land, garage, storage, building)
   if (banos > 0 && !isLand && !isGarage && !isStorage && !isBuilding) {
@@ -430,7 +430,7 @@ function buildProperty(row, media) {
     };
     const actividades = row.local_actividad || [];
     for (const act of actividades) {
-      if (ACTIVIDAD_MAP[act]) { features.featuresCommercialActivity = ACTIVIDAD_MAP[act]; break; }
+      if (ACTIVIDAD_MAP[act]) { features.featuresCommercialMainActivity = ACTIVIDAD_MAP[act]; break; }
     }
 
     // Traspaso
@@ -441,7 +441,7 @@ function buildProperty(row, media) {
         const fechaStr = String(row.local_fin_contrato);
         // Extraer YYYY-MM de cualquier formato de fecha
         const match = fechaStr.match(/^(\d{4})-(0[1-9]|1[0-2])/);
-        if (match) features.featuresTransferEndContractDate = `${match[1]}-${match[2]}`;
+        if (match) features.featuresTransferEndContract = `${match[1]}-${match[2]}`;
       }
     }
   }
