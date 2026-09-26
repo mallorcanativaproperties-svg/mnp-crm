@@ -1010,6 +1010,9 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
     setMejorandoTodas(true);
     setMejoraBatchProgreso({ actual: 0, total: totalEncoladas });
 
+    // Lanzar el procesamiento inmediatamente sin esperar al cron de Vercel
+    fetch("/api/cron/mejora-fotos").catch(() => {});
+
     // Polling cada 5s para actualizar el contador
     const ref = propRef || propiedadId;
     if (mejoraPollRef.current) clearInterval(mejoraPollRef.current);
@@ -1026,6 +1029,9 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
           mejoraPollRef.current = null;
           setMejorandoTodas(false);
           setMejoraBatchProgreso(null);
+        } else if (d.pendiente > 0 && d.procesando === 0) {
+          // Hay pendientes pero nadie las está procesando — relanzar el cron
+          fetch("/api/cron/mejora-fotos").catch(() => {});
         }
       } catch { /* silencioso */ }
     }, 5000);
