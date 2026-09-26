@@ -26,10 +26,37 @@ import { descargarTexto, huellaContenido, recortar } from "@/lib/ia/extraer";
  * `recorte: { desde, hasta }` se queda solo con el tramo entre dos marcas
  * literales: imprescindible en los libros municipales, que traen todas las
  * ordenanzas en un mismo PDF.
+ * `buscar: ["frase", ...]` descarga y devuelve donde aparece cada frase con su
+ * contexto, sin indexar nada: es como se averiguan las marcas de recorte.
  */
 
 const MAX_CHARS = 3600; // ~900 tokens en castellano
 const SOLAPE = 350;
+
+/**
+ * Localiza frases en el texto descargado y devuelve su contexto.
+ *
+ * Un libro de ordenanzas municipal trae veinte impuestos en un mismo PDF y hay
+ * que acotar la ordenanza concreta antes de indexar. Sin esto, dar con la marca
+ * de recorte es adivinar a ciegas: se prueba una frase, el recorte sale mal y no
+ * hay forma de ver por que.
+ */
+function buscarEnTexto(texto, frases) {
+  const plano = texto.toLowerCase();
+  return (frases || []).slice(0, 8).map((f) => {
+    const aguja = String(f).toLowerCase();
+    const donde = [];
+    let i = plano.indexOf(aguja);
+    while (i !== -1 && donde.length < 6) {
+      donde.push({
+        offset: i,
+        contexto: texto.slice(Math.max(0, i - 130), i + aguja.length + 130).replace(/\s+/g, " "),
+      });
+      i = plano.indexOf(aguja, i + aguja.length);
+    }
+    return { frase: f, veces: donde.length, donde };
+  });
+}
 
 /** Corta el texto en secciones encabezadas por "Artículo N" o por una disposición. */
 function partirPorArticulos(texto) {
@@ -182,6 +209,16 @@ export async function POST(request) {
 
     if (texto.length < 200) {
       return NextResponse.json({ error: "El texto extraído es demasiado corto", chars: texto.length }, { status: 422 });
+    }
+
+    // 2. Sonda: localizar frases para decidir el recorte. No escribe nada.
+    if (b.buscar) {
+      return NextResponse.json({
+        buscar: true,
+        titulo_de_la_pagina: tituloPagina,
+        caracteres: texto.length,
+        resultados: buscarEnTexto(texto, b.buscar),
+      });
     }
 
     // 2. Recorte opcional: un PDF municipal trae todas las ordenanzas juntas
