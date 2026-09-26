@@ -111,8 +111,7 @@ function buildProperty(row, media) {
   if (price > 0) operation.operationPrice = price;
   const community = Number(row.comunidad) || 0;
   if (community > 0 && !isAlquiler) operation.operationPriceCommunity = community;
-  const basuras = Number(row.basuras) || 0;
-  if (basuras > 0) operation.operationPriceUrbanizacion = basuras;
+  // operationPriceUrbanizacion no existe en el schema Idealista v6 — omitido
   // Alquiler — campos específicos
   if (isAlquiler) {
     if (Number(row.duracion_min_meses) > 0) operation.rentMinimumTerm = Number(row.duracion_min_meses);
@@ -306,54 +305,68 @@ function buildProperty(row, media) {
     });
   }
 
-  // Vídeos — detectar tipo según URL (youtube/vimeo/url directa)
+  // Vídeos — solo URLs directas (Supabase Storage .mp4); Idealista v6 rechaza YouTube/Vimeo
+  // Solo videoUrl + videoOrder, sin videoType (campo inexistente en schema)
   const videos = (media || []).filter(m => m.tipo === "video" && m.url).sort((a,b) => (a.orden||0)-(b.orden||0));
   if (videos.length > 0) {
     property.propertyVideos = videos.map((v, i) => {
       const vurl = v.url || "";
-      const videoType = vurl.includes("youtube.com") || vurl.includes("youtu.be") ? "youtube"
-        : vurl.includes("vimeo.com") ? "vimeo" : "url";
-      return { videoOrder: i + 1, videoUrl: vurl, videoType };
+      const match = vurl.match(/propiedades-media\/(.+)$/);
+      const relativePath = match ? match[1] : vurl;
+      return { videoOrder: i + 1, videoUrl: relativePath };
     });
   }
 
+  // Tour virtual — estructura correcta según schema Idealista v6
   if (row.tour360?.startsWith("http")) {
-    property.propertyVirtualTour = { virtualTourUrl: row.tour360 };
+    property.propertyVirtualTours = {
+      virtualTour3D: { virtualTour3DUrl: row.tour360 }
+    };
   }
 
   // PREMISES: Local / Nave comercial
   const isPremises = ["Local comercial","Nave industrial","Almacen","Negocio","Local","Nave"].includes(row.tipo);
   if (isPremises) {
     const actividades = row.local_actividad || [];
-    const hosteleria = ["Bar","Restaurante","Cafetería","Discoteca / pub / sala","Hotel / hostal","Otros hostelería"];
-    const comercio = ["Alimentación","Moda y complementos","Electrónica","Mobiliario y decoración","Farmacia / parafarmacia","Joyería / relojería","Papelería / librería","Juguetería","Otros comercio"];
-    const servicios = ["Peluquería / estética","Lavandería / tintorería","Agencia de viajes","Inmobiliaria","Financiero / seguros","Clínica / centro médico","Centro de formación","Gimnasio / deporte","Otros servicios"];
-    const industria = ["Taller / reparación","Almacén / logística","Industria ligera"];
-    let featuresCommercialActivity = null;
-    if (actividades.some(a => hosteleria.includes(a))) featuresCommercialActivity = "1";
-    else if (actividades.some(a => comercio.includes(a))) featuresCommercialActivity = "2";
-    else if (actividades.some(a => servicios.includes(a))) featuresCommercialActivity = "3";
-    else if (actividades.some(a => industria.includes(a))) featuresCommercialActivity = "4";
-    else if (actividades.length) featuresCommercialActivity = "5";
+    // featuresCommercialActivity — strings exactos del schema Idealista v6
+    const ACTIVIDAD_MAP = {
+      "Bar": "bar", "Restaurante": "restaurant", "Cafetería": "cafe",
+      "Discoteca / pub / sala": "nightclub", "Hotel / hostal": "hotel",
+      "Otros hostelería": "other",
+      "Alimentación": "supermarket", "Moda y complementos": "fashion",
+      "Electrónica": "electronics", "Mobiliario y decoración": "furniture",
+      "Farmacia / parafarmacia": "pharmacy", "Joyería / relojería": "jewellery",
+      "Papelería / librería": "bookshop", "Juguetería": "toyshop",
+      "Otros comercio": "other",
+      "Peluquería / estética": "hairSalon", "Lavandería / tintorería": "laundry",
+      "Agencia de viajes": "travelAgency", "Inmobiliaria": "realEstate",
+      "Financiero / seguros": "insurance", "Clínica / centro médico": "clinic",
+      "Centro de formación": "educationCentre", "Gimnasio / deporte": "gym",
+      "Otros servicios": "other",
+      "Taller / reparación": "workshop", "Almacén / logística": "warehouse",
+      "Industria ligera": "lightIndustry",
+    };
+    // featuresUbication — valores exactos del schema Idealista v6
     const locUbicMap = {
-      pie_calle:"streetLevel", centro_comercial:"shoppingCentre",
-      entreplanta:"mezzanine", sotano:"basement", planta_superior:"upperFloor",
+      pie_calle: "street", centro_comercial: "shopping",
+      entreplanta: "mezzanine", sotano: "belowGround", planta_superior: "on_top_floor",
     };
     const premises = {};
-    if (featuresCommercialActivity) premises.featuresCommercialActivity = featuresCommercialActivity;
-    if (row.local_ubicacion && locUbicMap[row.local_ubicacion]) premises.featuresPropertyLocation = locUbicMap[row.local_ubicacion];
-    if (row.local_n_escaparates) premises.featuresShowWindows = Number(row.local_n_escaparates);
+    // Mapear primera actividad encontrada al string correcto
+    for (const act of actividades) {
+      if (ACTIVIDAD_MAP[act]) { premises.featuresCommercialActivity = ACTIVIDAD_MAP[act]; break; }
+    }
+    if (row.local_ubicacion && locUbicMap[row.local_ubicacion]) premises.featuresUbication = locUbicMap[row.local_ubicacion];
+    if (row.local_n_escaparates) premises.featuresWindowsShop = Number(row.local_n_escaparates);
     if (row.local_n_plantas) premises.featuresFloorsProperty = Number(row.local_n_plantas);
-    if (row.local_salida_humos) premises.featuresSmokeExtractor = true;
-    if (row.local_cocina_equipada) premises.featuresKitchen = true;
-    if (row.local_ac) premises.featuresAirConditioning = true;
+    if (row.local_salida_humos) premises.featuresSmokeExtraction = true;
+    if (row.local_cocina_equipada) premises.featuresEquippedKitchen = true;
+    if (row.local_ac) premises.featuresConditionedAir = true;
     if (row.local_calefaccion) premises.featuresHeating = true;
-    if (row.local_alarma) premises.featuresAlarmSystem = true;
-    if (row.local_cctv) premises.featuresCCTV = true;
-    if (row.local_almacen) premises.featuresWarehouseInBuilding = true;
-    if (row.local_hace_esquina) premises.featuresCornerProperty = true;
-    if (row.local_entrada_auxiliar) premises.featuresAuxiliaryEntrance = true;
-    if (row.local_tiene_oficina) premises.featuresOfficeInPremise = true;
+    if (row.local_alarma) premises.featuresSecurityAlarm = true;
+    // featuresCCTV, featuresAuxiliaryEntrance, featuresOfficeInPremise no existen en schema v6 — omitidos
+    if (row.local_almacen) premises.featuresStorage = true;
+    if (row.local_hace_esquina) premises.featuresLocatedAtCorner = true;
     if (row.local_puerta_seguridad) premises.featuresSecurityDoor = true;
     if (row.op === "Traspaso") {
       if (row.local_alquiler_mes) premises.transferRentPrice = Number(row.local_alquiler_mes);
