@@ -117,34 +117,9 @@ function buildProperty(row, media) {
     operation.operationPriceParking = Number(row.precio_parking);
   }
   // operationPriceUrbanizacion no existe en el schema Idealista v6 — omitido
-  // Alquiler — campos específicos
-  if (isAlquiler) {
-    if (Number(row.duracion_min_meses) > 0) operation.rentMinimumTerm = Number(row.duracion_min_meses);
-    if (Number(row.fianza_meses) > 0) operation.rentDepositMonths = Number(row.fianza_meses);
-    if (row.mascotas === true || row.mascotas === "true") operation.rentPetsAllowed = true;
-    else if (row.mascotas === false || row.mascotas === "false") operation.rentPetsAllowed = false;
-
-    // Tipo de operación: residencia o temporada
-    if (row.alq_tipo_operacion === "temporada") operation.rentSubtype = "shortTerm";
-    else operation.rentSubtype = "longTerm";
-
-    // Número máximo de inquilinos
-    if (Number(row.alq_max_inquilinos) > 0) operation.rentMaxTenants = Number(row.alq_max_inquilinos);
-
-    // Apto para niños
-    if (row.alq_apto_ninos === true) operation.rentChildrenAllowed = true;
-    else if (row.alq_apto_ninos === false) operation.rentChildrenAllowed = false;
-
-    // Equipamiento cocina/mobiliario
-    const EQUIP_MAP = {
-      "Cocina con electrodomésticos y casa amueblada":     "furnished",
-      "Cocina con electrodomésticos y casa sin amueblar":  "kitchenEquipped",
-      "Cocina vacía y casa sin amueblar":                  "unfurnished",
-      "No lo sé":                                          "unknown",
-    };
-    if (row.alq_equipamiento && EQUIP_MAP[row.alq_equipamiento]) {
-      operation.rentFurnished = EQUIP_MAP[row.alq_equipamiento];
-    }
+  // Depósito — operationDepositMonths existe en operation.json
+  if (isAlquiler && Number(row.fianza_meses) > 0) {
+    operation.operationDepositMonths = Number(row.fianza_meses);
   }
   property.propertyOperation = operation;
 
@@ -222,12 +197,39 @@ function buildProperty(row, media) {
     features.featuresParkingAvailable = true;
     if (Number(row.n_plazas) > 0) features.featuresParkingSpacesNumber = Number(row.n_plazas);
   } else if (row.parking === "Comunitario") {
-    features.featuresCommunalParkingAvailable = true;
+    // "Comunitario" no tiene campo específico en Idealista v6 — se omite
   } else if (row.parking === "Opcional") {
     features.featuresParkingAvailable = true; // opcional = disponible
     if (Number(row.n_plazas) > 0) features.featuresParkingSpacesNumber = Number(row.n_plazas);
   }
-  if (isAlquiler && row.venta_mobiliario === true) features.featuresEquippedWithFurniture = true;
+  // Alquiler — campos específicos (homes.json fields, NO en operation.json)
+  if (isAlquiler) {
+    // Temporada vs larga estancia
+    if (row.alq_tipo_operacion === "temporada") {
+      features.featuresSeasonalRental = true;
+      features.featuresShortTerm = true;
+    }
+    // Mascotas
+    if (row.mascotas === true || row.mascotas === "true") features.featuresAllowPets = true;
+    else if (row.mascotas === false || row.mascotas === "false") features.featuresAllowPets = false;
+    // Número máximo de inquilinos
+    if (Number(row.alq_max_inquilinos) > 0) features.featuresTenantNumber = Number(row.alq_max_inquilinos);
+    // Apto para niños
+    if (row.alq_apto_ninos === true) features.featuresRecommendedForChildren = true;
+    else if (row.alq_apto_ninos === false) features.featuresRecommendedForChildren = false;
+    // Equipamiento cocina/mobiliario
+    const EQUIP_MAP = {
+      "Cocina con electrodomésticos y casa amueblada":    "furnished",
+      "Cocina con electrodomésticos y casa sin amueblar": "kitchenEquipped",
+      "Cocina vacía y casa sin amueblar":                 "unfurnished",
+      "No lo sé":                                         "unknown",
+    };
+    if (row.alq_equipamiento && EQUIP_MAP[row.alq_equipamiento]) {
+      features.featuresEquippedWithFurniture = EQUIP_MAP[row.alq_equipamiento];
+    }
+  } else if (row.venta_mobiliario === true) {
+    features.featuresEquippedWithFurniture = true;
+  }
 
   const AIRE_MAP = {
     "No disponible": "notAvailable", "Solo frio": "cold",
@@ -277,11 +279,11 @@ function buildProperty(row, media) {
   }
   // Campos opcionales garaje
   if (tipo === "garage") {
-    if (row.garaje_puerta_auto === true) features.parkingAutomaticDoor = true;
-    if (row.garaje_plaza_cubierta === true) features.parkingPlaceCovered = true;
+    if (row.garaje_puerta_auto === true) features.featuresParkingAutomaticDoor = true;
+    if (row.garaje_plaza_cubierta === true) features.featuresParkingPlaceCovered = true;
     if (row.garaje_tipo) {
       const GARAGE_TIPO_MAP = { "Trastero/Depósito": "depot", "Plaza aparcamiento": "parking_space", "Desconocido": "unknown" };
-      if (GARAGE_TIPO_MAP[row.garaje_tipo]) features.parkingType = GARAGE_TIPO_MAP[row.garaje_tipo];
+      if (GARAGE_TIPO_MAP[row.garaje_tipo]) features.featuresParkingType = GARAGE_TIPO_MAP[row.garaje_tipo];
     }
   }
 
@@ -292,13 +294,13 @@ function buildProperty(row, media) {
       const ACCESO_MAP = { "Urbano": "urban", "Carretera": "road", "Pista": "track", "Autovía/Autopista": "highway", "Desconocido": "unknown" };
       if (ACCESO_MAP[row.terreno_acceso]) features.featuresAccessType = ACCESO_MAP[row.terreno_acceso];
     }
-    if (row.terreno_luz === true) features.featuresElectricity = true;
-    if (row.terreno_agua === true) features.featuresWater = true;
-    if (row.terreno_gas === true) features.featuresNaturalGas = true;
-    if (row.terreno_alcantarillado === true) features.featuresSewerage = true;
-    if (row.terreno_aceras === true) features.featuresSidewalk = true;
-    if (row.terreno_alumbrado === true) features.featuresStreetLighting = true;
-    if (row.terreno_carretera === true) features.featuresRoadAccess = true;
+    if (row.terreno_luz === true) features.featuresUtilitiesElectricity = true;
+    if (row.terreno_agua === true) features.featuresUtilitiesWater = true;
+    if (row.terreno_gas === true) features.featuresUtilitiesNaturalGas = true;
+    if (row.terreno_alcantarillado === true) features.featuresUtilitiesSewerage = true;
+    if (row.terreno_aceras === true) features.featuresUtilitiesSidewalk = true;
+    if (row.terreno_alumbrado === true) features.featuresUtilitiesStreetLighting = true;
+    if (row.terreno_carretera === true) features.featuresUtilitiesRoadAccess = true;
   }
 
   // Campos opcionales trastero
@@ -309,7 +311,7 @@ function buildProperty(row, media) {
     if (row.trastero_muelle_carga === true) features.featuresLoadingDock = true;
   }
 
-  const OCC_MAP = { "Vacía": "free", "Alquilada": "tenanted", "Ocupada": "not_free" };
+  const OCC_MAP = { "Vacía": "free", "Alquilada": "tenanted", "Ocupada": "illegally_occupied" };
   if (row.ocupacion_actual && OCC_MAP[row.ocupacion_actual]) features.featuresCurrentOccupation = OCC_MAP[row.ocupacion_actual];
 
   if (isStudio || row.tipo === "Loft") features.featuresStudio = true;
@@ -408,23 +410,23 @@ function buildProperty(row, media) {
   const isPremises = ["Local comercial","Nave industrial","Almacen","Negocio","Local","Nave"].includes(row.tipo);
   if (isPremises) {
     const actividades = row.local_actividad || [];
-    // featuresCommercialActivity — strings exactos del schema Idealista v6
+    // featuresCommercialActivity — enum exacto del schema Idealista v6 features.json
     const ACTIVIDAD_MAP = {
-      "Bar": "bar", "Restaurante": "restaurant", "Cafetería": "cafe",
+      "Bar": "bar", "Restaurante": "restaurant", "Cafetería": "coffee_shop",
       "Discoteca / pub / sala": "nightclub", "Hotel / hostal": "hotel",
-      "Otros hostelería": "other",
-      "Alimentación": "supermarket", "Moda y complementos": "fashion",
-      "Electrónica": "electronics", "Mobiliario y decoración": "furniture",
-      "Farmacia / parafarmacia": "pharmacy", "Joyería / relojería": "jewellery",
-      "Papelería / librería": "bookshop", "Juguetería": "toyshop",
-      "Otros comercio": "other",
-      "Peluquería / estética": "hairSalon", "Lavandería / tintorería": "laundry",
-      "Agencia de viajes": "travelAgency", "Inmobiliaria": "realEstate",
-      "Financiero / seguros": "insurance", "Clínica / centro médico": "clinic",
-      "Centro de formación": "educationCentre", "Gimnasio / deporte": "gym",
-      "Otros servicios": "other",
-      "Taller / reparación": "workshop", "Almacén / logística": "warehouse",
-      "Industria ligera": "lightIndustry",
+      "Otros hostelería": "other_types_of_caterings",
+      "Alimentación": "supermarket", "Moda y complementos": "clothing_store",
+      "Electrónica": "electronics_and_computer_store", "Mobiliario y decoración": "housewares_store",
+      "Farmacia / parafarmacia": "pharmacy", "Joyería / relojería": "jewelry_shop",
+      "Papelería / librería": "bookstore", "Juguetería": "toy_store",
+      "Otros comercio": "other_commercial_activities",
+      "Peluquería / estética": "hair_salon", "Lavandería / tintorería": "laundry",
+      "Agencia de viajes": "travel_agency", "Inmobiliaria": "real_estate_agency",
+      "Financiero / seguros": "bank", "Clínica / centro médico": "clinic",
+      "Centro de formación": "educational_center", "Gimnasio / deporte": "gym",
+      "Otros servicios": "other_types_of_services",
+      "Taller / reparación": "repair_shop", "Almacén / logística": "storehouse",
+      "Industria ligera": "light_industry",
     };
     // featuresUbication — valores exactos del schema Idealista v6
     const locUbicMap = {
@@ -434,10 +436,10 @@ function buildProperty(row, media) {
     const premises = {};
     // Mapear primera actividad encontrada al string correcto
     for (const act of actividades) {
-      if (ACTIVIDAD_MAP[act]) { premises.featuresCommercialActivity = ACTIVIDAD_MAP[act]; break; }
+      if (ACTIVIDAD_MAP[act]) { premises.featuresCommercialMainActivity = ACTIVIDAD_MAP[act]; break; }
     }
     if (row.local_ubicacion && locUbicMap[row.local_ubicacion]) premises.featuresUbication = locUbicMap[row.local_ubicacion];
-    if (row.local_n_escaparates) premises.featuresWindowsShop = Number(row.local_n_escaparates);
+    if (row.local_n_escaparates) premises.featuresWindowsNumber = Number(row.local_n_escaparates);
     if (row.local_n_plantas) premises.featuresFloorsProperty = Number(row.local_n_plantas);
     if (row.local_salida_humos) premises.featuresSmokeExtraction = true;
     if (row.local_cocina_equipada) premises.featuresEquippedKitchen = true;
@@ -449,9 +451,10 @@ function buildProperty(row, media) {
     if (row.local_hace_esquina) premises.featuresLocatedAtCorner = true;
     if (row.local_puerta_seguridad) premises.featuresSecurityDoor = true;
     if (row.op === "Traspaso") {
-      if (row.local_alquiler_mes) premises.transferRentPrice = Number(row.local_alquiler_mes);
-      if (row.local_fianza_meses) premises.transferDepositMonths = Number(row.local_fianza_meses);
-      if (row.local_fin_contrato) premises.transferContractEndDate = row.local_fin_contrato;
+      // featuresPriceTransfer: precio del traspaso — ya se incluye en operationPrice (schema: operationPriceTransfer)
+      // featuresTransferEndContract: fecha fin contrato arrendamiento (formato ISO "YYYY-MM-DD")
+      if (row.local_fin_contrato) premises.featuresTransferEndContract = row.local_fin_contrato;
+      // Nota: alquiler mensual y fianza del traspaso van en propertyOperation (operationPrice/operationDepositMonths)
     }
     if (Object.keys(premises).length > 0) property.propertyPremises = premises;
   }
