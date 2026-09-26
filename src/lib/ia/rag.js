@@ -67,6 +67,57 @@ export async function recuperarContexto(agente, consulta) {
   return d2 || [];
 }
 
+/**
+ * Ordenanza municipal completa cuando la consulta nombra un municipio.
+ *
+ * La plusvalia depende del municipio: el tipo de gravamen lo fija cada
+ * ayuntamiento y los plazos de declaracion tambien. Dejar que la ordenanza
+ * compita por hueco con la ley estatal no funciona — en la prueba de Calvia el
+ * agente tuvo que decir "el articulo 7º no consta en mi base de conocimiento"
+ * cuando si estaba cargado, solo que no habia entrado en el ranking. Si el caso
+ * es de Calvia, el agente lee la ordenanza de Calvia entera: son 22 fragmentos.
+ */
+export async function recuperarOrdenanzaMunicipal(agenteSlug, consulta) {
+  const texto = (consulta || "").toLowerCase();
+
+  const { data: docs } = await sbAdmin
+    .from("ia_documentos")
+    .select("id, municipio")
+    .eq("agente_slug", agenteSlug)
+    .eq("estado", "indexado")
+    .not("municipio", "is", null);
+
+  // Sin acentos: nadie escribe "Calvià" con el acento en una consulta rapida.
+  const sinTildes = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const plano = sinTildes(texto);
+  const ids = (docs || [])
+    .filter((d) => plano.includes(sinTildes(d.municipio.toLowerCase())))
+    .map((d) => d.id);
+  if (ids.length === 0) return [];
+
+  const { data, error } = await sbAdmin
+    .from("ia_chunks")
+    .select(
+      "chunk_id:id, documento_id, contenido, metadata, ia_documentos!inner(titulo, referencia_legal, fuente, url_origen, ambito, tipo, organo, numero, fecha_resolucion, peso, vigencia_hasta)"
+    )
+    .in("documento_id", ids)
+    .order("orden");
+  if (error) {
+    console.error("[rag] ordenanza municipal", error.message);
+    return [];
+  }
+
+  // Misma forma plana que devuelve match_ia_chunks, para poder mezclarlos.
+  return (data || []).map((f) => ({
+    chunk_id: f.chunk_id,
+    documento_id: f.documento_id,
+    contenido: f.contenido,
+    metadata: f.metadata,
+    similitud: 1,
+    ...f.ia_documentos,
+  }));
+}
+
 /** Bloque <conocimiento> que se inyecta pegado a la ultima consulta. */
 export function construirBloqueConocimiento(fragmentos) {
   if (!fragmentos || fragmentos.length === 0) {

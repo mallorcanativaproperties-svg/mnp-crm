@@ -8,6 +8,7 @@ import {
   sbAdmin,
   getAgente,
   recuperarContexto,
+  recuperarOrdenanzaMunicipal,
   construirBloqueConocimiento,
   resumirFuentes,
 } from "@/lib/ia/rag";
@@ -26,8 +27,15 @@ export async function POST(request) {
     const ultimaConsulta =
       [...(mensajes || [])].reverse().find((m) => m.rol === "user")?.contenido || "";
 
-    // 1. Recuperacion aislada por agente
-    const fragmentos = await recuperarContexto(agente, ultimaConsulta);
+    // 1. Recuperacion aislada por agente. Si el caso es de un municipio con
+    // ordenanza cargada, esa ordenanza entra completa: el tipo de gravamen y el
+    // plazo de declaracion son municipales y no pueden quedar fuera por ranking.
+    const [recuperados, ordenanza] = await Promise.all([
+      recuperarContexto(agente, ultimaConsulta),
+      recuperarOrdenanzaMunicipal(agente.slug, ultimaConsulta),
+    ]);
+    const vistos = new Set(ordenanza.map((f) => f.chunk_id));
+    const fragmentos = [...ordenanza, ...recuperados.filter((f) => !vistos.has(f.chunk_id))];
     const bloqueConocimiento = construirBloqueConocimiento(fragmentos);
     const fuentes = resumirFuentes(fragmentos);
 
@@ -72,7 +80,7 @@ export async function POST(request) {
       body: JSON.stringify({
         // Opus 5 rechaza `temperature`: el parametro esta deprecado para este modelo
         model: agente.modelo || "claude-opus-5",
-        max_tokens: agente.max_tokens || 4000,
+        max_tokens: agente.max_tokens || 12000,
         // El prompt de sistema es fijo por agente: cachearlo abarata cada consulta
         system: [
           {
