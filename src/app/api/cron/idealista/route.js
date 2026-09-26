@@ -210,8 +210,16 @@ function buildProperty(row, media) {
   if (banos > 0 && !isLand && !isGarage && !isStorage && !isBuilding) {
     features.featuresBathroomNumber = banos;
   }
-  // featuresBedroomNumber: solo homes — homes.json anyOf requiere rooms O bedrooms; emitimos 0 si es home sin dormitorios
-  if (isHomeType) features.featuresBedroomNumber = bedrooms > 0 ? bedrooms : 0;
+  // featuresBedroomNumber: solo homes — homes.json anyOf requiere rooms O bedrooms
+  // integer1to99 tiene minimum:1, NO se puede emitir 0
+  // Si no hay dormitorios (estudio), emitimos featuresRooms:1 para satisfacer el anyOf
+  if (isHomeType) {
+    if (bedrooms > 0) {
+      features.featuresBedroomNumber = bedrooms;
+    } else {
+      features.featuresRooms = features.featuresRooms || 1; // estudio: satisface anyOf sin violar minimum
+    }
+  }
 
   // featuresBuiltYear: homes, premises, offices — NO garage, storage, building, land (additionalProperties:false)
   if (row.ano_construc && !isGarage && !isStorage && !isBuilding && !isLand) {
@@ -320,7 +328,8 @@ function buildProperty(row, media) {
       if (row.mascotas === true  || row.mascotas === "true")  features.featuresAllowPets = true;
       if (row.mascotas === false || row.mascotas === "false") features.featuresAllowPets = false;
 
-      if (Number(row.alq_max_inquilinos) > 0) {
+      if (Number(row.alq_max_inquilinos) >= 2) {
+        // number2to99: minimum 2 — no emitir si el valor es 1 (violaría el schema)
         features.featuresTenantNumber = Math.min(Number(row.alq_max_inquilinos), 10);
       }
       if (row.alq_apto_ninos === true)  features.featuresRecommendedForChildren = true;
@@ -356,7 +365,7 @@ function buildProperty(row, media) {
       if (row.aire_acond_tipo !== "No disponible") features.featuresConditionedAir = true;
     }
     if (row.agua_cal) features.featuresHotWater = row.agua_cal !== "Sin agua caliente";
-    if (row.doble_acristalamiento === true) features.featuresWindowsDouble = true;
+    // featuresWindowsDouble NO existe en offices.json (additionalProperties:false) — omitido
     if (row.puerta_blindada === true)       features.featuresSecurityDoor   = true;
     if (row.alarma_seguridad === true)      features.featuresSecurityAlarm  = true;
     if (Number(row.n_plazas) > 0)          features.featuresParkingSpacesNumber = Number(row.n_plazas);
@@ -421,7 +430,7 @@ function buildProperty(row, media) {
     };
     const actividades = row.local_actividad || [];
     for (const act of actividades) {
-      if (ACTIVIDAD_MAP[act]) { features.featuresCommercialMainActivity = ACTIVIDAD_MAP[act]; break; }
+      if (ACTIVIDAD_MAP[act]) { features.featuresCommercialActivity = ACTIVIDAD_MAP[act]; break; }
     }
 
     // Traspaso
@@ -432,7 +441,7 @@ function buildProperty(row, media) {
         const fechaStr = String(row.local_fin_contrato);
         // Extraer YYYY-MM de cualquier formato de fecha
         const match = fechaStr.match(/^(\d{4})-(0[1-9]|1[0-2])/);
-        if (match) features.featuresTransferEndContract = `${match[1]}-${match[2]}`;
+        if (match) features.featuresTransferEndContractDate = `${match[1]}-${match[2]}`;
       }
     }
   }
