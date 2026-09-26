@@ -222,7 +222,14 @@ function buildProperty(row, media) {
   }
   if (isAlquiler && row.venta_mobiliario === true) features.featuresEquippedWithFurniture = true;
 
-  if (row.aire_acond_tipo && row.aire_acond_tipo !== "No disponible") features.featuresConditionedAir = true;
+  const AIRE_MAP = {
+    "No disponible": "notAvailable", "Solo frio": "cold",
+    "Frio/Calor": "cold/heat", "Preinstalacion": "preInstallation",
+  };
+  if (row.aire_acond_tipo && AIRE_MAP[row.aire_acond_tipo]) {
+    features.featuresConditionedAirType = AIRE_MAP[row.aire_acond_tipo];
+    if (row.aire_acond_tipo !== "No disponible") features.featuresConditionedAir = true;
+  }
   if (row.calefaccion && HEAT_MAP[row.calefaccion]) features.featuresHeatingType = HEAT_MAP[row.calefaccion];
 
 
