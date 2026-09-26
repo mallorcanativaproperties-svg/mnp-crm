@@ -5,7 +5,7 @@ export const maxDuration = 300;
 
 import { NextResponse } from "next/server";
 import { sbAdmin } from "@/lib/ia/rag";
-import { descargarTexto, huellaContenido } from "@/lib/ia/extraer";
+import { descargarTexto, huellaContenido, recortar } from "@/lib/ia/extraer";
 import { sendWhatsApp } from "@/lib/evolutionApi";
 
 /**
@@ -55,7 +55,7 @@ export async function GET(request) {
   try {
     let q = sbAdmin
       .from("ia_documentos")
-      .select("id, agente_slug, titulo, referencia_legal, url_origen, hash_contenido, n_caracteres, cambio_detectado_at")
+      .select("id, agente_slug, titulo, referencia_legal, url_origen, hash_contenido, n_caracteres, cambio_detectado_at, recorte")
       .not("url_origen", "is", null)
       .eq("estado", "indexado")
       .order("revisado_at", { ascending: true, nullsFirst: true })
@@ -73,9 +73,18 @@ export async function GET(request) {
     for (const doc of docs || []) {
       const ahora = new Date().toISOString();
       try {
-        const { texto } = await descargarTexto(doc.url_origen);
+        let { texto } = await descargarTexto(doc.url_origen);
         if (!texto || texto.length < 200) {
           throw new Error(`texto demasiado corto (${texto?.length || 0} car.)`);
+        }
+        // Si el documento se indexo recortando un tramo del PDF municipal, hay
+        // que recortar igual antes de comparar: si no, la huella nunca coincide.
+        if (doc.recorte?.desde || doc.recorte?.hasta) {
+          const r = recortar(texto, doc.recorte.desde, doc.recorte.hasta);
+          // Que la marca desaparezca no es un fallo de descarga: significa que
+          // el ayuntamiento ha reordenado o retitulado la ordenanza.
+          if (r.error) throw new Error(`recorte: ${r.error}`);
+          texto = r.texto;
         }
         const huella = await huellaContenido(texto);
         revisados++;

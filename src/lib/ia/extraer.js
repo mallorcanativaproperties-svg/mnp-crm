@@ -47,6 +47,31 @@ export async function descargarTexto(url) {
 
   const tipoContenido = (res.headers.get("content-type") || "").toLowerCase();
   const esPdf = tipoContenido.includes("pdf") || /\.pdf(\?|$)/i.test(url);
+  const esZip = !esPdf && (tipoContenido.includes("zip") || /\.zip(\?|$)/i.test(url));
+
+  if (esZip) {
+    // Llucmajor publica sus ordenanzas dentro de un .zip. Se coge el PDF mas
+    // grande que contenga: en estos paquetes el resto suele ser el anexo o la
+    // diligencia de publicacion.
+    const { default: PizZip } = await import("pizzip");
+    const zip = new PizZip(Buffer.from(await res.arrayBuffer()));
+    const pdfs = Object.values(zip.files)
+      .filter((f) => !f.dir && /\.pdf$/i.test(f.name))
+      .map((f) => ({ nombre: f.name, datos: f.asNodeBuffer() }))
+      .sort((a, b) => b.datos.length - a.datos.length);
+    if (pdfs.length === 0) {
+      throw new Error(
+        `El zip no contiene ningun PDF (${Object.keys(zip.files).slice(0, 6).join(", ")})`
+      );
+    }
+    const { default: leerPdf } = await import("pdf-parse/lib/pdf-parse.js");
+    const datos = await leerPdf(pdfs[0].datos);
+    const texto = String(datos.text || "")
+      .replace(/[ \t ]+/g, " ")
+      .replace(/\n\s*\n\s*\n+/g, "\n\n")
+      .trim();
+    return { texto, tituloPagina: `ZIP → ${pdfs[0].nombre}`, esPdf: true };
+  }
 
   if (esPdf) {
     // Las ordenanzas fiscales municipales se publican en PDF: sin esto,
@@ -65,6 +90,37 @@ export async function descargarTexto(url) {
   const html = await res.text();
   const tituloPagina = (html.match(/<title>([\s\S]*?)<\/title>/i)?.[1] || "").trim().slice(0, 300);
   return { texto: limpiarHtml(html), tituloPagina, esPdf: false };
+}
+
+/**
+ * Recorta el texto entre dos marcas literales.
+ *
+ * Los ayuntamientos publican un unico PDF con TODAS sus ordenanzas fiscales
+ * (Calvia: 580.000 caracteres, 636 articulos). Ahi "Articulo 9" existe veinte
+ * veces — una por impuesto — asi que filtrar por numero de articulo traeria
+ * basura de otros tributos. Hay que quedarse antes con la ordenanza concreta.
+ *
+ * La usan la ingesta, al indexar, y el control de vigencia, que tiene que
+ * recortar EXACTAMENTE igual antes de comparar la huella.
+ */
+export function recortar(texto, desde, hasta) {
+  const plano = texto.toLowerCase();
+  let ini = 0;
+  if (desde) {
+    ini = plano.indexOf(String(desde).toLowerCase());
+    if (ini === -1) return { error: `No aparece la marca de inicio: "${desde}"` };
+  }
+  let fin = texto.length;
+  if (hasta) {
+    const rel = plano.indexOf(String(hasta).toLowerCase(), ini + 1);
+    if (rel === -1) return { error: `No aparece la marca de fin: "${hasta}" despues del inicio` };
+    fin = rel;
+  }
+  const trozo = texto.slice(ini, fin).trim();
+  if (trozo.length < 200) {
+    return { error: `El recorte deja solo ${trozo.length} caracteres: revisa las marcas` };
+  }
+  return { texto: trozo };
 }
 
 /**

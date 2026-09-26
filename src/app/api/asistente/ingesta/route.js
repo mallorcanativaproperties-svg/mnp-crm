@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { sbAdmin } from "@/lib/ia/rag";
 import { generarEmbeddings } from "@/lib/ia/embeddings";
-import { descargarTexto, huellaContenido } from "@/lib/ia/extraer";
+import { descargarTexto, huellaContenido, recortar } from "@/lib/ia/extraer";
 
 /**
  * Ingesta de conocimiento para los agentes del Asistente IA.
@@ -23,6 +23,9 @@ import { descargarTexto, huellaContenido } from "@/lib/ia/extraer";
  * (IRPF, LGT) cargar entero empeora la recuperacion, no la mejora.
  * `seco: true` analiza y devuelve el troceado SIN escribir nada: sirve para
  * comprobar que la norma descargada es la que crees antes de indexarla.
+ * `recorte: { desde, hasta }` se queda solo con el tramo entre dos marcas
+ * literales: imprescindible en los libros municipales, que traen todas las
+ * ordenanzas en un mismo PDF.
  */
 
 const MAX_CHARS = 3600; // ~900 tokens en castellano
@@ -35,7 +38,11 @@ function partirPorArticulos(texto) {
   // tratan como tales, el artículo se parte y el filtro por artículo deja de verlo.
   // El patrón amplio (markdown, secciones numeradas) se reserva para documentos
   // internos, que no tienen articulado.
-  const reLegal = /(?:^|\n)\s*((?:Art[íi]culo|Disposici[óo]n\s+(?:adicional|transitoria|final|derogatoria))[^\n]{0,140})/gi;
+  // En catalán es "Article" y "Disposició addicional/transitòria": las ordenanzas
+  // fiscales de los municipios de Mallorca están casi todas en catalán, y sin
+  // esto el texto cae al patrón amplio y se trocea por apartados internos — se
+  // pierde la numeración del articulado y con ella la cita.
+  const reLegal = /(?:^|\n)\s*((?:Art[íi]cul[oe]|Art[íi]cle|Disposici[óo]n?\s+(?:adicional|addicional|transitoria|transit[òo]ria|final|derogatoria|derogat[òo]ria))[^\n]{0,140})/gi;
   const reLibre = /(?:^|\n)\s*(#{1,4}\s+[^\n]{1,140}|\d{1,2}(?:\.\d{1,2})*\.\s+[A-ZÁÉÍÓÚÑ][^\n]{0,140})/g;
 
   const recoger = (re) => {
@@ -69,8 +76,13 @@ function partirPorArticulos(texto) {
 /** "Artículo 35 bis. Título" -> "35 bis" */
 function numeroDeArticulo(encabezado) {
   if (!encabezado) return null;
-  const m = encabezado.match(/Art[íi]culo\s+([0-9]+(?:\s*(?:bis|ter|quater|qu[íi]nquies))?)/i);
-  return m ? m[1].replace(/\s+/g, " ").trim().toLowerCase() : null;
+  // "Article 9è", "Artículo 9º", "Artículo 41 bis": el ordinal catalán o
+  // castellano no forma parte del numero con el que se cita.
+  const m = encabezado.match(
+    /(?:Art[íi]cul[oe]|Art[íi]cle)\s+([0-9]+)\s*(?:º|ª|è|é|er|r|n|t|a)?\.?\s*(bis|ter|quater|qu[íi]nquies)?/i
+  );
+  if (!m) return null;
+  return [m[1], m[2]].filter(Boolean).join(" ").trim().toLowerCase();
 }
 
 /**
@@ -172,7 +184,16 @@ export async function POST(request) {
       return NextResponse.json({ error: "El texto extraído es demasiado corto", chars: texto.length }, { status: 422 });
     }
 
-    // 2. Troceado por artículos
+    // 2. Recorte opcional: un PDF municipal trae todas las ordenanzas juntas
+    let recorteInfo = null;
+    if (b.recorte?.desde || b.recorte?.hasta) {
+      const r = recortar(texto, b.recorte.desde, b.recorte.hasta);
+      if (r.error) return NextResponse.json({ error: r.error, caracteres: texto.length }, { status: 422 });
+      recorteInfo = { original: texto.length, recortado: r.texto.length };
+      texto = r.texto;
+    }
+
+    // 3. Troceado por artículos
     const secciones = partirPorArticulos(texto);
     const trozos = trocear(secciones, b.articulos);
 
@@ -192,6 +213,7 @@ export async function POST(request) {
       return NextResponse.json({
         seco: true,
         titulo_de_la_pagina: tituloPagina,
+        recorte: recorteInfo,
         caracteres: texto.length,
         secciones: secciones.length,
         fragmentos: trozos.length,
@@ -207,7 +229,8 @@ export async function POST(request) {
     const hash = crypto
       .createHash("sha256")
       .update(
-        `${b.agenteSlug}|${b.url || `texto:${b.titulo}`}|${(b.articulos || []).join(",")}`
+        `${b.agenteSlug}|${b.url || `texto:${b.titulo}`}|${(b.articulos || []).join(",")}` +
+          `|${b.recorte?.desde || ""}`
       )
       .digest("hex");
 
@@ -233,6 +256,7 @@ export async function POST(request) {
         vigencia_desde: b.vigencia_desde || null,
         vigencia_hasta: b.vigencia_hasta || null,
         estado: "procesando",
+        recorte: b.recorte || null,
         // Huella del texto tal y como se ha indexado: es el punto de partida
         // del control de vigencia, que cada noche vuelve a bajar la fuente y
         // compara. Sin esto, la primera pasada avisaria de todo.
