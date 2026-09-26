@@ -80,7 +80,12 @@ function partirPorArticulos(texto) {
     let m;
     re.lastIndex = 0;
     while ((m = re.exec(texto)) !== null) {
-      out.push({ inicio: m.index + m[0].indexOf(m[1]), encabezado: m[1].trim() });
+      const encabezado = m[1].trim();
+      // Un encabezado nunca empieza en minuscula. Si lo hace es una frase que
+      // ha caido al principio de linea ("artículo 106 de la Ley..."), y tratarla
+      // como encabezado parte el articulo de verdad en dos.
+      if (/^[a-záéíóúïüñç]/.test(encabezado)) continue;
+      out.push({ inicio: m.index + m[0].indexOf(m[1]), encabezado });
     }
     return out;
   };
