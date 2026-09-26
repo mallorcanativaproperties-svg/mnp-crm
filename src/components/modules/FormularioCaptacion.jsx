@@ -35,8 +35,8 @@ const IEE_OPTS = ["Favorable", "Desfavorable", "Pendiente", "No aplica"];
 
 
 const ZONAS_MAP = {
-  "Palma": ["Casco Antiguo","Santa Catalina","El Terreno","Son Espanyolet","Son Cotoner","Son Dameto","La Bonanova","Genova","Cala Major","Son Rapinya","La Vileta","Pere Garau","Foners","Plaza de Toros","Son Gotleu","La Soledad","Vivero","Son Oliva","Rafal","Son Cladera","Son Ferriol","Sant Jordi","Can Pastilla","Coll den Rabassa","Nou Llevant","SIndioteria","SAranjassa","Es Pilari","Amanecer"],
-  "Calvia": ["Palmanova","Magaluf","Santa Ponsa","Peguera","Illetes","Portals Nous","Bendinat","Calvia Vila"],
+  "Palma": ["Casco Antiguo","Santa Catalina","El Terreno","Son Espanyolet","Son Cotoner","Son Dameto","La Bonanova","Genova","Cala Major","Son Rapinya","La Vileta","Pere Garau","Foners","Plaza de Toros","Son Gotleu","La Soledad","Vivero","Son Oliva","Rafal","Son Cladera","Son Ferriol","Sant Jordi","Can Pastilla","Coll den Rabassa","Nou Llevant","SIndioteria","SAranjassa","Es Pilari","Amanecer","Son Sardina","Establiments","Secar de la Real"],
+  "Calvia": ["Palmanova","Magaluf","Santa Ponsa","Peguera","Illetes","Portals Nous","Bendinat","Calvia Vila","Costa de la Calma","Son Ferrer","El Toro"],
   "Marratxi": ["Portol","Sa Cabaneta","Pont dInca","Es Figueral","Sa Cabana"],
   "Inca": ["Centro","Poligono","Afueras"],
   "Manacor": ["Centro","Porto Cristo","Cala Murada"],
@@ -343,8 +343,8 @@ export default function FormularioCaptacion() {
   const [precioProp, setPrecioProp] = useState("");
   const [precioTraspaso, setPrecioTraspaso] = useState("");
   const [precioAlquiler, setPrecioAlquiler] = useState("");
-  const [fianzaMeses, setFianzaMeses] = useState("1");
-  const [duracionMinMeses, setDuracionMinMeses] = useState("11");
+  const [fianzaMeses, setFianzaMeses] = useState("");
+  const [duracionMinMeses, setDuracionMinMeses] = useState("");
   const [mascotas, setMascotas] = useState(false);
   const [alqEquipamiento,  setAlqEquipamiento]  = useState("");
   const [alqTipoOperacion, setAlqTipoOperacion] = useState("residencia");
@@ -578,8 +578,8 @@ export default function FormularioCaptacion() {
       precio_prop: Number(precioProp) || 0,
       precio_traspaso: Number(precioTraspaso) || 0,
       precio_alquiler: Number(precioAlquiler) || 0,
-      fianza_meses: Number(fianzaMeses) || 1,
-      duracion_min_meses: Number(duracionMinMeses) || 11,
+      fianza_meses: fianzaMeses !== "" ? Number(fianzaMeses) : null,
+      duracion_min_meses: duracionMinMeses !== "" ? Number(duracionMinMeses) : null,
       mascotas: mascotas,
       alq_equipamiento:   alqEquipamiento   || null,
       ...(op === "Alquiler" ? { alq_tipo_operacion: alqTipoOperacion || null } : {}),
@@ -956,7 +956,6 @@ export default function FormularioCaptacion() {
                       <option value="entreplanta">Entreplanta</option>
                       <option value="sotano">Sótano</option>
                       <option value="planta_superior">Planta superior</option>
-                      <option value="otros">Otros</option>
                     </select>
                   </div>
                   <div>
@@ -1136,7 +1135,9 @@ export default function FormularioCaptacion() {
                 <Select label="Tipo de alquiler" value={alqTipoOperacion} onChange={setAlqTipoOperacion}
                   options={["residencia", "temporada"]} />
                 <Toggle label="Mascotas permitidas" value={mascotas} onChange={setMascotas} />
-                <Toggle label="Apto para niños" value={alqAptoNinos === true} onChange={v => setAlqAptoNinos(v)} />
+                <Select label="Apto para niños" value={alqAptoNinos === true ? "si" : alqAptoNinos === false ? "no" : ""}
+                  onChange={v => setAlqAptoNinos(v === "si" ? true : v === "no" ? false : null)}
+                  options={["si","no"]} />
               </div>
               {esResidencial && (
                 <Select label="Equipamiento *" value={alqEquipamiento} onChange={setAlqEquipamiento}
