@@ -582,7 +582,7 @@ export default function FormularioCaptacion() {
       duracion_min_meses: Number(duracionMinMeses) || 11,
       mascotas: mascotas,
       alq_equipamiento:   alqEquipamiento   || null,
-      alq_tipo_operacion: alqTipoOperacion  || null,
+      ...(op === "Alquiler" ? { alq_tipo_operacion: alqTipoOperacion || null } : {}),
       alq_max_inquilinos: Number(alqMaxInquilinos) || null,
       alq_apto_ninos:     alqAptoNinos      ?? null,
       honorarios: Number(honorarios) || 5,
@@ -1141,7 +1141,6 @@ export default function FormularioCaptacion() {
               {esResidencial && (
                 <Select label="Equipamiento *" value={alqEquipamiento} onChange={setAlqEquipamiento}
                   options={[
-                    "",
                     "Cocina con electrodomésticos y casa amueblada",
                     "Cocina con electrodomésticos y casa sin amueblar",
                     "Cocina vacía y casa sin amueblar",
