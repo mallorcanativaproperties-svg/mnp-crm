@@ -66,6 +66,11 @@ function mapDbToJs(row) {
     localHaceEsquina: row.local_hace_esquina || false,
     localEntradaAuxiliar: row.local_entrada_auxiliar || false,
     localTieneOficina: row.local_tiene_oficina || false,
+    bloque: row.bloque || "", escalera: row.escalera || "", urbanizacion: row.urbanizacion || "",
+    chimenea: row.chimenea || false, cocinaEquipada: row.cocina_equipada || false,
+    dobleAcristalamiento: row.doble_acristalamiento || false, puertaBlindada: row.puerta_blindada || false,
+    alarmaSeguridad: row.alarma_seguridad || false, plantasEdificio: Number(row.plantas_edificio) || 0,
+    ocupacionActual: row.ocupacion_actual || "",
   };
 }
 
@@ -117,6 +122,12 @@ function mapJsToDb(p) {
     local_hace_esquina: p.localHaceEsquina || null,
     local_entrada_auxiliar: p.localEntradaAuxiliar || null,
     local_tiene_oficina: p.localTieneOficina || null,
+    bloque: p.bloque || null, escalera: p.escalera || null, urbanizacion: p.urbanizacion || null,
+    chimenea: p.chimenea || false, cocina_equipada: p.cocinaEquipada || false,
+    doble_acristalamiento: p.dobleAcristalamiento || false, puerta_blindada: p.puertaBlindada || false,
+    alarma_seguridad: p.alarmaSeguridad || false,
+    plantas_edificio: p.plantasEdificio ? Number(p.plantasEdificio) : null,
+    ocupacion_actual: p.ocupacionActual || null,
     updated_at: new Date().toISOString(),
   };
 }
@@ -2820,6 +2831,9 @@ REGLAS:
             {EFl({label: "Distancia playa", field: "distPlaya", pub: true})}
             {EFl({label: "Planta", field: "planta", pub: true})}
             {EFl({label: "Puerta", field: "puerta", pub: true})}
+            {EFl({label: "Bloque", field: "bloque", pub: true})}
+            {EFl({label: "Escalera", field: "escalera", pub: true})}
+            {esResidencial && EFl({label: "Urbanizacion", field: "urbanizacion", pub: true})}
             {EFl({label: "Latitud (GPS)", field: "latitud", pub: true, type: "number"})}
             {EFl({label: "Longitud (GPS)", field: "longitud", pub: true, type: "number"})}
           </div>
@@ -3065,6 +3079,18 @@ REGLAS:
                 )}
               </>);
             })()}
+          </div>}
+          {esResidencial && <div style={{ ...g4, marginTop: 8 }}>
+            {EFl({label: "Chimenea", field: "chimenea", pub: true, type: "bool"})}
+            {EFl({label: "Cocina equipada", field: "cocinaEquipada", pub: true, type: "bool"})}
+            {EFl({label: "Doble acristalamiento", field: "dobleAcristalamiento", pub: true, type: "bool"})}
+            {EFl({label: "Puerta blindada", field: "puertaBlindada", pub: true, type: "bool"})}
+          </div>}
+          {esResidencial && <div style={{ ...g4, marginTop: 8 }}>
+            {EFl({label: "Alarma seguridad", field: "alarmaSeguridad", pub: true, type: "bool"})}
+            {EFl({label: "Plantas edificio", field: "plantasEdificio", pub: true, type: "number"})}
+            {EFl({label: "Ocupacion actual", field: "ocupacionActual", pub: true, options: ["","Vacía","Alquilada","Ocupada"], type: "select"})}
+            <div />
           </div>}
           <div style={{ ...g2, marginTop: 8 }}>
             {EFl({label: "Parking", field: "parking", pub: true, options: ["Si","No","Comunitario","Opcional"], type: "select"})}
@@ -3622,6 +3648,9 @@ function IdealistaJsonButton({ supabase }) {
     if(row.num) addr.addressStreetNumber=String(row.num);
     if(row.planta){const fv=String(row.planta).trim();if(FLOOR_MAP[fv]) addr.addressFloor=FLOOR_MAP[fv];else{const n=parseInt(fv);if(!isNaN(n)&&n>=1&&n<=60) addr.addressFloor=String(n);}}
     if(row.puerta) addr.addressDoor=String(row.puerta);
+    if(row.bloque) addr.addressBlock=String(row.bloque);
+    if(row.escalera) addr.addressStair=String(row.escalera);
+    if(row.urbanizacion) addr.addressUrbanization=String(row.urbanizacion);
     if(row.cp) addr.addressPostalCode=String(row.cp);
     if(row.municipio) addr.addressTown=row.municipio;
     if(row.latitud&&row.longitud){addr.addressCoordinatesPrecision="exact";addr.addressCoordinatesLatitude=Number(row.latitud);addr.addressCoordinatesLongitude=Number(row.longitud);}
@@ -3664,6 +3693,16 @@ function IdealistaJsonButton({ supabase }) {
     if(row.ref_cat) feat.featuresCadastralReference=row.ref_cat;
     if(row.cert_energ){if(row.cert_energ==="Exento") feat.featuresEnergyCertificateRating="exempt";else if(/^[A-G]$/.test(row.cert_energ)) feat.featuresEnergyCertificateRating=row.cert_energ;}
     if(row.emisiones_energ&&/^[A-G]$/.test(row.emisiones_energ)) feat.featuresEnergyCertificateEmissionsRating=row.emisiones_energ;
+    if(row.chimenea===true) feat.featuresChimney=true;
+    if(row.cocina_equipada===true) feat.featuresEquippedKitchen=true;
+    if(row.doble_acristalamiento===true) feat.featuresWindowsDouble=true;
+    if(row.puerta_blindada===true) feat.featuresSecurityDoor=true;
+    if(row.alarma_seguridad===true) feat.featuresSecurityAlarm=true;
+    if(Number(row.plantas_edificio)>0) feat.featuresFloorsBuilding=Number(row.plantas_edificio);
+    const OCC_MAP={"Vacía":"empty","Alquilada":"rented","Ocupada":"occupied"};
+    if(row.ocupacion_actual&&OCC_MAP[row.ocupacion_actual]) feat.featuresCurrentOccupation=OCC_MAP[row.ocupacion_actual];
+    const HOT_WATER_MAP={"Caldera individual":"individual","Caldera central":"centralHeating","Solar":"solar","Sin agua caliente":"noHotWater"};
+    if(row.agua_cal&&HOT_WATER_MAP[row.agua_cal]) feat.featuresHotWater=HOT_WATER_MAP[row.agua_cal];
     if(row.orient){const ORIENT_MAP={"Norte":["North"],"Sur":["South"],"Este":["East"],"Oeste":["West"],"Noreste":["North","East"],"Noroeste":["North","West"],"Sureste":["South","East"],"Suroeste":["South","West"]};const dirs=ORIENT_MAP[row.orient]||[];if(dirs.includes("North")) feat.featuresOrientationNorth=true;if(dirs.includes("South")) feat.featuresOrientationSouth=true;if(dirs.includes("East")) feat.featuresOrientationEast=true;if(dirs.includes("West")) feat.featuresOrientationWest=true;}
     property.propertyFeatures=feat;
     const descs=[];

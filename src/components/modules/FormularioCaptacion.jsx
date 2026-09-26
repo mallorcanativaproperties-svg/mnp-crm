@@ -436,6 +436,20 @@ export default function FormularioCaptacion() {
   const [localEntradaAuxiliar, setLocalEntradaAuxiliar] = useState(false);
   const [localTieneOficina, setLocalTieneOficina] = useState(false);
 
+  // Dirección extendida
+  const [bloque, setBloque] = useState("");
+  const [escalera, setEscalera] = useState("");
+  const [urbanizacion, setUrbanizacion] = useState("");
+
+  // Características residenciales adicionales (Idealista v6)
+  const [chimenea, setChimenea] = useState(false);
+  const [cocinaEquipada, setCocinaEquipada] = useState(false);
+  const [dobleAcristalamiento, setDobleAcristalamiento] = useState(false);
+  const [puertaBlindada, setPuertaBlindada] = useState(false);
+  const [alarmaSeguridad, setAlarmaSeguridad] = useState(false);
+  const [plantasEdificio, setPlantasEdificio] = useState("");
+  const [ocupacionActual, setOcupacionActual] = useState("");
+
   // Publicacion
 
   // Propietarios (array dinámico)
@@ -489,7 +503,9 @@ export default function FormularioCaptacion() {
       parking, nPlazas, aireAcond, aireAcondTipo, tipologiaChalet, plantasChalet, suelos, carpExt, carpInt,
       emisionesEnerg, calefaccion, aguaCal, suministros, drenaje,
       ventExt, elecRef, fontRef, notasPriv, propietarios, cualPos, cualNeg, refCatCuest, latitud, longitud,
-      alqEquipamiento, alqTipoOperacion, alqMaxInquilinos, alqAptoNinos]);
+      alqEquipamiento, alqTipoOperacion, alqMaxInquilinos, alqAptoNinos,
+      bloque, escalera, urbanizacion, chimenea, cocinaEquipada, dobleAcristalamiento,
+      puertaBlindada, alarmaSeguridad, plantasEdificio, ocupacionActual]);
   const pv = op === "Alquiler" ? (Number(precioAlquiler)||0) : op === "Traspaso" ? (Number(precioTraspaso)||0) : (Number(precioVenta) || 0);
   const pp = Number(precioProp) || 0;
 
@@ -574,6 +590,7 @@ export default function FormularioCaptacion() {
       dir, num: num || null, cp: cp || null, municipio, zona: zona || null,
       orient: orient || null, dist_playa: distPlaya || null, vis_dir: visDir,
       planta: planta || null, puerta: puerta || null,
+      bloque: bloque || null, escalera: escalera || null, urbanizacion: urbanizacion || null,
       precio_venta: Number(precioVenta) || 0,
       precio_prop: Number(precioProp) || 0,
       precio_traspaso: Number(precioTraspaso) || 0,
@@ -630,6 +647,12 @@ export default function FormularioCaptacion() {
       suministros: suministros.length > 0 ? suministros : [],
       drenaje: drenaje || null,
       vent_ext: ventExt,
+      chimenea, cocina_equipada: cocinaEquipada,
+      doble_acristalamiento: dobleAcristalamiento,
+      puerta_blindada: puertaBlindada,
+      alarma_seguridad: alarmaSeguridad,
+      plantas_edificio: plantasEdificio ? Number(plantasEdificio) : null,
+      ocupacion_actual: ocupacionActual || null,
       elec_reformada: elecRef,
       font_reformada: fontRef,
       local_ubicacion: localUbicacion || null,
@@ -828,7 +851,10 @@ export default function FormularioCaptacion() {
             <Input label="Numero" value={num} onChange={setNum} placeholder="12" />
             <Input label="Planta" value={planta} onChange={setPlanta} placeholder="2, Bajo, Entreplanta..." />
             <Input label="Puerta" value={puerta} onChange={setPuerta} placeholder="A, 1..." />
+            <Input label="Bloque" value={bloque} onChange={setBloque} placeholder="A, 1..." />
+            <Input label="Escalera" value={escalera} onChange={setEscalera} placeholder="1, A..." />
           </div>
+          {esResidencial && <Input label="Urbanizacion" value={urbanizacion} onChange={setUrbanizacion} placeholder="Urb. Los Pinos" />}
           <div style={g3}>
             <Input label="Codigo postal" value={cp} onChange={setCp} placeholder="07007" required />
             <Select label="Municipio" value={municipio} onChange={(v) => { setMunicipio(v); setZona(""); }} options={Object.keys(ZONAS_MAP)} required />
@@ -1047,6 +1073,16 @@ export default function FormularioCaptacion() {
             {(esResidencial || esComercial) && <Toggle label="Incluye mobiliario" value={ventaMob} onChange={setVentaMob} />}
             {tieneAireCalef && <Toggle label="Aire acondicionado" value={aireAcond} onChange={e => { setAireAcond(e); setAireAcondTipo(e ? "Frio/Calor" : ""); }} />}
             {tieneAireCalef && aireAcond && <Select label="Tipo aire" value={aireAcondTipo} onChange={setAireAcondTipo} options={["Solo frio","Frio/Calor","Preinstalacion"]} />}
+            {esResidencial && <Toggle label="Chimenea" value={chimenea} onChange={setChimenea} />}
+            {esResidencial && <Toggle label="Cocina equipada" value={cocinaEquipada} onChange={setCocinaEquipada} />}
+            {esResidencial && <Toggle label="Doble acristalamiento" value={dobleAcristalamiento} onChange={setDobleAcristalamiento} />}
+            {esResidencial && <Toggle label="Puerta blindada" value={puertaBlindada} onChange={setPuertaBlindada} />}
+            {esResidencial && <Toggle label="Alarma de seguridad" value={alarmaSeguridad} onChange={setAlarmaSeguridad} />}
+          </div>}
+          {esResidencial && <div style={g3}>
+            <Input label="Plantas del edificio" value={plantasEdificio} onChange={setPlantasEdificio} type="number" placeholder="5" />
+            <Select label="Ocupacion actual" value={ocupacionActual} onChange={setOcupacionActual}
+              options={["Vacía","Alquilada","Ocupada"]} />
           </div>}
           <div style={g3}>
             <Select label="Parking" value={parking} onChange={setParking} options={["Si","No","Comunitario","Opcional"]} />
