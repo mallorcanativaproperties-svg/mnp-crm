@@ -9,13 +9,25 @@ function getSupabase() {
 
 const BASE_URL = "https://crm.mallorcanativaproperties.com";
 
+function normalizarTel(tel) {
+  let n = tel.replace(/\D/g, ""); // quitar todo salvo dígitos
+  if (n.startsWith("0034")) n = n.slice(4);
+  if (n.startsWith("34") && n.length === 11) n = n; // ya correcto
+  else if (n.length === 9) n = "34" + n; // número español sin prefijo
+  return n;
+}
+
 async function enviarWhatsApp(tel, texto) {
   try {
-    await fetch(`${process.env.EVOLUTION_API_URL}/message/sendText/${process.env.EVOLUTION_INSTANCE}`, {
+    const numero = normalizarTel(tel);
+    console.log("[enviar-firma] Enviando WhatsApp a:", numero);
+    const resp = await fetch(`${process.env.EVOLUTION_API_URL}/message/sendText/${process.env.EVOLUTION_INSTANCE}`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "apikey": process.env.EVOLUTION_API_KEY },
-      body: JSON.stringify({ number: tel.replace(/\D/g, ""), text: texto }),
+      body: JSON.stringify({ number: numero, text: texto }),
     });
+    const body = await resp.text();
+    console.log("[enviar-firma] Evolution respuesta:", resp.status, body.slice(0, 200));
   } catch (e) {
     console.error("[enviar-firma] WhatsApp error:", e.message);
   }
