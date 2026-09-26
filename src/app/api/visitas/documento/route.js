@@ -270,7 +270,7 @@ export async function GET(req) {
       MARGIN_L + COL_W * 1 + (COL_W - SIG_W) / 2,  // col 1: agente     ≈ 232
       MARGIN_L + COL_W * 2 + (COL_W - SIG_W) / 2,  // col 2: propietario≈ 390
     ];
-    const Y_FIRMA = 110; // pts desde abajo
+    const Y_FIRMA = 460; // pts desde abajo (justo bajo los títulos de columna)
 
     const firmasParaEstampar = [];
 
