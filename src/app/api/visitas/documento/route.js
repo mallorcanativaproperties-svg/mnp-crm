@@ -82,6 +82,9 @@ async function rellenarDocx(tipo, contenido) {
       : (prop.precio_publicacion ? fmtPrecioLargo(prop.precio_publicacion) : ""),
     condiciones_particulares: contenido.condiciones_particulares
       ? `\n${contenido.condiciones_particulares}` : "",
+    // Respuesta del vendedor — casilla marcada según decisión
+    acepta_propuesta:    contenido.respuesta_vendedor === "acepta"    ? "☑" : "☐",
+    no_acepta_propuesta: contenido.respuesta_vendedor === "no_acepta" ? "☑" : "☐",
   });
 
   return doc.getZip().generate({ type: "nodebuffer" });
@@ -343,7 +346,7 @@ export async function GET(req) {
 
 export async function POST(req) {
   const supabase = sb();
-  const { docId, firmante, firmaData, firmaRowId } = await req.json();
+  const { docId, firmante, firmaData, firmaRowId, respuestaVendedor } = await req.json();
   if (!docId || !firmante || !firmaData) return NextResponse.json({ error: "Faltan datos" }, { status: 400 });
 
   const now = new Date().toISOString();
@@ -396,7 +399,20 @@ export async function POST(req) {
       firmado_vendedor_at: now,
       estado: "firmado_vendedor",
       updated_at: now,
+      // Guardar respuesta del vendedor en contenido JSONB para que se refleje en el PDF
+      ...(respuestaVendedor ? {
+        contenido: supabase.rpc ? undefined : undefined, // placeholder, se actualiza abajo
+      } : {}),
     }).eq("id", docId);
+
+    // Guardar respuesta_vendedor en el JSONB contenido si viene
+    if (respuestaVendedor) {
+      const { data: docActual } = await supabase
+        .from("visita_documentos").select("contenido").eq("id", docId).single();
+      await supabase.from("visita_documentos").update({
+        contenido: { ...(docActual?.contenido || {}), respuesta_vendedor: respuestaVendedor },
+      }).eq("id", docId);
+    }
 
     try {
       await fetch(`${process.env.NEXT_PUBLIC_APP_URL || "https://crm.mallorcanativaproperties.com"}/api/visitas/notificar-firma`, {
