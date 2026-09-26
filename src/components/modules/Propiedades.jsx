@@ -2124,7 +2124,7 @@ function PropDetail({ p, currentUser, onClose, onUpdate, onDelete, onDuplicate }
       Pareado:"house", Villa:"house", "Villa de Lujo":"house", "Casa Tipo Duplex":"house",
       "Finca rustica":"rustic", Finca:"rustic",
       "Local comercial":"premises_commercial", Oficina:"office",
-      "Nave industrial":"premises_commercial", Almacen:"premises_commercial", Negocio:"premises_commercial",
+      "Nave industrial":"premises_industrial", Almacen:"premises_industrial", Negocio:"premises_commercial",
       Parcela:"land", Solar:"land", "Terreno urbano":"land", "Terreno urbanizable":"land",
       "Terreno rustico":"land", "Terreno rural":"land", "Terreno industrial":"land",
       Garaje:"garage", Parking:"garage", Trastero:"storage", Edificio:"building",
@@ -2435,7 +2435,7 @@ REGLAS:
     "Finca rustica":"rustic", Finca:"rustic",
     // Local/Nave → premises_commercial
     "Local comercial":"premises_commercial", Oficina:"office",
-    "Nave industrial":"premises_commercial", Almacen:"premises_commercial", Negocio:"premises_commercial",
+    "Nave industrial":"premises_industrial", Almacen:"premises_industrial", Negocio:"premises_commercial",
     // Terreno → land
     Parcela:"land", Solar:"land", "Terreno urbano":"land", "Terreno urbanizable":"land",
     "Terreno rustico":"land", "Terreno rural":"land", "Terreno industrial":"land",
@@ -3655,16 +3655,16 @@ function IdealistaJsonButton({ supabase }) {
     Pareado:"house", Villa:"house", "Villa de Lujo":"house", "Casa Tipo Duplex":"house",
     "Finca rustica":"rustic", Finca:"rustic",
     "Local comercial":"premises_commercial", Oficina:"office",
-    "Nave industrial":"premises_commercial", Almacen:"premises_commercial", Negocio:"premises_commercial",
+    "Nave industrial":"premises_industrial", Almacen:"premises_industrial", Negocio:"premises_commercial",
     Parcela:"land", Solar:"land", "Terreno urbano":"land", "Terreno urbanizable":"land",
     "Terreno rustico":"land", "Terreno rural":"land", "Terreno industrial":"land",
     Garaje:"garage", Parking:"garage", Trastero:"storage", Edificio:"building",
   };
   // Valores exactos del schema Idealista v6 — deben mantenerse sincronizados con route.js
   const CONSERV_MAP = { "Buen estado":"good","Reformado":"fully_reformed","A reformar":"toRestore","Obra nueva":"new","En construccion":"new_development_in_construction" };
-  const HEAT_MAP = { "Gas central":"centralGas","Gas individual":"individualGas","Electrica central":"centralOther","Electrica individual":"individualElectric","Bomba de calor":"individualAirConditioningHeatPump","Aerotermia":"centralGeothermal","Suelo radiante":"centralOther","Sin calefaccion":"noHeating" };
+  const HEAT_MAP = { "Gas central":"centralGas","Gas individual":"individualGas","Electrica central":"centralOther","Electrica individual":"individualElectric","Bomba de calor":"individualAirConditioningHeatPump","Aerotermia":"individualAirConditioningHeatPump","Suelo radiante":"centralOther","Sin calefaccion":"noHeating" };
   const IMAGE_TAG_MAP = { LIVING_ROOM:"living",BEDROOM:"bedroom",BATHROOM:"bathroom",KITCHEN:"kitchen",TERRACE:"terrace",SWIMMING_POOL:"pool",GARDEN:"garden",CORRIDOR:"corridor",PLAN:"plan",VIEWS:"views",FACADE:"facade",GARAGE:"garage",STORAGE:"storage_space",BALCONY:"balcony",DINING:"dining_room",HALL:"hall",PATIO:"patio",PORCH:"porch" };
-  const FLOOR_MAP = { "Bajo":"bj","Baja":"bj","Planta baja":"bj","PB":"bj","0":"bj","Entreplanta":"en","Entresuelo":"en","Semisotano":"ss","Semisótano":"ss","SS":"ss","Sotano":"st","Sótano":"st","-1":"ss","-2":"st" };
+  const FLOOR_MAP = { "Bajo":"bj","Baja":"bj","Planta baja":"bj","PB":"bj","0":"bj","Entreplanta":"en","Entresuelo":"en","Semisotano":"ss","Semisótano":"ss","SS":"ss","Sotano":"st","Sótano":"st","-1":"-1","-2":"-2" };
   const VALID_CERT = ["A","B","C","D","E","F","G","Exento"];
 
   function isValid(row) {
@@ -3735,7 +3735,7 @@ function IdealistaJsonButton({ supabase }) {
     // Features — bloque base (campos comunes a todos los tipos)
     const feat={featuresType:tipo};
     const mConst=Number(row.m_const)||0; if(mConst>0) feat.featuresAreaConstructed=mConst;
-    const mUtil=Number(row.m_util)||0; if(mUtil>0&&!isLand&&!isGarage) feat.featuresAreaUsable=mUtil;
+    const mUtil=Number(row.m_util)||0; if(mUtil>0&&!isLand&&!isGarage&&!isStorage) feat.featuresAreaUsable=mUtil;
     const mParcela=Number(row.m_parcela)||0;
     if((isHomeType||isLand)&&mParcela>0) feat.featuresAreaPlot=mParcela;
     if(isLand&&Number(row.m_edificable)>0) feat.featuresAreaBuildable=Number(row.m_edificable);
@@ -3800,7 +3800,7 @@ function IdealistaJsonButton({ supabase }) {
       const AIRE_MAP_OFF={"No disponible":"notAvailable","Solo frio":"cold","Frio/Calor":"cold/heat","Preinstalacion":"preInstallation"};
       if(row.aire_acond_tipo&&AIRE_MAP_OFF[row.aire_acond_tipo]){feat.featuresConditionedAirType=AIRE_MAP_OFF[row.aire_acond_tipo];if(row.aire_acond_tipo!=="No disponible") feat.featuresConditionedAir=true;}
       if(row.agua_cal) feat.featuresHotWater=row.agua_cal!=="Sin agua caliente";
-      // featuresWindowsDouble NO existe en offices.json — omitido
+      if(row.doble_acristalamiento===true) feat.featuresWindowsDouble=true;
       if(row.puerta_blindada===true) feat.featuresSecurityDoor=true;
       if(row.alarma_seguridad===true) feat.featuresSecurityAlarm=true;
       if(Number(row.n_plazas)>0) feat.featuresParkingSpacesNumber=Number(row.n_plazas);
@@ -3811,27 +3811,28 @@ function IdealistaJsonButton({ supabase }) {
     }
     // Features — bloque PREMISES (premises_commercial / premises_industrial)
     if(isPremisesType){
-      if(row.calefaccion&&HEAT_MAP[row.calefaccion]) feat.featuresHeatingType=HEAT_MAP[row.calefaccion];
+      // premises.json: featuresHeating (boolean), NO featuresHeatingType, NO featuresHotWater, NO featuresWindowsDouble
+      if(row.calefaccion&&row.calefaccion!=="Sin calefaccion") feat.featuresHeating=true;
+      else if(row.calefaccion==="Sin calefaccion") feat.featuresHeating=false;
       // premises solo tiene featuresConditionedAir, NO featuresConditionedAirType
       if(row.aire_acond_tipo&&row.aire_acond_tipo!=="No disponible") feat.featuresConditionedAir=true;
-      if(row.agua_cal) feat.featuresHotWater=row.agua_cal!=="Sin agua caliente";
-      if(row.doble_acristalamiento===true) feat.featuresWindowsDouble=true;
       if(row.puerta_blindada===true) feat.featuresSecurityDoor=true;
       if(row.alarma_seguridad===true) feat.featuresSecurityAlarm=true;
-      if(Number(row.plantas_edificio)>0) feat.featuresFloorsBuilding=Number(row.plantas_edificio);
+      if(row.trastero===true) feat.featuresStorage=true;
+      if(Number(row.local_n_plantas)>0) feat.featuresFloorsProperty=Number(row.local_n_plantas);
       if(row.local_salida_humos) feat.featuresSmokeExtraction=true;
       if(row.local_cocina_equipada) feat.featuresEquippedKitchen=true;
       if(row.local_hace_esquina) feat.featuresLocatedAtCorner=true;
       const locUbicMap={pie_calle:"street",centro_comercial:"shopping",entreplanta:"mezzanine",sotano:"belowGround",planta_superior:"on_top_floor"};
       if(row.local_ubicacion&&locUbicMap[row.local_ubicacion]) feat.featuresUbication=locUbicMap[row.local_ubicacion];
       if(row.local_n_escaparates) feat.featuresWindowsNumber=Number(row.local_n_escaparates);
-      if(row.local_n_plantas) feat.featuresFloorsProperty=Number(row.local_n_plantas);
-      const ACTIVIDAD_MAP={"Bar":"bar","Restaurante":"restaurant","Cafetería":"coffee_shop","Discoteca / pub / sala":"nightclub","Hotel / hostal":"hotel","Otros hostelería":"other_types_of_caterings","Alimentación":"supermarket","Moda y complementos":"clothing_store","Electrónica":"electronics_and_computer_store","Mobiliario y decoración":"housewares_store","Farmacia / parafarmacia":"pharmacy","Joyería / relojería":"jewelry_shop","Papelería / librería":"bookstore","Juguetería":"toy_store","Otros comercio":"other_commercial_activities","Peluquería / estética":"hair_salon","Lavandería / tintorería":"laundry","Agencia de viajes":"travel_agency","Inmobiliaria":"real_estate_agency","Financiero / seguros":"bank","Clínica / centro médico":"clinic","Centro de formación":"educational_center","Gimnasio / deporte":"gym","Otros servicios":"other_types_of_services","Taller / reparación":"repair_shop","Almacén / logística":"storehouse","Industria ligera":"light_industry"};
+      // featuresFloorsProperty ya establecido arriba con local_n_plantas
+      const ACTIVIDAD_MAP={"Bar":"bar","Restaurante":"restaurant","Cafetería":"coffee_shop","Discoteca / pub / sala":"nightclub","Hotel / hostal":"hotel","Otros hostelería":"other_types_of_caterings","Alimentación":"supermarket","Moda y complementos":"clothing_store","Electrónica":"electronics_and_computer_store","Mobiliario y decoración":"housewares_store","Farmacia / parafarmacia":"pharmacy","Joyería / relojería":"jewelry_shop","Papelería / librería":"bookstore","Juguetería":"other_commercial_activities","Otros comercio":"other_commercial_activities","Peluquería / estética":"hair_salon","Lavandería / tintorería":"laundry","Agencia de viajes":"other_types_of_services","Inmobiliaria":"real_estate_agency","Financiero / seguros":"other_commercial_activities","Clínica / centro médico":"clinic","Centro de formación":"educational_center","Gimnasio / deporte":"gym","Otros servicios":"other_types_of_services","Taller / reparación":"repair_shop","Almacén / logística":"storehouse","Industria ligera":"other_commercial_activities"};
       const actividades=row.local_actividad||[];
       for(const act of actividades){if(ACTIVIDAD_MAP[act]){feat.featuresCommercialMainActivity=ACTIVIDAD_MAP[act];break;}}
       if(Number(row.local_altura_libre)>0) feat.featuresAreaHeight=Number(row.local_altura_libre);
       if(row.local_muelle_carga===true) feat.featuresLoadingDock=true;
-      if(row.local_acceso_24h===true) feat.featuresAccess24h=true;
+      // featuresAccess24h NO existe en premises.json — omitido
       // Traspaso
       if(isTraspaso){
         feat.featuresIsATransfer=true;
@@ -3884,13 +3885,19 @@ function IdealistaJsonButton({ supabase }) {
     const fotos=(media||[]).filter(m=>m.tipo==="foto"&&m.url).sort((a,b)=>(a.orden||0)-(b.orden||0));
     const planos=(media||[]).filter(m=>m.tipo==="plano"&&m.url).sort((a,b)=>(a.orden||0)-(b.orden||0));
     const allImgs=[...fotos,...planos];
+    const SUPABASE_URL=process.env.NEXT_PUBLIC_SUPABASE_URL||"";
+    const STORAGE_BASE=SUPABASE_URL?`${SUPABASE_URL}/storage/v1/object/public/propiedades-media/`:"";
     if(allImgs.length>0){
       property.propertyImages=allImgs.map((item,i)=>{
-        const url=String(item.url||"");
-        const marker="propiedades-media/";
-        const idx=url.indexOf(marker);
-        const relativePath=idx!==-1?url.substring(idx+marker.length):url;
-        const img={imageOrder:i+1,imageUrl:relativePath};
+        const rawUrl=String(item.url||"");
+        let imageUrl=rawUrl;
+        if(!rawUrl.startsWith("http")){
+          imageUrl=STORAGE_BASE+rawUrl;
+        } else if(rawUrl.includes("/propiedades-media/")&&STORAGE_BASE){
+          const match=rawUrl.match(/propiedades-media\/(.+)$/);
+          if(match) imageUrl=STORAGE_BASE+match[1];
+        }
+        const img={imageOrder:i+1,imageUrl};
         if(item.tipo==="plano"){
           img.imageLabel="plan";
         } else if(item.etiqueta&&IMAGE_TAG_MAP[item.etiqueta]){

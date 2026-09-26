@@ -83,7 +83,7 @@ const HEAT_MAP = {
   "Electrica central": "centralOther",
   "Electrica individual": "individualElectric",
   "Bomba de calor": "individualAirConditioningHeatPump",
-  "Aerotermia": "centralGeothermal",
+  "Aerotermia": "individualAirConditioningHeatPump",
   "Suelo radiante": "centralOther",
   "Sin calefaccion": "noHeating",
 };
@@ -198,7 +198,7 @@ function buildProperty(row, media) {
   // featuresAreaConstructed: obligatorio para todos excepto land y garage
   if (mConst > 0) features.featuresAreaConstructed = mConst;
   // featuresAreaUsable: homes, premises, offices, building (no land, no garage, no storage)
-  if (mUtil > 0 && !isLand && !isGarage) features.featuresAreaUsable = mUtil;
+  if (mUtil > 0 && !isLand && !isGarage && !isStorage) features.featuresAreaUsable = mUtil;
   // featuresAreaPlot: homes (house/rustic) y land
   if ((isHouse || isLand) && mParcela > 0) features.featuresAreaPlot = mParcela;
   // featuresAreaBuildable: solo land
@@ -356,7 +356,7 @@ function buildProperty(row, media) {
       if (row.aire_acond_tipo !== "No disponible") features.featuresConditionedAir = true;
     }
     if (row.agua_cal) features.featuresHotWater = row.agua_cal !== "Sin agua caliente";
-    // featuresWindowsDouble NO existe en offices.json — omitido
+    if (row.doble_acristalamiento === true) features.featuresWindowsDouble = true;
     if (row.puerta_blindada === true)       features.featuresSecurityDoor   = true;
     if (row.alarma_seguridad === true)      features.featuresSecurityAlarm  = true;
     if (Number(row.n_plazas) > 0)          features.featuresParkingSpacesNumber = Number(row.n_plazas);
@@ -371,21 +371,19 @@ function buildProperty(row, media) {
 
   // ── Campos exclusivos de PREMISES (local/nave) ────────────────────────────
   if (isPremisesType) {
-    if (row.calefaccion && HEAT_MAP[row.calefaccion]) {
-      features.featuresHeatingType = HEAT_MAP[row.calefaccion];
-    }
+    // premises.json: featuresHeating (boolean), NO featuresHeatingType, NO featuresHotWater,
+    // NO featuresWindowsDouble, NO featuresAccess24h — featuresFloorsProperty (NO FloorsBuilding)
+    if (row.calefaccion && row.calefaccion !== "Sin calefaccion") features.featuresHeating = true;
+    else if (row.calefaccion === "Sin calefaccion") features.featuresHeating = false;
     if (row.aire_acond_tipo && row.aire_acond_tipo !== "No disponible") {
       features.featuresConditionedAir = true;
     }
-    if (row.agua_cal) features.featuresHotWater = row.agua_cal !== "Sin agua caliente";
-    if (row.doble_acristalamiento === true) features.featuresWindowsDouble  = true;
     if (row.puerta_blindada === true)       features.featuresSecurityDoor   = true;
     if (row.alarma_seguridad === true)      features.featuresSecurityAlarm  = true;
-    // featuresStorage NO existe en premises.json — omitido
-    if (Number(row.plantas_edificio) > 0)  features.featuresFloorsBuilding  = Number(row.plantas_edificio);
+    if (row.trastero === true)             features.featuresStorage         = true;
+    if (Number(row.local_n_plantas) > 0)   features.featuresFloorsProperty  = Number(row.local_n_plantas);
     if (Number(row.local_altura_libre) > 0) features.featuresAreaHeight     = Number(row.local_altura_libre);
     if (row.local_muelle_carga === true)   features.featuresLoadingDock     = true;
-    if (row.local_acceso_24h === true)     features.featuresAccess24h       = true;
     if (row.local_salida_humos)            features.featuresSmokeExtraction = true;
     if (row.local_cocina_equipada)         features.featuresEquippedKitchen = true;
     if (row.local_hace_esquina)            features.featuresLocatedAtCorner = true;
@@ -398,8 +396,9 @@ function buildProperty(row, media) {
       features.featuresUbication = locUbicMap[row.local_ubicacion];
     }
     if (row.local_n_escaparates) features.featuresWindowsNumber  = Number(row.local_n_escaparates);
-    if (row.local_n_plantas)     features.featuresFloorsProperty = Number(row.local_n_plantas);
+    // featuresFloorsProperty ya seteado arriba con local_n_plantas
 
+    // ACTIVIDAD_MAP — solo valores presentes en el enum featuresCommercialActivity de features.json
     const ACTIVIDAD_MAP = {
       "Bar": "bar", "Restaurante": "restaurant", "Cafetería": "coffee_shop",
       "Discoteca / pub / sala": "nightclub", "Hotel / hostal": "hotel",
@@ -407,15 +406,18 @@ function buildProperty(row, media) {
       "Alimentación": "supermarket", "Moda y complementos": "clothing_store",
       "Electrónica": "electronics_and_computer_store", "Mobiliario y decoración": "housewares_store",
       "Farmacia / parafarmacia": "pharmacy", "Joyería / relojería": "jewelry_shop",
-      "Papelería / librería": "bookstore", "Juguetería": "toy_store",
+      "Papelería / librería": "bookstore",
+      "Juguetería": "other_commercial_activities",       // toy_store no existe en el enum
       "Otros comercio": "other_commercial_activities",
       "Peluquería / estética": "hair_salon", "Lavandería / tintorería": "laundry",
-      "Agencia de viajes": "travel_agency", "Inmobiliaria": "real_estate_agency",
-      "Financiero / seguros": "bank", "Clínica / centro médico": "clinic",
+      "Agencia de viajes": "other_types_of_services",   // travel_agency no existe en el enum
+      "Inmobiliaria": "real_estate_agency",
+      "Financiero / seguros": "other_commercial_activities", // bank no existe en el enum
+      "Clínica / centro médico": "clinic",
       "Centro de formación": "educational_center", "Gimnasio / deporte": "gym",
       "Otros servicios": "other_types_of_services",
       "Taller / reparación": "repair_shop", "Almacén / logística": "storehouse",
-      "Industria ligera": "light_industry",
+      "Industria ligera": "other_commercial_activities", // light_industry no existe en el enum
     };
     const actividades = row.local_actividad || [];
     for (const act of actividades) {
@@ -508,17 +510,27 @@ function buildProperty(row, media) {
   if (row.desc_de?.trim())    descriptions.push({ descriptionLanguage: "german",  descriptionText: row.desc_de.trim().slice(0, 4000) });
   if (descriptions.length > 0) property.propertyDescriptions = descriptions;
 
-  // ── Imágenes — rutas RELATIVAS para FTP ───────────────────────────────────
+  // ── Imágenes — imageUrl debe ser URL absoluta https:// según schema v6 rules.json#/imagesUrlFormat
+  // Las imágenes están en Supabase Storage; se envía la URL pública completa
+  const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+  const STORAGE_BASE = SUPABASE_URL ? `${SUPABASE_URL}/storage/v1/object/public/propiedades-media/` : "";
   const fotos  = (media || []).filter(m => m.tipo === "foto"  && m.url).sort((a,b) => (a.orden||0)-(b.orden||0));
   const planos = (media || []).filter(m => m.tipo === "plano" && m.url).sort((a,b) => (a.orden||0)-(b.orden||0));
-  const allImgs = [...fotos, ...planos];
+  const allImgs = [...fotos, ...planos].slice(0, 200);
 
   if (allImgs.length > 0) {
     property.propertyImages = allImgs.map((item, i) => {
-      const url = item.url || "";
-      const match = url.match(/propiedades-media\/(.+)$/);
-      const relativePath = match ? match[1] : url;
-      const img = { imageOrder: i + 1, imageUrl: relativePath, imageAiGenerated: item.ia_generada === true };
+      const rawUrl = String(item.url || "");
+      // Si ya es URL absoluta, usarla directamente; si es relativa, añadir base de Supabase
+      let imageUrl = rawUrl;
+      if (!rawUrl.startsWith("http")) {
+        imageUrl = STORAGE_BASE + rawUrl;
+      } else if (rawUrl.includes("/propiedades-media/") && STORAGE_BASE) {
+        // Normalizar por si acaso viene con base antigua
+        const match = rawUrl.match(/propiedades-media\/(.+)$/);
+        if (match) imageUrl = STORAGE_BASE + match[1];
+      }
+      const img = { imageOrder: i + 1, imageUrl, imageAiGenerated: item.ia_generada === true };
       if (item.tipo === "plano") {
         img.imageLabel = "plan";
       } else if (item.etiqueta && IMAGE_TAG_MAP[item.etiqueta]) {
