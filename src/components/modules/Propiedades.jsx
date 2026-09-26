@@ -71,6 +71,7 @@ function mapDbToJs(row) {
     dobleAcristalamiento: row.doble_acristalamiento || false, puertaBlindada: row.puerta_blindada || false,
     alarmaSeguridad: row.alarma_seguridad || false, plantasEdificio: Number(row.plantas_edificio) || 0,
     ocupacionActual: row.ocupacion_actual || "",
+    tipoGaraje: row.tipo_garaje || "",
   };
 }
 
@@ -128,6 +129,7 @@ function mapJsToDb(p) {
     alarma_seguridad: p.alarmaSeguridad || false,
     plantas_edificio: p.plantasEdificio ? Number(p.plantasEdificio) : null,
     ocupacion_actual: p.ocupacionActual || null,
+    tipo_garaje: p.tipoGaraje || null,
     updated_at: new Date().toISOString(),
   };
 }
@@ -3092,11 +3094,15 @@ REGLAS:
             {EFl({label: "Ocupacion actual", field: "ocupacionActual", pub: true, options: ["","Vacía","Alquilada","Ocupada"], type: "select"})}
             <div />
           </div>}
-          <div style={{ ...g2, marginTop: 8 }}>
+          {esGaraje && <div style={{ ...g2, marginTop: 8 }}>
+            {EFl({label: "Tipo de garaje", field: "tipoGaraje", pub: true, options: ["","Plaza abierta","Caja cerrada","Puerta automática","Moto"], type: "select"})}
+            <div />
+          </div>}
+          {!esGaraje && <div style={{ ...g2, marginTop: 8 }}>
             {EFl({label: "Parking", field: "parking", pub: true, options: ["Si","No","Comunitario","Opcional"], type: "select"})}
             {EFl({label: "N plazas", field: "nPlazas", pub: true, type: "number"})}
-          </div>
-          {(draft?.parking === "Si" || draft?.parking === "Opcional") && <div style={{ ...g2, marginTop: 8 }}>
+          </div>}
+          {!esGaraje && (draft?.parking === "Si" || draft?.parking === "Opcional") && <div style={{ ...g2, marginTop: 8 }}>
             {EFl({label: "Precio garaje aparte (€)", field: "precioParking", pub: true, type: "number"})}
             <div><div style={{ fontSize: 10, color: "#9A968A", marginTop: 4 }}>Dejar vacío si el garaje va incluido en el precio</div></div>
           </div>}
@@ -3705,7 +3711,11 @@ function IdealistaJsonButton({ supabase }) {
     if(row.doble_acristalamiento===true) feat.featuresWindowsDouble=true;
     if(row.puerta_blindada===true) feat.featuresSecurityDoor=true;
     if(row.alarma_seguridad===true) feat.featuresSecurityAlarm=true;
-    if(Number(row.plantas_edificio)>0&&tipo!=="flat") feat.featuresFloorsBuilding=Number(row.plantas_edificio);
+    if(Number(row.plantas_edificio)>0) feat.featuresFloorsBuilding=Number(row.plantas_edificio);
+    const LAND_TYPE_MAP={"Parcela":"urban","Solar":"urban","Terreno urbano":"urban","Terreno urbanizable":"urbanizable","Terreno rustico":"rustic","Terreno rural":"rustic","Terreno industrial":"industrial"};
+    if(tipo==="land"&&row.tipo&&LAND_TYPE_MAP[row.tipo]) feat.featuresLandType=LAND_TYPE_MAP[row.tipo];
+    const GARAGE_TYPE_MAP={"Plaza abierta":"openSpace","Caja cerrada":"closedBox","Puerta automática":"automaticDoor","Moto":"motorcycle","Trastero":"closedBox"};
+    if(tipo==="garage"&&row.tipo_garaje&&GARAGE_TYPE_MAP[row.tipo_garaje]) feat.featuresGarageType=GARAGE_TYPE_MAP[row.tipo_garaje];
     const OCC_MAP={"Vacía":"free","Alquilada":"tenanted","Ocupada":"not_free"};
     if(row.ocupacion_actual&&OCC_MAP[row.ocupacion_actual]) feat.featuresCurrentOccupation=OCC_MAP[row.ocupacion_actual];
     // featuresHotWater es boolean en schema v6 (no string)
