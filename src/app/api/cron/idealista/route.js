@@ -239,16 +239,16 @@ function buildProperty(row, media) {
   }
   if (row.calefaccion && HEAT_MAP[row.calefaccion]) features.featuresHeatingType = HEAT_MAP[row.calefaccion];
 
-  const HOT_WATER_MAP = { "Caldera individual": "individual", "Caldera central": "centralHeating", "Solar": "solar", "Sin agua caliente": "noHotWater" };
-  if (row.agua_cal && HOT_WATER_MAP[row.agua_cal]) features.featuresHotWater = HOT_WATER_MAP[row.agua_cal];
+  // featuresHotWater es boolean en schema v6 (no string)
+  if (row.agua_cal) features.featuresHotWater = row.agua_cal !== "Sin agua caliente";
 
   if (row.chimenea === true) features.featuresChimney = true;
   if (row.cocina_equipada === true) features.featuresEquippedKitchen = true;
   if (row.doble_acristalamiento === true) features.featuresWindowsDouble = true;
   if (row.puerta_blindada === true) features.featuresSecurityDoor = true;
   if (row.alarma_seguridad === true) features.featuresSecurityAlarm = true;
-  if (Number(row.plantas_edificio) > 0) features.featuresFloorsBuilding = Number(row.plantas_edificio);
-  const OCC_MAP = { "Vacía": "empty", "Alquilada": "rented", "Ocupada": "occupied" };
+  if (Number(row.plantas_edificio) > 0 && tipo !== "flat") features.featuresFloorsBuilding = Number(row.plantas_edificio);
+  const OCC_MAP = { "Vacía": "free", "Alquilada": "tenanted", "Ocupada": "not_free" };
   if (row.ocupacion_actual && OCC_MAP[row.ocupacion_actual]) features.featuresCurrentOccupation = OCC_MAP[row.ocupacion_actual];
 
   if (isStudio || row.tipo === "Loft") features.featuresStudio = true;

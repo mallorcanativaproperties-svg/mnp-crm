@@ -3705,11 +3705,11 @@ function IdealistaJsonButton({ supabase }) {
     if(row.doble_acristalamiento===true) feat.featuresWindowsDouble=true;
     if(row.puerta_blindada===true) feat.featuresSecurityDoor=true;
     if(row.alarma_seguridad===true) feat.featuresSecurityAlarm=true;
-    if(Number(row.plantas_edificio)>0) feat.featuresFloorsBuilding=Number(row.plantas_edificio);
-    const OCC_MAP={"Vacía":"empty","Alquilada":"rented","Ocupada":"occupied"};
+    if(Number(row.plantas_edificio)>0&&tipo!=="flat") feat.featuresFloorsBuilding=Number(row.plantas_edificio);
+    const OCC_MAP={"Vacía":"free","Alquilada":"tenanted","Ocupada":"not_free"};
     if(row.ocupacion_actual&&OCC_MAP[row.ocupacion_actual]) feat.featuresCurrentOccupation=OCC_MAP[row.ocupacion_actual];
-    const HOT_WATER_MAP={"Caldera individual":"individual","Caldera central":"centralHeating","Solar":"solar","Sin agua caliente":"noHotWater"};
-    if(row.agua_cal&&HOT_WATER_MAP[row.agua_cal]) feat.featuresHotWater=HOT_WATER_MAP[row.agua_cal];
+    // featuresHotWater es boolean en schema v6 (no string)
+    if(row.agua_cal) feat.featuresHotWater=row.agua_cal!=="Sin agua caliente";
     if(row.orient){const ORIENT_MAP={"Norte":["North"],"Sur":["South"],"Este":["East"],"Oeste":["West"],"Noreste":["North","East"],"Noroeste":["North","West"],"Sureste":["South","East"],"Suroeste":["South","West"]};const dirs=ORIENT_MAP[row.orient]||[];if(dirs.includes("North")) feat.featuresOrientationNorth=true;if(dirs.includes("South")) feat.featuresOrientationSouth=true;if(dirs.includes("East")) feat.featuresOrientationEast=true;if(dirs.includes("West")) feat.featuresOrientationWest=true;}
     property.propertyFeatures=feat;
     const descs=[];
