@@ -3743,7 +3743,12 @@ function IdealistaJsonButton({ supabase }) {
     const banos=(Number(row.banos)||0)+(Number(row.aseos)||0);
     if(banos>0&&!isLand&&!isGarage&&!isStorage&&!isBuilding) feat.featuresBathroomNumber=banos;
     const bedrooms=Number(row.total_hab)||((Number(row.hab_dobles)||0)+(Number(row.hab_simples)||0));
-    if(isHomeType) feat.featuresBedroomNumber=bedrooms>0?bedrooms:0;
+    // featuresBedroomNumber: integer1to99 minimum:1 — NO emitir 0
+    // Si no hay dormitorios (estudio), emitimos featuresRooms:1 para satisfacer el anyOf
+    if(isHomeType){
+      if(bedrooms>0){feat.featuresBedroomNumber=bedrooms;}
+      else{feat.featuresRooms=feat.featuresRooms||1;}
+    }
     // featuresBuiltYear: NO garage, storage, building, land (additionalProperties:false)
     if(row.ano_construc&&!isGarage&&!isStorage&&!isBuilding&&!isLand){const y=parseInt(row.ano_construc);if(y>1800&&y<=new Date().getFullYear()) feat.featuresBuiltYear=y;}
     if(!isLand&&!isGarage&&!isStorage){const conserv=CONSERV_MAP[row.conserv];if(conserv) feat.featuresConservation=conserv;}
@@ -3783,7 +3788,7 @@ function IdealistaJsonButton({ supabase }) {
         else{feat.featuresResidential=true;}
         if(row.mascotas===true||row.mascotas==="true") feat.featuresAllowPets=true;
         else if(row.mascotas===false||row.mascotas==="false") feat.featuresAllowPets=false;
-        if(Number(row.alq_max_inquilinos)>0) feat.featuresTenantNumber=Math.min(Number(row.alq_max_inquilinos),10);
+        if(Number(row.alq_max_inquilinos)>=2) feat.featuresTenantNumber=Math.min(Number(row.alq_max_inquilinos),10); // number2to99: minimum 2
         if(row.alq_apto_ninos===true) feat.featuresRecommendedForChildren=true;
         else if(row.alq_apto_ninos===false) feat.featuresRecommendedForChildren=false;
         // featuresEquippedWithFurniture solo disponible para alquiler
@@ -3801,7 +3806,7 @@ function IdealistaJsonButton({ supabase }) {
       const AIRE_MAP_OFF={"No disponible":"notAvailable","Solo frio":"cold","Frio/Calor":"cold/heat","Preinstalacion":"preInstallation"};
       if(row.aire_acond_tipo&&AIRE_MAP_OFF[row.aire_acond_tipo]){feat.featuresConditionedAirType=AIRE_MAP_OFF[row.aire_acond_tipo];if(row.aire_acond_tipo!=="No disponible") feat.featuresConditionedAir=true;}
       if(row.agua_cal) feat.featuresHotWater=row.agua_cal!=="Sin agua caliente";
-      if(row.doble_acristalamiento===true) feat.featuresWindowsDouble=true;
+      // featuresWindowsDouble NO existe en offices.json (additionalProperties:false) — omitido
       if(row.puerta_blindada===true) feat.featuresSecurityDoor=true;
       if(row.alarma_seguridad===true) feat.featuresSecurityAlarm=true;
       if(Number(row.n_plazas)>0) feat.featuresParkingSpacesNumber=Number(row.n_plazas);
@@ -3830,14 +3835,14 @@ function IdealistaJsonButton({ supabase }) {
       // featuresFloorsProperty ya establecido arriba con local_n_plantas
       const ACTIVIDAD_MAP={"Bar":"bar","Restaurante":"restaurant","Cafetería":"coffee_shop","Discoteca / pub / sala":"nightclub","Hotel / hostal":"hotel","Otros hostelería":"other_types_of_caterings","Alimentación":"supermarket","Moda y complementos":"clothing_store","Electrónica":"electronics_and_computer_store","Mobiliario y decoración":"housewares_store","Farmacia / parafarmacia":"pharmacy","Joyería / relojería":"jewelry_shop","Papelería / librería":"bookstore","Juguetería":"other_commercial_activities","Otros comercio":"other_commercial_activities","Peluquería / estética":"hair_salon","Lavandería / tintorería":"laundry","Agencia de viajes":"other_types_of_services","Inmobiliaria":"real_estate_agency","Financiero / seguros":"other_commercial_activities","Clínica / centro médico":"clinic","Centro de formación":"educational_center","Gimnasio / deporte":"gym","Otros servicios":"other_types_of_services","Taller / reparación":"repair_shop","Almacén / logística":"storehouse","Industria ligera":"other_commercial_activities"};
       const actividades=row.local_actividad||[];
-      for(const act of actividades){if(ACTIVIDAD_MAP[act]){feat.featuresCommercialMainActivity=ACTIVIDAD_MAP[act];break;}}
+      for(const act of actividades){if(ACTIVIDAD_MAP[act]){feat.featuresCommercialActivity=ACTIVIDAD_MAP[act];break;}}
       // featuresAreaHeight NO existe en premises.json (additionalProperties:false) — omitido
       if(row.local_muelle_carga===true) feat.featuresLoadingDock=true;
       // featuresAccess24h NO existe en premises.json — omitido
       // Traspaso
       if(isTraspaso){
         feat.featuresIsATransfer=true;
-        if(row.local_fin_contrato){const m=String(row.local_fin_contrato).match(/^(\d{4})-(0[1-9]|1[0-2])/);if(m) feat.featuresTransferEndContract=`${m[1]}-${m[2]}`;}
+        if(row.local_fin_contrato){const m=String(row.local_fin_contrato).match(/^(\d{4})-(0[1-9]|1[0-2])/);if(m) feat.featuresTransferEndContractDate=`${m[1]}-${m[2]}`;}
       }
     }
     // Features — bloque LAND
