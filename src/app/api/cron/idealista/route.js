@@ -137,7 +137,7 @@ function buildProperty(row, media) {
   else if (row.vis_dir === "Solo calle") address.addressVisibility = "street";
   else address.addressVisibility = "hidden";
   if (row.dir) address.addressStreetName = row.dir;
-  if (row.num) address.addressStreetNumber = String(row.num);
+  if (row.num) address.addressStreetNumber = String(parseInt(row.num) || row.num).slice(0, 10);
   if (row.planta) {
     const floorVal = String(row.planta).trim();
     if (FLOOR_MAP[floorVal]) {
@@ -147,7 +147,7 @@ function buildProperty(row, media) {
       if (!isNaN(num) && num >= 1 && num <= 60) address.addressFloor = String(num);
     }
   }
-  if (row.puerta) address.addressDoor = String(row.puerta);
+  if (row.puerta) address.addressDoor = String(row.puerta).slice(0, 4);
   if (row.bloque) address.addressBlock = String(row.bloque);
   if (row.escalera) address.addressStair = String(row.escalera);
   if (row.urbanizacion) address.addressUrbanization = String(row.urbanizacion);
@@ -367,9 +367,9 @@ function buildProperty(row, media) {
 
   // Descripciones
   const descriptions = [];
-  if (row.desc_texto?.trim()) descriptions.push({ descriptionLanguage: "spanish", descriptionText: row.desc_texto.trim() });
-  if (row.desc_en?.trim()) descriptions.push({ descriptionLanguage: "english", descriptionText: row.desc_en.trim() });
-  if (row.desc_de?.trim()) descriptions.push({ descriptionLanguage: "german", descriptionText: row.desc_de.trim() });
+  if (row.desc_texto?.trim()) descriptions.push({ descriptionLanguage: "spanish", descriptionText: row.desc_texto.trim().slice(0, 4000) });
+  if (row.desc_en?.trim()) descriptions.push({ descriptionLanguage: "english", descriptionText: row.desc_en.trim().slice(0, 4000) });
+  if (row.desc_de?.trim()) descriptions.push({ descriptionLanguage: "german", descriptionText: row.desc_de.trim().slice(0, 4000) });
   if (descriptions.length > 0) property.propertyDescriptions = descriptions;
 
   // Imágenes — rutas RELATIVAS para FTP (fotos + planos)
@@ -393,16 +393,14 @@ function buildProperty(row, media) {
     });
   }
 
-  // Vídeos — solo URLs directas (Supabase Storage .mp4); Idealista v6 rechaza YouTube/Vimeo
-  // Solo videoUrl + videoOrder, sin videoType (campo inexistente en schema)
-  const videos = (media || []).filter(m => m.tipo === "video" && m.url).sort((a,b) => (a.orden||0)-(b.orden||0));
+  // Vídeos — URL pública de Supabase Storage (schema videoUrl requiere URL absoluta https://)
+  // Solo videoUrl + videoOrder, sin videoType (campo inexistente en schema). Máx 6 vídeos.
+  const videos = (media || []).filter(m => m.tipo === "video" && m.url?.startsWith("http")).sort((a,b) => (a.orden||0)-(b.orden||0)).slice(0, 6);
   if (videos.length > 0) {
-    property.propertyVideos = videos.map((v, i) => {
-      const vurl = v.url || "";
-      const match = vurl.match(/propiedades-media\/(.+)$/);
-      const relativePath = match ? match[1] : vurl;
-      return { videoOrder: i + 1, videoUrl: relativePath };
-    });
+    property.propertyVideos = videos.map((v, i) => ({
+      videoOrder: i + 1,
+      videoUrl: v.url,
+    }));
   }
 
   // Tour virtual — estructura correcta según schema Idealista v6
