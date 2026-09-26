@@ -275,6 +275,39 @@ function buildProperty(row, media) {
     };
     if (GARAGE_CAPACITY_MAP[row.tipo_garaje]) features.featuresGarageCapacityType = GARAGE_CAPACITY_MAP[row.tipo_garaje];
   }
+  // Campos opcionales garaje
+  if (tipo === "garage") {
+    if (row.garaje_puerta_auto === true) features.parkingAutomaticDoor = true;
+    if (row.garaje_plaza_cubierta === true) features.parkingPlaceCovered = true;
+    if (row.garaje_tipo) {
+      const GARAGE_TIPO_MAP = { "Trastero/Depósito": "depot", "Plaza aparcamiento": "parking_space", "Desconocido": "unknown" };
+      if (GARAGE_TIPO_MAP[row.garaje_tipo]) features.parkingType = GARAGE_TIPO_MAP[row.garaje_tipo];
+    }
+  }
+
+  // Campos opcionales terreno
+  if (tipo === "land") {
+    if (Number(row.m_edificable) > 0) features.featuresAreaBuildable = Number(row.m_edificable);
+    if (row.terreno_acceso) {
+      const ACCESO_MAP = { "Urbano": "urban", "Carretera": "road", "Pista": "track", "Autovía/Autopista": "highway", "Desconocido": "unknown" };
+      if (ACCESO_MAP[row.terreno_acceso]) features.featuresAccessType = ACCESO_MAP[row.terreno_acceso];
+    }
+    if (row.terreno_luz === true) features.featuresElectricity = true;
+    if (row.terreno_agua === true) features.featuresWater = true;
+    if (row.terreno_gas === true) features.featuresNaturalGas = true;
+    if (row.terreno_alcantarillado === true) features.featuresSewerage = true;
+    if (row.terreno_aceras === true) features.featuresSidewalk = true;
+    if (row.terreno_alumbrado === true) features.featuresStreetLighting = true;
+    if (row.terreno_carretera === true) features.featuresRoadAccess = true;
+  }
+
+  // Campos opcionales trastero
+  if (tipo === "storage") {
+    if (row.trastero_acceso_24h === true) features.featuresAccess24h = true;
+    if (Number(row.trastero_altura) > 0) features.featuresAreaHeight = Number(row.trastero_altura);
+    if (row.trastero_seguridad_24h === true) features.featuresSecurity24h = true;
+    if (row.trastero_muelle_carga === true) features.featuresLoadingDock = true;
+  }
 
   const OCC_MAP = { "Vacía": "free", "Alquilada": "tenanted", "Ocupada": "not_free" };
   if (row.ocupacion_actual && OCC_MAP[row.ocupacion_actual]) features.featuresCurrentOccupation = OCC_MAP[row.ocupacion_actual];
