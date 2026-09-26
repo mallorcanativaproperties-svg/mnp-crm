@@ -6,6 +6,7 @@ import { readFile } from "fs/promises";
 import path from "path";
 import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
+import { PDFDocument, rgb } from "pdf-lib";
 
 function sb() {
   return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
@@ -98,6 +99,50 @@ async function docxAPdf(docxBytes) {
   });
   if (!res.ok) throw new Error(`Gotenberg error ${res.status}: ${await res.text()}`);
   return Buffer.from(await res.arrayBuffer());
+}
+
+// Estampa las firmas (base64 PNG del canvas) en la última página del PDF
+async function estamparFirmas(pdfBytes, firmas) {
+  // firmas: [{ dataUrl, nombre, x, y, width, height }]
+  if (!firmas || firmas.length === 0) return pdfBytes;
+
+  const pdfDoc = await PDFDocument.load(pdfBytes);
+  const pages = pdfDoc.getPages();
+  const lastPage = pages[pages.length - 1];
+  const { width: pageWidth, height: pageHeight } = lastPage.getSize();
+
+  for (const f of firmas) {
+    if (!f.dataUrl) continue;
+    try {
+      // Extraer bytes del data URL (data:image/png;base64,...)
+      const base64 = f.dataUrl.replace(/^data:image\/png;base64,/, "");
+      const imgBytes = Buffer.from(base64, "base64");
+      const img = await pdfDoc.embedPng(imgBytes);
+
+      // Posición: distribuir firmas horizontalmente en la parte inferior
+      const sigWidth  = f.width  || 160;
+      const sigHeight = f.height || 50;
+      const x = f.x !== undefined ? f.x : 60;
+      // pdf-lib usa coordenadas desde abajo: y=0 es la base
+      const y = f.y !== undefined ? f.y : 60;
+
+      lastPage.drawImage(img, { x, y, width: sigWidth, height: sigHeight });
+
+      // Nombre debajo de la firma (pequeño)
+      if (f.nombre) {
+        lastPage.drawText(f.nombre, {
+          x,
+          y: y - 14,
+          size: 8,
+          color: rgb(0.4, 0.4, 0.4),
+        });
+      }
+    } catch (e) {
+      console.error("[estamparFirmas] error con firma de", f.nombre, e.message);
+    }
+  }
+
+  return Buffer.from(await pdfDoc.save());
 }
 
 export async function GET(req) {
@@ -205,7 +250,61 @@ export async function GET(req) {
 
   try {
     const docxBytes = await rellenarDocx(doc.tipo, contenido);
-    const pdfBytes  = await docxAPdf(docxBytes);
+    let pdfBytes    = await docxAPdf(docxBytes);
+
+    // ── Estampar firmas si existen ──────────────────────────────────────────
+    const firmasParaEstampar = [];
+
+    // Firmas de compradores (visita_doc_firmas)
+    const { data: firmasCompradores } = await supabase
+      .from("visita_doc_firmas")
+      .select("nombre_firmante, firma_data, firmado_at")
+      .eq("doc_id", docId)
+      .order("created_at");
+
+    if (firmasCompradores?.length > 0) {
+      const firmados = firmasCompradores.filter(f => f.firma_data && f.firmado_at);
+      // Distribuir horizontalmente: comprador 1 a la izquierda, comprador 2 en el centro
+      firmados.forEach((f, i) => {
+        firmasParaEstampar.push({
+          dataUrl: f.firma_data,
+          nombre:  f.nombre_firmante,
+          x:       60 + i * 200,
+          y:       95,
+          width:   160,
+          height:  50,
+        });
+      });
+    }
+
+    // Firma del vendedor
+    if (doc.firma_vendedor_data) {
+      firmasParaEstampar.push({
+        dataUrl: doc.firma_vendedor_data,
+        nombre:  "Propietario / Vendedor",
+        x:       60,
+        y:       40,
+        width:   160,
+        height:  50,
+      });
+    }
+
+    // Firma del agente
+    if (doc.firma_agente_data) {
+      firmasParaEstampar.push({
+        dataUrl: doc.firma_agente_data,
+        nombre:  agente.nombre || "Agente",
+        x:       280,
+        y:       40,
+        width:   160,
+        height:  50,
+      });
+    }
+
+    if (firmasParaEstampar.length > 0) {
+      pdfBytes = await estamparFirmas(pdfBytes, firmasParaEstampar);
+    }
+    // ───────────────────────────────────────────────────────────────────────
 
     const storagePath = `documentos_visita/${docId}.pdf`;
     await supabase.storage.from("formacion").upload(storagePath, pdfBytes, {
