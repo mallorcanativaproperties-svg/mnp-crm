@@ -450,6 +450,7 @@ export default function FormularioCaptacion() {
   const [alarmaSeguridad, setAlarmaSeguridad] = useState(false);
   const [plantasEdificio, setPlantasEdificio] = useState("");
   const [ocupacionActual, setOcupacionActual] = useState("");
+  const [tipoGaraje, setTipoGaraje] = useState("");
 
   // Publicacion
 
@@ -506,7 +507,7 @@ export default function FormularioCaptacion() {
       ventExt, elecRef, fontRef, notasPriv, propietarios, cualPos, cualNeg, refCatCuest, latitud, longitud,
       alqEquipamiento, alqTipoOperacion, alqMaxInquilinos, alqAptoNinos,
       bloque, escalera, urbanizacion, chimenea, cocinaEquipada, dobleAcristalamiento,
-      puertaBlindada, alarmaSeguridad, plantasEdificio, ocupacionActual]);
+      puertaBlindada, alarmaSeguridad, plantasEdificio, ocupacionActual, tipoGaraje]);
   const pv = op === "Alquiler" ? (Number(precioAlquiler)||0) : op === "Traspaso" ? (Number(precioTraspaso)||0) : (Number(precioVenta) || 0);
   const pp = Number(precioProp) || 0;
 
@@ -655,6 +656,7 @@ export default function FormularioCaptacion() {
       alarma_seguridad: alarmaSeguridad,
       plantas_edificio: plantasEdificio ? Number(plantasEdificio) : null,
       ocupacion_actual: ocupacionActual || null,
+      tipo_garaje: tipoGaraje || null,
       elec_reformada: elecRef,
       font_reformada: fontRef,
       local_ubicacion: localUbicacion || null,
@@ -1086,13 +1088,17 @@ export default function FormularioCaptacion() {
             <Select label="Ocupacion actual" value={ocupacionActual} onChange={setOcupacionActual}
               options={["Vacía","Alquilada","Ocupada"]} />
           </div>}
-          <div style={g3}>
+          {esGaraje && <div style={g3}>
+            <Select label="Tipo de garaje" value={tipoGaraje} onChange={setTipoGaraje}
+              options={["Plaza abierta","Caja cerrada","Puerta automática","Moto"]} />
+          </div>}
+          {!esGaraje && <div style={g3}>
             <Select label="Parking" value={parking} onChange={setParking} options={["Si","No","Comunitario","Opcional"]} />
             <Input label="N plazas" value={nPlazas} onChange={setNPlazas} type="number" />
             {(parking === "Si" || parking === "Opcional") &&
               <Input label="Precio garaje (si va aparte)" value={precioParking} onChange={setPrecioParking} type="number" placeholder="Dejar vacío si incluido" />
             }
-          </div>
+          </div>}
         </Sec>}
 
         {/* 7. Instalaciones */}
