@@ -92,6 +92,39 @@ export async function descargarTexto(url) {
   return { texto: limpiarHtml(html), tituloPagina, esPdf: false };
 }
 
+/** Una marca, con los espacios y los saltos de linea colapsados. */
+export function aplanar(s) {
+  return String(s || "").replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+/**
+ * Version aplanada del texto + indice de vuelta al original.
+ *
+ * En un PDF el titulo de una ordenanza viene partido en dos lineas, asi que
+ * buscar la marca literalmente no la encuentra nunca. Se busca sobre el texto
+ * aplanado y se traduce la posicion al original con `idx`.
+ */
+export function indexarSinEspacios(texto) {
+  let plano = "";
+  const idx = [];
+  let enEspacio = false;
+  for (let i = 0; i < texto.length; i++) {
+    const c = texto[i];
+    if (c === " " || c === "\n" || c === "\t" || c === "\r" || c === " ") {
+      if (!enEspacio) {
+        plano += " ";
+        idx.push(i);
+        enEspacio = true;
+      }
+    } else {
+      plano += c.toLowerCase();
+      idx.push(i);
+      enEspacio = false;
+    }
+  }
+  return { plano, idx };
+}
+
 /**
  * Recorta el texto entre dos marcas literales.
  *
@@ -104,17 +137,19 @@ export async function descargarTexto(url) {
  * recortar EXACTAMENTE igual antes de comparar la huella.
  */
 export function recortar(texto, desde, hasta) {
-  const plano = texto.toLowerCase();
+  const { plano, idx } = indexarSinEspacios(texto);
   let ini = 0;
   if (desde) {
-    ini = plano.indexOf(String(desde).toLowerCase());
-    if (ini === -1) return { error: `No aparece la marca de inicio: "${desde}"` };
+    const p = plano.indexOf(aplanar(desde));
+    if (p === -1) return { error: `No aparece la marca de inicio: "${desde}"` };
+    ini = idx[p];
   }
   let fin = texto.length;
   if (hasta) {
-    const rel = plano.indexOf(String(hasta).toLowerCase(), ini + 1);
-    if (rel === -1) return { error: `No aparece la marca de fin: "${hasta}" despues del inicio` };
-    fin = rel;
+    const desdeP = desde ? plano.indexOf(aplanar(desde)) + 1 : 1;
+    const p = plano.indexOf(aplanar(hasta), desdeP);
+    if (p === -1) return { error: `No aparece la marca de fin: "${hasta}" despues del inicio` };
+    fin = idx[p];
   }
   const trozo = texto.slice(ini, fin).trim();
   if (trozo.length < 200) {

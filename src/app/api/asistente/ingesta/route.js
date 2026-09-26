@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { sbAdmin } from "@/lib/ia/rag";
 import { generarEmbeddings } from "@/lib/ia/embeddings";
-import { descargarTexto, huellaContenido, recortar } from "@/lib/ia/extraer";
+import { descargarTexto, huellaContenido, recortar, aplanar, indexarSinEspacios } from "@/lib/ia/extraer";
 
 /**
  * Ingesta de conocimiento para los agentes del Asistente IA.
@@ -42,15 +42,18 @@ const SOLAPE = 350;
  * hay forma de ver por que.
  */
 function buscarEnTexto(texto, frases) {
-  const plano = texto.toLowerCase();
+  // Busca sobre el texto aplanado: en un PDF la frase que buscas casi siempre
+  // esta partida por un salto de linea.
+  const { plano, idx } = indexarSinEspacios(texto);
   return (frases || []).slice(0, 8).map((f) => {
-    const aguja = String(f).toLowerCase();
+    const aguja = aplanar(f);
     const donde = [];
     let i = plano.indexOf(aguja);
     while (i !== -1 && donde.length < 6) {
+      const real = idx[i];
       donde.push({
-        offset: i,
-        contexto: texto.slice(Math.max(0, i - 130), i + aguja.length + 130).replace(/\s+/g, " "),
+        offset: real,
+        contexto: texto.slice(Math.max(0, real - 130), real + aguja.length + 160).replace(/\s+/g, " "),
       });
       i = plano.indexOf(aguja, i + aguja.length);
     }
