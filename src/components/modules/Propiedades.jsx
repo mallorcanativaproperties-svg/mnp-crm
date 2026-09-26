@@ -10,7 +10,7 @@ import PropietariosEditor, { PROPIETARIO_VACIO } from "@/components/Propietarios
 import dynamic from "next/dynamic";
 const VisitasResumen = dynamic(() => import("@/components/VisitasResumen"), { ssr: false });
 import { PlusIcon, MagnifyingGlassIcon, PencilSquareIcon, TrashIcon, PhotoIcon, GlobeAltIcon, ArrowUpTrayIcon } from "@heroicons/react/24/outline";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 
 function mapDbToJs(row) {
@@ -678,6 +678,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
   const [iaVariaciones, setIaVariaciones] = useState([]); // hasta
   const [mejorandoTodas, setMejorandoTodas] = useState(false);
   const [mejoraBatchProgreso, setMejoraBatchProgreso] = useState(null); // { actual, total }
+  const mejoraPollRef = useRef(null);
   const [showModalMejora, setShowModalMejora] = useState(false);
   const [fotosSeleccionadas, setFotosSeleccionadas] = useState(new Set()); // ids seleccionados 3 variaciones generadas
   const [iaLoading, setIaLoading] = useState(false);
@@ -686,6 +687,11 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
   useEffect(() => {
     if (propiedadId) loadMedia(false);
   }, [propiedadId]);
+
+  // Limpiar polling al desmontar
+  useEffect(() => {
+    return () => { if (mejoraPollRef.current) clearInterval(mejoraPollRef.current); };
+  }, []);
 
   async function loadMedia(notify = false) {
     setLoading(true);
@@ -998,11 +1004,31 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
     }
 
     setFotosSeleccionadas(new Set());
-    alert(`✦ Mejora en cola
 
-${fotos.length} foto${fotos.length !== 1 ? "s" : ""} añadida${fotos.length !== 1 ? "s" : ""} a la cola de procesamiento.
+    // Activar indicador de progreso
+    const totalEncoladas = fotos.length;
+    setMejorandoTodas(true);
+    setMejoraBatchProgreso({ actual: 0, total: totalEncoladas });
 
-El servidor las irá mejorando de forma automática. Recibirás un WhatsApp cuando termine.`);
+    // Polling cada 5s para actualizar el contador
+    const ref = propRef || propiedadId;
+    if (mejoraPollRef.current) clearInterval(mejoraPollRef.current);
+    mejoraPollRef.current = setInterval(async () => {
+      try {
+        const r = await fetch(`/api/foto-ia/estado?ref=${encodeURIComponent(ref)}`);
+        const d = await r.json();
+        if (!d.ok) return;
+        const enProceso = d.pendiente + d.procesando;
+        const procesadas = totalEncoladas - enProceso;
+        setMejoraBatchProgreso({ actual: Math.max(0, procesadas), total: totalEncoladas });
+        if (enProceso === 0) {
+          clearInterval(mejoraPollRef.current);
+          mejoraPollRef.current = null;
+          setMejorandoTodas(false);
+          setMejoraBatchProgreso(null);
+        }
+      } catch { /* silencioso */ }
+    }, 5000);
   }
 
   // Home Staging: genera variación sin reemplazar la original (previewOnly)
@@ -1121,6 +1147,30 @@ El servidor las irá mejorando de forma automática. Recibirás un WhatsApp cuan
           </div>
         )}
       </div>
+
+      {/* Banner de progreso mejora IA */}
+      {mejorandoTodas && mejoraBatchProgreso && (
+        <div style={{
+          display: "flex", alignItems: "center", gap: 12,
+          background: "#F8F6F1", border: "1px solid #E7E1D4",
+          padding: "10px 16px", marginBottom: 12,
+        }}>
+          <span style={{ fontSize: 13, color: "#AC8A54" }}>✦</span>
+          <span style={{ fontSize: 12, color: "#5C5347", fontFamily: "Inter, sans-serif", fontWeight: 500 }}>
+            Mejorando fotografías con IA — {mejoraBatchProgreso.actual} de {mejoraBatchProgreso.total} completadas
+          </span>
+          <div style={{ flex: 1, height: 3, background: "#E7E1D4", borderRadius: 2 }}>
+            <div style={{
+              height: 3, borderRadius: 2, background: "#AC8A54",
+              width: `${mejoraBatchProgreso.total > 0 ? (mejoraBatchProgreso.actual / mejoraBatchProgreso.total) * 100 : 0}%`,
+              transition: "width 0.5s ease",
+            }} />
+          </div>
+          <span style={{ fontSize: 11, color: "#9A968A", fontFamily: "Inter, sans-serif", whiteSpace: "nowrap" }}>
+            Recibirás un WhatsApp al terminar
+          </span>
+        </div>
+      )}
 
       {/* Drag hint */}
       {filteredMedia.length > 1 && (
