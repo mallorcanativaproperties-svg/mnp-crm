@@ -3708,12 +3708,12 @@ function IdealistaJsonButton({ supabase }) {
     const opType=isAlquiler?"rent":"sale";
     const price=isAlquiler?(Number(row.precio_alquiler)||0):isTraspaso?(Number(row.precio_traspaso)||0):(Number(row.precio_venta)||0);
     const op={operationType:opType};
-    if(price>0) op.operationPrice=price;
+    if(price>0) op.operationPrice=Math.round(price);
     if(isAlquiler&&Number(row.fianza_meses)>0) op.operationDepositMonths=Number(row.fianza_meses);
     const community=Number(row.comunidad)||0; if(community>0&&community<=9999&&!isAlquiler) op.operationPriceCommunity=community;
     const tiposConPrecioParking=["flat","house","rustic","premises_commercial","premises_industrial","office","building"];
-    if((row.parking==="Si"||row.parking==="Opcional")&&Number(row.precio_parking)>0&&tiposConPrecioParking.includes(tipo)) op.operationPriceParking=Number(row.precio_parking);
-    if(isTraspaso&&Number(row.precio_traspaso)>0) op.operationPriceTransfer=Number(row.precio_traspaso);
+    if((row.parking==="Si"||row.parking==="Opcional")&&Number(row.precio_parking)>0&&tiposConPrecioParking.includes(tipo)) op.operationPriceParking=Math.round(Number(row.precio_parking));
+    if(isTraspaso&&Number(row.precio_traspaso)>0) op.operationPriceTransfer=Math.round(Number(row.precio_traspaso));
     property.propertyOperation=op;
     property.propertyContact={contactName:"Mallorca Nativa Properties",contactEmail:"mallorcanativaproperties@gmail.com",contactPrimaryPhonePrefix:"34",contactPrimaryPhoneNumber:"655882682"};
     // Dirección con truncados según schema
@@ -3835,14 +3835,14 @@ function IdealistaJsonButton({ supabase }) {
       // featuresFloorsProperty ya establecido arriba con local_n_plantas
       const ACTIVIDAD_MAP={"Bar":"bar","Restaurante":"restaurant","Cafetería":"coffee_shop","Discoteca / pub / sala":"nightclub","Hotel / hostal":"hotel","Otros hostelería":"other_types_of_caterings","Alimentación":"supermarket","Moda y complementos":"clothing_store","Electrónica":"electronics_and_computer_store","Mobiliario y decoración":"housewares_store","Farmacia / parafarmacia":"pharmacy","Joyería / relojería":"jewelry_shop","Papelería / librería":"bookstore","Juguetería":"other_commercial_activities","Otros comercio":"other_commercial_activities","Peluquería / estética":"hair_salon","Lavandería / tintorería":"laundry","Agencia de viajes":"other_types_of_services","Inmobiliaria":"real_estate_agency","Financiero / seguros":"other_commercial_activities","Clínica / centro médico":"clinic","Centro de formación":"educational_center","Gimnasio / deporte":"gym","Otros servicios":"other_types_of_services","Taller / reparación":"repair_shop","Almacén / logística":"storehouse","Industria ligera":"other_commercial_activities"};
       const actividades=row.local_actividad||[];
-      for(const act of actividades){if(ACTIVIDAD_MAP[act]){feat.featuresCommercialActivity=ACTIVIDAD_MAP[act];break;}}
+      for(const act of actividades){if(ACTIVIDAD_MAP[act]){feat.featuresCommercialMainActivity=ACTIVIDAD_MAP[act];break;}}
       // featuresAreaHeight NO existe en premises.json (additionalProperties:false) — omitido
       if(row.local_muelle_carga===true) feat.featuresLoadingDock=true;
       // featuresAccess24h NO existe en premises.json — omitido
       // Traspaso
       if(isTraspaso){
         feat.featuresIsATransfer=true;
-        if(row.local_fin_contrato){const m=String(row.local_fin_contrato).match(/^(\d{4})-(0[1-9]|1[0-2])/);if(m) feat.featuresTransferEndContractDate=`${m[1]}-${m[2]}`;}
+        if(row.local_fin_contrato){const m=String(row.local_fin_contrato).match(/^(\d{4})-(0[1-9]|1[0-2])/);if(m) feat.featuresTransferEndContract=`${m[1]}-${m[2]}`;}
       }
     }
     // Features — bloque LAND
@@ -3869,7 +3869,7 @@ function IdealistaJsonButton({ supabase }) {
     // Features — bloque STORAGE
     if(isStorage){
       if(row.trastero_acceso_24h===true) feat.featuresAccess24h=true;
-      if(Number(row.trastero_altura)>0) feat.featuresAreaHeight=Number(row.trastero_altura);
+      if(Number(row.trastero_altura)>0) feat.featuresAreaHeight=Math.min(Number(row.trastero_altura),9); // schema max 9
       if(row.trastero_seguridad_24h===true) feat.featuresSecurity24h=true;
       if(row.trastero_muelle_carga===true) feat.featuresLoadingDock=true;
     }
