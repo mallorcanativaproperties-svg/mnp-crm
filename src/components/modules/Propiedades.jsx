@@ -984,57 +984,35 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
     const fotos = media.filter(m => m.tipo === "foto" && fotosSeleccionadas.has(m.id));
     if (!fotos.length) return;
     setShowModalMejora(false);
-
-    const login = typeof window !== "undefined" ? localStorage.getItem("mnp_user_login") || "" : "";
-    try {
-      const res = await fetch("/api/foto-ia/batch", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          mediaIds: fotos.map(f => f.id),
-          propiedadRef: propRef || propiedadId,
-          agenteLogin: login,
-        }),
-      });
-      const data = await res.json();
-      if (!data.ok) throw new Error(data.error);
-    } catch (e) {
-      alert("Error al añadir a la cola: " + e.message);
-      return;
-    }
-
     setFotosSeleccionadas(new Set());
 
-    // Activar indicador de progreso
-    const totalEncoladas = fotos.length;
+    const total = fotos.length;
     setMejorandoTodas(true);
-    setMejoraBatchProgreso({ actual: 0, total: totalEncoladas });
+    setMejoraBatchProgreso({ actual: 0, total });
 
-    // Lanzar el procesamiento inmediatamente sin esperar al cron de Vercel
-    fetch("/api/cron/mejora-fotos").catch(() => {});
-
-    // Polling cada 5s para actualizar el contador
-    const ref = propRef || propiedadId;
-    if (mejoraPollRef.current) clearInterval(mejoraPollRef.current);
-    mejoraPollRef.current = setInterval(async () => {
+    // Procesar foto a foto directamente desde el cliente (sin cola ni cron)
+    let procesadas = 0;
+    for (const foto of fotos) {
       try {
-        const r = await fetch(`/api/foto-ia/estado?ref=${encodeURIComponent(ref)}`);
-        const d = await r.json();
-        if (!d.ok) return;
-        const enProceso = d.pendiente + d.procesando;
-        const procesadas = totalEncoladas - enProceso;
-        setMejoraBatchProgreso({ actual: Math.max(0, procesadas), total: totalEncoladas });
-        if (enProceso === 0) {
-          clearInterval(mejoraPollRef.current);
-          mejoraPollRef.current = null;
-          setMejorandoTodas(false);
-          setMejoraBatchProgreso(null);
-        } else if (d.pendiente > 0 && d.procesando === 0) {
-          // Hay pendientes pero nadie las está procesando — relanzar el cron
-          fetch("/api/cron/mejora-fotos").catch(() => {});
-        }
-      } catch { /* silencioso */ }
-    }, 5000);
+        const res = await fetch("/api/foto-ia", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mediaId: foto.id, tipo: "mejora", estilo: null, imageUrl: foto.url }),
+        });
+        const data = await res.json();
+        if (!data.ok) console.warn("Error mejorando foto", foto.id, data.error);
+      } catch (e) {
+        console.warn("Error mejorando foto", foto.id, e.message);
+      }
+      procesadas++;
+      setMejoraBatchProgreso({ actual: procesadas, total });
+    }
+
+    setMejorandoTodas(false);
+    setMejoraBatchProgreso(null);
+
+    // Recargar la galería para mostrar las fotos mejoradas
+    await loadMedia(true);
   }
 
   // Home Staging: genera variación sin reemplazar la original (previewOnly)
