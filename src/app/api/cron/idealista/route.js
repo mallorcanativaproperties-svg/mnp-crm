@@ -187,6 +187,8 @@ function buildProperty(row, media) {
   if (row.elec_reformada === true) features.featuresRenovatedElectricity = true;
   if (row.font_reformada === true) features.featuresRenovatedPlumbing = true;
   if (row.balcon === true) features.featuresBalcony = true;
+  if (Number(row.m_terraza) > 0) features.featuresTerraceArea = Number(row.m_terraza);
+  if (Number(row.m_balcon) > 0) features.featuresBalconyArea = Number(row.m_balcon);
   // Parking — todos los valores positivos
   if (row.parking === "Si") {
     features.featuresParkingAvailable = true;
@@ -195,6 +197,7 @@ function buildProperty(row, media) {
     features.featuresCommunalParkingAvailable = true;
   } else if (row.parking === "Opcional") {
     features.featuresParkingAvailable = true; // opcional = disponible
+    if (Number(row.n_plazas) > 0) features.featuresParkingSpacesNumber = Number(row.n_plazas);
   }
   if (row.venta_mobiliario === true) features.featuresEquippedWithFurniture = true;
 
