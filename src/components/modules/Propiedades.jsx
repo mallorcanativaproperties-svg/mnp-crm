@@ -3561,10 +3561,11 @@ function IdealistaJsonButton({ supabase }) {
     "Terreno rustico":"land", "Terreno rural":"land", "Terreno industrial":"land",
     Garaje:"garage", Parking:"garage", Trastero:"storage", Edificio:"building",
   };
-  const CONSERV_MAP = { "Buen estado":"good","Reformado":"renovated","A reformar":"toRestore","Obra nueva":"new","En construccion":"underConstruction" };
-  const HEAT_MAP = { "Gas central":"centralGas","Gas individual":"individualGas","Electrica central":"centralElectric","Electrica individual":"individualElectric","Bomba de calor":"individualAirConditioningHeatPump","Aerotermia":"centralHeatPump","Suelo radiante":"centralRadiantFloor","Sin calefaccion":"noHeating" };
-  const IMAGE_TAG_MAP = { LIVING_ROOM:"living_room",BEDROOM:"room",BATHROOM:"bathroom",KITCHEN:"kitchen",TERRACE:"terrace",SWIMMING_POOL:"pool",GARDEN:"garden",CORRIDOR:"hallway",PLAN:"plan",VIEWS:"view",FACADE:"facade",GARAGE:"garage",STORAGE:"storage",BALCONY:"terrace",DINING:"living_room",HALL:"hallway",PATIO:"garden",PORCH:"terrace" };
-  const FLOOR_MAP = { "Bajo":"groundFloor","Planta baja":"groundFloor","PB":"groundFloor","0":"groundFloor","Entreplanta":"mezzanine","Entresuelo":"mezzanine" };
+  // Valores exactos del schema Idealista v6 — deben mantenerse sincronizados con route.js
+  const CONSERV_MAP = { "Buen estado":"good","Reformado":"fully_reformed","A reformar":"toRestore","Obra nueva":"new","En construccion":"new_development_in_construction" };
+  const HEAT_MAP = { "Gas central":"centralGas","Gas individual":"individualGas","Electrica central":"centralOther","Electrica individual":"individualElectric","Bomba de calor":"individualAirConditioningHeatPump","Aerotermia":"centralGeothermal","Suelo radiante":"centralOther","Sin calefaccion":"noHeating" };
+  const IMAGE_TAG_MAP = { LIVING_ROOM:"living",BEDROOM:"bedroom",BATHROOM:"bathroom",KITCHEN:"kitchen",TERRACE:"terrace",SWIMMING_POOL:"pool",GARDEN:"garden",CORRIDOR:"corridor",PLAN:"plan",VIEWS:"views",FACADE:"facade",GARAGE:"garage",STORAGE:"storage_space",BALCONY:"balcony",DINING:"dining_room",HALL:"hall",PATIO:"patio",PORCH:"porch" };
+  const FLOOR_MAP = { "Bajo":"bj","Baja":"bj","Planta baja":"bj","PB":"bj","0":"bj","Entreplanta":"en","Entresuelo":"en","Semisotano":"ss","Semisótano":"ss","SS":"ss","Sotano":"st","Sótano":"st","-1":"ss","-2":"st" };
   const VALID_CERT = ["A","B","C","D","E","F","G","Exento"];
 
   function isValid(row) {
@@ -3619,7 +3620,7 @@ function IdealistaJsonButton({ supabase }) {
     else addr.addressVisibility="hidden";
     if(row.dir) addr.addressStreetName=row.dir;
     if(row.num) addr.addressStreetNumber=String(row.num);
-    if(row.planta){const fv=String(row.planta).trim();if(FLOOR_MAP[fv]) addr.addressFloor=FLOOR_MAP[fv];else{const n=parseInt(fv);if(!isNaN(n)&&n>=1&&n<=20) addr.addressFloor=String(n);}}
+    if(row.planta){const fv=String(row.planta).trim();if(FLOOR_MAP[fv]) addr.addressFloor=FLOOR_MAP[fv];else{const n=parseInt(fv);if(!isNaN(n)&&n>=1&&n<=60) addr.addressFloor=String(n);}}
     if(row.puerta) addr.addressDoor=String(row.puerta);
     if(row.cp) addr.addressPostalCode=String(row.cp);
     if(row.municipio) addr.addressTown=row.municipio;
@@ -3684,9 +3685,8 @@ function IdealistaJsonButton({ supabase }) {
           img.imageLabel="plan";
         } else if(item.etiqueta&&IMAGE_TAG_MAP[item.etiqueta]){
           img.imageLabel=IMAGE_TAG_MAP[item.etiqueta];
-        } else {
-          img.imageLabel="unknown";
         }
+        // Sin etiqueta válida: no se envía imageLabel
         img.imageAiGenerated=item.ia_generada===true;
         return img;
       });
