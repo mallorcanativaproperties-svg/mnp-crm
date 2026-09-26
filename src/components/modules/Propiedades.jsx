@@ -3749,8 +3749,8 @@ function IdealistaJsonButton({ supabase }) {
       if(bedrooms>0){feat.featuresBedroomNumber=bedrooms;}
       else{feat.featuresRooms=feat.featuresRooms||1;}
     }
-    // featuresBuiltYear: NO garage, storage, building, land (additionalProperties:false)
-    if(row.ano_construc&&!isGarage&&!isStorage&&!isBuilding&&!isLand){const y=parseInt(row.ano_construc);if(y>1800&&y<=new Date().getFullYear()) feat.featuresBuiltYear=y;}
+    // featuresBuiltYear: NO garage, storage, land (additionalProperties:false) — building.json SÍ lo tiene
+    if(row.ano_construc&&!isGarage&&!isStorage&&!isLand){const y=parseInt(row.ano_construc);if(y>1800&&y<=new Date().getFullYear()) feat.featuresBuiltYear=y;}
     if(!isLand&&!isGarage&&!isStorage){const conserv=CONSERV_MAP[row.conserv];if(conserv) feat.featuresConservation=conserv;}
     if(row.ref_cat) feat.featuresCadastralReference=row.ref_cat;
     // Features — bloque HOMES (flat/house/rustic): campos exclusivos de homes.json
@@ -3798,7 +3798,7 @@ function IdealistaJsonButton({ supabase }) {
     }
     // Features — bloque OFFICES
     // offices.json: featuresLiftNumber (NO featuresLiftAvailable), featuresHeating (NO featuresHeatingType),
-    // NO featuresWindowsDouble (no existe en offices.json — additionalProperties:false)
+    // featuresWindowsDouble SÍ existe en offices.json (confirmado en schema v6)
     if(isOffice){
       if(row.ascensor===true) feat.featuresLiftNumber=1;
       if(row.calefaccion&&row.calefaccion!=="Sin calefaccion") feat.featuresHeating=true;
@@ -3806,7 +3806,7 @@ function IdealistaJsonButton({ supabase }) {
       const AIRE_MAP_OFF={"No disponible":"notAvailable","Solo frio":"cold","Frio/Calor":"cold/heat","Preinstalacion":"preInstallation"};
       if(row.aire_acond_tipo&&AIRE_MAP_OFF[row.aire_acond_tipo]){feat.featuresConditionedAirType=AIRE_MAP_OFF[row.aire_acond_tipo];if(row.aire_acond_tipo!=="No disponible") feat.featuresConditionedAir=true;}
       if(row.agua_cal) feat.featuresHotWater=row.agua_cal!=="Sin agua caliente";
-      // featuresWindowsDouble NO existe en offices.json (additionalProperties:false) — omitido
+      if(row.doble_acristalamiento===true) feat.featuresWindowsDouble=true; // offices.json sí lo tiene
       if(row.puerta_blindada===true) feat.featuresSecurityDoor=true;
       if(row.alarma_seguridad===true) feat.featuresSecurityAlarm=true;
       if(Number(row.n_plazas)>0) feat.featuresParkingSpacesNumber=Number(row.n_plazas);

@@ -221,8 +221,8 @@ function buildProperty(row, media) {
     }
   }
 
-  // featuresBuiltYear: homes, premises, offices — NO garage, storage, building, land (additionalProperties:false)
-  if (row.ano_construc && !isGarage && !isStorage && !isBuilding && !isLand) {
+  // featuresBuiltYear: homes, premises, offices, building — NO garage, storage, land (additionalProperties:false)
+  if (row.ano_construc && !isGarage && !isStorage && !isLand) {
     const year = parseInt(row.ano_construc);
     if (year > 1800 && year <= new Date().getFullYear()) features.featuresBuiltYear = year;
   }
@@ -349,7 +349,7 @@ function buildProperty(row, media) {
 
   // ── Campos exclusivos de OFFICES ──────────────────────────────────────────
   // offices.json: featuresLiftNumber (NO featuresLiftAvailable), featuresHeating (NO featuresHeatingType),
-  // NO featuresWindowsDouble (no existe en offices.json — additionalProperties:false)
+  // featuresWindowsDouble SÍ existe en offices.json (confirmado en schema v6)
   if (isOffice) {
     // featuresLiftNumber: entero (offices.json no tiene featuresLiftAvailable)
     if (row.ascensor === true) features.featuresLiftNumber = 1;
@@ -365,7 +365,7 @@ function buildProperty(row, media) {
       if (row.aire_acond_tipo !== "No disponible") features.featuresConditionedAir = true;
     }
     if (row.agua_cal) features.featuresHotWater = row.agua_cal !== "Sin agua caliente";
-    // featuresWindowsDouble NO existe en offices.json (additionalProperties:false) — omitido
+    if (row.doble_acristalamiento === true)  features.featuresWindowsDouble  = true; // offices.json sí lo tiene
     if (row.puerta_blindada === true)       features.featuresSecurityDoor   = true;
     if (row.alarma_seguridad === true)      features.featuresSecurityAlarm  = true;
     if (Number(row.n_plazas) > 0)          features.featuresParkingSpacesNumber = Number(row.n_plazas);
