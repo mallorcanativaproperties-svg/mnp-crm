@@ -75,12 +75,17 @@ export default function FirmarVisita() {
           .neq("id", fila.id);
         setCoFirmantes(otros || []);
 
-        // Cargar PDF
+        // Cargar PDF — usar pdf_url pública de Supabase si existe, si no regenerar
         if (docData) {
-          const pdfRes = await fetch(`/api/visitas/documento?id=${docData.id}`);
-          if (pdfRes.ok) {
-            const blob = await pdfRes.blob();
-            setPdfUrl(URL.createObjectURL(blob));
+          if (docData.pdf_url) {
+            setPdfUrl(docData.pdf_url);
+          } else {
+            // Regenerar y guardará pdf_url en BD
+            await fetch(`/api/visitas/documento?id=${docData.id}`);
+            // Releer el doc para obtener la pdf_url recién guardada
+            const { data: docActualizado } = await sb
+              .from("visita_documentos").select("pdf_url").eq("id", docData.id).single();
+            if (docActualizado?.pdf_url) setPdfUrl(docActualizado.pdf_url);
           }
         }
       } else {
@@ -92,11 +97,14 @@ export default function FirmarVisita() {
         if (data.firmado_vendedor_at) { setFirmado(true); setLoading(false); return; }
         setDoc(data);
 
-        // Cargar PDF
-        const pdfRes = await fetch(`/api/visitas/documento?id=${data.id}`);
-        if (pdfRes.ok) {
-          const blob = await pdfRes.blob();
-          setPdfUrl(URL.createObjectURL(blob));
+        // Cargar PDF — usar pdf_url pública si existe
+        if (data.pdf_url) {
+          setPdfUrl(data.pdf_url);
+        } else {
+          await fetch(`/api/visitas/documento?id=${data.id}`);
+          const { data: docActualizado } = await sb
+            .from("visita_documentos").select("pdf_url").eq("id", data.id).single();
+          if (docActualizado?.pdf_url) setPdfUrl(docActualizado.pdf_url);
         }
       }
       setLoading(false);
@@ -249,15 +257,36 @@ export default function FirmarVisita() {
         {/* Documento PDF */}
         {pdfUrl && (
           <div style={{ marginBottom:24 }}>
-            <div style={{ fontSize:12, color:TEXT, fontWeight:600, marginBottom:8 }}>
-              Lea el documento completo antes de firmar:
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:8 }}>
+              <div style={{ fontSize:12, color:TEXT, fontWeight:600 }}>
+                Lea el documento completo antes de firmar:
+              </div>
+              <a href={pdfUrl} target="_blank" rel="noopener noreferrer"
+                style={{ fontSize:12, color:GOLD, fontWeight:700, textDecoration:"none",
+                  padding:"6px 12px", border:`1px solid ${GOLD}`, borderRadius:6 }}>
+                ↗ Abrir PDF
+              </a>
             </div>
-            <div style={{ border:`1px solid ${BORDER}`, borderRadius:3, overflow:"hidden", height:480 }}>
-              <iframe
-                src={`${pdfUrl}#toolbar=0`}
+            <div style={{ border:`1px solid ${BORDER}`, borderRadius:3, overflow:"hidden", height:520 }}>
+              <object
+                data={pdfUrl}
+                type="application/pdf"
                 style={{ width:"100%", height:"100%", border:"none" }}
                 onLoad={() => setLeido(true)}
-              />
+              >
+                {/* Fallback para iOS Safari que no soporta object/iframe con PDF */}
+                <div style={{ padding:24, textAlign:"center" }}>
+                  <div style={{ fontSize:40, marginBottom:12 }}>📄</div>
+                  <div style={{ fontSize:14, color:TEXT, marginBottom:16 }}>
+                    Tu dispositivo no puede mostrar el PDF en esta pantalla.
+                  </div>
+                  <a href={pdfUrl} target="_blank" rel="noopener noreferrer"
+                    style={{ display:"inline-block", padding:"12px 24px", background:DARK, color:WHITE,
+                      borderRadius:8, fontSize:14, fontWeight:700, textDecoration:"none" }}>
+                    Abrir documento PDF
+                  </a>
+                </div>
+              </object>
             </div>
             <label style={{ display:"flex", alignItems:"center", gap:8, marginTop:12, cursor:"pointer" }}>
               <input type="checkbox" checked={leido} onChange={e => setLeido(e.target.checked)}
