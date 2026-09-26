@@ -30,6 +30,10 @@
     {
       "path": "/api/cron/mejora-fotos",
       "schedule": "*/10 * * * *"
+    },
+    {
+      "path": "/api/cron/asistente-vigencia",
+      "schedule": "40 4 * * *"
     }
   ],
   "headers": [

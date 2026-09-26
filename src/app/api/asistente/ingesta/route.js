@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { sbAdmin } from "@/lib/ia/rag";
 import { generarEmbeddings } from "@/lib/ia/embeddings";
+import { descargarTexto, huellaContenido } from "@/lib/ia/extraer";
 
 /**
  * Ingesta de conocimiento para los agentes del Asistente IA.
@@ -26,29 +27,6 @@ import { generarEmbeddings } from "@/lib/ia/embeddings";
 
 const MAX_CHARS = 3600; // ~900 tokens en castellano
 const SOLAPE = 350;
-
-function limpiarHtml(html) {
-  return html
-    .replace(/<script[\s\S]*?<\/script>/gi, " ")
-    .replace(/<style[\s\S]*?<\/style>/gi, " ")
-    .replace(/<!--[\s\S]*?-->/g, " ")
-    .replace(/<\/(p|div|li|h[1-6]|tr|br)>/gi, "\n")
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<[^>]+>/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&aacute;/g, "á").replace(/&eacute;/g, "é").replace(/&iacute;/g, "í")
-    .replace(/&oacute;/g, "ó").replace(/&uacute;/g, "ú").replace(/&ntilde;/g, "ñ")
-    .replace(/&Aacute;/g, "Á").replace(/&Eacute;/g, "É").replace(/&Iacute;/g, "Í")
-    .replace(/&Oacute;/g, "Ó").replace(/&Uacute;/g, "Ú").replace(/&Ntilde;/g, "Ñ")
-    .replace(/&ordm;/g, "º").replace(/&ordf;/g, "ª").replace(/&deg;/g, "º")
-    .replace(/&laquo;/g, "«").replace(/&raquo;/g, "»")
-    .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"').replace(/&#39;/g, "'")
-    .replace(/&[a-zA-Z#0-9]+;/g, " ")
-    .replace(/[ \t ]+/g, " ")
-    .replace(/\n\s*\n\s*\n+/g, "\n\n")
-    .trim();
-}
 
 /** Corta el texto en secciones encabezadas por "Artículo N" o por una disposición. */
 function partirPorArticulos(texto) {
@@ -181,32 +159,12 @@ export async function POST(request) {
     let tituloPagina = null;
     if (!texto) {
       if (!b.url) return NextResponse.json({ error: "Falta url o texto" }, { status: 400 });
-      const res = await fetch(b.url, {
-        headers: { "User-Agent": "Mozilla/5.0 (compatible; MallorcaNativaCRM/1.0)" },
-      });
-      if (!res.ok) {
-        return NextResponse.json(
-          { error: `La fuente respondió ${res.status}`, url: b.url },
-          { status: 502 }
-        );
-      }
-      const tipoContenido = (res.headers.get("content-type") || "").toLowerCase();
-      const esPdf = tipoContenido.includes("pdf") || /\.pdf(\?|$)/i.test(b.url);
-
-      if (esPdf) {
-        // Las ordenanzas fiscales municipales se publican en PDF: sin esto,
-        // la plusvalía de un municipio concreto no se puede calcular.
-        const { default: leerPdf } = await import("pdf-parse/lib/pdf-parse.js");
-        const datos = await leerPdf(Buffer.from(await res.arrayBuffer()));
-        tituloPagina = (datos.info?.Title || "").trim().slice(0, 300) || `PDF, ${datos.numpages} páginas`;
-        texto = String(datos.text || "")
-          .replace(/[ \t ]+/g, " ")
-          .replace(/\n\s*\n\s*\n+/g, "\n\n")
-          .trim();
-      } else {
-        const html = await res.text();
-        tituloPagina = (html.match(/<title>([\s\S]*?)<\/title>/i)?.[1] || "").trim().slice(0, 300);
-        texto = limpiarHtml(html);
+      try {
+        const bajado = await descargarTexto(b.url);
+        texto = bajado.texto;
+        tituloPagina = bajado.tituloPagina;
+      } catch (e) {
+        return NextResponse.json({ error: e.message, url: b.url }, { status: 502 });
       }
     }
 
@@ -275,6 +233,12 @@ export async function POST(request) {
         vigencia_desde: b.vigencia_desde || null,
         vigencia_hasta: b.vigencia_hasta || null,
         estado: "procesando",
+        // Huella del texto tal y como se ha indexado: es el punto de partida
+        // del control de vigencia, que cada noche vuelve a bajar la fuente y
+        // compara. Sin esto, la primera pasada avisaria de todo.
+        hash_contenido: await huellaContenido(texto),
+        n_caracteres: texto.length,
+        revisado_at: new Date().toISOString(),
       })
       .select("id")
       .single();
