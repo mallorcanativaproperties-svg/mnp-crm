@@ -126,24 +126,30 @@ export default function FirmarVisita() {
     return () => clearInterval(interval);
   }, [firmaRow, firmado]);
 
-  // Canvas firma
-  function iniciarTrazo(e) {
-    setDibujando(true);
+  // Canvas firma — con escalado para que funcione bien en móvil
+  function getCoordsEscaladas(e) {
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
-    const ctx = canvas.getContext("2d");
-    const x = (e.touches?.[0]?.clientX ?? e.clientX) - rect.left;
-    const y = (e.touches?.[0]?.clientY ?? e.clientY) - rect.top;
+    const scaleX = canvas.width  / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const clientX = e.touches?.[0]?.clientX ?? e.clientX;
+    const clientY = e.touches?.[0]?.clientY ?? e.clientY;
+    return {
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top)  * scaleY,
+    };
+  }
+  function iniciarTrazo(e) {
+    setDibujando(true);
+    const { x, y } = getCoordsEscaladas(e);
+    const ctx = canvasRef.current.getContext("2d");
     ctx.beginPath(); ctx.moveTo(x, y);
   }
   function dibujar(e) {
     if (!dibujando) return;
     e.preventDefault();
-    const canvas = canvasRef.current;
-    const rect = canvas.getBoundingClientRect();
-    const ctx = canvas.getContext("2d");
-    const x = (e.touches?.[0]?.clientX ?? e.clientX) - rect.left;
-    const y = (e.touches?.[0]?.clientY ?? e.clientY) - rect.top;
+    const { x, y } = getCoordsEscaladas(e);
+    const ctx = canvasRef.current.getContext("2d");
     ctx.lineWidth = 2.5; ctx.lineCap = "round"; ctx.strokeStyle = DARK;
     ctx.lineTo(x, y); ctx.stroke();
     setTieneFirma(true);
