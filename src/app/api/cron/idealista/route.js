@@ -37,29 +37,50 @@ const TIPO_MAP = {
 };
 
 const CONSERV_MAP = {
-  "Buen estado": "good", "Reformado": "renovated",
-  "A reformar": "toRestore", "Obra nueva": "new", "En construccion": "underConstruction",
+  "Buen estado": "good", "Reformado": "fully_reformed",
+  "A reformar": "toRestore", "Obra nueva": "new", "En construccion": "new_development_in_construction",
 };
 
 const IMAGE_TAG_MAP = {
-  LIVING_ROOM: "living_room", BEDROOM: "room", BATHROOM: "bathroom",
-  KITCHEN: "kitchen", TERRACE: "terrace", SWIMMING_POOL: "pool",
-  GARDEN: "garden", CORRIDOR: "hallway", PLAN: "plan", VIEWS: "view",
-  FACADE: "facade", GARAGE: "garage", STORAGE: "storage",
-  BALCONY: "terrace", DINING: "living_room", HALL: "hallway",
-  PATIO: "garden", PORCH: "terrace",
+  // Valores exactos del schema Idealista v6 images.json
+  LIVING_ROOM: "living",       // sala de estar
+  BEDROOM: "bedroom",          // dormitorio
+  BATHROOM: "bathroom",        // baño
+  KITCHEN: "kitchen",          // cocina
+  TERRACE: "terrace",          // terraza
+  SWIMMING_POOL: "pool",       // piscina
+  GARDEN: "garden",            // jardín
+  CORRIDOR: "corridor",        // pasillo
+  PLAN: "plan",                // plano
+  VIEWS: "views",              // vistas
+  FACADE: "facade",            // fachada
+  GARAGE: "garage",            // garaje
+  STORAGE: "storage_space",    // trastero
+  BALCONY: "balcony",          // balcón (valor propio, no "terrace")
+  DINING: "dining_room",       // comedor
+  HALL: "hall",                // entrada/recibidor
+  PATIO: "patio",              // patio
+  PORCH: "porch",              // porche
 };
 
+// Valores exactos del schema Idealista v6 address.json (pattern: ^(-[1-2]|[1-9]|[1-5][0-9]|60|bj|en|ss|st)$)
 const FLOOR_MAP = {
-  "Bajo": "groundFloor", "Baja": "groundFloor", "Planta baja": "groundFloor", "PB": "groundFloor", "0": "groundFloor",
-  "Entreplanta": "mezzanine", "Entresuelo": "mezzanine", "SS": "mezzanine", "Semisotano": "mezzanine", "-1": "mezzanine",
+  "Bajo": "bj", "Baja": "bj", "Planta baja": "bj", "PB": "bj", "0": "bj",
+  "Entreplanta": "en", "Entresuelo": "en",
+  "Semisotano": "ss", "Semisótano": "ss", "SS": "ss",
+  "Sotano": "st", "Sótano": "st", "-2": "st",
+  "-1": "ss",
 };
 
+// Valores exactos del schema Idealista v6 features.json (featuresHeatingType)
 const HEAT_MAP = {
-  "Gas central": "centralGas", "Gas individual": "individualGas",
-  "Electrica central": "centralElectric", "Electrica individual": "individualElectric",
+  "Gas central": "centralGas",
+  "Gas individual": "individualGas",
+  "Electrica central": "centralOther",        // no existe centralElectric — mapeamos a centralOther
+  "Electrica individual": "individualElectric",
   "Bomba de calor": "individualAirConditioningHeatPump",
-  "Aerotermia": "centralHeatPump", "Suelo radiante": "centralRadiantFloor",
+  "Aerotermia": "centralGeothermal",          // aerotermia ≈ geotérmica central
+  "Suelo radiante": "centralOther",            // suelo radiante — centralOther (no hay valor específico)
   "Sin calefaccion": "noHeating",
 };
 
@@ -144,7 +165,7 @@ function buildProperty(row, media) {
       address.addressFloor = FLOOR_MAP[floorVal];
     } else {
       const num = parseInt(floorVal);
-      if (!isNaN(num) && num >= 1 && num <= 20) address.addressFloor = String(num);
+      if (!isNaN(num) && num >= 1 && num <= 60) address.addressFloor = String(num);
     }
   }
   if (row.puerta) address.addressDoor = String(row.puerta);
