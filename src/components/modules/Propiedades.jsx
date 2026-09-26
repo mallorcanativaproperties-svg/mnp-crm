@@ -3747,7 +3747,8 @@ function IdealistaJsonButton({ supabase }) {
     if(row.parking==="Si") feat.featuresParkingAvailable=true;
     // Alquiler — campos específicos en features (homes.json), NO en operation
     if(row.op==="Alquiler"){
-      if(row.alq_tipo_operacion==="temporada"){feat.featuresSeasonalRental=true;feat.featuresShortTerm=true;}
+      if(row.alq_tipo_operacion==="temporada"){feat.featuresSeasonalRental=true;}
+      else if(row.alq_tipo_operacion==="corta"){feat.featuresShortTerm=true;}
       if(row.mascotas===true||row.mascotas==="true") feat.featuresAllowPets=true;
       else if(row.mascotas===false||row.mascotas==="false") feat.featuresAllowPets=false;
       if(Number(row.alq_max_inquilinos)>0) feat.featuresTenantNumber=Number(row.alq_max_inquilinos);

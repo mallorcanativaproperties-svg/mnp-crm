@@ -208,6 +208,9 @@ function buildProperty(row, media) {
     // Temporada vs larga estancia
     if (row.alq_tipo_operacion === "temporada") {
       features.featuresSeasonalRental = true;
+      // featuresShortTerm NO se activa simultáneamente: el schema exige que solo uno de
+      // featuresSeasonalRental, featuresResidential, featuresShortTerm sea true a la vez
+    } else if (row.alq_tipo_operacion === "corta") {
       features.featuresShortTerm = true;
     }
     // Mascotas
@@ -440,7 +443,7 @@ function buildProperty(row, media) {
     const premises = {};
     // Mapear primera actividad encontrada al string correcto
     for (const act of actividades) {
-      if (ACTIVIDAD_MAP[act]) { premises.featuresCommercialActivity = ACTIVIDAD_MAP[act]; break; }
+      if (ACTIVIDAD_MAP[act]) { premises.featuresCommercialMainActivity = ACTIVIDAD_MAP[act]; break; }
     }
     if (row.local_ubicacion && locUbicMap[row.local_ubicacion]) premises.featuresUbication = locUbicMap[row.local_ubicacion];
     if (row.local_n_escaparates) premises.featuresWindowsNumber = Number(row.local_n_escaparates);
