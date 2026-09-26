@@ -190,9 +190,24 @@ export async function POST(request) {
           { status: 502 }
         );
       }
-      const html = await res.text();
-      tituloPagina = (html.match(/<title>([\s\S]*?)<\/title>/i)?.[1] || "").trim().slice(0, 300);
-      texto = limpiarHtml(html);
+      const tipoContenido = (res.headers.get("content-type") || "").toLowerCase();
+      const esPdf = tipoContenido.includes("pdf") || /\.pdf(\?|$)/i.test(b.url);
+
+      if (esPdf) {
+        // Las ordenanzas fiscales municipales se publican en PDF: sin esto,
+        // la plusvalía de un municipio concreto no se puede calcular.
+        const { default: leerPdf } = await import("pdf-parse/lib/pdf-parse.js");
+        const datos = await leerPdf(Buffer.from(await res.arrayBuffer()));
+        tituloPagina = (datos.info?.Title || "").trim().slice(0, 300) || `PDF, ${datos.numpages} páginas`;
+        texto = String(datos.text || "")
+          .replace(/[ \t ]+/g, " ")
+          .replace(/\n\s*\n\s*\n+/g, "\n\n")
+          .trim();
+      } else {
+        const html = await res.text();
+        tituloPagina = (html.match(/<title>([\s\S]*?)<\/title>/i)?.[1] || "").trim().slice(0, 300);
+        texto = limpiarHtml(html);
+      }
     }
 
     if (texto.length < 200) {
