@@ -11,10 +11,22 @@ const GOLD = "#AC8A54"; const DARK = "#1a2528"; const CREAM = "#F8F6F1";
 const TEXT = "#22262E"; const MUTED = "#9A968A"; const BORDER = "#E7E1D4";
 const WHITE = "#FFFFFF"; const SUCCESS = "#2C6E52"; const DANGER = "#A23A3A";
 
+const TIPO_NOMBRES = {
+  hoja_visita: "Registro de Visita",
+  oferta: "Propuesta de Compra",
+  reserva: "Reserva Exclusiva",
+  contraoferta: "Contraoferta",
+};
+
 export default function FirmarVisita() {
   const [token, setToken] = useState(null);
   const [tipo, setTipo] = useState("comprador");
+  // Para compradores: registro en visita_doc_firmas
+  const [firmaRow, setFirmaRow] = useState(null);
+  // Para vendedor: doc de visita_documentos
   const [doc, setDoc] = useState(null);
+  // Co-firmantes (otros compradores del mismo doc)
+  const [coFirmantes, setCoFirmantes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [pdfUrl, setPdfUrl] = useState(null);
@@ -33,29 +45,78 @@ export default function FirmarVisita() {
     if (!t) { setError("Enlace inválido o expirado."); setLoading(false); return; }
 
     async function cargar() {
-      const campo = tp === "vendedor" ? "token_firma_vendedor" : "token_firma_comprador";
-      const { data } = await sb.from("visita_documentos")
-        .select("id,tipo,estado,pdf_url,firmado_comprador_at,firmado_vendedor_at")
-        .eq(campo, t).single();
-      if (!data) { setError("Enlace inválido o ya utilizado."); setLoading(false); return; }
-      // Comprobar si ya firmó
-      if (tp === "comprador" && data.firmado_comprador_at) {
-        setFirmado(true); setLoading(false); return;
-      }
-      if (tp === "vendedor" && data.firmado_vendedor_at) {
-        setFirmado(true); setLoading(false); return;
-      }
-      setDoc(data);
-      // Cargar PDF
-      const pdfRes = await fetch(`/api/visitas/documento?id=${data.id}`);
-      if (pdfRes.ok) {
-        const blob = await pdfRes.blob();
-        setPdfUrl(URL.createObjectURL(blob));
+      if (tp === "comprador") {
+        // Buscar el token en visita_doc_firmas
+        const { data: fila } = await sb
+          .from("visita_doc_firmas")
+          .select("id, doc_id, nombre_firmante, firma_data, firmado_at")
+          .eq("token", t)
+          .single();
+
+        if (!fila) { setError("Enlace inválido o ya utilizado."); setLoading(false); return; }
+
+        if (fila.firmado_at) { setFirmado(true); setLoading(false); return; }
+
+        setFirmaRow(fila);
+
+        // Cargar el doc principal para saber el tipo y obtener el PDF
+        const { data: docData } = await sb
+          .from("visita_documentos")
+          .select("id, tipo, estado, pdf_url")
+          .eq("id", fila.doc_id)
+          .single();
+        setDoc(docData);
+
+        // Cargar co-firmantes (otros compradores del mismo doc)
+        const { data: otros } = await sb
+          .from("visita_doc_firmas")
+          .select("id, nombre_firmante, firmado_at")
+          .eq("doc_id", fila.doc_id)
+          .neq("id", fila.id);
+        setCoFirmantes(otros || []);
+
+        // Cargar PDF
+        if (docData) {
+          const pdfRes = await fetch(`/api/visitas/documento?id=${docData.id}`);
+          if (pdfRes.ok) {
+            const blob = await pdfRes.blob();
+            setPdfUrl(URL.createObjectURL(blob));
+          }
+        }
+      } else {
+        // Vendedor: buscar token en visita_documentos
+        const { data } = await sb.from("visita_documentos")
+          .select("id, tipo, estado, pdf_url, firmado_vendedor_at")
+          .eq("token_firma_vendedor", t).single();
+        if (!data) { setError("Enlace inválido o ya utilizado."); setLoading(false); return; }
+        if (data.firmado_vendedor_at) { setFirmado(true); setLoading(false); return; }
+        setDoc(data);
+
+        // Cargar PDF
+        const pdfRes = await fetch(`/api/visitas/documento?id=${data.id}`);
+        if (pdfRes.ok) {
+          const blob = await pdfRes.blob();
+          setPdfUrl(URL.createObjectURL(blob));
+        }
       }
       setLoading(false);
     }
     cargar();
   }, []);
+
+  // Polling para actualizar estado de co-firmantes en tiempo real
+  useEffect(() => {
+    if (!firmaRow?.doc_id || firmado) return;
+    const interval = setInterval(async () => {
+      const { data: otros } = await sb
+        .from("visita_doc_firmas")
+        .select("id, nombre_firmante, firmado_at")
+        .eq("doc_id", firmaRow.doc_id)
+        .neq("id", firmaRow.id);
+      setCoFirmantes(otros || []);
+    }, 10000); // cada 10 segundos
+    return () => clearInterval(interval);
+  }, [firmaRow, firmado]);
 
   // Canvas firma
   function iniciarTrazo(e) {
@@ -90,26 +151,22 @@ export default function FirmarVisita() {
     if (!tieneFirma) return;
     setFirmando(true);
     const firmaData = canvasRef.current.toDataURL("image/png");
+
+    const docId = doc?.id || firmaRow?.doc_id;
     const res = await fetch("/api/visitas/documento", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ docId: doc.id, firmante: tipo, firmaData }),
+      body: JSON.stringify({ docId, firmante: tipo, firmaData, firmaRowId: firmaRow?.id }),
     });
     if (res.ok) {
-      // Notificar al agente si es comprador → pedir firma vendedor si aplica
-      if (tipo === "comprador" && (doc.tipo === "oferta" || doc.tipo === "reserva")) {
-        await fetch("/api/visitas/notificar-firma", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ docId: doc.id, firmante: tipo }),
-        });
-      }
       setFirmado(true);
     } else {
       setError("Error al guardar la firma. Por favor inténtalo de nuevo.");
     }
     setFirmando(false);
   }
+
+  const tipoNombre = doc ? (TIPO_NOMBRES[doc.tipo] || doc.tipo) : "";
 
   if (loading) return (
     <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", background:CREAM }}>
@@ -135,6 +192,21 @@ export default function FirmarVisita() {
         <p style={{ fontSize:13, color:MUTED, fontFamily:"Inter, sans-serif", lineHeight:1.6 }}>
           Su firma ha quedado registrada correctamente. Recibirá una copia del documento firmado por parte de Nativa Properties.
         </p>
+        {/* Mostrar estado de co-firmantes si los hay */}
+        {coFirmantes.length > 0 && (
+          <div style={{ marginTop:20, padding:"14px 16px", background:WHITE, border:`1px solid ${BORDER}`, borderRadius:3, textAlign:"left" }}>
+            <div style={{ fontSize:11, color:GOLD, fontWeight:700, letterSpacing:"0.1em", marginBottom:10 }}>ESTADO DE OTROS FIRMANTES</div>
+            {coFirmantes.map(cf => (
+              <div key={cf.id} style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
+                <span style={{ fontSize:16 }}>{cf.firmado_at ? "✅" : "⏳"}</span>
+                <span style={{ fontSize:13, color:TEXT }}>{cf.nombre_firmante}</span>
+                <span style={{ fontSize:11, color:MUTED, marginLeft:"auto" }}>
+                  {cf.firmado_at ? new Date(cf.firmado_at).toLocaleString("es-ES", { day:"2-digit", month:"2-digit", hour:"2-digit", minute:"2-digit" }) : "Pendiente"}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
         <div style={{ marginTop:24, padding:"12px 20px", background:WHITE, border:`1px solid ${BORDER}`, borderRadius:3 }}>
           <div style={{ fontSize:11, color:GOLD, fontWeight:700, letterSpacing:"0.15em", marginBottom:4 }}>NATIVA PROPERTIES</div>
           <div style={{ fontSize:12, color:MUTED, fontFamily:"Inter, sans-serif" }}>info@mallorcanativaproperties.com · 655 88 26 82</div>
@@ -150,15 +222,30 @@ export default function FirmarVisita() {
         <div>
           <div style={{ fontSize:10, color:GOLD, letterSpacing:"0.2em", fontWeight:700 }}>NATIVA PROPERTIES</div>
           <div style={{ fontSize:14, color:WHITE, fontWeight:600, marginTop:2 }}>
-            {tipo === "vendedor" ? "Firma de propietario" : "Firma de comprador"}
+            {tipo === "vendedor" ? "Firma de propietario" : `Firma de comprador${firmaRow?.nombre_firmante ? ` — ${firmaRow.nombre_firmante}` : ""}`}
           </div>
         </div>
-        <div style={{ fontSize:11, color:"rgba(255,255,255,0.5)" }}>
-          {doc?.tipo === "hoja_visita" ? "Registro de Visita" : doc?.tipo === "oferta" ? "Propuesta de Compra" : "Reserva Exclusiva"}
-        </div>
+        <div style={{ fontSize:11, color:"rgba(255,255,255,0.5)" }}>{tipoNombre}</div>
       </div>
 
       <div style={{ maxWidth:680, margin:"0 auto", padding:"24px 16px" }}>
+
+        {/* Estado co-firmantes (solo comprador, cuando hay más de uno) */}
+        {tipo === "comprador" && coFirmantes.length > 0 && (
+          <div style={{ marginBottom:20, padding:"14px 16px", background:WHITE, border:`1px solid ${BORDER}`, borderRadius:3 }}>
+            <div style={{ fontSize:11, color:GOLD, fontWeight:700, letterSpacing:"0.1em", marginBottom:10 }}>ESTADO DE OTROS FIRMANTES</div>
+            {coFirmantes.map(cf => (
+              <div key={cf.id} style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
+                <span style={{ fontSize:16 }}>{cf.firmado_at ? "✅" : "⏳"}</span>
+                <span style={{ fontSize:13, color:TEXT }}>{cf.nombre_firmante}</span>
+                <span style={{ fontSize:11, color:MUTED, marginLeft:"auto" }}>
+                  {cf.firmado_at ? new Date(cf.firmado_at).toLocaleString("es-ES", { day:"2-digit", month:"2-digit", hour:"2-digit", minute:"2-digit" }) : "Pendiente"}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Documento PDF */}
         {pdfUrl && (
           <div style={{ marginBottom:24 }}>
