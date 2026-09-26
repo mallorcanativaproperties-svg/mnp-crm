@@ -3837,7 +3837,7 @@ function IdealistaJsonButton({ supabase }) {
       // Traspaso
       if(isTraspaso){
         feat.featuresIsATransfer=true;
-        if(row.local_fin_contrato){const m=String(row.local_fin_contrato).match(/^(\d{4})-(\d{2})/);if(m) feat.featuresTransferEndContract=`${m[1]}-${m[2]}`;}
+        if(row.local_fin_contrato){const m=String(row.local_fin_contrato).match(/^(\d{4})-(0[1-9]|1[0-2])/);if(m) feat.featuresTransferEndContract=`${m[1]}-${m[2]}`;}
       }
     }
     // Features — bloque LAND
@@ -3885,7 +3885,7 @@ function IdealistaJsonButton({ supabase }) {
     // Fotos + planos (planos van con imageLabel "plan")
     const fotos=(media||[]).filter(m=>m.tipo==="foto"&&m.url).sort((a,b)=>(a.orden||0)-(b.orden||0));
     const planos=(media||[]).filter(m=>m.tipo==="plano"&&m.url).sort((a,b)=>(a.orden||0)-(b.orden||0));
-    const allImgs=[...fotos,...planos];
+    const allImgs=[...fotos,...planos].slice(0,200);
     const SUPABASE_URL=process.env.NEXT_PUBLIC_SUPABASE_URL||"";
     const STORAGE_BASE=SUPABASE_URL?`${SUPABASE_URL}/storage/v1/object/public/propiedades-media/`:"";
     if(allImgs.length>0){
