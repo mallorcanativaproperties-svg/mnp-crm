@@ -123,7 +123,7 @@ function buildProperty(row, media) {
   const operation = { operationType: isAlquiler ? "rent" : "sale" };
   if (price > 0) operation.operationPrice = Math.round(price);
   const community = Number(row.comunidad) || 0;
-  if (community > 0 && community <= 9999 && !isAlquiler) operation.operationPriceCommunity = community;
+  if (community > 0 && community <= 9999 && !isAlquiler) operation.operationPriceCommunity = Math.round(community);
   // Precio garaje aparte — solo para tipos residenciales/comerciales
   const tiposConPrecioParking = ["flat","house","rustic","premises_commercial","premises_industrial","office","building"];
   if ((row.parking === "Si" || row.parking === "Opcional") &&

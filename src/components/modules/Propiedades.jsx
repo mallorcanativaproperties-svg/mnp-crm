@@ -3669,23 +3669,24 @@ function IdealistaJsonButton({ supabase }) {
 
   function isValid(row) {
     if (!row.ref||!row.tipo||!row.municipio||!row.dir) return false;
-    if (!row.cp&&!(row.latitud&&row.longitud)) return false;
+    if(!(row.cp&&/^[0-9]{5}$/.test(String(row.cp)))&&!(row.latitud&&row.longitud)) return false;
+    if(!row.op) return false;
     const precioOp = row.op === "Alquiler" ? Number(row.precio_alquiler) : row.op === "Traspaso" ? Number(row.precio_traspaso) : Number(row.precio_venta);
     if(!precioOp||precioOp<=0) return false;
-    if (!row.op||!row.desc_texto?.trim()) return false;
+    if(!row.desc_texto?.trim()) return false;
     const tipo=TIPO_MAP[row.tipo]; if(!tipo) return false;
-    // Superficie: terreno requiere m_parcela, el resto m_const (salvo garage/storage)
-    const needsMConst=!["land","garage","storage"].includes(tipo);
+    // m_const obligatorio excepto terrenos y garage; storage también lo requiere (storage.json: required featuresAreaConstructed)
+    const needsMConst=!["land","garage"].includes(tipo);
     if(needsMConst&&(!Number(row.m_const)||Number(row.m_const)<=0)) return false;
     if(tipo==="land"&&(!Number(row.m_parcela)||Number(row.m_parcela)<=0)) return false;
-    // Baños: obligatorio para residencial y comercial
-    const needsBaths=["flat","house","rustic","premises_commercial","office"].includes(tipo);
-    // tipología y plantas chalet: opcionales en Idealista, no bloquean publicación
+    // Baños: obligatorio para residencial y comercial (incluyendo premises_industrial)
+    const needsBaths=["flat","house","rustic","premises_commercial","premises_industrial","office"].includes(tipo);
     if(needsBaths&&(Number(row.banos)||0)+(Number(row.aseos)||0)<=0) return false;
     // Cert energético: solo residencial
     const residencial=["flat","house","rustic"].includes(tipo);
     if(residencial&&(!row.cert_energ||!VALID_CERT.includes(row.cert_energ))) return false;
     if(!Array.isArray(row.destinos)||!row.destinos.includes("Idealista")) return false;
+    if(row.idealista_estado==="pausada") return false;
     return true;
   }
 
@@ -3710,7 +3711,7 @@ function IdealistaJsonButton({ supabase }) {
     const op={operationType:opType};
     if(price>0) op.operationPrice=Math.round(price);
     if(isAlquiler&&Number(row.fianza_meses)>0) op.operationDepositMonths=Number(row.fianza_meses);
-    const community=Number(row.comunidad)||0; if(community>0&&community<=9999&&!isAlquiler) op.operationPriceCommunity=community;
+    const community=Number(row.comunidad)||0; if(community>0&&community<=9999&&!isAlquiler) op.operationPriceCommunity=Math.round(community);
     const tiposConPrecioParking=["flat","house","rustic","premises_commercial","premises_industrial","office","building"];
     if((row.parking==="Si"||row.parking==="Opcional")&&Number(row.precio_parking)>0&&tiposConPrecioParking.includes(tipo)) op.operationPriceParking=Math.round(Number(row.precio_parking));
     if(isTraspaso&&Number(row.precio_traspaso)>0) op.operationPriceTransfer=Math.round(Number(row.precio_traspaso));
