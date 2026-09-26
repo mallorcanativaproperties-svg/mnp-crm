@@ -3710,7 +3710,7 @@ function IdealistaJsonButton({ supabase }) {
     const op={operationType:opType};
     if(price>0) op.operationPrice=price;
     if(isAlquiler&&Number(row.fianza_meses)>0) op.operationDepositMonths=Number(row.fianza_meses);
-    const community=Number(row.comunidad)||0; if(community>0&&!isAlquiler) op.operationPriceCommunity=community;
+    const community=Number(row.comunidad)||0; if(community>0&&community<=9999&&!isAlquiler) op.operationPriceCommunity=community;
     const tiposConPrecioParking=["flat","house","rustic","premises_commercial","premises_industrial","office","building"];
     if((row.parking==="Si"||row.parking==="Opcional")&&Number(row.precio_parking)>0&&tiposConPrecioParking.includes(tipo)) op.operationPriceParking=Number(row.precio_parking);
     if(isTraspaso&&Number(row.precio_traspaso)>0) op.operationPriceTransfer=Number(row.precio_traspaso);
@@ -3739,12 +3739,13 @@ function IdealistaJsonButton({ supabase }) {
     const mParcela=Number(row.m_parcela)||0;
     if((isHomeType||isLand)&&mParcela>0) feat.featuresAreaPlot=mParcela;
     if(isLand&&Number(row.m_edificable)>0) feat.featuresAreaBuildable=Number(row.m_edificable);
-    if(isStorage&&Number(row.trastero_altura)>0) feat.featuresAreaHeight=Number(row.trastero_altura);
+    // featuresAreaHeight se asigna en el bloque isStorage más abajo
     const banos=(Number(row.banos)||0)+(Number(row.aseos)||0);
     if(banos>0&&!isLand&&!isGarage&&!isStorage&&!isBuilding) feat.featuresBathroomNumber=banos;
     const bedrooms=Number(row.total_hab)||((Number(row.hab_dobles)||0)+(Number(row.hab_simples)||0));
-    if(bedrooms>0&&isHomeType) feat.featuresBedroomNumber=bedrooms;
-    if(row.ano_construc){const y=parseInt(row.ano_construc);if(y>1800&&y<=new Date().getFullYear()) feat.featuresBuiltYear=y;}
+    if(isHomeType) feat.featuresBedroomNumber=bedrooms>0?bedrooms:0;
+    // featuresBuiltYear: NO garage, storage, building, land (additionalProperties:false)
+    if(row.ano_construc&&!isGarage&&!isStorage&&!isBuilding&&!isLand){const y=parseInt(row.ano_construc);if(y>1800&&y<=new Date().getFullYear()) feat.featuresBuiltYear=y;}
     if(!isLand&&!isGarage&&!isStorage){const conserv=CONSERV_MAP[row.conserv];if(conserv) feat.featuresConservation=conserv;}
     if(row.ref_cat) feat.featuresCadastralReference=row.ref_cat;
     // Features — bloque HOMES (flat/house/rustic): campos exclusivos de homes.json
@@ -3830,7 +3831,7 @@ function IdealistaJsonButton({ supabase }) {
       const ACTIVIDAD_MAP={"Bar":"bar","Restaurante":"restaurant","Cafetería":"coffee_shop","Discoteca / pub / sala":"nightclub","Hotel / hostal":"hotel","Otros hostelería":"other_types_of_caterings","Alimentación":"supermarket","Moda y complementos":"clothing_store","Electrónica":"electronics_and_computer_store","Mobiliario y decoración":"housewares_store","Farmacia / parafarmacia":"pharmacy","Joyería / relojería":"jewelry_shop","Papelería / librería":"bookstore","Juguetería":"other_commercial_activities","Otros comercio":"other_commercial_activities","Peluquería / estética":"hair_salon","Lavandería / tintorería":"laundry","Agencia de viajes":"other_types_of_services","Inmobiliaria":"real_estate_agency","Financiero / seguros":"other_commercial_activities","Clínica / centro médico":"clinic","Centro de formación":"educational_center","Gimnasio / deporte":"gym","Otros servicios":"other_types_of_services","Taller / reparación":"repair_shop","Almacén / logística":"storehouse","Industria ligera":"other_commercial_activities"};
       const actividades=row.local_actividad||[];
       for(const act of actividades){if(ACTIVIDAD_MAP[act]){feat.featuresCommercialMainActivity=ACTIVIDAD_MAP[act];break;}}
-      if(Number(row.local_altura_libre)>0) feat.featuresAreaHeight=Number(row.local_altura_libre);
+      // featuresAreaHeight NO existe en premises.json (additionalProperties:false) — omitido
       if(row.local_muelle_carga===true) feat.featuresLoadingDock=true;
       // featuresAccess24h NO existe en premises.json — omitido
       // Traspaso

@@ -123,7 +123,7 @@ function buildProperty(row, media) {
   const operation = { operationType: isAlquiler ? "rent" : "sale" };
   if (price > 0) operation.operationPrice = price;
   const community = Number(row.comunidad) || 0;
-  if (community > 0 && !isAlquiler) operation.operationPriceCommunity = community;
+  if (community > 0 && community <= 9999 && !isAlquiler) operation.operationPriceCommunity = community;
   // Precio garaje aparte — solo para tipos residenciales/comerciales
   const tiposConPrecioParking = ["flat","house","rustic","premises_commercial","premises_industrial","office","building"];
   if ((row.parking === "Si" || row.parking === "Opcional") &&
@@ -199,8 +199,8 @@ function buildProperty(row, media) {
   if (mConst > 0) features.featuresAreaConstructed = mConst;
   // featuresAreaUsable: homes, premises, offices, building (no land, no garage, no storage)
   if (mUtil > 0 && !isLand && !isGarage && !isStorage) features.featuresAreaUsable = mUtil;
-  // featuresAreaPlot: homes (house/rustic) y land
-  if ((isHouse || isLand) && mParcela > 0) features.featuresAreaPlot = mParcela;
+  // featuresAreaPlot: todos los home types (flat/house/rustic) y land — homes.json lo permite para todos
+  if ((isHomeType || isLand) && mParcela > 0) features.featuresAreaPlot = mParcela;
   // featuresAreaBuildable: solo land
   if (isLand && Number(row.m_edificable) > 0) features.featuresAreaBuildable = Number(row.m_edificable);
   // featuresAreaHeight: solo storage
@@ -210,11 +210,11 @@ function buildProperty(row, media) {
   if (banos > 0 && !isLand && !isGarage && !isStorage && !isBuilding) {
     features.featuresBathroomNumber = banos;
   }
-  // featuresBedroomNumber: solo homes
-  if (bedrooms > 0 && isHomeType) features.featuresBedroomNumber = bedrooms;
+  // featuresBedroomNumber: solo homes — homes.json anyOf requiere rooms O bedrooms; emitimos 0 si es home sin dormitorios
+  if (isHomeType) features.featuresBedroomNumber = bedrooms > 0 ? bedrooms : 0;
 
-  // featuresBuiltYear: todos
-  if (row.ano_construc) {
+  // featuresBuiltYear: homes, premises, offices — NO garage, storage, building, land (additionalProperties:false)
+  if (row.ano_construc && !isGarage && !isStorage && !isBuilding && !isLand) {
     const year = parseInt(row.ano_construc);
     if (year > 1800 && year <= new Date().getFullYear()) features.featuresBuiltYear = year;
   }
@@ -382,7 +382,7 @@ function buildProperty(row, media) {
     if (row.alarma_seguridad === true)      features.featuresSecurityAlarm  = true;
     if (row.trastero === true)             features.featuresStorage         = true;
     if (Number(row.local_n_plantas) > 0)   features.featuresFloorsProperty  = Number(row.local_n_plantas);
-    if (Number(row.local_altura_libre) > 0) features.featuresAreaHeight     = Number(row.local_altura_libre);
+    // featuresAreaHeight NO existe en premises.json (additionalProperties:false) — omitido
     if (row.local_muelle_carga === true)   features.featuresLoadingDock     = true;
     if (row.local_salida_humos)            features.featuresSmokeExtraction = true;
     if (row.local_cocina_equipada)         features.featuresEquippedKitchen = true;
@@ -578,8 +578,8 @@ function isValid(row) {
   if (!row.desc_texto?.trim()) return false;
   const tipo = TIPO_MAP[row.tipo];
   if (!tipo) return false;
-  // m_const obligatorio excepto terrenos y garage/storage
-  const needsMConst = !["land","garage","storage"].includes(tipo);
+  // m_const obligatorio excepto terrenos y garage; storage también lo requiere (storage.json: required featuresAreaConstructed)
+  const needsMConst = !["land","garage"].includes(tipo);
   if (needsMConst && (!Number(row.m_const) || Number(row.m_const) <= 0)) return false;
   if (tipo === "land" && (!Number(row.m_parcela) || Number(row.m_parcela) <= 0)) return false;
   const needsBaths = ["flat","house","rustic","premises_commercial","premises_industrial","office"].includes(tipo);
