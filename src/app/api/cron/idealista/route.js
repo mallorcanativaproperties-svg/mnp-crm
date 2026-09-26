@@ -431,7 +431,7 @@ function buildProperty(row, media) {
       if (row.local_fin_contrato) {
         const fechaStr = String(row.local_fin_contrato);
         // Extraer YYYY-MM de cualquier formato de fecha
-        const match = fechaStr.match(/^(\d{4})-(\d{2})/);
+        const match = fechaStr.match(/^(\d{4})-(0[1-9]|1[0-2])/);
         if (match) features.featuresTransferEndContract = `${match[1]}-${match[2]}`;
       }
     }
