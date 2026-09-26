@@ -243,31 +243,79 @@ export async function GET(req) {
 
 export async function POST(req) {
   const supabase = sb();
-  const { docId, firmante, firmaData } = await req.json();
+  const { docId, firmante, firmaData, firmaRowId } = await req.json();
   if (!docId || !firmante || !firmaData) return NextResponse.json({ error: "Faltan datos" }, { status: 400 });
 
-  const updates = { updated_at: new Date().toISOString() };
+  const now = new Date().toISOString();
+
   if (firmante === "comprador") {
-    updates.firma_comprador_data = firmaData;
-    updates.firmado_comprador_at = new Date().toISOString();
-    updates.estado = "firmado_comprador";
+    // Guardar firma en visita_doc_firmas (flujo multi-comprador)
+    if (firmaRowId) {
+      await supabase.from("visita_doc_firmas").update({
+        firma_data: firmaData,
+        firmado_at: now,
+      }).eq("id", firmaRowId);
+    }
+
+    // Comprobar si TODOS los compradores de este doc ya firmaron
+    const { data: todasFirmas } = await supabase
+      .from("visita_doc_firmas")
+      .select("id, firmado_at")
+      .eq("doc_id", docId);
+
+    const todosFirmaron = todasFirmas?.length > 0 && todasFirmas.every(f => f.firmado_at || f.id === firmaRowId);
+
+    if (todosFirmaron) {
+      // Marcar el doc como firmado por todos los compradores
+      await supabase.from("visita_documentos").update({
+        estado: "firmado_comprador",
+        firmado_comprador_at: now,
+        updated_at: now,
+      }).eq("id", docId);
+    } else {
+      // Al menos un comprador ha firmado
+      await supabase.from("visita_documentos").update({
+        updated_at: now,
+      }).eq("id", docId);
+    }
+
+    // Notificar
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_APP_URL || "https://crm.mallorcanativaproperties.com"}/api/visitas/notificar-firma`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ docId, firmante, todosFirmaron }),
+      });
+    } catch (e) {}
+
+    return NextResponse.json({ ok: true, todosFirmaron });
+
   } else if (firmante === "vendedor") {
-    updates.firma_vendedor_data = firmaData;
-    updates.firmado_vendedor_at = new Date().toISOString();
-    updates.estado = "firmado_vendedor";
+    await supabase.from("visita_documentos").update({
+      firma_vendedor_data: firmaData,
+      firmado_vendedor_at: now,
+      estado: "firmado_vendedor",
+      updated_at: now,
+    }).eq("id", docId);
+
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_APP_URL || "https://crm.mallorcanativaproperties.com"}/api/visitas/notificar-firma`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ docId, firmante }),
+      });
+    } catch (e) {}
+
+    return NextResponse.json({ ok: true });
+
   } else if (firmante === "agente") {
-    updates.firma_agente_data = firmaData;
-    updates.firma_agente_fecha = new Date().toISOString();
+    await supabase.from("visita_documentos").update({
+      firma_agente_data: firmaData,
+      firma_agente_fecha: now,
+      updated_at: now,
+    }).eq("id", docId);
+    return NextResponse.json({ ok: true });
   }
-  await supabase.from("visita_documentos").update(updates).eq("id", docId);
 
-  try {
-    await fetch(`${process.env.NEXT_PUBLIC_APP_URL || "https://crm.mallorcanativaproperties.com"}/api/visitas/notificar-firma`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ docId, firmante }),
-    });
-  } catch (e) {}
-
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ error: "firmante inválido" }, { status: 400 });
 }
