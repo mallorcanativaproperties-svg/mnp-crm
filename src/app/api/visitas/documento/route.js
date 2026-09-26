@@ -74,6 +74,7 @@ async function rellenarDocx(tipo, contenido) {
     telefono_comprador_1: c1.telefono || "",
     nombre_comprador_2:   nombre2 || "",
     dni_comprador_2:      nombre2 ? (c2.dni || "") : "",
+    telefono_comprador_2: nombre2 ? (c2.telefono || "") : "",
     // Precio oferta
     precio_oferta_largo:  contenido.precio_oferta
       ? fmtPrecioLargo(contenido.precio_oferta)
