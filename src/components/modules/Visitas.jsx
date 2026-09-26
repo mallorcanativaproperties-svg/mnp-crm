@@ -47,45 +47,90 @@ const TIPO_DOC = {
   contraoferta: { label: "Contraoferta",        icon: "🔄", firmVendedor: true  },
 };
 
+// Pipeline de estados para documentos
+const PIPELINE_ESTADOS = ["borrador","enviado","firmado_comprador","deposito_recibido","firmado_vendedor","completado"];
+
 const iSt = {
-  width: "100%", padding: "9px 12px", background: CREAM, border: `1px solid ${BORDER}`,
-  color: TEXT, fontSize: 13, fontFamily: "Inter, sans-serif", borderRadius: 2,
-  outline: "none", boxSizing: "border-box",
+  width: "100%", padding: "14px 16px", background: CREAM, border: `1.5px solid ${BORDER}`,
+  color: TEXT, fontSize: 15, fontFamily: "Inter, sans-serif", borderRadius: 10,
+  outline: "none", boxSizing: "border-box", WebkitAppearance: "none",
 };
+const iStSm = {
+  ...iSt, padding: "12px 14px", fontSize: 14,
+};
+
 const L = ({ c, req }) => (
-  <div style={{ fontSize: 10, color: MUTED, fontWeight: 700, letterSpacing: "0.1em",
-    marginBottom: 5, textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}>
+  <div style={{ fontSize: 11, color: MUTED, fontWeight: 700, letterSpacing: "0.08em",
+    marginBottom: 6, textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}>
     {c}{req && <span style={{ color: DANGER }}> *</span>}
   </div>
 );
 
 // ── Badge de estado ───────────────────────────────────────────────────────────
-function BadgeEstado({ estado }) {
+function BadgeEstado({ estado, size = "md" }) {
   const e = ESTADO_DOC[estado] || { label: estado, color: MUTED, bg: `${MUTED}15` };
+  const pad = size === "lg" ? "5px 14px" : "4px 10px";
+  const fs = size === "lg" ? 12 : 10;
   return (
-    <span style={{ fontSize: 10, fontWeight: 700, color: e.color, background: e.bg,
-      padding: "3px 9px", borderRadius: 10, fontFamily: "Inter, sans-serif", whiteSpace: "nowrap" }}>
+    <span style={{ fontSize: fs, fontWeight: 700, color: e.color, background: e.bg,
+      padding: pad, borderRadius: 20, fontFamily: "Inter, sans-serif", whiteSpace: "nowrap",
+      display: "inline-flex", alignItems: "center", gap: 4 }}>
       {e.label}
     </span>
   );
 }
 
-// ── Modal genérico ────────────────────────────────────────────────────────────
+// ── Estrellas de interés IA ───────────────────────────────────────────────────
+function EstrellaInteres({ nivel }) {
+  if (!nivel) return null;
+  const colors = ["", DANGER, DANGER, GOLD, GOLD, SUCCESS];
+  return (
+    <span style={{ fontSize: 16, letterSpacing: 1, color: colors[nivel] || GOLD }}>
+      {"★".repeat(nivel)}
+      <span style={{ color: `${MUTED}50` }}>{"★".repeat(5 - nivel)}</span>
+    </span>
+  );
+}
+
+// ── Avatar con iniciales ──────────────────────────────────────────────────────
+function Avatar({ nombre, apellidos, size = 44 }) {
+  const initials = [nombre?.[0], apellidos?.[0]].filter(Boolean).join("").toUpperCase() || "?";
+  return (
+    <div style={{
+      width: size, height: size, borderRadius: "50%", background: `linear-gradient(135deg, ${GOLD}, ${GOLD_L})`,
+      display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+      color: WHITE, fontWeight: 700, fontSize: size * 0.36, fontFamily: "Inter, sans-serif",
+      boxShadow: `0 2px 8px ${GOLD}44`,
+    }}>
+      {initials}
+    </div>
+  );
+}
+
+// ── Modal full-screen en mobile ───────────────────────────────────────────────
 function Modal({ title, onClose, children, width = 560 }) {
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(26,37,40,0.7)", zIndex: 1000,
-      display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-      <div style={{ background: WHITE, width: "100%", maxWidth: width, maxHeight: "90vh",
-        overflowY: "auto", borderRadius: 3, border: `1px solid ${BORDER}` }}>
-        <div style={{ padding: "18px 24px", borderBottom: `1px solid ${BORDER}`,
-          display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: TEXT, fontFamily: "Inter, sans-serif" }}>{title}</div>
-          <button onClick={onClose} style={{ background: "transparent", border: "none",
-            color: MUTED, cursor: "pointer", padding: 4, display: "flex" }}>
+    <div style={{ position: "fixed", inset: 0, background: "rgba(26,37,40,0.75)", zIndex: 1000,
+      display: "flex", alignItems: "flex-end", justifyContent: "center",
+      padding: 0, backdropFilter: "blur(4px)" }}>
+      <div style={{
+        background: WHITE, width: "100%", maxWidth: width,
+        maxHeight: "95vh", overflowY: "auto", borderRadius: "20px 20px 0 0",
+        border: `1px solid ${BORDER}`,
+      }}>
+        {/* Handle bar */}
+        <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
+          <div style={{ width: 40, height: 4, borderRadius: 2, background: BORDER }} />
+        </div>
+        <div style={{ padding: "14px 20px 10px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ fontSize: 18, fontWeight: 700, color: TEXT, fontFamily: "Inter, sans-serif" }}>{title}</div>
+          <button onClick={onClose} style={{ background: CREAM2, border: "none",
+            color: MUTED, cursor: "pointer", padding: 8, display: "flex", borderRadius: "50%",
+            minWidth: 36, minHeight: 36, alignItems: "center", justifyContent: "center" }}>
             <XMarkIcon style={{ width: 18, height: 18 }} />
           </button>
         </div>
-        <div style={{ padding: 24 }}>{children}</div>
+        <div style={{ padding: "0 20px 32px" }}>{children}</div>
       </div>
     </div>
   );
@@ -96,7 +141,7 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
   const [q, setQ] = useState("");
   const [results, setResults] = useState([]);
   const [showNew, setShowNew] = useState(false);
-  const [nuevoNombre, setNuevoNombre] = useState(""); // nombre completo
+  const [nuevoNombre, setNuevoNombre] = useState("");
   const [nuevoTel, setNuevoTel] = useState("");
   const [nuevoEmail, setNuevoEmail] = useState("");
   const [nuevoDni, setNuevoDni] = useState("");
@@ -104,7 +149,7 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
   const [saving, setSaving] = useState(false);
   const [sugerencias, setSugerencias] = useState([]);
   const [compradorExistenteId, setCompradorExistenteId] = useState(null);
-  const [completarDatos, setCompletarDatos] = useState(null); // comprador que necesita DNI/tel
+  const [completarDatos, setCompletarDatos] = useState(null);
   const [completarDni, setCompletarDni] = useState("");
   const [completarTel, setCompletarTel] = useState("");
   const [completarGuardando, setCompletarGuardando] = useState(false);
@@ -122,13 +167,11 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
     if (!nuevoTel.trim()) { alert("El teléfono es obligatorio."); return; }
     setSaving(true);
 
-    // Separar nombre completo en nombre + apellidos
     const partes = nuevoNombre.trim().split(" ");
     const nombreParte = partes[0] || "";
     const apellidosParte = partes.slice(1).join(" ");
 
     if (compradorExistenteId) {
-      // Ya existe — actualizar solo DNI y teléfono si faltaban
       await supabase.from("compradores").update({
         telefono: nuevoTel.trim(),
         dni: nuevoDni.trim(),
@@ -139,7 +182,6 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
         .select("*").eq("id", compradorExistenteId).single();
       if (existing) onChange(existing);
     } else {
-      // Nuevo comprador — insertar
       const { data } = await supabase.from("compradores").insert({
         nombre: nombreParte, apellidos: apellidosParte || null,
         telefono: nuevoTel.trim(), email: nuevoEmail.trim() || null,
@@ -156,38 +198,48 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
   }
 
   if (value) return (
-    <div style={{ background: CREAM2, border: `1px solid ${GOLD}`, padding: "10px 14px",
-      display: "flex", justifyContent: "space-between", alignItems: "center", borderRadius: 2 }}>
-      <div>
-        <div style={{ fontSize: 13, fontWeight: 600, color: TEXT, fontFamily: "Inter, sans-serif" }}>
-          {value.nombre} {value.apellidos || ""}
-        </div>
-        <div style={{ fontSize: 11, color: MUTED, fontFamily: "Inter, sans-serif" }}>
-          {value.telefono || ""}{value.email ? ` · ${value.email}` : ""}
-          {value.dni ? ` · DNI: ${value.dni}` : ""}
+    <div style={{ background: `${GOLD}10`, border: `2px solid ${GOLD}`, padding: "14px 16px",
+      display: "flex", justifyContent: "space-between", alignItems: "center", borderRadius: 12 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <Avatar nombre={value.nombre} apellidos={value.apellidos} size={40} />
+        <div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: TEXT, fontFamily: "Inter, sans-serif" }}>
+            {value.nombre} {value.apellidos || ""}
+          </div>
+          <div style={{ fontSize: 12, color: MUTED, fontFamily: "Inter, sans-serif", marginTop: 2 }}>
+            {value.telefono || ""}{value.email ? ` · ${value.email}` : ""}
+            {value.dni ? ` · DNI: ${value.dni}` : ""}
+          </div>
         </div>
       </div>
-      <button onClick={() => onChange(null)} style={{ background: "transparent", border: "none",
-        color: MUTED, cursor: "pointer", padding: 4 }}>
-        <XMarkIcon style={{ width: 14, height: 14 }} />
+      <button onClick={() => onChange(null)} style={{ background: CREAM2, border: "none",
+        color: MUTED, cursor: "pointer", padding: 8, borderRadius: "50%", minWidth: 34, minHeight: 34,
+        display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <XMarkIcon style={{ width: 15, height: 15 }} />
       </button>
     </div>
   );
 
   return (
     <div>
-      <div style={{ display: "flex", gap: 8 }}>
-        <input value={q} onChange={e => setQ(e.target.value)} placeholder={placeholder}
-          style={{ ...iSt, flex: 1 }} />
-        <button onClick={() => setShowNew(true)} style={{ padding: "9px 14px", background: DARK,
-          border: "none", color: WHITE, cursor: "pointer", borderRadius: 2, display: "flex",
-          alignItems: "center", gap: 6, fontSize: 11, fontWeight: 600, fontFamily: "Inter, sans-serif",
-          whiteSpace: "nowrap" }}>
-          <PlusIcon style={{ width: 14, height: 14 }} /> Nuevo
+      <div style={{ display: "flex", gap: 10 }}>
+        <div style={{ position: "relative", flex: 1 }}>
+          <MagnifyingGlassIcon style={{ width: 16, height: 16, position: "absolute", left: 14, top: "50%",
+            transform: "translateY(-50%)", color: MUTED }} />
+          <input value={q} onChange={e => setQ(e.target.value)} placeholder={placeholder}
+            style={{ ...iSt, paddingLeft: 40 }} />
+        </div>
+        <button onClick={() => setShowNew(true)} style={{
+          padding: "14px 18px", background: DARK, border: "none", color: WHITE, cursor: "pointer",
+          borderRadius: 10, display: "flex", alignItems: "center", gap: 6, fontSize: 13,
+          fontWeight: 700, fontFamily: "Inter, sans-serif", whiteSpace: "nowrap", minHeight: 50,
+        }}>
+          <PlusIcon style={{ width: 16, height: 16 }} /> Nuevo
         </button>
       </div>
       {results.length > 0 && (
-        <div style={{ border: `1px solid ${BORDER}`, background: WHITE, marginTop: 4, borderRadius: 2 }}>
+        <div style={{ border: `1.5px solid ${BORDER}`, background: WHITE, marginTop: 6,
+          borderRadius: 12, overflow: "hidden", boxShadow: "0 4px 20px rgba(0,0,0,0.1)" }}>
           {results.map(c => {
             const faltaDni = !c.dni?.trim();
             const faltaTel = !c.telefono?.trim();
@@ -199,25 +251,28 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
                   setQ(""); setResults([]);
                 } else { onChange(c); setQ(""); setResults([]); }
               }}
-                style={{ padding: "10px 14px", cursor: "pointer", borderBottom: `1px solid ${BORDER}`,
-                  fontFamily: "Inter, sans-serif" }}
+                style={{ padding: "14px 16px", cursor: "pointer", borderBottom: `1px solid ${BORDER}`,
+                  fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 12 }}
                 onMouseEnter={e => e.currentTarget.style.background = CREAM}
                 onMouseLeave={e => e.currentTarget.style.background = WHITE}>
-                <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>
-                    {c.nombre} {c.apellidos || ""}
-                  </span>
-                  {faltaAlgo && (
-                    <span style={{ fontSize:10, color:DANGER, fontWeight:700, background:`${DANGER}15`,
-                      padding:"1px 7px", borderRadius:10 }}>
-                      {faltaDni && faltaTel ? "Falta DNI y tel." : faltaDni ? "Falta DNI" : "Falta tel."}
+                <Avatar nombre={c.nombre} apellidos={c.apellidos} size={36} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap: "wrap" }}>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: TEXT }}>
+                      {c.nombre} {c.apellidos || ""}
                     </span>
-                  )}
-                </div>
-                <div style={{ fontSize: 11, color: MUTED }}>
-                  {c.telefono || <span style={{color:DANGER}}>Sin teléfono</span>}
-                  {c.email ? ` · ${c.email}` : ""}
-                  {c.dni ? ` · DNI: ${c.dni}` : <span style={{color:DANGER}}> · Sin DNI</span>}
+                    {faltaAlgo && (
+                      <span style={{ fontSize:10, color:DANGER, fontWeight:700, background:`${DANGER}15`,
+                        padding:"2px 8px", borderRadius:10 }}>
+                        {faltaDni && faltaTel ? "Falta DNI y tel." : faltaDni ? "Falta DNI" : "Falta tel."}
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: 12, color: MUTED, marginTop: 2 }}>
+                    {c.telefono || <span style={{color:DANGER}}>Sin teléfono</span>}
+                    {c.email ? ` · ${c.email}` : ""}
+                    {c.dni ? ` · DNI: ${c.dni}` : <span style={{color:DANGER}}> · Sin DNI</span>}
+                  </div>
                 </div>
               </div>
             );
@@ -225,11 +280,20 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
         </div>
       )}
       {completarDatos && (
-        <Modal title="Completar datos del comprador" onClose={() => setCompletarDatos(null)} width={420}>
-          <div style={{ fontSize: 13, color: TEXT, fontFamily: "Inter, sans-serif", marginBottom: 16 }}>
-            <strong>{completarDatos.nombre} {completarDatos.apellidos || ""}</strong> necesita DNI y teléfono para continuar.
+        <Modal title="Completar datos" onClose={() => setCompletarDatos(null)} width={440}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20,
+            padding: "14px 16px", background: CREAM, borderRadius: 12 }}>
+            <Avatar nombre={completarDatos.nombre} apellidos={completarDatos.apellidos} size={44} />
+            <div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: TEXT, fontFamily: "Inter, sans-serif" }}>
+                {completarDatos.nombre} {completarDatos.apellidos || ""}
+              </div>
+              <div style={{ fontSize: 12, color: DANGER, fontFamily: "Inter, sans-serif", marginTop: 2 }}>
+                Necesita DNI y teléfono para continuar
+              </div>
+            </div>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             <div>
               <L c="DNI / NIE" req />
               <input style={iSt} value={completarDni} onChange={e => setCompletarDni(e.target.value)}
@@ -241,10 +305,7 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
                 placeholder="+34 600 000 000" />
             </div>
           </div>
-          <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 20 }}>
-            <button onClick={() => setCompletarDatos(null)} style={{ padding: "9px 18px",
-              border: `1px solid ${BORDER}`, background: "transparent", color: MUTED,
-              cursor: "pointer", borderRadius: 2, fontFamily: "Inter, sans-serif" }}>Cancelar</button>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 20 }}>
             <button disabled={!completarDni.trim() || !completarTel.trim() || completarGuardando}
               onClick={async () => {
                 if (!completarDni.trim() || !completarTel.trim()) return;
@@ -257,10 +318,15 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
                 onChange(actualizado);
                 setCompletarDatos(null); setCompletarGuardando(false);
               }}
-              style={{ padding: "9px 22px", background: DARK, border: "none", color: WHITE,
-                cursor: "pointer", borderRadius: 2, fontWeight: 600, fontFamily: "Inter, sans-serif",
-                opacity: (!completarDni.trim() || !completarTel.trim()) ? 0.5 : 1 }}>
-              {completarGuardando ? "Guardando..." : "Guardar y añadir"}
+              style={{ padding: "16px", background: DARK, border: "none", color: WHITE,
+                cursor: "pointer", borderRadius: 12, fontWeight: 700, fontFamily: "Inter, sans-serif",
+                fontSize: 15, opacity: (!completarDni.trim() || !completarTel.trim()) ? 0.4 : 1 }}>
+              {completarGuardando ? "Guardando..." : "✓ Guardar y añadir"}
+            </button>
+            <button onClick={() => setCompletarDatos(null)} style={{ padding: "14px",
+              border: `1.5px solid ${BORDER}`, background: "transparent", color: MUTED,
+              cursor: "pointer", borderRadius: 12, fontFamily: "Inter, sans-serif", fontSize: 14 }}>
+              Cancelar
             </button>
           </div>
         </Modal>
@@ -268,14 +334,14 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
       {showNew && (
         <Modal title="Nuevo comprador" onClose={() => setShowNew(false)} width={480}>
           {compradorExistenteId && (
-            <div style={{ marginBottom: 12, padding: "8px 12px", background: `${GOLD}12`,
-              border: `1px solid ${GOLD}`, borderRadius: 2, fontSize: 11,
+            <div style={{ marginBottom: 16, padding: "12px 14px", background: `${GOLD}10`,
+              border: `1.5px solid ${GOLD}`, borderRadius: 10, fontSize: 13,
               color: GOLD, fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
-              ✓ Comprador ya existe en la BD — se actualizarán sus datos si has modificado algún campo
+              ✓ Ya existe en la BD — se actualizarán sus datos
             </div>
           )}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-            <div style={{ position: "relative", gridColumn: "1 / -1" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div style={{ position: "relative" }}>
               <L c="Nombre completo" req />
               <input style={iSt} value={nuevoNombre}
                 onChange={async e => {
@@ -295,9 +361,9 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
                 autoComplete="off" />
               {sugerencias.length > 0 && (
                 <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 20,
-                  background: WHITE, border: `1px solid ${GOLD}`, borderRadius: 2,
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)", maxHeight: 200, overflowY: "auto" }}>
-                  <div style={{ padding: "6px 12px", fontSize: 10, color: GOLD, fontWeight: 700,
+                  background: WHITE, border: `1.5px solid ${GOLD}`, borderRadius: 12,
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.15)", maxHeight: 220, overflowY: "auto", marginTop: 4 }}>
+                  <div style={{ padding: "8px 14px", fontSize: 10, color: GOLD, fontWeight: 700,
                     letterSpacing: "0.1em", borderBottom: `1px solid ${BORDER}`,
                     fontFamily: "Inter, sans-serif", background: `${GOLD}08` }}>
                     YA EXISTE EN LA BASE DE CLIENTES
@@ -313,45 +379,51 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
                         setCompradorExistenteId(s.id);
                         setSugerencias([]);
                       }}
-                      style={{ padding: "9px 12px", cursor: "pointer", borderBottom: `1px solid ${BORDER}`,
-                        fontFamily: "Inter, sans-serif" }}
+                      style={{ padding: "12px 14px", cursor: "pointer", borderBottom: `1px solid ${BORDER}`,
+                        fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 10 }}
                       onMouseEnter={e => e.currentTarget.style.background = CREAM}
                       onMouseLeave={e => e.currentTarget.style.background = WHITE}>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>
-                        {s.nombre} {s.apellidos || ""}
-                        {(!s.dni || !s.telefono) && (
-                          <span style={{ fontSize: 10, color: DANGER, marginLeft: 8, fontWeight: 700 }}>
-                            {!s.dni && !s.telefono ? "· Falta DNI y tel." : !s.dni ? "· Falta DNI" : "· Falta tel."}
-                          </span>
-                        )}
-                      </div>
-                      <div style={{ fontSize: 11, color: MUTED, marginTop: 2 }}>
-                        {s.telefono || "Sin teléfono"}{s.email ? ` · ${s.email}` : ""}{s.dni ? ` · DNI: ${s.dni}` : ""}
+                      <Avatar nombre={s.nombre} apellidos={s.apellidos} size={34} />
+                      <div>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: TEXT }}>
+                          {s.nombre} {s.apellidos || ""}
+                          {(!s.dni || !s.telefono) && (
+                            <span style={{ fontSize: 10, color: DANGER, marginLeft: 8, fontWeight: 700 }}>
+                              {!s.dni && !s.telefono ? "· Falta DNI y tel." : !s.dni ? "· Falta DNI" : "· Falta tel."}
+                            </span>
+                          )}
+                        </div>
+                        <div style={{ fontSize: 11, color: MUTED, marginTop: 2 }}>
+                          {s.telefono || "Sin teléfono"}{s.email ? ` · ${s.email}` : ""}{s.dni ? ` · DNI: ${s.dni}` : ""}
+                        </div>
                       </div>
                     </div>
                   ))}
-                  <div style={{ padding: "7px 12px", fontSize: 11, color: MUTED, fontStyle: "italic",
+                  <div style={{ padding: "8px 14px", fontSize: 11, color: MUTED, fontStyle: "italic",
                     fontFamily: "Inter, sans-serif", borderTop: `1px solid ${BORDER}` }}>
-                    Selecciona para autorellenar o continúa escribiendo para crear nuevo
+                    Selecciona para autorellenar o continúa para crear nuevo
                   </div>
                 </div>
               )}
             </div>
 
-            <div><L c="DNI / NIE" req /><input style={iSt} value={nuevoDni} onChange={e => setNuevoDni(e.target.value)} placeholder="12345678A" /></div>
-            <div><L c="Nacionalidad" /><input style={iSt} value={nuevaNac} onChange={e => setNuevaNac(e.target.value)} /></div>
-            <div><L c="Teléfono" req /><input style={iSt} value={nuevoTel} onChange={e => setNuevoTel(e.target.value)} placeholder="+34 600 000 000" /></div>
-            <div><L c="Email" /><input style={iSt} value={nuevoEmail} onChange={e => setNuevoEmail(e.target.value)} /></div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div><L c="DNI / NIE" req /><input style={iStSm} value={nuevoDni} onChange={e => setNuevoDni(e.target.value)} placeholder="12345678A" /></div>
+              <div><L c="Nacionalidad" /><input style={iStSm} value={nuevaNac} onChange={e => setNuevaNac(e.target.value)} /></div>
+              <div><L c="Teléfono" req /><input style={iStSm} value={nuevoTel} onChange={e => setNuevoTel(e.target.value)} placeholder="+34 600 000 000" /></div>
+              <div><L c="Email" /><input style={iStSm} value={nuevoEmail} onChange={e => setNuevoEmail(e.target.value)} /></div>
+            </div>
           </div>
-          <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 20 }}>
-            <button onClick={() => { setShowNew(false); setCompradorExistenteId(null); }} style={{ padding: "9px 18px", border: `1px solid ${BORDER}`,
-              background: "transparent", color: MUTED, cursor: "pointer", borderRadius: 2, fontFamily: "Inter, sans-serif" }}>
-              Cancelar
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 20 }}>
+            <button onClick={crearNuevo} disabled={saving}
+              style={{ padding: "16px", background: DARK, border: "none", color: WHITE,
+                cursor: "pointer", borderRadius: 12, fontWeight: 700, fontFamily: "Inter, sans-serif", fontSize: 15 }}>
+              {saving ? "Guardando..." : compradorExistenteId ? "✓ Guardar y seleccionar" : "✓ Crear y seleccionar"}
             </button>
-            <button onClick={crearNuevo} disabled={saving} style={{ padding: "9px 22px", background: DARK,
-              border: "none", color: WHITE, cursor: "pointer", borderRadius: 2, fontWeight: 600,
-              fontFamily: "Inter, sans-serif" }}>
-              {saving ? "Guardando..." : compradorExistenteId ? "Guardar y seleccionar" : "Crear y seleccionar"}
+            <button onClick={() => { setShowNew(false); setCompradorExistenteId(null); }}
+              style={{ padding: "14px", border: `1.5px solid ${BORDER}`, background: "transparent",
+                color: MUTED, cursor: "pointer", borderRadius: 12, fontFamily: "Inter, sans-serif", fontSize: 14 }}>
+              Cancelar
             </button>
           </div>
         </Modal>
@@ -371,13 +443,10 @@ function GeneradorDoc({ visita, propiedad, agente, onGuardado, onClose }) {
   async function guardar() {
     setSaving(true);
 
-    // Compradores: usar visita_compradores si existe, si no el comprador principal
     const todosComps = visita?.visita_compradores?.length > 0
       ? visita.visita_compradores.sort((a,b) => a.orden - b.orden).map(vc => vc.compradores).filter(Boolean)
       : visita?.compradores ? [visita.compradores] : [];
 
-    // Guardar los datos completos de propiedad en el contenido JSONB
-    // Esto garantiza que el PDF se genere correctamente aunque propiedad_id esté null
     const propObj = propiedad || {};
     const anexos = [];
     if (propObj.trastero === true) anexos.push("trastero incluido");
@@ -427,7 +496,6 @@ function GeneradorDoc({ visita, propiedad, agente, onGuardado, onClose }) {
       created_at: new Date().toISOString(),
     });
 
-    // Notificar al director/admin si es oferta o reserva
     if (tipo === "oferta" || tipo === "reserva") {
       await fetch("/api/visitas/notificar-admin", {
         method: "POST",
@@ -442,17 +510,20 @@ function GeneradorDoc({ visita, propiedad, agente, onGuardado, onClose }) {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
       <div>
         <L c="Tipo de documento" req />
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {Object.entries(TIPO_DOC).filter(([k]) => k !== "contraoferta").map(([k, v]) => (
             <button key={k} onClick={() => setTipo(k)} style={{
-              padding: "8px 16px", border: `1px solid ${tipo === k ? GOLD : BORDER}`,
-              background: tipo === k ? `${GOLD}15` : WHITE, color: tipo === k ? GOLD : MUTED,
-              cursor: "pointer", borderRadius: 2, fontSize: 12, fontWeight: 600,
-              fontFamily: "Inter, sans-serif" }}>
-              {v.icon} {v.label}
+              padding: "14px 16px", border: `2px solid ${tipo === k ? GOLD : BORDER}`,
+              background: tipo === k ? `${GOLD}10` : WHITE, color: tipo === k ? GOLD : TEXT,
+              cursor: "pointer", borderRadius: 12, fontSize: 14, fontWeight: tipo === k ? 700 : 400,
+              fontFamily: "Inter, sans-serif", textAlign: "left", display: "flex", alignItems: "center", gap: 12,
+            }}>
+              <span style={{ fontSize: 22 }}>{v.icon}</span>
+              <span>{v.label}</span>
+              {tipo === k && <CheckIcon style={{ width: 18, height: 18, marginLeft: "auto" }} />}
             </button>
           ))}
         </div>
@@ -467,58 +538,57 @@ function GeneradorDoc({ visita, propiedad, agente, onGuardado, onClose }) {
               placeholder="Ej: 450000" />
           </div>
           <div>
-            <L c="Opciones que condicionan aceptación (voluntario)" />
-            <textarea rows={3} style={{ ...iSt, resize: "vertical" }}
+            <L c="Condiciones que condicionan aceptación (voluntario)" />
+            <textarea rows={3} style={{ ...iSt, resize: "vertical", lineHeight: 1.6 }}
               value={condicionesParticulares}
               onChange={e => setCondicionesParticulares(e.target.value)}
               placeholder="Ej: Condicionado a obtención de hipoteca, entrega libre en 60 días..." />
-            <div style={{ fontSize: 10, color: MUTED, marginTop: 4, fontFamily: "Inter, sans-serif" }}>
-              Si se indica alguna condición, la propuesta quedará sujeta a su aceptación expresa por el vendedor.
-            </div>
           </div>
           <div>
             <L c="Método de pago de reserva (1.000€)" />
-            <div style={{ display: "flex", gap: 8 }}>
-              {[["transferencia", "Transferencia bancaria"], ["stripe", "Link de pago (Stripe)"]].map(([k, v]) => (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {[["transferencia", "🏦 Transferencia bancaria"], ["stripe", "💳 Link de pago (Stripe)"]].map(([k, v]) => (
                 <button key={k} onClick={() => setDepositoTipo(k)} style={{
-                  padding: "8px 16px", border: `1px solid ${depositoTipo === k ? GOLD : BORDER}`,
-                  background: depositoTipo === k ? `${GOLD}15` : WHITE, color: depositoTipo === k ? GOLD : MUTED,
-                  cursor: "pointer", borderRadius: 2, fontSize: 12, fontWeight: 600,
-                  fontFamily: "Inter, sans-serif" }}>
+                  padding: "14px 16px", border: `2px solid ${depositoTipo === k ? GOLD : BORDER}`,
+                  background: depositoTipo === k ? `${GOLD}10` : WHITE, color: depositoTipo === k ? GOLD : TEXT,
+                  cursor: "pointer", borderRadius: 12, fontSize: 14, fontWeight: depositoTipo === k ? 700 : 400,
+                  fontFamily: "Inter, sans-serif", textAlign: "left", display: "flex", alignItems: "center", gap: 8,
+                }}>
                   {v}
+                  {depositoTipo === k && <CheckIcon style={{ width: 18, height: 18, marginLeft: "auto" }} />}
                 </button>
               ))}
             </div>
             {depositoTipo === "transferencia" && (
-              <div style={{ marginTop: 8, padding: "10px 14px", background: CREAM2,
-                border: `1px solid ${BORDER}`, borderRadius: 2, fontSize: 11, color: TEXT,
-                fontFamily: "Inter, sans-serif", lineHeight: 1.6 }}>
+              <div style={{ marginTop: 10, padding: "14px 16px", background: CREAM2,
+                border: `1px solid ${BORDER}`, borderRadius: 12, fontSize: 13, color: TEXT,
+                fontFamily: "Inter, sans-serif", lineHeight: 1.7 }}>
                 Banco Sabadell · Titular: <strong>MALLORCA NATIVA, S.L.</strong><br />
                 IBAN: ES30 0081 0268 2700 0248 1851<br />
                 Concepto: Nombre completo del comprador
               </div>
             )}
             {depositoTipo === "stripe" && (
-              <div style={{ marginTop: 8, padding: "10px 14px", background: "#E6F1FB",
-                border: "1px solid #B5D4F4", borderRadius: 2, fontSize: 11, color: BLUE,
+              <div style={{ marginTop: 10, padding: "14px 16px", background: "#E6F1FB",
+                border: "1px solid #B5D4F4", borderRadius: 12, fontSize: 13, color: BLUE,
                 fontFamily: "Inter, sans-serif" }}>
-                Se generará un link de pago de 1.000€. El estado cambiará a "Depósito recibido" automáticamente cuando Stripe confirme el pago.
+                Se generará un link de pago de 1.000€ automáticamente al enviar el documento.
               </div>
             )}
           </div>
         </>
       )}
 
-      <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", paddingTop: 8,
+      <div style={{ display: "flex", flexDirection: "column", gap: 10, paddingTop: 8,
         borderTop: `1px solid ${BORDER}` }}>
-        <button onClick={onClose} style={{ padding: "9px 18px", border: `1px solid ${BORDER}`,
-          background: "transparent", color: MUTED, cursor: "pointer", borderRadius: 2,
-          fontFamily: "Inter, sans-serif" }}>Cancelar</button>
-        <button onClick={guardar} disabled={saving} style={{ padding: "9px 22px", background: DARK,
-          border: "none", color: WHITE, cursor: "pointer", borderRadius: 2, fontWeight: 600,
-          fontFamily: "Inter, sans-serif" }}>
-          {saving ? "Guardando..." : "Crear documento"}
+        <button onClick={guardar} disabled={saving} style={{ padding: "16px", background: DARK,
+          border: "none", color: WHITE, cursor: "pointer", borderRadius: 12, fontWeight: 700,
+          fontFamily: "Inter, sans-serif", fontSize: 15 }}>
+          {saving ? "Guardando..." : "📄 Crear documento"}
         </button>
+        <button onClick={onClose} style={{ padding: "14px", border: `1.5px solid ${BORDER}`,
+          background: "transparent", color: MUTED, cursor: "pointer", borderRadius: 12,
+          fontFamily: "Inter, sans-serif", fontSize: 14 }}>Cancelar</button>
       </div>
     </div>
   );
@@ -527,7 +597,7 @@ function GeneradorDoc({ visita, propiedad, agente, onGuardado, onClose }) {
 // ── Uploader de grabación + transcripción IA ──────────────────────────────────
 function UploaderGrabacion({ visitaId, onActualizado }) {
   const ref = useRef();
-  const [estado, setEstado] = useState("idle"); // idle | subiendo | transcribiendo | listo | error
+  const [estado, setEstado] = useState("idle");
   const [msg, setMsg] = useState("");
 
   async function manejarArchivo(e) {
@@ -565,21 +635,39 @@ function UploaderGrabacion({ visitaId, onActualizado }) {
     ref.current.value = "";
   }
 
-  const colores = { idle: MUTED, subiendo: BLUE, transcribiendo: GOLD, listo: SUCCESS, error: DANGER };
+  const colores = { idle: GOLD, subiendo: BLUE, transcribiendo: GOLD, listo: SUCCESS, error: DANGER };
+  const isLoading = estado === "subiendo" || estado === "transcribiendo";
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+    <div>
       <input ref={ref} type="file" accept="video/*,audio/*" onChange={manejarArchivo}
         style={{ display: "none" }} />
-      <button onClick={() => ref.current.click()} disabled={estado === "subiendo" || estado === "transcribiendo"}
-        style={{ padding: "6px 14px", border: `1px solid ${GOLD}`, background: "transparent",
-          color: GOLD, cursor: "pointer", borderRadius: 2, fontSize: 11, fontWeight: 600,
-          fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 6,
-          opacity: (estado === "subiendo" || estado === "transcribiendo") ? 0.6 : 1 }}>
-        <ArrowUpTrayIcon style={{ width: 14, height: 14 }} />
-        Subir grabación
+      <button onClick={() => ref.current.click()} disabled={isLoading}
+        style={{
+          padding: "16px", border: `2px dashed ${isLoading ? BORDER : GOLD}`,
+          background: isLoading ? CREAM : `${GOLD}08`,
+          color: isLoading ? MUTED : GOLD, cursor: isLoading ? "default" : "pointer",
+          borderRadius: 12, fontSize: 14, fontWeight: 700,
+          fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", justifyContent: "center",
+          gap: 10, width: "100%",
+        }}>
+        <MicrophoneIcon style={{ width: 22, height: 22 }} />
+        {isLoading ? msg : "🎙 Subir grabación de visita"}
       </button>
-      {msg && <span style={{ fontSize: 11, color: colores[estado], fontFamily: "Inter, sans-serif" }}>{msg}</span>}
+      {estado === "listo" && (
+        <div style={{ marginTop: 8, padding: "10px 14px", background: `${SUCCESS}10`,
+          border: `1px solid ${SUCCESS}30`, borderRadius: 10, fontSize: 13, color: SUCCESS,
+          fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
+          ✓ {msg}
+        </div>
+      )}
+      {estado === "error" && (
+        <div style={{ marginTop: 8, padding: "10px 14px", background: `${DANGER}08`,
+          border: `1px solid ${DANGER}30`, borderRadius: 10, fontSize: 13, color: DANGER,
+          fontFamily: "Inter, sans-serif" }}>
+          {msg}
+        </div>
+      )}
     </div>
   );
 }
@@ -626,27 +714,72 @@ function EditorInforme({ informe, propiedadNombre, onGuardado, onClose }) {
 
   return (
     <div>
-      <div style={{ fontSize: 11, color: MUTED, marginBottom: 12, fontFamily: "Inter, sans-serif" }}>
-        Informe de visitas — <strong style={{ color: TEXT }}>{propiedadNombre}</strong>.
+      <div style={{ fontSize: 13, color: MUTED, marginBottom: 14, fontFamily: "Inter, sans-serif",
+        padding: "12px 14px", background: CREAM, borderRadius: 10 }}>
+        📊 Informe de visitas — <strong style={{ color: TEXT }}>{propiedadNombre}</strong>.
         Revisa y edita antes de confirmar el envío al propietario.
       </div>
-      <textarea rows={18} value={contenido} onChange={e => setContenido(e.target.value)}
-        style={{ ...iSt, resize: "vertical", lineHeight: 1.7, fontSize: 12 }} />
-      <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 14 }}>
-        <button onClick={onClose} style={{ padding: "9px 18px", border: `1px solid ${BORDER}`,
-          background: "transparent", color: MUTED, cursor: "pointer", borderRadius: 2,
-          fontFamily: "Inter, sans-serif" }}>Cancelar</button>
-        <button onClick={guardar} disabled={guardando} style={{ padding: "9px 18px",
-          border: `1px solid ${GOLD}`, background: "transparent", color: GOLD, cursor: "pointer",
-          borderRadius: 2, fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
-          {guardando ? "Guardando..." : "Guardar borrador"}
+      <textarea rows={16} value={contenido} onChange={e => setContenido(e.target.value)}
+        style={{ ...iSt, resize: "vertical", lineHeight: 1.7, fontSize: 13 }} />
+      <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 16 }}>
+        <button onClick={confirmarYEnviar} disabled={enviando}
+          style={{ padding: "16px", background: SUCCESS, border: "none", color: WHITE,
+            cursor: "pointer", borderRadius: 12, fontWeight: 700, fontFamily: "Inter, sans-serif",
+            fontSize: 15, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+          <PaperAirplaneIcon style={{ width: 18, height: 18 }} />
+          {enviando ? "Enviando..." : "✉ Confirmar y enviar al propietario"}
         </button>
-        <button onClick={confirmarYEnviar} disabled={enviando} style={{ padding: "9px 22px",
-          background: SUCCESS, border: "none", color: WHITE, cursor: "pointer", borderRadius: 2,
-          fontWeight: 700, fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 6 }}>
-          <PaperAirplaneIcon style={{ width: 14, height: 14 }} />
-          {enviando ? "Enviando..." : "Confirmar y enviar"}
+        <button onClick={guardar} disabled={guardando}
+          style={{ padding: "14px", border: `2px solid ${GOLD}`, background: "transparent",
+            color: GOLD, cursor: "pointer", borderRadius: 12, fontFamily: "Inter, sans-serif",
+            fontWeight: 700, fontSize: 14 }}>
+          {guardando ? "Guardando..." : "💾 Guardar borrador"}
         </button>
+        <button onClick={onClose} style={{ padding: "14px", border: `1.5px solid ${BORDER}`,
+          background: "transparent", color: MUTED, cursor: "pointer", borderRadius: 12,
+          fontFamily: "Inter, sans-serif", fontSize: 14 }}>Cancelar</button>
+      </div>
+    </div>
+  );
+}
+
+// ── Pipeline de documento (paso a paso visual) ────────────────────────────────
+function PipelineDoc({ estado }) {
+  const pasos = ["borrador","enviado","firmado_comprador","deposito_recibido","firmado_vendedor","completado"];
+  const labelCorto = {
+    borrador: "Borrador", enviado: "Enviado", firmado_comprador: "Comprador ✓",
+    deposito_recibido: "Depósito ✓", firmado_vendedor: "Vendedor ✓", completado: "Completado",
+  };
+  const idxActual = pasos.indexOf(estado);
+
+  return (
+    <div style={{ overflowX: "auto", paddingBottom: 4 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 0, minWidth: "max-content" }}>
+        {pasos.map((p, i) => {
+          const activo = i === idxActual;
+          const hecho = i < idxActual;
+          const color = hecho ? SUCCESS : activo ? GOLD : BORDER;
+          const textColor = hecho ? SUCCESS : activo ? GOLD : MUTED;
+          return (
+            <div key={p} style={{ display: "flex", alignItems: "center" }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                <div style={{
+                  width: 10, height: 10, borderRadius: "50%",
+                  background: hecho || activo ? color : "transparent",
+                  border: `2px solid ${color}`,
+                  flexShrink: 0,
+                }} />
+                <span style={{ fontSize: 9, color: textColor, fontFamily: "Inter, sans-serif",
+                  fontWeight: activo ? 700 : 500, whiteSpace: "nowrap", letterSpacing: "0.03em" }}>
+                  {labelCorto[p]}
+                </span>
+              </div>
+              {i < pasos.length - 1 && (
+                <div style={{ width: 20, height: 2, background: i < idxActual ? SUCCESS : BORDER, marginBottom: 14, flexShrink: 0 }} />
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -667,8 +800,14 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
   const comp = todosCompradores[0];
   const docs = visita.visita_documentos || [];
   const fecha = new Date(visita.fecha_visita).toLocaleDateString("es-ES", {
-    day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
+    day: "2-digit", month: "short", year: "numeric",
   });
+  const hora = new Date(visita.fecha_visita).toLocaleTimeString("es-ES", {
+    hour: "2-digit", minute: "2-digit",
+  });
+  const fb = visita.feedback;
+  const nivelInteres = fb?.nivel_interes;
+  const NIVEL_COLOR = ["",DANGER,DANGER,GOLD,GOLD,SUCCESS];
 
   async function cambiarEstadoDoc(docId, nuevoEstado) {
     await supabase.from("visita_documentos").update({
@@ -678,7 +817,6 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
       ...(nuevoEstado === "deposito_recibido" ? { deposito_confirmado_at: new Date().toISOString() } : {}),
     }).eq("id", docId);
 
-    // Notificar al director/admin si es reserva u oferta
     const doc = docs.find(d => d.id === docId);
     if (doc && ["oferta", "reserva"].includes(doc.tipo) && nuevoEstado === "enviado") {
       await fetch("/api/visitas/notificar-admin", {
@@ -687,7 +825,6 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
         body: JSON.stringify({ visitaId: visita.id, docId, tipo: doc.tipo, propiedad }),
       });
     }
-
     onActualizado();
   }
 
@@ -711,283 +848,371 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
     onActualizado();
   }
 
+  const nombreCompradores = todosCompradores.length > 0
+    ? todosCompradores.map(c => `${c.nombre} ${c.apellidos || ""}`.trim()).join(" · ")
+    : "Sin comprador";
+
   return (
-    <div style={{ background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 3,
-      overflow: "hidden", marginBottom: 10 }}>
-      {/* Cabecera de la visita */}
-      <div style={{ padding: "14px 18px", display: "flex", alignItems: "center", gap: 14,
-        cursor: "pointer" }} onClick={() => setAbierta(o => !o)}>
-        <div style={{ flex: 1 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 14, fontWeight: 700, color: TEXT, fontFamily: "Inter, sans-serif" }}>
-              {todosCompradores.length > 0
-                ? todosCompradores.map(c => `${c.nombre} ${c.apellidos || ""}`.trim()).join(" · ")
-                : "Sin comprador"}
-            </span>
+    <div style={{ background: WHITE, border: `1.5px solid ${BORDER}`, borderRadius: 16,
+      overflow: "hidden", marginBottom: 12, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+
+      {/* Cabecera — tap para expandir */}
+      <div style={{ padding: "16px", cursor: "pointer", display: "flex", gap: 14, alignItems: "flex-start" }}
+        onClick={() => setAbierta(o => !o)}>
+
+        {/* Avatar */}
+        <Avatar nombre={comp?.nombre} apellidos={comp?.apellidos} size={48} />
+
+        {/* Info principal */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 16, fontWeight: 700, color: TEXT, fontFamily: "Inter, sans-serif",
+            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {nombreCompradores}
+          </div>
+          <div style={{ fontSize: 12, color: MUTED, fontFamily: "Inter, sans-serif", marginTop: 2 }}>
+            📅 {fecha} · {hora} · {visita.agente_login}
+          </div>
+
+          {/* Chips de estado rápido */}
+          <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap", alignItems: "center" }}>
+            {nivelInteres && (
+              <EstrellaInteres nivel={nivelInteres} />
+            )}
             {docs.length > 0 && (
-              <span style={{ fontSize: 10, background: `${GOLD}18`, color: GOLD, padding: "2px 8px",
-                borderRadius: 10, fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
-                {docs.length} doc{docs.length > 1 ? "s" : ""}
+              <span style={{ fontSize: 10, background: `${GOLD}18`, color: GOLD, padding: "3px 10px",
+                borderRadius: 20, fontFamily: "Inter, sans-serif", fontWeight: 700 }}>
+                📄 {docs.length} doc{docs.length > 1 ? "s" : ""}
               </span>
             )}
             {visita.resumen_ia && (
-              <span style={{ fontSize: 10, background: `${SUCCESS}15`, color: SUCCESS, padding: "2px 8px",
-                borderRadius: 10, fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
-                IA ✓
+              <span style={{ fontSize: 10, background: `${SUCCESS}15`, color: SUCCESS, padding: "3px 10px",
+                borderRadius: 20, fontFamily: "Inter, sans-serif", fontWeight: 700 }}>
+                🤖 IA ✓
+              </span>
+            )}
+            {todosCompradores.length > 1 && (
+              <span style={{ fontSize: 10, background: `${BLUE}12`, color: BLUE, padding: "3px 10px",
+                borderRadius: 20, fontFamily: "Inter, sans-serif", fontWeight: 700 }}>
+                👥 {todosCompradores.length} personas
               </span>
             )}
           </div>
-          <div style={{ fontSize: 11, color: MUTED, marginTop: 3, fontFamily: "Inter, sans-serif" }}>
-            {fecha} · {visita.agente_login}
-            {todosCompradores.filter(c => c.dni).map(c => ` · DNI: ${c.dni}`).join("")}
-            {todosCompradores.length > 1 && <span style={{ color: GOLD, marginLeft: 6, fontWeight: 600 }}>{todosCompradores.length} personas</span>}
-          </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          {puedeEditar && !showDoc && (
-            <button onClick={e => { e.stopPropagation(); setShowDoc(true); setAbierta(true); }}
-              style={{ padding: "6px 12px", border: `1px solid ${GOLD}`, background: "transparent",
-                color: GOLD, cursor: "pointer", borderRadius: 2, fontSize: 11, fontWeight: 600,
-                fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 4 }}>
-              <PlusIcon style={{ width: 13, height: 13 }} /> Documento
-            </button>
-          )}
+
+        {/* Flecha */}
+        <div style={{ color: MUTED, paddingTop: 4, flexShrink: 0 }}>
           {abierta
-            ? <ChevronUpIcon style={{ width: 16, height: 16, color: MUTED }} />
-            : <ChevronDownIcon style={{ width: 16, height: 16, color: MUTED }} />
+            ? <ChevronUpIcon style={{ width: 20, height: 20 }} />
+            : <ChevronDownIcon style={{ width: 20, height: 20 }} />
           }
         </div>
       </div>
 
       {/* Cuerpo expandido */}
       {abierta && (
-        <div style={{ borderTop: `1px solid ${BORDER}`, padding: "14px 18px",
-          background: CREAM }}>
+        <div style={{ borderTop: `1.5px solid ${BORDER}`, background: CREAM }}>
 
-          {/* Grabación + IA */}
-          {puedeEditar && (
-            <div style={{ marginBottom: 14, display: "flex", alignItems: "flex-start",
-              gap: 12, flexWrap: "wrap" }}>
-              <UploaderGrabacion visitaId={visita.id} onActualizado={onActualizado} />
-              {visita.grabacion_url && (
-                <a href={visita.grabacion_url} target="_blank" rel="noopener noreferrer"
-                  style={{ fontSize: 11, color: BLUE, fontFamily: "Inter, sans-serif" }}>
-                  Ver grabación
-                </a>
-              )}
+          {/* ── 📞 Comprador ── */}
+          <div style={{ padding: "16px", borderBottom: `1px solid ${BORDER}` }}>
+            <div style={{ fontSize: 11, color: GOLD, fontWeight: 800, letterSpacing: "0.1em",
+              marginBottom: 12, fontFamily: "Inter, sans-serif" }}>📞 COMPRADOR{todosCompradores.length > 1 ? "ES" : ""}</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {todosCompradores.map((c, i) => (
+                <div key={c.id || i} style={{ background: WHITE, borderRadius: 12, padding: "12px 14px",
+                  border: `1px solid ${BORDER}`, display: "flex", gap: 12, alignItems: "center" }}>
+                  <Avatar nombre={c.nombre} apellidos={c.apellidos} size={38} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: TEXT, fontFamily: "Inter, sans-serif" }}>
+                      {i === 0 && todosCompradores.length > 1 && (
+                        <span style={{ fontSize: 9, color: GOLD, fontWeight: 800, marginRight: 6,
+                          background: `${GOLD}15`, padding: "2px 6px", borderRadius: 6 }}>PRINCIPAL</span>
+                      )}
+                      {c.nombre} {c.apellidos || ""}
+                    </div>
+                    <div style={{ fontSize: 12, color: MUTED, marginTop: 3, display: "flex", gap: 12, flexWrap: "wrap" }}>
+                      {c.telefono && <span>📱 {c.telefono}</span>}
+                      {c.email && <span>✉ {c.email}</span>}
+                      {c.dni && <span>🪪 {c.dni}</span>}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-          )}
+          </div>
 
-          {/* Resumen IA */}
-          {visita.feedback && (() => {
-            const fb = visita.feedback;
-            const NIVEL_LABEL = ["","Sin interés","Interés bajo","Interés moderado","Interés alto","Muy interesado"];
-            const NIVEL_COLOR = ["",DANGER,DANGER,GOLD,GOLD,SUCCESS];
-            return (
-              <div style={{ marginBottom: 14, background: WHITE, border: `1px solid ${BORDER}`, borderLeft: `3px solid ${GOLD}`, padding: "10px 14px" }}>
-                <div style={{ fontSize: 9, color: GOLD, fontWeight: 700, letterSpacing: "0.12em", marginBottom: 8, textTransform: "uppercase" }}>✦ Análisis IA de la visita</div>
-                <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-                  {fb.nivel_interes && (
-                    <div>
-                      <div style={{ fontSize: 9, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 3 }}>Interés</div>
-                      <span style={{ fontSize: 12, fontWeight: 700, color: NIVEL_COLOR[fb.nivel_interes] }}>
-                        {"★".repeat(fb.nivel_interes)}{"☆".repeat(5 - fb.nivel_interes)} {NIVEL_LABEL[fb.nivel_interes]}
+          {/* ── 🤖 Análisis IA ── */}
+          {fb && (
+            <div style={{ padding: "16px", borderBottom: `1px solid ${BORDER}` }}>
+              <div style={{ fontSize: 11, color: GOLD, fontWeight: 800, letterSpacing: "0.1em",
+                marginBottom: 12, fontFamily: "Inter, sans-serif" }}>🤖 ANÁLISIS IA</div>
+              <div style={{ background: WHITE, borderRadius: 12, padding: "14px",
+                border: `1px solid ${BORDER}`, borderLeft: `4px solid ${GOLD}` }}>
+                {fb.nivel_interes && (
+                  <div style={{ marginBottom: 12 }}>
+                    <div style={{ fontSize: 10, color: MUTED, fontWeight: 700, letterSpacing: "0.08em",
+                      marginBottom: 6, fontFamily: "Inter, sans-serif" }}>NIVEL DE INTERÉS</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <EstrellaInteres nivel={fb.nivel_interes} />
+                      <span style={{ fontSize: 13, fontWeight: 700, color: NIVEL_COLOR[fb.nivel_interes],
+                        fontFamily: "Inter, sans-serif" }}>
+                        {["","Sin interés","Interés bajo","Interés moderado","Interés alto","Muy interesado"][fb.nivel_interes]}
                       </span>
                     </div>
-                  )}
+                  </div>
+                )}
+                <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
                   {fb.valoracion_precio && (
-                    <div>
-                      <div style={{ fontSize: 9, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 3 }}>Precio</div>
-                      <span style={{ fontSize: 11, color: fb.valoracion_precio === "Precio aceptable" ? SUCCESS : fb.valoracion_precio === "Precio muy fuera de mercado" ? DANGER : GOLD, fontWeight: 600 }}>
+                    <div style={{ flex: 1, minWidth: 120 }}>
+                      <div style={{ fontSize: 10, color: MUTED, fontWeight: 700, letterSpacing: "0.08em",
+                        marginBottom: 4, fontFamily: "Inter, sans-serif" }}>PRECIO</div>
+                      <span style={{ fontSize: 12, color: fb.valoracion_precio === "Precio aceptable" ? SUCCESS : fb.valoracion_precio === "Precio muy fuera de mercado" ? DANGER : GOLD, fontWeight: 600 }}>
                         {fb.valoracion_precio}
                       </span>
                     </div>
                   )}
                   {fb.siguiente_paso && fb.siguiente_paso !== "Sin acción" && (
-                    <div>
-                      <div style={{ fontSize: 9, color: MUTED, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 3 }}>Siguiente paso</div>
-                      <span style={{ fontSize: 11, color: BLUE, fontWeight: 600 }}>{fb.siguiente_paso}</span>
+                    <div style={{ flex: 1, minWidth: 140 }}>
+                      <div style={{ fontSize: 10, color: MUTED, fontWeight: 700, letterSpacing: "0.08em",
+                        marginBottom: 4, fontFamily: "Inter, sans-serif" }}>SIGUIENTE PASO</div>
+                      <span style={{ fontSize: 12, color: BLUE, fontWeight: 600 }}>{fb.siguiente_paso}</span>
                     </div>
                   )}
                 </div>
                 {fb.objeciones?.length > 0 && !fb.objeciones.includes("Sin objeciones") && (
-                  <div style={{ marginTop: 8, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                  <div style={{ marginTop: 10, display: "flex", gap: 6, flexWrap: "wrap" }}>
                     {fb.objeciones.map(o => (
-                      <span key={o} style={{ fontSize: 10, color: DANGER, background: DANGER + "12", padding: "2px 8px", border: `1px solid ${DANGER}22` }}>{o}</span>
+                      <span key={o} style={{ fontSize: 11, color: DANGER, background: `${DANGER}10`,
+                        padding: "4px 10px", borderRadius: 20, border: `1px solid ${DANGER}20`,
+                        fontFamily: "Inter, sans-serif" }}>⚠ {o}</span>
                     ))}
                   </div>
                 )}
               </div>
-            );
-          })()}
+            </div>
+          )}
 
+          {/* Resumen IA */}
           {visita.resumen_ia && (
-            <div style={{ marginBottom: 14, padding: "10px 14px", background: WHITE,
-              border: `1px solid ${BORDER}`, borderLeft: `3px solid ${SUCCESS}`, borderRadius: 2 }}>
-              <div style={{ fontSize: 10, color: SUCCESS, fontWeight: 700, letterSpacing: "0.1em",
-                marginBottom: 6, fontFamily: "Inter, sans-serif" }}>RESUMEN IA</div>
-              <div style={{ fontSize: 12, color: TEXT, lineHeight: 1.6, fontFamily: "Inter, sans-serif" }}>
-                {visita.resumen_ia}
+            <div style={{ padding: "0 16px 16px" }}>
+              <div style={{ padding: "14px", background: WHITE,
+                border: `1px solid ${BORDER}`, borderLeft: `4px solid ${SUCCESS}`, borderRadius: 12 }}>
+                <div style={{ fontSize: 10, color: SUCCESS, fontWeight: 800, letterSpacing: "0.08em",
+                  marginBottom: 8, fontFamily: "Inter, sans-serif" }}>📝 RESUMEN IA</div>
+                <div style={{ fontSize: 13, color: TEXT, lineHeight: 1.6, fontFamily: "Inter, sans-serif" }}>
+                  {visita.resumen_ia}
+                </div>
               </div>
             </div>
           )}
 
           {/* Transcripción */}
           {visita.transcripcion && (
-            <details style={{ marginBottom: 14 }}>
-              <summary style={{ fontSize: 11, color: MUTED, cursor: "pointer",
-                fontFamily: "Inter, sans-serif", padding: "4px 0" }}>
-                Ver transcripción completa
-              </summary>
-              <div style={{ marginTop: 8, padding: "10px 14px", background: WHITE,
-                border: `1px solid ${BORDER}`, borderRadius: 2, fontSize: 11, color: TEXT,
-                lineHeight: 1.7, fontFamily: "Inter, sans-serif", whiteSpace: "pre-wrap" }}>
-                {visita.transcripcion}
-              </div>
-            </details>
-          )}
-
-          {/* Notas */}
-          {visita.notas && (
-            <div style={{ marginBottom: 14, fontSize: 12, color: TEXT, fontStyle: "italic",
-              fontFamily: "Inter, sans-serif" }}>
-              {visita.notas}
+            <div style={{ padding: "0 16px 16px" }}>
+              <details>
+                <summary style={{ fontSize: 13, color: MUTED, cursor: "pointer",
+                  fontFamily: "Inter, sans-serif", padding: "8px 14px", background: WHITE,
+                  borderRadius: 10, border: `1px solid ${BORDER}`, listStyle: "none",
+                  display: "flex", alignItems: "center", gap: 8 }}>
+                  🎙 Ver transcripción completa
+                </summary>
+                <div style={{ marginTop: 8, padding: "14px", background: WHITE,
+                  border: `1px solid ${BORDER}`, borderRadius: 12, fontSize: 12, color: TEXT,
+                  lineHeight: 1.7, fontFamily: "Inter, sans-serif", whiteSpace: "pre-wrap" }}>
+                  {visita.transcripcion}
+                </div>
+              </details>
             </div>
           )}
 
-          {/* Documentos */}
-          {docs.length > 0 && (
-            <div style={{ marginBottom: 14 }}>
-              <div style={{ fontSize: 10, color: MUTED, fontWeight: 700, letterSpacing: "0.1em",
-                marginBottom: 8, fontFamily: "Inter, sans-serif", textTransform: "uppercase" }}>
-                Documentos
+          {/* ── 📝 Notas ── */}
+          {visita.notas && (
+            <div style={{ padding: "0 16px 16px" }}>
+              <div style={{ fontSize: 11, color: GOLD, fontWeight: 800, letterSpacing: "0.1em",
+                marginBottom: 8, fontFamily: "Inter, sans-serif" }}>📝 NOTAS</div>
+              <div style={{ padding: "12px 14px", background: WHITE, border: `1px solid ${BORDER}`,
+                borderRadius: 12, fontSize: 13, color: TEXT, fontStyle: "italic",
+                fontFamily: "Inter, sans-serif", lineHeight: 1.6 }}>
+                {visita.notas}
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {docs.map(doc => {
-                  const td = TIPO_DOC[doc.tipo] || { label: doc.tipo, icon: "📄" };
-                  const esOfResv = ["oferta","reserva","contraoferta"].includes(doc.tipo);
+            </div>
+          )}
 
-                  async function verDocumento() {
-                    window.open(`/api/visitas/documento?id=${doc.id}`, "_blank");
-                  }
+          {/* ── 🎙 Subir grabación ── */}
+          {puedeEditar && (
+            <div style={{ padding: "0 16px 16px" }}>
+              <UploaderGrabacion visitaId={visita.id} onActualizado={onActualizado} />
+              {visita.grabacion_url && (
+                <a href={visita.grabacion_url} target="_blank" rel="noopener noreferrer"
+                  style={{ display: "block", marginTop: 8, fontSize: 13, color: BLUE,
+                    fontFamily: "Inter, sans-serif", textAlign: "center" }}>
+                  ▶ Ver grabación existente
+                </a>
+              )}
+            </div>
+          )}
 
-                  async function enviarFirma(destinatario) {
-                    const res = await fetch("/api/visitas/enviar-firma", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ docId: doc.id, destinatario }),
-                    });
-                    const data = await res.json();
-                    if (data.ok) {
-                      alert(`✅ Link de firma enviado por WhatsApp al ${destinatario === "vendedor" ? "propietario" : "comprador"}.`);
-                      onActualizado();
-                    } else {
-                      alert(`Error: ${data.error}`);
+          {/* ── 📄 Documentos ── */}
+          {(docs.length > 0 || (puedeEditar && !showDoc)) && (
+            <div style={{ padding: "0 16px 16px" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                <div style={{ fontSize: 11, color: GOLD, fontWeight: 800, letterSpacing: "0.1em",
+                  fontFamily: "Inter, sans-serif" }}>📄 DOCUMENTOS</div>
+                {puedeEditar && !showDoc && (
+                  <button onClick={() => setShowDoc(true)} style={{
+                    padding: "8px 14px", background: DARK, border: "none", color: WHITE,
+                    cursor: "pointer", borderRadius: 20, fontSize: 12, fontWeight: 700,
+                    fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 6,
+                  }}>
+                    <PlusIcon style={{ width: 14, height: 14 }} /> Nuevo
+                  </button>
+                )}
+              </div>
+
+              {docs.length > 0 && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {docs.map(doc => {
+                    const td = TIPO_DOC[doc.tipo] || { label: doc.tipo, icon: "📄" };
+                    const esOfResv = ["oferta","reserva","contraoferta"].includes(doc.tipo);
+
+                    async function verDocumento() {
+                      window.open(`/api/visitas/documento?id=${doc.id}`, "_blank");
                     }
-                  }
 
-                  return (
-                    <div key={doc.id} style={{ background: WHITE, border: `1px solid ${BORDER}`,
-                      borderRadius: 2, overflow: "hidden" }}>
-                      {/* Cabecera del documento */}
-                      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center",
-                        justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                          <span style={{ fontSize: 20 }}>{td.icon}</span>
-                          <div>
-                            <div style={{ fontSize: 13, fontWeight: 600, color: TEXT, fontFamily: "Inter, sans-serif" }}>{td.label}</div>
-                            <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 3 }}>
-                              <BadgeEstado estado={doc.estado} />
+                    async function enviarFirma(destinatario) {
+                      const res = await fetch("/api/visitas/enviar-firma", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ docId: doc.id, destinatario }),
+                      });
+                      const data = await res.json();
+                      if (data.ok) {
+                        alert(`✅ Link de firma enviado por WhatsApp al ${destinatario === "vendedor" ? "propietario" : "comprador"}.`);
+                        onActualizado();
+                      } else {
+                        alert(`Error: ${data.error}`);
+                      }
+                    }
+
+                    return (
+                      <div key={doc.id} style={{ background: WHITE, border: `1.5px solid ${BORDER}`,
+                        borderRadius: 14, overflow: "hidden" }}>
+                        {/* Cabecera del documento */}
+                        <div style={{ padding: "14px 16px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
+                            <span style={{ fontSize: 28 }}>{td.icon}</span>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: 14, fontWeight: 700, color: TEXT,
+                                fontFamily: "Inter, sans-serif" }}>{td.label}</div>
                               {doc.contenido?.precio_oferta && (
-                                <span style={{ fontSize: 11, color: GOLD, fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
-                                  {Number(doc.contenido.precio_oferta).toLocaleString("es-ES")} €
+                                <div style={{ fontSize: 13, color: GOLD, fontFamily: "Inter, sans-serif",
+                                  fontWeight: 700, marginTop: 2 }}>
+                                  💰 {Number(doc.contenido.precio_oferta).toLocaleString("es-ES")} €
+                                </div>
+                              )}
+                            </div>
+                            <BadgeEstado estado={doc.estado} size="lg" />
+                          </div>
+
+                          {/* Pipeline visual */}
+                          {esOfResv && <PipelineDoc estado={doc.estado} />}
+
+                          {/* Datos bancarios */}
+                          {esOfResv && doc.deposito_tipo === "transferencia" && doc.estado === "enviado" && (
+                            <div style={{ marginTop: 10, padding: "10px 12px", background: CREAM,
+                              borderRadius: 10, fontSize: 12, color: TEXT, fontFamily: "Inter, sans-serif",
+                              lineHeight: 1.6 }}>
+                              💳 <strong>ES30 0081 0268 2700 0248 1851</strong><br />
+                              Concepto: {comp?.nombre} {comp?.apellidos}
+                            </div>
+                          )}
+
+                          {/* Condiciones particulares */}
+                          {doc.condiciones_particulares && (
+                            <div style={{ marginTop: 10, padding: "10px 12px", background: `${GOLD}08`,
+                              borderRadius: 10, border: `1px solid ${GOLD}22`, fontSize: 12,
+                              color: TEXT, fontFamily: "Inter, sans-serif", fontStyle: "italic" }}>
+                              📋 {doc.condiciones_particulares}
+                            </div>
+                          )}
+
+                          {/* Estado de firmas */}
+                          {(doc.firmado_comprador_at || doc.firmado_vendedor_at) && (
+                            <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 4 }}>
+                              {doc.firmado_comprador_at && (
+                                <span style={{ fontSize: 12, color: SUCCESS, fontFamily: "Inter, sans-serif" }}>
+                                  ✓ Comprador firmó {new Date(doc.firmado_comprador_at).toLocaleDateString("es-ES")}
+                                </span>
+                              )}
+                              {doc.firmado_vendedor_at && (
+                                <span style={{ fontSize: 12, color: SUCCESS, fontFamily: "Inter, sans-serif" }}>
+                                  ✓ Propietario firmó {new Date(doc.firmado_vendedor_at).toLocaleDateString("es-ES")}
                                 </span>
                               )}
                             </div>
-                          </div>
+                          )}
                         </div>
-                        {/* Acciones */}
-                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
-                          {/* Ver PDF */}
-                          <button onClick={verDocumento}
-                            style={{ padding: "6px 12px", border: `1px solid ${BORDER}`, background: WHITE,
-                              color: TEXT, cursor: "pointer", borderRadius: 2, fontSize: 11,
-                              fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 4 }}>
-                            <DocumentTextIcon style={{ width: 13, height: 13 }} /> Ver documento
-                          </button>
 
-                          {/* Enviar a firma — comprador */}
-                          {puedeEditar && doc.estado === "borrador" && (
-                            <button onClick={() => enviarFirma("comprador")}
-                              style={{ padding: "6px 12px", background: DARK, border: "none",
-                                color: WHITE, cursor: "pointer", borderRadius: 2, fontSize: 11,
-                                fontWeight: 600, fontFamily: "Inter, sans-serif",
-                                display: "flex", alignItems: "center", gap: 4 }}>
-                              <PaperAirplaneIcon style={{ width: 13, height: 13 }} />
-                              Enviar a comprador
+                        {/* Acciones del documento */}
+                        {puedeEditar && (
+                          <div style={{ padding: "12px 16px", borderTop: `1px solid ${BORDER}`,
+                            background: CREAM, display: "flex", flexDirection: "column", gap: 8 }}>
+                            <button onClick={verDocumento} style={{
+                              padding: "12px 16px", border: `1.5px solid ${BORDER}`, background: WHITE,
+                              color: TEXT, cursor: "pointer", borderRadius: 10, fontSize: 13, fontWeight: 600,
+                              fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center",
+                              justifyContent: "center", gap: 8,
+                            }}>
+                              <DocumentTextIcon style={{ width: 16, height: 16 }} /> Ver documento PDF
                             </button>
-                          )}
 
-                          {/* Enviar a firma — vendedor (solo si comprador ya firmó y es oferta/reserva) */}
-                          {puedeEditar && esOfResv && doc.estado === "firmado_comprador" && (
-                            <button onClick={() => enviarFirma("vendedor")}
-                              style={{ padding: "6px 12px", background: SUCCESS, border: "none",
-                                color: WHITE, cursor: "pointer", borderRadius: 2, fontSize: 11,
-                                fontWeight: 600, fontFamily: "Inter, sans-serif",
-                                display: "flex", alignItems: "center", gap: 4 }}>
-                              <PaperAirplaneIcon style={{ width: 13, height: 13 }} />
-                              Enviar a propietario
-                            </button>
-                          )}
+                            {doc.estado === "borrador" && (
+                              <button onClick={() => enviarFirma("comprador")} style={{
+                                padding: "14px 16px", background: DARK, border: "none", color: WHITE,
+                                cursor: "pointer", borderRadius: 10, fontSize: 14, fontWeight: 700,
+                                fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center",
+                                justifyContent: "center", gap: 8,
+                              }}>
+                                <PaperAirplaneIcon style={{ width: 18, height: 18 }} />
+                                Enviar firma → Comprador
+                              </button>
+                            )}
 
-                          {/* Contraoferta */}
-                          {puedeEditar && esOfResv && (
-                            <button onClick={() => duplicarComoContraoferta(doc)}
-                              style={{ padding: "6px 10px", border: `1px solid ${BORDER}`,
+                            {esOfResv && doc.estado === "firmado_comprador" && (
+                              <button onClick={() => enviarFirma("vendedor")} style={{
+                                padding: "14px 16px", background: SUCCESS, border: "none", color: WHITE,
+                                cursor: "pointer", borderRadius: 10, fontSize: 14, fontWeight: 700,
+                                fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center",
+                                justifyContent: "center", gap: 8,
+                              }}>
+                                <PaperAirplaneIcon style={{ width: 18, height: 18 }} />
+                                Enviar firma → Propietario
+                              </button>
+                            )}
+
+                            {esOfResv && (
+                              <button onClick={() => duplicarComoContraoferta(doc)} style={{
+                                padding: "12px 16px", border: `1.5px solid ${BORDER}`,
                                 background: "transparent", color: MUTED, cursor: "pointer",
-                                borderRadius: 2, fontSize: 10, fontFamily: "Inter, sans-serif",
-                                display: "flex", alignItems: "center", gap: 4 }}>
-                              <DocumentDuplicateIcon style={{ width: 12, height: 12 }} /> Contraoferta
-                            </button>
-                          )}
-                        </div>
+                                borderRadius: 10, fontSize: 13, fontFamily: "Inter, sans-serif",
+                                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                              }}>
+                                <DocumentDuplicateIcon style={{ width: 15, height: 15 }} /> Duplicar como contraoferta
+                              </button>
+                            )}
+                          </div>
+                        )}
                       </div>
+                    );
+                  })}
+                </div>
+              )}
 
-                      {/* Datos bancarios */}
-                      {esOfResv && doc.deposito_tipo === "transferencia" && doc.estado === "enviado" && (
-                        <div style={{ padding: "8px 16px", background: CREAM2,
-                          borderTop: `1px solid ${BORDER}`, fontSize: 11, color: TEXT,
-                          fontFamily: "Inter, sans-serif" }}>
-                          💳 Datos depósito: <strong>ES30 0081 0268 2700 0248 1851</strong> · Concepto: {comp?.nombre} {comp?.apellidos}
-                        </div>
-                      )}
-
-                      {/* Condiciones particulares */}
-                      {doc.condiciones_particulares && (
-                        <div style={{ padding: "8px 16px", background: `${GOLD}08`,
-                          borderTop: `1px solid ${GOLD}22`, fontSize: 11, color: TEXT,
-                          fontFamily: "Inter, sans-serif", fontStyle: "italic" }}>
-                          📋 Condición: {doc.condiciones_particulares}
-                        </div>
-                      )}
-
-                      {/* Estado de firmas */}
-                      {(doc.firmado_comprador_at || doc.firmado_vendedor_at) && (
-                        <div style={{ padding: "8px 16px", background: `${SUCCESS}08`,
-                          borderTop: `1px solid ${SUCCESS}22`, display: "flex", gap: 16,
-                          fontSize: 11, fontFamily: "Inter, sans-serif" }}>
-                          {doc.firmado_comprador_at && (
-                            <span style={{ color: SUCCESS }}>✓ Comprador firmó {new Date(doc.firmado_comprador_at).toLocaleDateString("es-ES")}</span>
-                          )}
-                          {doc.firmado_vendedor_at && (
-                            <span style={{ color: SUCCESS }}>✓ Propietario firmó {new Date(doc.firmado_vendedor_at).toLocaleDateString("es-ES")}</span>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+              {docs.length === 0 && !showDoc && (
+                <div style={{ textAlign: "center", padding: "20px", color: MUTED,
+                  fontFamily: "Inter, sans-serif", fontSize: 13 }}>
+                  Sin documentos todavía
+                </div>
+              )}
             </div>
           )}
 
@@ -1001,13 +1226,16 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
             </Modal>
           )}
 
-          {/* Acciones — solo administrador puede eliminar */}
+          {/* Eliminar visita — solo admin */}
           {currentUser?.role?.toLowerCase() === "administrador" && (
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
-              <button onClick={eliminarVisita} style={{ padding: "5px 12px", border: "1px solid #A23A3A33",
-                background: "transparent", color: DANGER, cursor: "pointer", borderRadius: 2,
-                fontSize: 11, fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 4 }}>
-                <TrashIcon style={{ width: 12, height: 12 }} /> Eliminar visita
+            <div style={{ padding: "0 16px 16px" }}>
+              <button onClick={eliminarVisita} style={{
+                padding: "12px 16px", border: `1.5px solid ${DANGER}30`,
+                background: `${DANGER}06`, color: DANGER, cursor: "pointer", borderRadius: 10,
+                fontSize: 13, fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center",
+                justifyContent: "center", gap: 8, width: "100%",
+              }}>
+                <TrashIcon style={{ width: 15, height: 15 }} /> Eliminar visita
               </button>
             </div>
           )}
@@ -1018,6 +1246,90 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
 }
 
 // ── Grupo de propiedad ────────────────────────────────────────────────────────
+// ── Agrupador de visitas por día dentro de una propiedad ─────────────────────
+function GrupoDia({ fecha, visitas, propiedadId, propiedadNombre, currentUser, onActualizado, informesPendientes }) {
+  const [informe, setInforme] = useState(null);
+  const [generando, setGenerando] = useState(false);
+  const agente = { nombre: currentUser?.nombre, user_login: currentUser?.user_login };
+
+  const informePendiente = informesPendientes?.find(
+    i => i.propiedad_id === propiedadId && i.fecha_referencia === fecha && i.estado !== "enviado"
+  ) || informesPendientes?.find(
+    i => i.propiedad_id === propiedadId && i.estado !== "enviado"
+  );
+
+  async function generarInformeDia() {
+    setGenerando(true);
+    const res = await fetch("/api/visitas/generar-informe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ propiedadId, agente: currentUser.user_login, fecha }),
+    });
+    const data = await res.json();
+    if (data.informeId) {
+      const { data: inf } = await supabase.from("visita_informes").select("*").eq("id", data.informeId).single();
+      setInforme(inf);
+    }
+    setGenerando(false);
+  }
+
+  const fechaDisplay = new Date(fecha + "T12:00:00").toLocaleDateString("es-ES", {
+    weekday: "long", day: "numeric", month: "long"
+  });
+  const esHoy = fecha === new Date().toISOString().slice(0, 10);
+  const esAyer = fecha === new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  const etiquetaDia = esHoy ? "Hoy" : esAyer ? "Ayer" : fechaDisplay;
+
+  return (
+    <div style={{ marginBottom: 20 }}>
+      {/* Header del día */}
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
+        <div style={{ flex: 1, height: 1, background: BORDER }} />
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+          <span style={{ fontSize: 12, fontWeight: 700, color: esHoy ? GOLD : MUTED,
+            fontFamily: "Inter, sans-serif", letterSpacing: "0.02em", textTransform: "capitalize" }}>
+            📅 {etiquetaDia}
+          </span>
+          <span style={{ fontSize: 11, background: `${GOLD}18`, color: GOLD, padding: "3px 10px",
+            borderRadius: 20, fontWeight: 700, fontFamily: "Inter, sans-serif" }}>
+            {visitas.length} visita{visitas.length !== 1 ? "s" : ""}
+          </span>
+        </div>
+        <div style={{ flex: 1, height: 1, background: BORDER }} />
+        {/* Botón informe del día */}
+        <button
+          onClick={informePendiente ? async () => {
+            const { data: inf } = await supabase.from("visita_informes").select("*").eq("id", informePendiente.id).single();
+            setInforme(inf);
+          } : generarInformeDia}
+          disabled={generando}
+          title={`Informe consolidado de todas las visitas del ${etiquetaDia}`}
+          style={{ padding: "6px 12px", border: `1.5px solid ${SUCCESS}`, background: "transparent",
+            color: SUCCESS, cursor: "pointer", borderRadius: 8, fontSize: 11, fontWeight: 700,
+            fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 5,
+            whiteSpace: "nowrap", opacity: generando ? 0.5 : 1 }}>
+          <DocumentTextIcon style={{ width: 13, height: 13 }} />
+          {generando ? "..." : informePendiente ? "Ver informe" : "Informe del día"}
+        </button>
+      </div>
+
+      {/* Visitas del día */}
+      {visitas.map(v => (
+        <TarjetaVisita key={v.id} visita={v} propiedad={{ id: propiedadId, nombre: propiedadNombre }}
+          agente={agente} currentUser={currentUser} onActualizado={onActualizado} />
+      ))}
+
+      {/* Modal editor informe */}
+      {informe && (
+        <Modal title={`Informe al propietario · ${etiquetaDia}`} onClose={() => setInforme(null)} width={640}>
+          <EditorInforme informe={informe} propiedadNombre={propiedadNombre}
+            onGuardado={onActualizado} onClose={() => setInforme(null)} />
+        </Modal>
+      )}
+    </div>
+  );
+}
+
 function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, onActualizado, informesPendientes }) {
   const [abierto, setAbierto] = useState(false);
   const [nuevaVisita, setNuevaVisita] = useState(false);
@@ -1025,7 +1337,6 @@ function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, on
   const [notasNueva, setNotasNueva] = useState("");
   const [horaVisita, setHoraVisita] = useState(new Date().toISOString().slice(0, 16));
   const [guardando, setGuardando] = useState(false);
-  const [informe, setInforme] = useState(null);
   const isAdmin = ["director", "administrador"].includes(currentUser?.role?.toLowerCase());
   const esPropio = visitas.some(v => v.agente_login === currentUser?.user_login);
   const puedeEditar = isAdmin || esPropio;
@@ -1033,6 +1344,16 @@ function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, on
   const informePendiente = informesPendientes?.find(i => i.propiedad_id === propiedadId && i.estado !== "enviado");
   const totalVisitas = visitas.length;
   const totalDocs = visitas.reduce((acc, v) => acc + (v.visita_documentos?.length || 0), 0);
+
+  // Agrupar visitas por día (YYYY-MM-DD)
+  const visitasPorDia = {};
+  visitas.forEach(v => {
+    const dia = new Date(v.fecha_visita).toISOString().slice(0, 10);
+    if (!visitasPorDia[dia]) visitasPorDia[dia] = [];
+    visitasPorDia[dia].push(v);
+  });
+  // Ordenar días desc (más reciente primero)
+  const diasOrdenados = Object.keys(visitasPorDia).sort((a, b) => b.localeCompare(a));
 
   async function crearVisita() {
     if (!compradorNueva) return;
@@ -1051,7 +1372,6 @@ function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, on
     setNotasNueva("");
     onActualizado();
 
-    // Programar envío de link cualificación a las 3 horas (via API)
     await fetch("/api/visitas/programar-cualificacion", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -1063,87 +1383,91 @@ function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, on
     });
   }
 
-  async function generarInformeIA() {
-    const res = await fetch("/api/visitas/generar-informe", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ propiedadId, agente: currentUser.user_login, fecha: new Date().toISOString().slice(0, 10) }),
-    });
-    const data = await res.json();
-    if (data.informeId) {
-      const { data: inf } = await supabase.from("visita_informes").select("*").eq("id", data.informeId).single();
-      setInforme(inf);
-    }
-  }
-
-  const agente = { nombre: currentUser?.nombre, user_login: currentUser?.user_login };
-
   return (
-    <div style={{ background: WHITE, border: `1px solid ${BORDER}`, borderRadius: 3, marginBottom: 16 }}>
+    <div style={{ background: WHITE, border: `1.5px solid ${BORDER}`, borderRadius: 16,
+      marginBottom: 14, overflow: "hidden", boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
+
       {/* Header del grupo */}
-      <div style={{ padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between",
-        cursor: "pointer", borderBottom: abierto ? `1px solid ${BORDER}` : "none" }}
+      <div style={{ padding: "16px 18px", cursor: "pointer",
+        borderBottom: abierto ? `1.5px solid ${BORDER}` : "none" }}
         onClick={() => setAbierto(o => !o)}>
-        <div style={{ flex: 1 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 14, fontWeight: 700, color: TEXT, fontFamily: "'Playfair Display', Georgia, serif" }}>
-              {propiedadNombre}
-            </span>
-            <span style={{ fontSize: 10, background: `${GOLD}18`, color: GOLD, padding: "2px 8px",
-              borderRadius: 10, fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
-              {totalVisitas} visita{totalVisitas !== 1 ? "s" : ""}
-            </span>
-            {totalDocs > 0 && (
-              <span style={{ fontSize: 10, background: `${BLUE}15`, color: BLUE, padding: "2px 8px",
-                borderRadius: 10, fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
-                {totalDocs} docs
-              </span>
-            )}
-            {informePendiente && (
-              <span style={{ fontSize: 10, background: "#9C6E1B18", color: "#9C6E1B", padding: "2px 8px",
-                borderRadius: 10, fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
-                ⚠ Informe pendiente
-              </span>
-            )}
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
+          {/* Ícono propiedad */}
+          <div style={{ width: 46, height: 46, borderRadius: 12, background: `${DARK}0a`,
+            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>
+            🏠
           </div>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          {puedeEditar && abierto && (
-            <button onClick={e => { e.stopPropagation(); setNuevaVisita(true); }}
-              style={{ padding: "6px 14px", background: DARK, border: "none", color: WHITE,
-                cursor: "pointer", borderRadius: 2, fontSize: 11, fontWeight: 600,
-                fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 6 }}>
-              <PlusIcon style={{ width: 13, height: 13 }} /> Nueva visita
-            </button>
-          )}
-          {puedeEditar && abierto && totalVisitas > 0 && (
-            <button onClick={async e => { e.stopPropagation(); await generarInformeIA(); }}
-              style={{ padding: "6px 14px", border: `1px solid ${SUCCESS}`, background: "transparent",
-                color: SUCCESS, cursor: "pointer", borderRadius: 2, fontSize: 11, fontWeight: 600,
-                fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 6 }}>
-              <DocumentTextIcon style={{ width: 13, height: 13 }} />
-              {informePendiente ? "Editar informe" : "Generar informe"}
-            </button>
-          )}
-          {abierto
-            ? <ChevronUpIcon style={{ width: 16, height: 16, color: MUTED }} />
-            : <ChevronDownIcon style={{ width: 16, height: 16, color: MUTED }} />
-          }
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: TEXT,
+              fontFamily: "'Playfair Display', Georgia, serif",
+              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {propiedadNombre}
+            </div>
+            {/* Chips */}
+            <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
+              <span style={{ fontSize: 11, background: `${GOLD}18`, color: GOLD, padding: "4px 12px",
+                borderRadius: 20, fontFamily: "Inter, sans-serif", fontWeight: 700 }}>
+                {totalVisitas} visita{totalVisitas !== 1 ? "s" : ""}
+              </span>
+              {diasOrdenados.length > 1 && (
+                <span style={{ fontSize: 11, background: `${DARK}0d`, color: DARK, padding: "4px 12px",
+                  borderRadius: 20, fontFamily: "Inter, sans-serif", fontWeight: 700 }}>
+                  {diasOrdenados.length} días
+                </span>
+              )}
+              {totalDocs > 0 && (
+                <span style={{ fontSize: 11, background: `${BLUE}12`, color: BLUE, padding: "4px 12px",
+                  borderRadius: 20, fontFamily: "Inter, sans-serif", fontWeight: 700 }}>
+                  {totalDocs} docs
+                </span>
+              )}
+              {informePendiente && (
+                <span style={{ fontSize: 11, background: "#9C6E1B18", color: "#9C6E1B", padding: "4px 12px",
+                  borderRadius: 20, fontFamily: "Inter, sans-serif", fontWeight: 700 }}>
+                  ⚠ Informe pendiente
+                </span>
+              )}
+            </div>
+          </div>
+          <div style={{ color: MUTED, flexShrink: 0, paddingTop: 2 }}>
+            {abierto ? <ChevronUpIcon style={{ width: 20, height: 20 }} /> : <ChevronDownIcon style={{ width: 20, height: 20 }} />}
+          </div>
         </div>
       </div>
 
-      {/* Lista de visitas */}
+      {/* Contenido expandido */}
       {abierto && (
-        <div style={{ padding: "14px 20px" }}>
-          {visitas.map(v => (
-            <TarjetaVisita key={v.id} visita={v} propiedad={{ id: propiedadId, nombre: propiedadNombre }}
-              agente={agente} currentUser={currentUser} onActualizado={onActualizado} />
+        <div style={{ padding: "14px 16px", background: CREAM }}>
+          {/* Botón Nueva visita */}
+          {puedeEditar && (
+            <button onClick={() => setNuevaVisita(true)} style={{
+              width: "100%", padding: "12px", background: DARK, border: "none", color: WHITE,
+              cursor: "pointer", borderRadius: 10, fontSize: 13, fontWeight: 700,
+              fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center",
+              justifyContent: "center", gap: 8, marginBottom: 16,
+            }}>
+              <PlusIcon style={{ width: 16, height: 16 }} /> Nueva visita en esta propiedad
+            </button>
+          )}
+
+          {/* Visitas agrupadas por día */}
+          {diasOrdenados.map(dia => (
+            <GrupoDia
+              key={dia}
+              fecha={dia}
+              visitas={visitasPorDia[dia]}
+              propiedadId={propiedadId}
+              propiedadNombre={propiedadNombre}
+              currentUser={currentUser}
+              onActualizado={onActualizado}
+              informesPendientes={informesPendientes}
+            />
           ))}
 
           {/* Modal nueva visita */}
           {nuevaVisita && (
             <Modal title="Registrar visita" onClose={() => setNuevaVisita(false)} width={520}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                 <div>
                   <L c="Comprador" req />
                   <SelectorComprador value={compradorNueva} onChange={setCompradorNueva} />
@@ -1159,27 +1483,21 @@ function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, on
                     style={{ ...iSt, resize: "vertical" }}
                     placeholder="Impresión del comprador, interés mostrado, preguntas relevantes..." />
                 </div>
-                <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", paddingTop: 8,
+                <div style={{ display: "flex", flexDirection: "column", gap: 10, paddingTop: 8,
                   borderTop: `1px solid ${BORDER}` }}>
-                  <button onClick={() => setNuevaVisita(false)} style={{ padding: "9px 18px",
-                    border: `1px solid ${BORDER}`, background: "transparent", color: MUTED,
-                    cursor: "pointer", borderRadius: 2, fontFamily: "Inter, sans-serif" }}>Cancelar</button>
                   <button onClick={crearVisita} disabled={!compradorNueva || guardando}
-                    style={{ padding: "9px 22px", background: DARK, border: "none", color: WHITE,
-                      cursor: "pointer", borderRadius: 2, fontWeight: 600, fontFamily: "Inter, sans-serif",
-                      opacity: !compradorNueva ? 0.5 : 1 }}>
-                    {guardando ? "Guardando..." : "Registrar visita"}
+                    style={{ padding: "16px", background: DARK, border: "none", color: WHITE,
+                      cursor: "pointer", borderRadius: 12, fontWeight: 700, fontFamily: "Inter, sans-serif",
+                      fontSize: 15, opacity: !compradorNueva ? 0.4 : 1 }}>
+                    {guardando ? "Guardando..." : "✓ Registrar visita"}
+                  </button>
+                  <button onClick={() => setNuevaVisita(false)} style={{ padding: "14px",
+                    border: `1.5px solid ${BORDER}`, background: "transparent", color: MUTED,
+                    cursor: "pointer", borderRadius: 12, fontFamily: "Inter, sans-serif", fontSize: 14 }}>
+                    Cancelar
                   </button>
                 </div>
               </div>
-            </Modal>
-          )}
-
-          {/* Modal editor informe */}
-          {informe && (
-            <Modal title="Informe al propietario" onClose={() => setInforme(null)} width={640}>
-              <EditorInforme informe={informe} propiedadNombre={propiedadNombre}
-                onGuardado={onActualizado} onClose={() => setInforme(null)} />
             </Modal>
           )}
         </div>
@@ -1209,7 +1527,6 @@ export default function Visitas({ currentUser }) {
   async function crearVisitaGlobal() {
     if (!nvPropiedad || nvCompradores.length === 0) return;
     setNvGuardando(true);
-    // Crear la visita con el primer comprador como referencia principal
     const { data: visita } = await supabase.from("visitas").insert({
       propiedad_id: nvPropiedad.id,
       agente_login: currentUser.user_login,
@@ -1218,12 +1535,10 @@ export default function Visitas({ currentUser }) {
       activo: true,
     }).select().single();
 
-    // Insertar todos los compradores en visita_compradores
     if (visita) {
       await supabase.from("visita_compradores").insert(
         nvCompradores.map((c, i) => ({ visita_id: visita.id, comprador_id: c.id, orden: i + 1 }))
       );
-      // Programar cualificación a las 3 horas para cada comprador
       for (const c of nvCompradores) {
         await fetch("/api/visitas/programar-cualificacion", {
           method: "POST",
@@ -1243,7 +1558,6 @@ export default function Visitas({ currentUser }) {
   }
 
   useEffect(() => {
-    // Cargar propiedades del agente al abrir el modal
     if (!modalNuevaVisita) return;
     let q = supabase.from("propiedades").select("id,ref,dir,municipio,agente,estado")
       .neq("estado", "vendida").neq("estado", "caida").order("created_at", { ascending: false });
@@ -1263,7 +1577,6 @@ export default function Visitas({ currentUser }) {
     const { data: vis } = await q;
     const vData = vis || [];
 
-    // Cargar propiedades referenciadas
     const propIds = [...new Set(vData.map(v => v.propiedad_id).filter(Boolean))];
     if (propIds.length > 0) {
       const { data: props } = await supabase.from("propiedades")
@@ -1274,7 +1587,6 @@ export default function Visitas({ currentUser }) {
       setPropiedades(pMap);
     }
 
-    // Informes pendientes
     const { data: inf } = await supabase.from("visita_informes")
       .select("*").neq("estado", "enviado");
     setInformes(inf || []);
@@ -1304,84 +1616,98 @@ export default function Visitas({ currentUser }) {
   const totalVisitas = visitas.length;
   const totalDocs = visitas.reduce((acc, v) => acc + (v.visita_documentos?.length || 0), 0);
   const informesPendientes = informes.filter(i => i.estado !== "enviado").length;
+  const propiedadesActivas = gruposFiltrados.length;
+
+  const statsData = [
+    { label: "Visitas", value: totalVisitas, emoji: "👁", color: GOLD },
+    { label: "Docs", value: totalDocs, emoji: "📄", color: BLUE },
+    { label: "Propiedades", value: propiedadesActivas, emoji: "🏠", color: DARK },
+    ...(informesPendientes > 0 ? [{ label: "Informes", value: informesPendientes, emoji: "⚠", color: "#9C6E1B" }] : []),
+  ];
 
   return (
-    <div style={{ background: CREAM, minHeight: "100vh", fontFamily: "Inter, sans-serif" }}>
-      {/* Header */}
-      <div style={{ background: WHITE, borderBottom: `1px solid ${BORDER}`, padding: "28px 40px 24px" }}>
-        <div style={{ fontSize: 10, color: GOLD, letterSpacing: "0.2em", fontWeight: 700, marginBottom: 4 }}>
-          NATIVA PROPERTIES
+    <div style={{ background: CREAM, minHeight: "100vh", fontFamily: "Inter, sans-serif",
+      maxWidth: "100vw", overflowX: "hidden" }}>
+
+      {/* ── Header ── */}
+      <div style={{ background: DARK, padding: "24px 20px 20px" }}>
+        <div style={{ fontSize: 10, color: GOLD_L, letterSpacing: "0.2em", fontWeight: 700, marginBottom: 4 }}>
+          MALLORCA NATIVA
         </div>
-        <h1 style={{ fontSize: 26, fontWeight: 400, color: TEXT, margin: "0 0 6px",
+        <h1 style={{ fontSize: 28, fontWeight: 400, color: WHITE, margin: "0 0 4px",
           fontFamily: "'Playfair Display', Georgia, serif" }}>
           Visitas
         </h1>
-        <p style={{ fontSize: 12, color: MUTED, margin: 0 }}>
-          Gestiona visitas, documentos y comunicación con compradores y propietarios.
+        <p style={{ fontSize: 13, color: `${WHITE}70`, margin: 0 }}>
+          Gestiona visitas, documentos y compradores
         </p>
-        {/* Stats */}
-        <div style={{ display: "flex", gap: 24, marginTop: 16 }}>
-          {[
-            { label: "Visitas totales", value: totalVisitas },
-            { label: "Documentos generados", value: totalDocs },
-            { label: "Propiedades activas", value: gruposFiltrados.length },
-            ...(informesPendientes > 0 ? [{ label: "Informes pendientes", value: informesPendientes, color: "#9C6E1B" }] : []),
-          ].map(s => (
-            <div key={s.label}>
-              <div style={{ fontSize: 22, fontWeight: 700, color: s.color || GOLD,
-                fontFamily: "'Playfair Display', Georgia, serif" }}>{s.value}</div>
-              <div style={{ fontSize: 10, color: MUTED, letterSpacing: "0.06em" }}>{s.label}</div>
+      </div>
+
+      {/* ── Stats bar — scroll horizontal en mobile ── */}
+      <div style={{ background: WHITE, borderBottom: `1px solid ${BORDER}`,
+        padding: "0 16px", overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+        <div style={{ display: "flex", gap: 0, minWidth: "max-content" }}>
+          {statsData.map((s, i) => (
+            <div key={s.label} style={{
+              padding: "16px 20px", textAlign: "center", minWidth: 80,
+              borderRight: i < statsData.length - 1 ? `1px solid ${BORDER}` : "none",
+            }}>
+              <div style={{ fontSize: 10, marginBottom: 4 }}>{s.emoji}</div>
+              <div style={{ fontSize: 26, fontWeight: 800, color: s.color,
+                fontFamily: "'Playfair Display', Georgia, serif", lineHeight: 1 }}>
+                {s.value}
+              </div>
+              <div style={{ fontSize: 10, color: MUTED, marginTop: 3, fontWeight: 600,
+                letterSpacing: "0.05em", textTransform: "uppercase" }}>
+                {s.label}
+              </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Filtros + botón nueva visita */}
-      <div style={{ padding: "16px 40px", background: WHITE, borderBottom: `1px solid ${BORDER}`,
-        display: "flex", gap: 12, alignItems: "center" }}>
-        <div style={{ position: "relative", flex: 1, maxWidth: 320 }}>
-          <MagnifyingGlassIcon style={{ width: 14, height: 14, position: "absolute", left: 10, top: "50%",
+      {/* ── Buscador ── */}
+      <div style={{ padding: "14px 16px", background: WHITE, borderBottom: `1px solid ${BORDER}` }}>
+        <div style={{ position: "relative" }}>
+          <MagnifyingGlassIcon style={{ width: 18, height: 18, position: "absolute", left: 14, top: "50%",
             transform: "translateY(-50%)", color: MUTED }} />
           <input value={filtroProp} onChange={e => setFiltroProp(e.target.value)}
-            placeholder="Buscar por referencia o dirección..."
-            style={{ ...iSt, paddingLeft: 32 }} />
+            placeholder="Buscar por ref. o dirección..."
+            style={{ ...iSt, paddingLeft: 44, fontSize: 15 }} />
         </div>
-        {/* Botón solo visible cuando ya hay visitas */}
-        {visitas.length > 0 && (
-          <button onClick={() => setModalNuevaVisita(true)}
-            style={{ padding: "9px 20px", background: DARK, border: "none", color: WHITE,
-              cursor: "pointer", borderRadius: 2, fontSize: 12, fontWeight: 700,
-              fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 8,
-              whiteSpace: "nowrap", flexShrink: 0 }}>
-            <PlusIcon style={{ width: 15, height: 15 }} /> Nueva visita
-          </button>
-        )}
       </div>
 
-      {/* Contenido */}
-      <div style={{ padding: "24px 40px" }}>
+      {/* ── Contenido ── */}
+      <div style={{ padding: "16px" }}>
         {loading ? (
-          <div style={{ color: MUTED, textAlign: "center", padding: 60 }}>Cargando visitas...</div>
+          <div style={{ textAlign: "center", padding: "60px 20px" }}>
+            <div style={{ fontSize: 36, marginBottom: 12 }}>⏳</div>
+            <div style={{ color: MUTED, fontFamily: "Inter, sans-serif", fontSize: 14 }}>Cargando visitas...</div>
+          </div>
         ) : gruposFiltrados.length === 0 ? (
-          <div style={{ textAlign: "center", padding: 60 }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>🏠</div>
-            <div style={{ fontSize: 16, fontWeight: 400, color: TEXT, fontFamily: "'Playfair Display', Georgia, serif", marginBottom: 8 }}>
-              No hay visitas registradas aún
+          <div style={{ textAlign: "center", padding: "60px 20px" }}>
+            <div style={{ fontSize: 56, marginBottom: 16 }}>🏠</div>
+            <div style={{ fontSize: 20, fontWeight: 400, color: TEXT, fontFamily: "'Playfair Display', Georgia, serif", marginBottom: 8 }}>
+              No hay visitas registradas
             </div>
-            <div style={{ fontSize: 13, color: MUTED, marginBottom: 24 }}>
+            <div style={{ fontSize: 14, color: MUTED, marginBottom: 28, lineHeight: 1.6 }}>
               Registra la primera visita para empezar a gestionar compradores y documentos.
             </div>
-            <button onClick={() => setModalNuevaVisita(true)}
-              style={{ padding: "12px 28px", background: DARK, border: "none", color: WHITE,
-                cursor: "pointer", borderRadius: 2, fontSize: 13, fontWeight: 700,
-                fontFamily: "Inter, sans-serif", display: "inline-flex", alignItems: "center", gap: 8 }}>
-              <PlusIcon style={{ width: 16, height: 16 }} /> Registrar primera visita
+            <button onClick={() => setModalNuevaVisita(true)} style={{
+              padding: "16px 28px", background: GOLD, border: "none", color: WHITE,
+              cursor: "pointer", borderRadius: 14, fontSize: 15, fontWeight: 700,
+              fontFamily: "Inter, sans-serif", display: "inline-flex", alignItems: "center", gap: 10,
+              boxShadow: `0 4px 20px ${GOLD}55`,
+            }}>
+              <PlusIcon style={{ width: 20, height: 20 }} /> Registrar primera visita
             </button>
           </div>
         ) : (
           gruposFiltrados.map(([pid, vis]) => {
             const prop = propiedades[pid];
-            const nombre = prop ? `${prop.ref || ""} — ${prop.dir || ""}, ${prop.municipio || ""}`.trim() : "Propiedad sin referencia";
+            const nombre = prop
+              ? `${prop.ref ? `[${prop.ref}] ` : ""}${prop.dir || ""}${prop.municipio ? ` — ${prop.municipio}` : ""}`.trim()
+              : "Propiedad sin referencia";
             return (
               <GrupoPropiedad key={pid} propiedadId={pid} propiedadNombre={nombre}
                 visitas={vis} currentUser={currentUser} onActualizado={cargar}
@@ -1390,10 +1716,26 @@ export default function Visitas({ currentUser }) {
           })
         )}
       </div>
-      {/* Modal nueva visita global */}
+
+      {/* ── FAB — Nueva Visita ── */}
+      {visitas.length > 0 && (
+        <button onClick={() => setModalNuevaVisita(true)} style={{
+          position: "fixed", bottom: 24, right: 20, zIndex: 900,
+          width: 60, height: 60, borderRadius: "50%",
+          background: `linear-gradient(135deg, ${GOLD}, ${GOLD_L})`,
+          border: "none", color: WHITE, cursor: "pointer",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          boxShadow: `0 6px 24px ${GOLD}70`,
+          fontSize: 28, fontWeight: 700,
+        }}>
+          <PlusIcon style={{ width: 28, height: 28 }} />
+        </button>
+      )}
+
+      {/* ── Modal nueva visita global ── */}
       {modalNuevaVisita && (
-        <Modal title="Registrar nueva visita" onClose={() => setModalNuevaVisita(false)} width={540}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <Modal title="Nueva visita" onClose={() => setModalNuevaVisita(false)} width={540}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
             <div>
               <L c="Propiedad" req />
               <select
@@ -1411,53 +1753,66 @@ export default function Visitas({ currentUser }) {
                 ))}
               </select>
               {propsAgente.length === 0 && (
-                <div style={{ fontSize: 11, color: MUTED, marginTop: 4, fontFamily: "Inter, sans-serif" }}>
+                <div style={{ fontSize: 12, color: MUTED, marginTop: 6, fontFamily: "Inter, sans-serif" }}>
                   Cargando propiedades...
                 </div>
               )}
             </div>
+
             <div>
               <L c={`Compradores${nvCompradores.length > 0 ? ` (${nvCompradores.length})` : ""}`} req />
-              {/* Lista de compradores añadidos */}
               {nvCompradores.length > 0 && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 8 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 10 }}>
                   {nvCompradores.map((c, i) => (
-                    <div key={c.id} style={{ background: CREAM2, border: `1px solid ${GOLD}`,
-                      padding: "8px 12px", display: "flex", justifyContent: "space-between",
-                      alignItems: "center", borderRadius: 2 }}>
-                      <div>
-                        <span style={{ fontSize: 13, fontWeight: 600, color: TEXT, fontFamily: "Inter, sans-serif" }}>
-                          {i === 0 && <span style={{ fontSize: 9, color: GOLD, marginRight: 6, fontWeight: 700 }}>PRINCIPAL</span>}
-                          {c.nombre} {c.apellidos || ""}
-                        </span>
-                        {c.dni && <span style={{ fontSize: 11, color: MUTED, marginLeft: 8 }}>DNI: {c.dni}</span>}
+                    <div key={c.id} style={{ background: `${GOLD}10`, border: `2px solid ${GOLD}`,
+                      padding: "12px 14px", display: "flex", justifyContent: "space-between",
+                      alignItems: "center", borderRadius: 12 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <Avatar nombre={c.nombre} apellidos={c.apellidos} size={36} />
+                        <div>
+                          {i === 0 && <div style={{ fontSize: 9, color: GOLD, fontWeight: 800,
+                            letterSpacing: "0.08em", marginBottom: 2 }}>PRINCIPAL</div>}
+                          <div style={{ fontSize: 14, fontWeight: 700, color: TEXT, fontFamily: "Inter, sans-serif" }}>
+                            {c.nombre} {c.apellidos || ""}
+                          </div>
+                          {c.dni && <div style={{ fontSize: 11, color: MUTED }}>DNI: {c.dni}</div>}
+                        </div>
                       </div>
                       <button onClick={() => setNvCompradores(nvCompradores.filter(x => x.id !== c.id))}
-                        style={{ background: "transparent", border: "none", color: MUTED, cursor: "pointer", padding: 2 }}>
-                        <XMarkIcon style={{ width: 13, height: 13 }} />
+                        style={{ background: CREAM2, border: "none", color: MUTED, cursor: "pointer",
+                          padding: 8, borderRadius: "50%", minWidth: 32, minHeight: 32,
+                          display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <XMarkIcon style={{ width: 14, height: 14 }} />
                       </button>
                     </div>
                   ))}
                 </div>
               )}
-              {/* Añadir otro comprador */}
               <SelectorComprador value={null}
                 onChange={c => { if (c && !nvCompradores.find(x => x.id === c.id)) setNvCompradores([...nvCompradores, c]); }}
-                placeholder={nvCompradores.length === 0 ? "Buscar o crear comprador principal..." : "Añadir otro comprador a la visita..."} />
+                placeholder={nvCompradores.length === 0 ? "Buscar o crear comprador principal..." : "Añadir otro comprador..."} />
             </div>
+
             <div>
-              <L c="Fecha y hora de la visita" />
+              <L c="Fecha y hora" />
               <input type="datetime-local" value={nvHora} onChange={e => setNvHora(e.target.value)} style={iSt} />
             </div>
-            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", paddingTop: 8, borderTop: `1px solid ${BORDER}` }}>
-              <button onClick={() => setModalNuevaVisita(false)} style={{ padding: "9px 18px",
-                border: `1px solid ${BORDER}`, background: "transparent", color: MUTED,
-                cursor: "pointer", borderRadius: 2, fontFamily: "Inter, sans-serif" }}>Cancelar</button>
-              <button onClick={crearVisitaGlobal} disabled={!nvPropiedad || nvCompradores.length === 0 || nvGuardando}
-                style={{ padding: "9px 22px", background: DARK, border: "none", color: WHITE,
-                  cursor: "pointer", borderRadius: 2, fontWeight: 700, fontFamily: "Inter, sans-serif",
-                  opacity: (!nvPropiedad || nvCompradores.length === 0) ? 0.5 : 1 }}>
-                {nvGuardando ? "Guardando..." : `Registrar visita${nvCompradores.length > 1 ? ` (${nvCompradores.length} personas)` : ""}`}
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, paddingTop: 8,
+              borderTop: `1px solid ${BORDER}` }}>
+              <button onClick={crearVisitaGlobal}
+                disabled={!nvPropiedad || nvCompradores.length === 0 || nvGuardando}
+                style={{ padding: "16px", background: GOLD, border: "none", color: WHITE,
+                  cursor: "pointer", borderRadius: 12, fontWeight: 700, fontFamily: "Inter, sans-serif",
+                  fontSize: 15, opacity: (!nvPropiedad || nvCompradores.length === 0) ? 0.4 : 1,
+                  boxShadow: `0 4px 16px ${GOLD}44`,
+                }}>
+                {nvGuardando ? "Guardando..." : `✓ Registrar visita${nvCompradores.length > 1 ? ` (${nvCompradores.length} personas)` : ""}`}
+              </button>
+              <button onClick={() => setModalNuevaVisita(false)} style={{ padding: "14px",
+                border: `1.5px solid ${BORDER}`, background: "transparent", color: MUTED,
+                cursor: "pointer", borderRadius: 12, fontFamily: "Inter, sans-serif", fontSize: 14 }}>
+                Cancelar
               </button>
             </div>
           </div>
