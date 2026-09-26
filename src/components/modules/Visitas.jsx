@@ -790,6 +790,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
   const [abierta, setAbierta] = useState(false);
   const [showDoc, setShowDoc] = useState(false);
   const [editandoDoc, setEditandoDoc] = useState(null);
+  const [firmasLinks, setFirmasLinks] = useState({}); // docId → [{nombre, token, firmado_at}]
   const isAdmin = ["director", "administrador"].includes(currentUser?.role?.toLowerCase());
   const esPropia = visita.agente_login === currentUser?.user_login;
   const puedeEditar = isAdmin || esPropia;
@@ -799,6 +800,25 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
     : visita.compradores ? [visita.compradores] : [];
   const comp = todosCompradores[0];
   const docs = visita.visita_documentos || [];
+
+  // Cargar tokens de firma para todos los docs que estén enviados
+  useEffect(() => {
+    const docsEnviados = docs.filter(d => ["enviado","firmado_comprador"].includes(d.estado));
+    if (docsEnviados.length === 0) return;
+    async function cargarLinks() {
+      const map = {};
+      for (const d of docsEnviados) {
+        const { data } = await supabase
+          .from("visita_doc_firmas")
+          .select("id, nombre_firmante, token, firmado_at")
+          .eq("doc_id", d.id)
+          .order("created_at");
+        if (data?.length) map[d.id] = data;
+      }
+      setFirmasLinks(map);
+    }
+    cargarLinks();
+  }, [docs.map(d=>d.estado).join()]);
   const fecha = new Date(visita.fecha_visita).toLocaleDateString("es-ES", {
     day: "2-digit", month: "short", year: "numeric",
   });
@@ -1135,6 +1155,47 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
                             </div>
                           )}
 
+                          {/* Links de firma de compradores */}
+                          {firmasLinks[doc.id]?.length > 0 && (
+                            <div style={{ marginTop: 12, padding: "10px 12px", background: `${DARK}08`,
+                              borderRadius: 10, border: `1px solid ${BORDER}` }}>
+                              <div style={{ fontSize: 10, color: GOLD, fontWeight: 800,
+                                letterSpacing: "0.1em", marginBottom: 8, fontFamily: "Inter, sans-serif" }}>
+                                🔗 LINKS DE FIRMA
+                              </div>
+                              {firmasLinks[doc.id].map(f => (
+                                <div key={f.id} style={{ marginBottom: 8 }}>
+                                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                                    <span style={{ fontSize: 13 }}>{f.firmado_at ? "✅" : "⏳"}</span>
+                                    <span style={{ fontSize: 12, fontWeight: 600, color: TEXT,
+                                      fontFamily: "Inter, sans-serif" }}>{f.nombre_firmante}</span>
+                                    {f.firmado_at && (
+                                      <span style={{ fontSize: 10, color: SUCCESS, fontFamily: "Inter, sans-serif" }}>
+                                        firmó {new Date(f.firmado_at).toLocaleDateString("es-ES")}
+                                      </span>
+                                    )}
+                                  </div>
+                                  {!f.firmado_at && (
+                                    <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                                      <input readOnly value={`https://crm.mallorcanativaproperties.com/firmar-visita?token=${f.token}&tipo=comprador`}
+                                        style={{ flex: 1, fontSize: 10, padding: "5px 8px", border: `1px solid ${BORDER}`,
+                                          borderRadius: 6, color: MUTED, fontFamily: "Inter, sans-serif",
+                                          background: WHITE, cursor: "text" }} />
+                                      <button onClick={() => {
+                                        navigator.clipboard.writeText(`https://crm.mallorcanativaproperties.com/firmar-visita?token=${f.token}&tipo=comprador`);
+                                        alert("✅ Link copiado");
+                                      }} style={{ padding: "5px 10px", background: DARK, border: "none",
+                                        color: WHITE, borderRadius: 6, fontSize: 11, cursor: "pointer",
+                                        fontFamily: "Inter, sans-serif", whiteSpace: "nowrap" }}>
+                                        Copiar
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
                           {/* Estado de firmas */}
                           {(doc.firmado_comprador_at || doc.firmado_vendedor_at) && (
                             <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 4 }}>
@@ -1165,7 +1226,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
                               <DocumentTextIcon style={{ width: 16, height: 16 }} /> Ver documento PDF
                             </button>
 
-                            {doc.estado === "borrador" && (
+                            {["borrador","enviado"].includes(doc.estado) && (
                               <button onClick={() => enviarFirma("comprador")} style={{
                                 padding: "14px 16px", background: DARK, border: "none", color: WHITE,
                                 cursor: "pointer", borderRadius: 10, fontSize: 14, fontWeight: 700,
@@ -1173,7 +1234,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
                                 justifyContent: "center", gap: 8,
                               }}>
                                 <PaperAirplaneIcon style={{ width: 18, height: 18 }} />
-                                Enviar firma → Comprador
+                                {doc.estado === "enviado" ? "Reenviar firma → Comprador" : "Enviar firma → Comprador"}
                               </button>
                             )}
 
