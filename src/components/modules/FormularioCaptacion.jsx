@@ -451,6 +451,22 @@ export default function FormularioCaptacion() {
   const [plantasEdificio, setPlantasEdificio] = useState("");
   const [ocupacionActual, setOcupacionActual] = useState("");
   const [tipoGaraje, setTipoGaraje] = useState("");
+  const [garajePuertaAuto, setGarajePuertaAuto] = useState(false);
+  const [garajePlazaCubierta, setGarajePlazaCubierta] = useState(false);
+  const [garajeTipo, setGarajeTipo] = useState("");
+  const [mEdificable, setMEdificable] = useState("");
+  const [terrenoAcceso, setTerrenoAcceso] = useState("");
+  const [terrenoLuz, setTerrenoLuz] = useState(false);
+  const [terrenoAgua, setTerrenoAgua] = useState(false);
+  const [terrenoGas, setTerrenoGas] = useState(false);
+  const [terrenoAlcantarillado, setTerrenoAlcantarillado] = useState(false);
+  const [terrenoAceras, setTerrenoAceras] = useState(false);
+  const [terrenoAlumbrado, setTerrenoAlumbrado] = useState(false);
+  const [terrenoCarretera, setTerrenoCarretera] = useState(false);
+  const [trasteroAltura, setTrasteroAltura] = useState("");
+  const [trasteroAcceso24h, setTrasteroAcceso24h] = useState(false);
+  const [trasteroSeguridad24h, setTrasteroSeguridad24h] = useState(false);
+  const [trasteroMuelleCarga, setTrasteroMuelleCarga] = useState(false);
 
   // Publicacion
 
@@ -507,7 +523,11 @@ export default function FormularioCaptacion() {
       ventExt, elecRef, fontRef, notasPriv, propietarios, cualPos, cualNeg, refCatCuest, latitud, longitud,
       alqEquipamiento, alqTipoOperacion, alqMaxInquilinos, alqAptoNinos,
       bloque, escalera, urbanizacion, chimenea, cocinaEquipada, dobleAcristalamiento,
-      puertaBlindada, alarmaSeguridad, plantasEdificio, ocupacionActual, tipoGaraje]);
+      puertaBlindada, alarmaSeguridad, plantasEdificio, ocupacionActual, tipoGaraje,
+      garajePuertaAuto, garajePlazaCubierta, garajeTipo,
+      mEdificable, terrenoAcceso, terrenoLuz, terrenoAgua, terrenoGas, terrenoAlcantarillado,
+      terrenoAceras, terrenoAlumbrado, terrenoCarretera,
+      trasteroAltura, trasteroAcceso24h, trasteroSeguridad24h, trasteroMuelleCarga]);
   const pv = op === "Alquiler" ? (Number(precioAlquiler)||0) : op === "Traspaso" ? (Number(precioTraspaso)||0) : (Number(precioVenta) || 0);
   const pp = Number(precioProp) || 0;
 
@@ -557,7 +577,8 @@ export default function FormularioCaptacion() {
   const ft = TIPO_MAP_COND[tipo] || "flat";
   const esResidencial = ["flat","house","rustic"].includes(ft);
   const esComercial = ["premises_commercial","office"].includes(ft);
-  const esGaraje = ["garage","storage"].includes(ft);
+  const esGaraje = ft === "garage";
+  const esTrastero = ft === "storage";
   const esTerreno = ft === "land";
   const esEdificio = ft === "building";
   const tieneHab = ["flat","house","rustic"].includes(ft);
@@ -657,6 +678,22 @@ export default function FormularioCaptacion() {
       plantas_edificio: plantasEdificio ? Number(plantasEdificio) : null,
       ocupacion_actual: ocupacionActual || null,
       tipo_garaje: tipoGaraje || null,
+      garaje_puerta_auto: garajePuertaAuto || false,
+      garaje_plaza_cubierta: garajePlazaCubierta || false,
+      garaje_tipo: garajeTipo || null,
+      m_edificable: Number(mEdificable) || null,
+      terreno_acceso: terrenoAcceso || null,
+      terreno_luz: terrenoLuz || false,
+      terreno_agua: terrenoAgua || false,
+      terreno_gas: terrenoGas || false,
+      terreno_alcantarillado: terrenoAlcantarillado || false,
+      terreno_aceras: terrenoAceras || false,
+      terreno_alumbrado: terrenoAlumbrado || false,
+      terreno_carretera: terrenoCarretera || false,
+      trastero_altura: Number(trasteroAltura) || null,
+      trastero_acceso_24h: trasteroAcceso24h || false,
+      trastero_seguridad_24h: trasteroSeguridad24h || false,
+      trastero_muelle_carga: trasteroMuelleCarga || false,
       elec_reformada: elecRef,
       font_reformada: fontRef,
       local_ubicacion: localUbicacion || null,
@@ -944,6 +981,20 @@ export default function FormularioCaptacion() {
             <Input label="Banos" value={banos} onChange={setBanos} type="number" />
             <Input label="Aseos" value={aseos} onChange={setAseos} type="number" />
           </div>}
+          {esTerreno && <div style={g2}>
+            <Input label="m2 edificables" value={mEdificable} onChange={setMEdificable} type="number" />
+            <Select label="Tipo de acceso" value={terrenoAcceso} onChange={setTerrenoAcceso}
+              options={["","Urbano","Carretera","Pista","Autovía/Autopista","Desconocido"]} />
+          </div>}
+          {esTerreno && <div style={{ display: "flex", flexWrap: "wrap", gap: 20 }}>
+            <Toggle label="Luz" value={terrenoLuz} onChange={setTerrenoLuz} />
+            <Toggle label="Agua" value={terrenoAgua} onChange={setTerrenoAgua} />
+            <Toggle label="Gas" value={terrenoGas} onChange={setTerrenoGas} />
+            <Toggle label="Alcantarillado" value={terrenoAlcantarillado} onChange={setTerrenoAlcantarillado} />
+            <Toggle label="Aceras" value={terrenoAceras} onChange={setTerrenoAceras} />
+            <Toggle label="Alumbrado" value={terrenoAlumbrado} onChange={setTerrenoAlumbrado} />
+            <Toggle label="Acceso carretera" value={terrenoCarretera} onChange={setTerrenoCarretera} />
+          </div>}
           <div style={g3}>
             {!esTerreno && <Input label="Ano construccion" value={anoCon} onChange={setAnoCon} placeholder="2005" />}
             <Select label="Conservacion" value={conserv} onChange={setConserv} options={CONSERVACION} />
@@ -1091,8 +1142,22 @@ export default function FormularioCaptacion() {
           {esGaraje && <div style={g3}>
             <Select label="Tipo de garaje (capacidad)" value={tipoGaraje} onChange={setTipoGaraje}
               options={["Coche compacto","Coche sedán","Moto","Coche y moto","Dos coches o más","Desconocido"]} />
+            <Select label="Tipología plaza" value={garajeTipo} onChange={setGarajeTipo}
+              options={["","Plaza aparcamiento","Trastero/Depósito","Desconocido"]} />
           </div>}
-          {!esGaraje && <div style={g3}>
+          {esGaraje && <div style={{ display: "flex", gap: 30 }}>
+            <Toggle label="Puerta automática" value={garajePuertaAuto} onChange={setGarajePuertaAuto} />
+            <Toggle label="Plaza cubierta" value={garajePlazaCubierta} onChange={setGarajePlazaCubierta} />
+          </div>}
+          {esTrastero && <div style={g2}>
+            <Input label="Altura interior (m)" value={trasteroAltura} onChange={setTrasteroAltura} type="number" />
+          </div>}
+          {esTrastero && <div style={{ display: "flex", gap: 30 }}>
+            <Toggle label="Acceso 24h" value={trasteroAcceso24h} onChange={setTrasteroAcceso24h} />
+            <Toggle label="Seguridad 24h" value={trasteroSeguridad24h} onChange={setTrasteroSeguridad24h} />
+            <Toggle label="Muelle de carga" value={trasteroMuelleCarga} onChange={setTrasteroMuelleCarga} />
+          </div>}
+          {!esGaraje && !esTrastero && <div style={g3}>
             <Select label="Parking" value={parking} onChange={setParking} options={["Si","No","Comunitario","Opcional"]} />
             <Input label="N plazas" value={nPlazas} onChange={setNPlazas} type="number" />
             {(parking === "Si" || parking === "Opcional") &&
