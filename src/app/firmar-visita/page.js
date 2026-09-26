@@ -33,6 +33,8 @@ export default function FirmarVisita() {
   const [leido, setLeido] = useState(false);
   const [firmando, setFirmando] = useState(false);
   const [firmado, setFirmado] = useState(false);
+  // Respuesta del vendedor: "acepta" | "no_acepta" | null
+  const [respuestaVendedor, setRespuestaVendedor] = useState(null);
   const canvasRef = useRef(null);
   const [dibujando, setDibujando] = useState(false);
   const [tieneFirma, setTieneFirma] = useState(false);
@@ -170,7 +172,13 @@ export default function FirmarVisita() {
     const res = await fetch("/api/visitas/documento", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ docId, firmante: tipo, firmaData, firmaRowId: firmaRow?.id }),
+      body: JSON.stringify({
+        docId,
+        firmante: tipo,
+        firmaData,
+        firmaRowId: firmaRow?.id,
+        ...(tipo === "vendedor" && respuestaVendedor ? { respuestaVendedor } : {}),
+      }),
     });
     if (res.ok) {
       setFirmado(true);
@@ -302,6 +310,44 @@ export default function FirmarVisita() {
           </div>
         )}
 
+        {/* Respuesta del vendedor: Acepta / No acepta (solo para oferta, reserva, contraoferta) */}
+        {leido && tipo === "vendedor" && doc && ["oferta","reserva","contraoferta"].includes(doc.tipo) && (
+          <div style={{ background:WHITE, border:`1px solid ${BORDER}`, borderRadius:3, padding:20, marginBottom:16 }}>
+            <div style={{ fontSize:13, fontWeight:700, color:TEXT, marginBottom:4, textTransform:"uppercase", letterSpacing:"0.08em" }}>
+              Respuesta de la Parte Vendedora
+            </div>
+            <div style={{ fontSize:11, color:MUTED, marginBottom:14 }}>
+              Seleccione su decisión respecto a la propuesta antes de firmar.
+            </div>
+            <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+              <label style={{ display:"flex", alignItems:"center", gap:12, cursor:"pointer",
+                padding:"12px 16px", border:`2px solid ${respuestaVendedor === "acepta" ? GOLD : BORDER}`,
+                borderRadius:3, background: respuestaVendedor === "acepta" ? "#FDF9F3" : WHITE }}>
+                <input type="radio" name="respuesta_vendedor" value="acepta"
+                  checked={respuestaVendedor === "acepta"}
+                  onChange={() => setRespuestaVendedor("acepta")}
+                  style={{ accentColor:GOLD, width:18, height:18 }} />
+                <div>
+                  <div style={{ fontSize:14, fontWeight:600, color:TEXT }}>☑ Acepta la propuesta</div>
+                  <div style={{ fontSize:11, color:MUTED, marginTop:2 }}>Confirma la aceptación de las condiciones establecidas</div>
+                </div>
+              </label>
+              <label style={{ display:"flex", alignItems:"center", gap:12, cursor:"pointer",
+                padding:"12px 16px", border:`2px solid ${respuestaVendedor === "no_acepta" ? DANGER : BORDER}`,
+                borderRadius:3, background: respuestaVendedor === "no_acepta" ? "#FDF3F3" : WHITE }}>
+                <input type="radio" name="respuesta_vendedor" value="no_acepta"
+                  checked={respuestaVendedor === "no_acepta"}
+                  onChange={() => setRespuestaVendedor("no_acepta")}
+                  style={{ accentColor:DANGER, width:18, height:18 }} />
+                <div>
+                  <div style={{ fontSize:14, fontWeight:600, color:TEXT }}>☐ No acepta la propuesta</div>
+                  <div style={{ fontSize:11, color:MUTED, marginTop:2 }}>Declina las condiciones de la presente propuesta</div>
+                </div>
+              </label>
+            </div>
+          </div>
+        )}
+
         {/* Canvas firma */}
         {leido && (
           <div style={{ background:WHITE, border:`1px solid ${BORDER}`, borderRadius:3, padding:20 }}>
@@ -322,10 +368,18 @@ export default function FirmarVisita() {
               <button onClick={limpiarFirma} style={{ padding:"8px 16px", border:`1px solid ${BORDER}`, background:"transparent", color:MUTED, cursor:"pointer", borderRadius:2, fontSize:12 }}>
                 Limpiar
               </button>
-              <button onClick={firmar} disabled={!tieneFirma || firmando}
-                style={{ padding:"12px 32px", background:tieneFirma ? DARK : BORDER, border:"none", color:WHITE, cursor:tieneFirma?"pointer":"not-allowed", borderRadius:2, fontSize:14, fontWeight:700 }}>
-                {firmando ? "Firmando..." : "Firmar documento"}
-              </button>
+              {(() => {
+                const necesitaRespuesta = tipo === "vendedor" && doc && ["oferta","reserva","contraoferta"].includes(doc.tipo);
+                const puedeFiremar = tieneFirma && !firmando && (!necesitaRespuesta || respuestaVendedor);
+                return (
+                  <button onClick={firmar} disabled={!puedeFiremar}
+                    style={{ padding:"12px 32px", background: puedeFiremar ? DARK : BORDER, border:"none", color:WHITE,
+                      cursor: puedeFiremar ? "pointer" : "not-allowed", borderRadius:2, fontSize:14, fontWeight:700 }}>
+                    {firmando ? "Firmando..." : necesitaRespuesta && !respuestaVendedor ? "Seleccione su respuesta primero" : "Firmar documento"}
+                  </button>
+                );
+              })()}
+
             </div>
             <div style={{ marginTop:16, padding:"10px 14px", background:CREAM, border:`1px solid ${BORDER}`, borderRadius:2, fontSize:11, color:MUTED, lineHeight:1.5 }}>
               Al firmar, confirma que ha leído y acepta el contenido del documento. Su firma quedará registrada con fecha, hora e IP para efectos legales.
