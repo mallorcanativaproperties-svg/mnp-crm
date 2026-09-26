@@ -111,6 +111,11 @@ function buildProperty(row, media) {
   if (price > 0) operation.operationPrice = price;
   const community = Number(row.comunidad) || 0;
   if (community > 0 && !isAlquiler) operation.operationPriceCommunity = community;
+  // Precio garaje aparte — solo si parking Si/Opcional y tipo no es garage/storage/land
+  const tiposConPrecioParking = ["flat","house","rustic","premises_commercial","office","building"];
+  if ((row.parking === "Si" || row.parking === "Opcional") && Number(row.precio_parking) > 0 && tiposConPrecioParking.includes(tipo)) {
+    operation.operationPriceParking = Number(row.precio_parking);
+  }
   // operationPriceUrbanizacion no existe en el schema Idealista v6 — omitido
   // Alquiler — campos específicos
   if (isAlquiler) {

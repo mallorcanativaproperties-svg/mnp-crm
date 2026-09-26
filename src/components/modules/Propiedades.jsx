@@ -25,7 +25,7 @@ function mapDbToJs(row) {
     certEnerg: row.cert_energ || "", conserv: row.conserv || "", anoConstruc: row.ano_construc || "",
     mUtil: Number(row.m_util) || 0, mConst: Number(row.m_const) || 0, mParcela: Number(row.m_parcela) || 0, mTerraza: Number(row.m_terraza) || 0, mBalcon: Number(row.m_balcon) || 0, mPorche: Number(row.m_porche) || 0,
     habDobles: Number(row.hab_dobles) || 0, habSimples: Number(row.hab_simples) || 0, totalHab: Number(row.total_hab) || 0, banos: Number(row.banos) || 0, aseos: Number(row.aseos) || 0, planta: row.planta || "",
-    parking: row.parking || "", nPlazas: Number(row.n_plazas) || 0,
+    parking: row.parking || "", nPlazas: Number(row.n_plazas) || 0, precioParking: Number(row.precio_parking) || 0,
     suelos: row.suelos || "", carpExt: row.carp_ext || "", carpInt: row.carp_int || "",
     persianasTipo: row.persianas_tipo || "", persianasMat: row.persianas_mat || "",
     clima: row.clima || "", aguaCal: row.agua_cal || "", aireAcondTipo: row.aire_acond_tipo || "", tipologiaChalet: row.tipologia_chalet || "", plantasChalet: Number(row.plantas_chalet) || 0, calefaccion: row.calefaccion || "", emisionesEnerg: row.emisiones_energ || "",
@@ -84,7 +84,7 @@ function mapJsToDb(p) {
     cert_energ: p.certEnerg, conserv: p.conserv, ano_construc: p.anoConstruc,
     m_util: Number(p.mUtil) || 0, m_const: Number(p.mConst) || 0, m_parcela: Number(p.mParcela) || 0, m_terraza: Number(p.mTerraza) || 0, m_balcon: Number(p.mBalcon) || 0, m_porche: Number(p.mPorche) || 0,
     hab_dobles: Number(p.habDobles) || 0, hab_simples: Number(p.habSimples) || 0, total_hab: Number(p.totalHab) || (Number(p.habDobles)||0) + (Number(p.habSimples)||0), banos: Number(p.banos) || 0, aseos: Number(p.aseos) || 0, planta: p.planta,
-    parking: p.parking, n_plazas: Number(p.nPlazas) || 0,
+    parking: p.parking, n_plazas: Number(p.nPlazas) || 0, precio_parking: (p.parking === "Si" || p.parking === "Opcional") && p.precioParking ? Number(p.precioParking) : null,
     suelos: p.suelos, carp_ext: p.carpExt, carp_int: p.carpInt,
     persianas_tipo: p.persianasTipo, persianas_mat: p.persianasMat,
     clima: p.clima, agua_cal: p.aguaCal, aire_acond_tipo: p.aireAcondTipo, tipologia_chalet: p.tipologiaChalet || null, plantas_chalet: Number(p.plantasChalet) || null, calefaccion: p.calefaccion, emisiones_energ: p.emisionesEnerg, suministros: p.suministros, drenaje: p.drenaje,
@@ -3096,6 +3096,10 @@ REGLAS:
             {EFl({label: "Parking", field: "parking", pub: true, options: ["Si","No","Comunitario","Opcional"], type: "select"})}
             {EFl({label: "N plazas", field: "nPlazas", pub: true, type: "number"})}
           </div>
+          {(draft?.parking === "Si" || draft?.parking === "Opcional") && <div style={{ ...g2, marginTop: 8 }}>
+            {EFl({label: "Precio garaje aparte (€)", field: "precioParking", pub: true, type: "number"})}
+            <div><div style={{ fontSize: 10, color: "#9A968A", marginTop: 4 }}>Dejar vacío si el garaje va incluido en el precio</div></div>
+          </div>}
         </Sec>}
         <div style={sep} />
 
@@ -3637,6 +3641,9 @@ function IdealistaJsonButton({ supabase }) {
       else if(row.mascotas === false || row.mascotas === "false") op.rentPetsAllowed = false;
     }
     const community=Number(row.comunidad)||0; if(community>0&&row.op!=="Alquiler") op.operationPriceCommunity=community;
+    // Precio garaje aparte (solo si parking Si/Opcional y tipo no es garaje/trastero/terreno/edificio)
+    const tiposConPrecioParking=["flat","house","rustic","premises_commercial","office","building"];
+    if((row.parking==="Si"||row.parking==="Opcional")&&Number(row.precio_parking)>0&&tiposConPrecioParking.includes(tipo)) op.operationPriceParking=Number(row.precio_parking);
     // operationPriceUrbanizacion no existe en schema Idealista v6 — omitido
     property.propertyOperation=op;
     property.propertyContact={contactName:"Mallorca Nativa Properties",contactEmail:"mallorcanativaproperties@gmail.com",contactPrimaryPhonePrefix:"34",contactPrimaryPhoneNumber:"655882682"};

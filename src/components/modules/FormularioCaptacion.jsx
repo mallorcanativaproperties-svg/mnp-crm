@@ -403,6 +403,7 @@ export default function FormularioCaptacion() {
   const [trastero, setTrastero] = useState(false);
   const [parking, setParking] = useState("No");
   const [nPlazas, setNPlazas] = useState("");
+  const [precioParking, setPrecioParking] = useState("");
   const [cualNeg, setCualNeg] = useState(["", "", "", "", "", ""]);
   const [aireAcond, setAireAcond] = useState(false);
   const [aireAcondTipo, setAireAcondTipo] = useState("");
@@ -500,7 +501,7 @@ export default function FormularioCaptacion() {
       mUtil, mConst, mParcela, mTerraza, mBalcon, mPorche,
       habDob, habSim, totalHab, banos, aseos, conserv, anoCon, certE, iee,
       ventaMob, terraza, balcon, jardin, piscina, ascensor, armarios, trastero,
-      parking, nPlazas, aireAcond, aireAcondTipo, tipologiaChalet, plantasChalet, suelos, carpExt, carpInt,
+      parking, nPlazas, precioParking, aireAcond, aireAcondTipo, tipologiaChalet, plantasChalet, suelos, carpExt, carpInt,
       emisionesEnerg, calefaccion, aguaCal, suministros, drenaje,
       ventExt, elecRef, fontRef, notasPriv, propietarios, cualPos, cualNeg, refCatCuest, latitud, longitud,
       alqEquipamiento, alqTipoOperacion, alqMaxInquilinos, alqAptoNinos,
@@ -630,6 +631,7 @@ export default function FormularioCaptacion() {
       terraza, balcon, jardin, piscina, ascensor, armarios, trastero,
       parking: parking || "No",
       n_plazas: Number(nPlazas) || 0,
+      precio_parking: (parking === "Si" || parking === "Opcional") && precioParking ? Number(precioParking) : null,
       cual_neg: cualNeg.filter(Boolean),
       aire_acond: aireAcond,
       ref_cat: refCatCuest || null,
@@ -1087,6 +1089,9 @@ export default function FormularioCaptacion() {
           <div style={g3}>
             <Select label="Parking" value={parking} onChange={setParking} options={["Si","No","Comunitario","Opcional"]} />
             <Input label="N plazas" value={nPlazas} onChange={setNPlazas} type="number" />
+            {(parking === "Si" || parking === "Opcional") &&
+              <Input label="Precio garaje (si va aparte)" value={precioParking} onChange={setPrecioParking} type="number" placeholder="Dejar vacío si incluido" />
+            }
           </div>
         </Sec>}
 
