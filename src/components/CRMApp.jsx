@@ -204,6 +204,11 @@ function LoadingModule() {
 
 export default function CRMApp() {
   const [currentUser, setCurrentUser] = useState(null);
+  const [modalClave, setModalClave] = useState(false);
+  const [nuevaClave, setNuevaClave] = useState("");
+  const [confirmarClave, setConfirmarClave] = useState("");
+  const [guardandoClave, setGuardandoClave] = useState(false);
+  const [msgClave, setMsgClave] = useState(null);
 
   const inactivityTimer = React.useRef(null);
   const SESSION_TIMEOUT = 60 * 60 * 1000; // 60 minutos
@@ -236,6 +241,21 @@ export default function CRMApp() {
     if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
     localStorage.removeItem("mnp_user_login");
     setCurrentUser(null);
+  }
+
+  async function handleCambiarClave() {
+    if (!nuevaClave.trim()) return setMsgClave({ type: "error", text: "Escribe la nueva contraseña" });
+    if (nuevaClave.length < 6) return setMsgClave({ type: "error", text: "La contraseña debe tener al menos 6 caracteres" });
+    if (nuevaClave !== confirmarClave) return setMsgClave({ type: "error", text: "Las contraseñas no coinciden" });
+    setGuardandoClave(true);
+    setMsgClave(null);
+    const { error } = await supabase.from("usuarios").update({ pass_hash: nuevaClave.trim() }).eq("user_login", currentUser.user_login);
+    setGuardandoClave(false);
+    if (error) setMsgClave({ type: "error", text: error.message });
+    else {
+      setMsgClave({ type: "ok", text: "Contraseña actualizada correctamente" });
+      setTimeout(() => { setModalClave(false); setNuevaClave(""); setConfirmarClave(""); setMsgClave(null); }, 1500);
+    }
   }
   const [activeModule, setActiveModule] = useState("captacion");
   const [sidebarOpen, setSidebarOpen] = useState(typeof window !== "undefined" ? window.innerWidth > 768 : true);
@@ -448,12 +468,47 @@ export default function CRMApp() {
             <div>
               <div style={{ fontSize: 12, color: "#FFFFFF", fontWeight: 500 }}>{currentUser.nombre}</div>
               <div style={{ fontSize: 9, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.08em", marginTop: 2 }}>{currentUser.role === "director" ? "Director" : currentUser.role === "administrador" ? "Administrador" : "Agente"}</div>
-              <button onClick={handleLogout} style={{ marginTop: 8, padding: "5px 12px", borderRadius: 0, border: "1px solid #2A2926", background: "transparent", color: "#9A968A", cursor: "pointer", fontSize: 9, textTransform: "uppercase", fontFamily: "Inter, sans-serif", width: "100%" }}>
-                Cerrar sesion
-              </button>
+              <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+                <button onClick={() => { setNuevaClave(""); setConfirmarClave(""); setMsgClave(null); setModalClave(true); }} style={{ flex: 1, padding: "5px 8px", borderRadius: 0, border: "1px solid #2A2926", background: "transparent", color: "#9A968A", cursor: "pointer", fontSize: 9, textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}>
+                  🔑 Clave
+                </button>
+                <button onClick={handleLogout} style={{ flex: 1, padding: "5px 8px", borderRadius: 0, border: "1px solid #2A2926", background: "transparent", color: "#9A968A", cursor: "pointer", fontSize: 9, textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}>
+                  Salir
+                </button>
+              </div>
             </div>
           ) : (
-            <button onClick={handleLogout} style={{ background: "none", border: "none", color: "#9A968A", cursor: "pointer", fontSize: 10, width: "100%", textAlign: "center" }} title="Cerrar sesion">✕</button>
+            <div style={{ display: "flex", flexDirection: "column", gap: 4, alignItems: "center" }}>
+              <button onClick={() => { setNuevaClave(""); setConfirmarClave(""); setMsgClave(null); setModalClave(true); }} style={{ background: "none", border: "none", color: "#9A968A", cursor: "pointer", fontSize: 13, padding: 0 }} title="Cambiar contraseña">🔑</button>
+              <button onClick={handleLogout} style={{ background: "none", border: "none", color: "#9A968A", cursor: "pointer", fontSize: 10, width: "100%", textAlign: "center" }} title="Cerrar sesion">✕</button>
+            </div>
+          )}
+
+          {/* Modal cambiar contraseña */}
+          {modalClave && (
+            <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000, padding: 24 }}>
+              <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, width: "100%", maxWidth: 360, padding: "32px 36px" }}>
+                <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 400, margin: "0 0 6px" }}>Cambiar contraseña</h2>
+                <div style={{ fontSize: 11, color: "#9A968A", marginBottom: 24 }}>{currentUser.nombre} · @{currentUser.user_login}</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                  <div>
+                    <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 4 }}>Nueva contraseña</label>
+                    <input type="password" value={nuevaClave} onChange={e => setNuevaClave(e.target.value)} placeholder="Mínimo 6 caracteres" style={{ width: "100%", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "8px 10px", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" }} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 4 }}>Confirmar contraseña</label>
+                    <input type="password" value={confirmarClave} onChange={e => setConfirmarClave(e.target.value)} placeholder="Repite la contraseña" style={{ width: "100%", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "8px 10px", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" }} onKeyDown={e => e.key === "Enter" && handleCambiarClave()} />
+                  </div>
+                </div>
+                {msgClave && <div style={{ marginTop: 14, fontSize: 12, color: msgClave.type === "ok" ? "#2C6E52" : "#A23A3A", padding: "8px 12px", background: msgClave.type === "ok" ? "#6AAF8D11" : "#F6E7E5", borderRadius: 0 }}>{msgClave.text}</div>}
+                <div style={{ display: "flex", gap: 10, marginTop: 24, justifyContent: "flex-end" }}>
+                  <button onClick={() => setModalClave(false)} style={{ background: "transparent", border: "1px solid #2A2926", borderRadius: 0, color: "#9A968A", fontSize: 11, cursor: "pointer", padding: "10px 20px", fontFamily: "Inter, sans-serif" }}>Cancelar</button>
+                  <button onClick={handleCambiarClave} disabled={guardandoClave} style={{ background: guardandoClave ? "#E7E1D4" : "#AC8A54", border: "none", borderRadius: 0, color: guardandoClave ? "#9A968A" : "#F8F6F1", fontSize: 11, fontWeight: 700, cursor: guardandoClave ? "not-allowed" : "pointer", padding: "10px 24px", fontFamily: "Inter, sans-serif" }}>
+                    {guardandoClave ? "Guardando..." : "Cambiar contraseña"}
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </div>
