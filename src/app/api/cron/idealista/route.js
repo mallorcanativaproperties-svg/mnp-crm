@@ -26,10 +26,12 @@ const TIPO_MAP = {
   Pareado:"house", Villa:"house", "Villa de Lujo":"house", "Casa Tipo Duplex":"house",
   // rustic
   "Finca rustica":"rustic", Finca:"rustic",
-  // premises_commercial / office
-  "Local comercial":"premises_commercial", Oficina:"office",
-  "Nave industrial":"premises_commercial", Almacen:"premises_commercial", Negocio:"premises_commercial",
-  // land — todos mapean a "land"; el subtipo (land_urban/land_countrybuildable/land_countrynonbuildable) se asigna en buildProperty
+  // premises
+  "Local comercial":"premises_commercial", "Negocio":"premises_commercial",
+  "Nave industrial":"premises_industrial", "Almacen":"premises_industrial",
+  // office
+  Oficina:"office",
+  // land — el subtipo (land_urban/land_countrybuildable/land_countrynonbuildable) se asigna en buildProperty
   Parcela:"land", Solar:"land", "Terreno urbano":"land", "Terreno urbanizable":"land",
   "Terreno rustico":"land", "Terreno rural":"land", "Terreno industrial":"land",
   // garage / storage / building
@@ -43,44 +45,46 @@ const CONSERV_MAP = {
 
 const IMAGE_TAG_MAP = {
   // Valores exactos del schema Idealista v6 images.json
-  LIVING_ROOM: "living",       // sala de estar
-  BEDROOM: "bedroom",          // dormitorio
-  BATHROOM: "bathroom",        // baño
-  KITCHEN: "kitchen",          // cocina
-  TERRACE: "terrace",          // terraza
-  SWIMMING_POOL: "pool",       // piscina
-  GARDEN: "garden",            // jardín
-  CORRIDOR: "corridor",        // pasillo
-  PLAN: "plan",                // plano
-  VIEWS: "views",              // vistas
-  FACADE: "facade",            // fachada
-  GARAGE: "garage",            // garaje
-  STORAGE: "storage_space",    // trastero
-  BALCONY: "balcony",          // balcón (valor propio, no "terrace")
-  DINING: "dining_room",       // comedor
-  HALL: "hall",                // entrada/recibidor
-  PATIO: "patio",              // patio
-  PORCH: "porch",              // porche
+  LIVING_ROOM: "living",
+  BEDROOM: "bedroom",
+  BATHROOM: "bathroom",
+  KITCHEN: "kitchen",
+  TERRACE: "terrace",
+  SWIMMING_POOL: "pool",
+  GARDEN: "garden",
+  CORRIDOR: "corridor",
+  PLAN: "plan",
+  VIEWS: "views",
+  FACADE: "facade",
+  GARAGE: "garage",
+  STORAGE: "storage_space",
+  BALCONY: "balcony",
+  DINING: "dining_room",
+  HALL: "hall",
+  PATIO: "patio",
+  PORCH: "porch",
 };
 
-// Valores exactos del schema Idealista v6 address.json (pattern: ^(-[1-2]|[1-9]|[1-5][0-9]|60|bj|en|ss|st)$)
+// Valores exactos del schema address.json (pattern: ^(-[1-2]|[1-9]|[1-5][0-9]|60|bj|en|ss|st)$)
+// NOTA: "-1" y "-2" son valores literales válidos en el schema; ss/st son semisótano/sótano descriptivos
 const FLOOR_MAP = {
   "Bajo": "bj", "Baja": "bj", "Planta baja": "bj", "PB": "bj", "0": "bj",
   "Entreplanta": "en", "Entresuelo": "en",
   "Semisotano": "ss", "Semisótano": "ss", "SS": "ss",
-  "Sotano": "st", "Sótano": "st", "-2": "st",
-  "-1": "ss",
+  "Sotano": "st", "Sótano": "st",
+  // Plantas numéricas negativas: el schema acepta "-1" y "-2" como literales
+  "-1": "-1", "-2": "-2",
 };
 
-// Valores exactos del schema Idealista v6 features.json (featuresHeatingType)
+// Valores exactos del schema features.json (featuresHeatingType)
 const HEAT_MAP = {
   "Gas central": "centralGas",
   "Gas individual": "individualGas",
-  "Electrica central": "centralOther",        // no existe centralElectric — mapeamos a centralOther
+  "Electrica central": "centralOther",
   "Electrica individual": "individualElectric",
   "Bomba de calor": "individualAirConditioningHeatPump",
-  "Aerotermia": "centralGeothermal",          // aerotermia ≈ geotérmica central
-  "Suelo radiante": "centralOther",            // suelo radiante — centralOther (no hay valor específico)
+  "Aerotermia": "centralGeothermal",
+  "Suelo radiante": "centralOther",
   "Sin calefaccion": "noHeating",
 };
 
@@ -88,10 +92,18 @@ const HEAT_MAP = {
 
 function buildProperty(row, media) {
   const tipo = TIPO_MAP[row.tipo] || "flat";
-  const isHouse = tipo === "house" || tipo === "rustic";
-  const isDuplex = row.tipo === "Duplex" || row.tipo === "Atico Duplex";
+  const isHouse   = tipo === "house" || tipo === "rustic";
+  const isDuplex  = row.tipo === "Duplex" || row.tipo === "Atico Duplex";
   const isPenthouse = row.tipo === "Atico" || row.tipo === "Atico Duplex";
-  const isStudio = row.tipo === "Estudio";
+  const isStudio  = row.tipo === "Estudio";
+  const isHomeType = ["flat","house","rustic"].includes(tipo) ||
+    tipo.startsWith("house_") || tipo.startsWith("rustic_");
+  const isPremisesType = tipo === "premises_commercial" || tipo === "premises_industrial";
+  const isLand    = tipo === "land";
+  const isGarage  = tipo === "garage";
+  const isStorage = tipo === "storage";
+  const isBuilding = tipo === "building";
+  const isOffice  = tipo === "office";
 
   const property = {
     propertyCode: row.ref,
@@ -99,7 +111,7 @@ function buildProperty(row, media) {
     propertyVisibility: "idealista",
   };
 
-  // Operación — precio dinámico según tipo
+  // ── Operación ──────────────────────────────────────────────────────────────
   const isAlquiler = row.op === "Alquiler";
   const isTraspaso = row.op === "Traspaso";
   const price = isAlquiler
@@ -107,23 +119,28 @@ function buildProperty(row, media) {
     : isTraspaso
       ? Number(row.precio_traspaso) || 0
       : Number(row.precio_venta) || 0;
+
   const operation = { operationType: isAlquiler ? "rent" : "sale" };
   if (price > 0) operation.operationPrice = price;
   const community = Number(row.comunidad) || 0;
   if (community > 0 && !isAlquiler) operation.operationPriceCommunity = community;
-  // Precio garaje aparte — solo si parking Si/Opcional y tipo no es garage/storage/land
-  const tiposConPrecioParking = ["flat","house","rustic","premises_commercial","office","building"];
-  if ((row.parking === "Si" || row.parking === "Opcional") && Number(row.precio_parking) > 0 && tiposConPrecioParking.includes(tipo)) {
+  // Precio garaje aparte — solo para tipos residenciales/comerciales
+  const tiposConPrecioParking = ["flat","house","rustic","premises_commercial","premises_industrial","office","building"];
+  if ((row.parking === "Si" || row.parking === "Opcional") &&
+      Number(row.precio_parking) > 0 && tiposConPrecioParking.includes(tipo)) {
     operation.operationPriceParking = Number(row.precio_parking);
   }
-  // operationPriceUrbanizacion no existe en el schema Idealista v6 — omitido
-  // Depósito — operationDepositMonths existe en operation.json
+  // operationPriceTransfer — para traspasos de locales
+  if (isTraspaso && Number(row.precio_traspaso) > 0) {
+    operation.operationPriceTransfer = Number(row.precio_traspaso);
+  }
+  // Depósito
   if (isAlquiler && Number(row.fianza_meses) > 0) {
     operation.operationDepositMonths = Number(row.fianza_meses);
   }
   property.propertyOperation = operation;
 
-  // Contacto
+  // ── Contacto ───────────────────────────────────────────────────────────────
   property.propertyContact = {
     contactName: "Mallorca Nativa Properties",
     contactEmail: "mallorcanativaproperties@gmail.com",
@@ -131,293 +148,252 @@ function buildProperty(row, media) {
     contactPrimaryPhoneNumber: "655882682",
   };
 
-  // Dirección
+  // ── Dirección ──────────────────────────────────────────────────────────────
   const address = { addressCountry: "Spain" };
   if (row.vis_dir === "Direccion exacta") address.addressVisibility = "full";
   else if (row.vis_dir === "Solo calle") address.addressVisibility = "street";
   else address.addressVisibility = "hidden";
-  if (row.dir) address.addressStreetName = row.dir;
+
+  if (row.dir) address.addressStreetName = String(row.dir).slice(0, 200);
   if (row.num) address.addressStreetNumber = String(parseInt(row.num) || row.num).slice(0, 10);
+
   if (row.planta) {
     const floorVal = String(row.planta).trim();
-    if (FLOOR_MAP[floorVal]) {
+    if (FLOOR_MAP[floorVal] !== undefined) {
       address.addressFloor = FLOOR_MAP[floorVal];
     } else {
       const num = parseInt(floorVal);
       if (!isNaN(num) && num >= 1 && num <= 60) address.addressFloor = String(num);
     }
   }
-  if (row.puerta) address.addressDoor = String(row.puerta).slice(0, 4);
-  if (row.bloque) address.addressBlock = String(row.bloque);
-  if (row.escalera) address.addressStair = String(row.escalera);
-  if (row.urbanizacion) address.addressUrbanization = String(row.urbanizacion);
-  if (row.cp) address.addressPostalCode = String(row.cp);
-  if (row.municipio) address.addressTown = row.municipio;
+
+  if (row.puerta)       address.addressDoor          = String(row.puerta).slice(0, 4);
+  if (row.bloque)       address.addressBlock          = String(row.bloque).slice(0, 20);
+  if (row.escalera)     address.addressStair          = String(row.escalera).slice(0, 10);
+  if (row.urbanizacion) address.addressUrbanization   = String(row.urbanizacion).slice(0, 50);
+  // Código postal — debe ser exactamente 5 dígitos para España
+  if (row.cp && /^[0-9]{5}$/.test(String(row.cp))) {
+    address.addressPostalCode = String(row.cp);
+  }
+  if (row.municipio) address.addressTown = String(row.municipio).slice(0, 50);
+
   if (row.latitud && row.longitud) {
-    address.addressCoordinatesPrecision = "exact";
-    address.addressCoordinatesLatitude = Number(row.latitud);
-    address.addressCoordinatesLongitude = Number(row.longitud);
+    address.addressCoordinatesPrecision   = "exact";
+    address.addressCoordinatesLatitude    = Number(row.latitud);
+    address.addressCoordinatesLongitude   = Number(row.longitud);
   }
   property.propertyAddress = address;
 
-  // Features
+  // ── Features — objeto base con campos comunes a todos los tipos ────────────
+  // IMPORTANTE: Idealista v6 usa additionalProperties:false en cada sub-schema.
+  // Construimos features con SOLO los campos permitidos para cada tipo.
   const features = { featuresType: tipo };
-  const mConst = Number(row.m_const) || 0;
-  const mUtil = Number(row.m_util) || 0;
-  const mParcela = Number(row.m_parcela) || 0;
-  const banos = (Number(row.banos) || 0) + (Number(row.aseos) || 0);
-  const habDobles = Number(row.hab_dobles) || 0;
-  const habSimples = Number(row.hab_simples) || 0;
 
+  const mConst   = Number(row.m_const)   || 0;
+  const mUtil    = Number(row.m_util)    || 0;
+  const mParcela = Number(row.m_parcela) || 0;
+  const banos    = (Number(row.banos) || 0) + (Number(row.aseos) || 0);
+  const bedrooms = Number(row.total_hab) || ((Number(row.hab_dobles) || 0) + (Number(row.hab_simples) || 0));
+
+  // featuresAreaConstructed: obligatorio para todos excepto land y garage
   if (mConst > 0) features.featuresAreaConstructed = mConst;
-  if (mUtil > 0) features.featuresAreaUsable = mUtil;
-  if ((isHouse || tipo === "land") && mParcela > 0) features.featuresAreaPlot = mParcela;
-  if (banos > 0) features.featuresBathroomNumber = banos;
-  const bedrooms = Number(row.total_hab) || (habDobles + habSimples);
-  if (bedrooms > 0) features.featuresBedroomNumber = bedrooms;
+  // featuresAreaUsable: homes, premises, offices, building (no land, no garage, no storage)
+  if (mUtil > 0 && !isLand && !isGarage) features.featuresAreaUsable = mUtil;
+  // featuresAreaPlot: homes (house/rustic) y land
+  if ((isHouse || isLand) && mParcela > 0) features.featuresAreaPlot = mParcela;
+  // featuresAreaBuildable: solo land
+  if (isLand && Number(row.m_edificable) > 0) features.featuresAreaBuildable = Number(row.m_edificable);
+  // featuresAreaHeight: solo storage
+  if (isStorage && Number(row.trastero_altura) > 0) features.featuresAreaHeight = Number(row.trastero_altura);
+
+  // featuresBathroomNumber: homes, premises, offices (no land, garage, storage, building)
+  if (banos > 0 && !isLand && !isGarage && !isStorage && !isBuilding) {
+    features.featuresBathroomNumber = banos;
+  }
+  // featuresBedroomNumber: solo homes
+  if (bedrooms > 0 && isHomeType) features.featuresBedroomNumber = bedrooms;
+
+  // featuresBuiltYear: todos
   if (row.ano_construc) {
     const year = parseInt(row.ano_construc);
     if (year > 1800 && year <= new Date().getFullYear()) features.featuresBuiltYear = year;
   }
 
-  if (row.jardin === true) features.featuresGarden = true;
-  if (row.ascensor === true) features.featuresLiftAvailable = true;
-  if (row.piscina === true) features.featuresPool = true;
-  if (row.trastero === true) features.featuresStorage = true;
-  if (row.terraza === true) features.featuresTerrace = true;
-  if (row.armarios === true) features.featuresWardrobes = true;
-  if (row.vent_ext === true) features.featuresWindowsLocation = "exterior";
-  // featuresRenovatedElectricity y featuresRenovatedPlumbing no existen en Idealista v6 — omitidos
-  if (row.balcon === true) features.featuresBalcony = true;
-  // featuresTerraceArea y featuresBalconyArea no existen en ningún schema Idealista v6 — omitidos
-  // Parking — todos los valores positivos
-  // featuresParkingSpacesNumber existe en offices.json y building.json pero NO en homes.json
-  const isHomeType = ["flat","house","rustic"].includes(tipo) ||
-    tipo.startsWith("house_") || tipo.startsWith("rustic_");
-  if (row.parking === "Si") {
-    features.featuresParkingAvailable = true;
-    if (Number(row.n_plazas) > 0 && !isHomeType) features.featuresParkingSpacesNumber = Number(row.n_plazas);
-  } else if (row.parking === "Comunitario") {
-    // "Comunitario" no tiene campo específico en Idealista v6 — se omite
-  } else if (row.parking === "Opcional") {
-    features.featuresParkingAvailable = true; // opcional = disponible
-    if (Number(row.n_plazas) > 0 && !isHomeType) features.featuresParkingSpacesNumber = Number(row.n_plazas);
-  }
-  // Alquiler — campos específicos (homes.json fields, NO en operation.json)
-  if (isAlquiler) {
-    // Temporada vs larga estancia
-    if (row.alq_tipo_operacion === "temporada") {
-      features.featuresSeasonalRental = true;
-      // featuresShortTerm NO se activa simultáneamente: el schema exige que solo uno de
-      // featuresSeasonalRental, featuresResidential, featuresShortTerm sea true a la vez
-    } else if (row.alq_tipo_operacion === "corta") {
-      features.featuresShortTerm = true;
-    }
-    // Mascotas
-    if (row.mascotas === true || row.mascotas === "true") features.featuresAllowPets = true;
-    else if (row.mascotas === false || row.mascotas === "false") features.featuresAllowPets = false;
-    // Número máximo de inquilinos
-    if (Number(row.alq_max_inquilinos) > 0) features.featuresTenantNumber = Number(row.alq_max_inquilinos);
-    // Apto para niños
-    if (row.alq_apto_ninos === true) features.featuresRecommendedForChildren = true;
-    else if (row.alq_apto_ninos === false) features.featuresRecommendedForChildren = false;
-    // Equipamiento cocina/mobiliario — featuresEquippedKitchen y featuresEquippedWithFurniture son boolean
-    // featuresEquippedWithFurniture solo se procesa si featuresEquippedKitchen=true (per spec)
-    if (row.alq_equipamiento === "Cocina con electrodomésticos y casa amueblada") {
-      features.featuresEquippedKitchen = true;
-      features.featuresEquippedWithFurniture = true;
-    } else if (row.alq_equipamiento === "Cocina con electrodomésticos y casa sin amueblar") {
-      features.featuresEquippedKitchen = true;
-    }
-    // "Cocina vacía y casa sin amueblar" y "No lo sé" → no emitir ninguno
-  } else if (row.venta_mobiliario === true) {
-    features.featuresEquippedWithFurniture = true;
+  // featuresConservation: homes, premises, offices, building
+  if (!isLand && !isGarage && !isStorage) {
+    const conserv = CONSERV_MAP[row.conserv];
+    if (conserv) features.featuresConservation = conserv;
   }
 
-  const AIRE_MAP = {
-    "No disponible": "notAvailable", "Solo frio": "cold",
-    "Frio/Calor": "cold/heat", "Preinstalacion": "preInstallation",
-  };
-  if (row.aire_acond_tipo && AIRE_MAP[row.aire_acond_tipo]) {
-    // featuresConditionedAirType NO existe en homes.json — solo emitir para offices/premises/building/etc.
-    if (!isHomeType) features.featuresConditionedAirType = AIRE_MAP[row.aire_acond_tipo];
-    if (row.aire_acond_tipo !== "No disponible") features.featuresConditionedAir = true;
-  }
-  if (row.calefaccion && HEAT_MAP[row.calefaccion]) features.featuresHeatingType = HEAT_MAP[row.calefaccion];
-
-  // featuresHotWater NO existe en homes.json — solo emitir para offices/premises/building/etc.
-  if (row.agua_cal && !isHomeType) features.featuresHotWater = row.agua_cal !== "Sin agua caliente";
-
-  if (row.chimenea === true) features.featuresChimney = true;
-  if (row.cocina_equipada === true) features.featuresEquippedKitchen = true;
-  // featuresWindowsDouble, featuresSecurityDoor, featuresSecurityAlarm NO existen en homes.json
-  if (row.doble_acristalamiento === true && !isHomeType) features.featuresWindowsDouble = true;
-  if (row.puerta_blindada === true && !isHomeType) features.featuresSecurityDoor = true;
-  if (row.alarma_seguridad === true && !isHomeType) features.featuresSecurityAlarm = true;
-  if (Number(row.plantas_edificio) > 0) features.featuresFloorsBuilding = Number(row.plantas_edificio);
-
-  // Subtipo terreno — se codifica en featuresType (schema v6: land/land_urban/land_countrybuildable/land_countrynonbuildable)
-  if (tipo === "land" && row.tipo) {
-    const LAND_SUBTYPE_MAP = {
-      "Parcela": "land_urban",
-      "Solar": "land_urban",
-      "Terreno urbano": "land_urban",
-      "Terreno urbanizable": "land_countrybuildable",
-      "Terreno rustico": "land_countrynonbuildable",
-      "Terreno rural": "land_countrynonbuildable",
-      "Terreno industrial": "land_urban", // no existe land_industrial en schema v6
-    };
-    if (LAND_SUBTYPE_MAP[row.tipo]) features.featuresType = LAND_SUBTYPE_MAP[row.tipo];
-  }
-
-  // featuresGarageCapacityType — para tipo garage (schema v6: unknown/car_compact/car_sedan/motorcycle/car_and_motorcycle/two_cars_and_more)
-  if (tipo === "garage" && row.tipo_garaje) {
-    const GARAGE_CAPACITY_MAP = {
-      "Coche compacto": "car_compact",
-      "Coche sedán": "car_sedan",
-      "Moto": "motorcycle",
-      "Coche y moto": "car_and_motorcycle",
-      "Dos coches o más": "two_cars_and_more",
-      "Desconocido": "unknown",
-    };
-    if (GARAGE_CAPACITY_MAP[row.tipo_garaje]) features.featuresGarageCapacityType = GARAGE_CAPACITY_MAP[row.tipo_garaje];
-  }
-  // Campos opcionales garaje
-  if (tipo === "garage") {
-    if (row.garaje_puerta_auto === true) features.featuresParkingAutomaticDoor = true;
-    if (row.garaje_plaza_cubierta === true) features.featuresParkingPlaceCovered = true;
-    if (row.garaje_tipo) {
-      const GARAGE_TIPO_MAP = { "Trastero/Depósito": "depot", "Plaza aparcamiento": "parking_space", "Desconocido": "unknown" };
-      if (GARAGE_TIPO_MAP[row.garaje_tipo]) features.featuresParkingType = GARAGE_TIPO_MAP[row.garaje_tipo];
-    }
-  }
-
-  // Campos opcionales terreno
-  if (tipo === "land") {
-    if (Number(row.m_edificable) > 0) features.featuresAreaBuildable = Number(row.m_edificable);
-    if (row.terreno_acceso) {
-      const ACCESO_MAP = { "Urbano": "urban", "Carretera": "road", "Pista": "track", "Autovía/Autopista": "highway", "Desconocido": "unknown" };
-      if (ACCESO_MAP[row.terreno_acceso]) features.featuresAccessType = ACCESO_MAP[row.terreno_acceso];
-    }
-    if (row.terreno_luz === true) features.featuresUtilitiesElectricity = true;
-    if (row.terreno_agua === true) features.featuresUtilitiesWater = true;
-    if (row.terreno_gas === true) features.featuresUtilitiesNaturalGas = true;
-    if (row.terreno_alcantarillado === true) features.featuresUtilitiesSewerage = true;
-    if (row.terreno_aceras === true) features.featuresUtilitiesSidewalk = true;
-    if (row.terreno_alumbrado === true) features.featuresUtilitiesStreetLighting = true;
-    if (row.terreno_carretera === true) features.featuresUtilitiesRoadAccess = true;
-  }
-
-  // Campos opcionales trastero
-  if (tipo === "storage") {
-    if (row.trastero_acceso_24h === true) features.featuresAccess24h = true;
-    if (Number(row.trastero_altura) > 0) features.featuresAreaHeight = Number(row.trastero_altura);
-    if (row.trastero_seguridad_24h === true) features.featuresSecurity24h = true;
-    if (row.trastero_muelle_carga === true) features.featuresLoadingDock = true;
-  }
-
-  const OCC_MAP = { "Vacía": "free", "Alquilada": "tenanted", "Ocupada": "illegally_occupied" };
-  if (row.ocupacion_actual && OCC_MAP[row.ocupacion_actual]) features.featuresCurrentOccupation = OCC_MAP[row.ocupacion_actual];
-
-  if (isStudio || row.tipo === "Loft") features.featuresStudio = true;
-  if (isPenthouse) features.featuresPenthouse = true;
-  if (isDuplex) features.featuresDuplex = true;
-
-  const conserv = CONSERV_MAP[row.conserv];
-  if (conserv) features.featuresConservation = conserv;
+  // featuresCadastralReference: todos
   if (row.ref_cat) features.featuresCadastralReference = row.ref_cat;
 
-  // Chalet — tipología se refleja en featuresType (homes.json: house_independent, house_semidetached, house_terraced)
-  // featuresHouseSubtype y featuresFloorNumber no existen en homes.json — se usan los tipos específicos en TIPO_MAP
-  if ((tipo === "house" || tipo === "rustic") && row.tipologia_chalet) {
-    const TIPOLOGIA_TYPE_MAP = {
-      "Independiente": "house_independent",
-      "Pareado": "house_semidetached",
-      "Adosado": "house_terraced",
-      "En hilera": "house_terraced",
-    };
-    // Solo sustituir si el tipo actual es genérico "house"
-    if (tipo === "house" && TIPOLOGIA_TYPE_MAP[row.tipologia_chalet]) {
-      features.featuresType = TIPOLOGIA_TYPE_MAP[row.tipologia_chalet];
+  // ── Campos exclusivos de HOMES (flat, house, rustic) ──────────────────────
+  if (isHomeType) {
+    if (row.jardin === true)   features.featuresGarden        = true;
+    if (row.ascensor === true) features.featuresLiftAvailable = true;
+    if (row.piscina === true)  features.featuresPool          = true;
+    if (row.trastero === true) features.featuresStorage       = true;
+    if (row.terraza === true)  features.featuresTerrace       = true;
+    if (row.armarios === true) features.featuresWardrobes     = true;
+    if (row.balcon === true)   features.featuresBalcony       = true;
+    if (row.chimenea === true) features.featuresChimney       = true;
+    if (row.vent_ext === true) features.featuresWindowsLocation = "exterior";
+
+    if (row.parking === "Si" || row.parking === "Opcional") {
+      features.featuresParkingAvailable = true;
     }
-    if (Number(row.plantas_chalet) > 0) features.featuresFloorsBuilding = Number(row.plantas_chalet);
-  }
 
-  if (row.cert_energ) {
-    if (row.cert_energ === "Exento") features.featuresEnergyCertificateRating = "exempt";
-    else if (/^[A-G]$/.test(row.cert_energ)) features.featuresEnergyCertificateRating = row.cert_energ;
-    // "En tramite" ya no es válido para España desde 2021 (Idealista v6, 01/07/2026) — se omite
-  }
-  if (row.emisiones_energ && /^[A-G]$/.test(row.emisiones_energ)) {
-    features.featuresEnergyCertificateEmissionsRating = row.emisiones_energ;
-  }
-
-  if (row.orient) {
-    // Mapeo exacto desde opciones del select (Norte, Sur, Este, Oeste, Sureste, Suroeste, Noreste, Noroeste)
-    const ORIENT_MAP = {
-      "Norte": ["North"], "Sur": ["South"], "Este": ["East"], "Oeste": ["West"],
-      "Noreste": ["North","East"], "Noroeste": ["North","West"],
-      "Sureste": ["South","East"], "Suroeste": ["South","West"],
-    };
-    const dirs = ORIENT_MAP[row.orient] || [];
-    if (dirs.includes("North")) features.featuresOrientationNorth = true;
-    if (dirs.includes("South")) features.featuresOrientationSouth = true;
-    if (dirs.includes("East")) features.featuresOrientationEast = true;
-    if (dirs.includes("West")) features.featuresOrientationWest = true;
-  }
-
-  property.propertyFeatures = features;
-
-  // Descripciones
-  const descriptions = [];
-  if (row.desc_texto?.trim()) descriptions.push({ descriptionLanguage: "spanish", descriptionText: row.desc_texto.trim().slice(0, 4000) });
-  if (row.desc_en?.trim()) descriptions.push({ descriptionLanguage: "english", descriptionText: row.desc_en.trim().slice(0, 4000) });
-  if (row.desc_de?.trim()) descriptions.push({ descriptionLanguage: "german", descriptionText: row.desc_de.trim().slice(0, 4000) });
-  if (descriptions.length > 0) property.propertyDescriptions = descriptions;
-
-  // Imágenes — rutas RELATIVAS para FTP (fotos + planos)
-  const fotos  = (media || []).filter(m => m.tipo === "foto"  && m.url).sort((a,b) => (a.orden||0)-(b.orden||0));
-  const planos = (media || []).filter(m => m.tipo === "plano" && m.url).sort((a,b) => (a.orden||0)-(b.orden||0));
-  const allImgs = [...fotos, ...planos];
-
-  if (allImgs.length > 0) {
-    property.propertyImages = allImgs.map((item, i) => {
-      const url = item.url || "";
-      const match = url.match(/propiedades-media\/(.+)$/);
-      const relativePath = match ? match[1] : url;
-      const img = { imageOrder: i + 1, imageUrl: relativePath, imageAiGenerated: item.ia_generada === true };
-      if (item.tipo === "plano") {
-        img.imageLabel = "plan";
-      } else if (item.etiqueta && IMAGE_TAG_MAP[item.etiqueta]) {
-        img.imageLabel = IMAGE_TAG_MAP[item.etiqueta];
+    // Subtipo chalet
+    if ((tipo === "house" || tipo === "rustic") && row.tipologia_chalet) {
+      const TIPOLOGIA_TYPE_MAP = {
+        "Independiente": "house_independent",
+        "Pareado":       "house_semidetached",
+        "Adosado":       "house_terraced",
+        "En hilera":     "house_terraced",
+      };
+      if (tipo === "house" && TIPOLOGIA_TYPE_MAP[row.tipologia_chalet]) {
+        features.featuresType = TIPOLOGIA_TYPE_MAP[row.tipologia_chalet];
       }
-      // No enviar imageLabel si no hay etiqueta válida
-      return img;
-    });
+      if (Number(row.plantas_chalet) > 0) features.featuresFloorsBuilding = Number(row.plantas_chalet);
+    }
+
+    if (isStudio || row.tipo === "Loft") features.featuresStudio    = true;
+    if (isPenthouse)                     features.featuresPenthouse  = true;
+    if (isDuplex)                        features.featuresDuplex     = true;
+
+    if (row.cocina_equipada === true) features.featuresEquippedKitchen = true;
+
+    // Calefacción y aire — homes.json tiene featuresConditionedAir pero NO featuresConditionedAirType
+    if (row.calefaccion && HEAT_MAP[row.calefaccion]) {
+      features.featuresHeatingType = HEAT_MAP[row.calefaccion];
+    }
+    if (row.aire_acond_tipo && row.aire_acond_tipo !== "No disponible") {
+      features.featuresConditionedAir = true;
+      // featuresConditionedAirType NO existe en homes.json — omitido para homes
+    }
+
+    // Ocupación
+    const OCC_MAP = { "Vacía": "free", "Alquilada": "tenanted", "Ocupada": "illegally_occupied" };
+    if (row.ocupacion_actual && OCC_MAP[row.ocupacion_actual]) {
+      features.featuresCurrentOccupation = OCC_MAP[row.ocupacion_actual];
+    }
+
+    // Certificado energético — obligatorio para residencial
+    if (row.cert_energ) {
+      if (row.cert_energ === "Exento") features.featuresEnergyCertificateRating = "exempt";
+      else if (/^[A-G]$/.test(row.cert_energ)) features.featuresEnergyCertificateRating = row.cert_energ;
+    }
+    if (row.emisiones_energ && /^[A-G]$/.test(row.emisiones_energ)) {
+      features.featuresEnergyCertificateEmissionsRating = row.emisiones_energ;
+    }
+
+    // Orientación
+    if (row.orient) {
+      const ORIENT_MAP = {
+        "Norte": ["North"], "Sur": ["South"], "Este": ["East"], "Oeste": ["West"],
+        "Noreste": ["North","East"], "Noroeste": ["North","West"],
+        "Sureste": ["South","East"], "Suroeste": ["South","West"],
+      };
+      const dirs = ORIENT_MAP[row.orient] || [];
+      if (dirs.includes("North")) features.featuresOrientationNorth = true;
+      if (dirs.includes("South")) features.featuresOrientationSouth = true;
+      if (dirs.includes("East"))  features.featuresOrientationEast  = true;
+      if (dirs.includes("West"))  features.featuresOrientationWest  = true;
+    }
+
+    // Campos de alquiler — solo para homes y solo en alquiler
+    if (isAlquiler) {
+      // Solo uno de estos tres puede ser true a la vez (constraint del schema)
+      if (row.alq_tipo_operacion === "temporada") {
+        features.featuresSeasonalRental = true;
+      } else if (row.alq_tipo_operacion === "corta") {
+        features.featuresShortTerm = true;
+        // featuresShortTermLicense: obligatorio cuando featuresShortTerm=true
+        if (row.alq_licencia_turistica) {
+          features.featuresShortTermLicense = String(row.alq_licencia_turistica);
+        }
+      } else {
+        features.featuresResidential = true;
+      }
+
+      if (row.mascotas === true  || row.mascotas === "true")  features.featuresAllowPets = true;
+      if (row.mascotas === false || row.mascotas === "false") features.featuresAllowPets = false;
+
+      if (Number(row.alq_max_inquilinos) > 0) {
+        features.featuresTenantNumber = Math.min(Number(row.alq_max_inquilinos), 10);
+      }
+      if (row.alq_apto_ninos === true)  features.featuresRecommendedForChildren = true;
+      if (row.alq_apto_ninos === false) features.featuresRecommendedForChildren = false;
+
+      // Equipamiento — featuresEquippedWithFurniture solo válido para alquiler
+      if (row.alq_equipamiento === "Cocina con electrodomésticos y casa amueblada") {
+        features.featuresEquippedKitchen      = true;
+        features.featuresEquippedWithFurniture = true;
+      } else if (row.alq_equipamiento === "Cocina con electrodomésticos y casa sin amueblar") {
+        features.featuresEquippedKitchen = true;
+      }
+      // "Cocina vacía y casa sin amueblar" / "No lo sé" → no emitir nada
+    }
+    // featuresEquippedWithFurniture NO se emite para venta (schema: "only available for rent")
   }
 
-  // Vídeos — URL pública de Supabase Storage (schema videoUrl requiere URL absoluta https://)
-  // Solo videoUrl + videoOrder, sin videoType (campo inexistente en schema). Máx 6 vídeos.
-  const videos = (media || []).filter(m => m.tipo === "video" && m.url?.startsWith("http")).sort((a,b) => (a.orden||0)-(b.orden||0)).slice(0, 6);
-  if (videos.length > 0) {
-    property.propertyVideos = videos.map((v, i) => ({
-      videoOrder: i + 1,
-      videoUrl: v.url,
-    }));
-  }
-
-  // Tour virtual — estructura correcta según schema Idealista v6
-  if (row.tour360?.startsWith("http")) {
-    property.propertyVirtualTours = {
-      virtualTour3D: { virtualTourUrl: row.tour360 }
+  // ── Campos exclusivos de OFFICES ──────────────────────────────────────────
+  if (isOffice) {
+    if (row.ascensor === true) features.featuresLiftAvailable = true;
+    if (row.calefaccion && HEAT_MAP[row.calefaccion]) {
+      features.featuresHeatingType = HEAT_MAP[row.calefaccion];
+    }
+    const AIRE_MAP = {
+      "No disponible": "notAvailable", "Solo frio": "cold",
+      "Frio/Calor": "cold/heat", "Preinstalacion": "preInstallation",
     };
+    if (row.aire_acond_tipo && AIRE_MAP[row.aire_acond_tipo]) {
+      features.featuresConditionedAirType = AIRE_MAP[row.aire_acond_tipo];
+      if (row.aire_acond_tipo !== "No disponible") features.featuresConditionedAir = true;
+    }
+    if (row.agua_cal) features.featuresHotWater = row.agua_cal !== "Sin agua caliente";
+    if (row.doble_acristalamiento === true) features.featuresWindowsDouble  = true;
+    if (row.puerta_blindada === true)       features.featuresSecurityDoor   = true;
+    if (row.alarma_seguridad === true)      features.featuresSecurityAlarm  = true;
+    if (Number(row.n_plazas) > 0)          features.featuresParkingSpacesNumber = Number(row.n_plazas);
+    if (row.trastero === true)             features.featuresStorage         = true;
+    if (Number(row.plantas_edificio) > 0)  features.featuresFloorsBuilding  = Number(row.plantas_edificio);
+
+    const OCC_MAP = { "Vacía": "free", "Alquilada": "tenanted", "Ocupada": "illegally_occupied" };
+    if (row.ocupacion_actual && OCC_MAP[row.ocupacion_actual]) {
+      features.featuresCurrentOccupation = OCC_MAP[row.ocupacion_actual];
+    }
   }
 
-  // PREMISES: Local / Nave comercial
-  const isPremises = ["Local comercial","Nave industrial","Almacen","Negocio","Local","Nave"].includes(row.tipo);
-  if (isPremises) {
-    const actividades = row.local_actividad || [];
-    // featuresCommercialActivity — enum exacto del schema Idealista v6 features.json
+  // ── Campos exclusivos de PREMISES (local/nave) ────────────────────────────
+  if (isPremisesType) {
+    if (row.calefaccion && HEAT_MAP[row.calefaccion]) {
+      features.featuresHeatingType = HEAT_MAP[row.calefaccion];
+    }
+    if (row.aire_acond_tipo && row.aire_acond_tipo !== "No disponible") {
+      features.featuresConditionedAir = true;
+    }
+    if (row.agua_cal) features.featuresHotWater = row.agua_cal !== "Sin agua caliente";
+    if (row.doble_acristalamiento === true) features.featuresWindowsDouble  = true;
+    if (row.puerta_blindada === true)       features.featuresSecurityDoor   = true;
+    if (row.alarma_seguridad === true)      features.featuresSecurityAlarm  = true;
+    if (row.trastero === true)             features.featuresStorage         = true;
+    if (Number(row.plantas_edificio) > 0)  features.featuresFloorsBuilding  = Number(row.plantas_edificio);
+    if (row.local_salida_humos)            features.featuresSmokeExtraction = true;
+    if (row.local_cocina_equipada)         features.featuresEquippedKitchen = true;
+    if (row.local_hace_esquina)            features.featuresLocatedAtCorner = true;
+
+    const locUbicMap = {
+      pie_calle: "street", centro_comercial: "shopping",
+      entreplanta: "mezzanine", sotano: "belowGround", planta_superior: "on_top_floor",
+    };
+    if (row.local_ubicacion && locUbicMap[row.local_ubicacion]) {
+      features.featuresUbication = locUbicMap[row.local_ubicacion];
+    }
+    if (row.local_n_escaparates) features.featuresWindowsNumber  = Number(row.local_n_escaparates);
+    if (row.local_n_plantas)     features.featuresFloorsProperty = Number(row.local_n_plantas);
+
     const ACTIVIDAD_MAP = {
       "Bar": "bar", "Restaurante": "restaurant", "Cafetería": "coffee_shop",
       "Discoteca / pub / sala": "nightclub", "Hotel / hostal": "hotel",
@@ -435,35 +411,133 @@ function buildProperty(row, media) {
       "Taller / reparación": "repair_shop", "Almacén / logística": "storehouse",
       "Industria ligera": "light_industry",
     };
-    // featuresUbication — valores exactos del schema Idealista v6
-    const locUbicMap = {
-      pie_calle: "street", centro_comercial: "shopping",
-      entreplanta: "mezzanine", sotano: "belowGround", planta_superior: "on_top_floor",
-    };
-    const premises = {};
-    // Mapear primera actividad encontrada al string correcto
+    const actividades = row.local_actividad || [];
     for (const act of actividades) {
-      if (ACTIVIDAD_MAP[act]) { premises.featuresCommercialMainActivity = ACTIVIDAD_MAP[act]; break; }
+      if (ACTIVIDAD_MAP[act]) { features.featuresCommercialMainActivity = ACTIVIDAD_MAP[act]; break; }
     }
-    if (row.local_ubicacion && locUbicMap[row.local_ubicacion]) premises.featuresUbication = locUbicMap[row.local_ubicacion];
-    if (row.local_n_escaparates) premises.featuresWindowsNumber = Number(row.local_n_escaparates);
-    if (row.local_n_plantas) premises.featuresFloorsProperty = Number(row.local_n_plantas);
-    if (row.local_salida_humos) premises.featuresSmokeExtraction = true;
-    if (row.local_cocina_equipada) premises.featuresEquippedKitchen = true;
-    if (row.local_ac) premises.featuresConditionedAir = true;
-    if (row.local_calefaccion) premises.featuresHeating = true;
-    if (row.local_alarma) premises.featuresSecurityAlarm = true;
-    // featuresCCTV, featuresAuxiliaryEntrance, featuresOfficeInPremise no existen en schema v6 — omitidos
-    if (row.local_almacen) premises.featuresStorage = true;
-    if (row.local_hace_esquina) premises.featuresLocatedAtCorner = true;
-    if (row.local_puerta_seguridad) premises.featuresSecurityDoor = true;
-    if (row.op === "Traspaso") {
-      // featuresPriceTransfer: precio del traspaso — ya se incluye en operationPrice (schema: operationPriceTransfer)
-      // featuresTransferEndContract: fecha fin contrato arrendamiento (formato ISO "YYYY-MM-DD")
-      if (row.local_fin_contrato) premises.featuresTransferEndContract = row.local_fin_contrato;
-      // Nota: alquiler mensual y fianza del traspaso van en propertyOperation (operationPrice/operationDepositMonths)
+
+    // Traspaso
+    if (isTraspaso) {
+      features.featuresIsATransfer = true;
+      // Fecha fin contrato: formato YYYY-MM (solo año y mes según schema)
+      if (row.local_fin_contrato) {
+        const fechaStr = String(row.local_fin_contrato);
+        // Extraer YYYY-MM de cualquier formato de fecha
+        const match = fechaStr.match(/^(\d{4})-(\d{2})/);
+        if (match) features.featuresTransferEndContract = `${match[1]}-${match[2]}`;
+      }
     }
-    if (Object.keys(premises).length > 0) property.propertyPremises = premises;
+  }
+
+  // ── Campos exclusivos de LAND ──────────────────────────────────────────────
+  if (isLand) {
+    // Subtipo terreno
+    const LAND_SUBTYPE_MAP = {
+      "Parcela":           "land_urban",
+      "Solar":             "land_urban",
+      "Terreno urbano":    "land_urban",
+      "Terreno urbanizable": "land_countrybuildable",
+      "Terreno rustico":   "land_countrynonbuildable",
+      "Terreno rural":     "land_countrynonbuildable",
+      "Terreno industrial": "land_urban",
+    };
+    if (LAND_SUBTYPE_MAP[row.tipo]) features.featuresType = LAND_SUBTYPE_MAP[row.tipo];
+
+    if (row.terreno_acceso) {
+      const ACCESO_MAP = {
+        "Urbano": "urban", "Carretera": "road", "Pista": "track",
+        "Autovía/Autopista": "highway", "Desconocido": "unknown",
+      };
+      if (ACCESO_MAP[row.terreno_acceso]) features.featuresAccessType = ACCESO_MAP[row.terreno_acceso];
+    }
+    if (row.terreno_luz          === true) features.featuresUtilitiesElectricity    = true;
+    if (row.terreno_agua         === true) features.featuresUtilitiesWater          = true;
+    if (row.terreno_gas          === true) features.featuresUtilitiesNaturalGas     = true;
+    if (row.terreno_alcantarillado === true) features.featuresUtilitiesSewerage     = true;
+    if (row.terreno_aceras       === true) features.featuresUtilitiesSidewalk       = true;
+    if (row.terreno_alumbrado    === true) features.featuresUtilitiesStreetLighting = true;
+    if (row.terreno_carretera    === true) features.featuresUtilitiesRoadAccess     = true;
+  }
+
+  // ── Campos exclusivos de GARAGE ───────────────────────────────────────────
+  if (isGarage) {
+    // featuresGarageCapacityType es REQUERIDO en garage.json
+    const GARAGE_CAPACITY_MAP = {
+      "Coche compacto":   "car_compact",
+      "Coche sedán":      "car_sedan",
+      "Moto":             "motorcycle",
+      "Coche y moto":     "car_and_motorcycle",
+      "Dos coches o más": "two_cars_and_more",
+      "Desconocido":      "unknown",
+    };
+    // Si no hay valor en BD, usar "unknown" (campo obligatorio)
+    features.featuresGarageCapacityType = GARAGE_CAPACITY_MAP[row.tipo_garaje] || "unknown";
+
+    if (row.garaje_puerta_auto     === true) features.featuresParkingAutomaticDoor  = true;
+    if (row.garaje_plaza_cubierta  === true) features.featuresParkingPlaceCovered   = true;
+  }
+
+  // ── Campos exclusivos de STORAGE ──────────────────────────────────────────
+  if (isStorage) {
+    if (row.trastero_acceso_24h   === true) features.featuresAccess24h    = true;
+    if (row.trastero_seguridad_24h === true) features.featuresSecurity24h = true;
+    if (row.trastero_muelle_carga  === true) features.featuresLoadingDock = true;
+  }
+
+  // ── Campos exclusivos de BUILDING ─────────────────────────────────────────
+  if (isBuilding) {
+    if (row.ascensor === true)            features.featuresLiftAvailable      = true;
+    if (row.jardin === true)              features.featuresGarden              = true;
+    if (Number(row.n_plazas) > 0)        features.featuresParkingSpacesNumber = Number(row.n_plazas);
+    if (Number(row.plantas_edificio) > 0) features.featuresFloorsBuilding      = Number(row.plantas_edificio);
+  }
+
+  property.propertyFeatures = features;
+
+  // ── Descripciones ──────────────────────────────────────────────────────────
+  const descriptions = [];
+  if (row.desc_texto?.trim()) descriptions.push({ descriptionLanguage: "spanish", descriptionText: row.desc_texto.trim().slice(0, 4000) });
+  if (row.desc_en?.trim())    descriptions.push({ descriptionLanguage: "english", descriptionText: row.desc_en.trim().slice(0, 4000) });
+  if (row.desc_de?.trim())    descriptions.push({ descriptionLanguage: "german",  descriptionText: row.desc_de.trim().slice(0, 4000) });
+  if (descriptions.length > 0) property.propertyDescriptions = descriptions;
+
+  // ── Imágenes — rutas RELATIVAS para FTP ───────────────────────────────────
+  const fotos  = (media || []).filter(m => m.tipo === "foto"  && m.url).sort((a,b) => (a.orden||0)-(b.orden||0));
+  const planos = (media || []).filter(m => m.tipo === "plano" && m.url).sort((a,b) => (a.orden||0)-(b.orden||0));
+  const allImgs = [...fotos, ...planos];
+
+  if (allImgs.length > 0) {
+    property.propertyImages = allImgs.map((item, i) => {
+      const url = item.url || "";
+      const match = url.match(/propiedades-media\/(.+)$/);
+      const relativePath = match ? match[1] : url;
+      const img = { imageOrder: i + 1, imageUrl: relativePath, imageAiGenerated: item.ia_generada === true };
+      if (item.tipo === "plano") {
+        img.imageLabel = "plan";
+      } else if (item.etiqueta && IMAGE_TAG_MAP[item.etiqueta]) {
+        img.imageLabel = IMAGE_TAG_MAP[item.etiqueta];
+      }
+      return img;
+    });
+  }
+
+  // ── Vídeos — URL absoluta requerida por el schema ─────────────────────────
+  const videos = (media || [])
+    .filter(m => m.tipo === "video" && m.url?.startsWith("http"))
+    .sort((a,b) => (a.orden||0)-(b.orden||0))
+    .slice(0, 6);
+  if (videos.length > 0) {
+    property.propertyVideos = videos.map((v, i) => ({
+      videoOrder: i + 1,
+      videoUrl: v.url,
+    }));
+  }
+
+  // ── Tour virtual ───────────────────────────────────────────────────────────
+  if (row.tour360?.startsWith("http")) {
+    property.propertyVirtualTours = {
+      virtualTour3D: { virtualTourUrl: row.tour360 }
+    };
   }
 
   return property;
@@ -473,7 +547,8 @@ function buildProperty(row, media) {
 
 function isValid(row) {
   if (!row.ref || !row.tipo || !row.municipio || !row.dir) return false;
-  if (!row.cp && !(row.latitud && row.longitud)) return false;
+  // Código postal válido O coordenadas
+  if (!(row.cp && /^[0-9]{5}$/.test(String(row.cp))) && !(row.latitud && row.longitud)) return false;
   if (!row.op) return false;
   const opPrice = row.op === "Alquiler"
     ? Number(row.precio_alquiler)
@@ -488,7 +563,7 @@ function isValid(row) {
   const needsMConst = !["land","garage","storage"].includes(tipo);
   if (needsMConst && (!Number(row.m_const) || Number(row.m_const) <= 0)) return false;
   if (tipo === "land" && (!Number(row.m_parcela) || Number(row.m_parcela) <= 0)) return false;
-  const needsBaths = ["flat","house","rustic","premises_commercial","office"].includes(tipo);
+  const needsBaths = ["flat","house","rustic","premises_commercial","premises_industrial","office"].includes(tipo);
   if (needsBaths && (Number(row.banos) || 0) + (Number(row.aseos) || 0) <= 0) return false;
   const residencial = ["flat","house","rustic"].includes(tipo);
   if (residencial) {
@@ -509,8 +584,8 @@ function cleanObj(obj) {
       Object.entries(obj)
         .filter(([, v]) => {
           if (v === null || v === undefined) return false;
-          if (typeof v === "boolean") return true; // preservar false
-          if (typeof v === "number") return true;  // preservar 0
+          if (typeof v === "boolean") return true;
+          if (typeof v === "number") return true;
           if (typeof v === "string") return v !== "";
           if (Array.isArray(v)) return v.length > 0;
           return true;
@@ -525,7 +600,6 @@ function cleanObj(obj) {
 
 async function ftpUploadBuffer(client, buffer, remotePath) {
   const stream = Readable.from(buffer);
-  // Crear directorios intermedios si no existen
   const dir = remotePath.substring(0, remotePath.lastIndexOf("/"));
   if (dir) await client.ensureDir(dir);
   await client.uploadFrom(stream, remotePath);
@@ -534,7 +608,6 @@ async function ftpUploadBuffer(client, buffer, remotePath) {
 // ─── Handler principal ─────────────────────────────────────────────────────────
 
 export async function GET(request) {
-  // Verificar CRON_SECRET
   const auth = request.headers.get("authorization");
   if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -551,7 +624,6 @@ export async function GET(request) {
   const supabase = getSupabase();
 
   try {
-    // 1. Obtener propiedades publicadas de Supabase
     const { data: propiedades, error: propErr } = await supabase
       .from("propiedades")
       .select("*")
@@ -565,10 +637,8 @@ export async function GET(request) {
 
     if (mediaErr) throw mediaErr;
 
-    // 2. Filtrar propiedades válidas para Idealista
     const validas = (propiedades || []).filter(isValid);
 
-    // 3. Construir el feed JSON con rutas relativas
     const now = new Date();
     const sendDate = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,"0")}/${String(now.getDate()).padStart(2,"0")} ${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}:${String(now.getSeconds()).padStart(2,"0")}`;
 
@@ -592,7 +662,6 @@ export async function GET(request) {
     const cleanFeed = cleanObj(feed);
     const jsonBuffer = Buffer.from(JSON.stringify(cleanFeed, null, 2), "utf-8");
 
-    // 4. Conectar al FTP y subir todo
     const client = new ftp.Client();
     client.ftp.verbose = false;
 
@@ -604,16 +673,16 @@ export async function GET(request) {
         secure: true,
       });
 
-      // 4a. Subir el JSON
       const jsonFileName = `${CUSTOMER_CODE}.json`;
       await ftpUploadBuffer(client, jsonBuffer, jsonFileName);
 
-      // 4b. Subir fotos y planos de cada propiedad al FTP
       let fotosSubidas = 0;
       let fotosError = 0;
 
       for (const prop of validas) {
-        const media = (mediaAll || []).filter(m => m.propiedad_id === prop.id && (m.tipo === "foto" || m.tipo === "plano") && m.url);
+        const media = (mediaAll || []).filter(m =>
+          m.propiedad_id === prop.id && (m.tipo === "foto" || m.tipo === "plano") && m.url
+        );
 
         for (const item of media) {
           try {
