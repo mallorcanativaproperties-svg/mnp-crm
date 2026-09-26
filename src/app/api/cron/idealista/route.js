@@ -195,8 +195,8 @@ function buildProperty(row, media) {
   const banos    = (Number(row.banos) || 0) + (Number(row.aseos) || 0);
   const bedrooms = Number(row.total_hab) || ((Number(row.hab_dobles) || 0) + (Number(row.hab_simples) || 0));
 
-  // featuresAreaConstructed: obligatorio para todos excepto land y garage
-  if (mConst > 0) features.featuresAreaConstructed = mConst;
+  // featuresAreaConstructed: obligatorio para todos excepto land y garage (land.json no lo incluye)
+  if (mConst > 0 && !isLand) features.featuresAreaConstructed = mConst;
   // featuresAreaUsable: homes, premises, offices, building (no land, no garage, no storage)
   if (mUtil > 0 && !isLand && !isGarage && !isStorage) features.featuresAreaUsable = mUtil;
   // featuresAreaPlot: todos los home types (flat/house/rustic) y land — homes.json lo permite para todos

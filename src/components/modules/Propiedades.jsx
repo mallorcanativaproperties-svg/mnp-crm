@@ -3735,7 +3735,7 @@ function IdealistaJsonButton({ supabase }) {
     property.propertyAddress=addr;
     // Features — bloque base (campos comunes a todos los tipos)
     const feat={featuresType:tipo};
-    const mConst=Number(row.m_const)||0; if(mConst>0) feat.featuresAreaConstructed=mConst;
+    const mConst=Number(row.m_const)||0; if(mConst>0&&!isLand) feat.featuresAreaConstructed=mConst;
     const mUtil=Number(row.m_util)||0; if(mUtil>0&&!isLand&&!isGarage&&!isStorage) feat.featuresAreaUsable=mUtil;
     const mParcela=Number(row.m_parcela)||0;
     if((isHomeType||isLand)&&mParcela>0) feat.featuresAreaPlot=mParcela;
