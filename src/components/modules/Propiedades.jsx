@@ -72,6 +72,22 @@ function mapDbToJs(row) {
     alarmaSeguridad: row.alarma_seguridad || false, plantasEdificio: Number(row.plantas_edificio) || 0,
     ocupacionActual: row.ocupacion_actual || "",
     tipoGaraje: row.tipo_garaje || "",
+    garajePuertaAuto: row.garaje_puerta_auto || false,
+    garajePlazaCubierta: row.garaje_plaza_cubierta || false,
+    garajeTipo: row.garaje_tipo || "",
+    mEdificable: Number(row.m_edificable) || 0,
+    terrenoAcceso: row.terreno_acceso || "",
+    terrenoLuz: row.terreno_luz || false,
+    terrenoAgua: row.terreno_agua || false,
+    terrenoGas: row.terreno_gas || false,
+    terrenoAlcantarillado: row.terreno_alcantarillado || false,
+    terrenoAceras: row.terreno_aceras || false,
+    terrenoAlumbrado: row.terreno_alumbrado || false,
+    terrenoCarretera: row.terreno_carretera || false,
+    trasteroAcceso24h: row.trastero_acceso_24h || false,
+    trasteroAltura: Number(row.trastero_altura) || 0,
+    trasteroSeguridad24h: row.trastero_seguridad_24h || false,
+    trasteroMuelleCarga: row.trastero_muelle_carga || false,
   };
 }
 
@@ -130,6 +146,22 @@ function mapJsToDb(p) {
     plantas_edificio: p.plantasEdificio ? Number(p.plantasEdificio) : null,
     ocupacion_actual: p.ocupacionActual || null,
     tipo_garaje: p.tipoGaraje || null,
+    garaje_puerta_auto: p.garajePuertaAuto || false,
+    garaje_plaza_cubierta: p.garajePlazaCubierta || false,
+    garaje_tipo: p.garajeTipo || null,
+    m_edificable: Number(p.mEdificable) || null,
+    terreno_acceso: p.terrenoAcceso || null,
+    terreno_luz: p.terrenoLuz || false,
+    terreno_agua: p.terrenoAgua || false,
+    terreno_gas: p.terrenoGas || false,
+    terreno_alcantarillado: p.terrenoAlcantarillado || false,
+    terreno_aceras: p.terrenoAceras || false,
+    terreno_alumbrado: p.terrenoAlumbrado || false,
+    terreno_carretera: p.terrenoCarretera || false,
+    trastero_acceso_24h: p.trasteroAcceso24h || false,
+    trastero_altura: Number(p.trasteroAltura) || null,
+    trastero_seguridad_24h: p.trasteroSeguridad24h || false,
+    trastero_muelle_carga: p.trasteroMuelleCarga || false,
     updated_at: new Date().toISOString(),
   };
 }
@@ -2413,7 +2445,8 @@ REGLAS:
   const ft = TIPO_MAP_COND[tipoActual] || "flat";
   const esResidencial = ["flat","house","rustic"].includes(ft);
   const esComercial = ["premises_commercial","office"].includes(ft);
-  const esGaraje = ["garage","storage"].includes(ft);
+  const esGaraje = ft === "garage";
+  const esTrastero = ft === "storage";
   const esEdificio = ft === "building";
   const esTerreno = ft === "land";
   const tieneHab = ["flat","house","rustic"].includes(ft);
@@ -2917,6 +2950,32 @@ REGLAS:
               {EFl({label: "Aseos", field: "aseos", pub: true, type: "number"})}
             </div>
           )}
+          {esTerreno && <div style={{ ...g2, marginTop: 8 }}>
+            {EFl({label: "m2 edificables", field: "mEdificable", pub: true, type: "number"})}
+            {EFl({label: "Tipo de acceso", field: "terrenoAcceso", pub: true, options: ["","Urbano","Carretera","Pista","Autovía/Autopista","Desconocido"], type: "select"})}
+          </div>}
+          {esTerreno && <div style={{ ...g4, marginTop: 8 }}>
+            {EFl({label: "Luz", field: "terrenoLuz", pub: true, type: "toggle"})}
+            {EFl({label: "Agua", field: "terrenoAgua", pub: true, type: "toggle"})}
+            {EFl({label: "Gas", field: "terrenoGas", pub: true, type: "toggle"})}
+            {EFl({label: "Alcantarillado", field: "terrenoAlcantarillado", pub: true, type: "toggle"})}
+          </div>}
+          {esTerreno && <div style={{ ...g4, marginTop: 8 }}>
+            {EFl({label: "Aceras", field: "terrenoAceras", pub: true, type: "toggle"})}
+            {EFl({label: "Alumbrado", field: "terrenoAlumbrado", pub: true, type: "toggle"})}
+            {EFl({label: "Acceso carretera", field: "terrenoCarretera", pub: true, type: "toggle"})}
+            <div />
+          </div>}
+          {esTrastero && <div style={{ ...g2, marginTop: 8 }}>
+            {EFl({label: "Altura (m)", field: "trasteroAltura", pub: true, type: "number"})}
+            <div />
+          </div>}
+          {esTrastero && <div style={{ ...g4, marginTop: 8 }}>
+            {EFl({label: "Acceso 24h", field: "trasteroAcceso24h", pub: true, type: "toggle"})}
+            {EFl({label: "Seguridad 24h", field: "trasteroSeguridad24h", pub: true, type: "toggle"})}
+            {EFl({label: "Muelle de carga", field: "trasteroMuelleCarga", pub: true, type: "toggle"})}
+            <div />
+          </div>}
           <div style={{ ...g3, marginTop: 8 }}>
             {!esTerreno && EFl({label: "Ano construccion", field: "anoConstruc", pub: true})}
             {EFl({label: "Conservacion", field: "conserv", pub: true, options: ["Buen estado","Reformado","A reformar","Obra nueva","En construccion"], type: "select"})}
@@ -3041,7 +3100,7 @@ REGLAS:
         <div style={sep} />
 
         {/* Extras y dotaciones — separado de características, igual que cuestionario */}
-        {(esResidencial || esComercial || esGaraje) && <Sec title="Extras y dotaciones">
+        {(esResidencial || esComercial || esGaraje || esTrastero) && <Sec title="Extras y dotaciones">
           {tieneExtras && <div style={{ ...g4, marginTop: 4 }}>
             {EFl({label: "Terraza", field: "terraza", pub: true, type: "bool"})}
             {ft !== "rustic" && EFl({label: "Balcon", field: "balcon", pub: true, type: "bool"})}
@@ -3096,7 +3155,11 @@ REGLAS:
           </div>}
           {esGaraje && <div style={{ ...g2, marginTop: 8 }}>
             {EFl({label: "Tipo de garaje (capacidad)", field: "tipoGaraje", pub: true, options: ["","Coche compacto","Coche sedán","Moto","Coche y moto","Dos coches o más","Desconocido"], type: "select"})}
-            <div />
+            {EFl({label: "Tipología plaza", field: "garajeTipo", pub: true, options: ["","Plaza aparcamiento","Trastero/Depósito","Desconocido"], type: "select"})}
+          </div>}
+          {esGaraje && <div style={{ ...g2, marginTop: 8 }}>
+            {EFl({label: "Puerta automática", field: "garajePuertaAuto", pub: true, type: "toggle"})}
+            {EFl({label: "Plaza cubierta", field: "garajePlazaCubierta", pub: true, type: "toggle"})}
           </div>}
           {!esGaraje && <div style={{ ...g2, marginTop: 8 }}>
             {EFl({label: "Parking", field: "parking", pub: true, options: ["Si","No","Comunitario","Opcional"], type: "select"})}
@@ -3716,6 +3779,12 @@ function IdealistaJsonButton({ supabase }) {
     if(tipo==="land"&&row.tipo){const LAND_SUBTYPE_MAP={"Parcela":"land_urban","Solar":"land_urban","Terreno urbano":"land_urban","Terreno urbanizable":"land_countrybuildable","Terreno rustico":"land_countrynonbuildable","Terreno rural":"land_countrynonbuildable","Terreno industrial":"land_urban"};if(LAND_SUBTYPE_MAP[row.tipo])feat.featuresType=LAND_SUBTYPE_MAP[row.tipo];}
     // featuresGarageCapacityType (schema v6)
     if(tipo==="garage"&&row.tipo_garaje){const GARAGE_CAPACITY_MAP={"Coche compacto":"car_compact","Coche sedán":"car_sedan","Moto":"motorcycle","Coche y moto":"car_and_motorcycle","Dos coches o más":"two_cars_and_more","Desconocido":"unknown"};if(GARAGE_CAPACITY_MAP[row.tipo_garaje])feat.featuresGarageCapacityType=GARAGE_CAPACITY_MAP[row.tipo_garaje];}
+    // Opcionales garaje
+    if(tipo==="garage"){if(row.garaje_puerta_auto===true)feat.parkingAutomaticDoor=true;if(row.garaje_plaza_cubierta===true)feat.parkingPlaceCovered=true;if(row.garaje_tipo){const M={"Trastero/Depósito":"depot","Plaza aparcamiento":"parking_space","Desconocido":"unknown"};if(M[row.garaje_tipo])feat.parkingType=M[row.garaje_tipo];}}
+    // Opcionales terreno
+    if(tipo==="land"){if(Number(row.m_edificable)>0)feat.featuresAreaBuildable=Number(row.m_edificable);if(row.terreno_acceso){const M={"Urbano":"urban","Carretera":"road","Pista":"track","Autovía/Autopista":"highway","Desconocido":"unknown"};if(M[row.terreno_acceso])feat.featuresAccessType=M[row.terreno_acceso];}if(row.terreno_luz===true)feat.featuresElectricity=true;if(row.terreno_agua===true)feat.featuresWater=true;if(row.terreno_gas===true)feat.featuresNaturalGas=true;if(row.terreno_alcantarillado===true)feat.featuresSewerage=true;if(row.terreno_aceras===true)feat.featuresSidewalk=true;if(row.terreno_alumbrado===true)feat.featuresStreetLighting=true;if(row.terreno_carretera===true)feat.featuresRoadAccess=true;}
+    // Opcionales trastero
+    if(tipo==="storage"){if(row.trastero_acceso_24h===true)feat.featuresAccess24h=true;if(Number(row.trastero_altura)>0)feat.featuresAreaHeight=Number(row.trastero_altura);if(row.trastero_seguridad_24h===true)feat.featuresSecurity24h=true;if(row.trastero_muelle_carga===true)feat.featuresLoadingDock=true;}
     const OCC_MAP={"Vacía":"free","Alquilada":"tenanted","Ocupada":"not_free"};
     if(row.ocupacion_actual&&OCC_MAP[row.ocupacion_actual]) feat.featuresCurrentOccupation=OCC_MAP[row.ocupacion_actual];
     // featuresHotWater es boolean en schema v6 (no string)
