@@ -3095,7 +3095,7 @@ REGLAS:
             <div />
           </div>}
           {esGaraje && <div style={{ ...g2, marginTop: 8 }}>
-            {EFl({label: "Tipo de garaje", field: "tipoGaraje", pub: true, options: ["","Plaza abierta","Caja cerrada","Puerta automática","Moto"], type: "select"})}
+            {EFl({label: "Tipo de garaje (capacidad)", field: "tipoGaraje", pub: true, options: ["","Coche compacto","Coche sedán","Moto","Coche y moto","Dos coches o más","Desconocido"], type: "select"})}
             <div />
           </div>}
           {!esGaraje && <div style={{ ...g2, marginTop: 8 }}>
@@ -3712,10 +3712,10 @@ function IdealistaJsonButton({ supabase }) {
     if(row.puerta_blindada===true) feat.featuresSecurityDoor=true;
     if(row.alarma_seguridad===true) feat.featuresSecurityAlarm=true;
     if(Number(row.plantas_edificio)>0) feat.featuresFloorsBuilding=Number(row.plantas_edificio);
-    const LAND_TYPE_MAP={"Parcela":"urban","Solar":"urban","Terreno urbano":"urban","Terreno urbanizable":"urbanizable","Terreno rustico":"rustic","Terreno rural":"rustic","Terreno industrial":"industrial"};
-    if(tipo==="land"&&row.tipo&&LAND_TYPE_MAP[row.tipo]) feat.featuresLandType=LAND_TYPE_MAP[row.tipo];
-    const GARAGE_TYPE_MAP={"Plaza abierta":"openSpace","Caja cerrada":"closedBox","Puerta automática":"automaticDoor","Moto":"motorcycle","Trastero":"closedBox"};
-    if(tipo==="garage"&&row.tipo_garaje&&GARAGE_TYPE_MAP[row.tipo_garaje]) feat.featuresGarageType=GARAGE_TYPE_MAP[row.tipo_garaje];
+    // Subtipo terreno en featuresType (schema v6)
+    if(tipo==="land"&&row.tipo){const LAND_SUBTYPE_MAP={"Parcela":"land_urban","Solar":"land_urban","Terreno urbano":"land_urban","Terreno urbanizable":"land_countrybuildable","Terreno rustico":"land_countrynonbuildable","Terreno rural":"land_countrynonbuildable","Terreno industrial":"land_urban"};if(LAND_SUBTYPE_MAP[row.tipo])feat.featuresType=LAND_SUBTYPE_MAP[row.tipo];}
+    // featuresGarageCapacityType (schema v6)
+    if(tipo==="garage"&&row.tipo_garaje){const GARAGE_CAPACITY_MAP={"Coche compacto":"car_compact","Coche sedán":"car_sedan","Moto":"motorcycle","Coche y moto":"car_and_motorcycle","Dos coches o más":"two_cars_and_more","Desconocido":"unknown"};if(GARAGE_CAPACITY_MAP[row.tipo_garaje])feat.featuresGarageCapacityType=GARAGE_CAPACITY_MAP[row.tipo_garaje];}
     const OCC_MAP={"Vacía":"free","Alquilada":"tenanted","Ocupada":"not_free"};
     if(row.ocupacion_actual&&OCC_MAP[row.ocupacion_actual]) feat.featuresCurrentOccupation=OCC_MAP[row.ocupacion_actual];
     // featuresHotWater es boolean en schema v6 (no string)

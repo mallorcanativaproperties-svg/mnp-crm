@@ -29,7 +29,7 @@ const TIPO_MAP = {
   // premises_commercial / office
   "Local comercial":"premises_commercial", Oficina:"office",
   "Nave industrial":"premises_commercial", Almacen:"premises_commercial", Negocio:"premises_commercial",
-  // land
+  // land — todos mapean a "land"; el subtipo (land_urban/land_countrybuildable/land_countrynonbuildable) se asigna en buildProperty
   Parcela:"land", Solar:"land", "Terreno urbano":"land", "Terreno urbanizable":"land",
   "Terreno rustico":"land", "Terreno rural":"land", "Terreno industrial":"land",
   // garage / storage / building
@@ -249,27 +249,31 @@ function buildProperty(row, media) {
   if (row.alarma_seguridad === true) features.featuresSecurityAlarm = true;
   if (Number(row.plantas_edificio) > 0) features.featuresFloorsBuilding = Number(row.plantas_edificio);
 
-  // featuresLandType — obligatorio para tipo land (schema v6)
-  const LAND_TYPE_MAP = {
-    "Parcela": "urban", "Solar": "urban", "Terreno urbano": "urban",
-    "Terreno urbanizable": "urbanizable",
-    "Terreno rustico": "rustic", "Terreno rural": "rustic",
-    "Terreno industrial": "industrial",
-  };
-  if (tipo === "land" && row.tipo && LAND_TYPE_MAP[row.tipo]) {
-    features.featuresLandType = LAND_TYPE_MAP[row.tipo];
+  // Subtipo terreno — se codifica en featuresType (schema v6: land/land_urban/land_countrybuildable/land_countrynonbuildable)
+  if (tipo === "land" && row.tipo) {
+    const LAND_SUBTYPE_MAP = {
+      "Parcela": "land_urban",
+      "Solar": "land_urban",
+      "Terreno urbano": "land_urban",
+      "Terreno urbanizable": "land_countrybuildable",
+      "Terreno rustico": "land_countrynonbuildable",
+      "Terreno rural": "land_countrynonbuildable",
+      "Terreno industrial": "land_urban", // no existe land_industrial en schema v6
+    };
+    if (LAND_SUBTYPE_MAP[row.tipo]) features.featuresType = LAND_SUBTYPE_MAP[row.tipo];
   }
 
-  // featuresGarageType — para tipo garage
-  const GARAGE_TYPE_MAP = {
-    "Plaza abierta": "openSpace",
-    "Caja cerrada": "closedBox",
-    "Puerta automática": "automaticDoor",
-    "Moto": "motorcycle",
-    "Trastero": "closedBox",
-  };
-  if (tipo === "garage" && row.tipo_garaje && GARAGE_TYPE_MAP[row.tipo_garaje]) {
-    features.featuresGarageType = GARAGE_TYPE_MAP[row.tipo_garaje];
+  // featuresGarageCapacityType — para tipo garage (schema v6: unknown/car_compact/car_sedan/motorcycle/car_and_motorcycle/two_cars_and_more)
+  if (tipo === "garage" && row.tipo_garaje) {
+    const GARAGE_CAPACITY_MAP = {
+      "Coche compacto": "car_compact",
+      "Coche sedán": "car_sedan",
+      "Moto": "motorcycle",
+      "Coche y moto": "car_and_motorcycle",
+      "Dos coches o más": "two_cars_and_more",
+      "Desconocido": "unknown",
+    };
+    if (GARAGE_CAPACITY_MAP[row.tipo_garaje]) features.featuresGarageCapacityType = GARAGE_CAPACITY_MAP[row.tipo_garaje];
   }
 
   const OCC_MAP = { "Vacía": "free", "Alquilada": "tenanted", "Ocupada": "not_free" };

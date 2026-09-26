@@ -1089,8 +1089,8 @@ export default function FormularioCaptacion() {
               options={["Vacía","Alquilada","Ocupada"]} />
           </div>}
           {esGaraje && <div style={g3}>
-            <Select label="Tipo de garaje" value={tipoGaraje} onChange={setTipoGaraje}
-              options={["Plaza abierta","Caja cerrada","Puerta automática","Moto"]} />
+            <Select label="Tipo de garaje (capacidad)" value={tipoGaraje} onChange={setTipoGaraje}
+              options={["Coche compacto","Coche sedán","Moto","Coche y moto","Dos coches o más","Desconocido"]} />
           </div>}
           {!esGaraje && <div style={g3}>
             <Select label="Parking" value={parking} onChange={setParking} options={["Si","No","Comunitario","Opcional"]} />
