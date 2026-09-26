@@ -2139,8 +2139,8 @@ function PropDetail({ p, currentUser, onClose, onUpdate, onDelete, onDuplicate }
           {req && <span style={{ color: "#A23A3A", fontSize: 14, fontWeight: 700 }}>*</span>}
         </div>
         {type === "bool" ? (
-          <select value={d[field] ? "true" : "false"} onChange={e => upd(field, e.target.value === "true")} onBlur={() => autoSave(draft)} style={inputStyle}>
-            <option value="true">Si</option><option value="false">No</option>
+          <select value={d[field] === null || d[field] === undefined ? "" : (d[field] ? "true" : "false")} onChange={e => upd(field, e.target.value === "" ? null : e.target.value === "true")} onBlur={() => autoSave(draft)} style={inputStyle}>
+            <option value="">Sin definir</option><option value="true">Si</option><option value="false">No</option>
           </select>
         ) : type === "select" ? (
           <select value={d[field] || ""} onChange={e => upd(field, e.target.value)} onBlur={() => autoSave(draft)} style={inputStyle}>
@@ -2913,7 +2913,7 @@ REGLAS:
           <div style={g3}>
             {tieneCert && EFl({label: "Cert. energetico", req: true, field: "certEnerg", pub: true, options: ["A","B","C","D","E","F","G","Exento"], type: "select"})}
             {tieneCert && EFl({label: "Emisiones energeticas", field: "emisionesEnerg", pub: true, options: ["A","B","C","D","E","F","G"], type: "select"})}
-            {esResidencial && EFl({label: "IEE", field: "iee", pub: true, options: IEE_OPTS_P, type: "select"})}
+            {esResidencial && EFl({label: "IEE", field: "iee", pub: true, req: true, options: IEE_OPTS_P, type: "select"})}
           </div>
           {esResidencial && <div style={{ ...g3, marginTop: 8 }}>
             {EFl({label: "Suelos", field: "suelos", pub: true, options: SUELOS_OPTS, type: "select"})}
