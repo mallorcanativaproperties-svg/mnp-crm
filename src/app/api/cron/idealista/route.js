@@ -38,7 +38,7 @@ const TIPO_MAP = {
 
 const CONSERV_MAP = {
   "Buen estado": "good", "Reformado": "renovated",
-  "A reformar": "toRestore", "Obra nueva": "new", "En construccion": "new",
+  "A reformar": "toRestore", "Obra nueva": "new", "En construccion": "underConstruction",
 };
 
 const IMAGE_TAG_MAP = {
@@ -51,8 +51,8 @@ const IMAGE_TAG_MAP = {
 };
 
 const FLOOR_MAP = {
-  "Bajo": "groundFloor", "Planta baja": "groundFloor", "PB": "groundFloor", "0": "groundFloor",
-  "Entreplanta": "mezzanine", "Entresuelo": "mezzanine",
+  "Bajo": "groundFloor", "Baja": "groundFloor", "Planta baja": "groundFloor", "PB": "groundFloor", "0": "groundFloor",
+  "Entreplanta": "mezzanine", "Entresuelo": "mezzanine", "SS": "mezzanine", "Semisotano": "mezzanine", "-1": "mezzanine",
 };
 
 const HEAT_MAP = {
@@ -199,7 +199,7 @@ function buildProperty(row, media) {
     features.featuresParkingAvailable = true; // opcional = disponible
     if (Number(row.n_plazas) > 0) features.featuresParkingSpacesNumber = Number(row.n_plazas);
   }
-  if (row.venta_mobiliario === true) features.featuresEquippedWithFurniture = true;
+  if (isAlquiler && row.venta_mobiliario === true) features.featuresEquippedWithFurniture = true;
 
   if (row.aire_acond_tipo && row.aire_acond_tipo !== "No disponible") features.featuresConditionedAir = true;
   if (row.calefaccion && HEAT_MAP[row.calefaccion]) features.featuresHeatingType = HEAT_MAP[row.calefaccion];
@@ -226,9 +226,9 @@ function buildProperty(row, media) {
   }
 
   if (row.cert_energ) {
-    if (row.cert_energ === "En tramite") features.featuresEnergyCertificateRating = "inProcess";
-    else if (row.cert_energ === "Exento") features.featuresEnergyCertificateRating = "exempt";
+    if (row.cert_energ === "Exento") features.featuresEnergyCertificateRating = "exempt";
     else if (/^[A-G]$/.test(row.cert_energ)) features.featuresEnergyCertificateRating = row.cert_energ;
+    // "En tramite" ya no es válido para España desde 2021 (Idealista v6, 01/07/2026) — se omite
   }
   if (row.emisiones_energ && /^[A-G]$/.test(row.emisiones_energ)) {
     features.featuresEnergyCertificateEmissionsRating = row.emisiones_energ;
@@ -272,9 +272,8 @@ function buildProperty(row, media) {
         img.imageLabel = "plan";
       } else if (item.etiqueta && IMAGE_TAG_MAP[item.etiqueta]) {
         img.imageLabel = IMAGE_TAG_MAP[item.etiqueta];
-      } else {
-        img.imageLabel = "unknown";
       }
+      // No enviar imageLabel si no hay etiqueta válida
       return img;
     });
   }
@@ -366,6 +365,7 @@ function isValid(row) {
     if (!cert || !["A","B","C","D","E","F","G","Exento"].includes(cert)) return false;
   }
   if (!Array.isArray(row.destinos) || !row.destinos.includes("Idealista")) return false;
+  if (row.idealista_estado === "pausada") return false;
   return true;
 }
 
