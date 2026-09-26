@@ -256,9 +256,25 @@ export async function GET(req) {
     let pdfBytes    = await docxAPdf(docxBytes);
 
     // ── Estampar firmas si existen ──────────────────────────────────────────
+    // Layout 3 columnas (igual que el DOCX): Comprador | Agente | Propietario
+    // A4 = 595 pts ancho, márgenes ≈ 60 pts c/lado → útil 475 pts → 3 cols de ~158 pts
+    // pdf-lib: y=0 es la base de la página, y alto típico A4 = 842 pts
+    // Fila de firmas: y_base ≈ 100 pts desde abajo (sobre los títulos de columna)
+    const SIG_W = 130;  // ancho firma
+    const SIG_H = 45;   // alto firma
+    const MARGIN_L = 60;
+    const COL_W = 158;
+    // Centro de cada columna (pts desde borde izquierdo)
+    const COL_X = [
+      MARGIN_L + COL_W * 0 + (COL_W - SIG_W) / 2,  // col 0: comprador  ≈ 74
+      MARGIN_L + COL_W * 1 + (COL_W - SIG_W) / 2,  // col 1: agente     ≈ 232
+      MARGIN_L + COL_W * 2 + (COL_W - SIG_W) / 2,  // col 2: propietario≈ 390
+    ];
+    const Y_FIRMA = 110; // pts desde abajo
+
     const firmasParaEstampar = [];
 
-    // Firmas de compradores (visita_doc_firmas)
+    // Col 0 — Compradores (pueden ser varios: apilan verticalmente dentro de la columna)
     const { data: firmasCompradores } = await supabase
       .from("visita_doc_firmas")
       .select("nombre_firmante, firma_data, firmado_at")
@@ -267,40 +283,41 @@ export async function GET(req) {
 
     if (firmasCompradores?.length > 0) {
       const firmados = firmasCompradores.filter(f => f.firma_data && f.firmado_at);
-      // Distribuir horizontalmente: comprador 1 a la izquierda, comprador 2 en el centro
       firmados.forEach((f, i) => {
+        // Si hay 2 compradores los apilamos: primero a Y_FIRMA + (SIG_H+18), segundo a Y_FIRMA
+        const yOffset = (firmados.length - 1 - i) * (SIG_H + 18);
         firmasParaEstampar.push({
           dataUrl: f.firma_data,
           nombre:  f.nombre_firmante,
-          x:       60 + i * 200,
-          y:       95,
-          width:   160,
-          height:  50,
+          x:       COL_X[0],
+          y:       Y_FIRMA + yOffset,
+          width:   SIG_W,
+          height:  SIG_H,
         });
       });
     }
 
-    // Firma del vendedor
+    // Col 1 — Agente
+    if (doc.firma_agente_data) {
+      firmasParaEstampar.push({
+        dataUrl: doc.firma_agente_data,
+        nombre:  agente.nombre || "Agente Inmobiliario",
+        x:       COL_X[1],
+        y:       Y_FIRMA,
+        width:   SIG_W,
+        height:  SIG_H,
+      });
+    }
+
+    // Col 2 — Propietario / Vendedor
     if (doc.firma_vendedor_data) {
       firmasParaEstampar.push({
         dataUrl: doc.firma_vendedor_data,
         nombre:  "Propietario / Vendedor",
-        x:       60,
-        y:       40,
-        width:   160,
-        height:  50,
-      });
-    }
-
-    // Firma del agente
-    if (doc.firma_agente_data) {
-      firmasParaEstampar.push({
-        dataUrl: doc.firma_agente_data,
-        nombre:  agente.nombre || "Agente",
-        x:       280,
-        y:       40,
-        width:   160,
-        height:  50,
+        x:       COL_X[2],
+        y:       Y_FIRMA,
+        width:   SIG_W,
+        height:  SIG_H,
       });
     }
 
