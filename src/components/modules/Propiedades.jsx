@@ -3611,7 +3611,7 @@ function IdealistaJsonButton({ supabase }) {
       else if(row.mascotas === false || row.mascotas === "false") op.rentPetsAllowed = false;
     }
     const community=Number(row.comunidad)||0; if(community>0&&row.op!=="Alquiler") op.operationPriceCommunity=community;
-    const basuras=Number(row.basuras)||0; if(basuras>0) op.operationPriceUrbanizacion=basuras;
+    // operationPriceUrbanizacion no existe en schema Idealista v6 — omitido
     property.propertyOperation=op;
     property.propertyContact={contactName:"Mallorca Nativa Properties",contactEmail:"mallorcanativaproperties@gmail.com",contactPrimaryPhonePrefix:"34",contactPrimaryPhoneNumber:"655882682"};
     const addr={addressCountry:"Spain"};
@@ -3692,16 +3692,18 @@ function IdealistaJsonButton({ supabase }) {
         return img;
       });
     }
-    // Vídeos
+    // Vídeos — rutas relativas FTP, sin videoType (no existe en schema v6)
     const videos=(media||[]).filter(m=>m.tipo==="video"&&m.url).sort((a,b)=>(a.orden||0)-(b.orden||0));
     if(videos.length>0){
       property.propertyVideos=videos.map((v,i)=>{
         const vurl=v.url||"";
-        const vtype=vurl.includes("youtube.com")||vurl.includes("youtu.be")?"youtube":vurl.includes("vimeo.com")?"vimeo":"url";
-        return{videoOrder:i+1,videoUrl:vurl,videoType:vtype};
+        const match=vurl.match(/propiedades-media\/(.+)$/);
+        const relativePath=match?match[1]:vurl;
+        return{videoOrder:i+1,videoUrl:relativePath};
       });
     }
-    if(row.tour360?.startsWith("http")) property.propertyVirtualTour={virtualTourUrl:row.tour360};
+    // Tour virtual — propertyVirtualTours (plural) según schema v6
+    if(row.tour360?.startsWith("http")) property.propertyVirtualTours={virtualTour3D:{virtualTour3DUrl:row.tour360}};
     return property;
   }
 
