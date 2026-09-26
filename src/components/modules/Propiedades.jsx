@@ -43,7 +43,7 @@ function mapDbToJs(row) {
     destinos: row.destinos || [], fotos: Number(row.fotos) || 0, videos: Number(row.videos) || 0, tour360: row.tour360 || "", planos: Number(row.planos) || 0,
     fechaCap: row.fecha_cap || "", visitas: Number(row.visitas) || 0,
     cualPos: row.cual_pos || [], cualNeg: row.cual_neg || [],
-    puerta: row.puerta || "", latitud: row.latitud != null ? row.latitud : null, longitud: row.longitud != null ? row.longitud : null, idealistaId: row.idealista_id || "",
+    puerta: row.puerta || "", latitud: row.latitud != null ? row.latitud : null, longitud: row.longitud != null ? row.longitud : null,
     descEn: row.desc_en || "", descDe: row.desc_de || "",
     terraza: row.terraza || false, piscina: row.piscina || false, ascensor: row.ascensor || false,
     jardin: row.jardin || false, aireAcond: row.aire_acond || false, armarios: row.armarios || false,
@@ -97,7 +97,7 @@ function mapJsToDb(p) {
     puerta: p.puerta, latitud: p.latitud != null ? Number(p.latitud) || null : null, longitud: p.longitud != null ? Number(p.longitud) || null : null, idealista_id: p.idealistaId,
     desc_en: p.descEn, desc_de: p.descDe,
     terraza: p.terraza, piscina: p.piscina, ascensor: p.ascensor,
-    jardin: p.jardin, aire_acond: !!(p.aireAcondTipo && p.aireAcondTipo !== "No disponible"), armarios: p.armarios,
+    jardin: p.jardin, aire_acond: p.aireAcond || false, armarios: p.armarios,
     trastero: p.trastero, balcon: p.balcon,
     local_ubicacion: p.localUbicacion || null,
     local_actividad: p.localActividad?.length ? p.localActividad : null,
@@ -3561,7 +3561,7 @@ function IdealistaJsonButton({ supabase }) {
     "Terreno rustico":"land", "Terreno rural":"land", "Terreno industrial":"land",
     Garaje:"garage", Parking:"garage", Trastero:"storage", Edificio:"building",
   };
-  const CONSERV_MAP = { "Buen estado":"good","Reformado":"renovated","A reformar":"toRestore","Obra nueva":"new","En construccion":"new" };
+  const CONSERV_MAP = { "Buen estado":"good","Reformado":"renovated","A reformar":"toRestore","Obra nueva":"new","En construccion":"underConstruction" };
   const HEAT_MAP = { "Gas central":"centralGas","Gas individual":"individualGas","Electrica central":"centralElectric","Electrica individual":"individualElectric","Bomba de calor":"individualAirConditioningHeatPump","Aerotermia":"centralHeatPump","Suelo radiante":"centralRadiantFloor","Sin calefaccion":"noHeating" };
   const IMAGE_TAG_MAP = { LIVING_ROOM:"living_room",BEDROOM:"room",BATHROOM:"bathroom",KITCHEN:"kitchen",TERRACE:"terrace",SWIMMING_POOL:"pool",GARDEN:"garden",CORRIDOR:"hallway",PLAN:"plan",VIEWS:"view",FACADE:"facade",GARAGE:"garage",STORAGE:"storage",BALCONY:"terrace",DINING:"living_room",HALL:"hallway",PATIO:"garden",PORCH:"terrace" };
   const FLOOR_MAP = { "Bajo":"groundFloor","Planta baja":"groundFloor","PB":"groundFloor","0":"groundFloor","Entreplanta":"mezzanine","Entresuelo":"mezzanine" };
@@ -3660,7 +3660,7 @@ function IdealistaJsonButton({ supabase }) {
     if(isDuplex) feat.featuresDuplex=true;
     const conserv=CONSERV_MAP[row.conserv]; if(conserv) feat.featuresConservation=conserv;
     if(row.ref_cat) feat.featuresCadastralReference=row.ref_cat;
-    if(row.cert_energ){if(row.cert_energ==="En tramite") feat.featuresEnergyCertificateRating="inProcess";else if(row.cert_energ==="Exento") feat.featuresEnergyCertificateRating="exempt";else if(/^[A-G]$/.test(row.cert_energ)) feat.featuresEnergyCertificateRating=row.cert_energ;}
+    if(row.cert_energ){if(row.cert_energ==="Exento") feat.featuresEnergyCertificateRating="exempt";else if(/^[A-G]$/.test(row.cert_energ)) feat.featuresEnergyCertificateRating=row.cert_energ;}
     if(row.emisiones_energ&&/^[A-G]$/.test(row.emisiones_energ)) feat.featuresEnergyCertificateEmissionsRating=row.emisiones_energ;
     if(row.orient){const ORIENT_MAP={"Norte":["North"],"Sur":["South"],"Este":["East"],"Oeste":["West"],"Noreste":["North","East"],"Noroeste":["North","West"],"Sureste":["South","East"],"Suroeste":["South","West"]};const dirs=ORIENT_MAP[row.orient]||[];if(dirs.includes("North")) feat.featuresOrientationNorth=true;if(dirs.includes("South")) feat.featuresOrientationSouth=true;if(dirs.includes("East")) feat.featuresOrientationEast=true;if(dirs.includes("West")) feat.featuresOrientationWest=true;}
     property.propertyFeatures=feat;
