@@ -3753,19 +3753,22 @@ function IdealistaJsonButton({ supabase }) {
       if(Number(row.alq_max_inquilinos)>0) feat.featuresTenantNumber=Number(row.alq_max_inquilinos);
       if(row.alq_apto_ninos===true) feat.featuresRecommendedForChildren=true;
       else if(row.alq_apto_ninos===false) feat.featuresRecommendedForChildren=false;
-      const EQUIP_MAP={"Cocina con electrodomésticos y casa amueblada":"furnished","Cocina con electrodomésticos y casa sin amueblar":"kitchenEquipped","Cocina vacía y casa sin amueblar":"unfurnished","No lo sé":"unknown"};
-      if(row.alq_equipamiento&&EQUIP_MAP[row.alq_equipamiento]) feat.featuresEquippedWithFurniture=EQUIP_MAP[row.alq_equipamiento];
+      // featuresEquippedKitchen y featuresEquippedWithFurniture son boolean (no string)
+      if(row.alq_equipamiento==="Cocina con electrodomésticos y casa amueblada"){feat.featuresEquippedKitchen=true;feat.featuresEquippedWithFurniture=true;}
+      else if(row.alq_equipamiento==="Cocina con electrodomésticos y casa sin amueblar"){feat.featuresEquippedKitchen=true;}
     } else if(row.venta_mobiliario===true) feat.featuresEquippedWithFurniture=true;
+    // featuresConditionedAirType NO existe en homes.json — solo para offices/premises/building
+    const isHomeType=["flat","house","rustic"].includes(tipo)||tipo.startsWith("house_")||tipo.startsWith("rustic_");
     const AIRE_MAP={"No disponible":"notAvailable","Solo frio":"cold","Frio/Calor":"cold/heat","Preinstalacion":"preInstallation"};
-    if(row.aire_acond_tipo&&AIRE_MAP[row.aire_acond_tipo]){feat.featuresConditionedAirType=AIRE_MAP[row.aire_acond_tipo];if(row.aire_acond_tipo!=="No disponible") feat.featuresConditionedAir=true;}
-    if((tipo==="house"||tipo==="rustic")&&row.tipologia_chalet){
-      const HT_MAP={"Adosado":"terraced","Pareado":"semiDetached","Independiente":"detached","En hilera":"terraced"};
-      if(HT_MAP[row.tipologia_chalet]) feat.featuresHouseSubtype=HT_MAP[row.tipologia_chalet];
+    if(row.aire_acond_tipo&&AIRE_MAP[row.aire_acond_tipo]){if(!isHomeType) feat.featuresConditionedAirType=AIRE_MAP[row.aire_acond_tipo];if(row.aire_acond_tipo!=="No disponible") feat.featuresConditionedAir=true;}
+    // Tipología chalet → featuresType específico (homes.json: house_independent, house_semidetached, house_terraced)
+    if(tipo==="house"&&row.tipologia_chalet){
+      const HT_MAP={"Independiente":"house_independent","Pareado":"house_semidetached","Adosado":"house_terraced","En hilera":"house_terraced"};
+      if(HT_MAP[row.tipologia_chalet]) feat.featuresType=HT_MAP[row.tipologia_chalet];
+      if(Number(row.plantas_chalet)>0) feat.featuresFloorsBuilding=Number(row.plantas_chalet);
     }
-    if((tipo==="house"||tipo==="rustic")&&Number(row.plantas_chalet)>0) feat.featuresFloorNumber=Number(row.plantas_chalet);
     if(row.calefaccion&&HEAT_MAP[row.calefaccion]) feat.featuresHeatingType=HEAT_MAP[row.calefaccion];
-    if(row.elec_reformada===true) feat.featuresRenovatedElectricity=true;
-    if(row.font_reformada===true) feat.featuresRenovatedPlumbing=true;
+    // featuresRenovatedElectricity y featuresRenovatedPlumbing no existen en Idealista v6 — omitidos
     if(row.vent_ext===true) feat.featuresWindowsLocation="exterior";
     if(isStudio||row.tipo==="Loft") feat.featuresStudio=true;
     if(isPenthouse) feat.featuresPenthouse=true;
@@ -3776,9 +3779,10 @@ function IdealistaJsonButton({ supabase }) {
     if(row.emisiones_energ&&/^[A-G]$/.test(row.emisiones_energ)) feat.featuresEnergyCertificateEmissionsRating=row.emisiones_energ;
     if(row.chimenea===true) feat.featuresChimney=true;
     if(row.cocina_equipada===true) feat.featuresEquippedKitchen=true;
-    if(row.doble_acristalamiento===true) feat.featuresWindowsDouble=true;
-    if(row.puerta_blindada===true) feat.featuresSecurityDoor=true;
-    if(row.alarma_seguridad===true) feat.featuresSecurityAlarm=true;
+    // featuresWindowsDouble, featuresSecurityDoor, featuresSecurityAlarm NO existen en homes.json
+    if(row.doble_acristalamiento===true&&!isHomeType) feat.featuresWindowsDouble=true;
+    if(row.puerta_blindada===true&&!isHomeType) feat.featuresSecurityDoor=true;
+    if(row.alarma_seguridad===true&&!isHomeType) feat.featuresSecurityAlarm=true;
     if(Number(row.plantas_edificio)>0) feat.featuresFloorsBuilding=Number(row.plantas_edificio);
     // Subtipo terreno en featuresType (schema v6)
     if(tipo==="land"&&row.tipo){const LAND_SUBTYPE_MAP={"Parcela":"land_urban","Solar":"land_urban","Terreno urbano":"land_urban","Terreno urbanizable":"land_countrybuildable","Terreno rustico":"land_countrynonbuildable","Terreno rural":"land_countrynonbuildable","Terreno industrial":"land_urban"};if(LAND_SUBTYPE_MAP[row.tipo])feat.featuresType=LAND_SUBTYPE_MAP[row.tipo];}
@@ -3792,8 +3796,8 @@ function IdealistaJsonButton({ supabase }) {
     if(tipo==="storage"){if(row.trastero_acceso_24h===true)feat.featuresAccess24h=true;if(Number(row.trastero_altura)>0)feat.featuresAreaHeight=Number(row.trastero_altura);if(row.trastero_seguridad_24h===true)feat.featuresSecurity24h=true;if(row.trastero_muelle_carga===true)feat.featuresLoadingDock=true;}
     const OCC_MAP={"Vacía":"free","Alquilada":"tenanted","Ocupada":"illegally_occupied"};
     if(row.ocupacion_actual&&OCC_MAP[row.ocupacion_actual]) feat.featuresCurrentOccupation=OCC_MAP[row.ocupacion_actual];
-    // featuresHotWater es boolean en schema v6 (no string)
-    if(row.agua_cal) feat.featuresHotWater=row.agua_cal!=="Sin agua caliente";
+    // featuresHotWater NO existe en homes.json — solo para offices/premises/building
+    if(row.agua_cal&&!isHomeType) feat.featuresHotWater=row.agua_cal!=="Sin agua caliente";
     if(row.orient){const ORIENT_MAP={"Norte":["North"],"Sur":["South"],"Este":["East"],"Oeste":["West"],"Noreste":["North","East"],"Noroeste":["North","West"],"Sureste":["South","East"],"Suroeste":["South","West"]};const dirs=ORIENT_MAP[row.orient]||[];if(dirs.includes("North")) feat.featuresOrientationNorth=true;if(dirs.includes("South")) feat.featuresOrientationSouth=true;if(dirs.includes("East")) feat.featuresOrientationEast=true;if(dirs.includes("West")) feat.featuresOrientationWest=true;}
     property.propertyFeatures=feat;
     const descs=[];
@@ -3832,8 +3836,8 @@ function IdealistaJsonButton({ supabase }) {
         return{videoOrder:i+1,videoUrl:relativePath};
       });
     }
-    // Tour virtual — propertyVirtualTours (plural) según schema v6
-    if(row.tour360?.startsWith("http")) property.propertyVirtualTours={virtualTour3D:{virtualTour3DUrl:row.tour360}};
+    // Tour virtual — virtualTourUrl (NO virtualTour3DUrl) según virtualTour3D.json schema v6
+    if(row.tour360?.startsWith("http")) property.propertyVirtualTours={virtualTour3D:{virtualTourUrl:row.tour360}};
     return property;
   }
 
