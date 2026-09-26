@@ -46,6 +46,9 @@ export async function GET(request) {
   const url = new URL(request.url);
   const limite = Math.min(Number(url.searchParams.get("limite")) || POR_PASADA, 40);
   const forzar = url.searchParams.get("forzar") === "1";
+  // `silencio=1` hace la comprobación entera pero no manda el WhatsApp: sirve
+  // para probar el circuito sin dispararle un aviso falso a nadie.
+  const avisar = url.searchParams.get("silencio") !== "1";
 
   const corte = new Date(Date.now() - DIAS_ENTRE_REVISIONES * 86400000).toISOString();
 
@@ -138,7 +141,7 @@ export async function GET(request) {
 
     // Un aviso solo cuando hay algo que decidir. Los fallos de descarga se
     // avisan a partir de tres: una sede municipal caída una noche no es noticia.
-    if (cambiados.length > 0) {
+    if (cambiados.length > 0 && avisar) {
       const lineas = cambiados
         .slice(0, 8)
         .map((c) => `• *${c.referencia || c.titulo}* (${c.agente})\n  ${c.delta > 0 ? "+" : ""}${c.delta} car.`)
@@ -150,7 +153,7 @@ export async function GET(request) {
           (cambiados.length > 8 ? `\n\n…y ${cambiados.length - 8} más.` : "") +
           `\n\nEl agente sigue respondiendo con la versión antigua hasta que se recargue. Dímelo y la recargo.`
       );
-    } else if (fallidos.length >= 3) {
+    } else if (fallidos.length >= 3 && avisar) {
       await sendWhatsApp(
         TELEFONO_AVISO,
         `⚠️ *Asistente IA · revisión de fuentes*\n\n` +
@@ -163,6 +166,7 @@ export async function GET(request) {
       candidatos: docs?.length || 0,
       revisados,
       primera_huella: primeraHuella,
+      aviso_enviado: avisar && cambiados.length > 0,
       cambiados,
       fallidos,
     });
