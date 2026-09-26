@@ -247,7 +247,31 @@ function buildProperty(row, media) {
   if (row.doble_acristalamiento === true) features.featuresWindowsDouble = true;
   if (row.puerta_blindada === true) features.featuresSecurityDoor = true;
   if (row.alarma_seguridad === true) features.featuresSecurityAlarm = true;
-  if (Number(row.plantas_edificio) > 0 && tipo !== "flat") features.featuresFloorsBuilding = Number(row.plantas_edificio);
+  if (Number(row.plantas_edificio) > 0) features.featuresFloorsBuilding = Number(row.plantas_edificio);
+
+  // featuresLandType — obligatorio para tipo land (schema v6)
+  const LAND_TYPE_MAP = {
+    "Parcela": "urban", "Solar": "urban", "Terreno urbano": "urban",
+    "Terreno urbanizable": "urbanizable",
+    "Terreno rustico": "rustic", "Terreno rural": "rustic",
+    "Terreno industrial": "industrial",
+  };
+  if (tipo === "land" && row.tipo && LAND_TYPE_MAP[row.tipo]) {
+    features.featuresLandType = LAND_TYPE_MAP[row.tipo];
+  }
+
+  // featuresGarageType — para tipo garage
+  const GARAGE_TYPE_MAP = {
+    "Plaza abierta": "openSpace",
+    "Caja cerrada": "closedBox",
+    "Puerta automática": "automaticDoor",
+    "Moto": "motorcycle",
+    "Trastero": "closedBox",
+  };
+  if (tipo === "garage" && row.tipo_garaje && GARAGE_TYPE_MAP[row.tipo_garaje]) {
+    features.featuresGarageType = GARAGE_TYPE_MAP[row.tipo_garaje];
+  }
+
   const OCC_MAP = { "Vacía": "free", "Alquilada": "tenanted", "Ocupada": "not_free" };
   if (row.ocupacion_actual && OCC_MAP[row.ocupacion_actual]) features.featuresCurrentOccupation = OCC_MAP[row.ocupacion_actual];
 
