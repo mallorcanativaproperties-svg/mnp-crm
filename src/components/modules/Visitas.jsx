@@ -791,6 +791,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
   const [showDoc, setShowDoc] = useState(false);
   const [editandoDoc, setEditandoDoc] = useState(null);
   const [firmasLinks, setFirmasLinks] = useState({}); // docId → [{nombre, token, firmado_at}]
+  const [firmaAgenteDocId, setFirmaAgenteDocId] = useState(null); // docId en proceso de firma agente
   const isAdmin = ["director", "administrador"].includes(currentUser?.role?.toLowerCase());
   const esPropia = visita.agente_login === currentUser?.user_login;
   const puedeEditar = isAdmin || esPropia;
@@ -1250,6 +1251,25 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
                               </button>
                             )}
 
+                            {/* Firma del agente — disponible cuando todos han firmado (firmado_vendedor) o firmado_comprador en hoja_visita */}
+                            {(doc.estado === "firmado_vendedor" || (!esOfResv && doc.estado === "firmado_comprador")) && !doc.firma_agente_data && (
+                              <button onClick={() => setFirmaAgenteDocId(doc.id)} style={{
+                                padding: "14px 16px", background: GOLD, border: "none", color: WHITE,
+                                cursor: "pointer", borderRadius: 10, fontSize: 14, fontWeight: 700,
+                                fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center",
+                                justifyContent: "center", gap: 8,
+                              }}>
+                                ✍️ Firmar como agente
+                              </button>
+                            )}
+                            {doc.firma_agente_data && (
+                              <div style={{ padding: "10px 14px", background: `${SUCCESS}12`, border: `1px solid ${SUCCESS}40`,
+                                borderRadius: 10, fontSize: 12, color: SUCCESS, fontFamily: "Inter, sans-serif",
+                                display: "flex", alignItems: "center", gap: 8 }}>
+                                ✅ Agente firmó {doc.firma_agente_fecha ? new Date(doc.firma_agente_fecha).toLocaleDateString("es-ES") : ""}
+                              </div>
+                            )}
+
                             {esOfResv && (
                               <button onClick={() => duplicarComoContraoferta(doc)} style={{
                                 padding: "12px 16px", border: `1.5px solid ${BORDER}`,
@@ -1277,6 +1297,18 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
             </div>
           )}
 
+          {/* Modal firma del agente */}
+          {firmaAgenteDocId && (
+            <Modal title="Tu firma como agente" onClose={() => setFirmaAgenteDocId(null)} width={480}>
+              <ModalFirmaAgente
+                docId={firmaAgenteDocId}
+                agente={agente}
+                onFirmado={() => { setFirmaAgenteDocId(null); onActualizado(); }}
+                onClose={() => setFirmaAgenteDocId(null)}
+              />
+            </Modal>
+          )}
+
           {/* Modal generador de documento */}
           {showDoc && (
             <Modal title="Nuevo documento" onClose={() => setShowDoc(false)} width={540}>
@@ -1302,6 +1334,104 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+// ── Modal firma del agente ───────────────────────────────────────────────────
+function ModalFirmaAgente({ docId, agente, onFirmado, onClose }) {
+  const canvasRef = useRef(null);
+  const [dibujando, setDibujando] = useState(false);
+  const [tieneFirma, setTieneFirma] = useState(false);
+  const [firmando, setFirmando] = useState(false);
+
+  function getCoordsEscaladas(e) {
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const clientX = e.touches?.[0]?.clientX ?? e.clientX;
+    const clientY = e.touches?.[0]?.clientY ?? e.clientY;
+    return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
+  }
+  function iniciarTrazo(e) {
+    setDibujando(true);
+    const { x, y } = getCoordsEscaladas(e);
+    const ctx = canvasRef.current.getContext("2d");
+    ctx.beginPath(); ctx.moveTo(x, y);
+  }
+  function dibujar(e) {
+    if (!dibujando) return;
+    e.preventDefault();
+    const { x, y } = getCoordsEscaladas(e);
+    const ctx = canvasRef.current.getContext("2d");
+    ctx.lineWidth = 2.5; ctx.lineCap = "round"; ctx.strokeStyle = "#1a2528";
+    ctx.lineTo(x, y); ctx.stroke();
+    setTieneFirma(true);
+  }
+  function terminarTrazo() { setDibujando(false); }
+  function limpiar() {
+    const canvas = canvasRef.current;
+    canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+    setTieneFirma(false);
+  }
+
+  async function firmar() {
+    if (!tieneFirma) return;
+    setFirmando(true);
+    const firmaData = canvasRef.current.toDataURL("image/png");
+    const res = await fetch("/api/visitas/documento", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ docId, firmante: "agente", firmaData }),
+    });
+    if (res.ok) {
+      onFirmado();
+    } else {
+      alert("Error al guardar la firma. Inténtalo de nuevo.");
+      setFirmando(false);
+    }
+  }
+
+  return (
+    <div style={{ padding: "0 4px 4px" }}>
+      <div style={{ fontSize: 13, color: "#9A968A", fontFamily: "Inter, sans-serif", marginBottom: 16 }}>
+        Firma el documento como agente inmobiliario. Tu firma quedará estampada en el PDF.
+      </div>
+      {agente?.nombre && (
+        <div style={{ fontSize: 12, color: "#AC8A54", fontWeight: 700, marginBottom: 12,
+          fontFamily: "Inter, sans-serif", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+          {agente.nombre}
+        </div>
+      )}
+      <div style={{ border: "2px solid #E7E1D4", borderRadius: 8, background: "#F8F6F1",
+        touchAction: "none", marginBottom: 12 }}>
+        <canvas
+          ref={canvasRef}
+          width={600} height={140}
+          style={{ width: "100%", height: 140, display: "block", cursor: "crosshair", borderRadius: 6 }}
+          onMouseDown={iniciarTrazo} onMouseMove={dibujar} onMouseUp={terminarTrazo} onMouseLeave={terminarTrazo}
+          onTouchStart={iniciarTrazo} onTouchMove={dibujar} onTouchEnd={terminarTrazo}
+        />
+      </div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <button onClick={limpiar} style={{ padding: "8px 16px", border: "1px solid #E7E1D4",
+          background: "transparent", color: "#9A968A", cursor: "pointer", borderRadius: 8, fontSize: 12 }}>
+          Limpiar
+        </button>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button onClick={onClose} style={{ padding: "10px 20px", border: "1px solid #E7E1D4",
+            background: "transparent", color: "#9A968A", cursor: "pointer", borderRadius: 8, fontSize: 13 }}>
+            Cancelar
+          </button>
+          <button onClick={firmar} disabled={!tieneFirma || firmando}
+            style={{ padding: "10px 24px", background: tieneFirma ? "#AC8A54" : "#E7E1D4",
+              border: "none", color: "#fff", cursor: tieneFirma ? "pointer" : "not-allowed",
+              borderRadius: 8, fontSize: 13, fontWeight: 700 }}>
+            {firmando ? "Firmando..." : "Firmar documento"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
