@@ -274,8 +274,12 @@ export async function POST(request) {
     const hash = crypto
       .createHash("sha256")
       .update(
+        // El sufijo del recorte SOLO se anade cuando hay recorte: si se anadiera
+        // vacio, cambiaria el hash de todos los documentos ya cargados y la
+        // siguiente recarga de cualquiera de ellos crearia un duplicado en vez
+        // de reemplazarlo.
         `${b.agenteSlug}|${b.url || `texto:${b.titulo}`}|${(b.articulos || []).join(",")}` +
-          `|${b.recorte?.desde || ""}`
+          (b.recorte?.desde ? `|${b.recorte.desde}` : "")
       )
       .digest("hex");
 
