@@ -1059,11 +1059,11 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
                   fontFamily: "Inter, sans-serif" }}>📄 DOCUMENTOS</div>
                 {puedeEditar && !showDoc && (
                   <button onClick={() => setShowDoc(true)} style={{
-                    padding: "8px 14px", background: DARK, border: "none", color: WHITE,
-                    cursor: "pointer", borderRadius: 20, fontSize: 12, fontWeight: 700,
-                    fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 6,
+                    padding: "10px 18px", background: DARK, border: "none", color: WHITE,
+                    cursor: "pointer", borderRadius: 20, fontSize: 13, fontWeight: 700,
+                    fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 7,
                   }}>
-                    <PlusIcon style={{ width: 14, height: 14 }} /> Nuevo
+                    <PlusIcon style={{ width: 16, height: 16 }} /> Firmar Visita
                   </button>
                 )}
               </div>
