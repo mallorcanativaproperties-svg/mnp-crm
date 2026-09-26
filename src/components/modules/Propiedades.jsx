@@ -3431,7 +3431,7 @@ REGLAS:
             </div>
             <PropietariosEditor
               propietarios={d.propietarios || [{ ...PROPIETARIO_VACIO }]}
-              onChange={val => setData(prev => ({ ...prev, propietarios: val }))}
+              onChange={val => setDraft(prev => ({ ...prev, propietarios: val }))}
             />
             <div style={{ marginTop: 8 }}>
               {EFl({label: "Notas privadas", field: "notasPriv", pub: false, type: "textarea"})}
