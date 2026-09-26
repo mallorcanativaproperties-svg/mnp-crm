@@ -3791,13 +3791,16 @@ function IdealistaJsonButton({ supabase }) {
       }
     }
     // Features — bloque OFFICES
+    // offices.json: featuresLiftNumber (NO featuresLiftAvailable), featuresHeating (NO featuresHeatingType),
+    // NO featuresWindowsDouble (no existe en offices.json — additionalProperties:false)
     if(isOffice){
-      if(row.ascensor===true) feat.featuresLiftAvailable=true;
-      if(row.calefaccion&&HEAT_MAP[row.calefaccion]) feat.featuresHeatingType=HEAT_MAP[row.calefaccion];
+      if(row.ascensor===true) feat.featuresLiftNumber=1;
+      if(row.calefaccion&&row.calefaccion!=="Sin calefaccion") feat.featuresHeating=true;
+      else if(row.calefaccion==="Sin calefaccion") feat.featuresHeating=false;
       const AIRE_MAP_OFF={"No disponible":"notAvailable","Solo frio":"cold","Frio/Calor":"cold/heat","Preinstalacion":"preInstallation"};
       if(row.aire_acond_tipo&&AIRE_MAP_OFF[row.aire_acond_tipo]){feat.featuresConditionedAirType=AIRE_MAP_OFF[row.aire_acond_tipo];if(row.aire_acond_tipo!=="No disponible") feat.featuresConditionedAir=true;}
       if(row.agua_cal) feat.featuresHotWater=row.agua_cal!=="Sin agua caliente";
-      if(row.doble_acristalamiento===true) feat.featuresWindowsDouble=true;
+      // featuresWindowsDouble NO existe en offices.json — omitido
       if(row.puerta_blindada===true) feat.featuresSecurityDoor=true;
       if(row.alarma_seguridad===true) feat.featuresSecurityAlarm=true;
       if(Number(row.n_plazas)>0) feat.featuresParkingSpacesNumber=Number(row.n_plazas);
@@ -3864,12 +3867,9 @@ function IdealistaJsonButton({ supabase }) {
       if(row.trastero_muelle_carga===true) feat.featuresLoadingDock=true;
     }
     // Features — bloque BUILDING
+    // building.json: featuresLiftNumber (NO featuresLiftAvailable), NO featuresBathroomNumber, NO featuresBedroomNumber, NO featuresStorage
     if(isBuilding){
-      const banos=(Number(row.banos)||0)+(Number(row.aseos)||0); if(banos>0) feat.featuresBathroomNumber=banos;
-      const bedrooms=(Number(row.hab_dobles)||0)+(Number(row.hab_simples)||0);
-      const bedroomsTotal=Number(row.total_hab)||bedrooms;
-      if(bedroomsTotal>0) feat.featuresBedroomNumber=bedroomsTotal;
-      if(row.ascensor===true) feat.featuresLiftAvailable=true;
+      if(row.ascensor===true) feat.featuresLiftNumber=1;
       if(row.jardin===true) feat.featuresGarden=true;
       if(Number(row.n_plazas)>0) feat.featuresParkingSpacesNumber=Number(row.n_plazas);
       if(Number(row.plantas_edificio)>0) feat.featuresFloorsBuilding=Number(row.plantas_edificio);

@@ -339,11 +339,14 @@ function buildProperty(row, media) {
   }
 
   // ── Campos exclusivos de OFFICES ──────────────────────────────────────────
+  // offices.json: featuresLiftNumber (NO featuresLiftAvailable), featuresHeating (NO featuresHeatingType),
+  // NO featuresWindowsDouble (no existe en offices.json — additionalProperties:false)
   if (isOffice) {
-    if (row.ascensor === true) features.featuresLiftAvailable = true;
-    if (row.calefaccion && HEAT_MAP[row.calefaccion]) {
-      features.featuresHeatingType = HEAT_MAP[row.calefaccion];
-    }
+    // featuresLiftNumber: entero (offices.json no tiene featuresLiftAvailable)
+    if (row.ascensor === true) features.featuresLiftNumber = 1;
+    // featuresHeating: boolean (offices.json no tiene featuresHeatingType)
+    if (row.calefaccion && row.calefaccion !== "Sin calefaccion") features.featuresHeating = true;
+    else if (row.calefaccion === "Sin calefaccion") features.featuresHeating = false;
     const AIRE_MAP = {
       "No disponible": "notAvailable", "Solo frio": "cold",
       "Frio/Calor": "cold/heat", "Preinstalacion": "preInstallation",
@@ -353,7 +356,7 @@ function buildProperty(row, media) {
       if (row.aire_acond_tipo !== "No disponible") features.featuresConditionedAir = true;
     }
     if (row.agua_cal) features.featuresHotWater = row.agua_cal !== "Sin agua caliente";
-    if (row.doble_acristalamiento === true) features.featuresWindowsDouble  = true;
+    // featuresWindowsDouble NO existe en offices.json — omitido
     if (row.puerta_blindada === true)       features.featuresSecurityDoor   = true;
     if (row.alarma_seguridad === true)      features.featuresSecurityAlarm  = true;
     if (Number(row.n_plazas) > 0)          features.featuresParkingSpacesNumber = Number(row.n_plazas);
@@ -378,8 +381,11 @@ function buildProperty(row, media) {
     if (row.doble_acristalamiento === true) features.featuresWindowsDouble  = true;
     if (row.puerta_blindada === true)       features.featuresSecurityDoor   = true;
     if (row.alarma_seguridad === true)      features.featuresSecurityAlarm  = true;
-    if (row.trastero === true)             features.featuresStorage         = true;
+    // featuresStorage NO existe en premises.json — omitido
     if (Number(row.plantas_edificio) > 0)  features.featuresFloorsBuilding  = Number(row.plantas_edificio);
+    if (Number(row.local_altura_libre) > 0) features.featuresAreaHeight     = Number(row.local_altura_libre);
+    if (row.local_muelle_carga === true)   features.featuresLoadingDock     = true;
+    if (row.local_acceso_24h === true)     features.featuresAccess24h       = true;
     if (row.local_salida_humos)            features.featuresSmokeExtraction = true;
     if (row.local_cocina_equipada)         features.featuresEquippedKitchen = true;
     if (row.local_hace_esquina)            features.featuresLocatedAtCorner = true;
@@ -485,8 +491,9 @@ function buildProperty(row, media) {
   }
 
   // ── Campos exclusivos de BUILDING ─────────────────────────────────────────
+  // building.json: featuresLiftNumber (NO featuresLiftAvailable), NO featuresStorage
   if (isBuilding) {
-    if (row.ascensor === true)            features.featuresLiftAvailable      = true;
+    if (row.ascensor === true)            features.featuresLiftNumber          = 1;
     if (row.jardin === true)              features.featuresGarden              = true;
     if (Number(row.n_plazas) > 0)        features.featuresParkingSpacesNumber = Number(row.n_plazas);
     if (Number(row.plantas_edificio) > 0) features.featuresFloorsBuilding      = Number(row.plantas_edificio);
