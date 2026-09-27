@@ -37,6 +37,256 @@ const rotulo = {
   textTransform: "uppercase",
 };
 
+/* ═══════════════════════ Texto de la respuesta ═══════════════════════
+ *
+ * El agente escribe con marcas de Markdown: **negrita**, guiones, almohadillas
+ * de titulo. Hasta ahora esto se pintaba con white-space: pre-wrap, es decir
+ * en crudo, asi que en pantalla se leian los asteriscos y las almohadillas, y
+ * al copiar y pegar en un correo se iban con el texto. De ahi que el formato
+ * pareciera raro: no lo era, era Markdown sin pintar.
+ *
+ * No se mete una libreria para esto. El agente escribe un subconjunto muy
+ * pequeno y controlado desde su propio prompt (negrita, listas, citas entre
+ * comillas invertidas, y los tres titulos de las partes), y eso cabe en esta
+ * funcion. Una libreria de Markdown traeria ademas HTML arbitrario, que aqui
+ * no queremos.
+ */
+
+/** Trocea una linea en fragmentos de texto, negrita y cita. */
+function piezasDeLinea(linea) {
+  const piezas = [];
+  const re = /(\*\*[^*]+\*\*|`[^`]+`)/g;
+  let ultimo = 0;
+  let m;
+  while ((m = re.exec(linea)) !== null) {
+    if (m.index > ultimo) piezas.push({ t: "texto", v: linea.slice(ultimo, m.index) });
+    const bruto = m[0];
+    if (bruto.startsWith("**")) piezas.push({ t: "fuerte", v: bruto.slice(2, -2) });
+    else piezas.push({ t: "cita", v: bruto.slice(1, -1) });
+    ultimo = m.index + bruto.length;
+  }
+  if (ultimo < linea.length) piezas.push({ t: "texto", v: linea.slice(ultimo) });
+  return piezas;
+}
+
+function Linea({ texto }) {
+  return (
+    <>
+      {piezasDeLinea(texto).map((p, i) =>
+        p.t === "fuerte" ? (
+          <strong key={i} style={{ fontWeight: 600, color: TINTA }}>
+            {p.v}
+          </strong>
+        ) : p.t === "cita" ? (
+          <span key={i} style={{ fontSize: "0.9em", color: GRIS, whiteSpace: "nowrap" }}>
+            {p.v}
+          </span>
+        ) : (
+          <span key={i}>{p.v}</span>
+        )
+      )}
+    </>
+  );
+}
+
+/** Pinta el texto de una respuesta: titulos, listas, reglas y parrafos. */
+function Texto({ contenido, color }) {
+  const bloques = [];
+  const lineas = String(contenido || "").split("\n");
+  let parrafo = [];
+
+  const cerrarParrafo = () => {
+    if (parrafo.length === 0) return;
+    bloques.push({ tipo: "p", lineas: parrafo });
+    parrafo = [];
+  };
+
+  for (const cruda of lineas) {
+    const l = cruda.trimEnd();
+    if (!l.trim()) {
+      cerrarParrafo();
+      continue;
+    }
+    if (/^\s*(---+|___+|\*\*\*+)\s*$/.test(l)) {
+      cerrarParrafo();
+      bloques.push({ tipo: "regla" });
+      continue;
+    }
+    const titulo = l.match(/^(#{1,6})\s+(.*)$/);
+    if (titulo) {
+      cerrarParrafo();
+      bloques.push({ tipo: "titulo", nivel: titulo[1].length, texto: titulo[2] });
+      continue;
+    }
+    // Las filas de tabla ya no deberian llegar, pero si llegan se pintan como
+    // linea suelta y no como un muro de barras verticales.
+    if (/^\s*\|/.test(l)) {
+      if (/^\s*\|[\s|:-]+\|\s*$/.test(l)) continue; // separador de cabecera
+      cerrarParrafo();
+      bloques.push({
+        tipo: "p",
+        lineas: [l.replace(/^\s*\|/, "").replace(/\|\s*$/, "").split("|").map((c) => c.trim()).filter(Boolean).join(" · ")],
+      });
+      continue;
+    }
+    const lista = l.match(/^\s*(?:[-•*●]|(\d+)[.)])\s+(.*)$/);
+    if (lista) {
+      cerrarParrafo();
+      bloques.push({ tipo: "item", marca: lista[1] ? `${lista[1]}.` : "·", texto: lista[2] });
+      continue;
+    }
+    parrafo.push(l);
+  }
+  cerrarParrafo();
+
+  return (
+    <div style={{ fontSize: 13.5, lineHeight: 1.7, color: TINTA }}>
+      {bloques.map((b, i) => {
+        if (b.tipo === "regla")
+          return <div key={i} style={{ height: 1, background: LINEA, margin: "16px 0" }} />;
+        if (b.tipo === "titulo")
+          return (
+            <div
+              key={i}
+              style={{
+                ...rotulo,
+                fontSize: b.nivel <= 2 ? 11 : 10,
+                color,
+                marginTop: i === 0 ? 0 : 20,
+                marginBottom: 8,
+              }}
+            >
+              <Linea texto={b.texto} />
+            </div>
+          );
+        if (b.tipo === "item")
+          return (
+            <div key={i} style={{ display: "flex", gap: 9, marginBottom: 5 }}>
+              <span style={{ color: GRIS, flexShrink: 0, minWidth: b.marca === "·" ? 6 : 16 }}>
+                {b.marca}
+              </span>
+              <span style={{ minWidth: 0 }}>
+                <Linea texto={b.texto} />
+              </span>
+            </div>
+          );
+        return (
+          <p key={i} style={{ margin: "0 0 11px" }}>
+            {b.lineas.map((l, j) => (
+              <span key={j}>
+                {j > 0 && <br />}
+                <Linea texto={l} />
+              </span>
+            ))}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
+/**
+ * La respuesta partida en sus tres partes, cada una con su boton de copiar.
+ *
+ * La Parte 2 es el mensaje que se le manda al cliente, y es lo que de verdad
+ * se copia y se pega. Copiar la respuesta entera obliga a recortar a mano el
+ * analisis interno, que es justo lo que el cliente no debe leer.
+ */
+function Respuesta({ contenido, color, enCurso }) {
+  const texto = String(contenido || "");
+  // Corta por los rotulos de parte, aceptando "# PARTE 1", "### PARTE 2 —", etc.
+  const cortes = [...texto.matchAll(/^#{1,4}\s*PARTE\s+(\d)[^\n]*$/gim)];
+
+  if (cortes.length < 2) {
+    return (
+      <>
+        <Texto contenido={texto} color={color} />
+        {!enCurso && texto.trim().length > 0 && <Copiar texto={texto} />}
+      </>
+    );
+  }
+
+  const partes = cortes.map((m, i) => {
+    const desde = m.index;
+    const hasta = i + 1 < cortes.length ? cortes[i + 1].index : texto.length;
+    const trozo = texto.slice(desde, hasta);
+    const salto = trozo.indexOf("\n");
+    return {
+      titulo: (salto === -1 ? trozo : trozo.slice(0, salto)).replace(/^#{1,4}\s*/, "").trim(),
+      cuerpo: (salto === -1 ? "" : trozo.slice(salto + 1)).trim(),
+      n: m[1],
+    };
+  });
+
+  const previo = texto.slice(0, cortes[0].index).trim();
+
+  return (
+    <>
+      {previo && <Texto contenido={previo} color={color} />}
+      {partes.map((p, i) => (
+        <div key={i} style={{ marginTop: i === 0 && !previo ? 0 : 20 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 12,
+              paddingBottom: 7,
+              marginBottom: 11,
+              borderBottom: `1px solid ${LINEA}`,
+            }}
+          >
+            <div style={{ ...rotulo, fontSize: 10, color }}>{p.titulo}</div>
+            {!enCurso && p.cuerpo && <Copiar texto={p.cuerpo} etiqueta={p.n === "2" ? "Copiar para el cliente" : "Copiar"} />}
+          </div>
+          <Texto contenido={p.cuerpo} color={color} />
+        </div>
+      ))}
+      {!enCurso && <Copiar texto={texto} etiqueta="Copiar todo" />}
+    </>
+  );
+}
+
+function Copiar({ texto, etiqueta = "Copiar" }) {
+  const [hecho, setHecho] = useState(false);
+  return (
+    <button
+      onClick={async () => {
+        try {
+          await navigator.clipboard.writeText(texto);
+        } catch {
+          // Algunos navegadores lo bloquean sin gesto directo; el textarea de
+          // reserva funciona en todos.
+          const ta = document.createElement("textarea");
+          ta.value = texto;
+          ta.style.position = "fixed";
+          ta.style.opacity = "0";
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+        }
+        setHecho(true);
+        setTimeout(() => setHecho(false), 1800);
+      }}
+      style={{
+        ...rotulo,
+        fontSize: 9,
+        background: "none",
+        border: `1px solid ${hecho ? "#2C6E52" : LINEA}`,
+        color: hecho ? "#2C6E52" : GRIS,
+        padding: "4px 9px",
+        cursor: "pointer",
+        flexShrink: 0,
+        fontFamily: FUENTE,
+      }}
+      title="Copiar al portapapeles"
+    >
+      {hecho ? "Copiado" : etiqueta}
+    </button>
+  );
+}
+
 function fecha(iso) {
   if (!iso) return "";
   const d = new Date(iso);
@@ -558,12 +808,19 @@ function Chat({ agente, usuarioId, casoInicial, onVolver }) {
                 ) : (
                   <div>
                     <div style={{ ...rotulo, color, marginBottom: 8 }}>{agente.nombre}</div>
-                    <div style={{ fontSize: 13.5, lineHeight: 1.75, color: TINTA, whiteSpace: "pre-wrap" }}>
-                      {m.contenido}
-                      {cargando && i === mensajes.length - 1 && (
-                        <span style={{ display: "inline-block", width: 7, height: 14, background: color, marginLeft: 3, verticalAlign: "middle" }} />
-                      )}
-                    </div>
+                    <Respuesta
+                      contenido={m.contenido}
+                      color={color}
+                      enCurso={cargando && i === mensajes.length - 1}
+                    />
+                    {cargando && i === mensajes.length - 1 && (
+                      <div style={{ marginTop: 6, display: "flex", alignItems: "center", gap: 8 }}>
+                        <span style={{ display: "inline-block", width: 7, height: 14, background: color }} />
+                        <span style={{ fontSize: 11, color: GRIS }}>
+                          {m.contenido ? "escribiendo…" : "consultando la normativa…"}
+                        </span>
+                      </div>
+                    )}
 
                     {m.fuentes?.length > 0 && (
                       <div style={{ marginTop: 16, paddingTop: 12, borderTop: `1px solid ${LINEA}` }}>
@@ -967,9 +1224,13 @@ function DetalleCaso({ caso, usuarioId, nombreAgente, color, onCerrar, onContinu
             <div style={{ ...rotulo, fontSize: 9, color: m.rol === "user" ? GRIS : color, marginBottom: 7 }}>
               {m.rol === "user" ? "Consulta" : nombreAgente}
             </div>
-            <div style={{ fontSize: 13, lineHeight: 1.7, color: TINTA, whiteSpace: "pre-wrap" }}>
-              {m.contenido}
-            </div>
+            {m.rol === "user" ? (
+              <div style={{ fontSize: 13, lineHeight: 1.7, color: TINTA, whiteSpace: "pre-wrap" }}>
+                {m.contenido}
+              </div>
+            ) : (
+              <Respuesta contenido={m.contenido} color={color} />
+            )}
             {m.fuentes?.length > 0 && (
               <div style={{ marginTop: 12, paddingTop: 10, borderTop: `1px solid ${LINEA}` }}>
                 <div style={{ ...rotulo, fontSize: 9, color: GRIS, marginBottom: 6 }}>Fuentes</div>
