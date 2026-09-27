@@ -26,9 +26,9 @@ const TIPO_ICON  = {
   video:        <PlayCircleIcon style={{ width:22, height:22 }} />,
   enlace:       <LinkIcon style={{ width:22, height:22 }} />,
 };
-const TIPO_LABEL = { pdf: "PDF", presentacion: "PresentaciÃ³n", video: "VÃ­deo YouTube", enlace: "Enlace externo" };
+const TIPO_LABEL = { pdf: "PDF", presentacion: "Presentación", video: "Vídeo YouTube", enlace: "Enlace externo" };
 
-// Paletas de cards oro/crema/blanco â una por posiciÃ³n
+// Paletas de cards oro/crema/blanco — una por posición
 const CARD_PALETTES = [
   { bg: WHITE,   border: GOLD,       accent: GOLD,       num: "#FFFFFF", numBg: GOLD       },
   { bg: CREAM,   border: GOLD_LIGHT, accent: DARK,       num: GOLD,      numBg: CREAM2     },
@@ -49,7 +49,7 @@ function ytId(url) {
   return m ? m[1] : null;
 }
 
-// âââ Barra de progreso pequeÃ±a âââââââââââââââââââââââââââââââââââ
+// âââ Barra de progreso pequeña âââââââââââââââââââââââââââââââââââ
 function BarProg({ pct, color = GOLD }) {
   return (
     <div style={{ height: 4, background: BORDER, borderRadius: 0, overflow: "hidden" }}>
@@ -167,7 +167,7 @@ function VisorRecurso({ recurso, userLogin, onClose, onCompletado }) {
           <div style={{ padding: "14px 16px", borderBottom: `1px solid ${BORDER}`, background: WHITE }}>
             <div style={{ fontSize: 10, color: GOLD, letterSpacing: "0.15em", fontWeight: 700, fontFamily: "Inter, sans-serif" }}>MIS NOTAS</div>
           </div>
-          <textarea value={nota} onChange={e => setNota(e.target.value)} placeholder="Escribe tus notas aquÃ­..."
+          <textarea value={nota} onChange={e => setNota(e.target.value)} placeholder="Escribe tus notas aquí..."
             style={{ flex: 1, background: "transparent", border: "none", color: TEXT, fontSize: 13, fontFamily: "Inter, sans-serif", padding: 14, resize: "none", outline: "none", lineHeight: 1.7 }} />
           {nota !== notaGuardada && (
             <div style={{ padding: "10px 14px", borderTop: `1px solid ${BORDER}` }}>
@@ -199,7 +199,7 @@ async function generarCertificado(nombreAgente, nombreCurso, nombreModuloInterno
   doc.setTextColor(172, 138, 84); doc.setFont("helvetica", "bold"); doc.setFontSize(10);
   doc.text("NATIVA PROPERTIES", 148.5, 42, { align: "center" });
   doc.setTextColor(44, 42, 38); doc.setFontSize(26);
-  doc.text("CERTIFICADO DE FORMACIÃN", 148.5, 64, { align: "center" });
+  doc.text("CERTIFICADO DE FORMACIÓN", 148.5, 64, { align: "center" });
   doc.setFont("helvetica", "normal"); doc.setFontSize(13); doc.setTextColor(154, 150, 138);
   doc.text("Este certificado acredita que", 148.5, 86, { align: "center" });
   doc.setFontSize(24); doc.setTextColor(44, 42, 38); doc.setFont("helvetica", "bold");
@@ -213,7 +213,7 @@ async function generarCertificado(nombreAgente, nombreCurso, nombreModuloInterno
   doc.save(`Certificado_${nombreAgente.replace(/ /g,"_")}.pdf`);
 }
 
-// âââ Editor de mÃ³dulo âââââââââââââââââââââââââââââââââââââââââââââ
+// âââ Editor de módulo âââââââââââââââââââââââââââââââââââââââââââââ
 function EditorModulo({ modulo, onSave, onClose }) {
   const [f, setF] = useState(modulo || { titulo: "", descripcion: "", subseccion: "agentes", icono: "ð", imagen_portada: "", activo: true });
   const [imgUrl, setImgUrl] = useState(f.imagen_portada || "");
@@ -231,14 +231,14 @@ function EditorModulo({ modulo, onSave, onClose }) {
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(26,37,40,0.7)", zIndex: 900, display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div style={{ background: WHITE, width: "100%", maxWidth: 540, padding: 32, borderRadius: 0, border: `1px solid ${BORDER}` }}>
-        <div style={{ fontSize: 16, fontWeight: 700, color: TEXT, fontFamily: "Inter, sans-serif", marginBottom: 24 }}>{f.id ? "Editar mÃ³dulo" : "Nuevo mÃ³dulo"}</div>
-        <div style={{ marginBottom: 14 }}><L c="TÃ­tulo *" /><input value={f.titulo} onChange={e => setF({...f, titulo: e.target.value})} style={ISt} /></div>
-        <div style={{ marginBottom: 14 }}><L c="DescripciÃ³n" /><textarea value={f.descripcion||""} onChange={e => setF({...f, descripcion: e.target.value})} rows={3} style={{...ISt, resize:"vertical"}} /></div>
+        <div style={{ fontSize: 16, fontWeight: 700, color: TEXT, fontFamily: "Inter, sans-serif", marginBottom: 24 }}>{f.id ? "Editar módulo" : "Nuevo módulo"}</div>
+        <div style={{ marginBottom: 14 }}><L c="Título *" /><input value={f.titulo} onChange={e => setF({...f, titulo: e.target.value})} style={ISt} /></div>
+        <div style={{ marginBottom: 14 }}><L c="Descripción" /><textarea value={f.descripcion||""} onChange={e => setF({...f, descripcion: e.target.value})} rows={3} style={{...ISt, resize:"vertical"}} /></div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
-          <div><L c="SubsecciÃ³n" />
+          <div><L c="Subsección" />
             <select value={f.subseccion} onChange={e => setF({...f, subseccion: e.target.value})} style={{...ISt, cursor:"pointer"}}>
-              <option value="agentes">FormaciÃ³n de Agentes</option>
-              <option value="direccion">FormaciÃ³n DirecciÃ³n</option>
+              <option value="agentes">Formación de Agentes</option>
+              <option value="direccion">Formación Dirección</option>
               <option value="asistente">Asistente IA</option>
             </select>
           </div>
@@ -281,18 +281,18 @@ function EditorRecurso({ recurso, temaId, onSave, onClose }) {
     <div style={{ position: "fixed", inset: 0, background: "rgba(26,37,40,0.7)", zIndex: 950, display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div style={{ background: WHITE, width: "100%", maxWidth: 520, padding: 32, borderRadius: 0, border: `1px solid ${BORDER}` }}>
         <div style={{ fontSize: 16, fontWeight: 700, color: TEXT, fontFamily: "Inter, sans-serif", marginBottom: 24 }}>{f.id ? "Editar recurso" : "Nuevo recurso"}</div>
-        <div style={{ marginBottom: 14 }}><L c="TÃ­tulo *" /><input value={f.titulo} onChange={e => setF({...f, titulo: e.target.value})} style={ISt} /></div>
+        <div style={{ marginBottom: 14 }}><L c="Título *" /><input value={f.titulo} onChange={e => setF({...f, titulo: e.target.value})} style={ISt} /></div>
         <div style={{ marginBottom: 14 }}><L c="Tipo" />
           <select value={f.tipo} onChange={e => setF({...f, tipo: e.target.value})} style={{...ISt, cursor:"pointer"}}>
             {Object.entries(TIPO_LABEL).map(([k,v]) => <option key={k} value={k}>{v}</option>)}
           </select>
         </div>
-        {/* Si es PDF o presentaciÃ³n â uploader + URL manual */}
+        {/* Si es PDF o presentación â uploader + URL manual */}
         {(f.tipo === "pdf" || f.tipo === "presentacion") ? (
           <div style={{ marginBottom: 14 }}>
             <L c="Archivo" />
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <Uploader label={f.tipo === "pdf" ? "Subir PDF" : "Subir presentaciÃ³n"}
+              <Uploader label={f.tipo === "pdf" ? "Subir PDF" : "Subir presentación"}
                 accept={f.tipo === "pdf" ? ".pdf" : ".pdf,.pptx"}
                 bucketPath={`documentos/${Date.now()}.pdf`}
                 onUrl={(url) => setF({...f, url})} />
@@ -310,7 +310,7 @@ function EditorRecurso({ recurso, temaId, onSave, onClose }) {
         )}
         <div style={{ marginBottom: 20, display: "flex", gap: 14, alignItems: "flex-end" }}>
           <div style={{ flex: 1 }}>
-            <L c={`DuraciÃ³n estimada (min)${cargando ? " Â· calculando..." : ""}`} />
+            <L c={`Duración estimada (min)${cargando ? " · calculando..." : ""}`} />
             <input type="number" value={f.duracion_min||""} onChange={e => setF({...f, duracion_min: +e.target.value||null})} style={{...ISt, width:100}} placeholder="10" />
           </div>
         </div>
@@ -329,7 +329,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
   const userLogin = currentUser?.user_login || "";
 
   const [subseccion, setSubseccion]       = useState(defaultSubseccion);
-  // Si viene desde el sidebar con subsecciÃ³n fija, no permitir cambio de pestaÃ±a
+  // Si viene desde el sidebar con subsección fija, no permitir cambio de pestaña
   const subseccionFija = !!defaultSubseccion;
   const [modulos, setModulos]             = useState([]);
   const [temas, setTemas]                 = useState({});
@@ -402,7 +402,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
   }
 
   // ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-  // VISTA: GRID DE MÃDULOS
+  // VISTA: GRID DE MÓDULOS
   // ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
   if (vista === "modulos") return (
     <div style={{ background: CREAM, minHeight: "100vh", fontFamily: "Inter, sans-serif" }}>
@@ -424,12 +424,12 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
           )}
         </div>
 
-        {/* Tabs â solo si NO viene subsecciÃ³n fija desde el sidebar */}
+        {/* Tabs — solo si NO viene subsección fija desde el sidebar */}
         {!subseccionFija && (
           <div style={{ display: "flex", gap: 0, marginTop: 24 }}>
             {[
-              { key: "agentes", label: "FormaciÃ³n de Agentes", Icon: AcademicCapIcon },
-              ...(isAdmin ? [{ key: "direccion", label: "DirecciÃ³n y Asistente IA", Icon: StarIcon }] : []),
+              { key: "agentes", label: "Formación de Agentes", Icon: AcademicCapIcon },
+              ...(isAdmin ? [{ key: "direccion", label: "Dirección y Asistente IA", Icon: StarIcon }] : []),
             ].map(s => (
               <button key={s.key} onClick={() => setSubseccion(s.key)} style={{
                 padding: "12px 24px", background: "transparent", border: "none",
@@ -473,7 +473,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                       : (
                         <div style={{ width:"100%", height:"100%", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:8 }}>
                           <span style={{ fontSize: 44 }}>{mod.icono}</span>
-                          <div style={{ fontSize: 10, color: GOLD, letterSpacing: "0.15em", fontWeight: 700 }}>MÃDULO {idx+1}</div>
+                          <div style={{ fontSize: 10, color: GOLD, letterSpacing: "0.15em", fontWeight: 700 }}>MÓDULO {idx+1}</div>
                         </div>
                       )
                     }
@@ -485,7 +485,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                     {isAdmin && (
                       <div style={{ position:"absolute", top:8, left:8, display:"flex", gap:6 }} onClick={e=>e.stopPropagation()}>
                         <button onClick={() => setEditMod(mod)} style={{ width:28, height:28, border:`1px solid ${GOLD}66`, background:WHITE+"CC", color:GOLD, cursor:"pointer", borderRadius: 0, display:"flex", alignItems:"center", justifyContent:"center", padding:4 }}><PencilSquareIcon style={{ width:16, height:16 }} /></button>
-                        <button onClick={async () => { if(confirm(`Â¿Eliminar el mÃ³dulo "${mod.titulo}" y todo su contenido?`)) { await supabase.from("formacion_modulos").update({ activo:false }).eq("id", mod.id); cargarTodo(); }}} style={{ width:28, height:28, border:"1px solid #A23A3A66", background:WHITE+"CC", color:"#A23A3A", cursor:"pointer", borderRadius: 0, display:"flex", alignItems:"center", justifyContent:"center", padding:4 }}><TrashIcon style={{ width:16, height:16 }} /></button>
+                        <button onClick={async () => { if(confirm(`¿Eliminar el módulo "${mod.titulo}" y todo su contenido?`)) { await supabase.from("formacion_modulos").update({ activo:false }).eq("id", mod.id); cargarTodo(); }}} style={{ width:28, height:28, border:"1px solid #A23A3A66", background:WHITE+"CC", color:"#A23A3A", cursor:"pointer", borderRadius: 0, display:"flex", alignItems:"center", justifyContent:"center", padding:4 }}><TrashIcon style={{ width:16, height:16 }} /></button>
                       </div>
                     )}
                   </div>
@@ -524,7 +524,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
               );
             })}
 
-            {/* Card aÃ±adir mÃ³dulo */}
+            {/* Card añadir módulo */}
             {isAdmin && (
               <div onClick={() => setEditMod({})} style={{
                 border: `2px dashed ${GOLD_XL}`, borderRadius: 0, cursor:"pointer",
@@ -534,7 +534,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                 onMouseEnter={e => { e.currentTarget.style.borderColor=GOLD; e.currentTarget.style.background=CREAM; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor=GOLD_XL; e.currentTarget.style.background=WHITE; }}>
                 <PlusIcon style={{ width:28, height:28, color:GOLD_XL }} />
-                <div style={{ fontSize:12, color:MUTED, fontFamily:"Inter, sans-serif" }}>Nuevo mÃ³dulo</div>
+                <div style={{ fontSize:12, color:MUTED, fontFamily:"Inter, sans-serif" }}>Nuevo módulo</div>
               </div>
             )}
           </div>
@@ -547,7 +547,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
   );
 
   // ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-  // VISTA: TEMAS DEL MÃDULO
+  // VISTA: TEMAS DEL MÓDULO
   // ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
   if (vista === "temas") {
     const tList = temas[moduloActivo?.id] || [];
@@ -557,25 +557,25 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
     const tienePoliza = !!(datosUsuario?.poliza_rc?.trim());
     const puedeDescargar = completo && tieneRegistro && tienePoliza;
 
-    // Tooltip para el botÃ³n deshabilitado
+    // Tooltip para el botón deshabilitado
     const motivoBloqueado = !completo
-      ? "Completa todos los mÃ³dulos primero"
+      ? "Completa todos los módulos primero"
       : !tieneRegistro && !tienePoliza
-      ? "AÃ±ade tu nÂº de registro de agente y pÃ³liza RC en tu perfil"
+      ? "Añade tu nÂº de registro de agente y póliza RC en tu perfil"
       : !tieneRegistro
-      ? "AÃ±ade tu nÂº de registro de agente inmobiliario en tu perfil"
-      : "AÃ±ade tu pÃ³liza RC en tu perfil";
+      ? "Añade tu nÂº de registro de agente inmobiliario en tu perfil"
+      : "Añade tu póliza RC en tu perfil";
 
     return (
       <div style={{ background: CREAM, minHeight:"100vh", fontFamily:"Inter, sans-serif" }}>
 
-        {/* Banda superior â breadcrumb */}
+        {/* Banda superior — breadcrumb */}
         <div style={{ background:DARK, padding:"12px 32px", display:"flex", alignItems:"center", gap:8, fontSize:11 }}>
           <button onClick={() => setVista("modulos")} style={{ background:"transparent", border:"none", color:"rgba(255,255,255,0.5)", cursor:"pointer", padding:0, fontFamily:"Inter, sans-serif" }}>Academia</button>
           <span style={{ color:"rgba(255,255,255,0.25)" }}>âº</span>
           <span style={{ color:"rgba(255,255,255,0.9)", fontWeight:600 }}>{moduloActivo?.titulo}</span>
         </div>
-        {/* Imagen con degradados de integraciÃ³n */}
+        {/* Imagen con degradados de integración */}
         <div style={{ position:"relative", height:"33vh", minHeight:200, maxHeight:380, overflow:"hidden",
           background: moduloActivo?.imagen_portada ? DARK : `linear-gradient(135deg, ${GOLD_XL} 0%, ${CREAM2} 100%)` }}>
           {moduloActivo?.imagen_portada
@@ -589,11 +589,11 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
           <div style={{ position:"absolute", top:0, bottom:0, left:0, width:80, background:"linear-gradient(to right, rgba(26,37,40,1) 0%, rgba(26,37,40,0) 100%)" }} />
           <div style={{ position:"absolute", top:0, bottom:0, right:0, width:80, background:"linear-gradient(to left, rgba(26,37,40,1) 0%, rgba(26,37,40,0) 100%)" }} />
         </div>
-        {/* Banda inferior â tÃ­tulo */}
+        {/* Banda inferior — título */}
         <div style={{ background:DARK, padding:"14px 32px 20px" }}>
           <button onClick={() => setVista("modulos")} style={{ background:"transparent", border:"none", color:"rgba(255,255,255,0.45)", fontSize:11, cursor:"pointer", padding:0, marginBottom:8, fontFamily:"Inter, sans-serif", display:"block" }}>â Volver a cursos</button>
           <div style={{ fontSize:10, color:"rgba(255,255,255,0.4)", letterSpacing:"0.18em", fontWeight:700, marginBottom:4 }}>
-            {subseccion === "direccion" ? "FORMACIÃN DIRECCIÃN" : subseccion === "asistente" ? "ASISTENTE IA" : "FORMACIÃN AGENTES"}
+            {subseccion === "direccion" ? "FORMACIÓN DIRECCIÓN" : subseccion === "asistente" ? "ASISTENTE IA" : "FORMACIÓN AGENTES"}
           </div>
           <h2 style={{ fontSize:22, fontWeight: 600, color:WHITE, margin:0, fontFamily: "'Playfair Display', serif" }}>
             {moduloActivo?.titulo}
@@ -601,7 +601,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
           {moduloActivo?.descripcion && <p style={{ fontSize:12, color:"rgba(255,255,255,0.5)", margin:"4px 0 0", lineHeight:1.5 }}>{moduloActivo.descripcion}</p>}
         </div>
 
-        {/* Barra de progreso + diploma â separada del hero */}
+        {/* Barra de progreso + diploma — separada del hero */}
         <div style={{ background:WHITE, borderBottom:`1px solid ${BORDER}`, padding:"16px 40px", display:"flex", alignItems:"center", gap:24 }}>
           <div style={{ flex:1, maxWidth:320 }}>
             <div style={{ display:"flex", justifyContent:"space-between", fontSize:11, color:MUTED, marginBottom:5 }}>
@@ -640,10 +640,10 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
           {isAdmin && (
             <button onClick={() => setEditTema({ titulo:"", descripcion:"", orden: tList.length })}
               style={{ marginBottom:20, padding:"8px 18px", border:`1px dashed ${GOLD}`, background:"transparent", color:GOLD, fontSize:11, cursor:"pointer", fontFamily:"Inter, sans-serif", fontWeight:600, borderRadius: 0 }}>
-              + AÃ±adir mÃ³dulo
+              + Añadir módulo
             </button>
           )}
-          {tList.length === 0 && <div style={{ color:MUTED, textAlign:"center", padding:60, fontFamily:"Inter, sans-serif" }}>No hay temas disponibles aÃºn.</div>}
+          {tList.length === 0 && <div style={{ color:MUTED, textAlign:"center", padding:60, fontFamily:"Inter, sans-serif" }}>No hay temas disponibles aún.</div>}
           <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
             {tList.map((tema, idx) => {
               const rList = recursos[tema.id] || [];
@@ -655,7 +655,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                 <div key={tema.id} style={{ background: proximamente ? CREAM2 : WHITE, border:`1px solid ${proximamente ? BORDER : p.border}`, borderRadius: 0, overflow:"hidden", display:"flex", transition:"box-shadow 0.2s", opacity: proximamente ? 0.7 : 1 }}
                   onMouseEnter={e=>{ if(!proximamente) e.currentTarget.style.boxShadow=`0 4px 16px rgba(172,138,84,0.12)`; }}
                   onMouseLeave={e=>e.currentTarget.style.boxShadow="none"}>
-                  {/* NÃºmero */}
+                  {/* Número */}
                   <div style={{ width:52, background: proximamente ? `${BORDER}55` : `${p.numBg}22`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, borderRight:`1px solid ${BORDER}` }}>
                     <span style={{ fontSize:18, fontWeight: 600, color: proximamente ? MUTED : p.accent, fontFamily: "'Playfair Display', serif" }}>{idx+1}</span>
                   </div>
@@ -663,7 +663,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                   <div style={{ flex:1, padding:"16px 20px", cursor: proximamente ? "default" : "pointer" }} onClick={() => { if(!proximamente){ setTemaActivo(tema); setVista("recursos"); } }}>
                     <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:4 }}>
                       <div style={{ fontSize:14, fontWeight:700, color: proximamente ? MUTED : TEXT, fontFamily:"Inter, sans-serif" }}>{tema.titulo}</div>
-                      {proximamente && <span style={{ fontSize:9, fontWeight:700, color:MUTED, background:BORDER, padding:"2px 8px", borderRadius: 20, letterSpacing:"0.1em", flexShrink:0 }}>PRÃXIMAMENTE</span>}
+                      {proximamente && <span style={{ fontSize:9, fontWeight:700, color:MUTED, background:BORDER, padding:"2px 8px", borderRadius: 20, letterSpacing:"0.1em", flexShrink:0 }}>PRÓXIMAMENTE</span>}
                     </div>
                     {tema.descripcion && <div style={{ fontSize:12, color:MUTED, lineHeight:1.4, marginBottom: proximamente ? 0 : 10 }}>{tema.descripcion}</div>}
                     {!proximamente && (
@@ -678,7 +678,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                     {isAdmin && (
                       <>
                         <button onClick={() => setEditTema(tema)} style={{ background:"transparent", border:`1px solid ${BORDER}`, color:MUTED, padding:"5px 8px", cursor:"pointer", borderRadius: 0, display:"flex", alignItems:"center" }}><PencilSquareIcon style={{ width:14, height:14 }} /></button>
-                        <button onClick={async e => { e.stopPropagation(); if(confirm(`Â¿Eliminar el tema "${tema.titulo}" y todos sus recursos?`)) { await supabase.from("formacion_temas").update({ activo:false }).eq("id", tema.id); cargarTodo(); }}} style={{ background:"transparent", border:"1px solid #A23A3A44", color:"#A23A3A", padding:"5px 8px", cursor:"pointer", borderRadius: 0, display:"flex", alignItems:"center" }}><TrashIcon style={{ width:14, height:14 }} /></button>
+                        <button onClick={async e => { e.stopPropagation(); if(confirm(`¿Eliminar el tema "${tema.titulo}" y todos sus recursos?`)) { await supabase.from("formacion_temas").update({ activo:false }).eq("id", tema.id); cargarTodo(); }}} style={{ background:"transparent", border:"1px solid #A23A3A44", color:"#A23A3A", padding:"5px 8px", cursor:"pointer", borderRadius: 0, display:"flex", alignItems:"center" }}><TrashIcon style={{ width:14, height:14 }} /></button>
                       </>
                     )}
                     {!proximamente && <span style={{ color:GOLD, fontSize:16, cursor:"pointer" }} onClick={() => { setTemaActivo(tema); setVista("recursos"); }}>âº</span>}
@@ -693,8 +693,8 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
         {editTema && (
           <div style={{ position:"fixed", inset:0, background:"rgba(26,37,40,0.7)", zIndex:900, display:"flex", alignItems:"center", justifyContent:"center" }}>
             <div style={{ background:WHITE, width:"100%", maxWidth:480, padding:32, borderRadius: 0, border:`1px solid ${BORDER}` }}>
-              <div style={{ fontSize:16, fontWeight:700, color:TEXT, fontFamily:"Inter, sans-serif", marginBottom:20 }}>{editTema.id?"Editar mÃ³dulo":"Nuevo mÃ³dulo"}</div>
-              {[["TÃ­tulo","titulo"],["DescripciÃ³n","descripcion"]].map(([label,key])=>(
+              <div style={{ fontSize:16, fontWeight:700, color:TEXT, fontFamily:"Inter, sans-serif", marginBottom:20 }}>{editTema.id?"Editar módulo":"Nuevo módulo"}</div>
+              {[["Título","titulo"],["Descripción","descripcion"]].map(([label,key])=>(
                 <div key={key} style={{ marginBottom:14 }}>
                   <div style={{ fontSize:10, color:MUTED, fontWeight:700, letterSpacing:"0.1em", marginBottom:5, textTransform:"uppercase", fontFamily:"Inter, sans-serif" }}>{label}</div>
                   <input value={editTema[key]||""} onChange={e=>setEditTema({...editTema,[key]:e.target.value})}
@@ -731,7 +731,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
     return (
       <div style={{ background:CREAM, minHeight:"100vh", fontFamily:"Inter, sans-serif" }}>
 
-        {/* Banda superior â breadcrumb */}
+        {/* Banda superior — breadcrumb */}
         <div style={{ background:DARK, padding:"12px 32px", display:"flex", alignItems:"center", gap:8, fontSize:11 }}>
           <button onClick={()=>setVista("modulos")} style={{ background:"transparent", border:"none", color:"rgba(255,255,255,0.45)", cursor:"pointer", padding:0, fontFamily:"Inter, sans-serif" }}>Academia</button>
           <span style={{ color:"rgba(255,255,255,0.2)" }}>âº</span>
@@ -739,7 +739,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
           <span style={{ color:"rgba(255,255,255,0.2)" }}>âº</span>
           <span style={{ color:"rgba(255,255,255,0.9)", fontWeight:600 }}>{temaActivo?.titulo}</span>
         </div>
-        {/* Imagen con degradados de integraciÃ³n */}
+        {/* Imagen con degradados de integración */}
         <div style={{ position:"relative", height:"33vh", minHeight:200, maxHeight:380, overflow:"hidden",
           background: temaActivo?.imagen_portada ? DARK : `linear-gradient(135deg, ${GOLD_XL} 0%, ${CREAM2} 100%)` }}>
           {temaActivo?.imagen_portada
@@ -753,11 +753,11 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
           <div style={{ position:"absolute", top:0, bottom:0, left:0, width:80, background:"linear-gradient(to right, rgba(26,37,40,1) 0%, rgba(26,37,40,0) 100%)" }} />
           <div style={{ position:"absolute", top:0, bottom:0, right:0, width:80, background:"linear-gradient(to left, rgba(26,37,40,1) 0%, rgba(26,37,40,0) 100%)" }} />
         </div>
-        {/* Banda inferior â tÃ­tulo */}
+        {/* Banda inferior — título */}
         <div style={{ background:DARK, padding:"14px 32px 20px" }}>
-          <button onClick={()=>setVista("temas")} style={{ background:"transparent", border:"none", color:"rgba(255,255,255,0.45)", fontSize:11, cursor:"pointer", padding:0, marginBottom:8, fontFamily:"Inter, sans-serif", display:"block" }}>â Volver a mÃ³dulos</button>
+          <button onClick={()=>setVista("temas")} style={{ background:"transparent", border:"none", color:"rgba(255,255,255,0.45)", fontSize:11, cursor:"pointer", padding:0, marginBottom:8, fontFamily:"Inter, sans-serif", display:"block" }}>â Volver a módulos</button>
           <div style={{ fontSize:10, color:"rgba(255,255,255,0.4)", letterSpacing:"0.18em", fontWeight:700, marginBottom:4 }}>
-            {subseccion === "direccion" ? "FORMACIÃN DIRECCIÃN" : subseccion === "asistente" ? "ASISTENTE IA" : "FORMACIÃN AGENTES"}
+            {subseccion === "direccion" ? "FORMACIÓN DIRECCIÓN" : subseccion === "asistente" ? "ASISTENTE IA" : "FORMACIÓN AGENTES"}
           </div>
           <h2 style={{ fontSize:22, fontWeight: 600, color:WHITE, margin:0, fontFamily: "'Playfair Display', serif" }}>
             {temaActivo?.titulo}
@@ -769,7 +769,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
           {isAdmin && (
             <button onClick={()=>setEditRec({})}
               style={{ marginBottom:20, padding:"8px 18px", border:`1px dashed ${GOLD}`, background:"transparent", color:GOLD, fontSize:11, cursor:"pointer", fontFamily:"Inter, sans-serif", fontWeight:600, borderRadius: 0 }}>
-              + AÃ±adir contenido
+              + Añadir contenido
             </button>
           )}
           {rList.length === 0 && <div style={{ color:MUTED, textAlign:"center", padding:60 }}>No hay recursos en este tema.</div>}
@@ -782,7 +782,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
               const esVideo = rec.tipo === "video";
 
               if (esEnlace) {
-                // ââ Enlace externo â estilo compacto y diferenciado ââââââââââ
+                // ââ Enlace externo — estilo compacto y diferenciado ââââââââââ
                 return (
                   <div key={rec.id}
                     draggable={isAdmin}
@@ -814,7 +814,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                     <div style={{ flex:1, minWidth:0 }}>
                       <div style={{ fontSize:13, fontWeight:600, color:hecho?GOLD:TEXT, fontFamily:"Inter, sans-serif", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{rec.titulo}</div>
                       <div style={{ fontSize:11, color:MUTED, marginTop:2 }}>
-                        Enlace externo{rec.duracion_min ? ` Â· ${fmt(rec.duracion_min)} lectura` : ""}
+                        Enlace externo{rec.duracion_min ? ` · ${fmt(rec.duracion_min)} lectura` : ""}
                         {hecho && <span style={{ color:GOLD, fontWeight:600, marginLeft:8 }}>â Visitado</span>}
                       </div>
                     </div>
@@ -822,7 +822,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                       {isAdmin && (
                         <>
                           <button onClick={()=>setEditRec(rec)} style={{ background:"transparent", border:`1px solid ${BORDER}`, color:MUTED, padding:"4px 6px", cursor:"pointer", borderRadius: 0, display:"flex", alignItems:"center" }}><PencilSquareIcon style={{ width:12, height:12 }} /></button>
-                          <button onClick={async()=>{ if(confirm("Â¿Eliminar?")){ await supabase.from("formacion_recursos").update({activo:false}).eq("id",rec.id); cargarTodo(); }}}
+                          <button onClick={async()=>{ if(confirm("¿Eliminar?")){ await supabase.from("formacion_recursos").update({activo:false}).eq("id",rec.id); cargarTodo(); }}}
                             style={{ background:"transparent", border:`1px solid #A23A3A33`, color:"#A23A3A", padding:"4px 6px", cursor:"pointer", borderRadius: 0, display:"flex", alignItems:"center" }}><TrashIcon style={{ width:12, height:12 }} /></button>
                         </>
                       )}
@@ -844,7 +844,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                 );
               }
 
-              // ââ PDF / PresentaciÃ³n / VÃ­deo â tarjeta completa âââââââââââ
+              // ââ PDF / Presentación / Vídeo — tarjeta completa âââââââââââ
               const p = pal(idx);
               return (
                 <div key={rec.id}
@@ -876,15 +876,15 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                     <div style={{ fontSize:14, fontWeight:700, color:hecho?GOLD:TEXT, marginBottom:3, fontFamily:"Inter, sans-serif" }}>{rec.titulo}</div>
                     <div style={{ display:"flex", gap:10, fontSize:11, color:MUTED }}>
                       <span>{TIPO_LABEL[rec.tipo]}</span>
-                      {rec.duracion_min && <span>Â· {fmt(rec.duracion_min)}</span>}
-                      {hecho && <span style={{ color:GOLD, fontWeight:600 }}>Â· â Completado</span>}
+                      {rec.duracion_min && <span>· {fmt(rec.duracion_min)}</span>}
+                      {hecho && <span style={{ color:GOLD, fontWeight:600 }}>· â Completado</span>}
                     </div>
                   </div>
                   <div style={{ display:"flex", gap:10, alignItems:"center", flexShrink:0 }}>
                     {isAdmin && (
                       <>
                         <button onClick={()=>setEditRec(rec)} style={{ background:"transparent", border:`1px solid ${BORDER}`, color:MUTED, padding:"6px 8px", cursor:"pointer", borderRadius: 0, display:"flex", alignItems:"center" }}><PencilSquareIcon style={{ width:14, height:14 }} /></button>
-                        <button onClick={async()=>{ if(confirm("Â¿Eliminar?")){ await supabase.from("formacion_recursos").update({activo:false}).eq("id",rec.id); cargarTodo(); }}}
+                        <button onClick={async()=>{ if(confirm("¿Eliminar?")){ await supabase.from("formacion_recursos").update({activo:false}).eq("id",rec.id); cargarTodo(); }}}
                           style={{ background:"transparent", border:`1px solid #A23A3A44`, color:"#A23A3A", padding:"6px 8px", cursor:"pointer", borderRadius: 0, display:"flex", alignItems:"center" }}><TrashIcon style={{ width:14, height:14 }} /></button>
                       </>
                     )}
