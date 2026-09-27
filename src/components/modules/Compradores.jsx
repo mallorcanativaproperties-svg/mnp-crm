@@ -204,7 +204,7 @@ function Card({ b, onClick, onWhatsApp }) {
   const s = score(b);
   const est = ESTADOS.find(e => e.key === b.st) || ESTADOS[0];
   return <div onClick={onClick} style={{
-    background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, padding: "22px 26px",
+    background: "var(--white)", border: "1px solid var(--border)", borderRadius: 0, padding: "22px 26px",
     cursor: "pointer", transition: "all 0.3s ease", position: "relative", overflow: "hidden",
   }}
   onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--gold)"; e.currentTarget.style.boxShadow = "0 0 0 2px var(--gold), 0 0 8px 2px rgba(172,138,84,0.5), 0 0 20px 6px rgba(172,138,84,0.2), 0 0 40px 12px rgba(172,138,84,0.08)"; e.currentTarget.style.background = "var(--white)"; }}
@@ -673,7 +673,7 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
               </div>
 
               {/* Vista previa del mensaje */}
-              <div style={{ background: "#F0F8F4", border: "1px solid var(--success)44", padding: "16px 20px", marginBottom: 20, borderRadius: 2 }}>
+              <div style={{ background: "#F0F8F4", border: "1px solid var(--success)44", padding: "16px 20px", marginBottom: 20, borderRadius: 0 }}>
                 <div style={{ fontSize: 10, color: "var(--success)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Vista previa del mensaje (español)</div>
                 <div style={{ fontSize: 12, color: "var(--text)", lineHeight: 1.6, whiteSpace: "pre-line" }}>
                   {`¡Hola! Te escribimos de Nativa Properties. Si quieres tener acceso preferente a propiedades antes de que salgan al mercado, puedes completar este formulario. Así podremos enviarte oportunidades que encajen con tus preferencias antes de su publicación.
@@ -718,8 +718,8 @@ ${(typeof window !== "undefined" ? window.location.origin : "https://crm.mallorc
                   <span>{progresoWa.enviados + progresoWa.errores} de {progresoWa.total}</span>
                   <span style={{ color: "var(--success)" }}>{progresoWa.enviados} enviados</span>
                 </div>
-                <div style={{ height: 6, background: "var(--border)", borderRadius: 3, overflow: "hidden" }}>
-                  <div style={{ height: "100%", background: "var(--success)", borderRadius: 3, transition: "width 0.5s", width: progresoWa.total > 0 ? `${Math.round(((progresoWa.enviados + progresoWa.errores) / progresoWa.total) * 100)}%` : "0%" }} />
+                <div style={{ height: 6, background: "var(--border)", borderRadius: 0, overflow: "hidden" }}>
+                  <div style={{ height: "100%", background: "var(--success)", borderRadius: 0, transition: "width 0.5s", width: progresoWa.total > 0 ? `${Math.round(((progresoWa.enviados + progresoWa.errores) / progresoWa.total) * 100)}%` : "0%" }} />
                 </div>
               </div>
               {progresoWa.actual && (
@@ -1507,7 +1507,7 @@ function WhatsAppPanel({ buyer, onClose }) {
             const isAgent = m.from !== "cliente";
             elements.push(
               <div key={i} style={{ display: "flex", justifyContent: isAgent ? "flex-end" : "flex-start", marginBottom: 4 }}>
-                <div style={{ maxWidth: "78%", padding: "9px 13px 7px", background: isAgent ? PETROL : "var(--white)", color: isAgent ? CREAM : "var(--text)", borderRadius: isAgent ? "12px 12px 2px 12px" : "12px 12px 12px 2px", border: isAgent ? "none" : "1px solid var(--border)", fontSize: 13, lineHeight: 1.55, boxShadow: "0 1px 3px rgba(0,0,0,0.07)" }}>
+                <div style={{ maxWidth: "78%", padding: "9px 13px 7px", background: isAgent ? PETROL : "var(--white)", color: isAgent ? CREAM : "var(--text)", borderRadius: isAgent ? 0 : 0, border: isAgent ? "none" : "1px solid var(--border)", fontSize: 13, lineHeight: 1.55, boxShadow: "0 1px 3px rgba(0,0,0,0.07)" }}>
                   {m.from === "agente_manual" && <div style={{ fontSize: 9, color: BRONZE, marginBottom: 3, letterSpacing: "0.1em" }}>AGENTE</div>}
                   <div style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{m.text}</div>
                   {m.ts && (
