@@ -10,6 +10,7 @@
  * cuando la casa lo actualice hay que regenerar estos ficheros y recargar.
  */
 const MODULOS = {
+  "atlas-mallorca": () => import("./atlas-mallorca.js"),
   "modulo-01": () => import("./modulo-01.js"),
   "modulo-02": () => import("./modulo-02.js"),
   "modulo-03": () => import("./modulo-03.js"),
