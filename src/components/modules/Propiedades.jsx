@@ -2018,7 +2018,7 @@ function PropCard({ p, onClick }) {
           <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 4 }}>{p.zona}, {p.municipio} - {p.tipo}</div>
         </div>
         <div style={{ textAlign: "right", flexShrink: 0 }}>
-          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, color: "var(--gold)" }}>{fmtP(p.precioVenta)}</div>
+          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, color: "var(--gold)" }}>{fmtP(p.op === 'Alquiler' ? p.precioAlquiler : p.op === 'Traspaso' ? p.precioTraspaso : p.precioVenta)}</div>
           {p.precioAnt > 0 && <div style={{ fontSize: 11, color: "var(--amber)", textDecoration: "line-through" }}>{fmtP(p.precioAnt)}</div>}
           <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 2 }}>{p.mConst} m2 - {p.habDobles + p.habSimples} hab - {(p.banos || 0) + (p.aseos || 0)} ban.</div>
         </div>
