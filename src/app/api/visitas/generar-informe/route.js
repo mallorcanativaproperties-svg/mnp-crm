@@ -1,25 +1,9 @@
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import Anthropic from "@anthropic-ai/sdk";
 const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-
-// La llamada a Claude va por fetch, como en el resto del proyecto, y no por el
-// SDK: el import de "@anthropic-ai/sdk" estaba sin dependencia en package.json,
-// asi que este fichero rompia el build entero y ningun despliegue pasaba.
-async function pedirAClaude({ model, max_tokens, messages }) {
-  const r = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "x-api-key": process.env.ANTHROPIC_API_KEY,
-      "anthropic-version": "2023-06-01",
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({ model, max_tokens, messages }),
-  });
-  if (!r.ok) throw new Error(`Anthropic ${r.status}: ${(await r.text()).slice(0, 300)}`);
-  return r.json();
-}
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 export async function POST(req) {
   try {
@@ -38,24 +22,60 @@ export async function POST(req) {
     if (!visitas?.length) return NextResponse.json({ error: "No hay visitas este día" }, { status: 400 });
 
     // Construir contexto para Claude
+    const NIVEL_LABEL = ["","Sin interés","Interés bajo","Interés moderado","Interés alto","Muy interesado"];
     const visitasTexto = visitas.map((v, i) => {
       const c = v.compradores;
       const hora = new Date(v.fecha_visita).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
       const docs = v.visita_documentos?.map(d => d.tipo).join(", ") || "Sin documentos";
+      const fb = v.feedback;
+      const feedbackTexto = fb ? [
+        fb.nivel_interes ? `Nivel de interés: ${NIVEL_LABEL[fb.nivel_interes] || fb.nivel_interes} (${fb.nivel_interes}/5)` : null,
+        fb.valoracion_precio ? `Valoración del precio: ${fb.valoracion_precio}` : null,
+        fb.objeciones?.length ? `Objeciones detectadas: ${fb.objeciones.join(", ")}` : null,
+        fb.siguiente_paso ? `Siguiente paso acordado: ${fb.siguiente_paso}` : null,
+      ].filter(Boolean).join("\n") : null;
       return `Visita ${i+1} — ${hora}h
 Interesado: ${c?.nombre} ${c?.apellidos || ""} (DNI: ${c?.dni || "no indicado"}, Nacionalidad: ${c?.pais || "España"})
 Documentos generados: ${docs}
-${v.notas ? `Notas del agente: ${v.notas}` : ""}
-${v.resumen_ia ? `Resumen IA: ${v.resumen_ia}` : ""}`;
+${v.resumen_ia ? `Resumen de la visita: ${v.resumen_ia}` : ""}
+${feedbackTexto ? `Análisis estructurado:\n${feedbackTexto}` : ""}
+${v.notas ? `Notas del agente: ${v.notas}` : ""}`;
     }).join("\n\n---\n\n");
 
+    const totalVisitas = visitas.length;
+    const visitasConInteres = visitas.filter(v => v.feedback?.nivel_interes >= 4).length;
+    const visitasConObjeciones = visitas.filter(v => v.feedback?.objeciones?.length && !v.feedback.objeciones.includes("Sin objeciones")).length;
+    const siguientesPasos = visitas.map(v => v.feedback?.siguiente_paso).filter(Boolean).filter(p => p !== "Sin acción" && p !== "Descartada");
+
     // Generar informe con Claude
-    const msg = await pedirAClaude({
+    const msg = await anthropic.messages.create({
       model: "claude-sonnet-4-6",
-      max_tokens: 1000,
+      max_tokens: 1500,
       messages: [{
         role: "user",
-        content: `Eres el agente ${agente} de Nativa Properties. Redacta un informe profesional para el propietario de la vivienda en ${prop?.dir || ""}, ${prop?.municipio || ""}, sobre las visitas realizadas hoy ${fecha}. Incluye: resumen de cada visita (hora, perfil del interesado con nombre y DNI, interés mostrado y documentos firmados si los hay), una valoración general del día y los próximos pasos. Usa un tono profesional y tranquilizador. Firma como ${agente} — Nativa Properties.\n\n${visitasTexto}`
+        content: `Eres ${agente}, agente inmobiliario de Nativa Properties. Redacta una carta de informe diario para el propietario de la vivienda en ${prop?.dir || ""}, ${prop?.municipio || ""} (Ref. ${prop?.ref || ""}).
+
+HOY SE HAN REALIZADO ${totalVisitas} VISITA${totalVisitas > 1 ? "S" : ""}.
+
+DATOS DE LAS VISITAS:
+${visitasTexto}
+
+RESUMEN GLOBAL DEL DÍA:
+- Visitas con alto interés (nivel 4-5): ${visitasConInteres} de ${totalVisitas}
+- Visitas con objeciones detectadas: ${visitasConObjeciones} de ${totalVisitas}
+${siguientesPasos.length ? `- Próximos pasos activos: ${[...new Set(siguientesPasos)].join(", ")}` : "- Sin acciones inmediatas pendientes"}
+
+INSTRUCCIONES PARA EL INFORME:
+1. Redacta una carta formal dirigida al propietario, comenzando con "Estimado/a propietario/a,"
+2. Describe brevemente cada visita: quién vino, a qué hora, su interés y si firmó algún documento
+3. Para cada visita, menciona de forma natural las objeciones detectadas (si las hay) y el siguiente paso acordado
+4. Si hay compradores con alto interés, destácalo positivamente
+5. Si hay objeciones de precio, comunícalas con tacto y de forma constructiva (sin alarmar)
+6. Cierra con una valoración general del día y los próximos pasos globales
+7. Usa un tono profesional, cercano y tranquilizador — el propietario necesita sentir que su propiedad está en buenas manos
+8. Firma como: ${agente} | Nativa Properties
+
+NO incluyas datos internos del CRM como IDs o referencias técnicas. Sé conciso pero completo.`
       }]
     });
 
