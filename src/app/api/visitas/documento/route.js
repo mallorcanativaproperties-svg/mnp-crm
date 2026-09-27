@@ -428,15 +428,59 @@ export async function POST(req) {
     return NextResponse.json({ ok: true, todosFirmaron });
 
   } else if (firmante === "vendedor") {
+    // ── Nuevo flujo multi-propietario (firmaRowId apunta a visita_doc_firmas_vendedor) ──
+    if (firmaRowId) {
+      await supabase.from("visita_doc_firmas_vendedor").update({
+        firma_data: firmaData,
+        firmado_at: now,
+      }).eq("id", firmaRowId);
+
+      // Guardar respuesta_vendedor en contenido JSONB si viene
+      if (respuestaVendedor) {
+        const { data: docActual } = await supabase
+          .from("visita_documentos").select("contenido").eq("id", docId).single();
+        await supabase.from("visita_documentos").update({
+          contenido: { ...(docActual?.contenido || {}), respuesta_vendedor: respuestaVendedor },
+          updated_at: now,
+        }).eq("id", docId);
+      }
+
+      // Comprobar si todos los propietarios han firmado
+      const { data: todasFirmasVend } = await supabase
+        .from("visita_doc_firmas_vendedor")
+        .select("id, firmado_at")
+        .eq("doc_id", docId);
+
+      const todosFirmaronVend = todasFirmasVend?.length > 0 &&
+        todasFirmasVend.every(f => f.firmado_at || f.id === firmaRowId);
+
+      if (todosFirmaronVend) {
+        // Usar la primera firma como firma_vendedor_data (para estampar en PDF)
+        await supabase.from("visita_documentos").update({
+          firma_vendedor_data: firmaData,
+          firmado_vendedor_at: now,
+          estado: "firmado_vendedor",
+          updated_at: now,
+        }).eq("id", docId);
+      }
+
+      try {
+        await fetch(`${process.env.NEXT_PUBLIC_APP_URL || "https://crm.mallorcanativaproperties.com"}/api/visitas/notificar-firma`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ docId, firmante }),
+        });
+      } catch (e) {}
+
+      return NextResponse.json({ ok: true, todosFirmaron: todosFirmaronVend });
+    }
+
+    // ── Flujo legacy (token único en visita_documentos) ────────────────────────
     await supabase.from("visita_documentos").update({
       firma_vendedor_data: firmaData,
       firmado_vendedor_at: now,
       estado: "firmado_vendedor",
       updated_at: now,
-      // Guardar respuesta del vendedor en contenido JSONB para que se refleje en el PDF
-      ...(respuestaVendedor ? {
-        contenido: supabase.rpc ? undefined : undefined, // placeholder, se actualiza abajo
-      } : {}),
     }).eq("id", docId);
 
     // Guardar respuesta_vendedor en el JSONB contenido si viene
