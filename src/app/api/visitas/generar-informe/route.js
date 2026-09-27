@@ -116,7 +116,8 @@ Escribe el informe con esta estructura exacta, usando párrafos naturales (no li
 5. CIERRE (2-3 líneas)
    Transmite disponibilidad total, compromiso con el servicio de calidad y que el propietario puede contar con nosotros en todo momento. Por eso le enviamos este informe. Firma como: ${agente} | Nativa Properties
 
-TONO: cercano, asertivo, realista y profesional. Ni rígido ni excesivamente formal. Directo al grano, sin florituras innecesarias.`;
+TONO: cercano, asertivo, realista y profesional. Ni rígido ni excesivamente formal. Directo al grano, sin florituras innecesarias.
+Evita expresiones coloquiales o demasiado informales como "no vamos a endulzarlo", "seré directo", "no nos engañemos" o similares. Cuando una visita no ha ido bien, exprésalo con naturalidad y profesionalidad, sin dramatizar ni usar recursos retóricos llamativos.`;
 
     const claudeRes = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
