@@ -52,8 +52,8 @@ function ytId(url) {
 // ─── Barra de progreso pequeña ───────────────────────────────────
 function BarProg({ pct, color = GOLD }) {
   return (
-    <div style={{ height: 4, background: BORDER, borderRadius: 2, overflow: "hidden" }}>
-      <div style={{ height: "100%", width: `${pct}%`, background: color, borderRadius: 2, transition: "width 0.5s" }} />
+    <div style={{ height: 4, background: BORDER, borderRadius: 0, overflow: "hidden" }}>
+      <div style={{ height: "100%", width: `${pct}%`, background: color, borderRadius: 0, transition: "width 0.5s" }} />
     </div>
   );
 }
@@ -84,7 +84,7 @@ function Uploader({ onUrl, accept = ".pdf", label = "Subir PDF", bucketPath = ""
     <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
       <input ref={ref} type="file" accept={accept} onChange={upload} style={{ display: "none" }} />
       <button onClick={() => ref.current.click()} disabled={loading}
-        style={{ padding: "6px 14px", border: `1px dashed ${GOLD}`, background: "transparent", color: GOLD, fontSize: 11, cursor: loading ? "wait" : "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600, borderRadius: 2 }}>
+        style={{ padding: "6px 14px", border: `1px dashed ${GOLD}`, background: "transparent", color: GOLD, fontSize: 11, cursor: loading ? "wait" : "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600, borderRadius: 0 }}>
         {loading ? "Subiendo..." : `↑ ${label}`}
       </button>
       {err && <span style={{ fontSize: 11, color: "#A23A3A" }}>{err}</span>}
@@ -133,10 +133,10 @@ function VisorRecurso({ recurso, userLogin, onClose, onCompletado }) {
           <div style={{ fontSize: 15, fontWeight: 700, color: TEXT, fontFamily: "Inter, sans-serif" }}>{recurso.titulo}</div>
           {recurso.duracion_min && <div style={{ fontSize: 11, color: GOLD, marginTop: 2 }}>{fmt(recurso.duracion_min)}</div>}
         </div>
-        <button onClick={toggleCompletado} style={{ padding: "8px 18px", border: `1px solid ${completado ? GOLD : BORDER}`, background: completado ? GOLD : "transparent", color: completado ? WHITE : MUTED, fontSize: 12, cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600, borderRadius: 2, transition: "all 0.2s" }}>
+        <button onClick={toggleCompletado} style={{ padding: "8px 18px", border: `1px solid ${completado ? GOLD : BORDER}`, background: completado ? GOLD : "transparent", color: completado ? WHITE : MUTED, fontSize: 12, cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600, borderRadius: 0, transition: "all 0.2s" }}>
           {completado ? "✓ Completado" : "Marcar completado"}
         </button>
-        <button onClick={onClose} style={{ padding:"8px 16px", border:`1px solid ${BORDER}`, background:"transparent", color:MUTED, fontSize:12, cursor:"pointer", fontFamily:"Inter, sans-serif", borderRadius:2, marginRight:4 }}>← Volver</button>
+        <button onClick={onClose} style={{ padding:"8px 16px", border:`1px solid ${BORDER}`, background:"transparent", color:MUTED, fontSize:12, cursor:"pointer", fontFamily:"Inter, sans-serif", borderRadius: 0, marginRight:4 }}>← Volver</button>
         <button onClick={onClose} style={{ background: "transparent", border: "none", color: MUTED, cursor: "pointer", display:"flex", alignItems:"center", padding:4 }}><XMarkIcon style={{ width:22, height:22 }} /></button>
       </div>
 
@@ -156,7 +156,7 @@ function VisorRecurso({ recurso, userLogin, onClose, onCompletado }) {
               <LinkIcon style={{ width:52, height:52, color:"#AC8A54" }} />
               <div style={{ fontSize: 18, color: WHITE, fontFamily: "'Playfair Display', Georgia, serif" }}>{recurso.titulo}</div>
               <a href={recurso.url} target="_blank" rel="noopener noreferrer"
-                style={{ padding: "14px 32px", background: GOLD, color: WHITE, fontSize: 14, fontWeight: 700, textDecoration: "none", fontFamily: "Inter, sans-serif", borderRadius: 2 }}>
+                style={{ padding: "14px 32px", background: GOLD, color: WHITE, fontSize: 14, fontWeight: 700, textDecoration: "none", fontFamily: "Inter, sans-serif", borderRadius: 0 }}>
                 Abrir enlace →
               </a>
             </div>
@@ -172,7 +172,7 @@ function VisorRecurso({ recurso, userLogin, onClose, onCompletado }) {
           {nota !== notaGuardada && (
             <div style={{ padding: "10px 14px", borderTop: `1px solid ${BORDER}` }}>
               <button onClick={guardarNota} disabled={guardando}
-                style={{ width: "100%", padding: 10, background: GOLD, border: "none", color: WHITE, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "Inter, sans-serif", borderRadius: 2 }}>
+                style={{ width: "100%", padding: 10, background: GOLD, border: "none", color: WHITE, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "Inter, sans-serif", borderRadius: 0 }}>
                 {guardando ? "Guardando..." : "Guardar nota"}
               </button>
             </div>
@@ -226,11 +226,11 @@ function EditorModulo({ modulo, onSave, onClose }) {
     onSave();
   }
   const L = ({ c }) => <div style={{ fontSize: 10, color: MUTED, fontWeight: 700, letterSpacing: "0.1em", marginBottom: 5, textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}>{c}</div>;
-  const ISt = { width: "100%", padding: "10px 14px", background: CREAM, border: `1px solid ${BORDER}`, color: TEXT, fontSize: 13, fontFamily: "Inter, sans-serif", borderRadius: 2, outline: "none", boxSizing: "border-box" };
+  const ISt = { width: "100%", padding: "10px 14px", background: CREAM, border: `1px solid ${BORDER}`, color: TEXT, fontSize: 13, fontFamily: "Inter, sans-serif", borderRadius: 0, outline: "none", boxSizing: "border-box" };
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(26,37,40,0.7)", zIndex: 900, display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ background: WHITE, width: "100%", maxWidth: 540, padding: 32, borderRadius: 4, border: `1px solid ${BORDER}` }}>
+      <div style={{ background: WHITE, width: "100%", maxWidth: 540, padding: 32, borderRadius: 0, border: `1px solid ${BORDER}` }}>
         <div style={{ fontSize: 16, fontWeight: 700, color: TEXT, fontFamily: "Inter, sans-serif", marginBottom: 24 }}>{f.id ? "Editar módulo" : "Nuevo módulo"}</div>
         <div style={{ marginBottom: 14 }}><L c="Título *" /><input value={f.titulo} onChange={e => setF({...f, titulo: e.target.value})} style={ISt} /></div>
         <div style={{ marginBottom: 14 }}><L c="Descripción" /><textarea value={f.descripcion||""} onChange={e => setF({...f, descripcion: e.target.value})} rows={3} style={{...ISt, resize:"vertical"}} /></div>
@@ -247,7 +247,7 @@ function EditorModulo({ modulo, onSave, onClose }) {
         <div style={{ marginBottom: 20 }}>
           <L c="Imagen de portada" />
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            {imgUrl && <img src={imgUrl} style={{ width: 60, height: 40, objectFit: "cover", borderRadius: 2, border: `1px solid ${BORDER}` }} />}
+            {imgUrl && <img src={imgUrl} style={{ width: 60, height: 40, objectFit: "cover", borderRadius: 0, border: `1px solid ${BORDER}` }} />}
             <Uploader label="Subir imagen" accept=".jpg,.jpeg,.png,.webp"
               bucketPath={`portadas/${Date.now()}`}
               onUrl={(url) => setImgUrl(url)} />
@@ -255,8 +255,8 @@ function EditorModulo({ modulo, onSave, onClose }) {
           </div>
         </div>
         <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-          <button onClick={onClose} style={{ padding: "10px 20px", border: `1px solid ${BORDER}`, background: "transparent", color: MUTED, cursor: "pointer", fontFamily: "Inter, sans-serif", borderRadius: 2 }}>Cancelar</button>
-          <button onClick={guardar} style={{ padding: "10px 24px", background: DARK, border: "none", color: WHITE, cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600, borderRadius: 2 }}>Guardar</button>
+          <button onClick={onClose} style={{ padding: "10px 20px", border: `1px solid ${BORDER}`, background: "transparent", color: MUTED, cursor: "pointer", fontFamily: "Inter, sans-serif", borderRadius: 0 }}>Cancelar</button>
+          <button onClick={guardar} style={{ padding: "10px 24px", background: DARK, border: "none", color: WHITE, cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600, borderRadius: 0 }}>Guardar</button>
         </div>
       </div>
     </div>
@@ -275,11 +275,11 @@ function EditorRecurso({ recurso, temaId, onSave, onClose }) {
     onSave();
   }
   const L = ({ c }) => <div style={{ fontSize: 10, color: MUTED, fontWeight: 700, letterSpacing: "0.1em", marginBottom: 5, textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}>{c}</div>;
-  const ISt = { width: "100%", padding: "10px 14px", background: CREAM, border: `1px solid ${BORDER}`, color: TEXT, fontSize: 13, fontFamily: "Inter, sans-serif", borderRadius: 2, outline: "none", boxSizing: "border-box" };
+  const ISt = { width: "100%", padding: "10px 14px", background: CREAM, border: `1px solid ${BORDER}`, color: TEXT, fontSize: 13, fontFamily: "Inter, sans-serif", borderRadius: 0, outline: "none", boxSizing: "border-box" };
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(26,37,40,0.7)", zIndex: 950, display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ background: WHITE, width: "100%", maxWidth: 520, padding: 32, borderRadius: 4, border: `1px solid ${BORDER}` }}>
+      <div style={{ background: WHITE, width: "100%", maxWidth: 520, padding: 32, borderRadius: 0, border: `1px solid ${BORDER}` }}>
         <div style={{ fontSize: 16, fontWeight: 700, color: TEXT, fontFamily: "Inter, sans-serif", marginBottom: 24 }}>{f.id ? "Editar recurso" : "Nuevo recurso"}</div>
         <div style={{ marginBottom: 14 }}><L c="Título *" /><input value={f.titulo} onChange={e => setF({...f, titulo: e.target.value})} style={ISt} /></div>
         <div style={{ marginBottom: 14 }}><L c="Tipo" />
@@ -315,8 +315,8 @@ function EditorRecurso({ recurso, temaId, onSave, onClose }) {
           </div>
         </div>
         <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-          <button onClick={onClose} style={{ padding: "10px 20px", border: `1px solid ${BORDER}`, background:"transparent", color:MUTED, cursor:"pointer", fontFamily:"Inter, sans-serif", borderRadius:2 }}>Cancelar</button>
-          <button onClick={guardar} style={{ padding: "10px 24px", background: DARK, border:"none", color:WHITE, cursor:"pointer", fontFamily:"Inter, sans-serif", fontWeight:600, borderRadius:2 }}>Guardar</button>
+          <button onClick={onClose} style={{ padding: "10px 20px", border: `1px solid ${BORDER}`, background:"transparent", color:MUTED, cursor:"pointer", fontFamily:"Inter, sans-serif", borderRadius: 0 }}>Cancelar</button>
+          <button onClick={guardar} style={{ padding: "10px 24px", background: DARK, border:"none", color:WHITE, cursor:"pointer", fontFamily:"Inter, sans-serif", fontWeight:600, borderRadius: 0 }}>Guardar</button>
         </div>
       </div>
     </div>
@@ -412,13 +412,13 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 4 }}>
           <div>
             <div style={{ fontSize: 10, color: GOLD, letterSpacing: "0.2em", fontWeight: 700, marginBottom: 4 }}>NATIVA PROPERTIES</div>
-            <h1 style={{ fontSize: 26, color: TEXT, fontWeight: 400, margin: 0, fontFamily: "'Playfair Display', Georgia, serif" }}>
+            <h1 style={{ fontSize: 26, color: TEXT, fontWeight: 600, margin: 0, fontFamily: "'Playfair Display', Georgia, serif" }}>
               {subseccion === "direccion" ? "Formación Dirección" : subseccion === "asistente" ? "Asistente IA" : "Formación de Agentes"}
             </h1>
           </div>
           {isAdmin && (
             <button onClick={() => setVista("seguimiento")}
-              style={{ padding: "9px 18px", border: `1px solid ${BORDER}`, background: WHITE, color: TEXT, fontSize: 11, cursor: "pointer", fontWeight: 600, letterSpacing: "0.08em", fontFamily: "Inter, sans-serif", borderRadius: 2 }}>
+              style={{ padding: "9px 18px", border: `1px solid ${BORDER}`, background: WHITE, color: TEXT, fontSize: 11, cursor: "pointer", fontWeight: 600, letterSpacing: "0.08em", fontFamily: "Inter, sans-serif", borderRadius: 0 }}>
               📊 Seguimiento
             </button>
           )}
@@ -458,7 +458,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
               return (
                 <div key={mod.id} style={{
                   background: p.bg, border: `1px solid ${p.border}`,
-                  borderRadius: 3, overflow: "hidden", cursor: "pointer",
+                  borderRadius: 0, overflow: "hidden", cursor: "pointer",
                   boxShadow: "0 2px 12px rgba(172,138,84,0.08)",
                   transition: "transform 0.2s, box-shadow 0.2s"
                 }}
@@ -478,21 +478,21 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                       )
                     }
                     {completo && (
-                      <div style={{ position:"absolute", top:12, right:12, background: GOLD, color: WHITE, fontSize: 9, fontWeight: 700, padding:"3px 10px", letterSpacing:"0.1em", borderRadius:2 }}>
+                      <div style={{ position:"absolute", top:12, right:12, background: GOLD, color: WHITE, fontSize: 9, fontWeight: 700, padding:"3px 10px", letterSpacing:"0.1em", borderRadius: 0 }}>
                         ✓ COMPLETADO
                       </div>
                     )}
                     {isAdmin && (
                       <div style={{ position:"absolute", top:8, left:8, display:"flex", gap:6 }} onClick={e=>e.stopPropagation()}>
-                        <button onClick={() => setEditMod(mod)} style={{ width:28, height:28, border:`1px solid ${GOLD}66`, background:WHITE+"CC", color:GOLD, cursor:"pointer", borderRadius:2, display:"flex", alignItems:"center", justifyContent:"center", padding:4 }}><PencilSquareIcon style={{ width:16, height:16 }} /></button>
-                        <button onClick={async () => { if(confirm(`¿Eliminar el módulo "${mod.titulo}" y todo su contenido?`)) { await supabase.from("formacion_modulos").update({ activo:false }).eq("id", mod.id); cargarTodo(); }}} style={{ width:28, height:28, border:"1px solid #A23A3A66", background:WHITE+"CC", color:"#A23A3A", cursor:"pointer", borderRadius:2, display:"flex", alignItems:"center", justifyContent:"center", padding:4 }}><TrashIcon style={{ width:16, height:16 }} /></button>
+                        <button onClick={() => setEditMod(mod)} style={{ width:28, height:28, border:`1px solid ${GOLD}66`, background:WHITE+"CC", color:GOLD, cursor:"pointer", borderRadius: 0, display:"flex", alignItems:"center", justifyContent:"center", padding:4 }}><PencilSquareIcon style={{ width:16, height:16 }} /></button>
+                        <button onClick={async () => { if(confirm(`¿Eliminar el módulo "${mod.titulo}" y todo su contenido?`)) { await supabase.from("formacion_modulos").update({ activo:false }).eq("id", mod.id); cargarTodo(); }}} style={{ width:28, height:28, border:"1px solid #A23A3A66", background:WHITE+"CC", color:"#A23A3A", cursor:"pointer", borderRadius: 0, display:"flex", alignItems:"center", justifyContent:"center", padding:4 }}><TrashIcon style={{ width:16, height:16 }} /></button>
                       </div>
                     )}
                   </div>
 
                   {/* Cuerpo */}
                   <div style={{ padding: "18px 20px 16px" }} onClick={() => { setModuloActivo(mod); setVista("temas"); }}>
-                    <h3 style={{ fontSize: 15, fontWeight: 700, color: TEXT, margin: "0 0 6px", fontFamily: "'Playfair Display', Georgia, serif", lineHeight: 1.3 }}>{mod.titulo}</h3>
+                    <h3 style={{ fontSize: 15, fontWeight: 600, color: TEXT, margin: "0 0 6px", fontFamily: "'Playfair Display', Georgia, serif", lineHeight: 1.3 }}>{mod.titulo}</h3>
                     {mod.descripcion && <p style={{ fontSize: 12, color: MUTED, margin: "0 0 14px", lineHeight: 1.5 }}>{mod.descripcion}</p>}
 
                     {/* Progreso */}
@@ -512,7 +512,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                       <div style={{ display:"flex", gap:8 }}>
                         {completo && (
                           <button onClick={e => { e.stopPropagation(); generarCertificado(currentUser?.nombre||userLogin, mod.titulo, ""); }}
-                            style={{ padding:"6px 12px", background:GOLD, border:"none", color:WHITE, fontSize:10, fontWeight:700, cursor:"pointer", fontFamily:"Inter, sans-serif", borderRadius:2 }}>
+                            style={{ padding:"6px 12px", background:GOLD, border:"none", color:WHITE, fontSize:10, fontWeight:700, cursor:"pointer", fontFamily:"Inter, sans-serif", borderRadius: 0 }}>
                             Certificado
                           </button>
                         )}
@@ -527,7 +527,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
             {/* Card añadir módulo */}
             {isAdmin && (
               <div onClick={() => setEditMod({})} style={{
-                border: `2px dashed ${GOLD_XL}`, borderRadius: 3, cursor:"pointer",
+                border: `2px dashed ${GOLD_XL}`, borderRadius: 0, cursor:"pointer",
                 display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center",
                 minHeight: 260, gap:10, transition:"all 0.2s", background: WHITE
               }}
@@ -595,7 +595,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
           <div style={{ fontSize:10, color:"rgba(255,255,255,0.4)", letterSpacing:"0.18em", fontWeight:700, marginBottom:4 }}>
             {subseccion === "direccion" ? "FORMACIÓN DIRECCIÓN" : subseccion === "asistente" ? "ASISTENTE IA" : "FORMACIÓN AGENTES"}
           </div>
-          <h2 style={{ fontSize:22, fontWeight:400, color:WHITE, margin:0, fontFamily:"'Playfair Display', Georgia, serif" }}>
+          <h2 style={{ fontSize:22, fontWeight: 600, color:WHITE, margin:0, fontFamily:"'Playfair Display', Georgia, serif" }}>
             {moduloActivo?.titulo}
           </h2>
           {moduloActivo?.descripcion && <p style={{ fontSize:12, color:"rgba(255,255,255,0.5)", margin:"4px 0 0", lineHeight:1.5 }}>{moduloActivo.descripcion}</p>}
@@ -620,7 +620,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                 background: puedeDescargar ? GOLD : CREAM2,
                 color: puedeDescargar ? WHITE : MUTED,
                 fontSize:11, fontWeight:700, cursor: puedeDescargar ? "pointer" : "not-allowed",
-                fontFamily:"Inter, sans-serif", borderRadius:2,
+                fontFamily:"Inter, sans-serif", borderRadius: 0,
                 opacity: puedeDescargar ? 1 : 0.6, transition:"all 0.2s",
                 display:"flex", alignItems:"center", gap:6
               }}>
@@ -628,7 +628,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
               Descargar diploma
             </button>
             {!puedeDescargar && (
-              <div style={{ position:"absolute", bottom:"calc(100% + 6px)", left:"50%", transform:"translateX(-50%)", background:DARK, color:CREAM, fontSize:10, padding:"5px 10px", borderRadius:3, whiteSpace:"nowrap", pointerEvents:"none", zIndex:10 }}>
+              <div style={{ position:"absolute", bottom:"calc(100% + 6px)", left:"50%", transform:"translateX(-50%)", background:DARK, color:CREAM, fontSize:10, padding:"5px 10px", borderRadius: 0, whiteSpace:"nowrap", pointerEvents:"none", zIndex:10 }}>
                 {motivoBloqueado}
               </div>
             )}
@@ -639,7 +639,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
         <div style={{ padding:"28px 40px" }}>
           {isAdmin && (
             <button onClick={() => setEditTema({ titulo:"", descripcion:"", orden: tList.length })}
-              style={{ marginBottom:20, padding:"8px 18px", border:`1px dashed ${GOLD}`, background:"transparent", color:GOLD, fontSize:11, cursor:"pointer", fontFamily:"Inter, sans-serif", fontWeight:600, borderRadius:2 }}>
+              style={{ marginBottom:20, padding:"8px 18px", border:`1px dashed ${GOLD}`, background:"transparent", color:GOLD, fontSize:11, cursor:"pointer", fontFamily:"Inter, sans-serif", fontWeight:600, borderRadius: 0 }}>
               + Añadir módulo
             </button>
           )}
@@ -652,18 +652,18 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
               const p = pal(idx);
               const proximamente = rList.length === 0;
               return (
-                <div key={tema.id} style={{ background: proximamente ? CREAM2 : WHITE, border:`1px solid ${proximamente ? BORDER : p.border}`, borderRadius:3, overflow:"hidden", display:"flex", transition:"box-shadow 0.2s", opacity: proximamente ? 0.7 : 1 }}
+                <div key={tema.id} style={{ background: proximamente ? CREAM2 : WHITE, border:`1px solid ${proximamente ? BORDER : p.border}`, borderRadius: 0, overflow:"hidden", display:"flex", transition:"box-shadow 0.2s", opacity: proximamente ? 0.7 : 1 }}
                   onMouseEnter={e=>{ if(!proximamente) e.currentTarget.style.boxShadow=`0 4px 16px rgba(172,138,84,0.12)`; }}
                   onMouseLeave={e=>e.currentTarget.style.boxShadow="none"}>
                   {/* Número */}
                   <div style={{ width:52, background: proximamente ? `${BORDER}55` : `${p.numBg}22`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, borderRight:`1px solid ${BORDER}` }}>
-                    <span style={{ fontSize:18, fontWeight:700, color: proximamente ? MUTED : p.accent, fontFamily:"'Playfair Display', Georgia, serif" }}>{idx+1}</span>
+                    <span style={{ fontSize:18, fontWeight: 600, color: proximamente ? MUTED : p.accent, fontFamily:"'Playfair Display', Georgia, serif" }}>{idx+1}</span>
                   </div>
                   {/* Contenido */}
                   <div style={{ flex:1, padding:"16px 20px", cursor: proximamente ? "default" : "pointer" }} onClick={() => { if(!proximamente){ setTemaActivo(tema); setVista("recursos"); } }}>
                     <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:4 }}>
                       <div style={{ fontSize:14, fontWeight:700, color: proximamente ? MUTED : TEXT, fontFamily:"Inter, sans-serif" }}>{tema.titulo}</div>
-                      {proximamente && <span style={{ fontSize:9, fontWeight:700, color:MUTED, background:BORDER, padding:"2px 8px", borderRadius:10, letterSpacing:"0.1em", flexShrink:0 }}>PRÓXIMAMENTE</span>}
+                      {proximamente && <span style={{ fontSize:9, fontWeight:700, color:MUTED, background:BORDER, padding:"2px 8px", borderRadius: 20, letterSpacing:"0.1em", flexShrink:0 }}>PRÓXIMAMENTE</span>}
                     </div>
                     {tema.descripcion && <div style={{ fontSize:12, color:MUTED, lineHeight:1.4, marginBottom: proximamente ? 0 : 10 }}>{tema.descripcion}</div>}
                     {!proximamente && (
@@ -677,8 +677,8 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                   <div style={{ display:"flex", alignItems:"center", padding:"0 16px", gap:8, flexShrink:0 }}>
                     {isAdmin && (
                       <>
-                        <button onClick={() => setEditTema(tema)} style={{ background:"transparent", border:`1px solid ${BORDER}`, color:MUTED, padding:"5px 8px", cursor:"pointer", borderRadius:2, display:"flex", alignItems:"center" }}><PencilSquareIcon style={{ width:14, height:14 }} /></button>
-                        <button onClick={async e => { e.stopPropagation(); if(confirm(`¿Eliminar el tema "${tema.titulo}" y todos sus recursos?`)) { await supabase.from("formacion_temas").update({ activo:false }).eq("id", tema.id); cargarTodo(); }}} style={{ background:"transparent", border:"1px solid #A23A3A44", color:"#A23A3A", padding:"5px 8px", cursor:"pointer", borderRadius:2, display:"flex", alignItems:"center" }}><TrashIcon style={{ width:14, height:14 }} /></button>
+                        <button onClick={() => setEditTema(tema)} style={{ background:"transparent", border:`1px solid ${BORDER}`, color:MUTED, padding:"5px 8px", cursor:"pointer", borderRadius: 0, display:"flex", alignItems:"center" }}><PencilSquareIcon style={{ width:14, height:14 }} /></button>
+                        <button onClick={async e => { e.stopPropagation(); if(confirm(`¿Eliminar el tema "${tema.titulo}" y todos sus recursos?`)) { await supabase.from("formacion_temas").update({ activo:false }).eq("id", tema.id); cargarTodo(); }}} style={{ background:"transparent", border:"1px solid #A23A3A44", color:"#A23A3A", padding:"5px 8px", cursor:"pointer", borderRadius: 0, display:"flex", alignItems:"center" }}><TrashIcon style={{ width:14, height:14 }} /></button>
                       </>
                     )}
                     {!proximamente && <span style={{ color:GOLD, fontSize:16, cursor:"pointer" }} onClick={() => { setTemaActivo(tema); setVista("recursos"); }}>›</span>}
@@ -692,19 +692,19 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
         {/* Modal editor tema */}
         {editTema && (
           <div style={{ position:"fixed", inset:0, background:"rgba(26,37,40,0.7)", zIndex:900, display:"flex", alignItems:"center", justifyContent:"center" }}>
-            <div style={{ background:WHITE, width:"100%", maxWidth:480, padding:32, borderRadius:4, border:`1px solid ${BORDER}` }}>
+            <div style={{ background:WHITE, width:"100%", maxWidth:480, padding:32, borderRadius: 0, border:`1px solid ${BORDER}` }}>
               <div style={{ fontSize:16, fontWeight:700, color:TEXT, fontFamily:"Inter, sans-serif", marginBottom:20 }}>{editTema.id?"Editar módulo":"Nuevo módulo"}</div>
               {[["Título","titulo"],["Descripción","descripcion"]].map(([label,key])=>(
                 <div key={key} style={{ marginBottom:14 }}>
                   <div style={{ fontSize:10, color:MUTED, fontWeight:700, letterSpacing:"0.1em", marginBottom:5, textTransform:"uppercase", fontFamily:"Inter, sans-serif" }}>{label}</div>
                   <input value={editTema[key]||""} onChange={e=>setEditTema({...editTema,[key]:e.target.value})}
-                    style={{ width:"100%", padding:"10px 14px", background:CREAM, border:`1px solid ${BORDER}`, color:TEXT, fontSize:13, fontFamily:"Inter, sans-serif", borderRadius:2, outline:"none", boxSizing:"border-box" }} />
+                    style={{ width:"100%", padding:"10px 14px", background:CREAM, border:`1px solid ${BORDER}`, color:TEXT, fontSize:13, fontFamily:"Inter, sans-serif", borderRadius: 0, outline:"none", boxSizing:"border-box" }} />
                 </div>
               ))}
               <div style={{ marginBottom:16 }}>
                 <div style={{ fontSize:10, color:MUTED, fontWeight:700, letterSpacing:"0.1em", marginBottom:6, textTransform:"uppercase", fontFamily:"Inter, sans-serif" }}>Imagen de portada</div>
                 <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-                  {editTema.imagen_portada && <img src={editTema.imagen_portada} style={{ width:60, height:40, objectFit:"cover", borderRadius:2, border:`1px solid ${BORDER}` }} />}
+                  {editTema.imagen_portada && <img src={editTema.imagen_portada} style={{ width:60, height:40, objectFit:"cover", borderRadius: 0, border:`1px solid ${BORDER}` }} />}
                   <Uploader label="Subir imagen" accept=".jpg,.jpeg,.png,.webp"
                     bucketPath={`portadas/modulo_${Date.now()}`}
                     onUrl={(url) => setEditTema({...editTema, imagen_portada: url})} />
@@ -712,8 +712,8 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                 </div>
               </div>
               <div style={{ display:"flex", gap:10, justifyContent:"flex-end" }}>
-                <button onClick={()=>setEditTema(null)} style={{ padding:"10px 20px", border:`1px solid ${BORDER}`, background:"transparent", color:MUTED, cursor:"pointer", fontFamily:"Inter, sans-serif", borderRadius:2 }}>Cancelar</button>
-                <button onClick={()=>guardarTema(editTema)} style={{ padding:"10px 24px", background:DARK, border:"none", color:WHITE, cursor:"pointer", fontFamily:"Inter, sans-serif", fontWeight:600, borderRadius:2 }}>Guardar</button>
+                <button onClick={()=>setEditTema(null)} style={{ padding:"10px 20px", border:`1px solid ${BORDER}`, background:"transparent", color:MUTED, cursor:"pointer", fontFamily:"Inter, sans-serif", borderRadius: 0 }}>Cancelar</button>
+                <button onClick={()=>guardarTema(editTema)} style={{ padding:"10px 24px", background:DARK, border:"none", color:WHITE, cursor:"pointer", fontFamily:"Inter, sans-serif", fontWeight:600, borderRadius: 0 }}>Guardar</button>
               </div>
             </div>
           </div>
@@ -745,7 +745,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
           {temaActivo?.imagen_portada
             ? <img src={temaActivo.imagen_portada} style={{ position:"absolute", inset:0, width:"100%", height:"100%", objectFit:"contain", objectPosition:"center" }} />
             : <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                <span style={{ fontSize:56, fontWeight:700, color:GOLD, opacity:0.18, fontFamily:"'Playfair Display', Georgia, serif" }}>{temaActivo?.orden || ""}</span>
+                <span style={{ fontSize:56, fontWeight: 600, color:GOLD, opacity:0.18, fontFamily:"'Playfair Display', Georgia, serif" }}>{temaActivo?.orden || ""}</span>
               </div>
           }
           <div style={{ position:"absolute", top:0, left:0, right:0, height:50, background:"linear-gradient(to bottom, rgba(26,37,40,1) 0%, rgba(26,37,40,0) 100%)" }} />
@@ -759,7 +759,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
           <div style={{ fontSize:10, color:"rgba(255,255,255,0.4)", letterSpacing:"0.18em", fontWeight:700, marginBottom:4 }}>
             {subseccion === "direccion" ? "FORMACIÓN DIRECCIÓN" : subseccion === "asistente" ? "ASISTENTE IA" : "FORMACIÓN AGENTES"}
           </div>
-          <h2 style={{ fontSize:22, fontWeight:400, color:WHITE, margin:0, fontFamily:"'Playfair Display', Georgia, serif" }}>
+          <h2 style={{ fontSize:22, fontWeight: 600, color:WHITE, margin:0, fontFamily:"'Playfair Display', Georgia, serif" }}>
             {temaActivo?.titulo}
           </h2>
           {temaActivo?.descripcion && <p style={{ fontSize:12, color:"rgba(255,255,255,0.5)", margin:"4px 0 0", lineHeight:1.5 }}>{temaActivo.descripcion}</p>}
@@ -768,7 +768,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
         <div style={{ padding:"28px 40px" }}>
           {isAdmin && (
             <button onClick={()=>setEditRec({})}
-              style={{ marginBottom:20, padding:"8px 18px", border:`1px dashed ${GOLD}`, background:"transparent", color:GOLD, fontSize:11, cursor:"pointer", fontFamily:"Inter, sans-serif", fontWeight:600, borderRadius:2 }}>
+              style={{ marginBottom:20, padding:"8px 18px", border:`1px dashed ${GOLD}`, background:"transparent", color:GOLD, fontSize:11, cursor:"pointer", fontFamily:"Inter, sans-serif", fontWeight:600, borderRadius: 0 }}>
               + Añadir contenido
             </button>
           )}
@@ -801,7 +801,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                       background: hecho ? `${GOLD}08` : CREAM,
                       border: `1px solid ${isOver ? GOLD : BORDER}`,
                       borderLeft: `3px solid ${isOver ? GOLD : hecho ? GOLD : GOLD_LIGHT}`,
-                      borderRadius: 3, padding:"12px 16px",
+                      borderRadius: 0, padding:"12px 16px",
                       display:"flex", alignItems:"center", gap:12, transition:"all 0.2s",
                       opacity: isDragging ? 0.4 : 1,
                       transform: isOver ? "translateY(-2px)" : "none",
@@ -821,9 +821,9 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                     <div style={{ display:"flex", gap:8, alignItems:"center", flexShrink:0 }}>
                       {isAdmin && (
                         <>
-                          <button onClick={()=>setEditRec(rec)} style={{ background:"transparent", border:`1px solid ${BORDER}`, color:MUTED, padding:"4px 6px", cursor:"pointer", borderRadius:2, display:"flex", alignItems:"center" }}><PencilSquareIcon style={{ width:12, height:12 }} /></button>
+                          <button onClick={()=>setEditRec(rec)} style={{ background:"transparent", border:`1px solid ${BORDER}`, color:MUTED, padding:"4px 6px", cursor:"pointer", borderRadius: 0, display:"flex", alignItems:"center" }}><PencilSquareIcon style={{ width:12, height:12 }} /></button>
                           <button onClick={async()=>{ if(confirm("¿Eliminar?")){ await supabase.from("formacion_recursos").update({activo:false}).eq("id",rec.id); cargarTodo(); }}}
-                            style={{ background:"transparent", border:`1px solid #A23A3A33`, color:"#A23A3A", padding:"4px 6px", cursor:"pointer", borderRadius:2, display:"flex", alignItems:"center" }}><TrashIcon style={{ width:12, height:12 }} /></button>
+                            style={{ background:"transparent", border:`1px solid #A23A3A33`, color:"#A23A3A", padding:"4px 6px", cursor:"pointer", borderRadius: 0, display:"flex", alignItems:"center" }}><TrashIcon style={{ width:12, height:12 }} /></button>
                         </>
                       )}
                       <button onClick={async () => {
@@ -836,7 +836,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                             cargarTodo();
                           }
                         }}
-                        style={{ padding:"6px 14px", background:"transparent", border:`1px solid ${GOLD}`, color:GOLD, fontSize:11, fontWeight:600, cursor:"pointer", fontFamily:"Inter, sans-serif", borderRadius:2, whiteSpace:"nowrap" }}>
+                        style={{ padding:"6px 14px", background:"transparent", border:`1px solid ${GOLD}`, color:GOLD, fontSize:11, fontWeight:600, cursor:"pointer", fontFamily:"Inter, sans-serif", borderRadius: 0, whiteSpace:"nowrap" }}>
                         Abrir →
                       </button>
                     </div>
@@ -862,7 +862,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                   }}
                   style={{
                     background: WHITE, border:`1px solid ${isOver ? GOLD : hecho?GOLD:p.border}`,
-                    borderRadius:3, padding:"18px 22px",
+                    borderRadius: 0, padding:"18px 22px",
                     display:"flex", alignItems:"center", gap:16, transition:"all 0.2s",
                     opacity: isDragging ? 0.4 : 1,
                     transform: isOver ? "translateY(-2px)" : "none",
@@ -883,13 +883,13 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                   <div style={{ display:"flex", gap:10, alignItems:"center", flexShrink:0 }}>
                     {isAdmin && (
                       <>
-                        <button onClick={()=>setEditRec(rec)} style={{ background:"transparent", border:`1px solid ${BORDER}`, color:MUTED, padding:"6px 8px", cursor:"pointer", borderRadius:2, display:"flex", alignItems:"center" }}><PencilSquareIcon style={{ width:14, height:14 }} /></button>
+                        <button onClick={()=>setEditRec(rec)} style={{ background:"transparent", border:`1px solid ${BORDER}`, color:MUTED, padding:"6px 8px", cursor:"pointer", borderRadius: 0, display:"flex", alignItems:"center" }}><PencilSquareIcon style={{ width:14, height:14 }} /></button>
                         <button onClick={async()=>{ if(confirm("¿Eliminar?")){ await supabase.from("formacion_recursos").update({activo:false}).eq("id",rec.id); cargarTodo(); }}}
-                          style={{ background:"transparent", border:`1px solid #A23A3A44`, color:"#A23A3A", padding:"6px 8px", cursor:"pointer", borderRadius:2, display:"flex", alignItems:"center" }}><TrashIcon style={{ width:14, height:14 }} /></button>
+                          style={{ background:"transparent", border:`1px solid #A23A3A44`, color:"#A23A3A", padding:"6px 8px", cursor:"pointer", borderRadius: 0, display:"flex", alignItems:"center" }}><TrashIcon style={{ width:14, height:14 }} /></button>
                       </>
                     )}
                     <button onClick={()=>setVisor(rec)}
-                      style={{ padding:"10px 22px", background:hecho?`${GOLD}18`:GOLD, border:`1px solid ${GOLD}`, color:hecho?GOLD:WHITE, fontSize:11, fontWeight:700, cursor:"pointer", fontFamily:"Inter, sans-serif", letterSpacing:"0.06em", borderRadius:2 }}>
+                      style={{ padding:"10px 22px", background:hecho?`${GOLD}18`:GOLD, border:`1px solid ${GOLD}`, color:hecho?GOLD:WHITE, fontSize:11, fontWeight:700, cursor:"pointer", fontFamily:"Inter, sans-serif", letterSpacing:"0.06em", borderRadius: 0 }}>
                       {hecho ? "Repasar →" : "Iniciar →"}
                     </button>
                   </div>
@@ -943,11 +943,11 @@ function Seguimiento({ modulos, temas, recursos, onClose }) {
     <div style={{ background:CREAM, minHeight:"100vh", fontFamily:"Inter, sans-serif" }}>
       <div style={{ background:WHITE, borderBottom:`1px solid ${BORDER}`, padding:"20px 40px", display:"flex", alignItems:"center", gap:16 }}>
         <button onClick={onClose} style={{ background:"transparent", border:"none", color:MUTED, cursor:"pointer", fontSize:12, padding:0, fontFamily:"Inter, sans-serif" }}>← Volver</button>
-        <h2 style={{ fontSize:20, fontWeight:400, color:TEXT, margin:0, fontFamily:"'Playfair Display', Georgia, serif" }}>Panel de seguimiento</h2>
+        <h2 style={{ fontSize:20, fontWeight: 600, color:TEXT, margin:0, fontFamily:"'Playfair Display', Georgia, serif" }}>Panel de seguimiento</h2>
       </div>
       <div style={{ padding:"28px 40px", overflowX:"auto" }}>
         {loading ? <div style={{ color:MUTED, textAlign:"center", padding:60 }}>Cargando...</div> : (
-          <table style={{ width:"100%", borderCollapse:"collapse", background:WHITE, border:`1px solid ${BORDER}`, borderRadius:3 }}>
+          <table style={{ width:"100%", borderCollapse:"collapse", background:WHITE, border:`1px solid ${BORDER}`, borderRadius: 0 }}>
             <thead>
               <tr style={{ background:CREAM2, borderBottom:`2px solid ${GOLD}` }}>
                 <th style={{ textAlign:"left", padding:"12px 18px", fontSize:10, color:GOLD, fontWeight:700, letterSpacing:"0.12em" }}>AGENTE</th>
