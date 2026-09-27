@@ -134,15 +134,15 @@ export default function Usuarios({ currentUser }) {
         <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "10px 0 0" }}>Gestión de usuarios y permisos del equipo</p>
         <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginTop: 28, marginBottom: 28 }} />
       </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 8 }}>
-            <p style={{ fontSize: 12, color: "#9A968A", margin: 0 }}>{usuarios.filter(u => u.activo).length} activos · {usuarios.filter(u => !u.activo).length} inactivos</p>
-            {usuarios.some(u => !u.activo) && (
-              <button onClick={() => setMostrarInactivos(v => !v)}
-                style={{ fontSize: 11, color: "#9A968A", background: "none", border: "1px solid #E7E1D4", padding: "3px 10px", cursor: "pointer", fontFamily: "Inter, sans-serif" }}>
-                {mostrarInactivos ? "Ocultar inactivos" : "Ver inactivos"}
-              </button>
-            )}
-          </div>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <p style={{ fontSize: 12, color: "#9A968A", margin: 0 }}>{usuarios.filter(u => u.activo).length} activos · {usuarios.filter(u => !u.activo).length} inactivos</p>
+          {usuarios.some(u => !u.activo) && (
+            <button onClick={() => setMostrarInactivos(v => !v)}
+              style={{ fontSize: 11, color: "#9A968A", background: "none", border: "1px solid #E7E1D4", padding: "3px 10px", cursor: "pointer", fontFamily: "Inter, sans-serif" }}>
+              {mostrarInactivos ? "Ocultar inactivos" : "Ver inactivos"}
+            </button>
+          )}
         </div>
         <button onClick={abrirNuevo} style={{ padding: "12px 24px", borderRadius: 0, border: "1px solid #C8A97E", background: "transparent", color: "#AC8A54", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}>
           + Nuevo usuario

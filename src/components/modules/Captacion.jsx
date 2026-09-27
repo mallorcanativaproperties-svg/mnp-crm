@@ -529,12 +529,13 @@ export default function Captacion() {
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 600, margin: 0, lineHeight: 1.1, color: "#A8854A" }}>Prospección Particulares</h1>
         <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "10px 0 0" }}>Gestión de captación y prospección de propietarios</p>
         <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginTop: 28, marginBottom: 28 }} />
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
             <button onClick={handleScrapingManual} disabled={scrapingManual}
               style={{ padding: "10px 20px", background: scrapingManual ? "#E7E1D4" : PETROL, border: "none", color: scrapingManual ? "#9A968A" : CREAM, fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", cursor: scrapingManual ? "not-allowed" : "pointer", fontFamily: "Inter, sans-serif" }}>
               {scrapingManual ? "Buscando..." : "Buscar en portales"}
             </button>
-          </div>
-          {scrapingMsg && <div style={{ marginTop: 10, fontSize: 12, color: scrapingMsg.startsWith("✓") ? "#2C6E52" : "#A23A3A" }}>{scrapingMsg}</div>}
+          {scrapingMsg && <div style={{ fontSize: 12, color: scrapingMsg.startsWith("✓") ? "#2C6E52" : "#A23A3A" }}>{scrapingMsg}</div>}
         </div>
 
         {/* Stats */}

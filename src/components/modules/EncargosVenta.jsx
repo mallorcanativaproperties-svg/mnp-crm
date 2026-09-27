@@ -339,10 +339,13 @@ export default function EncargosVenta() {
         <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "10px 0 0" }}>Gestión de encargos y mandatos de venta</p>
         <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginTop: 28, marginBottom: 28 }} />
       </div>
-        <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} /><button onClick={() => { setShowForm(true); loadCurrentUser(); }}
+
+        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 24 }}>
+          <button onClick={() => { setShowForm(true); loadCurrentUser(); }}
               style={{ padding: "10px 24px", background: PETROL, border: "none", color: CREAM, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.14em", borderRadius: 0 }}>
               + Nuevo encargo
             </button>
+        </div>
 
         {/* Formulario modal */}
         {showForm && (
