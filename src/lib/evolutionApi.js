@@ -65,7 +65,9 @@ export async function sendWhatsApp(to, text) {
     body: JSON.stringify({ number: phone, text }),
   });
   console.log(`Evolution sendText to ${phone}:`, JSON.stringify(data).slice(0, 300));
-  return data;
+  // Evolution devuelve el id del mensaje en key.id o message.id
+  const waMessageId = data?.key?.id || data?.id || null;
+  return { ...data, waMessageId };
 }
 
 // Envía botones interactivos (Evolution API los soporta sin plantillas de Meta)
@@ -143,6 +145,7 @@ export async function logMensajeWA(supabase, phone, texto, fromWho = "sistema", 
       from_who:        fromWho,
       texto:           textoFinal,
       timestamp:       new Date().toISOString(),
+      wa_status:       fromWho !== "cliente" ? "SENT" : null,
     });
   } catch (e) {
     console.error("[logMensajeWA] error:", e.message);
