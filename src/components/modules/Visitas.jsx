@@ -2133,7 +2133,7 @@ export default function Visitas({ currentUser }) {
     setModalNuevaVisita(false);
     setNvPropiedad(null); setNvCompradores([]);
     setNvHora((() => { const now = new Date(); const pad = n => String(n).padStart(2,"0"); return `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`; })());
-    cargar();
+    cargar(true);
   }
 
   useEffect(() => {
