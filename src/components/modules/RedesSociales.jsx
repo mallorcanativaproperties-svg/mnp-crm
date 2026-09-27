@@ -190,7 +190,7 @@ function PostEditor({ post, onClose, onSaved }) {
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 1000, display: "flex", alignItems: "flex-start", justifyContent: "center", paddingTop: 40, overflowY: "auto" }} onClick={onClose}>
       <div style={{ ...S.card, maxWidth: 620, width: "95%", padding: "28px 32px", marginBottom: 40 }} onClick={(e) => e.stopPropagation()}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-          <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 400, margin: 0 }}>{post ? "Editar" : "Nuevo"} <em>post</em></h3>
+          <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 600, margin: 0 }}>{post ? "Editar" : "Nuevo"} <em>post</em></h3>
           <button onClick={onClose} style={{ background: "none", border: "none", color: "#9A968A", cursor: "pointer", fontSize: 18 }}>✕</button>
         </div>
         <div style={{ marginBottom: 14 }}><label style={S.label}>Título</label><input value={titulo} onChange={(e) => setTitulo(e.target.value)} placeholder="Título del post" style={S.input} /></div>
@@ -396,7 +396,7 @@ function TabInbox() {
       <div style={{ borderRight: selected ? "1px solid #2A2926" : "none", overflowY: "auto", maxHeight: "calc(100vh - 220px)" }}>
         <div style={{ padding: "12px 16px", borderBottom: "1px solid #2A2926", display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ fontSize: 12, color: "#22262E", fontWeight: 500 }}>Inbox</span>
-          {unread > 0 && <span style={{ fontSize: 9, padding: "2px 8px", borderRadius: 10, background: "#A23A3A", color: "#fff", fontWeight: 600 }}>{unread}</span>}
+          {unread > 0 && <span style={{ fontSize: 9, padding: "2px 8px", borderRadius: 20, background: "#A23A3A", color: "#fff", fontWeight: 600 }}>{unread}</span>}
           <div style={{ flex: 1 }} />
           <select value={platformFilter} onChange={(e) => setPlatformFilter(e.target.value)} style={{ ...S.input, width: "auto", fontSize: 10, padding: "4px 8px" }}>
             <option value="all">Todas</option>
@@ -575,7 +575,7 @@ function TabAutomations() {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                    <div onClick={() => toggle(a)} style={{ width: 36, height: 20, borderRadius: 10, background: a.activa ? "#2C6E52" : "#E7E1D4", cursor: "pointer", position: "relative", transition: "background 0.2s" }}><div style={{ width: 16, height: 16, borderRadius: "50%", background: "#22262E", position: "absolute", top: 2, left: a.activa ? 18 : 2, transition: "left 0.2s" }} /></div>
+                    <div onClick={() => toggle(a)} style={{ width: 36, height: 20, borderRadius: 20, background: a.activa ? "#2C6E52" : "#E7E1D4", cursor: "pointer", position: "relative", transition: "background 0.2s" }}><div style={{ width: 16, height: 16, borderRadius: "50%", background: "#22262E", position: "absolute", top: 2, left: a.activa ? 18 : 2, transition: "left 0.2s" }} /></div>
                     <span style={{ fontSize: 14, color: "#22262E", fontWeight: 500 }}>{a.nombre}</span>
                     {a.platform !== "all" ? <RedIcon red={a.platform} size={18} /> : <Tag>Todas</Tag>}
                   </div>
@@ -652,7 +652,7 @@ function AutoEditor({ onClose, onSaved, existing }) {
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 1000, display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "30px 12px", overflowY: "auto" }}>
       <div style={{ ...S.card, maxWidth: 600, width: "95%", padding: "28px 32px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-          <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 400, margin: 0 }}>{existing ? "Editar" : "Nueva"} <em>automatizacion</em></h3>
+          <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 600, margin: 0 }}>{existing ? "Editar" : "Nueva"} <em>automatizacion</em></h3>
           <button onClick={onClose} style={{ background: "none", border: "none", color: "#9A968A", cursor: "pointer", fontSize: 18 }}>✕</button>
         </div>
 
@@ -875,7 +875,7 @@ function TabCuentas() {
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => setShowConnect(null)}>
           <div style={{ ...S.card, maxWidth: 520, width: "95%", padding: "28px 32px" }} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 400, margin: 0 }}>Conectar <em>{REDES.find((r) => r.key === showConnect)?.label}</em></h3>
+              <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 600, margin: 0 }}>Conectar <em>{REDES.find((r) => r.key === showConnect)?.label}</em></h3>
               <button onClick={() => setShowConnect(null)} style={{ background: "none", border: "none", color: "#9A968A", cursor: "pointer", fontSize: 18 }}>✕</button>
             </div>
             <div style={{ fontSize: 11, color: "#9A968A", marginBottom: 16, lineHeight: 1.5, padding: "10px 14px", background: "#F8F6F1", borderRadius: 0 }}>{platformInfo[showConnect]?.help}</div>
@@ -1084,7 +1084,7 @@ function TabSilvia() {
                           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
                             <span style={{ fontSize: 12, fontWeight: 600, color: "#22262E" }}>@{c.username}</span>
                             <span style={{ fontSize: 9, color: "#9A968A" }}>{c.timestamp ? new Date(c.timestamp).toLocaleString("es-ES", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) : ""}</span>
-                            {c.dm_sent && <span style={{ fontSize: 9, padding: "2px 8px", borderRadius: 10, background: "#6AAF8D20", color: "#2C6E52", fontWeight: 600 }}>✓ DM enviado</span>}
+                            {c.dm_sent && <span style={{ fontSize: 9, padding: "2px 8px", borderRadius: 20, background: "#6AAF8D20", color: "#2C6E52", fontWeight: 600 }}>✓ DM enviado</span>}
                           </div>
                           <div style={{ fontSize: 12, color: "#A09D93", lineHeight: 1.5, marginBottom: 8 }}>{c.text}</div>
                           {c.replies?.length > 0 && (
@@ -1336,7 +1336,7 @@ export default function RedesSociales() {
         {/* Header */}
         <div style={{ marginBottom: 28, borderBottom: "1px solid #2A2926", paddingBottom: 20 }}>
           <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Nativa Properties</div>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 400, margin: 0, lineHeight: 1.1 }}>Redes <em>Sociales</em></h1>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 600, margin: 0, lineHeight: 1.1 }}>Redes <em>Sociales</em></h1>
           <p style={{ fontSize: 12, color: "#9A968A", margin: "10px 0 0", letterSpacing: "0.04em" }}>Publicar, responder, automatizar — Instagram, Facebook, LinkedIn, TikTok, YouTube</p>
         </div>
 
