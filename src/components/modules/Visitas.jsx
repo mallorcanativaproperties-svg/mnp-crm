@@ -2267,7 +2267,7 @@ export default function Visitas({ currentUser }) {
               : "Propiedad sin referencia";
             return (
               <GrupoPropiedad key={pid} propiedadId={pid} propiedadNombre={nombre}
-                visitas={vis} currentUser={currentUser} onActualizado={cargar}
+                visitas={vis} currentUser={currentUser} onActualizado={() => cargar(true)}
                 informesPendientes={informes}
                 abierto={gruposAbiertos.has(pid)}
                 onToggle={() => setGruposAbiertos(prev => {
