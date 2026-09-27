@@ -1671,17 +1671,25 @@ function GrupoDia({ fecha, visitas, propiedadId, propiedadNombre, currentUser, o
 
   async function generarInformeDia() {
     setGenerando(true);
-    const res = await fetch("/api/visitas/generar-informe", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ propiedadId, agente: currentUser.user_login, fecha }),
-    });
-    const data = await res.json();
-    if (data.informeId) {
-      const { data: inf } = await supabase.from("visita_informes").select("*").eq("id", data.informeId).single();
-      setInforme(inf);
+    try {
+      const res = await fetch("/api/visitas/generar-informe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ propiedadId, agente: currentUser.user_login, fecha }),
+      });
+      const data = await res.json();
+      if (data.error) {
+        alert("Error al generar informe: " + data.error);
+      } else if (data.informeId) {
+        const { data: inf } = await supabase.from("visita_informes").select("*").eq("id", data.informeId).single();
+        setInforme(inf);
+      }
+    } catch (e) {
+      console.error("[generarInformeDia]", e);
+      alert("Error al generar informe: " + e.message);
+    } finally {
+      setGenerando(false);
     }
-    setGenerando(false);
   }
 
   const fechaDisplay = new Date(fecha + "T12:00:00").toLocaleDateString("es-ES", {
