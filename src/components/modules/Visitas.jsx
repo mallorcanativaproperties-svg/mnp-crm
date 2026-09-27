@@ -1993,7 +1993,11 @@ export default function Visitas({ currentUser }) {
     setLoading(false);
   }, [isAdmin, currentUser?.user_login]);
 
-  useEffect(() => { cargar(); }, [cargar]);
+  useEffect(() => {
+    cargar();
+    const interval = setInterval(cargar, 15000);
+    return () => clearInterval(interval);
+  }, [cargar]);
 
   // Agrupar por propiedad
   const grupos = {};
