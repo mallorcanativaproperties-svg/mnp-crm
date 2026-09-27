@@ -112,7 +112,10 @@ function mapJsToDb(p) {
     prop_nombre: p.propNombre, prop_tel: p.propTel, prop_email: p.propEmail,
     propietarios: p.propietarios || [],
     agente: p.agente, estado: p.estado, destinos: p.estado === "publicada" ? (p.destinos || []) : [],
-    precio_cierre: p.precioCierre || null, fecha_publicacion: p.fechaPublicacion || null,
+    precio_cierre: p.precioCierre || null,
+    fecha_publicacion: p.estado === "publicada"
+      ? (p.fechaPublicacion || new Date().toISOString().split("T")[0])
+      : (p.fechaPublicacion || null),
     fotos: p.fotos, videos: p.videos, tour360: p.tour360, planos: p.planos,
     fecha_cap: p.fechaCap, visitas: p.visitas,
     cual_pos: p.cualPos, cual_neg: p.cualNeg,
