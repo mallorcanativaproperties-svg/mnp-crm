@@ -13,7 +13,8 @@ import {
   PaperAirplaneIcon, MicrophoneIcon, ArrowUpTrayIcon, PencilSquareIcon,
   TrashIcon, XMarkIcon, CheckCircleIcon, ClipboardDocumentListIcon,
   PhoneIcon, EnvelopeIcon, UserIcon, DocumentDuplicateIcon,
-  CameraIcon, CheckIcon, ChevronDownIcon, ChevronUpIcon
+  CameraIcon, CheckIcon, ChevronDownIcon, ChevronUpIcon,
+  PaperClipIcon
 } from "@heroicons/react/24/outline";
 
 // ── Paleta ────────────────────────────────────────────────────────────────────
@@ -1281,46 +1282,65 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
                                   {/* Justificante de depósito */}
                                   {tieneJustificante ? (
                                     <div style={{ display: "flex", alignItems: "center", gap: 8,
-                                      padding: "10px 14px", background: `${SUCCESS}12`,
+                                      padding: "12px 14px", background: `${SUCCESS}12`,
                                       border: `1px solid ${SUCCESS}40`, borderRadius: 10,
-                                      fontSize: 12, color: SUCCESS, fontFamily: "Inter, sans-serif" }}>
-                                      ✅ Justificante de depósito adjuntado
+                                      fontFamily: "Inter, sans-serif" }}>
+                                      <CheckCircleIcon style={{ width: 16, height: 16, color: SUCCESS, flexShrink: 0 }} />
+                                      <span style={{ fontSize: 13, color: SUCCESS, fontWeight: 600, flex: 1 }}>
+                                        Justificante adjuntado
+                                      </span>
                                       <a href={doc.justificante_deposito_url} target="_blank" rel="noreferrer"
-                                        style={{ color: SUCCESS, fontSize: 11, marginLeft: "auto" }}>Ver</a>
+                                        style={{ fontSize: 12, color: SUCCESS, fontWeight: 600,
+                                          textDecoration: "none", padding: "4px 10px",
+                                          border: `1px solid ${SUCCESS}60`, borderRadius: 6 }}>
+                                        Ver
+                                      </a>
                                       <button onClick={() => subirJustificante(doc.id)}
-                                        style={{ background: "none", border: "none", cursor: "pointer",
-                                          color: MUTED, fontSize: 11, fontFamily: "Inter, sans-serif" }}>
+                                        style={{ background: "none", border: `1px solid ${BORDER}`,
+                                          cursor: "pointer", color: MUTED, fontSize: 12,
+                                          fontFamily: "Inter, sans-serif", borderRadius: 6,
+                                          padding: "4px 10px" }}>
                                         Cambiar
                                       </button>
                                     </div>
                                   ) : (
                                     <button onClick={() => subirJustificante(doc.id)}
                                       disabled={subiendoJustificante}
-                                      style={{ padding: "12px 16px", background: "#9C6E1B", border: "none",
-                                        color: WHITE, cursor: "pointer", borderRadius: 10, fontSize: 14,
-                                        fontWeight: 700, fontFamily: "Inter, sans-serif",
-                                        display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                                      style={{ padding: "14px 16px", background: "#9C6E1B", border: "none",
+                                        color: WHITE, cursor: subiendoJustificante ? "not-allowed" : "pointer",
+                                        borderRadius: 10, fontSize: 14, fontWeight: 700,
+                                        fontFamily: "Inter, sans-serif", display: "flex",
+                                        alignItems: "center", justifyContent: "center", gap: 8,
+                                        width: "100%", boxSizing: "border-box",
                                         opacity: subiendoJustificante ? 0.6 : 1 }}>
-                                      <ArrowUpTrayIcon style={{ width: 18, height: 18 }} />
-                                      {subiendoJustificante ? "Subiendo…" : "📎 Adjuntar justificante de depósito"}
+                                      <ArrowUpTrayIcon style={{ width: 18, height: 18, flexShrink: 0 }} />
+                                      {subiendoJustificante ? "Subiendo…" : "Adjuntar justificante de depósito"}
                                     </button>
                                   )}
                                   {/* Enviar firma al propietario — bloqueado sin justificante */}
                                   <button onClick={() => tieneJustificante ? enviarFirma("vendedor") : null}
                                     disabled={!tieneJustificante}
-                                    title={!tieneJustificante ? "Debes adjuntar el justificante de depósito primero" : ""}
+                                    title={!tieneJustificante ? "Adjunta el justificante de depósito primero" : ""}
                                     style={{ padding: "14px 16px",
-                                      background: tieneJustificante ? SUCCESS : MUTED,
-                                      border: "none", color: WHITE,
+                                      background: tieneJustificante ? SUCCESS : BORDER,
+                                      border: "none", color: tieneJustificante ? WHITE : MUTED,
                                       cursor: tieneJustificante ? "pointer" : "not-allowed",
                                       borderRadius: 10, fontSize: 14, fontWeight: 700,
                                       fontFamily: "Inter, sans-serif", display: "flex",
                                       alignItems: "center", justifyContent: "center", gap: 8,
-                                      opacity: tieneJustificante ? 1 : 0.6 }}>
-                                    <PaperAirplaneIcon style={{ width: 18, height: 18 }} />
-                                    Enviar firma → Propietario
-                                    {!tieneJustificante && <span style={{ fontSize: 11, fontWeight: 400 }}>⚠️ falta justificante</span>}
+                                      width: "100%", boxSizing: "border-box" }}>
+                                    <PaperAirplaneIcon style={{ width: 18, height: 18, flexShrink: 0 }} />
+                                    <span style={{ flex: 1, textAlign: "center" }}>Enviar firma → Propietario</span>
+                                    {!tieneJustificante && (
+                                      <PaperClipIcon style={{ width: 15, height: 15, flexShrink: 0 }} />
+                                    )}
                                   </button>
+                                  {!tieneJustificante && (
+                                    <p style={{ margin: 0, fontSize: 11, color: MUTED,
+                                      fontFamily: "Inter, sans-serif", textAlign: "center", lineHeight: 1.4 }}>
+                                      Adjunta el justificante de depósito para desbloquear el envío al propietario
+                                    </p>
+                                  )}
                                 </div>
                               );
                             })()}
