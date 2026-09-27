@@ -91,7 +91,30 @@ export default function FirmarVisita() {
           }
         }
       } else {
-        // Vendedor: buscar token en visita_documentos
+        // Vendedor: buscar token primero en visita_doc_firmas_vendedor (nuevo, multi-propietario)
+        const { data: firmaVend } = await sb.from("visita_doc_firmas_vendedor")
+          .select("id, doc_id, nombre_firmante, firma_data, firmado_at")
+          .eq("token", t).single();
+
+        if (firmaVend) {
+          // Nuevo flujo multi-propietario
+          if (firmaVend.firmado_at) { setFirmado(true); setLoading(false); return; }
+          setFirmaRow(firmaVend);
+          const { data: docData } = await sb.from("visita_documentos")
+            .select("id, tipo, estado, pdf_url").eq("id", firmaVend.doc_id).single();
+          setDoc(docData);
+          if (docData?.pdf_url) {
+            setPdfUrl(docData.pdf_url);
+          } else {
+            await fetch(`/api/visitas/documento?id=${docData.id}`);
+            const { data: docAct } = await sb.from("visita_documentos").select("pdf_url").eq("id", docData.id).single();
+            if (docAct?.pdf_url) setPdfUrl(docAct.pdf_url);
+          }
+          setLoading(false);
+          return;
+        }
+
+        // Fallback: token antiguo en visita_documentos (retrocompatibilidad)
         const { data } = await sb.from("visita_documentos")
           .select("id, tipo, estado, pdf_url, firmado_vendedor_at")
           .eq("token_firma_vendedor", t).single();
