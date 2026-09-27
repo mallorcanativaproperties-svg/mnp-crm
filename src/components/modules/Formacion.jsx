@@ -7,7 +7,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { supabase } from "@/lib/supabase";
 
-// âââ PALETA ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ═══ PALETA ══════════════════════════════════════════════════════
 const GOLD       = "#AC8A54";
 const GOLD_LIGHT = "#C8A97E";
 const GOLD_XL    = "#E7D5B8";
@@ -39,7 +39,7 @@ const CARD_PALETTES = [
 
 function pal(idx) { return CARD_PALETTES[idx % CARD_PALETTES.length]; }
 
-// âââ Utilidades ââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ─── Utilidades ──────────────────────────────────────────────────
 function fmt(min) {
   if (!min) return null;
   return min < 60 ? `${min} min` : `${Math.floor(min/60)}h ${min%60>0?(min%60)+"min":""}`.trim();
@@ -49,7 +49,7 @@ function ytId(url) {
   return m ? m[1] : null;
 }
 
-// âââ Barra de progreso pequeña âââââââââââââââââââââââââââââââââââ
+// ─── Barra de progreso pequeña ───────────────────────────────────
 function BarProg({ pct, color = GOLD }) {
   return (
     <div style={{ height: 4, background: BORDER, borderRadius: 0, overflow: "hidden" }}>
@@ -58,7 +58,7 @@ function BarProg({ pct, color = GOLD }) {
   );
 }
 
-// âââ Uploader (solo admin) âââââââââââââââââââââââââââââââââââââââ
+// ─── Uploader (solo admin) ───────────────────────────────────────
 function Uploader({ onUrl, accept = ".pdf", label = "Subir PDF", bucketPath = "" }) {
   const ref = useRef();
   const [loading, setLoading] = useState(false);
@@ -85,14 +85,14 @@ function Uploader({ onUrl, accept = ".pdf", label = "Subir PDF", bucketPath = ""
       <input ref={ref} type="file" accept={accept} onChange={upload} style={{ display: "none" }} />
       <button onClick={() => ref.current.click()} disabled={loading}
         style={{ padding: "6px 14px", border: `1px dashed ${GOLD}`, background: "transparent", color: GOLD, fontSize: 11, cursor: loading ? "wait" : "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600, borderRadius: 0 }}>
-        {loading ? "Subiendo..." : `â ${label}`}
+        {loading ? "Subiendo..." : `↑ ${label}`}
       </button>
       {err && <span style={{ fontSize: 11, color: "#A23A3A" }}>{err}</span>}
     </div>
   );
 }
 
-// âââ Visor de recurso (modal fullscreen) âââââââââââââââââââââââââ
+// ─── Visor de recurso (modal fullscreen) ─────────────────────────
 function VisorRecurso({ recurso, userLogin, onClose, onCompletado }) {
   const [nota, setNota] = useState("");
   const [notaGuardada, setNotaGuardada] = useState("");
@@ -134,9 +134,9 @@ function VisorRecurso({ recurso, userLogin, onClose, onCompletado }) {
           {recurso.duracion_min && <div style={{ fontSize: 11, color: GOLD, marginTop: 2 }}>{fmt(recurso.duracion_min)}</div>}
         </div>
         <button onClick={toggleCompletado} style={{ padding: "8px 18px", border: `1px solid ${completado ? GOLD : BORDER}`, background: completado ? GOLD : "transparent", color: completado ? WHITE : MUTED, fontSize: 12, cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600, borderRadius: 0, transition: "all 0.2s" }}>
-          {completado ? "â Completado" : "Marcar completado"}
+          {completado ? "✓ Completado" : "Marcar completado"}
         </button>
-        <button onClick={onClose} style={{ padding:"8px 16px", border:`1px solid ${BORDER}`, background:"transparent", color:MUTED, fontSize:12, cursor:"pointer", fontFamily:"Inter, sans-serif", borderRadius: 0, marginRight:4 }}>â Volver</button>
+        <button onClick={onClose} style={{ padding:"8px 16px", border:`1px solid ${BORDER}`, background:"transparent", color:MUTED, fontSize:12, cursor:"pointer", fontFamily:"Inter, sans-serif", borderRadius: 0, marginRight:4 }}>← Volver</button>
         <button onClick={onClose} style={{ background: "transparent", border: "none", color: MUTED, cursor: "pointer", display:"flex", alignItems:"center", padding:4 }}><XMarkIcon style={{ width:22, height:22 }} /></button>
       </div>
 
@@ -157,7 +157,7 @@ function VisorRecurso({ recurso, userLogin, onClose, onCompletado }) {
               <div style={{ fontSize: 18, color: WHITE, fontFamily: "'Playfair Display', serif" }}>{recurso.titulo}</div>
               <a href={recurso.url} target="_blank" rel="noopener noreferrer"
                 style={{ padding: "14px 32px", background: GOLD, color: WHITE, fontSize: 14, fontWeight: 700, textDecoration: "none", fontFamily: "Inter, sans-serif", borderRadius: 0 }}>
-                Abrir enlace â
+                Abrir enlace →
               </a>
             </div>
           )}
@@ -183,7 +183,7 @@ function VisorRecurso({ recurso, userLogin, onClose, onCompletado }) {
   );
 }
 
-// âââ Certificado PDF âââââââââââââââââââââââââââââââââââââââââââââ
+// ─── Certificado PDF ─────────────────────────────────────────────
 function calcProgresoCurso(moduloId) {
   let total=0, done=0;
   (temas[moduloId]||[]).forEach(t => (recursos[t.id]||[]).forEach(r => { total++; if(progreso[r.id]) done++; }));
@@ -213,9 +213,9 @@ async function generarCertificado(nombreAgente, nombreCurso, nombreModuloInterno
   doc.save(`Certificado_${nombreAgente.replace(/ /g,"_")}.pdf`);
 }
 
-// âââ Editor de módulo âââââââââââââââââââââââââââââââââââââââââââââ
+// ─── Editor de módulo ─────────────────────────────────────────────
 function EditorModulo({ modulo, onSave, onClose }) {
-  const [f, setF] = useState(modulo || { titulo: "", descripcion: "", subseccion: "agentes", icono: "ð", imagen_portada: "", activo: true });
+  const [f, setF] = useState(modulo || { titulo: "", descripcion: "", subseccion: "agentes", icono: "📚", imagen_portada: "", activo: true });
   const [imgUrl, setImgUrl] = useState(f.imagen_portada || "");
 
   async function guardar() {
@@ -242,7 +242,7 @@ function EditorModulo({ modulo, onSave, onClose }) {
               <option value="asistente">Asistente IA</option>
             </select>
           </div>
-          <div><L c="Icono" /><input value={f.icono} onChange={e => setF({...f, icono: e.target.value})} style={ISt} placeholder="ð" /></div>
+          <div><L c="Icono" /><input value={f.icono} onChange={e => setF({...f, icono: e.target.value})} style={ISt} placeholder="📚" /></div>
         </div>
         <div style={{ marginBottom: 20 }}>
           <L c="Imagen de portada" />
@@ -263,7 +263,7 @@ function EditorModulo({ modulo, onSave, onClose }) {
   );
 }
 
-// âââ Editor de recurso ââââââââââââââââââââââââââââââââââââââââââââ
+// ─── Editor de recurso ────────────────────────────────────────────
 function EditorRecurso({ recurso, temaId, onSave, onClose }) {
   const [f, setF] = useState(recurso || { titulo: "", tipo: "pdf", url: "", duracion_min: null, orden: 0, activo: true });
   const [cargando, setCargando] = useState(false);
@@ -287,7 +287,7 @@ function EditorRecurso({ recurso, temaId, onSave, onClose }) {
             {Object.entries(TIPO_LABEL).map(([k,v]) => <option key={k} value={k}>{v}</option>)}
           </select>
         </div>
-        {/* Si es PDF o presentación â uploader + URL manual */}
+        {/* Si es PDF o presentación → uploader + URL manual */}
         {(f.tipo === "pdf" || f.tipo === "presentacion") ? (
           <div style={{ marginBottom: 14 }}>
             <L c="Archivo" />
@@ -296,7 +296,7 @@ function EditorRecurso({ recurso, temaId, onSave, onClose }) {
                 accept={f.tipo === "pdf" ? ".pdf" : ".pdf,.pptx"}
                 bucketPath={`documentos/${Date.now()}.pdf`}
                 onUrl={(url) => setF({...f, url})} />
-              {f.url && <div style={{ fontSize: 11, color: GOLD, wordBreak: "break-all" }}>â {f.url.split("/").pop()}</div>}
+              {f.url && <div style={{ fontSize: 11, color: GOLD, wordBreak: "break-all" }}>✓ {f.url.split("/").pop()}</div>}
               <div style={{ fontSize: 10, color: MUTED }}>O pega una URL directamente:</div>
               <input value={f.url} onChange={e => setF({...f, url: e.target.value})} style={{...ISt, fontSize:11}} placeholder="https://..." />
             </div>
@@ -323,7 +323,7 @@ function EditorRecurso({ recurso, temaId, onSave, onClose }) {
   );
 }
 
-// âââ COMPONENTE PRINCIPAL ââââââââââââââââââââââââââââââââââââââââ
+// ═══ COMPONENTE PRINCIPAL ════════════════════════════════════════
 export default function Formacion({ currentUser, defaultSubseccion = "agentes" }) {
   const isAdmin = ["director","administrador"].includes(currentUser?.role?.toLowerCase());
   const userLogin = currentUser?.user_login || "";
@@ -401,9 +401,9 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
     setEditTema(null); cargarTodo();
   }
 
-  // ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+  // ──────────────────────────────────────────────────────────────
   // VISTA: GRID DE MÓDULOS
-  // ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+  // ──────────────────────────────────────────────────────────────
   if (vista === "modulos") return (
     <div style={{ background: CREAM, minHeight: "100vh", fontFamily: "Inter, sans-serif" }}>
 
@@ -419,7 +419,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
           {isAdmin && (
             <button onClick={() => setVista("seguimiento")}
               style={{ padding: "9px 18px", border: `1px solid ${BORDER}`, background: WHITE, color: TEXT, fontSize: 11, cursor: "pointer", fontWeight: 600, letterSpacing: "0.08em", fontFamily: "Inter, sans-serif", borderRadius: 0 }}>
-              ð Seguimiento
+              📊 Seguimiento
             </button>
           )}
         </div>
@@ -479,7 +479,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                     }
                     {completo && (
                       <div style={{ position:"absolute", top:12, right:12, background: GOLD, color: WHITE, fontSize: 9, fontWeight: 700, padding:"3px 10px", letterSpacing:"0.1em", borderRadius: 0 }}>
-                        â COMPLETADO
+                        ✓ COMPLETADO
                       </div>
                     )}
                     {isAdmin && (
@@ -516,7 +516,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                             Certificado
                           </button>
                         )}
-                        <span style={{ fontSize:12, color:GOLD, fontWeight:700 }}>â</span>
+                        <span style={{ fontSize:12, color:GOLD, fontWeight:700 }}>→</span>
                       </div>
                     </div>
                   </div>
@@ -546,9 +546,9 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
     </div>
   );
 
-  // ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+  // ──────────────────────────────────────────────────────────────
   // VISTA: TEMAS DEL MÓDULO
-  // ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+  // ──────────────────────────────────────────────────────────────
   if (vista === "temas") {
     const tList = temas[moduloActivo?.id] || [];
     const { total, done, pct } = calcProg(moduloActivo?.id);
@@ -561,9 +561,9 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
     const motivoBloqueado = !completo
       ? "Completa todos los módulos primero"
       : !tieneRegistro && !tienePoliza
-      ? "Añade tu nÂº de registro de agente y póliza RC en tu perfil"
+      ? "Añade tu nº de registro de agente y póliza RC en tu perfil"
       : !tieneRegistro
-      ? "Añade tu nÂº de registro de agente inmobiliario en tu perfil"
+      ? "Añade tu nº de registro de agente inmobiliario en tu perfil"
       : "Añade tu póliza RC en tu perfil";
 
     return (
@@ -572,7 +572,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
         {/* Banda superior — breadcrumb */}
         <div style={{ background:DARK, padding:"12px 32px", display:"flex", alignItems:"center", gap:8, fontSize:11 }}>
           <button onClick={() => setVista("modulos")} style={{ background:"transparent", border:"none", color:"rgba(255,255,255,0.5)", cursor:"pointer", padding:0, fontFamily:"Inter, sans-serif" }}>Academia</button>
-          <span style={{ color:"rgba(255,255,255,0.25)" }}>âº</span>
+          <span style={{ color:"rgba(255,255,255,0.25)" }}>›</span>
           <span style={{ color:"rgba(255,255,255,0.9)", fontWeight:600 }}>{moduloActivo?.titulo}</span>
         </div>
         {/* Imagen con degradados de integración */}
@@ -581,7 +581,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
           {moduloActivo?.imagen_portada
             ? <img src={moduloActivo.imagen_portada} style={{ position:"absolute", inset:0, width:"100%", height:"100%", objectFit:"contain", objectPosition:"center" }} />
             : <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                <span style={{ fontSize:64, opacity:0.2 }}>{moduloActivo?.icono || "ð"}</span>
+                <span style={{ fontSize:64, opacity:0.2 }}>{moduloActivo?.icono || "🎓"}</span>
               </div>
           }
           <div style={{ position:"absolute", top:0, left:0, right:0, height:50, background:"linear-gradient(to bottom, rgba(26,37,40,1) 0%, rgba(26,37,40,0) 100%)" }} />
@@ -591,7 +591,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
         </div>
         {/* Banda inferior — título */}
         <div style={{ background:DARK, padding:"14px 32px 20px" }}>
-          <button onClick={() => setVista("modulos")} style={{ background:"transparent", border:"none", color:"rgba(255,255,255,0.45)", fontSize:11, cursor:"pointer", padding:0, marginBottom:8, fontFamily:"Inter, sans-serif", display:"block" }}>â Volver a cursos</button>
+          <button onClick={() => setVista("modulos")} style={{ background:"transparent", border:"none", color:"rgba(255,255,255,0.45)", fontSize:11, cursor:"pointer", padding:0, marginBottom:8, fontFamily:"Inter, sans-serif", display:"block" }}>← Volver a cursos</button>
           <div style={{ fontSize:10, color:"rgba(255,255,255,0.4)", letterSpacing:"0.18em", fontWeight:700, marginBottom:4 }}>
             {subseccion === "direccion" ? "FORMACIÓN DIRECCIÓN" : subseccion === "asistente" ? "ASISTENTE IA" : "FORMACIÓN AGENTES"}
           </div>
@@ -681,7 +681,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                         <button onClick={async e => { e.stopPropagation(); if(confirm(`¿Eliminar el tema "${tema.titulo}" y todos sus recursos?`)) { await supabase.from("formacion_temas").update({ activo:false }).eq("id", tema.id); cargarTodo(); }}} style={{ background:"transparent", border:"1px solid #A23A3A44", color:"#A23A3A", padding:"5px 8px", cursor:"pointer", borderRadius: 0, display:"flex", alignItems:"center" }}><TrashIcon style={{ width:14, height:14 }} /></button>
                       </>
                     )}
-                    {!proximamente && <span style={{ color:GOLD, fontSize:16, cursor:"pointer" }} onClick={() => { setTemaActivo(tema); setVista("recursos"); }}>âº</span>}
+                    {!proximamente && <span style={{ color:GOLD, fontSize:16, cursor:"pointer" }} onClick={() => { setTemaActivo(tema); setVista("recursos"); }}>›</span>}
                   </div>
                 </div>
               );
@@ -723,9 +723,9 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
     );
   }
 
-  // ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+  // ──────────────────────────────────────────────────────────────
   // VISTA: RECURSOS DEL TEMA
-  // ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+  // ──────────────────────────────────────────────────────────────
   if (vista === "recursos") {
     const rList = recursos[temaActivo?.id] || [];
     return (
@@ -734,9 +734,9 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
         {/* Banda superior — breadcrumb */}
         <div style={{ background:DARK, padding:"12px 32px", display:"flex", alignItems:"center", gap:8, fontSize:11 }}>
           <button onClick={()=>setVista("modulos")} style={{ background:"transparent", border:"none", color:"rgba(255,255,255,0.45)", cursor:"pointer", padding:0, fontFamily:"Inter, sans-serif" }}>Academia</button>
-          <span style={{ color:"rgba(255,255,255,0.2)" }}>âº</span>
+          <span style={{ color:"rgba(255,255,255,0.2)" }}>›</span>
           <button onClick={()=>setVista("temas")} style={{ background:"transparent", border:"none", color:"rgba(255,255,255,0.45)", cursor:"pointer", padding:0, fontFamily:"Inter, sans-serif" }}>{moduloActivo?.titulo}</button>
-          <span style={{ color:"rgba(255,255,255,0.2)" }}>âº</span>
+          <span style={{ color:"rgba(255,255,255,0.2)" }}>›</span>
           <span style={{ color:"rgba(255,255,255,0.9)", fontWeight:600 }}>{temaActivo?.titulo}</span>
         </div>
         {/* Imagen con degradados de integración */}
@@ -755,7 +755,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
         </div>
         {/* Banda inferior — título */}
         <div style={{ background:DARK, padding:"14px 32px 20px" }}>
-          <button onClick={()=>setVista("temas")} style={{ background:"transparent", border:"none", color:"rgba(255,255,255,0.45)", fontSize:11, cursor:"pointer", padding:0, marginBottom:8, fontFamily:"Inter, sans-serif", display:"block" }}>â Volver a módulos</button>
+          <button onClick={()=>setVista("temas")} style={{ background:"transparent", border:"none", color:"rgba(255,255,255,0.45)", fontSize:11, cursor:"pointer", padding:0, marginBottom:8, fontFamily:"Inter, sans-serif", display:"block" }}>← Volver a módulos</button>
           <div style={{ fontSize:10, color:"rgba(255,255,255,0.4)", letterSpacing:"0.18em", fontWeight:700, marginBottom:4 }}>
             {subseccion === "direccion" ? "FORMACIÓN DIRECCIÓN" : subseccion === "asistente" ? "ASISTENTE IA" : "FORMACIÓN AGENTES"}
           </div>
@@ -782,7 +782,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
               const esVideo = rec.tipo === "video";
 
               if (esEnlace) {
-                // ââ Enlace externo — estilo compacto y diferenciado ââââââââââ
+                // ── Enlace externo — estilo compacto y diferenciado ──────────
                 return (
                   <div key={rec.id}
                     draggable={isAdmin}
@@ -809,13 +809,13 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                     }}
                     onMouseEnter={e=>{ if(!isAdmin){ e.currentTarget.style.borderLeftColor=GOLD; e.currentTarget.style.background=`${GOLD}0D`; }}}
                     onMouseLeave={e=>{ e.currentTarget.style.borderLeftColor=hecho?GOLD:GOLD_LIGHT; e.currentTarget.style.background=hecho?`${GOLD}08`:CREAM; }}>
-                    {isAdmin && <div style={{ color:MUTED, flexShrink:0, cursor:"grab", fontSize:14, lineHeight:1 }}>â ¿</div>}
+                    {isAdmin && <div style={{ color:MUTED, flexShrink:0, cursor:"grab", fontSize:14, lineHeight:1 }}>⠿</div>}
                     <div style={{ color: GOLD, flexShrink:0, display:"flex" }}>{TIPO_ICON[rec.tipo]}</div>
                     <div style={{ flex:1, minWidth:0 }}>
                       <div style={{ fontSize:13, fontWeight:600, color:hecho?GOLD:TEXT, fontFamily:"Inter, sans-serif", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{rec.titulo}</div>
                       <div style={{ fontSize:11, color:MUTED, marginTop:2 }}>
                         Enlace externo{rec.duracion_min ? ` · ${fmt(rec.duracion_min)} lectura` : ""}
-                        {hecho && <span style={{ color:GOLD, fontWeight:600, marginLeft:8 }}>â Visitado</span>}
+                        {hecho && <span style={{ color:GOLD, fontWeight:600, marginLeft:8 }}>✓ Visitado</span>}
                       </div>
                     </div>
                     <div style={{ display:"flex", gap:8, alignItems:"center", flexShrink:0 }}>
@@ -837,14 +837,14 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                           }
                         }}
                         style={{ padding:"6px 14px", background:"transparent", border:`1px solid ${GOLD}`, color:GOLD, fontSize:11, fontWeight:600, cursor:"pointer", fontFamily:"Inter, sans-serif", borderRadius: 0, whiteSpace:"nowrap" }}>
-                        Abrir â
+                        Abrir →
                       </button>
                     </div>
                   </div>
                 );
               }
 
-              // ââ PDF / Presentación / Vídeo — tarjeta completa âââââââââââ
+              // ── PDF / Presentación / Vídeo — tarjeta completa ───────────
               const p = pal(idx);
               return (
                 <div key={rec.id}
@@ -870,14 +870,14 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                   }}
                   onMouseEnter={e=>{ if(!isDragging) e.currentTarget.style.boxShadow=`0 4px 16px rgba(172,138,84,0.12)`; }}
                   onMouseLeave={e=>e.currentTarget.style.boxShadow="none"}>
-                  {isAdmin && <div style={{ color:MUTED, flexShrink:0, cursor:"grab", fontSize:14, lineHeight:1 }}>â ¿</div>}
+                  {isAdmin && <div style={{ color:MUTED, flexShrink:0, cursor:"grab", fontSize:14, lineHeight:1 }}>⠿</div>}
                   <div style={{ color: GOLD, flexShrink:0, display:"flex" }}>{TIPO_ICON[rec.tipo]}</div>
                   <div style={{ flex:1 }}>
                     <div style={{ fontSize:14, fontWeight:700, color:hecho?GOLD:TEXT, marginBottom:3, fontFamily:"Inter, sans-serif" }}>{rec.titulo}</div>
                     <div style={{ display:"flex", gap:10, fontSize:11, color:MUTED }}>
                       <span>{TIPO_LABEL[rec.tipo]}</span>
                       {rec.duracion_min && <span>· {fmt(rec.duracion_min)}</span>}
-                      {hecho && <span style={{ color:GOLD, fontWeight:600 }}>· â Completado</span>}
+                      {hecho && <span style={{ color:GOLD, fontWeight:600 }}>· ✓ Completado</span>}
                     </div>
                   </div>
                   <div style={{ display:"flex", gap:10, alignItems:"center", flexShrink:0 }}>
@@ -890,7 +890,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                     )}
                     <button onClick={()=>setVisor(rec)}
                       style={{ padding:"10px 22px", background:hecho?`${GOLD}18`:GOLD, border:`1px solid ${GOLD}`, color:hecho?GOLD:WHITE, fontSize:11, fontWeight:700, cursor:"pointer", fontFamily:"Inter, sans-serif", letterSpacing:"0.06em", borderRadius: 0 }}>
-                      {hecho ? "Repasar â" : "Iniciar â"}
+                      {hecho ? "Repasar →" : "Iniciar →"}
                     </button>
                   </div>
                 </div>
@@ -905,16 +905,16 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
     );
   }
 
-  // ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+  // ──────────────────────────────────────────────────────────────
   // VISTA: SEGUIMIENTO (solo admin)
-  // ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+  // ──────────────────────────────────────────────────────────────
   if (vista === "seguimiento") {
     return <Seguimiento modulos={modulos} temas={temas} recursos={recursos} onClose={()=>setVista("modulos")} />;
   }
   return null;
 }
 
-// âââ Panel de seguimiento ââââââââââââââââââââââââââââââââââââââ
+// ─── Panel de seguimiento ──────────────────────────────────────
 function Seguimiento({ modulos, temas, recursos, onClose }) {
   const [agentes, setAgentes] = useState([]);
   const [progMap, setProgMap] = useState({});
@@ -942,7 +942,7 @@ function Seguimiento({ modulos, temas, recursos, onClose }) {
   return (
     <div style={{ background:CREAM, minHeight:"100vh", fontFamily:"Inter, sans-serif" }}>
       <div style={{ background:WHITE, borderBottom:`1px solid ${BORDER}`, padding:"20px 40px", display:"flex", alignItems:"center", gap:16 }}>
-        <button onClick={onClose} style={{ background:"transparent", border:"none", color:MUTED, cursor:"pointer", fontSize:12, padding:0, fontFamily:"Inter, sans-serif" }}>â Volver</button>
+        <button onClick={onClose} style={{ background:"transparent", border:"none", color:MUTED, cursor:"pointer", fontSize:12, padding:0, fontFamily:"Inter, sans-serif" }}>← Volver</button>
         <h2 style={{ fontSize:20, fontWeight: 600, color:TEXT, margin:0, fontFamily: "'Playfair Display', serif" }}>Panel de seguimiento</h2>
       </div>
       <div style={{ padding:"28px 40px", overflowX:"auto" }}>

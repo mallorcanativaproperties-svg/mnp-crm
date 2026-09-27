@@ -46,7 +46,7 @@ function SelectorZonas({ value = [], onChange, tipo = "deseada", disabled = fals
   const accentColor = tipo === "deseada" ? "var(--gold)" : "var(--danger)";
   const accentBg    = tipo === "deseada" ? "var(--gold-l)0D" : "#D4545408";
   const accentBorder= tipo === "deseada" ? "var(--gold-l)33" : "#D4545433";
-  const prefix      = tipo === "excluida" ? "â " : "";
+  const prefix      = tipo === "excluida" ? "✕ " : "";
 
   const zonasDeMuni = muniSel && ZONAS_MAP[muniSel] ? ZONAS_MAP[muniSel] : [];
 
@@ -104,7 +104,7 @@ function SelectorZonas({ value = [], onChange, tipo = "deseada", disabled = fals
                 return (
                   <button key={z} onClick={() => toggleZona(etiqueta)}
                     style={{ padding: "4px 10px", border: "1px solid " + (sel ? accentColor : "var(--border)"), background: sel ? accentBg : "transparent", color: sel ? accentColor : "var(--muted)", fontSize: 11, cursor: "pointer", fontFamily: "Inter, sans-serif", transition: "all 0.15s" }}>
-                    {sel ? "â " : ""}{z}
+                    {sel ? "✓ " : ""}{z}
                   </button>
                 );
               })}
@@ -141,19 +141,19 @@ function mapBuyerToDb(b) {
 }
 
 const PAISES = [
-  { pais: "España", prefijo: "+34", flag: "ðªð¸" },
-  { pais: "Alemania", prefijo: "+49", flag: "ð©ðª" },
-  { pais: "Reino Unido", prefijo: "+44", flag: "ð¬ð§" },
-  { pais: "Países Bajos", prefijo: "+31", flag: "ð³ð±" },
-  { pais: "Francia", prefijo: "+33", flag: "ð«ð·" },
-  { pais: "Suecia", prefijo: "+46", flag: "ð¸ðª" },
-  { pais: "Noruega", prefijo: "+47", flag: "ð³ð´" },
-  { pais: "Dinamarca", prefijo: "+45", flag: "ð©ð°" },
-  { pais: "Suiza", prefijo: "+41", flag: "ð¨ð­" },
-  { pais: "Bélgica", prefijo: "+32", flag: "ð§ðª" },
-  { pais: "Italia", prefijo: "+39", flag: "ð®ð¹" },
-  { pais: "Estados Unidos", prefijo: "+1", flag: "ðºð¸" },
-  { pais: "Otro", prefijo: "", flag: "ð" },
+  { pais: "España", prefijo: "+34", flag: "🇪🇸" },
+  { pais: "Alemania", prefijo: "+49", flag: "🇩🇪" },
+  { pais: "Reino Unido", prefijo: "+44", flag: "🇬🇧" },
+  { pais: "Países Bajos", prefijo: "+31", flag: "🇳🇱" },
+  { pais: "Francia", prefijo: "+33", flag: "🇫🇷" },
+  { pais: "Suecia", prefijo: "+46", flag: "🇸🇪" },
+  { pais: "Noruega", prefijo: "+47", flag: "🇳🇴" },
+  { pais: "Dinamarca", prefijo: "+45", flag: "🇩🇰" },
+  { pais: "Suiza", prefijo: "+41", flag: "🇨🇭" },
+  { pais: "Bélgica", prefijo: "+32", flag: "🇧🇪" },
+  { pais: "Italia", prefijo: "+39", flag: "🇮🇹" },
+  { pais: "Estados Unidos", prefijo: "+1", flag: "🇺🇸" },
+  { pais: "Otro", prefijo: "", flag: "🌍" },
 ];
 
 const ESTADOS = [
@@ -174,7 +174,7 @@ function score(b) {
   return Math.min(s, 100);
 }
 
-function fmt(n) { return n ? n.toLocaleString("es-ES") + " â¬" : "—"; }
+function fmt(n) { return n ? n.toLocaleString("es-ES") + " €" : "—"; }
 
 function Badge({ children, color, hollow }) {
   return <span style={{
@@ -228,11 +228,11 @@ function Card({ b, onClick, onWhatsApp }) {
       <span style={{ opacity: 0.3 }}>|</span>
       <span style={{ fontStyle: "italic" }}>{b.finalidad}</span>
       <span style={{ opacity: 0.3 }}>|</span>
-      <span>{b.fin === "Sí" ? "Financiación â" : b.fin === "No" ? "Sin financiación" : "Abierto a mejorar"}</span>
+      <span>{b.fin === "Sí" ? "Financiación ✓" : b.fin === "No" ? "Sin financiación" : "Abierto a mejorar"}</span>
     </div>
     <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 12 }}>
       {b.zd.map((z, i) => <span key={i} style={{ fontSize: 11, padding: "2px 8px", borderRadius: 0, fontFamily: "Inter, sans-serif", background: "rgba(200,169,126,0.05)", color: "var(--gold)", border: "1px solid rgba(172,138,84,0.3)", letterSpacing: "0.05em" }}>{z}</span>)}
-      {b.ze.map((z, i) => <span key={"e" + i} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 0, fontFamily: "Inter, sans-serif", background: "#D4956A0D", color: "var(--amber)", border: "1px solid #D4956A22", letterSpacing: "0.03em" }}>â {z}</span>)}
+      {b.ze.map((z, i) => <span key={"e" + i} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 0, fontFamily: "Inter, sans-serif", background: "#D4956A0D", color: "var(--amber)", border: "1px solid #D4956A22", letterSpacing: "0.03em" }}>✕ {z}</span>)}
     </div>
     {b.ag && <div style={{ marginTop: 10, fontSize: 11, color: "#3D577E", fontFamily: "Inter, sans-serif", fontWeight: 500 }}>Agente: {b.ag}</div>}
     <button
@@ -270,7 +270,7 @@ const CAMPOS_CRM = [
   { key: "nombre",     label: "Nombre completo",     req: true  },
   { key: "email",      label: "Email",                req: false },
   { key: "tel",        label: "Teléfono",             req: false },
-  { key: "ppto",       label: "Presupuesto (â¬)",      req: false },
+  { key: "ppto",       label: "Presupuesto (€)",      req: false },
   { key: "zd",         label: "Zona deseada",         req: false },
   { key: "ze",         label: "Zona excluida",        req: false },
   { key: "fin",        label: "Financiación",         req: false },
@@ -344,7 +344,7 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
   const [paso, setPaso] = useState(1); // 1: subir, 2: mapear, 3: revisar
   const [headers, setHeaders] = useState([]);
   const [rows, setRows] = useState([]);
-  const [mapeo, setMapeo] = useState({}); // colExcel â campoCRM
+  const [mapeo, setMapeo] = useState({}); // colExcel → campoCRM
   const [procesados, setProcesados] = useState([]); // {datos, duplicado, accion}
   const [importando, setImportando] = useState(false);
   const [error, setError] = useState("");
@@ -503,7 +503,7 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
 
   return <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)", display: "flex", justifyContent: "center", alignItems: "flex-start", padding: "24px 16px", zIndex: 1500, overflowY: "auto" }}>
     <div style={{ background: "var(--white)", border: "1px solid var(--text)", width: "100%", maxWidth: 780, padding: "36px 40px", position: "relative" }}>
-      <button onClick={onClose} style={{ position: "absolute", top: 16, right: 20, background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "var(--muted)" }}>â</button>
+      <button onClick={onClose} style={{ position: "absolute", top: 16, right: 20, background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "var(--muted)" }}>✕</button>
 
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
@@ -517,7 +517,7 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
             <div key={i} style={{ padding: "6px 20px", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em",
               color: paso === i+1 ? "#3D577E" : paso > i+1 ? "var(--success)" : "#C8C5BC",
               borderBottom: paso === i+1 ? "2px solid #3D577E" : "2px solid transparent" }}>
-              {paso > i+1 ? "â " : ""}{s}
+              {paso > i+1 ? "✓ " : ""}{s}
             </div>
           ))}
         </div>
@@ -532,13 +532,13 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
             Sube un archivo Excel (.xlsx, .xls) o CSV. En el siguiente paso podrás indicar qué columna corresponde a cada campo del CRM.
           </p>
           <label style={{ display: "block", border: "2px dashed var(--gold-l)44", padding: "40px 20px", textAlign: "center", cursor: "pointer", background: "#FDFCFA" }}>
-            <div style={{ fontSize: 32, marginBottom: 12 }}>ð</div>
+            <div style={{ fontSize: 32, marginBottom: 12 }}>📂</div>
             <div style={{ fontSize: 13, color: "var(--gold)", fontWeight: 600, marginBottom: 4 }}>Haz clic para seleccionar el archivo</div>
             <div style={{ fontSize: 11, color: "var(--muted)" }}>Excel (.xlsx, .xls) o CSV — máx 5MB</div>
             <input type="file" accept=".xlsx,.xls,.csv" onChange={handleFile} style={{ display: "none" }} />
           </label>
           <div style={{ marginTop: 16, padding: "12px 16px", background: "#F5F8FF", border: "1px solid #3D577E22", fontSize: 11, color: "#3D577E" }}>
-            ð¡ <strong>Consejo:</strong> Si tu Excel tiene muchas columnas, puedes ignorar las que no necesitas en el paso siguiente. Solo es obligatorio que haya una columna con el nombre del comprador.
+            💡 <strong>Consejo:</strong> Si tu Excel tiene muchas columnas, puedes ignorar las que no necesitas en el paso siguiente. Solo es obligatorio que haya una columna con el nombre del comprador.
           </div>
         </div>
       )}
@@ -559,7 +559,7 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
                   <span style={{ fontWeight: 600 }}>{h}</span>
                   <span style={{ fontSize: 10, color: "var(--muted)", marginLeft: 8 }}>ej: {rows[0]?.[h] || "—"}</span>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", color: "var(--gold-l)", fontSize: 14 }}>â</div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", color: "var(--gold-l)", fontSize: 14 }}>→</div>
                 <select value={mapeo[h] || "_ignorar"} onChange={e => setMapeo(m => ({ ...m, [h]: e.target.value }))} style={{ ...iSt, borderColor: mapeo[h] && mapeo[h] !== "_ignorar" ? "var(--success)44" : "var(--border)" }}>
                   {CAMPOS_CRM.map(c => <option key={c.key} value={c.key}>{c.label}{c.req ? " *" : ""}</option>)}
                 </select>
@@ -568,8 +568,8 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
           </div>
           <div style={{ fontSize: 11, color: "var(--muted)", marginBottom: 20 }}>* El campo Nombre es obligatorio</div>
           <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-            <button onClick={() => { setPaso(1); setError(""); }} style={{ padding: "10px 20px", border: "1px solid var(--text)", background: "none", color: "var(--muted)", cursor: "pointer", fontSize: 11, fontFamily: "Inter, sans-serif" }}>â Volver</button>
-            <button onClick={confirmarMapeo} style={{ padding: "10px 28px", border: "none", background: "#3D577E", color: "#fff", cursor: "pointer", fontSize: 11, fontWeight: 600, fontFamily: "Inter, sans-serif", textTransform: "uppercase", letterSpacing: "0.08em" }}>Continuar â</button>
+            <button onClick={() => { setPaso(1); setError(""); }} style={{ padding: "10px 20px", border: "1px solid var(--text)", background: "none", color: "var(--muted)", cursor: "pointer", fontSize: 11, fontFamily: "Inter, sans-serif" }}>← Volver</button>
+            <button onClick={confirmarMapeo} style={{ padding: "10px 28px", border: "none", background: "#3D577E", color: "#fff", cursor: "pointer", fontSize: 11, fontWeight: 600, fontFamily: "Inter, sans-serif", textTransform: "uppercase", letterSpacing: "0.08em" }}>Continuar →</button>
           </div>
         </div>
       )}
@@ -597,7 +597,7 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
           {totalDups > 0 && (
             <div style={{ marginBottom: 24 }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: "#E1306C", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12 }}>
-                â  Duplicados detectados — decide qué hacer con cada uno:
+                ⚠ Duplicados detectados — decide qué hacer con cada uno:
               </div>
               <div style={{ maxHeight: 280, overflowY: "auto", border: "1px solid var(--border)" }}>
                 {procesados.map((r, i) => !r.duplicado ? null : (
@@ -605,8 +605,8 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
                     <div>
                       <div style={{ fontSize: 12, fontWeight: 600 }}>{r.datos.nombre}</div>
                       <div style={{ fontSize: 11, color: "var(--muted)" }}>
-                        {r.datos.email && <span style={{ marginRight: 12 }}>ð§ {r.datos.email}</span>}
-                        {r.datos.tel && <span>ð± {r.datos.tel}</span>}
+                        {r.datos.email && <span style={{ marginRight: 12 }}>📧 {r.datos.email}</span>}
+                        {r.datos.tel && <span>📱 {r.datos.tel}</span>}
                       </div>
                       <div style={{ fontSize: 10, color: "#E1306C", marginTop: 2 }}>
                         Ya existe: <strong>{r.duplicado.nombre}</strong> — {r.duplicado.email || r.duplicado.tel}
@@ -640,7 +640,7 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
                     <span style={{ fontWeight: 600, minWidth: 180 }}>{r.datos.nombre}</span>
                     <span style={{ color: "var(--muted)" }}>{r.datos.email || "—"}</span>
                     <span style={{ color: "var(--muted)" }}>{r.datos.tel || "—"}</span>
-                    {r.datos.ppto > 0 && <span style={{ color: "var(--gold)" }}>{Number(r.datos.ppto).toLocaleString("es-ES")} â¬</span>}
+                    {r.datos.ppto > 0 && <span style={{ color: "var(--gold)" }}>{Number(r.datos.ppto).toLocaleString("es-ES")} €</span>}
                   </div>
                 ))}
                 {totalImportar > 3 && <div style={{ padding: "8px 14px", fontSize: 11, color: "var(--muted)", fontStyle: "italic" }}>... y {totalImportar - 3} más</div>}
@@ -649,7 +649,7 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
           )}
 
           <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-            <button onClick={() => { setPaso(2); setError(""); }} style={{ padding: "10px 20px", border: "1px solid var(--text)", background: "none", color: "var(--muted)", cursor: "pointer", fontSize: 11, fontFamily: "Inter, sans-serif" }}>â Volver</button>
+            <button onClick={() => { setPaso(2); setError(""); }} style={{ padding: "10px 20px", border: "1px solid var(--text)", background: "none", color: "var(--muted)", cursor: "pointer", fontSize: 11, fontFamily: "Inter, sans-serif" }}>← Volver</button>
             <button onClick={ejecutarImport} disabled={importando || totalImportar === 0}
               style={{ padding: "10px 28px", border: "none", background: totalImportar === 0 ? "#C8C5BC" : "var(--success)", color: "#fff", cursor: totalImportar === 0 ? "default" : "pointer", fontSize: 11, fontWeight: 600, fontFamily: "Inter, sans-serif", textTransform: "uppercase", letterSpacing: "0.08em" }}>
               {importando ? "Importando..." : `Importar ${totalImportar} comprador${totalImportar !== 1 ? "es" : ""}`}
@@ -665,18 +665,18 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
             <>
               {/* Pantalla de confirmación de envío */}
               <div style={{ textAlign: "center", padding: "20px 0 28px" }}>
-                <div style={{ fontSize: 40, marginBottom: 12 }}>â</div>
+                <div style={{ fontSize: 40, marginBottom: 12 }}>✅</div>
                 <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, marginBottom: 8 }}>
                   {idsImportados.length} comprador{idsImportados.length !== 1 ? "es" : ""} importado{idsImportados.length !== 1 ? "s" : ""}
                 </div>
-                <div style={{ fontSize: 12, color: "var(--muted)" }}>Â¿Quieres enviarles un WhatsApp con el formulario de cualificación?</div>
+                <div style={{ fontSize: 12, color: "var(--muted)" }}>¿Quieres enviarles un WhatsApp con el formulario de cualificación?</div>
               </div>
 
               {/* Vista previa del mensaje */}
               <div style={{ background: "#F0F8F4", border: "1px solid var(--success)44", padding: "16px 20px", marginBottom: 20, borderRadius: 0 }}>
                 <div style={{ fontSize: 10, color: "var(--success)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Vista previa del mensaje (español)</div>
                 <div style={{ fontSize: 12, color: "var(--text)", lineHeight: 1.6, whiteSpace: "pre-line" }}>
-                  {`Â¡Hola! Te escribimos de Nativa Properties. Si quieres tener acceso preferente a propiedades antes de que salgan al mercado, puedes completar este formulario. Así podremos enviarte oportunidades que encajen con tus preferencias antes de su publicación.
+                  {`¡Hola! Te escribimos de Nativa Properties. Si quieres tener acceso preferente a propiedades antes de que salgan al mercado, puedes completar este formulario. Así podremos enviarte oportunidades que encajen con tus preferencias antes de su publicación.
 
 ${(typeof window !== "undefined" ? window.location.origin : "https://crm.mallorcanativaproperties.com")}/cualificacion`}
                 </div>
@@ -701,14 +701,14 @@ ${(typeof window !== "undefined" ? window.location.origin : "https://crm.mallorc
                 </button>
                 <button onClick={ejecutarEnvioWa}
                   style={{ padding: "10px 28px", border: "none", background: enviarWa ? "#25D366" : "var(--muted)", color: "#fff", cursor: "pointer", fontSize: 11, fontWeight: 600, fontFamily: "Inter, sans-serif", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                  {enviarWa ? "Enviar WhatsApp â" : "Finalizar sin enviar"}
+                  {enviarWa ? "Enviar WhatsApp →" : "Finalizar sin enviar"}
                 </button>
               </div>
             </>
           ) : envioWa === "enviando" ? (
             <div style={{ padding: "20px 0" }}>
               <div style={{ textAlign: "center", marginBottom: 24 }}>
-                <div style={{ fontSize: 32, marginBottom: 8 }}>ð²</div>
+                <div style={{ fontSize: 32, marginBottom: 8 }}>📲</div>
                 <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 600 }}>Enviando mensajes...</div>
                 <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 4 }}>No cierres esta ventana hasta que termine</div>
               </div>
@@ -737,7 +737,7 @@ ${(typeof window !== "undefined" ? window.location.origin : "https://crm.mallorc
             /* Resultado del envío */
             <div>
               <div style={{ textAlign: "center", padding: "20px 0 24px" }}>
-                <div style={{ fontSize: 40, marginBottom: 12 }}>{envioWa.error ? "â ï¸" : "â"}</div>
+                <div style={{ fontSize: 40, marginBottom: 12 }}>{envioWa.error ? "⚠️" : "✅"}</div>
                 <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, marginBottom: 8 }}>
                   {envioWa.error ? "Error en el envío" : "Mensajes enviados"}
                 </div>
@@ -781,8 +781,8 @@ function ModalDuplicado({ nuevo, existente, motivo, isAdmin, onAbrir, onFusionar
 
   return <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", backdropFilter: "blur(8px)", display: "flex", justifyContent: "center", alignItems: "center", padding: 24, zIndex: 2000 }}>
     <div style={{ background: "var(--white)", border: "1px solid var(--text)", width: "100%", maxWidth: 680, maxHeight: "90vh", overflowY: "auto", padding: "36px 40px", position: "relative" }}>
-      <button onClick={onClose} style={{ position: "absolute", top: 16, right: 20, background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "var(--muted)" }}>â</button>
-      <div style={{ fontSize: 10, color: "#E1306C", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 8, fontWeight: 700 }}>â  Posible duplicado detectado</div>
+      <button onClick={onClose} style={{ position: "absolute", top: 16, right: 20, background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "var(--muted)" }}>✕</button>
+      <div style={{ fontSize: 10, color: "#E1306C", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 8, fontWeight: 700 }}>⚠ Posible duplicado detectado</div>
       <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, margin: "0 0 6px" }}>Este comprador ya podría existir</h3>
       <p style={{ fontSize: 12, color: "var(--muted)", margin: "0 0 24px" }}>Coincidencia por {motivo}. El nuevo comprador se ha guardado. Elige qué hacer:</p>
 
@@ -896,10 +896,10 @@ function Detail({ b, onClose, onSave, onDelete, onWhatsApp, currentUser, puedeEl
 
   return <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", display: "flex", justifyContent: "center", alignItems: "flex-start", padding: "40px 16px", zIndex: 1000, overflowY: "auto" }}>
     <div style={{ background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, width: "100%", maxWidth: 620, padding: "36px 40px", position: "relative" }}>
-      <button onClick={onClose} style={{ position: "absolute", top: 20, right: 24, background: "none", border: "none", color: "var(--muted)", fontSize: 20, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>â</button>
+      <button onClick={onClose} style={{ position: "absolute", top: 20, right: 24, background: "none", border: "none", color: "var(--muted)", fontSize: 20, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>✕</button>
       {puedeEliminar && <button onClick={() => { if (onDelete) onDelete(b); }} style={{ position: "absolute", top: 22, right: 60, background: "none", border: "1px solid #D4545433", borderRadius: 0, color: "var(--danger)", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "Inter, sans-serif" }}>Eliminar</button>}
       <button onClick={() => onWhatsApp && onWhatsApp(b)} style={{ position: "absolute", top: 18, right: 110, width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", background: "none", border: "none", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.2))", transition: "transform 0.2s", cursor: "pointer", padding: 0 }} title="Abrir chat WhatsApp" onMouseEnter={e => e.currentTarget.style.transform = "scale(1.12)"} onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}><svg width="34" height="34" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="goldGrad2" cx="40%" cy="35%" r="60%"><stop offset="0%" stopColor="#FFE57A"/><stop offset="40%" stopColor="#D4A017"/><stop offset="100%" stopColor="#8B6500"/></radialGradient><radialGradient id="goldRing2" cx="40%" cy="35%" r="60%"><stop offset="0%" stopColor="#FFD700"/><stop offset="60%" stopColor="#B8860B"/><stop offset="100%" stopColor="#6B4E00"/></radialGradient></defs><circle cx="18" cy="18" r="17" fill="url(#goldRing2)" stroke="#8B6500" strokeWidth="0.5"/><circle cx="18" cy="18" r="14" fill="url(#goldGrad2)"/><path d="M18 8.5C12.75 8.5 8.5 12.75 8.5 18C8.5 19.85 9.02 21.58 9.92 23.05L8.5 27.5L13.1 26.1C14.52 26.92 16.2 27.5 18 27.5C23.25 27.5 27.5 23.25 27.5 18C27.5 12.75 23.25 8.5 18 8.5Z" fill="white" fillOpacity="0.9"/><path d="M23.5 21.2C23.2 21.95 22.1 22.6 21.25 22.75C20.65 22.85 19.85 22.9 17.1 21.8C13.7 20.45 11.55 17 11.4 16.8C11.25 16.6 10.2 15.2 10.2 13.75C10.2 12.3 10.95 11.6 11.25 11.25C11.55 10.95 11.9 10.85 12.1 10.85C12.3 10.85 12.5 10.85 12.7 10.85C12.9 10.85 13.15 10.8 13.4 11.35C13.65 11.9 14.25 13.35 14.3 13.5C14.35 13.65 14.4 13.85 14.3 14.05C14.2 14.3 14.15 14.4 13.95 14.65C13.8 14.85 13.6 15.1 13.45 15.25C13.25 15.45 13.05 15.65 13.25 15.95C13.45 16.3 14.2 17.5 15.3 18.5C16.7 19.75 17.85 20.15 18.2 20.3C18.55 20.45 18.75 20.4 18.95 20.2C19.15 19.95 19.9 19.1 20.1 18.8C20.3 18.45 20.55 18.5 20.85 18.6C21.15 18.7 22.6 19.4 22.9 19.55C23.2 19.7 23.4 19.75 23.5 19.9C23.6 20.05 23.6 20.75 23.5 21.2Z" fill="#B8860B"/></svg></button>
-      {ed && autoSaveStatus && <div style={{ position: "absolute", top: 24, left: 40, fontSize: 10, color: autoSaveStatus === "saved" ? "var(--success)" : autoSaveStatus === "error" ? "var(--danger)" : "var(--muted)" }}>{autoSaveStatus === "saving" ? "â³ Guardando..." : autoSaveStatus === "saved" ? "â Guardado" : "â Error"}</div>}
+      {ed && autoSaveStatus && <div style={{ position: "absolute", top: 24, left: 40, fontSize: 10, color: autoSaveStatus === "saved" ? "var(--success)" : autoSaveStatus === "error" ? "var(--danger)" : "var(--muted)" }}>{autoSaveStatus === "saving" ? "⏳ Guardando..." : autoSaveStatus === "saved" ? "✓ Guardado" : "✗ Error"}</div>}
       {/* Pestañas: Ficha | Historial */}
       {puedeVerHistorial && <div style={{ display: "flex", gap: 0, marginBottom: 24, borderBottom: "1px solid var(--border)" }}>
         {["ficha","historial"].map(t => <button key={t} onClick={() => { setTab(t); if (t === "historial") cargarHistorial(); }}
@@ -908,7 +908,7 @@ function Detail({ b, onClose, onSave, onDelete, onWhatsApp, currentUser, puedeEl
         </button>)}
       </div>}
       {tab === "historial" && (
-        /* ─── PESTAÃA HISTORIAL ─── */
+        /* ─── PESTAÑA HISTORIAL ─── */
         <div>
           {loadingHistorial ? <div style={{ textAlign: "center", padding: 40, color: "var(--muted)", fontSize: 13 }}>Cargando historial...</div> :
            historial.length === 0 ? <div style={{ textAlign: "center", padding: 40, color: "var(--muted)", fontSize: 13, fontStyle: "italic" }}>Sin cambios registrados aún</div> :
@@ -933,7 +933,7 @@ function Detail({ b, onClose, onSave, onDelete, onWhatsApp, currentUser, puedeEl
            </div>}
         </div>
       )}
-      {/* ─── PESTAÃA FICHA ─── */}
+      {/* ─── PESTAÑA FICHA ─── */}
       <div style={{ display: tab === "historial" ? "none" : "block" }}>
       <div style={{ borderBottom: "1px solid var(--text)", paddingBottom: 24, marginBottom: 28 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
@@ -994,7 +994,7 @@ function NewBuyer({ onClose, onAdd }) {
 
   return <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", display: "flex", justifyContent: "center", alignItems: "flex-start", padding: "40px 16px", zIndex: 1000, overflowY: "auto" }}>
     <div style={{ background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, width: "100%", maxWidth: 560, padding: "36px 40px", position: "relative" }}>
-      <button onClick={onClose} style={{ position: "absolute", top: 20, right: 24, background: "none", border: "none", color: "var(--muted)", fontSize: 20, cursor: "pointer" }}>â</button>
+      <button onClick={onClose} style={{ position: "absolute", top: 20, right: 24, background: "none", border: "none", color: "var(--muted)", fontSize: 20, cursor: "pointer" }}>✕</button>
       <div style={{ fontSize: 10, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.15em", fontFamily: "Inter, sans-serif", marginBottom: 8 }}>Nuevo registro</div>
       <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 400, color: "var(--text)", margin: "0 0 28px" }}>Añadir <em>comprador</em></h2>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px 24px" }}>
@@ -1002,7 +1002,7 @@ function NewBuyer({ onClose, onAdd }) {
         <div><L>Email</L><input value={f.email} onChange={e => setF({ ...f, email: e.target.value })} style={iSt} /></div>
         <div><L>Teléfono</L><input value={f.tel} onChange={e => setF({ ...f, tel: e.target.value })} style={iSt} /></div>
         <div style={{ gridColumn: "span 2" }}><L>País de residencia</L><select value={f.pais} onChange={e => setF({ ...f, pais: e.target.value })} style={{ ...iSt, appearance: "auto" }}>{PAISES.map(p => <option key={p.pais} value={p.pais}>{p.flag} {p.pais} {p.prefijo}</option>)}</select></div>
-        <div><L>Presupuesto (â¬)</L><input type="number" value={f.ppto} onChange={e => setF({ ...f, ppto: e.target.value })} style={iSt} /></div>
+        <div><L>Presupuesto (€)</L><input type="number" value={f.ppto} onChange={e => setF({ ...f, ppto: e.target.value })} style={iSt} /></div>
         <div><L>Habitaciones</L><input value={f.hab} onChange={e => setF({ ...f, hab: e.target.value })} onBlur={e => autoBlur({...f, hab: e.target.value})} style={iSt} /></div>
         <div><L>Finalidad</L><select value={f.finalidad} onChange={e => setF({ ...f, finalidad: e.target.value })} style={{ ...iSt, appearance: "auto" }}>{FINALIDADES.map(x => <option key={x}>{x}</option>)}</select></div>
         <div><L>Financiación</L><select value={f.fin} onChange={e => setF({ ...f, fin: e.target.value })} style={{ ...iSt, appearance: "auto" }}>{["Sí","No","Abierto"].map(x => <option key={x}>{x}</option>)}</select></div>
@@ -1107,19 +1107,19 @@ export default function App({ currentUser }) {
       </div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             {isAdmin && <button onClick={syncFromSheet} disabled={syncing} style={{ padding: "12px 20px", borderRadius: 0, border: "1px solid var(--success-l)", background: "transparent", color: syncing ? "var(--muted)" : "var(--success)", cursor: syncing ? "wait" : "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", transition: "all 0.3s" }}>
-              {syncing ? "Sincronizando..." : "â» Sync Google Sheet"}
+              {syncing ? "Sincronizando..." : "↻ Sync Google Sheet"}
             </button>}
             <button onClick={() => {
               const url = `${window.location.origin}/cualificacion`;
               navigator.clipboard.writeText(url);
-              alert(`â Link copiado: ${url}`);
+              alert(`✅ Link copiado: ${url}`);
             }} style={{ padding: "12px 20px", borderRadius: 0, border: "1px solid #405c6b", background: "transparent", color: "#405c6b", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}>
-              ð Copiar link formulario
+              🔗 Copiar link formulario
             </button>
             {isAdmin && <button onClick={() => setShowImport(true)} style={{ padding: "12px 20px", borderRadius: 0, border: "1px solid #3D577E44", background: "transparent", color: "#3D577E", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}
               onMouseEnter={e => { e.currentTarget.style.background = "#3D577E"; e.currentTarget.style.color = "var(--cream)"; }}
               onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#3D577E"; }}
-            >â Importar Excel</button>}
+            >↑ Importar Excel</button>}
             <button onClick={() => setShowNew(true)} style={{ padding: "12px 28px", borderRadius: 0, border: "1px solid var(--gold-l)", background: "transparent", color: "var(--gold)", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}
               onMouseEnter={e => { e.currentTarget.style.background = "var(--gold)"; e.currentTarget.style.color = "var(--cream)"; }}
               onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--gold)"; }}
@@ -1190,13 +1190,13 @@ export default function App({ currentUser }) {
             </div>
             {totalPaginas > 1 && <div style={{ display: "flex", gap: 6 }}>
               <button onClick={() => setPagina(p => Math.max(1, p - 1))} disabled={pagina === 1}
-                style={{ padding: "4px 12px", border: "1px solid var(--text)", background: "transparent", color: pagina === 1 ? "#C8C5BC" : "var(--text)", cursor: pagina === 1 ? "default" : "pointer", fontSize: 11, fontFamily: "Inter, sans-serif" }}>â Anterior</button>
+                style={{ padding: "4px 12px", border: "1px solid var(--text)", background: "transparent", color: pagina === 1 ? "#C8C5BC" : "var(--text)", cursor: pagina === 1 ? "default" : "pointer", fontSize: 11, fontFamily: "Inter, sans-serif" }}>← Anterior</button>
               {Array.from({ length: Math.min(totalPaginas, 10) }, (_, i) => i + 1).map(n => (
                 <button key={n} onClick={() => setPagina(n)}
                   style={{ padding: "4px 10px", border: "1px solid " + (n === pagina ? "var(--gold)" : "var(--text)"), background: n === pagina ? "var(--gold)" : "transparent", color: n === pagina ? "#fff" : "var(--text)", cursor: "pointer", fontSize: 11, fontFamily: "Inter, sans-serif" }}>{n}</button>
               ))}
               <button onClick={() => setPagina(p => Math.min(totalPaginas, p + 1))} disabled={pagina === totalPaginas}
-                style={{ padding: "4px 12px", border: "1px solid var(--text)", background: "transparent", color: pagina === totalPaginas ? "#C8C5BC" : "var(--text)", cursor: pagina === totalPaginas ? "default" : "pointer", fontSize: 11, fontFamily: "Inter, sans-serif" }}>Siguiente â</button>
+                style={{ padding: "4px 12px", border: "1px solid var(--text)", background: "transparent", color: pagina === totalPaginas ? "#C8C5BC" : "var(--text)", cursor: pagina === totalPaginas ? "default" : "pointer", fontSize: 11, fontFamily: "Inter, sans-serif" }}>Siguiente →</button>
             </div>}
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -1249,7 +1249,7 @@ export default function App({ currentUser }) {
         }}
         onDelete={async (b) => {
           if (!puedeEliminar) { alert("No tienes permisos para eliminar compradores."); return; }
-          if (confirm("Â¿Eliminar este comprador? Esta accion no se puede deshacer.")) {
+          if (confirm("¿Eliminar este comprador? Esta accion no se puede deshacer.")) {
             await supabase.from("compradores").delete().eq("id", b.id);
             setSel(null); setData(d => d.filter(x => x.id !== b.id));
           }
@@ -1275,7 +1275,7 @@ export default function App({ currentUser }) {
       />}
       {showNew && <NewBuyer onClose={() => setShowNew(false)} onAdd={async n => {
         const dbData = mapBuyerToDb(n);
-        // ─── DETECCIÃN DE DUPLICADOS ───────────────────────────
+        // ─── DETECCIÓN DE DUPLICADOS ───────────────────────────
         const { data: todos } = await supabase.from("compradores").select("id,nombre,email,telefono").eq("activo", true).limit(2000);
         if (todos) {
           const nombreN = (n.nombre||"").toLowerCase().trim();
@@ -1472,11 +1472,11 @@ function WhatsAppPanel({ buyer, onClose }) {
             <button onClick={toggleModo} style={{ padding: "5px 12px", background: modoManual ? "rgba(172,138,84,0.15)" : "rgba(64,92,107,0.3)", border: `1px solid ${modoManual ? BRONZE : "#405c6b"}`, color: modoManual ? BRONZE : "#7aafc4", cursor: "pointer", fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", fontFamily: "Inter, sans-serif" }}>
               {modoManual ? "MANUAL" : "IA ACTIVA"}
             </button>
-            <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(248,246,241,0.4)", fontSize: 18, cursor: "pointer", lineHeight: 1, padding: "0 0 0 8px" }}>â</button>
+            <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(248,246,241,0.4)", fontSize: 18, cursor: "pointer", lineHeight: 1, padding: "0 0 0 8px" }}>✕</button>
           </div>
         </div>
         <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid rgba(255,255,255,0.06)", fontSize: 10, color: "rgba(248,246,241,0.3)", letterSpacing: "0.12em" }}>
-          CLAUDIA · CUALIFICACIÃN COMPRADORES
+          CLAUDIA · CUALIFICACIÓN COMPRADORES
         </div>
       </div>
 
@@ -1491,7 +1491,7 @@ function WhatsAppPanel({ buyer, onClose }) {
           <div style={{ textAlign: "center", padding: 48, color: "var(--muted)", fontSize: 12 }}>Cargando conversación...</div>
         ) : mensajes.length === 0 ? (
           <div style={{ textAlign: "center", padding: 48 }}>
-            <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 28, color: "#C8BFB0", marginBottom: 12 }}>â¦</div>
+            <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 28, color: "#C8BFB0", marginBottom: 12 }}>✦</div>
             <div style={{ fontSize: 13, color: "var(--muted)", lineHeight: 1.6 }}>Sin mensajes aún.<br/>Inicia la conversación con {buyer.nombre}.</div>
           </div>
         ) : (() => {
@@ -1516,7 +1516,7 @@ function WhatsAppPanel({ buyer, onClose }) {
                   {m.ts && (
                     <div style={{ fontSize: 10, color: isAgent ? "rgba(248,246,241,0.4)" : "var(--muted)", marginTop: 4, textAlign: "right", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 3 }}>
                       {m.ts}
-                      {isAgent && <span style={{ fontSize: 12, color: m.leido ? "#4FC3F7" : "rgba(248,246,241,0.4)" }}>ââ</span>}
+                      {isAgent && <span style={{ fontSize: 12, color: m.leido ? "#4FC3F7" : "rgba(248,246,241,0.4)" }}>✓✓</span>}
                     </div>
                   )}
                 </div>
@@ -1541,7 +1541,7 @@ function WhatsAppPanel({ buyer, onClose }) {
             style={{ flex: 1, padding: "11px 16px", background: modoManual ? "var(--white)" : "#F0ECE6", border: "1px solid var(--border)", color: "#1a2528", fontSize: 14, fontFamily: "Inter, sans-serif", outline: "none", cursor: modoManual ? "text" : "not-allowed", borderRadius: 0 }} />
           <button onClick={handleSend} disabled={!modoManual || !input.trim() || loading}
             style={{ width: 42, height: 42, borderRadius: "50%", background: (modoManual && input.trim() && !loading) ? BRONZE : "var(--border)", border: "none", color: (modoManual && input.trim() && !loading) ? CREAM : "var(--muted)", cursor: (modoManual && input.trim() && !loading) ? "pointer" : "default", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            â¤
+            ➤
           </button>
         </div>
       </div>
