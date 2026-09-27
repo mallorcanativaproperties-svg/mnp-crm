@@ -5,7 +5,7 @@ function notificarGuardado(msg) {
     try { window.dispatchEvent(new CustomEvent("mnp:guardado", { detail: { msg: msg || "Guardado correctamente" } })); } catch {}
   }
 }
-import { PlusIcon, MagnifyingGlassIcon, FunnelIcon, ArrowDownTrayIcon, PencilSquareIcon, TrashIcon, XMarkIcon, CheckIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, MagnifyingGlassIcon, FunnelIcon, ArrowDownTrayIcon, PencilSquareIcon, TrashIcon, XMarkIcon, CheckIcon, UsersIcon, BanknotesIcon, CreditCardIcon } from "@heroicons/react/24/outline";
 import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 
@@ -1151,7 +1151,12 @@ export default function App({ currentUser }) {
       )}
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 16, marginBottom: 36 }}>
-        {[{ n: data.length, l: "Compradores" }, { n: fmt(avg), l: "Presupuesto medio" }, { n: Math.round(withFin / data.length * 100) + "%", l: "Con financiaciÃ³n" }].map((s, i) => <div key={i} style={{ background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, padding: "20px 24px", textAlign: "center" }}>
+        {[
+          { n: data.length, l: "Compradores", Icon: UsersIcon },
+          { n: fmt(avg), l: "Presupuesto medio", Icon: BanknotesIcon },
+          { n: Math.round(withFin / data.length * 100) + "%", l: "Con financiación", Icon: CreditCardIcon }
+        ].map((s, i) => <div key={i} style={{ background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, padding: "20px 24px", textAlign: "center" }}>
+          <s.Icon style={{ width: 22, height: 22, color: "#A8854A", marginBottom: 8 }} />
           <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: "var(--text)", fontWeight: 400 }}>{s.n}</div>
           <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 6, textTransform: "uppercase", letterSpacing: "0.1em" }}>{s.l}</div>
         </div>)}
