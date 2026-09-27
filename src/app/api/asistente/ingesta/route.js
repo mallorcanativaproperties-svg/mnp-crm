@@ -103,6 +103,31 @@ const RE_NUM_Y_SUFIJO =
 
 const RE_CABECERA = "(?:Art[íi]cul[oe]|Art[íi]cle|Norm[ae])";
 
+// Ordinales escritos con letra, en la forma en que los rotula el BOE. Se guardan
+// aplanados (sin acentos no, pero sí en minuscula y con espacios normalizados),
+// que es como llegan de `aplanar`.
+const ORDINALES_EN_PALABRA = {
+  primero: 1, primer: 1, segundo: 2, tercero: 3, tercer: 3, cuarto: 4, quinto: 5,
+  sexto: 6, séptimo: 7, septimo: 7, octavo: 8, noveno: 9, nono: 9, décimo: 10, decimo: 10,
+  undécimo: 11, undecimo: 11, "décimo primero": 11, "decimo primero": 11, decimoprimero: 11,
+  duodécimo: 12, duodecimo: 12, "décimo segundo": 12, "decimo segundo": 12, decimosegundo: 12,
+  decimotercero: 13, "décimo tercero": 13, "decimo tercero": 13,
+  decimocuarto: 14, "décimo cuarto": 14, "decimo cuarto": 14,
+  decimoquinto: 15, "décimo quinto": 15, "decimo quinto": 15,
+  decimosexto: 16, "décimo sexto": 16, "decimo sexto": 16,
+  decimoséptimo: 17, decimoseptimo: 17, "décimo séptimo": 17, "decimo septimo": 17,
+  decimoctavo: 18, decimooctavo: 18, "décimo octavo": 18, "decimo octavo": 18,
+  decimonoveno: 19, decimonono: 19, "décimo noveno": 19, "decimo noveno": 19,
+  vigésimo: 20, vigesimo: 20,
+  vigesimoprimero: 21, "vigésimo primero": 21, "vigesimo primero": 21,
+  vigesimosegundo: 22, "vigésimo segundo": 22, "vigesimo segundo": 22,
+  vigesimotercero: 23, "vigésimo tercero": 23, "vigesimo tercero": 23,
+  vigesimocuarto: 24, "vigésimo cuarto": 24, "vigesimo cuarto": 24,
+  vigesimoquinto: 25, "vigésimo quinto": 25, "vigesimo quinto": 25,
+  vigesimosexto: 26, vigesimoséptimo: 27, vigesimoseptimo: 27, vigesimoctavo: 28,
+  vigesimonoveno: 29, trigésimo: 30, trigesimo: 30,
+};
+
 function marcarEncabezadosPegados(texto) {
   const re = new RegExp(
     "([.:]|[A-ZÁÉÍÓÚÑÇ]{3,})[ \\t]+" +
@@ -189,6 +214,18 @@ function numeroDeArticulo(encabezado) {
   if (/^\s*(Disposici|Cap[íi]tul|T[íi]tul|Secci|Subsecci|Annex|Anex|Libro|Llibre|Pre[áa]mbul)/i.test(encabezado)) {
     return null;
   }
+  // Las leyes antiguas numeran en palabras: la Ley de Propiedad Horizontal dice
+  // "Articulo noveno", no "Articulo 9". Se cita siempre como "articulo 9.1.e",
+  // asi que sin esta tabla el articulo mas usado del dominio de comunidades no
+  // era filtrable ni pesaba en la busqueda por encabezado.
+  const ordinal = encabezado.match(
+    /^\s*(?:Art[íi]cul[oe]|Art[íi]cle)\s+([a-záéíóúüñ]+(?:\s+[a-záéíóúüñ]+)?)\s*\.?/i
+  );
+  if (ordinal) {
+    const n = ORDINALES_EN_PALABRA[aplanar(ordinal[1]).replace(/\s+/g, " ")];
+    if (n) return String(n);
+  }
+
   const m = encabezado.match(
     new RegExp(RE_CABECERA + "\\s+" + RE_NUM_Y_SUFIJO + "(?![a-zç])", "i")
   );
