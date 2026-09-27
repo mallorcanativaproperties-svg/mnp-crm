@@ -792,6 +792,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
   const [editandoDoc, setEditandoDoc] = useState(null);
   const [firmasLinks, setFirmasLinks] = useState({}); // docId → [{nombre, token, firmado_at}]
   const [firmaAgenteDocId, setFirmaAgenteDocId] = useState(null); // docId en proceso de firma agente
+  const [subiendoJustificante, setSubiendoJustificante] = useState(false); // docId en proceso de subida
   const isAdmin = ["director", "administrador"].includes(currentUser?.role?.toLowerCase());
   const esPropia = visita.agente_login === currentUser?.user_login;
   const puedeEditar = isAdmin || esPropia;
@@ -1099,6 +1100,40 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
                       window.open(`/api/visitas/documento?id=${doc.id}`, "_blank");
                     }
 
+                    async function subirJustificante(docId) {
+                      const input = document.createElement("input");
+                      input.type = "file";
+                      input.accept = "image/*,application/pdf";
+                      input.onchange = async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        setSubiendoJustificante(true);
+                        try {
+                          const ext = file.name.split(".").pop();
+                          const path = `justificantes_deposito/${docId}.${ext}`;
+                          const { error: upErr } = await supabase.storage
+                            .from("formacion")
+                            .upload(path, file, { upsert: true, contentType: file.type });
+                          if (upErr) throw upErr;
+                          const { data: { publicUrl } } = supabase.storage
+                            .from("formacion")
+                            .getPublicUrl(path);
+                          const { error: dbErr } = await supabase
+                            .from("visita_documentos")
+                            .update({ justificante_deposito_url: publicUrl })
+                            .eq("id", docId);
+                          if (dbErr) throw dbErr;
+                          notificarGuardado("Justificante de depósito adjuntado ✅");
+                          onActualizado();
+                        } catch (err) {
+                          alert("Error al subir el justificante: " + err.message);
+                        } finally {
+                          setSubiendoJustificante(false);
+                        }
+                      };
+                      input.click();
+                    }
+
                     async function enviarFirma(destinatario) {
                       const res = await fetch("/api/visitas/enviar-firma", {
                         method: "POST",
@@ -1239,17 +1274,56 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
                               </button>
                             )}
 
-                            {esOfResv && doc.estado === "firmado_comprador" && (
-                              <button onClick={() => enviarFirma("vendedor")} style={{
-                                padding: "14px 16px", background: SUCCESS, border: "none", color: WHITE,
-                                cursor: "pointer", borderRadius: 10, fontSize: 14, fontWeight: 700,
-                                fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center",
-                                justifyContent: "center", gap: 8,
-                              }}>
-                                <PaperAirplaneIcon style={{ width: 18, height: 18 }} />
-                                Enviar firma → Propietario
-                              </button>
-                            )}
+                            {esOfResv && doc.estado === "firmado_comprador" && (() => {
+                              const tieneJustificante = !!doc.justificante_deposito_url;
+                              return (
+                                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                                  {/* Justificante de depósito */}
+                                  {tieneJustificante ? (
+                                    <div style={{ display: "flex", alignItems: "center", gap: 8,
+                                      padding: "10px 14px", background: `${SUCCESS}12`,
+                                      border: `1px solid ${SUCCESS}40`, borderRadius: 10,
+                                      fontSize: 12, color: SUCCESS, fontFamily: "Inter, sans-serif" }}>
+                                      ✅ Justificante de depósito adjuntado
+                                      <a href={doc.justificante_deposito_url} target="_blank" rel="noreferrer"
+                                        style={{ color: SUCCESS, fontSize: 11, marginLeft: "auto" }}>Ver</a>
+                                      <button onClick={() => subirJustificante(doc.id)}
+                                        style={{ background: "none", border: "none", cursor: "pointer",
+                                          color: MUTED, fontSize: 11, fontFamily: "Inter, sans-serif" }}>
+                                        Cambiar
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <button onClick={() => subirJustificante(doc.id)}
+                                      disabled={subiendoJustificante}
+                                      style={{ padding: "12px 16px", background: "#9C6E1B", border: "none",
+                                        color: WHITE, cursor: "pointer", borderRadius: 10, fontSize: 14,
+                                        fontWeight: 700, fontFamily: "Inter, sans-serif",
+                                        display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                                        opacity: subiendoJustificante ? 0.6 : 1 }}>
+                                      <ArrowUpTrayIcon style={{ width: 18, height: 18 }} />
+                                      {subiendoJustificante ? "Subiendo…" : "📎 Adjuntar justificante de depósito"}
+                                    </button>
+                                  )}
+                                  {/* Enviar firma al propietario — bloqueado sin justificante */}
+                                  <button onClick={() => tieneJustificante ? enviarFirma("vendedor") : null}
+                                    disabled={!tieneJustificante}
+                                    title={!tieneJustificante ? "Debes adjuntar el justificante de depósito primero" : ""}
+                                    style={{ padding: "14px 16px",
+                                      background: tieneJustificante ? SUCCESS : MUTED,
+                                      border: "none", color: WHITE,
+                                      cursor: tieneJustificante ? "pointer" : "not-allowed",
+                                      borderRadius: 10, fontSize: 14, fontWeight: 700,
+                                      fontFamily: "Inter, sans-serif", display: "flex",
+                                      alignItems: "center", justifyContent: "center", gap: 8,
+                                      opacity: tieneJustificante ? 1 : 0.6 }}>
+                                    <PaperAirplaneIcon style={{ width: 18, height: 18 }} />
+                                    Enviar firma → Propietario
+                                    {!tieneJustificante && <span style={{ fontSize: 11, fontWeight: 400 }}>⚠️ falta justificante</span>}
+                                  </button>
+                                </div>
+                              );
+                            })()}
 
                             {/* Firma del agente — disponible cuando todos han firmado (firmado_vendedor) o firmado_comprador en hoja_visita */}
                             {(doc.estado === "firmado_vendedor" || (!esOfResv && doc.estado === "firmado_comprador")) && !doc.firma_agente_data && (
