@@ -10,6 +10,13 @@ const nextConfig = {
       "/api/visitas/documento": ["./src/app/api/visitas/documento/*.docx"],
     },
   },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      // pdf-parse usa rutas internas que webpack no puede resolver estáticamente
+      config.externals = [...(config.externals || []), "pdf-parse"];
+    }
+    return config;
+  },
 };
 
 module.exports = nextConfig;
