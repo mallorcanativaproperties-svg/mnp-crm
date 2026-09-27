@@ -79,15 +79,35 @@ function buscarEnTexto(texto, frases) {
  * distingue un encabezado de una remisión, y por eso no vale con partir por
  * cualquier "Norma N" que aparezca.
  */
+// Los ordinales latinos tienen que estar todos: si falta uno, "Articulo 158
+// septies" se queda en "158" y un filtro por el 158 se lleva doce articulos de
+// mas sin avisar.
+//
+// "quater" es el latin correcto, pero el PTIM de Mallorca escribe "quarter" en
+// el indice y "quáter" en el cuerpo, del mismo documento. Los boletines no son
+// consistentes y la numeracion del articulo no puede depender de como lo haya
+// teclado el que publico el PDF.
 const RE_SUFIJO_LATINO =
-  "bis|ter|quar?ter|qu[íi]nquies|sexies|septies|octies|nonies|decies|undecies|duodecies|terdecies|quaterdecies|quindecies|sexdecies";
+  "bis|ter|qu[áa]r?ter|qu[íi]nquies|sexies|septies|octies|nonies|decies|undecies|duodecies|terdecies|quaterdecies|quindecies|sexdecies";
+
+// Numero de articulo con su ordinal. El sufijo aparece suelto ("Articulo 158
+// ter") y tambien entre parentesis ("Norma 7 (bis)"), otra vez en el mismo
+// documento, asi que los parentesis son opcionales a los dos lados.
+//
+// El ordinal catalan va PEGADO al numero ("Article 1r"); el latino va separado
+// ("Articulo 158 ter"). Por eso no se admite espacio antes del catalan: si se
+// admite, su "t" se come la "t" de "ter" y el articulo pierde el sufijo.
+const RE_NUM_Y_SUFIJO =
+  "([0-9]+)(?:º|ª|è|é|er|r|n|t|a)?\\.?\\s*\\(?\\s*(" + RE_SUFIJO_LATINO + ")?\\s*\\)?";
+
+const RE_CABECERA = "(?:Art[íi]cul[oe]|Art[íi]cle|Norm[ae])";
 
 function marcarEncabezadosPegados(texto) {
   const re = new RegExp(
     "([.:]|[A-ZÁÉÍÓÚÑÇ]{3,})[ \\t]+" +
-      "((?:Art[íi]cul[oe]|Art[íi]cle|Norm[ae])\\s+\\d+(?:\\s+(?:" +
-      RE_SUFIJO_LATINO +
-      "))?\\.?\\s+[A-ZÁÉÍÓÚÑÇ])",
+      // El \\.? del final es para "Articulo 7 bis. Bonificaciones": el punto va
+      // detras del sufijo, no del numero, y sin esto el encabezado no se marca.
+      "(" + RE_CABECERA + "\\s+" + RE_NUM_Y_SUFIJO + "\\.?\\s*[“\"«]?[A-ZÁÉÍÓÚÑÇ])",
     "g"
   );
   return texto.replace(re, "$1\n$2");
@@ -151,25 +171,14 @@ function numeroDeArticulo(encabezado) {
   if (!encabezado) return null;
   // "Article 9è", "Artículo 9º", "Artículo 41 bis": el ordinal catalán o
   // castellano no forma parte del numero con el que se cita.
-  // Los ordinales latinos altos (sexies, septies... sexdecies) tienen que estar
-  // en la lista: si no, "Articulo 158 septies" devuelve "158" y un filtro por el
-  // 158 se lleva doce articulos de mas sin avisar.
   //
   // El (?![a-zç]) del final no es adorno: sin el, "ter" gana a "terdecies" por
   // ser la alternativa anterior, y "Articulo 158 terdecies" pasa a ser "158 ter".
-  // La mordaza impide que un sufijo se coma el principio de otro mas largo, sea
-  // cual sea el orden de la lista.
-  //
-  // "quarter" con r es como lo escribe la normativa del PTIM de Mallorca; el
-  // latin correcto es "quater", y los dos circulan en boletines, asi que valen
-  // los dos.
+  // Entonces filtrar por "158 ter" se traia tambien el terdecies y filtrar por
+  // "158 terdecies" no traia nada. La mordaza impide que un sufijo se coma el
+  // principio de otro mas largo, sea cual sea el orden de la lista.
   const m = encabezado.match(
-    new RegExp(
-      "(?:Art[íi]cul[oe]|Art[íi]cle|Norm[ae])\\s+([0-9]+)(?:º|ª|è|é|er|r|n|t|a)?\\.?\\s*(" +
-        RE_SUFIJO_LATINO +
-        ")?(?![a-zç])",
-      "i"
-    )
+    new RegExp(RE_CABECERA + "\\s+" + RE_NUM_Y_SUFIJO + "(?![a-zç])", "i")
   );
   if (!m) return null;
   return [m[1], m[2]].filter(Boolean).join(" ").trim().toLowerCase();
