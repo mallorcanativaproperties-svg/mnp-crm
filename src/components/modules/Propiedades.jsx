@@ -641,9 +641,9 @@ function Fl({ label, value, pub, gold, req }) {
 }
 
 const MEDIA_TIPOS = [
-  { key: "foto", label: "Fotos", icon: "📷", accept: "image/*", color: "var(--gold)" },
-  { key: "video", label: "Videos", icon: "🎬", accept: "video/*", color: "#3D577E" },
-  { key: "plano", label: "Planos", icon: "📐", accept: "image/*,.pdf", color: "var(--success)" },
+  { key: "foto", label: "Fotos", iconKey: "photo", accept: "image/*", color: "var(--gold)" },
+  { key: "video", label: "Videos", iconKey: "video", accept: "video/*", color: "#3D577E" },
+  { key: "plano", label: "Planos", iconKey: "plan", accept: "image/*,.pdf", color: "var(--success)" },
 ];
 
 
@@ -1096,7 +1096,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
               fontSize: 11, fontWeight: active ? 600 : 400, letterSpacing: "0.06em", textTransform: "uppercase",
               fontFamily: "Inter, sans-serif", transition: "all 0.2s",
             }}>
-              {t.icon} {t.label} ({counts[t.key]})
+              {t.label} ({counts[t.key]})
             </button>
           );
         })}
@@ -1113,7 +1113,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                   letterSpacing: "0.1em", textTransform: "uppercase",
                   fontFamily: "Inter, sans-serif", borderRadius: 0, whiteSpace: "nowrap",
                 }}>
-                ✕ Eliminar {fotosSeleccionadas.size} foto{fotosSeleccionadas.size !== 1 ? "s" : ""}
+                × Eliminar {fotosSeleccionadas.size} foto{fotosSeleccionadas.size !== 1 ? "s" : ""}
               </button>
             )}
             {/* Botón mejorar */}
@@ -1130,8 +1130,8 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                 borderRadius: 0, whiteSpace: "nowrap",
               }}>
               {mejorandoTodas
-                ? `✦ Mejorando ${mejoraBatchProgreso?.procesando || 1}/${mejoraBatchProgreso?.total || 0}...`
-                : "✦ Mejorar fotografías"}
+                ? `Mejorando ${mejoraBatchProgreso?.procesando || 1}/${mejoraBatchProgreso?.total || 0}...`
+                : "Mejorar fotografías"}
             </button>
           </div>
         )}
@@ -1144,7 +1144,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
           background: "var(--cream)", border: "1px solid var(--border)",
           padding: "10px 16px", marginBottom: 12,
         }}>
-          <span style={{ fontSize: 13, color: "var(--gold)" }}>✦</span>
+          <span style={{ fontSize: 13, color: "var(--gold)" }}></span>
           <span style={{ fontSize: 12, color: "#5C5347", fontFamily: "Inter, sans-serif", fontWeight: 500 }}>
             {mejoraBatchProgreso.procesando <= mejoraBatchProgreso.total
               ? `Mejorando fotografía ${mejoraBatchProgreso.procesando} de ${mejoraBatchProgreso.total}...`
@@ -1267,7 +1267,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                   background: "#1a2528", color: "var(--gold-l)", fontSize: 9, fontWeight: 700,
                   padding: "2px 8px", borderRadius: 0, letterSpacing: "0.08em", textTransform: "uppercase",
                 }}>
-                  ✦ IA
+                  IA
                 </div>
               )}
 
@@ -1282,7 +1282,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                 <div
                   style={{ width: "100%", height: 140, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "#1A1917" }}
                 >
-                  <span style={{ fontSize: 32, marginBottom: 4 }}>📄</span>
+                  <span style={{ fontSize: 32, marginBottom: 4 }}></span>
                   <span style={{ fontSize: 10, color: "var(--muted)" }}>PDF</span>
                 </div>
               ) : (
@@ -1335,17 +1335,17 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                 </span>
                 <div style={{ display: "flex", gap: 4 }}>
                   {/* View */}
-                  <button onClick={(e) => { e.stopPropagation(); setLightbox(item); }} style={{ ...btnBase, padding: "2px 5px", fontSize: 10 }} title="Ver">👁</button>
+                  <button onClick={(e) => { e.stopPropagation(); setLightbox(item); }} style={{ ...btnBase, padding: "2px 5px", fontSize: 10 }} title="Ver"></button>
                   {/* Set as portada (only photos) */}
                   {activeTab === "foto" && !item.es_portada && (
-                    <button onClick={(e) => { e.stopPropagation(); handleSetPortada(item); }} style={{ ...btnBase, padding: "2px 5px", fontSize: 10, color: "var(--gold)", borderColor: "var(--gold-l)33" }} title="Hacer portada">★</button>
+                    <button onClick={(e) => { e.stopPropagation(); handleSetPortada(item); }} style={{ ...btnBase, padding: "2px 5px", fontSize: 10, color: "var(--gold)", borderColor: "var(--gold-l)33" }} title="Hacer portada"></button>
                   )}
                   {/* Editar con IA — solo fotos */}
                   {activeTab === "foto" && (
-                    <button onClick={(e) => { e.stopPropagation(); setIaModal({ item }); setIaVariaciones([]); setIaSeleccionada(null); }} style={{ ...btnBase, padding: "2px 5px", fontSize: 10, color: "#405c6b", borderColor: "#405c6b44" }} title="Editar con IA">✦</button>
+                    <button onClick={(e) => { e.stopPropagation(); setIaModal({ item }); setIaVariaciones([]); setIaSeleccionada(null); }} style={{ ...btnBase, padding: "2px 5px", fontSize: 10, color: "#405c6b", borderColor: "#405c6b44" }} title="Editar con IA"></button>
                   )}
                   {/* Delete */}
-                  <button onClick={(e) => { e.stopPropagation(); if (confirm("Eliminar este archivo?")) handleDelete(item); }} style={{ ...btnBase, padding: "2px 5px", fontSize: 10, color: "var(--danger)", borderColor: "var(--danger)44" }} title="Eliminar">✕</button>
+                  <button onClick={(e) => { e.stopPropagation(); if (confirm("Eliminar este archivo?")) handleDelete(item); }} style={{ ...btnBase, padding: "2px 5px", fontSize: 10, color: "var(--danger)", borderColor: "var(--danger)44" }} title="Eliminar">×</button>
                 </div>
               </div>
             </div>
@@ -1373,7 +1373,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
               </div>
               {!iaLoading && (
                 <button onClick={() => { setIaModal(null); setIaVariaciones([]); setIaSeleccionada(null); }}
-                  style={{ background: "none", border: "none", color: "var(--muted)", fontSize: 22, cursor: "pointer", lineHeight: 1, padding: "4px 0 0 16px" }}>✕</button>
+                  style={{ background: "none", border: "none", color: "var(--muted)", fontSize: 22, cursor: "pointer", lineHeight: 1, padding: "4px 0 0 16px" }}>×</button>
               )}
             </div>
 
@@ -1412,7 +1412,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                 {/* Loading mientras genera */}
                 {iaLoading && (
                   <div style={{ textAlign: "center", padding: "20px 0", borderTop: "1px solid var(--border)", marginBottom: 16 }}>
-                    <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, color: "var(--gold)", marginBottom: 8 }}>✦</div>
+                    <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, color: "var(--gold)", marginBottom: 8 }}></div>
                     <div style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#1a2528" }}>Generando variación...</div>
                     <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>20 — 40 segundos</div>
                   </div>
@@ -1512,7 +1512,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                   {/* Loading */}
                   {iaLoading && (
                     <div style={{ textAlign: "center", padding: "20px 0", borderTop: "1px solid var(--border)" }}>
-                      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, color: "var(--gold)", marginBottom: 10, lineHeight: 1 }}>✦</div>
+                      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, color: "var(--gold)", marginBottom: 10, lineHeight: 1 }}></div>
                       <div style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#1a2528", fontWeight: 500 }}>Generando imagen...</div>
                       <div style={{ fontFamily: "Inter, sans-serif", fontSize: 11, color: "var(--muted)", marginTop: 6 }}>20 — 40 segundos</div>
                     </div>
@@ -1575,7 +1575,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
               {/* Cerrar */}
               <button onClick={() => setLightbox(null)}
                 style={{ position: "absolute", top: -36, right: 0, background: "none", border: "none",
-                  color: "#fff", fontSize: 20, cursor: "pointer", opacity: 0.7, padding: "4px 8px" }}>✕</button>
+                  color: "#fff", fontSize: 20, cursor: "pointer", opacity: 0.7, padding: "4px 8px" }}>×</button>
 
               {/* Contador */}
               {itemsNav.length > 1 && (
@@ -1703,7 +1703,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                   cursor: fotosSeleccionadas.size === 0 ? "not-allowed" : "pointer",
                   fontSize: 11, fontFamily: "Inter, sans-serif", fontWeight: 600,
                   letterSpacing: "0.08em", textTransform: "uppercase", borderRadius: 0 }}>
-                ✦ Mejorar {fotosSeleccionadas.size} foto{fotosSeleccionadas.size !== 1 ? "s" : ""}
+                 Mejorar {fotosSeleccionadas.size} foto{fotosSeleccionadas.size !== 1 ? "s" : ""}
               </button>
             </div>
           </div>
@@ -1715,19 +1715,19 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
 }
 
 const DOC_TIPOS = [
-  { key: "nota_simple", label: "Nota Simple", icon: "📋" },
-  { key: "descripcion_catastral", label: "Descripción Catastral", icon: "🗺️" },
-  { key: "hoja_encargo", label: "Hoja de Encargo", icon: "📝" },
-  { key: "escritura", label: "Escritura", icon: "📜" },
-  { key: "ibi_recibo", label: "Recibo IBI", icon: "🏛️" },
-  { key: "comunidad", label: "Actas Comunidad", icon: "🏢" },
-  { key: "certificado_energetico", label: "Cert. Energetico", icon: "⚡" },
-  { key: "cedula_habitabilidad", label: "Cedula Habitabilidad", icon: "🏠" },
-  { key: "iee", label: "IEE / ITE", icon: "🔍" },
-  { key: "planos", label: "Planos Catastro", icon: "📐" },
-  { key: "contrato", label: "Contrato", icon: "✍️" },
-  { key: "dni_propietario", label: "DNI Propietario", icon: "🪪" },
-  { key: "otro", label: "Otro documento", icon: "📎" },
+  { key: "nota_simple", label: "Nota Simple", iconKey: "clipboard" },
+  { key: "descripcion_catastral", label: "Descripción Catastral", iconKey: "map" },
+  { key: "hoja_encargo", label: "Hoja de Encargo", iconKey: "pencil" },
+  { key: "escritura", label: "Escritura", iconKey: "scroll" },
+  { key: "ibi_recibo", label: "Recibo IBI", iconKey: "bank" },
+  { key: "comunidad", label: "Actas Comunidad", iconKey: "office" },
+  { key: "certificado_energetico", label: "Cert. Energetico", iconKey: "bolt" },
+  { key: "cedula_habitabilidad", label: "Cedula Habitabilidad", iconKey: "home" },
+  { key: "iee", label: "IEE / ITE", iconKey: "magnify" },
+  { key: "planos", label: "Planos Catastro", iconKey: "ruler" },
+  { key: "contrato", label: "Contrato", icon: "" },
+  { key: "dni_propietario", label: "DNI Propietario", iconKey: "card" },
+  { key: "otro", label: "Otro documento", iconKey: "clip" },
 ];
 
 function DocsSection({ propiedadId, propRef }) {
@@ -1819,10 +1819,10 @@ function DocsSection({ propiedadId, propRef }) {
   }
 
   function getIcon(mimeType, nombre) {
-    if (mimeType === "application/pdf" || nombre?.endsWith(".pdf")) return "📕";
-    if (mimeType?.startsWith("image/")) return "🖼️";
-    if (mimeType?.includes("word") || nombre?.endsWith(".docx") || nombre?.endsWith(".doc")) return "📘";
-    if (mimeType?.includes("spreadsheet") || nombre?.endsWith(".xlsx") || nombre?.endsWith(".xls")) return "📗";
+    if (mimeType === "application/pdf" || nombre?.endsWith(".pdf")) return "";
+    if (mimeType?.startsWith("image/")) return "";
+    if (mimeType?.includes("word") || nombre?.endsWith(".docx") || nombre?.endsWith(".doc")) return "";
+    if (mimeType?.includes("spreadsheet") || nombre?.endsWith(".xlsx") || nombre?.endsWith(".xls")) return "";
     return null;
   }
 
@@ -1892,7 +1892,7 @@ function DocsSection({ propiedadId, propRef }) {
           {tiposConDocs.map((tipo) => (
             <div key={tipo.key}>
               <div style={{ fontSize: 10, color: "var(--gold)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8, fontWeight: 600 }}>
-                {tipo.icon} {tipo.label}
+                {tipo.label}
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                 {groupedDocs[tipo.key].map((doc) => (
@@ -1912,7 +1912,7 @@ function DocsSection({ propiedadId, propRef }) {
                       style={{ fontSize: 10, color: "var(--success)", textDecoration: "none", padding: "4px 10px", border: "1px solid #8FA88A33", borderRadius: 0 }}>
                       Abrir
                     </a>
-                    <button onClick={() => { if (confirm("Eliminar " + doc.nombre + "?")) handleDelete(doc); }} style={btnDel}>✕</button>
+                    <button onClick={() => { if (confirm("Eliminar " + doc.nombre + "?")) handleDelete(doc); }} style={btnDel}>×</button>
                   </div>
                 ))}
               </div>
@@ -2002,7 +2002,7 @@ function PropCard({ p, onClick }) {
           {p.portadaUrl ? (
             <img src={p.portadaUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
           ) : (
-            <span style={{ fontSize: 22, opacity: 0.25 }}>🏠</span>
+            <span style={{ fontSize: 22, opacity: 0.25 }}></span>
           )}
         </div>
         {/* Contenido */}
@@ -2039,7 +2039,7 @@ function PropCard({ p, onClick }) {
             color: p.idealista_estado === "publicada" ? "var(--success)" : p.idealista_estado === "no_publicada" ? "var(--danger)" : "var(--gold)",
             border: "1px solid " + (p.idealista_estado === "publicada" ? "var(--success)44" : p.idealista_estado === "no_publicada" ? "var(--danger)44" : "var(--gold)44")
           }}>
-            {p.idealista_estado === "publicada" ? "✓ Idealista" : p.idealista_estado === "no_publicada" ? "✗ No en Idealista" : "⟳ Idealista"}
+            {p.idealista_estado === "publicada" ? "✓ Idealista" : p.idealista_estado === "no_publicada" ? "✗ No en Idealista" : "↻ Idealista"}
           </span>
         )}
         {p.ref && (() => {
@@ -2588,11 +2588,11 @@ REGLAS:
             const esPublicada = (draft.estado || p.estado) === "publicada";
             if (esPublicada) {
               // Publicada: NO deja guardar
-              alert("🚫 Esta propiedad está PUBLICADA.\n\nNo se puede guardar sin completar los campos obligatorios (*):\n\n• " + faltantes + "\n\nCompleta estos campos o cambia el estado a \'Captada\'.");
+              alert(" Esta propiedad está PUBLICADA.\n\nNo se puede guardar sin completar los campos obligatorios (*):\n\n• " + faltantes + "\n\nCompleta estos campos o cambia el estado a \'Captada\'.");
               return;
             } else {
               // Captada: avisa pero deja guardar
-              if (!confirm("⚠️ Hay campos obligatorios (*) sin completar:\n\n• " + faltantes + "\n\nSi guardas así, la propiedad NO podrá publicarse en Idealista.\n\n¿Guardar igualmente?")) return;
+              if (!confirm("⚠ Hay campos obligatorios (*) sin completar:\n\n• " + faltantes + "\n\nSi guardas así, la propiedad NO podrá publicarse en Idealista.\n\n¿Guardar igualmente?")) return;
             }
           }
           if (onUpdate) onUpdate(toSave);
@@ -2624,7 +2624,7 @@ REGLAS:
               if (idealistaFieldErrors.size > 0) {
                 const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","precioAlquiler":"Renta mensual","precioTraspaso":"Precio traspaso","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético","refCatastral":"Referencia catastral","fianzaMeses":"Fianza (meses)","duracionMinMeses":"Duración mínima (meses)","alqEquipamiento":"Equipamiento (cocina/mobiliario)"};
                 const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join("\n• ");
-                if (!confirm("⚠️ Campos con * sin completar:\n\n• " + faltantes + "\n\n¿Volver sin guardar igualmente?")) return;
+                if (!confirm("⚠ Campos con * sin completar:\n\n• " + faltantes + "\n\n¿Volver sin guardar igualmente?")) return;
               }
               onClose();
             }} style={{ padding: "8px 20px", borderRadius: 0, border: "1px solid var(--border)", background: "transparent", color: "var(--muted)", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
@@ -2648,10 +2648,10 @@ REGLAS:
                 const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join("\n• ");
                 const esPublicada = (draft.estado || p.estado) === "publicada";
                 if (esPublicada) {
-                  alert("🚫 Esta propiedad está PUBLICADA.\n\nNo se puede guardar sin completar los campos obligatorios (*):\n\n• " + faltantes + "\n\nCompleta estos campos o cambia el estado a 'Captada'.");
+                  alert(" Esta propiedad está PUBLICADA.\n\nNo se puede guardar sin completar los campos obligatorios (*):\n\n• " + faltantes + "\n\nCompleta estos campos o cambia el estado a 'Captada'.");
                   return;
                 } else {
-                  if (!confirm("⚠️ Hay campos obligatorios (*) sin completar:\n\n• " + faltantes + "\n\nSi guardas así, la propiedad NO podrá publicarse en Idealista.\n\n¿Guardar igualmente?")) return;
+                  if (!confirm("⚠ Hay campos obligatorios (*) sin completar:\n\n• " + faltantes + "\n\nSi guardas así, la propiedad NO podrá publicarse en Idealista.\n\n¿Guardar igualmente?")) return;
                 }
               }
               if (onUpdate) onUpdate(toSave);
@@ -2672,7 +2672,7 @@ REGLAS:
         {/* Aviso Idealista */}
         {editMode && (
           <div style={{ marginBottom: 24, padding: "12px 18px", background: idealistaReady ? "var(--success)10" : "var(--danger)08", border: "1px solid " + (idealistaReady ? "var(--success)30" : "var(--danger)25"), display: "flex", alignItems: "center", gap: 12 }}>
-            <span style={{ fontSize: 18 }}>{idealistaReady ? "✅" : "⚠️"}</span>
+            <span style={{ fontSize: 18 }}>{idealistaReady ? "✓" : "⚠"}</span>
             <span style={{ fontSize: 12, color: idealistaReady ? "var(--success)" : "var(--danger)", fontWeight: 600, fontFamily: "Inter, sans-serif", letterSpacing: "0.02em" }}>
               {idealistaReady
                 ? "Propiedad lista para Idealista — todos los campos requeridos están completos"
@@ -2759,7 +2759,7 @@ REGLAS:
                   color: p.idealistaEstado === "publicada" ? "var(--success)" : p.idealistaEstado === "no_publicada" ? "var(--danger)" : "var(--gold)",
                   border: "1px solid " + (p.idealistaEstado === "publicada" ? "var(--success)44" : p.idealistaEstado === "no_publicada" ? "var(--danger)44" : "var(--gold)44")
                 }}>
-                  {p.idealistaEstado === "publicada" ? "✓ Confirmado en Idealista" : p.idealistaEstado === "no_publicada" ? "⚠ No encontrado en Idealista — revisar" : "⟳ Pendiente verificación"}
+                  {p.idealistaEstado === "publicada" ? "✓ Confirmado en Idealista" : p.idealistaEstado === "no_publicada" ? "⚠ No encontrado en Idealista — revisar" : "↻ Pendiente verificación"}
                   {p.idealistaCheck && <span style={{ color: "var(--muted)", marginLeft: 6 }}>· {new Date(p.idealistaCheck).toLocaleDateString("es-ES")}</span>}
                 </span>
               </div>}
@@ -2807,10 +2807,10 @@ REGLAS:
                 const esRojo = diasMercado >= 45 || totalVisitas >= 10;
                 const esAmbar = !esRojo && (diasMercado >= 30 || (totalVisitas >= 5 && !tieneOferta));
                 const semaforo = esRojo
-                  ? { color: "var(--danger)", icon: "🔴", label: `${diasMercado} días en mercado · ${totalVisitas} visita${totalVisitas !== 1 ? "s" : ""} — Revisar precio`, msg: "Solicita una valoración actualizada a tu Agente de Referencia." }
+                  ? { color: "var(--danger)", iconKey: "dot-red", label: `${diasMercado} días en mercado · ${totalVisitas} visita${totalVisitas !== 1 ? "s" : ""} — Revisar precio`, msg: "Solicita una valoración actualizada a tu Agente de Referencia." }
                   : esAmbar
-                  ? { color: "#C8820A", icon: "🟡", label: `${diasMercado} días en mercado · ${totalVisitas} visita${totalVisitas !== 1 ? "s" : ""} — Atención`, msg: totalVisitas >= 5 ? "Hay visitas pero sin oferta. Considera revisar el precio." : "La propiedad lleva más de 30 días publicada. Considera revisar la estrategia de precio." }
-                  : { color: "var(--success)", icon: "🟢", label: `${diasMercado} días en mercado · ${totalVisitas} visita${totalVisitas !== 1 ? "s" : ""}`, msg: null };
+                  ? { color: "#C8820A", iconKey: "dot-yellow", label: `${diasMercado} días en mercado · ${totalVisitas} visita${totalVisitas !== 1 ? "s" : ""} — Atención`, msg: totalVisitas >= 5 ? "Hay visitas pero sin oferta. Considera revisar el precio." : "La propiedad lleva más de 30 días publicada. Considera revisar la estrategia de precio." }
+                  : { color: "var(--success)", iconKey: "dot-green", label: `${diasMercado} días en mercado · ${totalVisitas} visita${totalVisitas !== 1 ? "s" : ""}`, msg: null };
                 return (
                   <div style={{
                     gridColumn: "1/-1", padding: "10px 14px", marginBottom: 8,
@@ -3174,7 +3174,7 @@ REGLAS:
                 <div>
                   <div style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4, display: "flex", alignItems: "center", gap: 4 }}>
                     Aire acond.
-                    <span style={{ fontSize: 8, color: "var(--gold)" }}>★</span>
+                    <span style={{ fontSize: 8, color: "var(--gold)" }}></span>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <button onClick={() => {
@@ -3321,11 +3321,11 @@ REGLAS:
           <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
             <button onClick={traducirAIngles} disabled={translatingEn || translatingDe}
               style={{ padding: "9px 18px", borderRadius: 0, border: "1px solid #405c6b", background: translatingEn ? "var(--border)" : "transparent", color: translatingEn ? "var(--muted)" : "#405c6b", cursor: (translatingEn || translatingDe) ? "default" : "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 8 }}>
-              {translatingEn ? (<><span style={{ display: "inline-block", width: 12, height: 12, border: "2px solid var(--muted)", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />Traduciendo...</>) : "✦ Traducir al inglés"}
+              {translatingEn ? (<><span style={{ display: "inline-block", width: 12, height: 12, border: "2px solid var(--muted)", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />Traduciendo...</>) : " Traducir al inglés"}
             </button>
             <button onClick={traducirAAleman} disabled={translatingEn || translatingDe}
               style={{ padding: "9px 18px", borderRadius: 0, border: "1px solid #405c6b", background: translatingDe ? "var(--border)" : "transparent", color: translatingDe ? "var(--muted)" : "#405c6b", cursor: (translatingEn || translatingDe) ? "default" : "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 8 }}>
-              {translatingDe ? (<><span style={{ display: "inline-block", width: 12, height: 12, border: "2px solid var(--muted)", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />Traduciendo...</>) : "✦ Traducir al alemán"}
+              {translatingDe ? (<><span style={{ display: "inline-block", width: 12, height: 12, border: "2px solid var(--muted)", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />Traduciendo...</>) : " Traducir al alemán"}
             </button>
             {translateError && <span style={{ fontSize: 11, color: "var(--danger)" }}>{translateError}</span>}
           </div>
@@ -3541,8 +3541,8 @@ REGLAS:
                 const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","precioAlquiler":"Renta mensual","precioTraspaso":"Precio traspaso","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético","refCatastral":"Referencia catastral","fianzaMeses":"Fianza (meses)","duracionMinMeses":"Duración mínima (meses)","alqEquipamiento":"Equipamiento (cocina/mobiliario)"};
                 const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join("\n• ");
                 const esPublicada = (draft.estado || p.estado) === "publicada";
-                if (esPublicada) { alert("🚫 Propiedad PUBLICADA. Completa los campos * antes de guardar."); return; }
-                else { if (!confirm("⚠️ Campos * sin completar:\n\n• " + faltantes + "\n\n¿Guardar igualmente?")) return; }
+                if (esPublicada) { alert(" Propiedad PUBLICADA. Completa los campos * antes de guardar."); return; }
+                else { if (!confirm("⚠ Campos * sin completar:\n\n• " + faltantes + "\n\n¿Guardar igualmente?")) return; }
               }
               if (onUpdate) onUpdate(toSave);
             }} style={{ padding: "12px 28px", borderRadius: 0, border: "none", background: "linear-gradient(135deg, var(--gold-l), #D4B896)", color: "var(--cream)", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
@@ -4009,7 +4009,7 @@ function IdealistaJsonButton({ supabase }) {
       const url=URL.createObjectURL(blob);
       const a=document.createElement("a");a.href=url;a.download=`${CUSTOMER_CODE}.json`;a.click();
       URL.revokeObjectURL(url);
-      setStatus("ok");setMsg(`✅ JSON generado con ${validas.length} propiedad(es) — descarga iniciada.`);
+      setStatus("ok");setMsg(`✓ JSON generado con ${validas.length} propiedad(es) — descarga iniciada.`);
     } catch(err){setStatus("error");setMsg("Error: "+err.message);}
     setLoading(false);
   }
@@ -4017,7 +4017,7 @@ function IdealistaJsonButton({ supabase }) {
   return (
     <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:6}}>
       <button onClick={generarJSON} disabled={loading}
-        style={{background:loading?"var(--border)":"transparent",border:"1px solid "+(loading?"#3A3A38":"var(--success)"),borderRadius:3,color:loading?"var(--muted)":"var(--success)",fontSize:11,fontWeight:600,cursor:loading?"not-allowed":"pointer",padding:"12px 20px",fontFamily:"Inter, sans-serif",letterSpacing:"0.1em",whiteSpace:"nowrap",textTransform:"uppercase",transition:"all 0.3s"}}
+        style={{background:loading?"var(--border)":"transparent",border:"1px solid "+(loading?"#3A3A38":"var(--success)"),borderRadius:0,color:loading?"var(--muted)":"var(--success)",fontSize:11,fontWeight:600,cursor:loading?"not-allowed":"pointer",padding:"12px 20px",fontFamily:"Inter, sans-serif",letterSpacing:"0.1em",whiteSpace:"nowrap",textTransform:"uppercase",transition:"all 0.3s"}}
         onMouseEnter={e=>{if(!loading){e.currentTarget.style.background="var(--success)";e.currentTarget.style.color="var(--cream)";}}}
         onMouseLeave={e=>{if(!loading){e.currentTarget.style.background="transparent";e.currentTarget.style.color="var(--success)";}}}>
         {loading?"Generando...":"⬇ JSON Idealista"}
@@ -4122,14 +4122,14 @@ function CatastroImport({ draft, upd, editMode }) {
       const noImportados = Object.keys(LABELS).filter(k => !campos[k]).map(k => LABELS[k]);
 
       if (aplicados.length === 0) {
-        setMsg({ type: "error", text: "⚠️ Referencia encontrada pero el Catastro no devuelve datos de dirección para este inmueble. Completa los campos manualmente." });
+        setMsg({ type: "error", text: "⚠ Referencia encontrada pero el Catastro no devuelve datos de dirección para este inmueble. Completa los campos manualmente." });
       } else if (noImportados.length > 0) {
-        setMsg({ type: "warn", text: `✅ Importados: ${aplicados.join(", ")}. ⚠️ Sin datos: ${noImportados.join(", ")} — completa manualmente.` });
+        setMsg({ type: "warn", text: `✓ Importados: ${aplicados.join(", ")}. ⚠ Sin datos: ${noImportados.join(", ")} — completa manualmente.` });
       } else {
-        setMsg({ type: "ok", text: `✅ Todos los datos importados: ${aplicados.join(", ")}` });
+        setMsg({ type: "ok", text: `✓ Todos los datos importados: ${aplicados.join(", ")}` });
       }
     } catch (err) {
-      setMsg({ type: "error", text: `⚠️ ${err.message || "Error al consultar el Catastro"}. Comprueba la referencia e inténtalo de nuevo.` });
+      setMsg({ type: "error", text: `⚠ ${err.message || "Error al consultar el Catastro"}. Comprueba la referencia e inténtalo de nuevo.` });
     }
     setLoading(false);
   }
@@ -4204,7 +4204,7 @@ function IdealistaImportButton() {
       </label>
       {result && (
         <div style={{ fontSize: 10, textAlign: 'right', color: result.error ? '#D45454' : 'var(--success-l)' }}>
-          {result.error ? `Error: ${result.error}` : `✅ ${result.imported} importadas · ${result.skipped} ya existían · ${result.errors} errores`}
+          {result.error ? `Error: ${result.error}` : `✓ ${result.imported} importadas · ${result.skipped} ya existían · ${result.errors} errores`}
         </div>
       )}
     </div>
@@ -4335,7 +4335,7 @@ export default function CRMPropiedades({ currentUser }) {
             .eq("dir", dbData.dir).eq("municipio", dbData.municipio).limit(3);
           if (dups && dups.length > 0) {
             const lista = dups.map(d => `${d.ref} — ${d.dir}, ${d.municipio}`).join("\n");
-            const ok = confirm(`⚠️ Ya existe una propiedad con la misma dirección:\n\n${lista}\n\n¿Continuar igualmente?`);
+            const ok = confirm(`⚠ Ya existe una propiedad con la misma dirección:\n\n${lista}\n\n¿Continuar igualmente?`);
             if (!ok) return;
           }
         }
@@ -4417,7 +4417,7 @@ export default function CRMPropiedades({ currentUser }) {
     // Abrir la nueva ficha en edición
     const newPropData = mapDbToJs(inserted);
     setSel(newPropData);
-    alert(`✅ Ficha duplicada como ${newRef} — cambia la operación y el precio antes de publicar.`);
+    alert(`✓ Ficha duplicada como ${newRef} — cambia la operación y el precio antes de publicar.`);
   }
 
   async function deleteProperty(prop) {
@@ -4472,8 +4472,8 @@ export default function CRMPropiedades({ currentUser }) {
         {/* Banner aviso IEE — no bloqueante */}
         {ieeWarning && (
           <div style={{ background: "#FFF8E7", border: "1px solid #F0C040", padding: "12px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-            <span style={{ fontSize: 13, color: "#7A5C00" }}>⚠️ {ieeWarning}</span>
-            <button onClick={() => setIeeWarning(null)} style={{ background: "none", border: "none", color: "#7A5C00", cursor: "pointer", fontSize: 16, padding: 0, flexShrink: 0 }}>✕</button>
+            <span style={{ fontSize: 13, color: "#7A5C00" }}>⚠ {ieeWarning}</span>
+            <button onClick={() => setIeeWarning(null)} style={{ background: "none", border: "none", color: "#7A5C00", cursor: "pointer", fontSize: 16, padding: 0, flexShrink: 0 }}>×</button>
           </div>
         )}
 
