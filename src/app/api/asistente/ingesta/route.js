@@ -181,6 +181,14 @@ function numeroDeArticulo(encabezado) {
   // Entonces filtrar por "158 ter" se traia tambien el terdecies y filtrar por
   // "158 terdecies" no traia nada. La mordaza impide que un sufijo se coma el
   // principio de otro mas largo, sea cual sea el orden de la lista.
+  // Una disposicion, un capitulo o un titulo NO son un articulo, aunque su
+  // rotulo nombre uno: "Disposicion transitoria segunda. Regimen transitorio de
+  // la exencion del articulo 14.1.h)" resolvia a "14", y filtrar un documento
+  // por el articulo 14 se traia tambien esa disposicion. Se filtran por texto,
+  // no por numero, asi que aqui devuelven null.
+  if (/^\s*(Disposici|Cap[íi]tul|T[íi]tul|Secci|Subsecci|Annex|Anex|Libro|Llibre|Pre[áa]mbul)/i.test(encabezado)) {
+    return null;
+  }
   const m = encabezado.match(
     new RegExp(RE_CABECERA + "\\s+" + RE_NUM_Y_SUFIJO + "(?![a-zç])", "i")
   );
