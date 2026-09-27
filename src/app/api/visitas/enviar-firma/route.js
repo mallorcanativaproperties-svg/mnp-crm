@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import crypto from "crypto";
+import { logMensajeWA } from "@/lib/evolutionApi";
 
 function getSupabase() {
   return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
@@ -102,6 +103,7 @@ export async function POST(req) {
       const link = `${BASE_URL}/firmar-visita?token=${token}&tipo=comprador`;
       const msg  = `Hola ${nombre} 👋\n\nLe adjuntamos el *${tipoDoc}*${dirProp ? ` del inmueble en *${dirProp}*` : ""}.\n\nPor favor, léalo detenidamente y fírmelo desde el siguiente enlace:\n\n🔗 ${link}\n\n_Nativa Properties — 655 88 26 82_`;
       await enviarWhatsApp(c.telefono, msg);
+      await logMensajeWA(sb, c.telefono, msg, "sistema");
       enviados++;
     }
 
@@ -167,6 +169,7 @@ export async function POST(req) {
       const link = `${BASE_URL}/firmar-visita?token=${token}&tipo=vendedor`;
       const msg  = `Estimado/a ${p.nombre},\n\nTodos los compradores han firmado el *${tipoDoc}*${dirProp ? ` del inmueble en *${dirProp}*` : ""}.\n\nLe solicitamos su firma de conformidad en el siguiente enlace:\n\n🔗 ${link}\n\n_Nativa Properties — 655 88 26 82_`;
       await enviarWhatsApp(p.tel, msg);
+      await logMensajeWA(sb, p.tel, msg, "sistema");
       enviados++;
     }
 
