@@ -46,7 +46,7 @@ export default function LinkedIn() {
       {/* Header */}
       <div style={{ marginBottom: 36 }}>
         <div style={{ fontSize: 10, color: BRONZE, letterSpacing: "0.2em", marginBottom: 8 }}>MALLORCA NATIVA · LINKEDIN</div>
-        <h1 style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: "clamp(22px,5vw,30px)", fontWeight: 400, color: PETROL, margin: "0 0 8px", lineHeight: 1.2 }}>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(22px,5vw,30px)", fontWeight: 600, color: PETROL, margin: "0 0 8px", lineHeight: 1.2 }}>
           Publicar en LinkedIn
         </h1>
         <p style={{ fontSize: 13, color: "#9A968A", margin: 0, lineHeight: 1.6 }}>

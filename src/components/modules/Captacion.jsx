@@ -83,7 +83,7 @@ function FichaModal({ item, onClose, onUpdate, onAna }) {
         <div style={{ background: PETROL, padding: "20px 24px", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div>
             <div style={{ fontSize: 10, color: BRONZE, letterSpacing: "0.2em", marginBottom: 6 }}>PROSPECCIÓN · {item.distrito?.toUpperCase() || "MALLORCA"}</div>
-            <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 18, color: CREAM, fontWeight: 400 }}>{item.titulo || "Sin título"}</div>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, color: CREAM, fontWeight: 600 }}>{item.titulo || "Sin título"}</div>
             <div style={{ fontSize: 12, color: "#9A968A", marginTop: 4 }}>{item.direccion}</div>
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", color: "#9A968A", fontSize: 20, cursor: "pointer", padding: 4 }}>✕</button>
@@ -209,7 +209,7 @@ function TarjetaParticular({ item, onUpdate, onClick, onAna }) {
         )}
 
         {/* Título y dirección */}
-        <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 14, color: PETROL, marginBottom: 3, lineHeight: 1.3 }}>{item.titulo || "Sin título"}</div>
+        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, color: PETROL, marginBottom: 3, lineHeight: 1.3 }}>{item.titulo || "Sin título"}</div>
         <div style={{ fontSize: 11, color: "#9A968A", marginBottom: 10, display: "flex", gap: 8, alignItems: "center" }}>
           <span>{item.distrito} · {item.municipio}</span>
           {item.portal && <span style={{ fontSize: 9, padding: "1px 6px", background: item.portal === "fotocasa" ? "rgba(255,107,53,0.1)" : item.portal === "habitaclia" ? "rgba(0,122,255,0.1)" : "rgba(44,110,82,0.1)", color: item.portal === "fotocasa" ? "#E8450A" : item.portal === "habitaclia" ? "#0066CC" : "#2C6E52", letterSpacing: "0.06em", textTransform: "uppercase" }}>{item.portal}</span>}
@@ -376,7 +376,7 @@ function AnaPanel({ item, onClose }) {
       <div style={{ background: PETROL, padding: "16px 20px", flexShrink: 0 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ width: 40, height: 40, background: BRONZE, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 17, color: CREAM, fontWeight: 400 }}>
+            <div style={{ width: 40, height: 40, background: BRONZE, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "Inter, sans-serif", fontSize: 17, color: CREAM, fontWeight: 600 }}>
               {nombre.charAt(0).toUpperCase()}
             </div>
             <div>
@@ -527,7 +527,7 @@ export default function Captacion() {
         <div style={{ marginBottom: 28 }}>
           <div style={{ fontSize: 10, color: BRONZE, letterSpacing: "0.2em", marginBottom: 8 }}>MALLORCA NATIVA · PROSPECCIÓN</div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 16 }}>
-            <h1 style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: "clamp(22px,5vw,30px)", fontWeight: 400, color: PETROL, margin: 0 }}>Particulares en captación</h1>
+            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(22px,5vw,30px)", fontWeight: 600, color: PETROL, margin: 0 }}>Particulares en captación</h1>
             <button onClick={handleScrapingManual} disabled={scrapingManual}
               style={{ padding: "10px 20px", background: scrapingManual ? "#E7E1D4" : PETROL, border: "none", color: scrapingManual ? "#9A968A" : CREAM, fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", cursor: scrapingManual ? "not-allowed" : "pointer", fontFamily: "Inter, sans-serif" }}>
               {scrapingManual ? "Buscando..." : "Buscar en portales"}
@@ -546,7 +546,7 @@ export default function Captacion() {
             { label: "Con chivatos", value: totalConChivatos, color: "#9C6E1B" },
           ].map(s => (
             <div key={s.label} style={{ background: "#fff", border: `1px solid ${BORDER}`, padding: "12px 14px", textAlign: "center" }}>
-              <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 22, color: s.color, marginBottom: 4 }}>{s.value}</div>
+              <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 22, fontWeight: 300, color: s.color, marginBottom: 4 }}>{s.value}</div>
               <div style={{ fontSize: 10, color: "#9A968A", letterSpacing: "0.1em" }}>{s.label.toUpperCase()}</div>
             </div>
           ))}
@@ -577,7 +577,7 @@ export default function Captacion() {
           <div style={{ textAlign: "center", padding: 60, color: "#9A968A", fontSize: 13, fontStyle: "italic" }}>Cargando...</div>
         ) : filtrados.length === 0 ? (
           <div style={{ textAlign: "center", padding: 60 }}>
-            <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 32, color: "#C8BFB0", marginBottom: 12 }}>◇</div>
+            <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 32, fontWeight: 300, color: "#C8BFB0", marginBottom: 12 }}>◇</div>
             <div style={{ fontSize: 13, color: "#9A968A" }}>No hay particulares en este estado.<br/>Pulsa "Buscar en portales" para importar.</div>
           </div>
         ) : (
