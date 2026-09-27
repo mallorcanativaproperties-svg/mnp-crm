@@ -328,6 +328,9 @@ export default function AsistenteIA({ currentUser }) {
         usuarioId={usuarioId}
         casoInicial={vista.casoId || null}
         onVolver={() => setVista({ pantalla: "portada" })}
+        onVerCasos={() =>
+          setVista({ pantalla: "biblioteca", agenteInicial: vista.agente.slug, volverA: vista.agente })
+        }
       />
     );
   }
@@ -337,7 +340,12 @@ export default function AsistenteIA({ currentUser }) {
       <Biblioteca
         agentes={agentes}
         usuarioId={usuarioId}
-        onVolver={() => setVista({ pantalla: "portada" })}
+        agenteInicial={vista.agenteInicial || ""}
+        onVolver={() =>
+          vista.volverA
+            ? setVista({ pantalla: "chat", agente: vista.volverA })
+            : setVista({ pantalla: "portada" })
+        }
         onContinuar={(caso) => {
           const agente = agentes.find((a) => a.slug === caso.agente_slug);
           if (agente) setVista({ pantalla: "chat", agente, casoId: caso.id });
@@ -467,28 +475,15 @@ function Portada({ agentes, cargando, onAbrirAgente, onAbrirBiblioteca }) {
 
 /* ═══════════════════════════ Chat ═══════════════════════════ */
 
-function Chat({ agente, usuarioId, casoInicial, onVolver }) {
+function Chat({ agente, usuarioId, casoInicial, onVolver, onVerCasos }) {
   const color = COLOR_FALLBACK[agente.slug] || ORO;
   const [mensajes, setMensajes] = useState([]);
   const [entrada, setEntrada] = useState("");
   const [cargando, setCargando] = useState(false);
   const [convId, setConvId] = useState(null);
-  const [historial, setHistorial] = useState([]);
-  const [panelAbierto, setPanelAbierto] = useState(true);
   const [validando, setValidando] = useState(false);
   const [casoValidado, setCasoValidado] = useState(false);
   const finRef = useRef(null);
-
-  const cargarHistorial = useCallback(() => {
-    fetch(`/api/asistente/historial?agente=${agente.slug}&limite=40`)
-      .then((r) => r.json())
-      .then((d) => setHistorial(d.casos || []))
-      .catch(() => setHistorial([]));
-  }, [agente.slug]);
-
-  useEffect(() => {
-    cargarHistorial();
-  }, [cargarHistorial]);
 
   const abrirCaso = useCallback(async (id) => {
     try {
@@ -590,7 +585,6 @@ function Chat({ agente, usuarioId, casoInicial, onVolver }) {
                 };
                 return copia;
               });
-              if (evento === "fin") cargarHistorial();
             }
 
             if (evento === "texto") {
@@ -620,7 +614,7 @@ function Chat({ agente, usuarioId, casoInicial, onVolver }) {
         setCargando(false);
       }
     },
-    [entrada, cargando, mensajes, convId, agente.slug, usuarioId, cargarHistorial]
+    [entrada, cargando, mensajes, convId, agente.slug, usuarioId]
   );
 
   const ultimaRespuesta = [...mensajes].reverse().find((m) => m.rol === "assistant")?.contenido || "";
@@ -628,99 +622,6 @@ function Chat({ agente, usuarioId, casoInicial, onVolver }) {
 
   return (
     <div style={{ display: "flex", height: "100vh", fontFamily: FUENTE, background: PAPEL }}>
-      {/* ── Historial del agente ── */}
-      {panelAbierto && (
-        <div
-          style={{
-            width: 268,
-            flexShrink: 0,
-            borderRight: `1px solid ${LINEA}`,
-            background: "#FFFFFF",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <div style={{ padding: "18px 18px 14px", borderBottom: `1px solid ${LINEA}` }}>
-            <div style={{ ...rotulo, color: GRIS, marginBottom: 12 }}>Historial</div>
-            <button
-              onClick={nuevoCaso}
-              style={{
-                width: "100%",
-                padding: "9px 12px",
-                border: `1px solid ${TINTA}`,
-                background: convId ? "#FFFFFF" : TINTA,
-                color: convId ? TINTA : PAPEL,
-                borderRadius: 0,
-                cursor: "pointer",
-                fontFamily: FUENTE,
-                ...rotulo,
-                fontSize: 10,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 7,
-              }}
-            >
-              <PlusIcon style={{ width: 13, height: 13 }} />
-              Caso nuevo
-            </button>
-          </div>
-
-          <div style={{ flex: 1, overflowY: "auto" }}>
-            {historial.length === 0 && (
-              <div style={{ padding: "18px", fontSize: 11.5, color: GRIS, lineHeight: 1.6 }}>
-                Todavia no hay consultas de este agente. La primera que hagas quedara aqui.
-              </div>
-            )}
-            {historial.map((c) => {
-              const activo = c.id === convId;
-              return (
-                <button
-                  key={c.id}
-                  onClick={() => abrirCaso(c.id)}
-                  style={{
-                    display: "block",
-                    width: "100%",
-                    textAlign: "left",
-                    padding: "13px 18px",
-                    border: "none",
-                    borderBottom: `1px solid ${LINEA}`,
-                    borderLeft: activo ? `3px solid ${color}` : "3px solid transparent",
-                    background: activo ? PAPEL : "#FFFFFF",
-                    cursor: "pointer",
-                    fontFamily: FUENTE,
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: 12,
-                      color: TINTA,
-                      lineHeight: 1.45,
-                      marginBottom: 6,
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      overflow: "hidden",
-                    }}
-                  >
-                    {c.titulo || c.planteamiento || "Sin titulo"}
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 10, color: GRIS }}>
-                    <span>{fecha(c.updated_at)}</span>
-                    {c.validada && (
-                      <span style={{ display: "flex", alignItems: "center", gap: 3, color: "#2C6E52" }}>
-                        <CheckBadgeIcon style={{ width: 11, height: 11 }} />
-                        validado
-                      </span>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
       {/* ── Conversacion ── */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
         <div
@@ -742,9 +643,9 @@ function Chat({ agente, usuarioId, casoInicial, onVolver }) {
             <ArrowLeftIcon style={{ width: 18, height: 18 }} />
           </button>
           <button
-            onClick={() => setPanelAbierto((v) => !v)}
-            style={{ background: "none", border: "none", cursor: "pointer", color: panelAbierto ? TINTA : GRIS, padding: 0, display: "flex" }}
-            title={panelAbierto ? "Ocultar historial" : "Ver historial"}
+            onClick={onVerCasos}
+            style={{ background: "none", border: "none", cursor: "pointer", color: GRIS, padding: 0, display: "flex" }}
+            title="Casos anteriores de este agente"
           >
             <ClockIcon style={{ width: 18, height: 18 }} />
           </button>
@@ -761,6 +662,28 @@ function Chat({ agente, usuarioId, casoInicial, onVolver }) {
                 Caso validado
               </span>
             )}
+            <button
+              onClick={nuevoCaso}
+              disabled={!convId && mensajes.length === 0}
+              style={{
+                padding: "8px 14px",
+                border: `1px solid ${convId || mensajes.length ? TINTA : LINEA}`,
+                background: "#FFFFFF",
+                color: convId || mensajes.length ? TINTA : GRIS,
+                borderRadius: 0,
+                cursor: convId || mensajes.length ? "pointer" : "default",
+                fontFamily: FUENTE,
+                ...rotulo,
+                fontSize: 9,
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+              title="Empezar un caso nuevo con este agente"
+            >
+              <PlusIcon style={{ width: 12, height: 12 }} />
+              Caso nuevo
+            </button>
             {sePuedeValidar && !casoValidado && (
               <button
                 onClick={() => setValidando(true)}
@@ -903,7 +826,6 @@ function Chat({ agente, usuarioId, casoInicial, onVolver }) {
           onValidado={() => {
             setValidando(false);
             setCasoValidado(true);
-            cargarHistorial();
           }}
         />
       )}
@@ -913,12 +835,14 @@ function Chat({ agente, usuarioId, casoInicial, onVolver }) {
 
 /* ═══════════════════════ Biblioteca de casos ═══════════════════════ */
 
-function Biblioteca({ agentes, usuarioId, onVolver, onContinuar }) {
+function Biblioteca({ agentes, usuarioId, agenteInicial = "", onVolver, onContinuar }) {
   const [casos, setCasos] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [q, setQ] = useState("");
   const [busqueda, setBusqueda] = useState("");
-  const [filtroAgente, setFiltroAgente] = useState("");
+  // Cuando se llega desde un agente, la biblioteca abre ya filtrada por el:
+  // el boton del chat dice "casos de este agente" y tiene que cumplirlo.
+  const [filtroAgente, setFiltroAgente] = useState(agenteInicial);
   // "" (todos) | "validados" | "pendientes". Los pendientes son el filtro de
   // trabajo: con sesenta casos, repasar los que faltan mirando uno a uno cual
   // lleva la marca de validado no se hace.
