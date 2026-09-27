@@ -337,8 +337,8 @@ export default function CRMApp() {
       {/* Sidebar */}
       <div style={{
         width: sidebarOpen ? 220 : (isMobile ? 0 : 56),
-        background: "var(--navy)",
-        borderRight: "1px solid var(--text)",
+        background: "var(--navy-mid)",
+        borderRight: "1px solid rgba(172,138,84,0.15)",
         display: "flex",
         flexDirection: "column",
         transition: "width 0.2s",
@@ -351,7 +351,7 @@ export default function CRMApp() {
         overflow: "hidden",
       }}>
         {/* Logo */}
-        <div style={{ padding: sidebarOpen ? "16px 16px" : "16px 10px", borderBottom: "1px solid var(--text)", display: "flex", alignItems: "center", justifyContent: sidebarOpen ? "flex-start" : "center" }}>
+        <div style={{ padding: sidebarOpen ? "16px 16px" : "16px 10px", borderBottom: "1px solid rgba(172,138,84,0.2)", display: "flex", alignItems: "center", justifyContent: sidebarOpen ? "flex-start" : "center" }}>
           {sidebarOpen ? (
             <img
               src="/images/logo-nativa-horizontal.png"
@@ -395,8 +395,8 @@ export default function CRMApp() {
                       width: "100%", padding: sidebarOpen ? "10px 16px" : "10px",
                       background: activeModule === topModule.key ? "var(--gold)22" : "transparent",
                       border: "none", borderLeft: activeModule === topModule.key ? "3px solid var(--gold)" : "3px solid transparent",
-                      color: activeModule === topModule.key ? "var(--gold)" : "rgba(255,255,255,0.65)",
-                      cursor: "pointer", fontSize: 12, fontWeight: 600,
+                      color: activeModule === topModule.key ? "var(--gold)" : "var(--muted)",
+                      cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.14em",
                       fontFamily: "Inter, sans-serif", textAlign: "left",
                       justifyContent: sidebarOpen ? "flex-start" : "center",
                       letterSpacing: "0.04em",
@@ -448,8 +448,8 @@ export default function CRMApp() {
                             width: "100%", padding: sidebarOpen ? "9px 16px 9px 24px" : "9px",
                             background: active ? mod.color + "12" : "transparent",
                             border: "none", borderLeft: active ? "3px solid " + mod.color : "3px solid transparent",
-                            color: active ? "var(--gold)" : "rgba(255,255,255,0.65)",
-                            cursor: "pointer", fontSize: 12, fontWeight: active ? 600 : 400,
+                            color: active ? "var(--gold)" : "var(--muted)",
+                            cursor: "pointer", fontSize: 11, fontWeight: active ? 600 : 500, letterSpacing: "0.14em",
                             fontFamily: "Inter, sans-serif", textAlign: "left",
                             transition: "all 0.15s",
                             justifyContent: sidebarOpen ? "flex-start" : "center",
