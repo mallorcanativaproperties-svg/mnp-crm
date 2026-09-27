@@ -299,17 +299,18 @@ export default function FirmarVisita() {
             </a>
 
             {/* Checkbox He leído — siempre visible justo debajo */}
-            <label style={{ display:"flex", alignItems:"center", gap:10, marginTop:14,
+            <label style={{ display:"block", marginTop:14,
               padding:"14px 16px", background:leido ? `${SUCCESS}10` : WHITE,
               border:`1.5px solid ${leido ? SUCCESS : BORDER}`, borderRadius:10,
               cursor:"pointer", transition:"all 0.15s" }}>
-              <input type="checkbox" checked={leido} onChange={e => setLeido(e.target.checked)}
-                style={{ width:18, height:18, accentColor:SUCCESS, flexShrink:0 }} />
-              <span style={{ fontSize:13, color: leido ? SUCCESS : TEXT,
-                fontWeight: leido ? 700 : 400, fontFamily:"Inter, sans-serif",
-                lineHeight:1.4, flex:1, minWidth:0 }}>
-                He leído y entendido el documento en su totalidad
-              </span>
+              <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                <input type="checkbox" checked={leido} onChange={e => setLeido(e.target.checked)}
+                  style={{ width:18, height:18, accentColor:SUCCESS, flexShrink:0 }} />
+                <span style={{ fontSize:13, color: leido ? SUCCESS : TEXT,
+                  fontWeight: leido ? 700 : 400, fontFamily:"Inter, sans-serif", lineHeight:1.4 }}>
+                  He leído y entendido el documento en su totalidad
+                </span>
+              </div>
             </label>
           </div>
         )}
