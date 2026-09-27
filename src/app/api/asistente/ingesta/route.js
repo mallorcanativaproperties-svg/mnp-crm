@@ -98,8 +98,17 @@ const RE_SUFIJO_LATINO =
 // El ordinal catalan va PEGADO al numero ("Article 1r"); el latino va separado
 // ("Articulo 158 ter"). Por eso no se admite espacio antes del catalan: si se
 // admite, su "t" se come la "t" de "ter" y el articulo pierde el sufijo.
+// Numeracion multinivel: el Plan General de Palma no numera por articulos sino
+// por "Norma 1.1.1", "Norma 2.1.8", "Norma 7.3.8" — titulo, capitulo y norma.
+// Sin los niveles, "Norma 7.3.8" se quedaba en "7" y centenares de normas
+// distintas colapsaban en un puñado de numeros: la que manda en una consulta de
+// Palma es la 7.3.8, y citar la 7 es citar otra cosa.
+//
+// El (?=\D|$) del final impide quedarse a medias de un nivel, y como los niveles
+// se piden con punto entre digitos, un "Articulo 14." normal sigue dando "14":
+// el punto final no va seguido de digito, asi que no entra en la numeracion.
 const RE_NUM_Y_SUFIJO =
-  "([0-9]+)(?:º|ª|è|é|er|r|n|t|a)?\\.?\\s*\\(?\\s*(" + RE_SUFIJO_LATINO + ")?\\s*\\)?";
+  "([0-9]+(?:\\.[0-9]+)*)(?:º|ª|è|é|er|r|n|t|a)?\\.?\\s*\\(?\\s*(" + RE_SUFIJO_LATINO + ")?\\s*\\)?";
 
 const RE_CABECERA = "(?:Art[íi]cul[oe]|Art[íi]cle|Norm[ae])";
 
