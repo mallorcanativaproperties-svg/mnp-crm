@@ -18,25 +18,25 @@ import {
 } from "@heroicons/react/24/outline";
 
 // ── Paleta ────────────────────────────────────────────────────────────────────
-const GOLD    = "#AC8A54";
-const GOLD_L  = "#C8A97E";
-const GOLD_XL = "#E7D5B8";
-const CREAM   = "#F8F6F1";
+const GOLD    = "var(--gold)";
+const GOLD_L  = "var(--gold-l)";
+const GOLD_XL = "var(--gold-xl)";
+const CREAM   = "var(--cream)";
 const CREAM2  = "#F0EBE3";
-const WHITE   = "#FFFFFF";
+const WHITE   = "var(--white)";
 const DARK    = "#1a2528";
-const TEXT    = "#22262E";
-const MUTED   = "#9A968A";
-const BORDER  = "#E7E1D4";
-const SUCCESS = "#2C6E52";
-const DANGER  = "#A23A3A";
-const BLUE    = "#185FA5";
+const TEXT    = "var(--text)";
+const MUTED   = "var(--muted)";
+const BORDER  = "var(--border)";
+const SUCCESS = "var(--success)";
+const DANGER  = "var(--danger)";
+const BLUE    = "var(--blue)";
 
 const ESTADO_DOC = {
   borrador:          { label: "Borrador",           color: MUTED,   bg: `${MUTED}15`    },
   enviado:           { label: "Enviado",            color: BLUE,    bg: `${BLUE}15`     },
   firmado_comprador: { label: "Firmado comprador",  color: GOLD,    bg: `${GOLD}15`     },
-  deposito_recibido: { label: "Depósito recibido",  color: "#9C6E1B", bg: "#9C6E1B15"   },
+  deposito_recibido: { label: "Depósito recibido",  color: "var(--amber)", bg: "var(--amber)15"   },
   firmado_vendedor:  { label: "Firmado vendedor",   color: SUCCESS, bg: `${SUCCESS}15`  },
   completado:        { label: "Completado",         color: SUCCESS, bg: `${SUCCESS}20`  },
 };
@@ -1555,7 +1555,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                                   ) : (
                                     <button onClick={() => subirJustificante(doc.id)}
                                       disabled={subiendoJustificante}
-                                      style={{ padding: "14px 16px", background: "#9C6E1B", border: "none",
+                                      style={{ padding: "14px 16px", background: "var(--amber)", border: "none",
                                         color: WHITE, cursor: subiendoJustificante ? "not-allowed" : "pointer",
                                         borderRadius: 10, fontSize: 14, fontWeight: 700,
                                         fontFamily: "Inter, sans-serif", display: "flex",
@@ -1742,16 +1742,16 @@ function ModalFirmaAgente({ docId, agente, onFirmado, onClose }) {
 
   return (
     <div style={{ padding: "0 4px 4px" }}>
-      <div style={{ fontSize: 13, color: "#9A968A", fontFamily: "Inter, sans-serif", marginBottom: 16 }}>
+      <div style={{ fontSize: 13, color: "var(--muted)", fontFamily: "Inter, sans-serif", marginBottom: 16 }}>
         Firma el documento como agente inmobiliario. Tu firma quedará estampada en el PDF.
       </div>
       {agente?.nombre && (
-        <div style={{ fontSize: 12, color: "#AC8A54", fontWeight: 700, marginBottom: 12,
+        <div style={{ fontSize: 12, color: "var(--gold)", fontWeight: 700, marginBottom: 12,
           fontFamily: "Inter, sans-serif", textTransform: "uppercase", letterSpacing: "0.08em" }}>
           {agente.nombre}
         </div>
       )}
-      <div style={{ border: "2px solid #E7E1D4", borderRadius: 8, background: "#F8F6F1",
+      <div style={{ border: "2px solid var(--border)", borderRadius: 8, background: "var(--cream)",
         touchAction: "none", marginBottom: 12 }}>
         <canvas
           ref={canvasRef}
@@ -1762,17 +1762,17 @@ function ModalFirmaAgente({ docId, agente, onFirmado, onClose }) {
         />
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <button onClick={limpiar} style={{ padding: "8px 16px", border: "1px solid #E7E1D4",
-          background: "transparent", color: "#9A968A", cursor: "pointer", borderRadius: 8, fontSize: 12 }}>
+        <button onClick={limpiar} style={{ padding: "8px 16px", border: "1px solid var(--border)",
+          background: "transparent", color: "var(--muted)", cursor: "pointer", borderRadius: 8, fontSize: 12 }}>
           Limpiar
         </button>
         <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={onClose} style={{ padding: "10px 20px", border: "1px solid #E7E1D4",
-            background: "transparent", color: "#9A968A", cursor: "pointer", borderRadius: 8, fontSize: 13 }}>
+          <button onClick={onClose} style={{ padding: "10px 20px", border: "1px solid var(--border)",
+            background: "transparent", color: "var(--muted)", cursor: "pointer", borderRadius: 8, fontSize: 13 }}>
             Cancelar
           </button>
           <button onClick={firmar} disabled={!tieneFirma || firmando}
-            style={{ padding: "10px 24px", background: tieneFirma ? "#AC8A54" : "#E7E1D4",
+            style={{ padding: "10px 24px", background: tieneFirma ? "var(--gold)" : "var(--border)",
               border: "none", color: "#fff", cursor: tieneFirma ? "pointer" : "not-allowed",
               borderRadius: 8, fontSize: 13, fontWeight: 700 }}>
             {firmando ? "Firmando..." : "Firmar documento"}
@@ -1985,7 +1985,7 @@ function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, on
                 </span>
               )}
               {informePendiente && (
-                <span style={{ fontSize: 11, background: "#9C6E1B18", color: "#9C6E1B", padding: "4px 12px",
+                <span style={{ fontSize: 11, background: "var(--amber)18", color: "var(--amber)", padding: "4px 12px",
                   borderRadius: 20, fontFamily: "Inter, sans-serif", fontWeight: 700 }}>
                   ⚠ Informe pendiente
                 </span>
@@ -2201,7 +2201,7 @@ export default function Visitas({ currentUser }) {
     { label: "Visitas", value: totalVisitas, emoji: "👁", color: GOLD },
     { label: "Docs", value: totalDocs, emoji: "📄", color: BLUE },
     { label: "Propiedades", value: propiedadesActivas, emoji: "🏠", color: DARK },
-    ...(informesPendientes > 0 ? [{ label: "Informes", value: informesPendientes, emoji: "⚠", color: "#9C6E1B" }] : []),
+    ...(informesPendientes > 0 ? [{ label: "Informes", value: informesPendientes, emoji: "⚠", color: "var(--amber)" }] : []),
   ];
 
   return (
