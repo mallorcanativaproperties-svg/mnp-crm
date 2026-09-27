@@ -131,14 +131,17 @@ async function estamparFirmas(pdfBytes, firmas) {
 
       lastPage.drawImage(img, { x, y, width: sigWidth, height: sigHeight });
 
-      // Nombre debajo de la firma (pequeño)
+      // Nombre y DNI debajo de la firma (pequeño, dos líneas si hay " — ")
       if (f.nombre) {
-        lastPage.drawText(f.nombre, {
-          x,
-          y: y - 14,
-          size: 8,
-          color: rgb(0.4, 0.4, 0.4),
+        const partes = f.nombre.split(" — ");
+        lastPage.drawText(partes[0] || "", {
+          x, y: y - 12, size: 7, color: rgb(0.3, 0.3, 0.3),
         });
+        if (partes[1]) {
+          lastPage.drawText(partes[1], {
+            x, y: y - 22, size: 7, color: rgb(0.3, 0.3, 0.3),
+          });
+        }
       }
     } catch (e) {
       console.error("[estamparFirmas] error con firma de", f.nombre, e.message);
@@ -157,7 +160,7 @@ export async function GET(req) {
   // 1. Cargar el documento con la visita
   const { data: doc } = await supabase
     .from("visita_documentos")
-    .select("*, visitas(id, agente_login, propiedad_id, comprador_id, visita_compradores(orden, compradores(nombre,apellidos,dni,telefono)))")
+    .select("*, visitas(id, agente_login, propiedad_id, comprador_id, visita_compradores(orden, compradores(id,nombre,apellidos,dni,telefono)))")
     .eq("id", docId)
     .single();
 
@@ -170,7 +173,7 @@ export async function GET(req) {
   if (visita?.propiedad_id) {
     const { data: p } = await supabase
       .from("propiedades")
-      .select("ref,dir,num,municipio,tipo,precio_venta,precio_alquiler,precio_prop,honorarios,honorarios_tipo,iva_hon,ref_cat,trastero,parking,n_plazas")
+      .select("ref,dir,num,municipio,tipo,precio_venta,precio_alquiler,precio_prop,honorarios,honorarios_tipo,iva_hon,ref_cat,trastero,parking,n_plazas,propietarios")
       .eq("id", visita.propiedad_id)
       .maybeSingle();
     propDB = p;
@@ -277,7 +280,7 @@ export async function GET(req) {
     // Col 0 — Compradores (pueden ser varios: apilan verticalmente dentro de la columna)
     const { data: firmasCompradores } = await supabase
       .from("visita_doc_firmas")
-      .select("nombre_firmante, firma_data, firmado_at")
+      .select("nombre_firmante, firma_data, firmado_at, comprador_id")
       .eq("doc_id", docId)
       .order("created_at");
 
@@ -286,9 +289,13 @@ export async function GET(req) {
       firmados.forEach((f, i) => {
         // Si hay 2 compradores los apilamos: primero a Y_FIRMA + (SIG_H+18), segundo a Y_FIRMA
         const yOffset = (firmados.length - 1 - i) * (SIG_H + 18);
+        // Añadir DNI/NIE del comprador si está en BD
+        const cDB = compradoresDB.find(c => c.id === f.comprador_id);
+        const dniC = cDB?.dni || "";
+        const nombreC = f.nombre_firmante + (dniC ? ` — ${dniC}` : "");
         firmasParaEstampar.push({
           dataUrl: f.firma_data,
-          nombre:  f.nombre_firmante,
+          nombre:  nombreC,
           x:       COL_X[0],
           y:       Y_FIRMA + yOffset,
           width:   SIG_W,
@@ -299,9 +306,10 @@ export async function GET(req) {
 
     // Col 1 — Agente
     if (doc.firma_agente_data) {
+      const dniAgente = agente.dni || "";
       firmasParaEstampar.push({
         dataUrl: doc.firma_agente_data,
-        nombre:  agente.nombre || "Agente Inmobiliario",
+        nombre:  (agente.nombre || "Agente Inmobiliario") + (dniAgente ? ` — ${dniAgente}` : ""),
         x:       COL_X[1],
         y:       Y_FIRMA,
         width:   SIG_W,
@@ -311,9 +319,18 @@ export async function GET(req) {
 
     // Col 2 — Propietario / Vendedor
     if (doc.firma_vendedor_data) {
+      // Nombre y DNI del propietario desde la ficha de la propiedad
+      let nombreVendedor = "Propietario / Vendedor";
+      if (propDB?.propietarios) {
+        const props = Array.isArray(propDB.propietarios) ? propDB.propietarios : [propDB.propietarios];
+        const p0 = props[0] || {};
+        const nombreP = [p0.nombre, p0.apellidos].filter(Boolean).join(" ").trim() || "";
+        const dniP = p0.dni || "";
+        if (nombreP) nombreVendedor = nombreP + (dniP ? ` — ${dniP}` : "");
+      }
       firmasParaEstampar.push({
         dataUrl: doc.firma_vendedor_data,
-        nombre:  "Propietario / Vendedor",
+        nombre:  nombreVendedor,
         x:       COL_X[2],
         y:       Y_FIRMA,
         width:   SIG_W,
