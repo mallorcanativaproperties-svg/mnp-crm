@@ -114,36 +114,74 @@ export async function POST(req) {
     return NextResponse.json({ ok: true, enviados });
   }
 
-  // ── VENDEDOR: token único, se envía solo cuando todos los compradores firmaron ─
+  // ── VENDEDOR: un token por cada propietario ─────────────────────────────────
   if (destinatario === "vendedor") {
-    let tel    = prop?.prop_tel?.replace(/\D/g, "") || null;
-    let nombre = "Propietario";
+    // Construir lista de propietarios (hasta 10)
+    let propietarios = [];
 
-    if (!tel && prop?.propietarios) {
-      const props = Array.isArray(prop.propietarios) ? prop.propietarios : [prop.propietarios];
-      tel    = props[0]?.tel?.replace(/\D/g, "") || props[0]?.telefono?.replace(/\D/g, "") || null;
-      nombre = props[0]?.nombre || "Propietario";
+    // Primero intentar el array jsonb propietarios
+    if (prop?.propietarios) {
+      const arr = Array.isArray(prop.propietarios) ? prop.propietarios : [prop.propietarios];
+      propietarios = arr
+        .filter(p => p?.nombre || p?.tel || p?.telefono)
+        .slice(0, 10)
+        .map((p, i) => ({
+          orden:  i,
+          nombre: p.nombre || "Propietario",
+          tel:    (p.tel || p.telefono || "").replace(/\D/g, ""),
+        }));
     }
 
-    if (!tel) {
+    // Fallback: prop_tel genérico
+    if (propietarios.length === 0 && prop?.prop_tel) {
+      propietarios = [{
+        orden:  0,
+        nombre: "Propietario",
+        tel:    prop.prop_tel.replace(/\D/g, ""),
+      }];
+    }
+
+    const conTel = propietarios.filter(p => p.tel.length >= 9);
+    if (conTel.length === 0) {
       return NextResponse.json(
         { error: "No hay teléfono del propietario en la ficha de la propiedad" },
         { status: 400 }
       );
     }
 
-    const token = crypto.randomBytes(32).toString("hex");
+    // Borrar tokens anteriores de vendedores (reenvío limpio)
+    await sb.from("visita_doc_firmas_vendedor").delete().eq("doc_id", docId);
+
+    let enviados = 0;
+    for (const p of conTel) {
+      const token = crypto.randomBytes(32).toString("hex");
+
+      await sb.from("visita_doc_firmas_vendedor").insert({
+        doc_id:          docId,
+        orden:           p.orden,
+        nombre_firmante: p.nombre,
+        telefono:        p.tel,
+        token,
+      });
+
+      const link = `${BASE_URL}/firmar-visita?token=${token}&tipo=vendedor`;
+      const msg  = `Estimado/a ${p.nombre},\n\nTodos los compradores han firmado el *${tipoDoc}*${dirProp ? ` del inmueble en *${dirProp}*` : ""}.\n\nLe solicitamos su firma de conformidad en el siguiente enlace:\n\n🔗 ${link}\n\n_Nativa Properties — 655 88 26 82_`;
+      await enviarWhatsApp(p.tel, msg);
+      enviados++;
+    }
+
+    // Actualizar estado doc — mantener token_firma_vendedor con el del primer propietario
+    // para retrocompatibilidad con firmar-visita/page.js (que busca por token en ambas tablas)
+    const primerToken = (await sb.from("visita_doc_firmas_vendedor")
+      .select("token").eq("doc_id", docId).order("orden").limit(1).single()).data?.token;
+
     await sb.from("visita_documentos").update({
-      token_firma_vendedor: token,
-      estado: "firmado_comprador", // ya todos firmaron, ahora espera vendedor → se envía
+      token_firma_vendedor: primerToken || null,
+      estado: "firmado_comprador",
       updated_at: new Date().toISOString(),
     }).eq("id", docId);
 
-    const link = `${BASE_URL}/firmar-visita?token=${token}&tipo=vendedor`;
-    const msg  = `Estimado/a ${nombre},\n\nTodos los compradores han firmado el *${tipoDoc}*${dirProp ? ` del inmueble en *${dirProp}*` : ""}.\n\nLe solicitamos su firma de conformidad en el siguiente enlace:\n\n🔗 ${link}\n\n_Nativa Properties — 655 88 26 82_`;
-    await enviarWhatsApp(tel, msg);
-
-    return NextResponse.json({ ok: true, enviados: 1 });
+    return NextResponse.json({ ok: true, enviados });
   }
 
   return NextResponse.json({ error: "destinatario debe ser 'comprador' o 'vendedor'" }, { status: 400 });
