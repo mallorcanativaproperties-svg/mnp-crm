@@ -116,12 +116,12 @@ function Modal({ title, onClose, children, width = 560 }) {
       padding: 0, backdropFilter: "blur(4px)" }}>
       <div style={{
         background: WHITE, width: "100%", maxWidth: width,
-        maxHeight: "95vh", overflowY: "auto", borderRadius: "20px 20px 0 0",
+        maxHeight: "95vh", overflowY: "auto", borderRadius: 0,
         border: `1px solid ${BORDER}`,
       }}>
         {/* Handle bar */}
         <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 0" }}>
-          <div style={{ width: 40, height: 4, borderRadius: 2, background: BORDER }} />
+          <div style={{ width: 40, height: 4, borderRadius: 0, background: BORDER }} />
         </div>
         <div style={{ padding: "14px 20px 10px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ fontSize: 18, fontWeight: 700, color: TEXT, fontFamily: "Inter, sans-serif" }}>{title}</div>
@@ -200,7 +200,7 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
 
   if (value) return (
     <div style={{ background: `${GOLD}10`, border: `2px solid ${GOLD}`, padding: "14px 16px",
-      display: "flex", justifyContent: "space-between", alignItems: "center", borderRadius: 12 }}>
+      display: "flex", justifyContent: "space-between", alignItems: "center", borderRadius: 0 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <Avatar nombre={value.nombre} apellidos={value.apellidos} size={40} />
         <div>
@@ -283,7 +283,7 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
       {completarDatos && (
         <Modal title="Completar datos" onClose={() => setCompletarDatos(null)} width={440}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20,
-            padding: "14px 16px", background: CREAM, borderRadius: 12 }}>
+            padding: "14px 16px", background: CREAM, borderRadius: 0 }}>
             <Avatar nombre={completarDatos.nombre} apellidos={completarDatos.apellidos} size={44} />
             <div>
               <div style={{ fontSize: 16, fontWeight: 700, color: TEXT, fontFamily: "Inter, sans-serif" }}>
@@ -923,7 +923,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
     : "Sin comprador";
 
   return (
-    <div style={{ background: WHITE, border: `1.5px solid ${BORDER}`, borderRadius: 0,
+    <div style={{ background: WHITE, border: `1.5px solid ${BORDER}`, borderRadius: 12,
       overflow: "hidden", marginBottom: 12, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
 
       {/* Cabecera — tap para expandir */}
@@ -1292,7 +1292,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
 
                     return (
                       <div key={doc.id} style={{ background: WHITE, border: `1.5px solid ${BORDER}`,
-                        borderRadius: 14, overflow: "hidden" }}>
+                        borderRadius: 0, overflow: "hidden" }}>
                         {/* Cabecera del documento */}
                         <div style={{ padding: "14px 16px" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
@@ -1330,7 +1330,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                                 <a href={doc.pdf_url} target="_blank" rel="noopener noreferrer"
                                   style={{ display: "flex", alignItems: "center", gap: 6,
                                     padding: "10px 16px", background: SUCCESS, color: WHITE,
-                                    borderRadius: 9, fontSize: 13, fontWeight: 700,
+                                    borderRadius: 0, fontSize: 13, fontWeight: 700,
                                     fontFamily: "Inter, sans-serif", textDecoration: "none",
                                     whiteSpace: "nowrap", flexShrink: 0 }}>
                                   ⬇️ Descargar PDF
@@ -1961,7 +1961,7 @@ function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, on
             🏠
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: TEXT,
+            <div style={{ fontSize: 15, fontWeight: 600, color: TEXT,
               fontFamily: "'Playfair Display', Georgia, serif",
               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {propiedadNombre}
@@ -2213,7 +2213,7 @@ export default function Visitas({ currentUser }) {
         <div style={{ fontSize: 10, color: GOLD_L, letterSpacing: "0.2em", fontWeight: 700, marginBottom: 4 }}>
           MALLORCA NATIVA
         </div>
-        <h1 style={{ fontSize: 28, fontWeight: 400, color: WHITE, margin: "0 0 4px",
+        <h1 style={{ fontSize: 28, fontWeight: 600, color: WHITE, margin: "0 0 4px",
           fontFamily: "'Playfair Display', Georgia, serif" }}>
           Visitas
         </h1>
@@ -2232,8 +2232,8 @@ export default function Visitas({ currentUser }) {
               borderRight: i < statsData.length - 1 ? `1px solid ${BORDER}` : "none",
             }}>
               <div style={{ fontSize: 10, marginBottom: 4 }}>{s.emoji}</div>
-              <div style={{ fontSize: 26, fontWeight: 800, color: s.color,
-                fontFamily: "'Playfair Display', Georgia, serif", lineHeight: 1 }}>
+              <div style={{ fontSize: 26, fontWeight: 300, color: s.color,
+                fontFamily: "'Cormorant Garamond', Georgia, serif", lineHeight: 1 }}>
                 {s.value}
               </div>
               <div style={{ fontSize: 10, color: MUTED, marginTop: 3, fontWeight: 600,
@@ -2266,7 +2266,7 @@ export default function Visitas({ currentUser }) {
         ) : gruposFiltrados.length === 0 ? (
           <div style={{ textAlign: "center", padding: "60px 20px" }}>
             <div style={{ fontSize: 56, marginBottom: 16 }}>🏠</div>
-            <div style={{ fontSize: 20, fontWeight: 400, color: TEXT, fontFamily: "'Playfair Display', Georgia, serif", marginBottom: 8 }}>
+            <div style={{ fontSize: 20, fontWeight: 600, color: TEXT, fontFamily: "'Playfair Display', Georgia, serif", marginBottom: 8 }}>
               No hay visitas registradas
             </div>
             <div style={{ fontSize: 14, color: MUTED, marginBottom: 28, lineHeight: 1.6 }}>
@@ -2274,7 +2274,7 @@ export default function Visitas({ currentUser }) {
             </div>
             <button onClick={() => setModalNuevaVisita(true)} style={{
               padding: "16px 28px", background: GOLD, border: "none", color: WHITE,
-              cursor: "pointer", borderRadius: 14, fontSize: 15, fontWeight: 700,
+              cursor: "pointer", borderRadius: 0, fontSize: 15, fontWeight: 700,
               fontFamily: "Inter, sans-serif", display: "inline-flex", alignItems: "center", gap: 10,
               boxShadow: `0 4px 20px ${GOLD}55`,
             }}>
