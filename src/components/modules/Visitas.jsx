@@ -53,7 +53,7 @@ const PIPELINE_ESTADOS = ["borrador","enviado","firmado_comprador","deposito_rec
 
 const iSt = {
   width: "100%", padding: "14px 16px", background: CREAM, border: `1.5px solid ${BORDER}`,
-  color: TEXT, fontSize: 15, fontFamily: "Inter, sans-serif", borderRadius: 10,
+  color: TEXT, fontSize: 15, fontFamily: "Inter, sans-serif", borderRadius: 0,
   outline: "none", boxSizing: "border-box", WebkitAppearance: "none",
 };
 const iStSm = {
@@ -232,7 +232,7 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
         </div>
         <button onClick={() => setShowNew(true)} style={{
           padding: "14px 18px", background: DARK, border: "none", color: WHITE, cursor: "pointer",
-          borderRadius: 10, display: "flex", alignItems: "center", gap: 6, fontSize: 13,
+          borderRadius: 0, display: "flex", alignItems: "center", gap: 6, fontSize: 13,
           fontWeight: 700, fontFamily: "Inter, sans-serif", whiteSpace: "nowrap", minHeight: 50,
         }}>
           <PlusIcon style={{ width: 16, height: 16 }} /> Nuevo
@@ -240,7 +240,7 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
       </div>
       {results.length > 0 && (
         <div style={{ border: `1.5px solid ${BORDER}`, background: WHITE, marginTop: 6,
-          borderRadius: 12, overflow: "hidden", boxShadow: "0 4px 20px rgba(0,0,0,0.1)" }}>
+          borderRadius: 0, overflow: "hidden", boxShadow: "0 4px 20px rgba(0,0,0,0.1)" }}>
           {results.map(c => {
             const faltaDni = !c.dni?.trim();
             const faltaTel = !c.telefono?.trim();
@@ -320,13 +320,13 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
                 setCompletarDatos(null); setCompletarGuardando(false);
               }}
               style={{ padding: "16px", background: DARK, border: "none", color: WHITE,
-                cursor: "pointer", borderRadius: 12, fontWeight: 700, fontFamily: "Inter, sans-serif",
+                cursor: "pointer", borderRadius: 0, fontWeight: 700, fontFamily: "Inter, sans-serif",
                 fontSize: 15, opacity: (!completarDni.trim() || !completarTel.trim()) ? 0.4 : 1 }}>
               {completarGuardando ? "Guardando..." : "✓ Guardar y añadir"}
             </button>
             <button onClick={() => setCompletarDatos(null)} style={{ padding: "14px",
               border: `1.5px solid ${BORDER}`, background: "transparent", color: MUTED,
-              cursor: "pointer", borderRadius: 12, fontFamily: "Inter, sans-serif", fontSize: 14 }}>
+              cursor: "pointer", borderRadius: 0, fontFamily: "Inter, sans-serif", fontSize: 14 }}>
               Cancelar
             </button>
           </div>
@@ -336,7 +336,7 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
         <Modal title="Nuevo comprador" onClose={() => setShowNew(false)} width={480}>
           {compradorExistenteId && (
             <div style={{ marginBottom: 16, padding: "12px 14px", background: `${GOLD}10`,
-              border: `1.5px solid ${GOLD}`, borderRadius: 10, fontSize: 13,
+              border: `1.5px solid ${GOLD}`, borderRadius: 0, fontSize: 13,
               color: GOLD, fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
               ✓ Ya existe en la BD — se actualizarán sus datos
             </div>
@@ -362,7 +362,7 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
                 autoComplete="off" />
               {sugerencias.length > 0 && (
                 <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 20,
-                  background: WHITE, border: `1.5px solid ${GOLD}`, borderRadius: 12,
+                  background: WHITE, border: `1.5px solid ${GOLD}`, borderRadius: 0,
                   boxShadow: "0 8px 24px rgba(0,0,0,0.15)", maxHeight: 220, overflowY: "auto", marginTop: 4 }}>
                   <div style={{ padding: "8px 14px", fontSize: 10, color: GOLD, fontWeight: 700,
                     letterSpacing: "0.1em", borderBottom: `1px solid ${BORDER}`,
@@ -418,12 +418,12 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
           <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 20 }}>
             <button onClick={crearNuevo} disabled={saving}
               style={{ padding: "16px", background: DARK, border: "none", color: WHITE,
-                cursor: "pointer", borderRadius: 12, fontWeight: 700, fontFamily: "Inter, sans-serif", fontSize: 15 }}>
+                cursor: "pointer", borderRadius: 0, fontWeight: 700, fontFamily: "Inter, sans-serif", fontSize: 15 }}>
               {saving ? "Guardando..." : compradorExistenteId ? "✓ Guardar y seleccionar" : "✓ Crear y seleccionar"}
             </button>
             <button onClick={() => { setShowNew(false); setCompradorExistenteId(null); }}
               style={{ padding: "14px", border: `1.5px solid ${BORDER}`, background: "transparent",
-                color: MUTED, cursor: "pointer", borderRadius: 12, fontFamily: "Inter, sans-serif", fontSize: 14 }}>
+                color: MUTED, cursor: "pointer", borderRadius: 0, fontFamily: "Inter, sans-serif", fontSize: 14 }}>
               Cancelar
             </button>
           </div>
@@ -511,7 +511,7 @@ function GeneradorDoc({ visita, propiedad, agente, onGuardado, onClose }) {
             <button key={k} onClick={() => setTipo(k)} style={{
               padding: "14px 16px", border: `2px solid ${tipo === k ? GOLD : BORDER}`,
               background: tipo === k ? `${GOLD}10` : WHITE, color: tipo === k ? GOLD : TEXT,
-              cursor: "pointer", borderRadius: 12, fontSize: 14, fontWeight: tipo === k ? 700 : 400,
+              cursor: "pointer", borderRadius: 0, fontSize: 14, fontWeight: tipo === k ? 700 : 400,
               fontFamily: "Inter, sans-serif", textAlign: "left", display: "flex", alignItems: "center", gap: 12,
             }}>
               <span style={{ fontSize: 22 }}>{v.icon}</span>
@@ -544,7 +544,7 @@ function GeneradorDoc({ visita, propiedad, agente, onGuardado, onClose }) {
                 <button key={k} onClick={() => setDepositoTipo(k)} style={{
                   padding: "14px 16px", border: `2px solid ${depositoTipo === k ? GOLD : BORDER}`,
                   background: depositoTipo === k ? `${GOLD}10` : WHITE, color: depositoTipo === k ? GOLD : TEXT,
-                  cursor: "pointer", borderRadius: 12, fontSize: 14, fontWeight: depositoTipo === k ? 700 : 400,
+                  cursor: "pointer", borderRadius: 0, fontSize: 14, fontWeight: depositoTipo === k ? 700 : 400,
                   fontFamily: "Inter, sans-serif", textAlign: "left", display: "flex", alignItems: "center", gap: 8,
                 }}>
                   {v}
@@ -554,7 +554,7 @@ function GeneradorDoc({ visita, propiedad, agente, onGuardado, onClose }) {
             </div>
             {depositoTipo === "transferencia" && (
               <div style={{ marginTop: 10, padding: "14px 16px", background: CREAM2,
-                border: `1px solid ${BORDER}`, borderRadius: 12, fontSize: 13, color: TEXT,
+                border: `1px solid ${BORDER}`, borderRadius: 0, fontSize: 13, color: TEXT,
                 fontFamily: "Inter, sans-serif", lineHeight: 1.7 }}>
                 Banco Sabadell · Titular: <strong>MALLORCA NATIVA, S.L.</strong><br />
                 IBAN: ES30 0081 0268 2700 0248 1851<br />
@@ -563,7 +563,7 @@ function GeneradorDoc({ visita, propiedad, agente, onGuardado, onClose }) {
             )}
             {depositoTipo === "stripe" && (
               <div style={{ marginTop: 10, padding: "14px 16px", background: "#E6F1FB",
-                border: "1px solid #B5D4F4", borderRadius: 12, fontSize: 13, color: BLUE,
+                border: "1px solid #B5D4F4", borderRadius: 0, fontSize: 13, color: BLUE,
                 fontFamily: "Inter, sans-serif" }}>
                 Se generará un link de pago de 1.000€ automáticamente al enviar el documento.
               </div>
@@ -575,12 +575,12 @@ function GeneradorDoc({ visita, propiedad, agente, onGuardado, onClose }) {
       <div style={{ display: "flex", flexDirection: "column", gap: 10, paddingTop: 8,
         borderTop: `1px solid ${BORDER}` }}>
         <button onClick={guardar} disabled={saving} style={{ padding: "16px", background: DARK,
-          border: "none", color: WHITE, cursor: "pointer", borderRadius: 12, fontWeight: 700,
+          border: "none", color: WHITE, cursor: "pointer", borderRadius: 0, fontWeight: 700,
           fontFamily: "Inter, sans-serif", fontSize: 15 }}>
           {saving ? "Guardando..." : "📄 Crear documento"}
         </button>
         <button onClick={onClose} style={{ padding: "14px", border: `1.5px solid ${BORDER}`,
-          background: "transparent", color: MUTED, cursor: "pointer", borderRadius: 12,
+          background: "transparent", color: MUTED, cursor: "pointer", borderRadius: 0,
           fontFamily: "Inter, sans-serif", fontSize: 14 }}>Cancelar</button>
       </div>
     </div>
@@ -640,7 +640,7 @@ function UploaderGrabacion({ visitaId, onActualizado }) {
           padding: "16px", border: `2px dashed ${isLoading ? BORDER : GOLD}`,
           background: isLoading ? CREAM : `${GOLD}08`,
           color: isLoading ? MUTED : GOLD, cursor: isLoading ? "default" : "pointer",
-          borderRadius: 12, fontSize: 14, fontWeight: 700,
+          borderRadius: 0, fontSize: 14, fontWeight: 700,
           fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", justifyContent: "center",
           gap: 10, width: "100%",
         }}>
@@ -649,14 +649,14 @@ function UploaderGrabacion({ visitaId, onActualizado }) {
       </button>
       {estado === "listo" && (
         <div style={{ marginTop: 8, padding: "10px 14px", background: `${SUCCESS}10`,
-          border: `1px solid ${SUCCESS}30`, borderRadius: 10, fontSize: 13, color: SUCCESS,
+          border: `1px solid ${SUCCESS}30`, borderRadius: 0, fontSize: 13, color: SUCCESS,
           fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
           ✓ {msg}
         </div>
       )}
       {estado === "error" && (
         <div style={{ marginTop: 8, padding: "10px 14px", background: `${DANGER}08`,
-          border: `1px solid ${DANGER}30`, borderRadius: 10, fontSize: 13, color: DANGER,
+          border: `1px solid ${DANGER}30`, borderRadius: 0, fontSize: 13, color: DANGER,
           fontFamily: "Inter, sans-serif" }}>
           {msg}
         </div>
@@ -729,7 +729,7 @@ function EditorInforme({ informe, propiedadNombre, onGuardado, onClose, propieda
   return (
     <div>
       <div style={{ fontSize: 13, color: MUTED, marginBottom: 14, fontFamily: "Inter, sans-serif",
-        padding: "12px 14px", background: CREAM, borderRadius: 10 }}>
+        padding: "12px 14px", background: CREAM, borderRadius: 0 }}>
         📊 Informe de visitas — <strong style={{ color: TEXT }}>{propiedadNombre}</strong>.
         Revisa y edita antes de confirmar el envío al propietario.
       </div>
@@ -738,27 +738,27 @@ function EditorInforme({ informe, propiedadNombre, onGuardado, onClose, propieda
       <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 16 }}>
         <button onClick={confirmarYEnviar} disabled={enviando}
           style={{ padding: "16px", background: SUCCESS, border: "none", color: WHITE,
-            cursor: "pointer", borderRadius: 12, fontWeight: 700, fontFamily: "Inter, sans-serif",
+            cursor: "pointer", borderRadius: 0, fontWeight: 700, fontFamily: "Inter, sans-serif",
             fontSize: 15, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
           <PaperAirplaneIcon style={{ width: 18, height: 18 }} />
           {enviando ? "Enviando..." : "✉ Confirmar y enviar al propietario"}
         </button>
         <button onClick={guardar} disabled={guardando}
           style={{ padding: "14px", border: `2px solid ${GOLD}`, background: "transparent",
-            color: GOLD, cursor: "pointer", borderRadius: 12, fontFamily: "Inter, sans-serif",
+            color: GOLD, cursor: "pointer", borderRadius: 0, fontFamily: "Inter, sans-serif",
             fontWeight: 700, fontSize: 14 }}>
           {guardando ? "Guardando..." : "💾 Guardar borrador"}
         </button>
         {propiedadId && agente && fecha && (
           <button onClick={regenerar} disabled={regenerando}
             style={{ padding: "14px", border: `1.5px solid ${MUTED}`, background: "transparent",
-              color: MUTED, cursor: "pointer", borderRadius: 12, fontFamily: "Inter, sans-serif",
+              color: MUTED, cursor: "pointer", borderRadius: 0, fontFamily: "Inter, sans-serif",
               fontWeight: 600, fontSize: 13, opacity: regenerando ? 0.5 : 1 }}>
             {regenerando ? "⏳ Regenerando..." : "🔄 Regenerar con IA"}
           </button>
         )}
         <button onClick={onClose} style={{ padding: "14px", border: `1.5px solid ${BORDER}`,
-          background: "transparent", color: MUTED, cursor: "pointer", borderRadius: 12,
+          background: "transparent", color: MUTED, cursor: "pointer", borderRadius: 0,
           fontFamily: "Inter, sans-serif", fontSize: 14 }}>Cancelar</button>
       </div>
     </div>
@@ -923,7 +923,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
     : "Sin comprador";
 
   return (
-    <div style={{ background: WHITE, border: `1.5px solid ${BORDER}`, borderRadius: 16,
+    <div style={{ background: WHITE, border: `1.5px solid ${BORDER}`, borderRadius: 0,
       overflow: "hidden", marginBottom: 12, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
 
       {/* Cabecera — tap para expandir */}
@@ -988,14 +988,14 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
               marginBottom: 12, fontFamily: "Inter, sans-serif" }}>📞 COMPRADOR{todosCompradores.length > 1 ? "ES" : ""}</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {todosCompradores.map((c, i) => (
-                <div key={c.id || i} style={{ background: WHITE, borderRadius: 12, padding: "12px 14px",
+                <div key={c.id || i} style={{ background: WHITE, borderRadius: 0, padding: "12px 14px",
                   border: `1px solid ${BORDER}`, display: "flex", gap: 12, alignItems: "center" }}>
                   <Avatar nombre={c.nombre} apellidos={c.apellidos} size={38} />
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 14, fontWeight: 700, color: TEXT, fontFamily: "Inter, sans-serif" }}>
                       {i === 0 && todosCompradores.length > 1 && (
                         <span style={{ fontSize: 9, color: GOLD, fontWeight: 800, marginRight: 6,
-                          background: `${GOLD}15`, padding: "2px 6px", borderRadius: 6 }}>PRINCIPAL</span>
+                          background: `${GOLD}15`, padding: "2px 6px", borderRadius: 0 }}>PRINCIPAL</span>
                       )}
                       {c.nombre} {c.apellidos || ""}
                     </div>
@@ -1026,14 +1026,14 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
               </div>
 
               {editandoFeedback && fbEdit ? (
-                <div style={{ background: WHITE, borderRadius: 12, padding: "14px", border: `1.5px solid ${GOLD}` }}>
+                <div style={{ background: WHITE, borderRadius: 0, padding: "14px", border: `1.5px solid ${GOLD}` }}>
                   {/* Nivel interés */}
                   <div style={{ marginBottom: 14 }}>
                     <div style={{ fontSize: 10, color: MUTED, fontWeight: 700, letterSpacing: "0.08em", marginBottom: 8, fontFamily: "Inter, sans-serif" }}>NIVEL DE INTERÉS</div>
                     <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                       {[1,2,3,4,5].map(n => (
                         <button key={n} onClick={() => setFbEdit(p => ({...p, nivel_interes: n}))}
-                          style={{ padding: "8px 14px", borderRadius: 20, border: `2px solid ${fbEdit.nivel_interes === n ? NIVEL_COLOR[n] : BORDER}`,
+                          style={{ padding: "8px 14px", borderRadius: 0 , border: `2px solid ${fbEdit.nivel_interes === n ? NIVEL_COLOR[n] : BORDER}`,
                             background: fbEdit.nivel_interes === n ? `${NIVEL_COLOR[n]}18` : CREAM,
                             color: fbEdit.nivel_interes === n ? NIVEL_COLOR[n] : MUTED,
                             cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "Inter, sans-serif" }}>
@@ -1050,7 +1050,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                         const col = v === "Precio aceptable" ? SUCCESS : v === "Precio muy fuera de mercado" ? DANGER : GOLD;
                         return (
                           <button key={v} onClick={() => setFbEdit(p => ({...p, valoracion_precio: v}))}
-                            style={{ padding: "8px 14px", borderRadius: 20, border: `2px solid ${fbEdit.valoracion_precio === v ? col : BORDER}`,
+                            style={{ padding: "8px 14px", borderRadius: 0 , border: `2px solid ${fbEdit.valoracion_precio === v ? col : BORDER}`,
                               background: fbEdit.valoracion_precio === v ? `${col}18` : CREAM,
                               color: fbEdit.valoracion_precio === v ? col : MUTED,
                               cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: "Inter, sans-serif" }}>
@@ -1068,7 +1068,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                         const sel = (fbEdit.objeciones||[]).includes(o);
                         return (
                           <button key={o} onClick={() => setFbEdit(p => ({ ...p, objeciones: sel ? p.objeciones.filter(x=>x!==o) : [...(p.objeciones||[]), o] }))}
-                            style={{ padding: "7px 12px", borderRadius: 20, border: `2px solid ${sel ? DANGER : BORDER}`,
+                            style={{ padding: "7px 12px", borderRadius: 0 , border: `2px solid ${sel ? DANGER : BORDER}`,
                               background: sel ? `${DANGER}12` : CREAM, color: sel ? DANGER : MUTED,
                               cursor: "pointer", fontSize: 11, fontWeight: sel ? 700 : 500, fontFamily: "Inter, sans-serif" }}>
                             {sel ? "✓ " : ""}{o}
@@ -1089,16 +1089,16 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                   <div style={{ display: "flex", gap: 10 }}>
                     <button onClick={guardarFeedback} disabled={guardandoFb}
                       style={{ flex: 1, padding: "12px", background: SUCCESS, border: "none", color: WHITE,
-                        cursor: "pointer", borderRadius: 10, fontWeight: 700, fontFamily: "Inter, sans-serif", fontSize: 14 }}>
+                        cursor: "pointer", borderRadius: 0, fontWeight: 700, fontFamily: "Inter, sans-serif", fontSize: 14 }}>
                       {guardandoFb ? "Guardando..." : "💾 Guardar análisis"}
                     </button>
                     <button onClick={() => setEditandoFeedback(false)}
                       style={{ padding: "12px 16px", border: `1.5px solid ${BORDER}`, background: "transparent",
-                        color: MUTED, cursor: "pointer", borderRadius: 10, fontFamily: "Inter, sans-serif" }}>Cancelar</button>
+                        color: MUTED, cursor: "pointer", borderRadius: 0, fontFamily: "Inter, sans-serif" }}>Cancelar</button>
                   </div>
                 </div>
               ) : fb ? (
-                <div style={{ background: WHITE, borderRadius: 12, padding: "14px",
+                <div style={{ background: WHITE, borderRadius: 0, padding: "14px",
                   border: `1px solid ${BORDER}`, borderLeft: `4px solid ${GOLD}` }}>
                   {fb.nivel_interes && (
                     <div style={{ marginBottom: 12 }}>
@@ -1142,7 +1142,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                   )}
                 </div>
               ) : puedeEditar ? (
-                <div style={{ padding: "14px", background: CREAM, border: `1.5px dashed ${BORDER}`, borderRadius: 12,
+                <div style={{ padding: "14px", background: CREAM, border: `1.5px dashed ${BORDER}`, borderRadius: 0,
                   fontSize: 13, color: MUTED, fontFamily: "Inter, sans-serif", textAlign: "center" }}>
                   Sin análisis IA — sube una grabación o pulsa Editar para rellenarlo manualmente
                 </div>
@@ -1154,7 +1154,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
           {visita.resumen_ia && (
             <div style={{ padding: "0 16px 16px" }}>
               <div style={{ padding: "14px", background: WHITE,
-                border: `1px solid ${BORDER}`, borderLeft: `4px solid ${SUCCESS}`, borderRadius: 12 }}>
+                border: `1px solid ${BORDER}`, borderLeft: `4px solid ${SUCCESS}`, borderRadius: 0 }}>
                 <div style={{ fontSize: 10, color: SUCCESS, fontWeight: 800, letterSpacing: "0.08em",
                   marginBottom: 8, fontFamily: "Inter, sans-serif" }}>📝 RESUMEN IA</div>
                 <div style={{ fontSize: 13, color: TEXT, lineHeight: 1.6, fontFamily: "Inter, sans-serif" }}>
@@ -1170,12 +1170,12 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
               <details>
                 <summary style={{ fontSize: 13, color: MUTED, cursor: "pointer",
                   fontFamily: "Inter, sans-serif", padding: "8px 14px", background: WHITE,
-                  borderRadius: 10, border: `1px solid ${BORDER}`, listStyle: "none",
+                  borderRadius: 0, border: `1px solid ${BORDER}`, listStyle: "none",
                   display: "flex", alignItems: "center", gap: 8 }}>
                   🎙 Ver transcripción completa
                 </summary>
                 <div style={{ marginTop: 8, padding: "14px", background: WHITE,
-                  border: `1px solid ${BORDER}`, borderRadius: 12, fontSize: 12, color: TEXT,
+                  border: `1px solid ${BORDER}`, borderRadius: 0, fontSize: 12, color: TEXT,
                   lineHeight: 1.7, fontFamily: "Inter, sans-serif", whiteSpace: "pre-wrap" }}>
                   {visita.transcripcion}
                 </div>
@@ -1189,7 +1189,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
               <div style={{ fontSize: 11, color: GOLD, fontWeight: 800, letterSpacing: "0.1em",
                 marginBottom: 8, fontFamily: "Inter, sans-serif" }}>📝 NOTAS</div>
               <div style={{ padding: "12px 14px", background: WHITE, border: `1px solid ${BORDER}`,
-                borderRadius: 12, fontSize: 13, color: TEXT, fontStyle: "italic",
+                borderRadius: 0, fontSize: 13, color: TEXT, fontStyle: "italic",
                 fontFamily: "Inter, sans-serif", lineHeight: 1.6 }}>
                 {visita.notas}
               </div>
@@ -1219,7 +1219,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                 {puedeEditar && !showDoc && (
                   <button onClick={() => setShowDoc(true)} style={{
                     padding: "10px 18px", background: DARK, border: "none", color: WHITE,
-                    cursor: "pointer", borderRadius: 20, fontSize: 13, fontWeight: 700,
+                    cursor: "pointer", borderRadius: 0 , fontSize: 13, fontWeight: 700,
                     fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 7,
                   }}>
                     <PlusIcon style={{ width: 16, height: 16 }} /> Firmar Visita
@@ -1314,7 +1314,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                           {doc.estado === "completado" && (
                             <div style={{ margin: "10px 0 6px", padding: "14px 16px",
                               background: `${SUCCESS}12`, border: `1.5px solid ${SUCCESS}40`,
-                              borderRadius: 12, display: "flex", alignItems: "center",
+                              borderRadius: 0, display: "flex", alignItems: "center",
                               justifyContent: "space-between", gap: 12 }}>
                               <div>
                                 <div style={{ fontSize: 13, fontWeight: 800, color: SUCCESS,
@@ -1345,7 +1345,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                           {/* Datos bancarios */}
                           {esOfResv && doc.deposito_tipo === "transferencia" && ["enviado","firmado_comprador","deposito_recibido","firmado_vendedor","firmado_agente","completado"].includes(doc.estado) && (
                             <div style={{ marginTop: 10, padding: "10px 12px", background: CREAM,
-                              borderRadius: 10, fontSize: 12, color: TEXT, fontFamily: "Inter, sans-serif",
+                              borderRadius: 0, fontSize: 12, color: TEXT, fontFamily: "Inter, sans-serif",
                               lineHeight: 1.6 }}>
                               💳 <strong>ES30 0081 0268 2700 0248 1851</strong><br />
                               Concepto: {comp?.nombre} {comp?.apellidos}
@@ -1355,7 +1355,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                           {/* Condiciones particulares */}
                           {doc.condiciones_particulares && (
                             <div style={{ marginTop: 10, padding: "10px 12px", background: `${GOLD}08`,
-                              borderRadius: 10, border: `1px solid ${GOLD}22`, fontSize: 12,
+                              borderRadius: 0, border: `1px solid ${GOLD}22`, fontSize: 12,
                               color: TEXT, fontFamily: "Inter, sans-serif", fontStyle: "italic" }}>
                               📋 {doc.condiciones_particulares}
                             </div>
@@ -1364,7 +1364,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                           {/* Links de firma de compradores */}
                           {firmasLinks[doc.id]?.length > 0 && (
                             <div style={{ marginTop: 12, padding: "10px 12px", background: `${DARK}08`,
-                              borderRadius: 10, border: `1px solid ${BORDER}` }}>
+                              borderRadius: 0, border: `1px solid ${BORDER}` }}>
                               <div style={{ fontSize: 10, color: GOLD, fontWeight: 800,
                                 letterSpacing: "0.1em", marginBottom: 8, fontFamily: "Inter, sans-serif" }}>
                                 🔗 LINKS DE FIRMA
@@ -1385,13 +1385,13 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                                     <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                                       <input readOnly value={`https://crm.mallorcanativaproperties.com/firmar-visita?token=${f.token}&tipo=comprador`}
                                         style={{ flex: 1, fontSize: 10, padding: "5px 8px", border: `1px solid ${BORDER}`,
-                                          borderRadius: 6, color: MUTED, fontFamily: "Inter, sans-serif",
+                                          borderRadius: 0, color: MUTED, fontFamily: "Inter, sans-serif",
                                           background: WHITE, cursor: "text" }} />
                                       <button onClick={() => {
                                         navigator.clipboard.writeText(`https://crm.mallorcanativaproperties.com/firmar-visita?token=${f.token}&tipo=comprador`);
                                         alert("✅ Link copiado");
                                       }} style={{ padding: "5px 10px", background: DARK, border: "none",
-                                        color: WHITE, borderRadius: 6, fontSize: 11, cursor: "pointer",
+                                        color: WHITE, borderRadius: 0, fontSize: 11, cursor: "pointer",
                                         fontFamily: "Inter, sans-serif", whiteSpace: "nowrap" }}>
                                         Copiar
                                       </button>
@@ -1405,7 +1405,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                           {/* Links de firma de propietarios (multi) */}
                           {firmasLinksVend[doc.id]?.length > 0 && (
                             <div style={{ marginTop: 12, padding: "10px 12px", background: `${GOLD}10`,
-                              borderRadius: 10, border: `1px solid ${GOLD}40` }}>
+                              borderRadius: 0, border: `1px solid ${GOLD}40` }}>
                               <div style={{ fontSize: 10, color: GOLD, fontWeight: 800,
                                 letterSpacing: "0.1em", marginBottom: 8, fontFamily: "Inter, sans-serif" }}>
                                 🔗 LINKS FIRMA PROPIETARIO{firmasLinksVend[doc.id].length > 1 ? "S" : ""}
@@ -1426,13 +1426,13 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                                     <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                                       <input readOnly value={`https://crm.mallorcanativaproperties.com/firmar-visita?token=${f.token}&tipo=vendedor`}
                                         style={{ flex: 1, fontSize: 10, padding: "5px 8px", border: `1px solid ${BORDER}`,
-                                          borderRadius: 6, color: MUTED, fontFamily: "Inter, sans-serif",
+                                          borderRadius: 0, color: MUTED, fontFamily: "Inter, sans-serif",
                                           background: WHITE, cursor: "text" }} />
                                       <button onClick={() => {
                                         navigator.clipboard.writeText(`https://crm.mallorcanativaproperties.com/firmar-visita?token=${f.token}&tipo=vendedor`);
                                         alert("✅ Link copiado");
                                       }} style={{ padding: "5px 10px", background: GOLD, border: "none",
-                                        color: WHITE, borderRadius: 6, fontSize: 11, cursor: "pointer",
+                                        color: WHITE, borderRadius: 0, fontSize: 11, cursor: "pointer",
                                         fontFamily: "Inter, sans-serif", whiteSpace: "nowrap" }}>
                                         Copiar
                                       </button>
@@ -1445,7 +1445,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                           {/* Fallback: link propietario legacy (token único) */}
                           {!firmasLinksVend[doc.id]?.length && doc.token_firma_vendedor && (
                             <div style={{ marginTop: 12, padding: "10px 12px", background: `${GOLD}10`,
-                              borderRadius: 10, border: `1px solid ${GOLD}40` }}>
+                              borderRadius: 0, border: `1px solid ${GOLD}40` }}>
                               <div style={{ fontSize: 10, color: GOLD, fontWeight: 800,
                                 letterSpacing: "0.1em", marginBottom: 6, fontFamily: "Inter, sans-serif" }}>
                                 🔗 LINK FIRMA PROPIETARIO
@@ -1465,13 +1465,13 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                                   <input readOnly
                                     value={`https://crm.mallorcanativaproperties.com/firmar-visita?token=${doc.token_firma_vendedor}&tipo=vendedor`}
                                     style={{ flex: 1, fontSize: 10, padding: "5px 8px", border: `1px solid ${BORDER}`,
-                                      borderRadius: 6, color: MUTED, fontFamily: "Inter, sans-serif",
+                                      borderRadius: 0, color: MUTED, fontFamily: "Inter, sans-serif",
                                       background: WHITE, cursor: "text" }} />
                                   <button onClick={() => {
                                     navigator.clipboard.writeText(`https://crm.mallorcanativaproperties.com/firmar-visita?token=${doc.token_firma_vendedor}&tipo=vendedor`);
                                     alert("✅ Link copiado");
                                   }} style={{ padding: "5px 10px", background: GOLD, border: "none",
-                                    color: WHITE, borderRadius: 6, fontSize: 11, cursor: "pointer",
+                                    color: WHITE, borderRadius: 0, fontSize: 11, cursor: "pointer",
                                     fontFamily: "Inter, sans-serif", whiteSpace: "nowrap" }}>
                                     Copiar
                                   </button>
@@ -1503,7 +1503,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                             background: CREAM, display: "flex", flexDirection: "column", gap: 8 }}>
                             <button onClick={verDocumento} style={{
                               padding: "12px 16px", border: `1.5px solid ${BORDER}`, background: WHITE,
-                              color: TEXT, cursor: "pointer", borderRadius: 10, fontSize: 13, fontWeight: 600,
+                              color: TEXT, cursor: "pointer", borderRadius: 0, fontSize: 13, fontWeight: 600,
                               fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center",
                               justifyContent: "center", gap: 8,
                             }}>
@@ -1513,7 +1513,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                             {["borrador","enviado"].includes(doc.estado) && (
                               <button onClick={() => enviarFirma("comprador")} style={{
                                 padding: "14px 16px", background: DARK, border: "none", color: WHITE,
-                                cursor: "pointer", borderRadius: 10, fontSize: 14, fontWeight: 700,
+                                cursor: "pointer", borderRadius: 0, fontSize: 14, fontWeight: 700,
                                 fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center",
                                 justifyContent: "center", gap: 8,
                               }}>
@@ -1532,7 +1532,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                                   {tieneJustificante ? (
                                     <div style={{ display: "flex", alignItems: "center", gap: 8,
                                       padding: "12px 14px", background: `${SUCCESS}12`,
-                                      border: `1px solid ${SUCCESS}40`, borderRadius: 10,
+                                      border: `1px solid ${SUCCESS}40`, borderRadius: 0,
                                       fontFamily: "Inter, sans-serif" }}>
                                       <CheckCircleIcon style={{ width: 16, height: 16, color: SUCCESS, flexShrink: 0 }} />
                                       <span style={{ fontSize: 13, color: SUCCESS, fontWeight: 600, flex: 1 }}>
@@ -1541,13 +1541,13 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                                       <a href={doc.justificante_deposito_url} target="_blank" rel="noreferrer"
                                         style={{ fontSize: 12, color: SUCCESS, fontWeight: 600,
                                           textDecoration: "none", padding: "4px 10px",
-                                          border: `1px solid ${SUCCESS}60`, borderRadius: 6 }}>
+                                          border: `1px solid ${SUCCESS}60`, borderRadius: 0 }}>
                                         Ver
                                       </a>
                                       <button onClick={() => subirJustificante(doc.id)}
                                         style={{ background: "none", border: `1px solid ${BORDER}`,
                                           cursor: "pointer", color: MUTED, fontSize: 12,
-                                          fontFamily: "Inter, sans-serif", borderRadius: 6,
+                                          fontFamily: "Inter, sans-serif", borderRadius: 0,
                                           padding: "4px 10px" }}>
                                         Cambiar
                                       </button>
@@ -1557,7 +1557,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                                       disabled={subiendoJustificante}
                                       style={{ padding: "14px 16px", background: "var(--amber)", border: "none",
                                         color: WHITE, cursor: subiendoJustificante ? "not-allowed" : "pointer",
-                                        borderRadius: 10, fontSize: 14, fontWeight: 700,
+                                        borderRadius: 0, fontSize: 14, fontWeight: 700,
                                         fontFamily: "Inter, sans-serif", display: "flex",
                                         alignItems: "center", justifyContent: "center", gap: 8,
                                         width: "100%", boxSizing: "border-box",
@@ -1576,7 +1576,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                                           background: tieneJustificante ? SUCCESS : BORDER,
                                           border: "none", color: tieneJustificante ? WHITE : MUTED,
                                           cursor: tieneJustificante ? "pointer" : "not-allowed",
-                                          borderRadius: 10, fontSize: 14, fontWeight: 700,
+                                          borderRadius: 0, fontSize: 14, fontWeight: 700,
                                           fontFamily: "Inter, sans-serif", display: "flex",
                                           alignItems: "center", justifyContent: "center", gap: 8,
                                           width: "100%", boxSizing: "border-box" }}>
@@ -1602,7 +1602,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                             {(doc.estado === "firmado_vendedor" || (!esOfResv && doc.estado === "firmado_comprador")) && !doc.firma_agente_data && (
                               <button onClick={() => setFirmaAgenteDocId(doc.id)} style={{
                                 padding: "14px 16px", background: GOLD, border: "none", color: WHITE,
-                                cursor: "pointer", borderRadius: 10, fontSize: 14, fontWeight: 700,
+                                cursor: "pointer", borderRadius: 0, fontSize: 14, fontWeight: 700,
                                 fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center",
                                 justifyContent: "center", gap: 8,
                               }}>
@@ -1611,7 +1611,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                             )}
                             {doc.firma_agente_data && (
                               <div style={{ padding: "10px 14px", background: `${SUCCESS}12`, border: `1px solid ${SUCCESS}40`,
-                                borderRadius: 10, fontSize: 12, color: SUCCESS, fontFamily: "Inter, sans-serif",
+                                borderRadius: 0, fontSize: 12, color: SUCCESS, fontFamily: "Inter, sans-serif",
                                 display: "flex", alignItems: "center", gap: 8 }}>
                                 ✅ Agente firmó {doc.firma_agente_fecha ? new Date(doc.firma_agente_fecha).toLocaleDateString("es-ES") : ""}
                               </div>
@@ -1621,7 +1621,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                               <button onClick={() => duplicarComoContraoferta(doc)} style={{
                                 padding: "12px 16px", border: `1.5px solid ${BORDER}`,
                                 background: "transparent", color: MUTED, cursor: "pointer",
-                                borderRadius: 10, fontSize: 13, fontFamily: "Inter, sans-serif",
+                                borderRadius: 0, fontSize: 13, fontFamily: "Inter, sans-serif",
                                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                               }}>
                                 <DocumentDuplicateIcon style={{ width: 15, height: 15 }} /> Duplicar como contraoferta
@@ -1671,7 +1671,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
             <div style={{ padding: "0 16px 16px" }}>
               <button onClick={eliminarVisita} style={{
                 padding: "12px 16px", border: `1.5px solid ${DANGER}30`,
-                background: `${DANGER}06`, color: DANGER, cursor: "pointer", borderRadius: 10,
+                background: `${DANGER}06`, color: DANGER, cursor: "pointer", borderRadius: 0,
                 fontSize: 13, fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center",
                 justifyContent: "center", gap: 8, width: "100%",
               }}>
@@ -1751,30 +1751,30 @@ function ModalFirmaAgente({ docId, agente, onFirmado, onClose }) {
           {agente.nombre}
         </div>
       )}
-      <div style={{ border: "2px solid var(--border)", borderRadius: 8, background: "var(--cream)",
+      <div style={{ border: "2px solid var(--border)", borderRadius: 0, background: "var(--cream)",
         touchAction: "none", marginBottom: 12 }}>
         <canvas
           ref={canvasRef}
           width={600} height={140}
-          style={{ width: "100%", height: 140, display: "block", cursor: "crosshair", borderRadius: 6 }}
+          style={{ width: "100%", height: 140, display: "block", cursor: "crosshair", borderRadius: 0 }}
           onMouseDown={iniciarTrazo} onMouseMove={dibujar} onMouseUp={terminarTrazo} onMouseLeave={terminarTrazo}
           onTouchStart={iniciarTrazo} onTouchMove={dibujar} onTouchEnd={terminarTrazo}
         />
       </div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <button onClick={limpiar} style={{ padding: "8px 16px", border: "1px solid var(--border)",
-          background: "transparent", color: "var(--muted)", cursor: "pointer", borderRadius: 8, fontSize: 12 }}>
+          background: "transparent", color: "var(--muted)", cursor: "pointer", borderRadius: 0, fontSize: 12 }}>
           Limpiar
         </button>
         <div style={{ display: "flex", gap: 8 }}>
           <button onClick={onClose} style={{ padding: "10px 20px", border: "1px solid var(--border)",
-            background: "transparent", color: "var(--muted)", cursor: "pointer", borderRadius: 8, fontSize: 13 }}>
+            background: "transparent", color: "var(--muted)", cursor: "pointer", borderRadius: 0, fontSize: 13 }}>
             Cancelar
           </button>
           <button onClick={firmar} disabled={!tieneFirma || firmando}
             style={{ padding: "10px 24px", background: tieneFirma ? "var(--gold)" : "var(--border)",
               border: "none", color: "#fff", cursor: tieneFirma ? "pointer" : "not-allowed",
-              borderRadius: 8, fontSize: 13, fontWeight: 700 }}>
+              borderRadius: 0, fontSize: 13, fontWeight: 700 }}>
             {firmando ? "Firmando..." : "Firmar documento"}
           </button>
         </div>
@@ -1855,7 +1855,7 @@ function GrupoDia({ fecha, visitas, propiedadId, propiedadNombre, currentUser, o
           disabled={generando}
           title={`Informe consolidado de todas las visitas del ${etiquetaDia}`}
           style={{ padding: "6px 12px", border: `1.5px solid ${SUCCESS}`, background: "transparent",
-            color: SUCCESS, cursor: "pointer", borderRadius: 8, fontSize: 11, fontWeight: 700,
+            color: SUCCESS, cursor: "pointer", borderRadius: 0, fontSize: 11, fontWeight: 700,
             fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 5,
             whiteSpace: "nowrap", opacity: generando ? 0.5 : 1 }}>
           <DocumentTextIcon style={{ width: 13, height: 13 }} />
@@ -1947,7 +1947,7 @@ function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, on
   }
 
   return (
-    <div style={{ background: WHITE, border: `1.5px solid ${BORDER}`, borderRadius: 16,
+    <div style={{ background: WHITE, border: `1.5px solid ${BORDER}`, borderRadius: 0,
       marginBottom: 14, overflow: "hidden", boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
 
       {/* Header del grupo */}
@@ -1956,7 +1956,7 @@ function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, on
         onClick={onToggle}>
         <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
           {/* Ícono propiedad */}
-          <div style={{ width: 46, height: 46, borderRadius: 12, background: `${DARK}0a`,
+          <div style={{ width: 46, height: 46, borderRadius: 0, background: `${DARK}0a`,
             display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>
             🏠
           </div>
@@ -2005,7 +2005,7 @@ function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, on
           {puedeEditar && (
             <button onClick={() => setNuevaVisita(true)} style={{
               width: "100%", padding: "12px", background: DARK, border: "none", color: WHITE,
-              cursor: "pointer", borderRadius: 10, fontSize: 13, fontWeight: 700,
+              cursor: "pointer", borderRadius: 0, fontSize: 13, fontWeight: 700,
               fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center",
               justifyContent: "center", gap: 8, marginBottom: 16,
             }}>
@@ -2052,13 +2052,13 @@ function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, on
                   borderTop: `1px solid ${BORDER}` }}>
                   <button onClick={crearVisita} disabled={!compradorNueva || guardando}
                     style={{ padding: "16px", background: DARK, border: "none", color: WHITE,
-                      cursor: "pointer", borderRadius: 12, fontWeight: 700, fontFamily: "Inter, sans-serif",
+                      cursor: "pointer", borderRadius: 0, fontWeight: 700, fontFamily: "Inter, sans-serif",
                       fontSize: 15, opacity: !compradorNueva ? 0.4 : 1 }}>
                     {guardando ? "Guardando..." : "✓ Registrar visita"}
                   </button>
                   <button onClick={() => setNuevaVisita(false)} style={{ padding: "14px",
                     border: `1.5px solid ${BORDER}`, background: "transparent", color: MUTED,
-                    cursor: "pointer", borderRadius: 12, fontFamily: "Inter, sans-serif", fontSize: 14 }}>
+                    cursor: "pointer", borderRadius: 0, fontFamily: "Inter, sans-serif", fontSize: 14 }}>
                     Cancelar
                   </button>
                 </div>
@@ -2353,7 +2353,7 @@ export default function Visitas({ currentUser }) {
                   {nvCompradores.map((c, i) => (
                     <div key={c.id} style={{ background: `${GOLD}10`, border: `2px solid ${GOLD}`,
                       padding: "12px 14px", display: "flex", justifyContent: "space-between",
-                      alignItems: "center", borderRadius: 12 }}>
+                      alignItems: "center", borderRadius: 0 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                         <Avatar nombre={c.nombre} apellidos={c.apellidos} size={36} />
                         <div>
@@ -2390,7 +2390,7 @@ export default function Visitas({ currentUser }) {
               <button onClick={crearVisitaGlobal}
                 disabled={!nvPropiedad || nvCompradores.length === 0 || nvGuardando}
                 style={{ padding: "16px", background: GOLD, border: "none", color: WHITE,
-                  cursor: "pointer", borderRadius: 12, fontWeight: 700, fontFamily: "Inter, sans-serif",
+                  cursor: "pointer", borderRadius: 0, fontWeight: 700, fontFamily: "Inter, sans-serif",
                   fontSize: 15, opacity: (!nvPropiedad || nvCompradores.length === 0) ? 0.4 : 1,
                   boxShadow: `0 4px 16px ${GOLD}44`,
                 }}>
@@ -2398,7 +2398,7 @@ export default function Visitas({ currentUser }) {
               </button>
               <button onClick={() => setModalNuevaVisita(false)} style={{ padding: "14px",
                 border: `1.5px solid ${BORDER}`, background: "transparent", color: MUTED,
-                cursor: "pointer", borderRadius: 12, fontFamily: "Inter, sans-serif", fontSize: 14 }}>
+                cursor: "pointer", borderRadius: 0, fontFamily: "Inter, sans-serif", fontSize: 14 }}>
                 Cancelar
               </button>
             </div>
