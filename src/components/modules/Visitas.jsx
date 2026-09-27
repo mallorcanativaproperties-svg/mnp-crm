@@ -1962,7 +1962,7 @@ function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, on
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 15, fontWeight: 600, color: TEXT,
-              fontFamily: "'Playfair Display', Georgia, serif",
+              fontFamily: "'Playfair Display', serif",
               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {propiedadNombre}
             </div>
@@ -2213,8 +2213,8 @@ export default function Visitas({ currentUser }) {
         <div style={{ fontSize: 10, color: GOLD_L, letterSpacing: "0.2em", fontWeight: 700, marginBottom: 4 }}>
           MALLORCA NATIVA
         </div>
-        <h1 style={{ fontSize: 28, fontWeight: 600, color: "var(--text)", margin: "0 0 4px",
-          fontFamily: "'Playfair Display', Georgia, serif" }}>
+        <h1 style={{ fontSize: 34, fontWeight: 600, color: "#A8854A", margin: "0 0 4px",
+          fontFamily: "'Playfair Display', serif" }}>
           Visitas
         </h1>
         <p style={{ fontSize: 13, color: "var(--muted)", margin: 0 }}>
@@ -2268,7 +2268,7 @@ export default function Visitas({ currentUser }) {
         ) : gruposFiltrados.length === 0 ? (
           <div style={{ textAlign: "center", padding: "60px 20px" }}>
             <div style={{ fontSize: 56, marginBottom: 16 }}>🏠</div>
-            <div style={{ fontSize: 20, fontWeight: 600, color: TEXT, fontFamily: "'Playfair Display', Georgia, serif", marginBottom: 8 }}>
+            <div style={{ fontSize: 20, fontWeight: 600, color: TEXT, fontFamily: "'Playfair Display', serif", marginBottom: 8 }}>
               No hay visitas registradas
             </div>
             <div style={{ fontSize: 14, color: MUTED, marginBottom: 28, lineHeight: 1.6 }}>

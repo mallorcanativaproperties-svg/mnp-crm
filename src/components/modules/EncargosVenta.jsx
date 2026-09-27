@@ -336,7 +336,7 @@ export default function EncargosVenta() {
         <div style={{ marginBottom: 28 }}>
           <div style={{ fontSize: 10, color: BRONZE, letterSpacing: "0.2em", marginBottom: 8 }}>MALLORCA NATIVA · CAPTACIÓN</div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 16 }}>
-            <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "clamp(22px,5vw,30px)", fontWeight: 600, color: PETROL, margin: 0 }}>Encargos de Venta</h1>
+            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 600, color: "#A8854A", margin: 0 }}>Encargos de Venta</h1>
             <button onClick={() => { setShowForm(true); loadCurrentUser(); }}
               style={{ padding: "10px 24px", background: PETROL, border: "none", color: CREAM, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.14em", borderRadius: 0 }}>
               + Nuevo encargo
@@ -546,7 +546,7 @@ export default function EncargosVenta() {
                     {ESTADO_LABEL[enc.estado] || enc.estado}
                   </span>
                 </div>
-                <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 15, fontWeight: 600, color: PETROL, marginBottom: 2 }}>
+                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 15, fontWeight: 600, color: PETROL, marginBottom: 2 }}>
                   {enc.propietarios?.[0]?.nombre || enc.prop1_nombre || "Propietario sin nombre"}
                   {enc.propietarios?.length > 1 && ` · ${enc.propietarios[1].nombre}`}
                 </div>

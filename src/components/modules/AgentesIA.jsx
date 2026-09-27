@@ -1174,7 +1174,7 @@ export default function AgentesIA() {
         <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
           <div>
             <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", fontWeight: 500 }}>Nativa Properties</div>
-            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 600, margin: "4px 0 0" }}>Agentes <em>IA</em></h1>
+            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 600, margin: "4px 0 0" , color: "#A8854A"}}>Agentes <em>IA</em></h1>
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <ScanEmailsButton />

@@ -117,7 +117,7 @@ function Portada({ agentes, cargando, onAbrirAgente, onAbrirBiblioteca }) {
 
   return (
     <div style={{ padding: "32px 28px", fontFamily: FUENTE, maxWidth: 1100 }}>
-      <h1 style={{ fontFamily: SERIF, fontSize: 28, fontWeight: 400, color: TINTA, margin: "0 0 8px" }}>
+      <h1 style={{ fontFamily: SERIF, fontSize: 34, fontWeight: 600, color: TINTA, margin: "0 0 8px" }}>
         Asistente <em>IA</em>
       </h1>
       <p style={{ fontSize: 13, color: GRIS, margin: "0 0 28px", maxWidth: 620, lineHeight: 1.6 }}>

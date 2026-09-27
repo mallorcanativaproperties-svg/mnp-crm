@@ -2603,7 +2603,7 @@ REGLAS:
         <div style={{ marginBottom: 36, borderBottom: "1px solid var(--border)", paddingBottom: 28, display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
           <div>
             <div style={{ fontSize: 10, color: "var(--gold)", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Nativa Properties</div>
-            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.1 }}>
+            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 600, margin: 0, lineHeight: 1.1 , color: "#A8854A"}}>
               Ficha de <em>Propiedad</em>
             </h1>
             <p style={{ fontSize: 12, color: "var(--muted)", margin: "10px 0 0", letterSpacing: "0.04em" }}>Completa y publica la ficha desde el CRM. Los campos marcados con * se sincronizan con Idealista.</p>
@@ -4482,7 +4482,7 @@ export default function CRMPropiedades({ currentUser }) {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 16 }}>
             <div>
               <div style={{ fontSize: 10, color: "var(--gold)", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Nativa Properties</div>
-              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 400, margin: 0, lineHeight: 1.1 }}>
+              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 600, margin: 0, lineHeight: 1.1 , color: "#A8854A"}}>
                 Cartera de <em>Propiedades</em>
               </h1>
               <p style={{ fontSize: 12, color: "var(--muted)", margin: "10px 0 0", letterSpacing: "0.04em" }}>{data.length} inmuebles - {pub} publicados</p>

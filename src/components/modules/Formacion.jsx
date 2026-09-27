@@ -154,7 +154,7 @@ function VisorRecurso({ recurso, userLogin, onClose, onCompletado }) {
           {recurso.tipo === "enlace" && (
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: 20 }}>
               <LinkIcon style={{ width:52, height:52, color:"#AC8A54" }} />
-              <div style={{ fontSize: 18, color: WHITE, fontFamily: "'Playfair Display', Georgia, serif" }}>{recurso.titulo}</div>
+              <div style={{ fontSize: 18, color: WHITE, fontFamily: "'Playfair Display', serif" }}>{recurso.titulo}</div>
               <a href={recurso.url} target="_blank" rel="noopener noreferrer"
                 style={{ padding: "14px 32px", background: GOLD, color: WHITE, fontSize: 14, fontWeight: 700, textDecoration: "none", fontFamily: "Inter, sans-serif", borderRadius: 0 }}>
                 Abrir enlace →
@@ -412,7 +412,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 4 }}>
           <div>
             <div style={{ fontSize: 10, color: GOLD, letterSpacing: "0.2em", fontWeight: 700, marginBottom: 4 }}>NATIVA PROPERTIES</div>
-            <h1 style={{ fontSize: 26, color: TEXT, fontWeight: 600, margin: 0, fontFamily: "'Playfair Display', Georgia, serif" }}>
+            <h1 style={{ fontSize: 34, color: TEXT, fontWeight: 600, margin: 0, fontFamily: "'Playfair Display', serif" }}>
               {subseccion === "direccion" ? "Formación Dirección" : subseccion === "asistente" ? "Asistente IA" : "Formación de Agentes"}
             </h1>
           </div>
@@ -492,7 +492,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
 
                   {/* Cuerpo */}
                   <div style={{ padding: "18px 20px 16px" }} onClick={() => { setModuloActivo(mod); setVista("temas"); }}>
-                    <h3 style={{ fontSize: 15, fontWeight: 600, color: TEXT, margin: "0 0 6px", fontFamily: "'Playfair Display', Georgia, serif", lineHeight: 1.3 }}>{mod.titulo}</h3>
+                    <h3 style={{ fontSize: 15, fontWeight: 600, color: TEXT, margin: "0 0 6px", fontFamily: "'Playfair Display', serif", lineHeight: 1.3 }}>{mod.titulo}</h3>
                     {mod.descripcion && <p style={{ fontSize: 12, color: MUTED, margin: "0 0 14px", lineHeight: 1.5 }}>{mod.descripcion}</p>}
 
                     {/* Progreso */}
@@ -595,7 +595,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
           <div style={{ fontSize:10, color:"rgba(255,255,255,0.4)", letterSpacing:"0.18em", fontWeight:700, marginBottom:4 }}>
             {subseccion === "direccion" ? "FORMACIÓN DIRECCIÓN" : subseccion === "asistente" ? "ASISTENTE IA" : "FORMACIÓN AGENTES"}
           </div>
-          <h2 style={{ fontSize:22, fontWeight: 600, color:WHITE, margin:0, fontFamily:"'Playfair Display', Georgia, serif" }}>
+          <h2 style={{ fontSize:22, fontWeight: 600, color:WHITE, margin:0, fontFamily: "'Playfair Display', serif" }}>
             {moduloActivo?.titulo}
           </h2>
           {moduloActivo?.descripcion && <p style={{ fontSize:12, color:"rgba(255,255,255,0.5)", margin:"4px 0 0", lineHeight:1.5 }}>{moduloActivo.descripcion}</p>}
@@ -657,7 +657,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
                   onMouseLeave={e=>e.currentTarget.style.boxShadow="none"}>
                   {/* Número */}
                   <div style={{ width:52, background: proximamente ? `${BORDER}55` : `${p.numBg}22`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, borderRight:`1px solid ${BORDER}` }}>
-                    <span style={{ fontSize:18, fontWeight: 600, color: proximamente ? MUTED : p.accent, fontFamily:"'Playfair Display', Georgia, serif" }}>{idx+1}</span>
+                    <span style={{ fontSize:18, fontWeight: 600, color: proximamente ? MUTED : p.accent, fontFamily: "'Playfair Display', serif" }}>{idx+1}</span>
                   </div>
                   {/* Contenido */}
                   <div style={{ flex:1, padding:"16px 20px", cursor: proximamente ? "default" : "pointer" }} onClick={() => { if(!proximamente){ setTemaActivo(tema); setVista("recursos"); } }}>
@@ -745,7 +745,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
           {temaActivo?.imagen_portada
             ? <img src={temaActivo.imagen_portada} style={{ position:"absolute", inset:0, width:"100%", height:"100%", objectFit:"contain", objectPosition:"center" }} />
             : <div style={{ position:"absolute", inset:0, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                <span style={{ fontSize:56, fontWeight: 600, color:GOLD, opacity:0.18, fontFamily:"'Playfair Display', Georgia, serif" }}>{temaActivo?.orden || ""}</span>
+                <span style={{ fontSize:56, fontWeight: 600, color:GOLD, opacity:0.18, fontFamily: "'Playfair Display', serif" }}>{temaActivo?.orden || ""}</span>
               </div>
           }
           <div style={{ position:"absolute", top:0, left:0, right:0, height:50, background:"linear-gradient(to bottom, rgba(26,37,40,1) 0%, rgba(26,37,40,0) 100%)" }} />
@@ -759,7 +759,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
           <div style={{ fontSize:10, color:"rgba(255,255,255,0.4)", letterSpacing:"0.18em", fontWeight:700, marginBottom:4 }}>
             {subseccion === "direccion" ? "FORMACIÓN DIRECCIÓN" : subseccion === "asistente" ? "ASISTENTE IA" : "FORMACIÓN AGENTES"}
           </div>
-          <h2 style={{ fontSize:22, fontWeight: 600, color:WHITE, margin:0, fontFamily:"'Playfair Display', Georgia, serif" }}>
+          <h2 style={{ fontSize:22, fontWeight: 600, color:WHITE, margin:0, fontFamily: "'Playfair Display', serif" }}>
             {temaActivo?.titulo}
           </h2>
           {temaActivo?.descripcion && <p style={{ fontSize:12, color:"rgba(255,255,255,0.5)", margin:"4px 0 0", lineHeight:1.5 }}>{temaActivo.descripcion}</p>}
@@ -943,7 +943,7 @@ function Seguimiento({ modulos, temas, recursos, onClose }) {
     <div style={{ background:CREAM, minHeight:"100vh", fontFamily:"Inter, sans-serif" }}>
       <div style={{ background:WHITE, borderBottom:`1px solid ${BORDER}`, padding:"20px 40px", display:"flex", alignItems:"center", gap:16 }}>
         <button onClick={onClose} style={{ background:"transparent", border:"none", color:MUTED, cursor:"pointer", fontSize:12, padding:0, fontFamily:"Inter, sans-serif" }}>← Volver</button>
-        <h2 style={{ fontSize:20, fontWeight: 600, color:TEXT, margin:0, fontFamily:"'Playfair Display', Georgia, serif" }}>Panel de seguimiento</h2>
+        <h2 style={{ fontSize:20, fontWeight: 600, color:TEXT, margin:0, fontFamily: "'Playfair Display', serif" }}>Panel de seguimiento</h2>
       </div>
       <div style={{ padding:"28px 40px", overflowX:"auto" }}>
         {loading ? <div style={{ color:MUTED, textAlign:"center", padding:60 }}>Cargando...</div> : (

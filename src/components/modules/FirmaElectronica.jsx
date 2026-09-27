@@ -327,7 +327,7 @@ export default function FirmaElectronica() {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 16 }}>
             <div>
               <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Nativa Properties</div>
-              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 600, margin: 0, lineHeight: 1.1 }}>
+              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 600, margin: 0, lineHeight: 1.1 , color: "#A8854A"}}>
                 Firma <em>Electronica</em>
               </h1>
               <p style={{ fontSize: 12, color: "#9A968A", margin: "10px 0 0", letterSpacing: "0.04em" }}>Envia documentos para firmar con validez legal</p>

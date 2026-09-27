@@ -527,7 +527,7 @@ export default function Captacion() {
         <div style={{ marginBottom: 28 }}>
           <div style={{ fontSize: 10, color: BRONZE, letterSpacing: "0.2em", marginBottom: 8 }}>MALLORCA NATIVA · PROSPECCIÓN</div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 16 }}>
-            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(22px,5vw,30px)", fontWeight: 600, color: PETROL, margin: 0 }}>Particulares en captación</h1>
+            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 600, color: "#A8854A", margin: 0 }}>Particulares en captación</h1>
             <button onClick={handleScrapingManual} disabled={scrapingManual}
               style={{ padding: "10px 20px", background: scrapingManual ? "#E7E1D4" : PETROL, border: "none", color: scrapingManual ? "#9A968A" : CREAM, fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", cursor: scrapingManual ? "not-allowed" : "pointer", fontFamily: "Inter, sans-serif" }}>
               {scrapingManual ? "Buscando..." : "Buscar en portales"}
