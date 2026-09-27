@@ -61,8 +61,41 @@ function buscarEnTexto(texto, frases) {
   });
 }
 
+/**
+ * Mete un salto de línea delante de los encabezados que el extractor de PDF ha
+ * dejado pegados al párrafo anterior.
+ *
+ * En el texto consolidado del PTIM de Mallorca la mitad de las normas salen así:
+ * "...salvo las excepciones previstas en la legislación aplicable. Norma 19.
+ * Régimen de usos de otras actividades (AP) 1. Actividades extractivas..." — todo
+ * en una línea. El troceador solo mira principios de línea, asi que no veia ese
+ * encabezado y la Norma 19 entera se quedaba pegada a la 18. Pasaba con las
+ * normas 9, 16, 17, 18 y 19, sin ningun aviso.
+ *
+ * Solo se marca cuando delante hay final de frase (punto o dos puntos) o un
+ * rótulo en mayúsculas ("CAPÍTULO II RÉGIMEN DE USOS Norma 16."), y cuando
+ * detrás viene mayúscula. Una cita —"lo previsto en la Norma 19", "conforme al
+ * artículo 158 ter"— va precedida de minúscula y no se toca: eso es lo que
+ * distingue un encabezado de una remisión, y por eso no vale con partir por
+ * cualquier "Norma N" que aparezca.
+ */
+const RE_SUFIJO_LATINO =
+  "bis|ter|quar?ter|qu[íi]nquies|sexies|septies|octies|nonies|decies|undecies|duodecies|terdecies|quaterdecies|quindecies|sexdecies";
+
+function marcarEncabezadosPegados(texto) {
+  const re = new RegExp(
+    "([.:]|[A-ZÁÉÍÓÚÑÇ]{3,})[ \\t]+" +
+      "((?:Art[íi]cul[oe]|Art[íi]cle|Norm[ae])\\s+\\d+(?:\\s+(?:" +
+      RE_SUFIJO_LATINO +
+      "))?\\.?\\s+[A-ZÁÉÍÓÚÑÇ])",
+    "g"
+  );
+  return texto.replace(re, "$1\n$2");
+}
+
 /** Corta el texto en secciones encabezadas por "Artículo N" o por una disposición. */
-function partirPorArticulos(texto) {
+function partirPorArticulos(textoOriginal) {
+  const texto = marcarEncabezadosPegados(textoOriginal);
   // Un texto legal se corta SOLO por "Artículo N" y disposiciones. Los apartados
   // numerados internos ("2. Los rendimientos netos...") no son encabezados: si se
   // tratan como tales, el artículo se parte y el filtro por artículo deja de verlo.
@@ -131,7 +164,12 @@ function numeroDeArticulo(encabezado) {
   // latin correcto es "quater", y los dos circulan en boletines, asi que valen
   // los dos.
   const m = encabezado.match(
-    /(?:Art[íi]cul[oe]|Art[íi]cle|Norm[ae])\s+([0-9]+)(?:º|ª|è|é|er|r|n|t|a)?\.?\s*(bis|ter|quar?ter|qu[íi]nquies|sexies|septies|octies|nonies|decies|undecies|duodecies|terdecies|quaterdecies|quindecies|sexdecies)?(?![a-zç])/i
+    new RegExp(
+      "(?:Art[íi]cul[oe]|Art[íi]cle|Norm[ae])\\s+([0-9]+)(?:º|ª|è|é|er|r|n|t|a)?\\.?\\s*(" +
+        RE_SUFIJO_LATINO +
+        ")?(?![a-zç])",
+      "i"
+    )
   );
   if (!m) return null;
   return [m[1], m[2]].filter(Boolean).join(" ").trim().toLowerCase();
