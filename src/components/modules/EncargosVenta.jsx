@@ -127,7 +127,7 @@ function FirmaAgenteModal({ encargo, onClose, onComplete }) {
         <div style={{ background: "#1a2528", padding: "18px 24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
             <div style={{ fontSize: 9, color: "var(--gold)", letterSpacing: "0.2em", marginBottom: 4 }}>FIRMA DEL AGENTE</div>
-            <div style={{ color: "var(--cream)", fontSize: 14, fontFamily: "'Libre Baskerville', Georgia, serif" }}>Firmar y generar PDF</div>
+            <div style={{ color: "var(--cream)", fontSize: 14, fontFamily: "Inter, sans-serif" }}>Firmar y generar PDF</div>
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", color: "var(--muted)", fontSize: 20, cursor: "pointer" }}><XMarkIcon style={{ width:14, height:14 }} /></button>
         </div>
@@ -336,9 +336,9 @@ export default function EncargosVenta() {
         <div style={{ marginBottom: 28 }}>
           <div style={{ fontSize: 10, color: BRONZE, letterSpacing: "0.2em", marginBottom: 8 }}>MALLORCA NATIVA · CAPTACIÓN</div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 16 }}>
-            <h1 style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: "clamp(22px,5vw,30px)", fontWeight: 400, color: PETROL, margin: 0 }}>Encargos de Venta</h1>
+            <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "clamp(22px,5vw,30px)", fontWeight: 600, color: PETROL, margin: 0 }}>Encargos de Venta</h1>
             <button onClick={() => { setShowForm(true); loadCurrentUser(); }}
-              style={{ padding: "10px 20px", background: PETROL, border: "none", color: CREAM, fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.08em" }}>
+              style={{ padding: "10px 24px", background: PETROL, border: "none", color: CREAM, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.14em", borderRadius: 0 }}>
               + Nuevo encargo
             </button>
           </div>
@@ -357,7 +357,7 @@ export default function EncargosVenta() {
               <div style={{ background: PETROL, padding: "20px 24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
                   <div style={{ fontSize: 10, color: BRONZE, letterSpacing: "0.2em", marginBottom: 4 }}>NUEVO ENCARGO</div>
-                  <div style={{ color: CREAM, fontSize: 15, fontFamily: "'Libre Baskerville', Georgia, serif", fontWeight: 400 }}>Hoja de Encargo de Venta</div>
+                  <div style={{ color: CREAM, fontSize: 15, fontFamily: "Inter, sans-serif", fontWeight: 400 }}>Hoja de Encargo de Venta</div>
                 </div>
                 <button onClick={() => setShowForm(false)} style={{ background: "none", border: "none", color: "var(--muted)", fontSize: 20, cursor: "pointer" }}><XMarkIcon style={{ width:14, height:14 }} /></button>
               </div>
@@ -512,9 +512,9 @@ export default function EncargosVenta() {
                 </div>
 
                 <div style={{ display: "flex", gap: 10 }}>
-                  <button onClick={() => setShowForm(false)} style={{ flex: 1, padding: "12px", background: "none", border: `1px solid ${BORDER}`, color: PETROL, fontSize: 13, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>Cancelar</button>
+                  <button onClick={() => setShowForm(false)} style={{ flex: 1, padding: "12px", background: "none", border: `1px solid ${BORDER}`, color: PETROL, fontSize: 11, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.14em", borderRadius: 0 }}>Cancelar</button>
                   <button onClick={handleSave} disabled={saving || !form.propietarios[0]?.nombre}
-                    style={{ flex: 2, padding: "12px", background: saving || !form.propietarios[0]?.nombre ? "var(--border)" : PETROL, border: "none", color: saving || !form.propietarios[0]?.nombre ? "var(--muted)" : CREAM, fontSize: 13, fontWeight: 600, cursor: saving || !form.propietarios[0]?.nombre ? "not-allowed" : "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.06em" }}>
+                    style={{ flex: 2, padding: "12px", background: saving || !form.propietarios[0]?.nombre ? "var(--border)" : PETROL, border: "none", color: saving || !form.propietarios[0]?.nombre ? "var(--muted)" : CREAM, fontSize: 11, fontWeight: 600, cursor: saving || !form.propietarios[0]?.nombre ? "not-allowed" : "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.14em", borderRadius: 0 }}>
                     {saving ? "Guardando..." : "Crear encargo y generar enlace"}
                   </button>
                 </div>
@@ -528,7 +528,7 @@ export default function EncargosVenta() {
           <div style={{ textAlign: "center", padding: 60, color: "var(--muted)", fontSize: 13, fontStyle: "italic" }}>Cargando...</div>
         ) : encargos.length === 0 ? (
           <div style={{ textAlign: "center", padding: 60 }}>
-            <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 32, color: "#C8BFB0", marginBottom: 12 }}>◇</div>
+            <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 32, fontWeight: 300, color: "#C8BFB0", marginBottom: 12 }}>◇</div>
             <div style={{ fontSize: 13, color: "var(--muted)" }}>No hay encargos de venta. Pulsa "+ Nuevo encargo" para crear el primero.</div>
           </div>
         ) : encargos.map(enc => (
@@ -546,7 +546,7 @@ export default function EncargosVenta() {
                     {ESTADO_LABEL[enc.estado] || enc.estado}
                   </span>
                 </div>
-                <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 15, color: PETROL, marginBottom: 2 }}>
+                <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 15, fontWeight: 600, color: PETROL, marginBottom: 2 }}>
                   {enc.propietarios?.[0]?.nombre || enc.prop1_nombre || "Propietario sin nombre"}
                   {enc.propietarios?.length > 1 && ` · ${enc.propietarios[1].nombre}`}
                 </div>
