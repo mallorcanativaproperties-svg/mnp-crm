@@ -674,10 +674,31 @@ function UploaderGrabacion({ visitaId, onActualizado }) {
 }
 
 // ── Editor de informe al propietario ─────────────────────────────────────────
-function EditorInforme({ informe, propiedadNombre, onGuardado, onClose }) {
+function EditorInforme({ informe, propiedadNombre, onGuardado, onClose, propiedadId, agente, fecha }) {
   const [contenido, setContenido] = useState(informe.contenido_borrador || "");
   const [enviando, setEnviando] = useState(false);
   const [guardando, setGuardando] = useState(false);
+  const [regenerando, setRegenerando] = useState(false);
+
+  async function regenerar() {
+    if (!propiedadId || !agente || !fecha) return;
+    setRegenerando(true);
+    try {
+      const res = await fetch("/api/visitas/generar-informe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ propiedadId, agente, fecha }),
+      });
+      const data = await res.json();
+      if (data.error) { alert("Error al regenerar: " + data.error); return; }
+      const { data: inf } = await supabase.from("visita_informes").select("contenido_borrador").eq("id", data.informeId).single();
+      setContenido(inf.contenido_borrador || "");
+    } catch (e) {
+      alert("Error al regenerar: " + e.message);
+    } finally {
+      setRegenerando(false);
+    }
+  }
 
   async function guardar() {
     setGuardando(true);
@@ -736,6 +757,14 @@ function EditorInforme({ informe, propiedadNombre, onGuardado, onClose }) {
             fontWeight: 700, fontSize: 14 }}>
           {guardando ? "Guardando..." : "💾 Guardar borrador"}
         </button>
+        {propiedadId && agente && fecha && (
+          <button onClick={regenerar} disabled={regenerando}
+            style={{ padding: "14px", border: `1.5px solid ${MUTED}`, background: "transparent",
+              color: MUTED, cursor: "pointer", borderRadius: 12, fontFamily: "Inter, sans-serif",
+              fontWeight: 600, fontSize: 13, opacity: regenerando ? 0.5 : 1 }}>
+            {regenerando ? "⏳ Regenerando..." : "🔄 Regenerar con IA"}
+          </button>
+        )}
         <button onClick={onClose} style={{ padding: "14px", border: `1.5px solid ${BORDER}`,
           background: "transparent", color: MUTED, cursor: "pointer", borderRadius: 12,
           fontFamily: "Inter, sans-serif", fontSize: 14 }}>Cancelar</button>
@@ -1858,7 +1887,8 @@ function GrupoDia({ fecha, visitas, propiedadId, propiedadNombre, currentUser, o
       {informe && (
         <Modal title={`Informe al propietario · ${etiquetaDia}`} onClose={() => setInforme(null)} width={640}>
           <EditorInforme informe={informe} propiedadNombre={propiedadNombre}
-            onGuardado={onActualizado} onClose={() => setInforme(null)} />
+            onGuardado={onActualizado} onClose={() => setInforme(null)}
+            propiedadId={propiedadId} agente={currentUser?.user_login} fecha={fecha} />
         </Modal>
       )}
     </div>
