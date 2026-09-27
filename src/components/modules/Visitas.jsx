@@ -1722,8 +1722,7 @@ function GrupoDia({ fecha, visitas, propiedadId, propiedadNombre, currentUser, o
   );
 }
 
-function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, onActualizado, informesPendientes, abierto, onToggle }) {
-  const [visitasAbiertas, setVisitasAbiertas] = useState(new Set()); // persiste entre refreshes
+function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, onActualizado, informesPendientes, abierto, onToggle, visitasAbiertas, setVisitasAbiertas }) {
   const [nuevaVisita, setNuevaVisita] = useState(false);
   const [compradorNueva, setCompradorNueva] = useState(null);
   const [notasNueva, setNotasNueva] = useState("");
@@ -1929,6 +1928,7 @@ export default function Visitas({ currentUser }) {
   const [nvGuardando, setNvGuardando] = useState(false);
   const [propsAgente, setPropsAgente] = useState([]);
   const [gruposAbiertos, setGruposAbiertos] = useState(new Set()); // persiste entre refreshes
+  const [visitasAbiertas, setVisitasAbiertas] = useState(new Set()); // persiste entre refreshes
 
   async function crearVisitaGlobal() {
     if (!nvPropiedad || nvCompradores.length === 0) return;
@@ -2127,7 +2127,9 @@ export default function Visitas({ currentUser }) {
                   const next = new Set(prev);
                   next.has(pid) ? next.delete(pid) : next.add(pid);
                   return next;
-                })} />
+                })}
+                visitasAbiertas={visitasAbiertas}
+                setVisitasAbiertas={setVisitasAbiertas} />
             );
           })
         )}
