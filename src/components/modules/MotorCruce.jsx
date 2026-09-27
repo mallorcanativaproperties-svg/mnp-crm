@@ -577,12 +577,10 @@ export default function MotorCruce() {
         {/* Header */}
         <div style={{ marginBottom: 40, borderBottom: "1px solid var(--text)", paddingBottom: 32 }}>
           <div style={{ fontSize: 10, color: "var(--gold)", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Nativa Properties</div>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 600, margin: 0, lineHeight: 1.1 , color: "#A8854A"}}>
-            Motor de Cruce
-          </h1>
-          <p style={{ fontSize: 12, color: "var(--muted)", margin: "10px 0 0", letterSpacing: "0.04em" }}>
-            Cruce automatico comprador - propiedad por presupuesto, zona y operacion
-          </p>
+          <div style={{ fontFamily: "Inter, sans-serif", fontSize: 11, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--muted)", marginBottom: 8 }}>NATIVA PROPERTIES</div>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Motor de Cruce</h1>
+        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Cruce automático entre propiedades y compradores con criterios coincidentes</p>
+        <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />
         </div>
 
         {/* Stats */}

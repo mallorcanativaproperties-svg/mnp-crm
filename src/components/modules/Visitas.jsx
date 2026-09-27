@@ -2213,13 +2213,10 @@ export default function Visitas({ currentUser }) {
         <div style={{ fontSize: 10, color: GOLD_L, letterSpacing: "0.2em", fontWeight: 700, marginBottom: 4 }}>
           MALLORCA NATIVA
         </div>
-        <h1 style={{ fontSize: 34, fontWeight: 600, color: "#A8854A", margin: "0 0 4px",
-          fontFamily: "'Playfair Display', serif" }}>
-          Visitas
-        </h1>
-        <p style={{ fontSize: 13, color: "var(--muted)", margin: 0 }}>
-          Gestiona visitas, documentos y compradores
-        </p>
+        <div style={{ fontFamily: "Inter, sans-serif", fontSize: 11, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--muted)", marginBottom: 8 }}>NATIVA PROPERTIES</div>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Visitas</h1>
+        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Registro y seguimiento de visitas a las propiedades</p>
+        <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />
       </div>
 
       {/* ── Stats bar — scroll horizontal en mobile ── */}

@@ -117,14 +117,10 @@ function Portada({ agentes, cargando, onAbrirAgente, onAbrirBiblioteca }) {
 
   return (
     <div style={{ padding: "32px 28px", fontFamily: FUENTE, maxWidth: 1100 }}>
-      <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 600, color: "#A8854A", margin: "0 0 8px" }}>
-        Asistente IA
-      </h1>
-      <p style={{ fontSize: 13, color: GRIS, margin: "0 0 28px", maxWidth: 620, lineHeight: 1.6 }}>
-        Tres especialistas independientes. Cada uno responde solo desde su propia base de
-        conocimiento, cita la norma de la que sale cada afirmacion y pide los datos que le
-        faltan antes de resolver un caso concreto.
-      </p>
+      <div style={{ fontFamily: "Inter, sans-serif", fontSize: 11, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--muted)", marginBottom: 8 }}>NATIVA PROPERTIES</div>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Asistente IA</h1>
+        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Tu asistente inteligente para consultas legales, fiscales y urbanísticas</p>
+        <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />
 
       {cargando && <div style={{ fontSize: 12, color: GRIS }}>Cargando agentes...</div>}
 

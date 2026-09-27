@@ -46,12 +46,10 @@ export default function LinkedIn() {
       {/* Header */}
       <div style={{ marginBottom: 36 }}>
         <div style={{ fontSize: 10, color: BRONZE, letterSpacing: "0.2em", marginBottom: 8 }}>MALLORCA NATIVA · LINKEDIN</div>
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 600, color: "#A8854A", margin: "0 0 8px", lineHeight: 1.2 }}>
-          Publicar en LinkedIn
-        </h1>
-        <p style={{ fontSize: 13, color: "#9A968A", margin: 0, lineHeight: 1.6 }}>
-          Publica en tu perfil personal de LinkedIn. La publicación en página de empresa estará disponible cuando LinkedIn apruebe el acceso.
-        </p>
+        <div style={{ fontFamily: "Inter, sans-serif", fontSize: 11, fontWeight: 600, letterSpacing: "0.15em", textTransform: "uppercase", color: "var(--muted)", marginBottom: 8 }}>NATIVA PROPERTIES</div>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Publicar en LinkedIn</h1>
+        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Publicación y gestión de contenido profesional en LinkedIn</p>
+        <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />
       </div>
 
       {/* Aviso temporal */}
