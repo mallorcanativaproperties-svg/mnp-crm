@@ -9,7 +9,7 @@ import { UserPlusIcon, PencilSquareIcon, TrashIcon, UserGroupIcon } from "@heroi
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 
-// director = Suren (acceso total), administrador = Silvia (gestiÃ³n sin Agentes IA), agente = comerciales
+// director = Suren (acceso total), administrador = Silvia (gestión sin Agentes IA), agente = comerciales
 const ROLES = ["director", "administrador", "agente"];
 const CODIGOS = ["MNSLA", "MNSKB", "MNAQA", "MNJAC", "MNGET"];
 
@@ -55,7 +55,7 @@ export default function Usuarios({ currentUser }) {
   }
 
   function abrirEditar(u) {
-    setForm({ ...u, pass_hash: "" }); // no mostrar contraseÃ±a actual
+    setForm({ ...u, pass_hash: "" }); // no mostrar contraseña actual
     setModal(u.id);
     setMsg(null);
   }
@@ -63,7 +63,7 @@ export default function Usuarios({ currentUser }) {
   async function guardar() {
     if (!form.user_login?.trim()) return setMsg({ type: "error", text: "El usuario es obligatorio" });
     if (!form.nombre?.trim()) return setMsg({ type: "error", text: "El nombre es obligatorio" });
-    if (modal === "nuevo" && !form.pass_hash?.trim()) return setMsg({ type: "error", text: "La contraseÃ±a es obligatoria para usuarios nuevos" });
+    if (modal === "nuevo" && !form.pass_hash?.trim()) return setMsg({ type: "error", text: "La contraseña es obligatoria para usuarios nuevos" });
 
     setSaving(true);
     setMsg(null);
@@ -115,7 +115,7 @@ export default function Usuarios({ currentUser }) {
       alert("No puedes eliminar tu propio usuario.");
       return;
     }
-    if (!confirm(`Â¿Eliminar a ${u.nombre}? Esta acciÃ³n no se puede deshacer.`)) return;
+    if (!confirm(`¿Eliminar a ${u.nombre}? Esta acción no se puede deshacer.`)) return;
     const { error } = await supabase.from("usuarios").delete().eq("id", u.id);
     if (error) { alert("Error al eliminar: " + error.message); return; }
     setUsuarios(us => us.filter(x => x.id !== u.id));
@@ -127,21 +127,32 @@ export default function Usuarios({ currentUser }) {
 
   return (
     <div style={{ padding: "40px 48px", maxWidth: 900, margin: "0 auto" }}>
-      {/* Header */}
-      <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Gestión de Usuarios</h1>
-        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Administración de usuarios, roles y permisos del equipo</p>
-        <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />
-      </div>
-      <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />
+              {/* Header */}
+        <div style={{ marginBottom: 28 }}>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Gestión de Usuarios</h1>
+          <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Administración de usuarios, roles y permisos del equipo</p>
+          <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />
+        </div>
+
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: 24 }}>
+          <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, width: "100%", maxWidth: 480, padding: "32px 36px" }}>
+            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 600, margin: "0 0 24px" }}>
+              {modal === "nuevo" ? "Nuevo usuario" : "Editar usuario"}
+            </h2>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <div>
+                <label style={lSt}>Nombre completo *</label>
+                <input style={iSt} value={form.nombre || ""} onChange={e => setForm(f => ({ ...f, nombre: e.target.value }))} />
+              </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <div>
                   <label style={lSt}>Usuario (login) *</label>
                   <input style={iSt} value={form.user_login || ""} onChange={e => setForm(f => ({ ...f, user_login: e.target.value.toLowerCase() }))} disabled={modal !== "nuevo"} placeholder="ej: suren" />
                 </div>
                 <div>
-                  <label style={lSt}>{modal === "nuevo" ? "ContraseÃ±a *" : "Nueva contraseÃ±a (dejar vacÃ­o para no cambiar)"}</label>
-                  <input style={iSt} type="password" value={form.pass_hash || ""} onChange={e => setForm(f => ({ ...f, pass_hash: e.target.value }))} placeholder="â¢â¢â¢â¢â¢â¢â¢â¢" />
+                  <label style={lSt}>{modal === "nuevo" ? "Contraseña *" : "Nueva contraseña (dejar vacío para no cambiar)"}</label>
+                  <input style={iSt} type="password" value={form.pass_hash || ""} onChange={e => setForm(f => ({ ...f, pass_hash: e.target.value }))} placeholder="••••••••" />
                 </div>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -152,20 +163,20 @@ export default function Usuarios({ currentUser }) {
                   </select>
                 </div>
                 <div>
-                  <label style={lSt}>CÃ³digo agente</label>
+                  <label style={lSt}>Código agente</label>
                   <select style={iSt} value={form.agente_codigo || ""} onChange={e => setForm(f => ({ ...f, agente_codigo: e.target.value }))}>
-                    <option value="">Sin cÃ³digo</option>
+                    <option value="">Sin código</option>
                     {CODIGOS.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
               </div>
               <div>
-                <label style={lSt}>TelÃ©fono</label>
+                <label style={lSt}>Teléfono</label>
                 <input style={iSt} value={form.agente_telefono || ""} onChange={e => setForm(f => ({ ...f, agente_telefono: e.target.value }))} placeholder="ej: 640130766" />
                 <input style={iSt} value={form.email || ""} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="Email del agente" />
                 <input style={iSt} value={form.dni || ""} onChange={e => setForm(f => ({ ...f, dni: e.target.value }))} placeholder="DNI/NIE del agente" />
-                <input style={iSt} value={form.poliza_rc || ""} onChange={e => setForm(f => ({ ...f, poliza_rc: e.target.value }))} placeholder="NÃºmero de pÃ³liza RC (para encargos)" />
-                <input style={iSt} value={form.numero_registro || ""} onChange={e => setForm(f => ({ ...f, numero_registro: e.target.value }))} placeholder="NÂº registro agente inmobiliario (ROAI Baleares)" />
+                <input style={iSt} value={form.poliza_rc || ""} onChange={e => setForm(f => ({ ...f, poliza_rc: e.target.value }))} placeholder="Número de póliza RC (para encargos)" />
+                <input style={iSt} value={form.numero_registro || ""} onChange={e => setForm(f => ({ ...f, numero_registro: e.target.value }))} placeholder="Nº registro agente inmobiliario (ROAI Baleares)" />
               </div>
               {modal !== "nuevo" && (
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -182,6 +193,8 @@ export default function Usuarios({ currentUser }) {
               <button onClick={guardar} disabled={saving} style={{ background: saving ? "#E7E1D4" : "#AC8A54", border: "none", borderRadius: 0, color: saving ? "#9A968A" : "#F8F6F1", fontSize: 11, fontWeight: 700, cursor: saving ? "not-allowed" : "pointer", padding: "10px 24px", fontFamily: "Inter, sans-serif" }}>
                 {saving ? "Guardando..." : "Guardar"}
               </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
