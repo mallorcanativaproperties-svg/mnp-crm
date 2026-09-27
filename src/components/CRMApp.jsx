@@ -28,9 +28,9 @@ const PanelErrores    = dynamic(() => import("./PanelErrores"),    { ssr: false 
 const ToastGuardado   = dynamic(() => import("./ToastGuardado"),   { ssr: false });
 
 // Roles del CRM:
-//   director      â Suren â acceso total
-//   administrador â Silvia â igual que director excepto Agentes IA/Simulador
-//   agente        â comerciales â acceso operativo, sin gestiÃ³n ni IA
+//   director      → Suren — acceso total
+//   administrador → Silvia — igual que director excepto Agentes IA/Simulador
+//   agente        → comerciales — acceso operativo, sin gestión ni IA
 const ROLES_ADMIN = ["director", "administrador"];
 
 const ICON_MAP = {
@@ -53,14 +53,14 @@ const ICON_MAP = {
 };
 
 const MODULES = [
-  // Acceso rÃ¡pido
-  { key: "captacion", label: "Formulario CualificaciÃ³n", icon: "captacion", color: "#AC8A54", roles: ["director", "administrador", "agente"], group: null },
+  // Acceso rápido
+  { key: "captacion", label: "Formulario Cualificación", icon: "captacion", color: "#AC8A54", roles: ["director", "administrador", "agente"], group: null },
 
   // PROPIEDADES
   { key: "propiedades", label: "Propiedades", icon: "propiedades", color: "#2C6E52", roles: ["director", "administrador", "agente"], group: "Propiedades" },
-  { key: "captacion_ana", label: "ProspecciÃ³n Particulares", icon: "captacion_ana", color: "#2C6E52", roles: ["director", "administrador", "agente"], group: "Propiedades" },
+  { key: "captacion_ana", label: "Prospección Particulares", icon: "captacion_ana", color: "#2C6E52", roles: ["director", "administrador", "agente"], group: "Propiedades" },
   { key: "encargos", label: "Encargos de Venta", icon: "encargos", color: "#2C6E52", roles: ["director", "administrador", "agente"], group: "Propiedades" },
-  { key: "firma", label: "Firma ElectrÃ³nica", icon: "firma", color: "#2C6E52", roles: ["director", "administrador", "agente"], group: "Propiedades" },
+  { key: "firma", label: "Firma Electrónica", icon: "firma", color: "#2C6E52", roles: ["director", "administrador", "agente"], group: "Propiedades" },
 
   // COMPRADORES
   { key: "compradores", label: "Base Compradores", icon: "compradores", color: "#3D577E", roles: ["director", "administrador", "agente"], group: "Compradores" },
@@ -70,19 +70,19 @@ const MODULES = [
   // REDES SOCIALES
   { key: "redes", label: "Redes Sociales", icon: "redes", color: "#E1306C", roles: ["director", "administrador", "agente"], group: "Redes Sociales" },
 
-  // AGENTES IA â solo director (Suren)
+  // AGENTES IA — solo director (Suren)
   { key: "agentes", label: "Agentes IA", icon: "agentes", color: "#9C6E1B", roles: ["director", "administrador", "agente"], group: "Agentes IA" },
-  { key: "formacion_agentes", label: "FormaciÃ³n Agentes", icon: "formacion_agentes", color: "#AC8A54", roles: ["director", "administrador", "agente"], group: "FormaciÃ³n" },
-  { key: "formacion_direccion", label: "FormaciÃ³n DirecciÃ³n", icon: "formacion_direccion", color: "#AC8A54", roles: ["director", "administrador"], group: "FormaciÃ³n" },
-  { key: "formacion_asistente", label: "Asistente IA", icon: "formacion_asistente", color: "#9C6E1B", roles: ["director", "administrador"], group: "FormaciÃ³n" },
+  { key: "formacion_agentes", label: "Formación Agentes", icon: "formacion_agentes", color: "#AC8A54", roles: ["director", "administrador", "agente"], group: "Formación" },
+  { key: "formacion_direccion", label: "Formación Dirección", icon: "formacion_direccion", color: "#AC8A54", roles: ["director", "administrador"], group: "Formación" },
+  { key: "formacion_asistente", label: "Asistente IA", icon: "formacion_asistente", color: "#9C6E1B", roles: ["director", "administrador"], group: "Formación" },
   { key: "simulador", label: "Simulador Claudia", icon: "simulador", color: "#9C6E1B", roles: ["director", "administrador"], group: "Agentes IA" },
 
-  // GESTIÃN â director y administrador
-  { key: "dashboard", label: "Dashboard", icon: "dashboard", color: "#AC8A54", roles: ["director", "administrador"], group: "GestiÃ³n" },
-  { key: "usuarios", label: "Usuarios", icon: "usuarios", color: "#AC8A54", roles: ["director", "administrador"], group: "GestiÃ³n" },
+  // GESTIÓN — director y administrador
+  { key: "dashboard", label: "Dashboard", icon: "dashboard", color: "#AC8A54", roles: ["director", "administrador"], group: "Gestión" },
+  { key: "usuarios", label: "Usuarios", icon: "usuarios", color: "#AC8A54", roles: ["director", "administrador"], group: "Gestión" },
 ];
 
-// Rate limiting: mÃ¡x 4 intentos por usuario, bloqueo 15 min en localStorage
+// Rate limiting: máx 4 intentos por usuario, bloqueo 15 min en localStorage
 const MAX_INTENTOS = 4;
 const BLOQUEO_MS = 15 * 60 * 1000; // 15 minutos
 
@@ -109,7 +109,7 @@ function LoginScreen({ onLogin }) {
 
   const handleLogin = async () => {
     setError("");
-    if (!user.trim() || !pass.trim()) { setError("Introduce usuario y contraseÃ±a"); return; }
+    if (!user.trim() || !pass.trim()) { setError("Introduce usuario y contraseña"); return; }
 
     const userKey = user.toLowerCase().trim();
     const rl = getRateLimit(userKey);
@@ -118,7 +118,7 @@ function LoginScreen({ onLogin }) {
     // Comprobar bloqueo activo
     if (rl.bloqueadoHasta && ahora < rl.bloqueadoHasta) {
       const minutos = Math.ceil((rl.bloqueadoHasta - ahora) / 60000);
-      setError(`Demasiados intentos fallidos. Espera ${minutos} minuto${minutos !== 1 ? "s" : ""} e intÃ©ntalo de nuevo.`);
+      setError(`Demasiados intentos fallidos. Espera ${minutos} minuto${minutos !== 1 ? "s" : ""} e inténtalo de nuevo.`);
       return;
     }
 
@@ -140,7 +140,7 @@ function LoginScreen({ onLogin }) {
         } else {
           setRateLimit(userKey, { intentos, bloqueadoHasta: null });
           const restantes = MAX_INTENTOS - intentos;
-          const msg = error?.code === "PGRST116" ? `Usuario o contraseÃ±a incorrectos. ${restantes} intento${restantes !== 1 ? "s" : ""} restante${restantes !== 1 ? "s" : ""}.` : `Error al acceder. ${restantes} intento${restantes !== 1 ? "s" : ""} restante${restantes !== 1 ? "s" : ""}.`;
+          const msg = error?.code === "PGRST116" ? `Usuario o contraseña incorrectos. ${restantes} intento${restantes !== 1 ? "s" : ""} restante${restantes !== 1 ? "s" : ""}.` : `Error al acceder. ${restantes} intento${restantes !== 1 ? "s" : ""} restante${restantes !== 1 ? "s" : ""}.`;
           setError(msg);
         }
       } else {
@@ -148,7 +148,7 @@ function LoginScreen({ onLogin }) {
         onLogin({ user_login: data.user_login, nombre: data.nombre, role: data.role, agente_codigo: data.agente_codigo, agente_telefono: data.agente_telefono });
       }
     } catch (e) {
-      setError("Error al conectar. IntÃ©ntalo de nuevo.");
+      setError("Error al conectar. Inténtalo de nuevo.");
     }
   };
 
@@ -172,7 +172,7 @@ function LoginScreen({ onLogin }) {
         <div style={{ textAlign: "center", marginBottom: 36 }}>
           <div style={{ fontSize: 12, color: "#E7D5B8", textTransform: "uppercase", letterSpacing: "0.35em", marginBottom: 10, fontWeight: 700, textShadow: "0 1px 10px rgba(0,0,0,0.8)" }}>Nativa Properties</div>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 54, fontWeight: 400, margin: 0, color: "#FFFFFF", textShadow: "0 2px 20px rgba(0,0,0,0.8)", letterSpacing: "0.05em" }}><em>CRM</em></h1>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.9)", marginTop: 12, letterSpacing: "0.08em", textShadow: "0 1px 10px rgba(0,0,0,0.8)" }}>GestiÃ³n inmobiliaria Â· Marketing Â· IA</p>
+          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.9)", marginTop: 12, letterSpacing: "0.08em", textShadow: "0 1px 10px rgba(0,0,0,0.8)" }}>Gestión inmobiliaria · Marketing · IA</p>
         </div>
         <div style={{ background: "rgba(255,255,255,0.97)", padding: "36px 32px" }}>
           <div style={{ marginBottom: 20 }}>
@@ -180,8 +180,8 @@ function LoginScreen({ onLogin }) {
             <input type="text" value={user} onChange={(e) => { setUser(e.target.value); setError(""); }} onKeyDown={(e) => { if (e.key === "Enter") handleLogin(); }} placeholder="tu usuario" style={iSt} />
           </div>
           <div style={{ marginBottom: 26 }}>
-            <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 6 }}>ContraseÃ±a</label>
-            <input type="password" value={pass} onChange={(e) => { setPass(e.target.value); setError(""); }} onKeyDown={(e) => { if (e.key === "Enter") handleLogin(); }} placeholder="tu contraseÃ±a" style={iSt} />
+            <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 6 }}>Contraseña</label>
+            <input type="password" value={pass} onChange={(e) => { setPass(e.target.value); setError(""); }} onKeyDown={(e) => { if (e.key === "Enter") handleLogin(); }} placeholder="tu contraseña" style={iSt} />
           </div>
           {error && <div style={{ marginBottom: 16, padding: "10px 14px", background: "#D4545412", border: "1px solid #D4545433", fontSize: 12, color: "#A23A3A", textAlign: "center" }}>{error}</div>}
           <button onClick={handleLogin} style={{ width: "100%", padding: "14px", border: "none", background: "#16294A", color: "#F8F6F1", cursor: "pointer", fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>Acceder</button>
@@ -217,7 +217,7 @@ export default function CRMApp() {
     if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
     inactivityTimer.current = setTimeout(() => {
       handleLogout();
-      alert("SesiÃ³n cerrada por inactividad (60 minutos). Por favor, vuelve a iniciar sesiÃ³n.");
+      alert("Sesión cerrada por inactividad (60 minutos). Por favor, vuelve a iniciar sesión.");
     }, SESSION_TIMEOUT);
   }
 
@@ -244,26 +244,26 @@ export default function CRMApp() {
   }
 
   async function handleCambiarClave() {
-    if (!nuevaClave.trim()) return setMsgClave({ type: "error", text: "Escribe la nueva contraseÃ±a" });
-    if (nuevaClave.length < 6) return setMsgClave({ type: "error", text: "La contraseÃ±a debe tener al menos 6 caracteres" });
-    if (nuevaClave !== confirmarClave) return setMsgClave({ type: "error", text: "Las contraseÃ±as no coinciden" });
+    if (!nuevaClave.trim()) return setMsgClave({ type: "error", text: "Escribe la nueva contraseña" });
+    if (nuevaClave.length < 6) return setMsgClave({ type: "error", text: "La contraseña debe tener al menos 6 caracteres" });
+    if (nuevaClave !== confirmarClave) return setMsgClave({ type: "error", text: "Las contraseñas no coinciden" });
     setGuardandoClave(true);
     setMsgClave(null);
     const { error } = await supabase.from("usuarios").update({ pass_hash: nuevaClave.trim() }).eq("user_login", currentUser.user_login);
     setGuardandoClave(false);
     if (error) setMsgClave({ type: "error", text: error.message });
     else {
-      setMsgClave({ type: "ok", text: "ContraseÃ±a actualizada correctamente" });
+      setMsgClave({ type: "ok", text: "Contraseña actualizada correctamente" });
       setTimeout(() => { setModalClave(false); setNuevaClave(""); setConfirmarClave(""); setMsgClave(null); }, 1500);
     }
   }
   const [activeModule, setActiveModule] = useState("captacion");
   const [sidebarOpen, setSidebarOpen] = useState(typeof window !== "undefined" ? window.innerWidth > 768 : true);
-  const [expandedGroups, setExpandedGroups] = useState({ "Propiedades": true, "Compradores": true, "Redes Sociales": true, "Agentes IA": true, "GestiÃ³n": true });
+  const [expandedGroups, setExpandedGroups] = useState({ "Propiedades": true, "Compradores": true, "Redes Sociales": true, "Agentes IA": true, "Gestión": true });
   const toggleGroup = (group) => setExpandedGroups(prev => ({ ...prev, [group]: !prev[group] }));
   const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth <= 768 : false);
 
-  // Detectar cambio de tamaÃ±o
+  // Detectar cambio de tamaño
   useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth <= 768;
@@ -330,7 +330,7 @@ export default function CRMApp() {
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "#F8F6F1", color: "#22262E" }}>
-      {/* Overlay mÃ³vil */}
+      {/* Overlay móvil */}
       {isMobile && sidebarOpen && (
         <div onClick={() => setSidebarOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 99 }} />
       )}
@@ -369,7 +369,7 @@ export default function CRMApp() {
 
         {/* Toggle */}
         <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.4)", padding: "10px", cursor: "pointer", fontSize: 14, textAlign: sidebarOpen ? "right" : "center" }}>
-          {sidebarOpen ? "â" : "â·"}
+          {sidebarOpen ? "◁" : "▷"}
         </button>
 
         {/* Navigation */}
@@ -384,7 +384,7 @@ export default function CRMApp() {
             });
 
             return <>
-              {/* Formulario CualificaciÃ³n â destacado */}
+              {/* Formulario Cualificación — destacado */}
               {topModule && (
                 <div style={{ padding: "8px 10px 4px" }}>
                   <button
@@ -414,7 +414,7 @@ export default function CRMApp() {
                 const hasActive = mods.some(m => m.key === activeModule);
                 return (
                   <div key={group} style={{ marginTop: 4 }}>
-                    {/* Cabecera del grupo â colapsable */}
+                    {/* Cabecera del grupo — colapsable */}
                     <button
                       onClick={() => sidebarOpen ? toggleGroup(group) : null}
                       style={{
@@ -429,10 +429,10 @@ export default function CRMApp() {
                       {sidebarOpen ? (
                         <>
                           <span style={{ fontSize: 9, letterSpacing: "0.15em", textTransform: "uppercase", fontWeight: 600 }}>{group}</span>
-                          <span style={{ fontSize: 10, opacity: 0.5, transition: "transform 0.2s", transform: isExpanded ? "rotate(0deg)" : "rotate(-90deg)", display: "inline-block" }}>â¾</span>
+                          <span style={{ fontSize: 10, opacity: 0.5, transition: "transform 0.2s", transform: isExpanded ? "rotate(0deg)" : "rotate(-90deg)", display: "inline-block" }}>▾</span>
                         </>
                       ) : (
-                        <span style={{ fontSize: 8, letterSpacing: "0.1em" }}>Â·Â·Â·</span>
+                        <span style={{ fontSize: 8, letterSpacing: "0.1em" }}>···</span>
                       )}
                     </button>
 
@@ -475,7 +475,7 @@ export default function CRMApp() {
               <div style={{ fontSize: 9, color: "rgba(255,255,255,0.5)", textTransform: "uppercase", letterSpacing: "0.08em", marginTop: 2 }}>{currentUser.role === "director" ? "Director" : currentUser.role === "administrador" ? "Administrador" : "Agente"}</div>
               <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
                 <button onClick={() => { setNuevaClave(""); setConfirmarClave(""); setMsgClave(null); setModalClave(true); }} style={{ flex: 1, padding: "5px 8px", borderRadius: 0, border: "1px solid #2A2926", background: "transparent", color: "#9A968A", cursor: "pointer", fontSize: 9, textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}>
-                  ð Clave
+                  🔑 Clave
                 </button>
                 <button onClick={handleLogout} style={{ flex: 1, padding: "5px 8px", borderRadius: 0, border: "1px solid #2A2926", background: "transparent", color: "#9A968A", cursor: "pointer", fontSize: 9, textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}>
                   Salir
@@ -484,32 +484,32 @@ export default function CRMApp() {
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 4, alignItems: "center" }}>
-              <button onClick={() => { setNuevaClave(""); setConfirmarClave(""); setMsgClave(null); setModalClave(true); }} style={{ background: "none", border: "none", color: "#9A968A", cursor: "pointer", fontSize: 13, padding: 0 }} title="Cambiar contraseÃ±a">ð</button>
-              <button onClick={handleLogout} style={{ background: "none", border: "none", color: "#9A968A", cursor: "pointer", fontSize: 10, width: "100%", textAlign: "center" }} title="Cerrar sesion">â</button>
+              <button onClick={() => { setNuevaClave(""); setConfirmarClave(""); setMsgClave(null); setModalClave(true); }} style={{ background: "none", border: "none", color: "#9A968A", cursor: "pointer", fontSize: 13, padding: 0 }} title="Cambiar contraseña">🔑</button>
+              <button onClick={handleLogout} style={{ background: "none", border: "none", color: "#9A968A", cursor: "pointer", fontSize: 10, width: "100%", textAlign: "center" }} title="Cerrar sesion">✕</button>
             </div>
           )}
 
-          {/* Modal cambiar contraseÃ±a */}
+          {/* Modal cambiar contraseña */}
           {modalClave && (
             <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000, padding: 24 }}>
               <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, width: "100%", maxWidth: 360, padding: "32px 36px" }}>
-                <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 400, margin: "0 0 6px" }}>Cambiar contraseÃ±a</h2>
-                <div style={{ fontSize: 11, color: "#9A968A", marginBottom: 24 }}>{currentUser.nombre} Â· @{currentUser.user_login}</div>
+                <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 400, margin: "0 0 6px" }}>Cambiar contraseña</h2>
+                <div style={{ fontSize: 11, color: "#9A968A", marginBottom: 24 }}>{currentUser.nombre} · @{currentUser.user_login}</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                   <div>
-                    <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 4 }}>Nueva contraseÃ±a</label>
-                    <input type="password" value={nuevaClave} onChange={e => setNuevaClave(e.target.value)} placeholder="MÃ­nimo 6 caracteres" style={{ width: "100%", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "8px 10px", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" }} />
+                    <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 4 }}>Nueva contraseña</label>
+                    <input type="password" value={nuevaClave} onChange={e => setNuevaClave(e.target.value)} placeholder="Mínimo 6 caracteres" style={{ width: "100%", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "8px 10px", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" }} />
                   </div>
                   <div>
-                    <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 4 }}>Confirmar contraseÃ±a</label>
-                    <input type="password" value={confirmarClave} onChange={e => setConfirmarClave(e.target.value)} placeholder="Repite la contraseÃ±a" style={{ width: "100%", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "8px 10px", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" }} onKeyDown={e => e.key === "Enter" && handleCambiarClave()} />
+                    <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 4 }}>Confirmar contraseña</label>
+                    <input type="password" value={confirmarClave} onChange={e => setConfirmarClave(e.target.value)} placeholder="Repite la contraseña" style={{ width: "100%", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "8px 10px", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" }} onKeyDown={e => e.key === "Enter" && handleCambiarClave()} />
                   </div>
                 </div>
                 {msgClave && <div style={{ marginTop: 14, fontSize: 12, color: msgClave.type === "ok" ? "#2C6E52" : "#A23A3A", padding: "8px 12px", background: msgClave.type === "ok" ? "#6AAF8D11" : "#F6E7E5", borderRadius: 0 }}>{msgClave.text}</div>}
                 <div style={{ display: "flex", gap: 10, marginTop: 24, justifyContent: "flex-end" }}>
                   <button onClick={() => setModalClave(false)} style={{ background: "transparent", border: "1px solid #2A2926", borderRadius: 0, color: "#9A968A", fontSize: 11, cursor: "pointer", padding: "10px 20px", fontFamily: "Inter, sans-serif" }}>Cancelar</button>
                   <button onClick={handleCambiarClave} disabled={guardandoClave} style={{ background: guardandoClave ? "#E7E1D4" : "#AC8A54", border: "none", borderRadius: 0, color: guardandoClave ? "#9A968A" : "#F8F6F1", fontSize: 11, fontWeight: 700, cursor: guardandoClave ? "not-allowed" : "pointer", padding: "10px 24px", fontFamily: "Inter, sans-serif" }}>
-                    {guardandoClave ? "Guardando..." : "Cambiar contraseÃ±a"}
+                    {guardandoClave ? "Guardando..." : "Cambiar contraseña"}
                   </button>
                 </div>
               </div>
@@ -520,10 +520,10 @@ export default function CRMApp() {
 
       {/* Main content */}
       <div style={{ marginLeft: isMobile ? 0 : (sidebarOpen ? 220 : 56), flex: 1, transition: "margin-left 0.2s", minHeight: "100vh" }}>
-        {/* Topbar mÃ³vil */}
+        {/* Topbar móvil */}
         {isMobile && (
           <div style={{ background: "#16294A", padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, position: "sticky", top: 0, zIndex: 98 }}>
-            <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{ background: "none", border: "none", color: "#AC8A54", fontSize: 20, cursor: "pointer", padding: 0, lineHeight: 1 }}>â°</button>
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} style={{ background: "none", border: "none", color: "#AC8A54", fontSize: 20, cursor: "pointer", padding: 0, lineHeight: 1 }}>☰</button>
             <div style={{ fontSize: 9, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", fontWeight: 500 }}>Nativa Properties</div>
             <div style={{ fontSize: 14, fontFamily: "'Playfair Display', serif", color: "#FFFFFF" }}><em>CRM</em></div>
           </div>
@@ -531,7 +531,7 @@ export default function CRMApp() {
         {/* Health alerts banner */}
         {healthAlerts.length > 0 && (
           <div style={{ background: "#D4545418", borderBottom: "1px solid #D4545433", padding: "10px 24px", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 14 }}>â ï¸</span>
+            <span style={{ fontSize: 14 }}>⚠️</span>
             <div style={{ flex: 1 }}>
               {healthAlerts.map((a, i) => (
                 <span key={i} style={{ fontSize: 11, color: "#A23A3A", marginRight: 16 }}>
@@ -539,7 +539,7 @@ export default function CRMApp() {
                 </span>
               ))}
             </div>
-            <button onClick={() => setHealthAlerts([])} style={{ background: "none", border: "none", color: "#A23A3A", cursor: "pointer", fontSize: 16, padding: 0 }}>â</button>
+            <button onClick={() => setHealthAlerts([])} style={{ background: "none", border: "none", color: "#A23A3A", cursor: "pointer", fontSize: 16, padding: 0 }}>✕</button>
           </div>
         )}
         <Suspense fallback={<LoadingModule />}>
