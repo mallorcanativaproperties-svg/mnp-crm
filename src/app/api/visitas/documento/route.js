@@ -503,11 +503,175 @@ export async function POST(req) {
     return NextResponse.json({ ok: true });
 
   } else if (firmante === "agente") {
+    // 1. Guardar firma del agente
     await supabase.from("visita_documentos").update({
       firma_agente_data: firmaData,
       firma_agente_fecha: now,
+      estado: "firmado_agente",
       updated_at: now,
     }).eq("id", docId);
+
+    // 2. Regenerar PDF con todas las firmas + merge justificante → enviar a todos
+    try {
+      const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://crm.mallorcanativaproperties.com";
+
+      // 2a. Regenerar PDF firmado (llamada al propio GET con todas las firmas ya guardadas)
+      const pdfRes = await fetch(`${BASE_URL}/api/visitas/documento?id=${docId}`);
+      if (!pdfRes.ok) throw new Error(`PDF regen error ${pdfRes.status}`);
+      const pdfBytes = Buffer.from(await pdfRes.arrayBuffer());
+
+      // 2b. Cargar datos del doc (para justificante y datos de contacto)
+      const { data: docFull } = await supabase
+        .from("visita_documentos")
+        .select("*, visitas(id, agente_login, propiedad_id)")
+        .eq("id", docId)
+        .single();
+
+      // 2c. Merge con justificante si existe
+      let pdfFinal = pdfBytes;
+      if (docFull?.justificante_deposito_url) {
+        try {
+          const justRes = await fetch(docFull.justificante_deposito_url);
+          if (justRes.ok) {
+            const contentType = justRes.headers.get("content-type") || "";
+            const justBytes = Buffer.from(await justRes.arrayBuffer());
+            const mergedDoc = await PDFDocument.load(pdfBytes);
+
+            if (contentType.includes("pdf")) {
+              // Justificante es PDF: añadir sus páginas
+              const justPdf = await PDFDocument.load(justBytes);
+              const pageIdxs = justPdf.getPageIndices();
+              const copiedPages = await mergedDoc.copyPages(justPdf, pageIdxs);
+              copiedPages.forEach(p => mergedDoc.addPage(p));
+            } else {
+              // Justificante es imagen (jpg/png): añadir como nueva página A4
+              const justPage = mergedDoc.addPage([595, 842]); // A4 pts
+              let img;
+              if (contentType.includes("png")) {
+                img = await mergedDoc.embedPng(justBytes);
+              } else {
+                img = await mergedDoc.embedJpg(justBytes);
+              }
+              const { width: iw, height: ih } = img.scale(1);
+              const scale = Math.min(535 / iw, 782 / ih); // margen 30pts cada lado
+              const sw = iw * scale;
+              const sh = ih * scale;
+              justPage.drawImage(img, {
+                x: (595 - sw) / 2,
+                y: (842 - sh) / 2,
+                width: sw,
+                height: sh,
+              });
+            }
+            pdfFinal = Buffer.from(await mergedDoc.save());
+          }
+        } catch (e) {
+          console.error("[documento/agente] merge justificante error:", e.message);
+          // Continúa con solo el PDF del contrato
+        }
+      }
+
+      // 2d. Subir PDF final al storage
+      const storagePath = `documentos_visita/${docId}_firmado_completo.pdf`;
+      await supabase.storage.from("formacion").upload(storagePath, pdfFinal, {
+        contentType: "application/pdf", upsert: true,
+      });
+      const { data: urlData } = supabase.storage.from("formacion").getPublicUrl(storagePath);
+      const pdfFinalUrl = urlData.publicUrl;
+
+      // Actualizar pdf_url con la versión completa
+      await supabase.from("visita_documentos").update({ pdf_url: pdfFinalUrl }).eq("id", docId);
+
+      // 2e. Obtener teléfonos de todos los destinatarios
+      const telefonos = []; // { tel, nombre }
+
+      // Compradores
+      const { data: firmasComp } = await supabase
+        .from("visita_doc_firmas")
+        .select("nombre_firmante, comprador_id")
+        .eq("doc_id", docId);
+      if (firmasComp?.length) {
+        for (const fc of firmasComp) {
+          if (fc.comprador_id) {
+            const { data: c } = await supabase
+              .from("compradores")
+              .select("telefono, nombre, apellidos")
+              .eq("id", fc.comprador_id)
+              .single();
+            if (c?.telefono) {
+              telefonos.push({ tel: c.telefono, nombre: fc.nombre_firmante || `${c.nombre} ${c.apellidos}`.trim() });
+            }
+          }
+        }
+      }
+
+      // Propietarios (vendedores)
+      const { data: firmasVend } = await supabase
+        .from("visita_doc_firmas_vendedor")
+        .select("nombre_firmante, telefono")
+        .eq("doc_id", docId);
+      if (firmasVend?.length) {
+        for (const fv of firmasVend) {
+          if (fv.telefono) {
+            telefonos.push({ tel: fv.telefono, nombre: fv.nombre_firmante || "Propietario" });
+          }
+        }
+      }
+
+      // Agente
+      if (docFull?.visitas?.agente_login) {
+        const { data: ag } = await supabase
+          .from("usuarios")
+          .select("nombre, telefono")
+          .eq("user_login", docFull.visitas.agente_login)
+          .single();
+        if (ag?.telefono) {
+          telefonos.push({ tel: ag.telefono, nombre: ag.nombre || "Agente" });
+        }
+      }
+
+      // 2f. Enviar PDF por WhatsApp a todos
+      const TIPO = {
+        hoja_visita:  "Registro de Visita",
+        oferta:       "Propuesta de Compra",
+        reserva:      "Reserva Exclusiva",
+        contraoferta: "Contraoferta",
+      };
+      const tipoDoc = TIPO[docFull?.tipo] || docFull?.tipo || "Documento";
+      const caption = `📄 *${tipoDoc} — firmado por todas las partes*\n\nAdjunto encontrará el documento firmado${docFull?.justificante_deposito_url ? " junto con el justificante de depósito" : ""}.\n\n_Nativa Properties — 655 88 26 82_`;
+
+      function normTel(tel) {
+        let n = String(tel).replace(/\D/g, "");
+        if (n.startsWith("0034")) n = n.slice(4);
+        if (n.length === 9) n = "34" + n;
+        return n;
+      }
+
+      for (const dest of telefonos) {
+        try {
+          const numero = normTel(dest.tel);
+          await fetch(`${process.env.EVOLUTION_API_URL}/message/sendMedia/${process.env.EVOLUTION_INSTANCE}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "apikey": process.env.EVOLUTION_API_KEY },
+            body: JSON.stringify({
+              number: numero,
+              mediatype: "document",
+              mimetype: "application/pdf",
+              media: pdfFinalUrl,
+              fileName: `${tipoDoc.replace(/ /g,"_")}_firmado.pdf`,
+              caption,
+            }),
+          });
+          console.log(`[documento/agente] PDF enviado a ${dest.nombre} (${numero})`);
+        } catch (e) {
+          console.error(`[documento/agente] error enviando a ${dest.nombre}:`, e.message);
+        }
+      }
+    } catch (e) {
+      console.error("[documento/agente] post-firma error:", e.message);
+      // No bloqueamos la respuesta — la firma ya se guardó
+    }
+
     return NextResponse.json({ ok: true });
   }
 
