@@ -504,11 +504,11 @@ export async function POST(req) {
     return NextResponse.json({ ok: true });
 
   } else if (firmante === "agente") {
-    // 1. Guardar firma del agente
+    // 1. Guardar firma del agente → completado (agente firma siempre el último)
     await supabase.from("visita_documentos").update({
       firma_agente_data: firmaData,
       firma_agente_fecha: now,
-      estado: "firmado_agente",
+      estado: "completado",
       updated_at: now,
     }).eq("id", docId);
 
