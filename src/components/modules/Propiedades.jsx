@@ -568,7 +568,7 @@ function SeccionGrande({ title, badge, badgeColor, children, defaultOpen = true,
         style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
           cursor: "pointer", padding: "13px 20px",
-          background: open ? "#F0EAE0" : "#F5F0E8",
+          background: "#F0EAE0",
           borderTop: "1px solid #E0D9CE",
           borderBottom: open ? "1px solid #E0D9CE" : "1px solid #E0D9CE",
           borderLeft: `3px solid ${accentColor}`,
@@ -1364,10 +1364,10 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
             {/* Header */}
             <div style={{ padding: "24px 32px 0", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
               <div>
-                <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 22, fontWeight: 400, color: "#1a2528", lineHeight: 1.2 }}>
+                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 400, color: "#1a2528", lineHeight: 1.2 }}>
                   Edición con Inteligencia Artificial
                 </div>
-                <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, color: "var(--gold)", marginTop: 4, letterSpacing: "0.06em" }}>
+                <div style={{ fontFamily: "Inter, sans-serif", fontSize: 12, color: "var(--gold)", marginTop: 4, letterSpacing: "0.06em" }}>
                   {iaModal.item.nombre}
                 </div>
               </div>
@@ -1382,7 +1382,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
             {/* Vista variaciones Home Staging (pantalla completa en el modal) */}
             {iaVariaciones.length > 0 ? (
               <div style={{ padding: "0 32px 28px" }}>
-                <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 10, color: "var(--muted)", letterSpacing: "0.12em", marginBottom: 16 }}>
+                <div style={{ fontFamily: "Inter, sans-serif", fontSize: 10, color: "var(--muted)", letterSpacing: "0.12em", marginBottom: 16 }}>
                   VARIACIONES HOME STAGING — {iaVariaciones.length}/3 · Selecciona la que más te guste
                 </div>
 
@@ -1390,13 +1390,13 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                 <div style={{ display: "grid", gridTemplateColumns: `repeat(${1 + iaVariaciones.length}, 1fr)`, gap: 12, marginBottom: 24 }}>
                   {/* Original */}
                   <div>
-                    <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 10, color: "var(--muted)", letterSpacing: "0.1em", marginBottom: 8 }}>ORIGINAL</div>
+                    <div style={{ fontFamily: "Inter, sans-serif", fontSize: 10, color: "var(--muted)", letterSpacing: "0.1em", marginBottom: 8 }}>ORIGINAL</div>
                     <img src={iaModal.item.url} alt="original" style={{ width: "100%", height: 340, objectFit: "cover", border: "2px solid var(--border)", display: "block" }} />
                   </div>
                   {/* Variaciones */}
                   {iaVariaciones.map((v, i) => (
                     <div key={i} onClick={() => setIaSeleccionada(i)} style={{ cursor: "pointer" }}>
-                      <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 10, color: iaSeleccionada === i ? "var(--gold)" : "var(--muted)", letterSpacing: "0.1em", marginBottom: 8, fontWeight: iaSeleccionada === i ? 700 : 400 }}>
+                      <div style={{ fontFamily: "Inter, sans-serif", fontSize: 10, color: iaSeleccionada === i ? "var(--gold)" : "var(--muted)", letterSpacing: "0.1em", marginBottom: 8, fontWeight: iaSeleccionada === i ? 700 : 400 }}>
                         {iaSeleccionada === i ? "✓ " : ""}{v.label.toUpperCase()}
                       </div>
                       <div style={{ position: "relative" }}>
@@ -1412,8 +1412,8 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                 {/* Loading mientras genera */}
                 {iaLoading && (
                   <div style={{ textAlign: "center", padding: "20px 0", borderTop: "1px solid var(--border)", marginBottom: 16 }}>
-                    <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 24, color: "var(--gold)", marginBottom: 8 }}>✦</div>
-                    <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 13, color: "#1a2528" }}>Generando variación...</div>
+                    <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, color: "var(--gold)", marginBottom: 8 }}>✦</div>
+                    <div style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#1a2528" }}>Generando variación...</div>
                     <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>20 — 40 segundos</div>
                   </div>
                 )}
@@ -1425,7 +1425,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                     {iaVariaciones.length < 3 && !iaLoading && (
                       <div style={{ display: "flex", gap: 0 }}>
                         <select value={iaEstilo} onChange={e => setIaEstilo(e.target.value)}
-                          style={{ padding: "10px 14px", background: "#fff", border: "1px solid var(--border)", borderRight: "none", color: "#1a2528", fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, outline: "none", cursor: "pointer", appearance: "none", WebkitAppearance: "none" }}>
+                          style={{ padding: "10px 14px", background: "#fff", border: "1px solid var(--border)", borderRight: "none", color: "#1a2528", fontFamily: "Inter, sans-serif", fontSize: 12, outline: "none", cursor: "pointer", appearance: "none", WebkitAppearance: "none" }}>
                           {["Nórdico","Industrial","Ecléctico","Minimalista","Bohemio","Art Deco"].map(e => (
                             <option key={e} value={e.toLowerCase()}>{e}</option>
                           ))}
@@ -1435,23 +1435,23 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                             const result = await generarVariacionIA(iaModal.item, iaEstilo);
                             if (result) setIaVariaciones(prev => [...prev, { url: result.url, storageKey: result.storageKey, label: `${iaEstilo.charAt(0).toUpperCase() + iaEstilo.slice(1)} ${prev.length + 1}` }]);
                           }}
-                          style={{ padding: "10px 18px", background: "var(--gold)", border: "none", color: "var(--cream)", fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.06em", cursor: "pointer" }}>
+                          style={{ padding: "10px 18px", background: "var(--gold)", border: "none", color: "var(--cream)", fontFamily: "Inter, sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.06em", cursor: "pointer" }}>
                           + Generar otra
                         </button>
                       </div>
                     )}
                     {iaVariaciones.length >= 3 && !iaLoading && (
-                      <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 11, color: "var(--muted)" }}>Máximo 3 variaciones alcanzado</div>
+                      <div style={{ fontFamily: "Inter, sans-serif", fontSize: 11, color: "var(--muted)" }}>Máximo 3 variaciones alcanzado</div>
                     )}
                   </div>
                   <div style={{ display: "flex", gap: 10 }}>
                     <button onClick={() => { setIaVariaciones([]); setIaSeleccionada(null); }}
-                      style={{ padding: "11px 20px", background: "none", border: "1px solid var(--border)", color: "var(--muted)", fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, cursor: "pointer" }}>
+                      style={{ padding: "11px 20px", background: "none", border: "1px solid var(--border)", color: "var(--muted)", fontFamily: "Inter, sans-serif", fontSize: 12, cursor: "pointer" }}>
                       Volver
                     </button>
                     {iaSeleccionada !== null && (
                       <button onClick={() => aplicarVariacionIA(iaVariaciones[iaSeleccionada])}
-                        style={{ padding: "11px 28px", background: "#1a2528", border: "none", color: "var(--cream)", fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", cursor: "pointer" }}>
+                        style={{ padding: "11px 28px", background: "#1a2528", border: "none", color: "var(--cream)", fontFamily: "Inter, sans-serif", fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", cursor: "pointer" }}>
                         USAR ESTA IMAGEN
                       </button>
                     )}
@@ -1465,7 +1465,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
 
                 {/* Foto original */}
                 <div style={{ paddingRight: 28 }}>
-                  <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 10, color: "var(--muted)", letterSpacing: "0.12em", marginBottom: 10 }}>IMAGEN ORIGINAL</div>
+                  <div style={{ fontFamily: "Inter, sans-serif", fontSize: 10, color: "var(--muted)", letterSpacing: "0.12em", marginBottom: 10 }}>IMAGEN ORIGINAL</div>
                   <img src={iaModal.item.url} alt="original" style={{ width: "100%", height: 440, objectFit: "cover", display: "block", border: "1px solid var(--border)" }} />
                 </div>
 
@@ -1474,12 +1474,12 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
 
                   {/* Mejora automática */}
                   <div style={{ marginBottom: 28 }}>
-                    <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 10, color: "var(--muted)", letterSpacing: "0.12em", marginBottom: 10 }}>MEJORA AUTOMÁTICA</div>
-                    <p style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, color: "#6B7280", lineHeight: 1.6, marginBottom: 14 }}>
+                    <div style={{ fontFamily: "Inter, sans-serif", fontSize: 10, color: "var(--muted)", letterSpacing: "0.12em", marginBottom: 10 }}>MEJORA AUTOMÁTICA</div>
+                    <p style={{ fontFamily: "Inter, sans-serif", fontSize: 12, color: "#6B7280", lineHeight: 1.6, marginBottom: 14 }}>
                       Optimiza iluminación, ángulo y encuadre. Retira desorden. Alta definición 16:9. Reemplaza la foto original directamente.
                     </p>
                     <button onClick={() => mejorarFoto(iaModal.item)} disabled={iaLoading}
-                      style={{ width: "100%", padding: "13px 0", background: iaLoading ? "var(--border)" : "#1a2528", border: "none", color: iaLoading ? "var(--muted)" : "var(--cream)", fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", cursor: iaLoading ? "not-allowed" : "pointer" }}>
+                      style={{ width: "100%", padding: "13px 0", background: iaLoading ? "var(--border)" : "#1a2528", border: "none", color: iaLoading ? "var(--muted)" : "var(--cream)", fontFamily: "Inter, sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", cursor: iaLoading ? "not-allowed" : "pointer" }}>
                       Mejorar fotografía
                     </button>
                   </div>
@@ -1488,12 +1488,12 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
 
                   {/* Home Staging */}
                   <div style={{ marginBottom: 28 }}>
-                    <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 10, color: "var(--muted)", letterSpacing: "0.12em", marginBottom: 10 }}>HOME STAGING VIRTUAL</div>
-                    <p style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, color: "#6B7280", lineHeight: 1.6, marginBottom: 14 }}>
+                    <div style={{ fontFamily: "Inter, sans-serif", fontSize: 10, color: "var(--muted)", letterSpacing: "0.12em", marginBottom: 10 }}>HOME STAGING VIRTUAL</div>
+                    <p style={{ fontFamily: "Inter, sans-serif", fontSize: 12, color: "#6B7280", lineHeight: 1.6, marginBottom: 14 }}>
                       Rediseño visual del espacio manteniendo la estructura. Genera hasta 3 variaciones para comparar antes de elegir.
                     </p>
                     <select value={iaEstilo} onChange={e => setIaEstilo(e.target.value)}
-                      style={{ width: "100%", padding: "11px 14px", marginBottom: 10, background: "#fff", border: "1px solid var(--border)", color: "#1a2528", fontFamily: "Raleway, Inter, sans-serif", fontSize: 13, outline: "none", cursor: "pointer", appearance: "none", WebkitAppearance: "none" }}>
+                      style={{ width: "100%", padding: "11px 14px", marginBottom: 10, background: "#fff", border: "1px solid var(--border)", color: "#1a2528", fontFamily: "Inter, sans-serif", fontSize: 13, outline: "none", cursor: "pointer", appearance: "none", WebkitAppearance: "none" }}>
                       {["Nórdico","Industrial","Ecléctico","Minimalista","Bohemio","Art Deco"].map(e => (
                         <option key={e} value={e.toLowerCase()}>{e}</option>
                       ))}
@@ -1504,7 +1504,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                         if (result) setIaVariaciones([{ url: result.url, storageKey: result.storageKey, label: `${iaEstilo.charAt(0).toUpperCase() + iaEstilo.slice(1)} 1` }]);
                       }}
                       disabled={iaLoading}
-                      style={{ width: "100%", padding: "13px 0", background: iaLoading ? "var(--border)" : "var(--gold)", border: "none", color: iaLoading ? "var(--muted)" : "var(--cream)", fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", cursor: iaLoading ? "not-allowed" : "pointer" }}>
+                      style={{ width: "100%", padding: "13px 0", background: iaLoading ? "var(--border)" : "var(--gold)", border: "none", color: iaLoading ? "var(--muted)" : "var(--cream)", fontFamily: "Inter, sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", cursor: iaLoading ? "not-allowed" : "pointer" }}>
                       Generar Home Staging
                     </button>
                   </div>
@@ -1512,16 +1512,16 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                   {/* Loading */}
                   {iaLoading && (
                     <div style={{ textAlign: "center", padding: "20px 0", borderTop: "1px solid var(--border)" }}>
-                      <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 28, color: "var(--gold)", marginBottom: 10, lineHeight: 1 }}>✦</div>
-                      <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 13, color: "#1a2528", fontWeight: 500 }}>Generando imagen...</div>
-                      <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 11, color: "var(--muted)", marginTop: 6 }}>20 — 40 segundos</div>
+                      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, color: "var(--gold)", marginBottom: 10, lineHeight: 1 }}>✦</div>
+                      <div style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#1a2528", fontWeight: 500 }}>Generando imagen...</div>
+                      <div style={{ fontFamily: "Inter, sans-serif", fontSize: 11, color: "var(--muted)", marginTop: 6 }}>20 — 40 segundos</div>
                     </div>
                   )}
 
                   {!iaLoading && (
                     <div style={{ marginTop: "auto", paddingTop: 20, borderTop: "1px solid var(--border)" }}>
                       <button onClick={() => { setIaModal(null); setIaVariaciones([]); setIaSeleccionada(null); }}
-                        style={{ width: "100%", padding: "11px 0", background: "none", border: "1px solid var(--border)", color: "var(--muted)", fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, cursor: "pointer" }}>
+                        style={{ width: "100%", padding: "11px 0", background: "none", border: "1px solid var(--border)", color: "var(--muted)", fontFamily: "Inter, sans-serif", fontSize: 12, cursor: "pointer" }}>
                         Cancelar
                       </button>
                     </div>
@@ -1633,7 +1633,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                 textTransform: "uppercase", fontFamily: "Inter, sans-serif", marginBottom: 4 }}>
                 Nativa Properties · IA
               </div>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 400 }}>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 600 }}>
                 Mejorar <em>fotografías</em>
               </div>
               <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 6, fontFamily: "Inter, sans-serif" }}>
@@ -2014,7 +2014,7 @@ function PropCard({ p, onClick }) {
             <Tag color={est.accent}>{est.label}</Tag>
             <Tag>{p.op}</Tag>
           </div>
-          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 400, color: "var(--text)", lineHeight: 1.3 }}>{p.ref} – {p.titulo}</div>
+          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 600, color: "var(--text)", lineHeight: 1.3 }}>{p.ref} – {p.titulo}</div>
           <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 4 }}>{p.zona}, {p.municipio} - {p.tipo}</div>
         </div>
         <div style={{ textAlign: "right", flexShrink: 0 }}>
@@ -3182,7 +3182,7 @@ REGLAS:
                       upd("aireAcond", newVal);
                       if (newVal && (!draft?.aireAcondTipo || draft?.aireAcondTipo === "No disponible")) upd("aireAcondTipo", "Frio/Calor");
                       if (!newVal) upd("aireAcondTipo", "");
-                    }} style={{ width: 36, height: 20, borderRadius: 10, border: "none", background: aireVal ? "var(--success)" : "var(--border)", cursor: "pointer", position: "relative", transition: "background 0.2s", flexShrink: 0 }}>
+                    }} style={{ width: 36, height: 20, borderRadius: 0, border: "none", background: aireVal ? "var(--success)" : "var(--border)", cursor: "pointer", position: "relative", transition: "background 0.2s", flexShrink: 0 }}>
                       <span style={{ position: "absolute", top: 2, left: aireVal ? 18 : 2, width: 16, height: 16, borderRadius: "50%", background: "#fff", transition: "left 0.2s", display: "block" }} />
                     </button>
                     <span style={{ fontSize: 12 }}>{aireVal ? "Sí" : "No"}</span>
@@ -3616,7 +3616,7 @@ function TabVisitasReadOnly({ propiedadId }) {
             Visitas y documentos
           </span>
           {totalVisitas > 0 && (
-            <span style={{ fontSize: 10, background: `${GOLD}18`, color: GOLD, padding: "2px 8px", borderRadius: 10, fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
+            <span style={{ fontSize: 10, background: `${GOLD}18`, color: GOLD, padding: "2px 8px", borderRadius: 0, fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
               {totalVisitas} visita{totalVisitas !== 1 ? "s" : ""} · {totalDocs} doc{totalDocs !== 1 ? "s" : ""}
             </span>
           )}
@@ -3651,7 +3651,7 @@ function TabVisitasReadOnly({ propiedadId }) {
                         {v.notas && <div style={{ fontSize: 11, color: TEXT, marginTop: 4, fontStyle: "italic" }}>{v.notas}</div>}
                       </div>
                       {v.resumen_ia && (
-                        <span style={{ fontSize: 10, background: "var(--success)18", color: "var(--success)", padding: "2px 8px", borderRadius: 10, whiteSpace: "nowrap", flexShrink: 0 }}>✓ Resumen IA</span>
+                        <span style={{ fontSize: 10, background: "var(--success)18", color: "var(--success)", padding: "2px 8px", borderRadius: 0, whiteSpace: "nowrap", flexShrink: 0 }}>✓ Resumen IA</span>
                       )}
                     </div>
                     {docs.length > 0 && (
@@ -3659,7 +3659,7 @@ function TabVisitasReadOnly({ propiedadId }) {
                         {docs.map(doc => {
                           const est = ESTADO_DOC[doc.estado] || { label: doc.estado, color: MUTED };
                           return (
-                            <div key={doc.id} style={{ fontSize: 10, border: `1px solid ${est.color}44`, color: est.color, padding: "3px 10px", borderRadius: 10, fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
+                            <div key={doc.id} style={{ fontSize: 10, border: `1px solid ${est.color}44`, color: est.color, padding: "3px 10px", borderRadius: 0, fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
                               {TIPO_DOC[doc.tipo] || doc.tipo} · {est.label}
                             </div>
                           );
