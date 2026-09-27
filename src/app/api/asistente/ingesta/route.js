@@ -121,8 +121,17 @@ function numeroDeArticulo(encabezado) {
   // Los ordinales latinos altos (sexies, septies... sexdecies) tienen que estar
   // en la lista: si no, "Articulo 158 septies" devuelve "158" y un filtro por el
   // 158 se lleva doce articulos de mas sin avisar.
+  //
+  // El (?![a-zç]) del final no es adorno: sin el, "ter" gana a "terdecies" por
+  // ser la alternativa anterior, y "Articulo 158 terdecies" pasa a ser "158 ter".
+  // La mordaza impide que un sufijo se coma el principio de otro mas largo, sea
+  // cual sea el orden de la lista.
+  //
+  // "quarter" con r es como lo escribe la normativa del PTIM de Mallorca; el
+  // latin correcto es "quater", y los dos circulan en boletines, asi que valen
+  // los dos.
   const m = encabezado.match(
-    /(?:Art[íi]cul[oe]|Art[íi]cle|Norm[ae])\s+([0-9]+)(?:º|ª|è|é|er|r|n|t|a)?\.?\s*(bis|ter|quater|qu[íi]nquies|sexies|septies|octies|nonies|decies|undecies|duodecies|terdecies|quaterdecies|quindecies|sexdecies)?/i
+    /(?:Art[íi]cul[oe]|Art[íi]cle|Norm[ae])\s+([0-9]+)(?:º|ª|è|é|er|r|n|t|a)?\.?\s*(bis|ter|quar?ter|qu[íi]nquies|sexies|septies|octies|nonies|decies|undecies|duodecies|terdecies|quaterdecies|quindecies|sexdecies)?(?![a-zç])/i
   );
   if (!m) return null;
   return [m[1], m[2]].filter(Boolean).join(" ").trim().toLowerCase();
