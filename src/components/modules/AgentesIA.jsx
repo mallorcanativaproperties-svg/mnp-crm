@@ -257,12 +257,25 @@ function Tag({ children, color }) {
   return <span style={{ display: "inline-block", fontSize: 9, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", padding: "3px 10px", borderRadius: 0, background: c + "18", color: c }}>{children}</span>;
 }
 
+function WATicks({ status }) {
+  if (!status) return null;
+  const s = String(status).toUpperCase();
+  if (s === "READ")      return <span style={{ color: "#34B7F1", fontSize: 11, marginLeft: 3 }}>✓✓</span>;
+  if (s === "DELIVERED") return <span style={{ color: "#9A968A", fontSize: 11, marginLeft: 3 }}>✓✓</span>;
+  if (s === "SENT")      return <span style={{ color: "#9A968A", fontSize: 11, marginLeft: 3 }}>✓</span>;
+  if (s === "PENDING")   return <span style={{ color: "#C8C0B0", fontSize: 11, marginLeft: 3 }}>🕐</span>;
+  return null;
+}
+
 function ChatBubble({ msg, isAgent }) {
   return (
     <div style={{ display: "flex", justifyContent: isAgent ? "flex-end" : "flex-start", marginBottom: 6 }}>
       <div style={{ maxWidth: "75%", padding: "10px 14px", borderRadius: isAgent ? "12px 12px 2px 12px" : "12px 12px 12px 2px", background: isAgent ? "#C8A97E22" : "#FFFFFF", border: "1px solid " + (isAgent ? "#C8A97E33" : "#E7E1D4") }}>
         <div style={{ fontSize: 12, color: "#22262E", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>{msg.text}</div>
-        <div style={{ fontSize: 9, color: "#9A968A", marginTop: 4, textAlign: isAgent ? "right" : "left" }}>{msg.ts}</div>
+        <div style={{ fontSize: 9, color: "#9A968A", marginTop: 4, textAlign: isAgent ? "right" : "left", display: "flex", alignItems: "center", justifyContent: isAgent ? "flex-end" : "flex-start", gap: 2 }}>
+          <span>{msg.ts}</span>
+          {isAgent && <WATicks status={msg.wa_status} />}
+        </div>
       </div>
     </div>
   );
@@ -993,6 +1006,7 @@ export default function AgentesIA() {
                 from: m.from_who || "cliente",
                 text: m.texto || "",
                 ts: m.timestamp ? new Date(m.timestamp).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) : "",
+                wa_status: m.wa_status || null,
               })),
               alertas: c.alertas || [],
               propiedad: c.propiedad || c.referencia || c.canal || "WhatsApp",
@@ -1027,6 +1041,7 @@ export default function AgentesIA() {
             from: m.from_who || "cliente",
             text: m.texto || "",
             ts: m.timestamp ? new Date(m.timestamp).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) : "",
+            wa_status: m.wa_status || null,
           })),
           alertas: c.alertas || [],
           propiedad: c.referencia ? `${c.referencia}${c.enlace ? " · " + c.enlace : ""}` : c.interes || c.contacto || c.canal || "WhatsApp",
