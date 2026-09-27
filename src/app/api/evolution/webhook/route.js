@@ -262,7 +262,34 @@ export async function POST(request) {
 
     for (const msg of items) {
       const key = msg.key || {};
-      if (key.fromMe) continue; // ignorar mensajes enviados por nosotros
+
+      // ── Mensajes enviados POR NOSOTROS desde WhatsApp (app móvil o web) ──────
+      // Los que envía el CRM se registran en logMensajeWA; estos son los que
+      // manda el agente directamente desde la app de WhatsApp.
+      if (key.fromMe) {
+        const remoteJid = key.remoteJid || "";
+        if (remoteJid && !remoteJid.endsWith("@g.us") && remoteJid !== "status@broadcast") {
+          const toPhone = jidToPhone(remoteJid);
+          const text    = extractIncomingText(msg.message);
+          if (toPhone && text) {
+            const phoneClean = toPhone;
+            const phoneWith34 = phoneClean.startsWith("34") ? phoneClean : "34" + phoneClean;
+            const { data: convs } = await supabase.from("conversaciones")
+              .select("id").or(`telefono.eq.${phoneClean},telefono.eq.${phoneWith34}`)
+              .order("created_at", { ascending: false }).limit(1);
+            if (convs?.length) {
+              await supabase.from("mensajes").upsert({
+                conversacion_id: convs[0].id,
+                from_who:        "agente",
+                texto:           text,
+                timestamp:       new Date().toISOString(),
+                wa_message_id:   key.id,
+              }, { onConflict: "wa_message_id", ignoreDuplicates: true });
+            }
+          }
+        }
+        continue;
+      }
 
       const remoteJid = key.remoteJid || "";
       if (!remoteJid || remoteJid.endsWith("@g.us") || remoteJid === "status@broadcast") continue;
