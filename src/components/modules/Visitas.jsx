@@ -1971,8 +1971,8 @@ export default function Visitas({ currentUser }) {
     q.then(({ data }) => setPropsAgente(data || []));
   }, [modalNuevaVisita]);
 
-  const cargar = useCallback(async () => {
-    setLoading(true);
+  const cargar = useCallback(async (silencioso = false) => {
+    if (!silencioso) setLoading(true);
     let q = supabase.from("visitas")
       .select("*, compradores(id,nombre,apellidos,dni,telefono,email,pais), visita_documentos(*), visita_compradores(*, compradores(id,nombre,apellidos,dni,telefono,email,pais))")
       .eq("activo", true)
@@ -1997,13 +1997,17 @@ export default function Visitas({ currentUser }) {
       .select("*").neq("estado", "enviado");
     setInformes(inf || []);
 
-    setVisitas(vData);
-    setLoading(false);
+    // Solo actualizar si los datos cambiaron (evita re-render y salto visual en refresh silencioso)
+    setVisitas(prev => {
+      if (JSON.stringify(prev) === JSON.stringify(vData)) return prev;
+      return vData;
+    });
+    if (!silencioso) setLoading(false);
   }, [isAdmin, currentUser?.user_login]);
 
   useEffect(() => {
     cargar();
-    const interval = setInterval(cargar, 15000);
+    const interval = setInterval(() => cargar(true), 15000);
     return () => clearInterval(interval);
   }, [cargar]);
 
