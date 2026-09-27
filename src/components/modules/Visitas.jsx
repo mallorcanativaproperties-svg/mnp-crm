@@ -840,6 +840,23 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
   const fb = visita.feedback;
   const nivelInteres = fb?.nivel_interes;
   const NIVEL_COLOR = ["",DANGER,DANGER,GOLD,GOLD,SUCCESS];
+  const [editandoFeedback, setEditandoFeedback] = useState(false);
+  const [fbEdit, setFbEdit] = useState(null);
+  const [guardandoFb, setGuardandoFb] = useState(false);
+
+  const OBJECIONES_OPTS = ["Precio alto","Estado / reforma necesaria","Zona o ubicación","Tamaño o distribución","Sin parking / trastero","Financiación pendiente","Comparando con otras propiedades","Sin objeciones"];
+  const SIGUIENTE_PASO_OPTS = ["Sin acción","Reenviar documentación","Segunda visita","Presentar oferta","Espera respuesta del comprador","Descartada"];
+  const VALORACION_PRECIO_OPTS = ["Precio aceptable","Precio alto, pediría rebaja","Precio muy fuera de mercado"];
+  const NIVEL_LABEL = ["","Sin interés","Interés bajo","Interés moderado","Interés alto","Muy interesado"];
+
+  async function guardarFeedback() {
+    setGuardandoFb(true);
+    await supabase.from("visitas").update({ feedback: fbEdit, updated_at: new Date().toISOString() }).eq("id", visita.id);
+    setGuardandoFb(false);
+    setEditandoFeedback(false);
+    notificarGuardado("Análisis guardado");
+    onActualizado();
+  }
 
   async function cambiarEstadoDoc(docId, nuevoEstado) {
     await supabase.from("visita_documentos").update({
@@ -850,11 +867,11 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
     }).eq("id", docId);
 
     const doc = docs.find(d => d.id === docId);
-    if (doc && ["oferta", "reserva"].includes(doc.tipo) && nuevoEstado === "enviado") {
+    if (doc && ["oferta", "reserva"].includes(doc.tipo) && ["enviado", "firmado_comprador"].includes(nuevoEstado)) {
       await fetch("/api/visitas/notificar-admin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ visitaId: visita.id, docId, tipo: doc.tipo, propiedad }),
+        body: JSON.stringify({ visitaId: visita.id, docId, tipo: doc.tipo, propiedad, estado: nuevoEstado }),
       });
     }
     onActualizado();
@@ -973,53 +990,142 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
           </div>
 
           {/* ── 🤖 Análisis IA ── */}
-          {fb && (
+          {(fb || puedeEditar) && (
             <div style={{ padding: "16px", borderBottom: `1px solid ${BORDER}` }}>
-              <div style={{ fontSize: 11, color: GOLD, fontWeight: 800, letterSpacing: "0.1em",
-                marginBottom: 12, fontFamily: "Inter, sans-serif" }}>🤖 ANÁLISIS IA</div>
-              <div style={{ background: WHITE, borderRadius: 12, padding: "14px",
-                border: `1px solid ${BORDER}`, borderLeft: `4px solid ${GOLD}` }}>
-                {fb.nivel_interes && (
-                  <div style={{ marginBottom: 12 }}>
-                    <div style={{ fontSize: 10, color: MUTED, fontWeight: 700, letterSpacing: "0.08em",
-                      marginBottom: 6, fontFamily: "Inter, sans-serif" }}>NIVEL DE INTERÉS</div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <EstrellaInteres nivel={fb.nivel_interes} />
-                      <span style={{ fontSize: 13, fontWeight: 700, color: NIVEL_COLOR[fb.nivel_interes],
-                        fontFamily: "Inter, sans-serif" }}>
-                        {["","Sin interés","Interés bajo","Interés moderado","Interés alto","Muy interesado"][fb.nivel_interes]}
-                      </span>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                <div style={{ fontSize: 11, color: GOLD, fontWeight: 800, letterSpacing: "0.1em",
+                  fontFamily: "Inter, sans-serif" }}>🤖 ANÁLISIS IA</div>
+                {puedeEditar && !editandoFeedback && (
+                  <button onClick={() => { setFbEdit(fb ? {...fb, objeciones: [...(fb.objeciones||[])]} : { nivel_interes: null, objeciones: [], valoracion_precio: null, siguiente_paso: null }); setEditandoFeedback(true); }}
+                    style={{ fontSize: 11, color: GOLD, background: `${GOLD}12`, border: `1px solid ${GOLD}30`,
+                      borderRadius: 20, padding: "4px 12px", cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 700 }}>
+                    ✏ Editar
+                  </button>
+                )}
+              </div>
+
+              {editandoFeedback && fbEdit ? (
+                <div style={{ background: WHITE, borderRadius: 12, padding: "14px", border: `1.5px solid ${GOLD}` }}>
+                  {/* Nivel interés */}
+                  <div style={{ marginBottom: 14 }}>
+                    <div style={{ fontSize: 10, color: MUTED, fontWeight: 700, letterSpacing: "0.08em", marginBottom: 8, fontFamily: "Inter, sans-serif" }}>NIVEL DE INTERÉS</div>
+                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {[1,2,3,4,5].map(n => (
+                        <button key={n} onClick={() => setFbEdit(p => ({...p, nivel_interes: n}))}
+                          style={{ padding: "8px 14px", borderRadius: 20, border: `2px solid ${fbEdit.nivel_interes === n ? NIVEL_COLOR[n] : BORDER}`,
+                            background: fbEdit.nivel_interes === n ? `${NIVEL_COLOR[n]}18` : CREAM,
+                            color: fbEdit.nivel_interes === n ? NIVEL_COLOR[n] : MUTED,
+                            cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "Inter, sans-serif" }}>
+                          {"★".repeat(n)} {NIVEL_LABEL[n]}
+                        </button>
+                      ))}
                     </div>
                   </div>
-                )}
-                <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-                  {fb.valoracion_precio && (
-                    <div style={{ flex: 1, minWidth: 120 }}>
+                  {/* Valoración precio */}
+                  <div style={{ marginBottom: 14 }}>
+                    <div style={{ fontSize: 10, color: MUTED, fontWeight: 700, letterSpacing: "0.08em", marginBottom: 8, fontFamily: "Inter, sans-serif" }}>VALORACIÓN PRECIO</div>
+                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {VALORACION_PRECIO_OPTS.map(v => {
+                        const col = v === "Precio aceptable" ? SUCCESS : v === "Precio muy fuera de mercado" ? DANGER : GOLD;
+                        return (
+                          <button key={v} onClick={() => setFbEdit(p => ({...p, valoracion_precio: v}))}
+                            style={{ padding: "8px 14px", borderRadius: 20, border: `2px solid ${fbEdit.valoracion_precio === v ? col : BORDER}`,
+                              background: fbEdit.valoracion_precio === v ? `${col}18` : CREAM,
+                              color: fbEdit.valoracion_precio === v ? col : MUTED,
+                              cursor: "pointer", fontSize: 12, fontWeight: 600, fontFamily: "Inter, sans-serif" }}>
+                            {v}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  {/* Objeciones */}
+                  <div style={{ marginBottom: 14 }}>
+                    <div style={{ fontSize: 10, color: MUTED, fontWeight: 700, letterSpacing: "0.08em", marginBottom: 8, fontFamily: "Inter, sans-serif" }}>OBJECIONES DETECTADAS</div>
+                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {OBJECIONES_OPTS.map(o => {
+                        const sel = (fbEdit.objeciones||[]).includes(o);
+                        return (
+                          <button key={o} onClick={() => setFbEdit(p => ({ ...p, objeciones: sel ? p.objeciones.filter(x=>x!==o) : [...(p.objeciones||[]), o] }))}
+                            style={{ padding: "7px 12px", borderRadius: 20, border: `2px solid ${sel ? DANGER : BORDER}`,
+                              background: sel ? `${DANGER}12` : CREAM, color: sel ? DANGER : MUTED,
+                              cursor: "pointer", fontSize: 11, fontWeight: sel ? 700 : 500, fontFamily: "Inter, sans-serif" }}>
+                            {sel ? "✓ " : ""}{o}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  {/* Siguiente paso */}
+                  <div style={{ marginBottom: 16 }}>
+                    <div style={{ fontSize: 10, color: MUTED, fontWeight: 700, letterSpacing: "0.08em", marginBottom: 8, fontFamily: "Inter, sans-serif" }}>SIGUIENTE PASO</div>
+                    <select value={fbEdit.siguiente_paso||""} onChange={e => setFbEdit(p => ({...p, siguiente_paso: e.target.value}))}
+                      style={{ ...iStSm, width: "100%", appearance: "none" }}>
+                      <option value="">— Seleccionar —</option>
+                      {SIGUIENTE_PASO_OPTS.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
+                  <div style={{ display: "flex", gap: 10 }}>
+                    <button onClick={guardarFeedback} disabled={guardandoFb}
+                      style={{ flex: 1, padding: "12px", background: SUCCESS, border: "none", color: WHITE,
+                        cursor: "pointer", borderRadius: 10, fontWeight: 700, fontFamily: "Inter, sans-serif", fontSize: 14 }}>
+                      {guardandoFb ? "Guardando..." : "💾 Guardar análisis"}
+                    </button>
+                    <button onClick={() => setEditandoFeedback(false)}
+                      style={{ padding: "12px 16px", border: `1.5px solid ${BORDER}`, background: "transparent",
+                        color: MUTED, cursor: "pointer", borderRadius: 10, fontFamily: "Inter, sans-serif" }}>Cancelar</button>
+                  </div>
+                </div>
+              ) : fb ? (
+                <div style={{ background: WHITE, borderRadius: 12, padding: "14px",
+                  border: `1px solid ${BORDER}`, borderLeft: `4px solid ${GOLD}` }}>
+                  {fb.nivel_interes && (
+                    <div style={{ marginBottom: 12 }}>
                       <div style={{ fontSize: 10, color: MUTED, fontWeight: 700, letterSpacing: "0.08em",
-                        marginBottom: 4, fontFamily: "Inter, sans-serif" }}>PRECIO</div>
-                      <span style={{ fontSize: 12, color: fb.valoracion_precio === "Precio aceptable" ? SUCCESS : fb.valoracion_precio === "Precio muy fuera de mercado" ? DANGER : GOLD, fontWeight: 600 }}>
-                        {fb.valoracion_precio}
-                      </span>
+                        marginBottom: 6, fontFamily: "Inter, sans-serif" }}>NIVEL DE INTERÉS</div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <EstrellaInteres nivel={fb.nivel_interes} />
+                        <span style={{ fontSize: 13, fontWeight: 700, color: NIVEL_COLOR[fb.nivel_interes],
+                          fontFamily: "Inter, sans-serif" }}>
+                          {NIVEL_LABEL[fb.nivel_interes]}
+                        </span>
+                      </div>
                     </div>
                   )}
-                  {fb.siguiente_paso && fb.siguiente_paso !== "Sin acción" && (
-                    <div style={{ flex: 1, minWidth: 140 }}>
-                      <div style={{ fontSize: 10, color: MUTED, fontWeight: 700, letterSpacing: "0.08em",
-                        marginBottom: 4, fontFamily: "Inter, sans-serif" }}>SIGUIENTE PASO</div>
-                      <span style={{ fontSize: 12, color: BLUE, fontWeight: 600 }}>{fb.siguiente_paso}</span>
+                  <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+                    {fb.valoracion_precio && (
+                      <div style={{ flex: 1, minWidth: 120 }}>
+                        <div style={{ fontSize: 10, color: MUTED, fontWeight: 700, letterSpacing: "0.08em",
+                          marginBottom: 4, fontFamily: "Inter, sans-serif" }}>PRECIO</div>
+                        <span style={{ fontSize: 12, color: fb.valoracion_precio === "Precio aceptable" ? SUCCESS : fb.valoracion_precio === "Precio muy fuera de mercado" ? DANGER : GOLD, fontWeight: 600 }}>
+                          {fb.valoracion_precio}
+                        </span>
+                      </div>
+                    )}
+                    {fb.siguiente_paso && fb.siguiente_paso !== "Sin acción" && (
+                      <div style={{ flex: 1, minWidth: 140 }}>
+                        <div style={{ fontSize: 10, color: MUTED, fontWeight: 700, letterSpacing: "0.08em",
+                          marginBottom: 4, fontFamily: "Inter, sans-serif" }}>SIGUIENTE PASO</div>
+                        <span style={{ fontSize: 12, color: BLUE, fontWeight: 600 }}>{fb.siguiente_paso}</span>
+                      </div>
+                    )}
+                  </div>
+                  {fb.objeciones?.length > 0 && !fb.objeciones.includes("Sin objeciones") && (
+                    <div style={{ marginTop: 10, display: "flex", gap: 6, flexWrap: "wrap" }}>
+                      {fb.objeciones.map(o => (
+                        <span key={o} style={{ fontSize: 11, color: DANGER, background: `${DANGER}10`,
+                          padding: "4px 10px", borderRadius: 20, border: `1px solid ${DANGER}20`,
+                          fontFamily: "Inter, sans-serif" }}>⚠ {o}</span>
+                      ))}
                     </div>
                   )}
                 </div>
-                {fb.objeciones?.length > 0 && !fb.objeciones.includes("Sin objeciones") && (
-                  <div style={{ marginTop: 10, display: "flex", gap: 6, flexWrap: "wrap" }}>
-                    {fb.objeciones.map(o => (
-                      <span key={o} style={{ fontSize: 11, color: DANGER, background: `${DANGER}10`,
-                        padding: "4px 10px", borderRadius: 20, border: `1px solid ${DANGER}20`,
-                        fontFamily: "Inter, sans-serif" }}>⚠ {o}</span>
-                    ))}
-                  </div>
-                )}
-              </div>
+              ) : puedeEditar ? (
+                <div style={{ padding: "14px", background: CREAM, border: `1.5px dashed ${BORDER}`, borderRadius: 12,
+                  fontSize: 13, color: MUTED, fontFamily: "Inter, sans-serif", textAlign: "center" }}>
+                  Sin análisis IA — sube una grabación o pulsa Editar para rellenarlo manualmente
+                </div>
+              ) : null}
             </div>
           )}
 
