@@ -6,7 +6,11 @@ import { sbAdmin } from "@/lib/ia/rag";
 /**
  * Biblioteca de casos: listado del historial de un agente.
  *
- * GET /api/asistente/historial?agente=fiscalidad&q=...&solo=validados|todos
+ * GET /api/asistente/historial?agente=fiscalidad&q=...&solo=validados|pendientes|todos
+ *
+ * `solo=pendientes` es el filtro de trabajo: los casos que nadie ha validado
+ * todavia. Sin el, para repasar los que faltan hay que ir mirando cual tiene la
+ * marca de validado y cual no, y con sesenta casos eso no se hace.
  *
  * La busqueda mira DENTRO de los mensajes, no solo el titulo. De un caso uno
  * recuerda "el de la sociedad luxemburguesa", no el titulo con el que se guardo.
@@ -61,6 +65,7 @@ export async function GET(request) {
 
     if (agente) query = query.eq("agente_slug", agente);
     if (solo === "validados") query = query.eq("validada", true);
+    if (solo === "pendientes") query = query.eq("validada", false);
     if (idsPorTexto) query = query.in("id", idsPorTexto);
 
     const { data: casos, error } = await query;

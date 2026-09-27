@@ -118,8 +118,10 @@ function Portada({ agentes, cargando, onAbrirAgente, onAbrirBiblioteca }) {
   return (
     <div style={{ padding: "32px 28px", fontFamily: FUENTE, maxWidth: 1100 }}>
       <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Asistente IA</h1>
-            <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Tu asistente inteligente para consultas legales, fiscales y urbanísticas</p>
-            <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />{cargando && <div style={{ fontSize: 12, color: GRIS }}>Cargando agentes...</div>}
+        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Tu asistente inteligente para consultas legales, fiscales y urbanísticas</p>
+        <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />
+
+      {cargando && <div style={{ fontSize: 12, color: GRIS }}>Cargando agentes...</div>}
 
       {!cargando && agentes.length === 0 && (
         <div style={{ fontSize: 12, color: GRIS }}>
@@ -654,7 +656,10 @@ function Biblioteca({ agentes, usuarioId, onVolver, onContinuar }) {
   const [q, setQ] = useState("");
   const [busqueda, setBusqueda] = useState("");
   const [filtroAgente, setFiltroAgente] = useState("");
-  const [soloValidados, setSoloValidados] = useState(false);
+  // "" (todos) | "validados" | "pendientes". Los pendientes son el filtro de
+  // trabajo: con sesenta casos, repasar los que faltan mirando uno a uno cual
+  // lleva la marca de validado no se hace.
+  const [filtroValidacion, setFiltroValidacion] = useState("");
   const [abierto, setAbierto] = useState(null);
 
   const cargar = useCallback(() => {
@@ -662,13 +667,13 @@ function Biblioteca({ agentes, usuarioId, onVolver, onContinuar }) {
     const p = new URLSearchParams({ limite: "120" });
     if (busqueda) p.set("q", busqueda);
     if (filtroAgente) p.set("agente", filtroAgente);
-    if (soloValidados) p.set("solo", "validados");
+    if (filtroValidacion) p.set("solo", filtroValidacion);
     fetch(`/api/asistente/historial?${p}`)
       .then((r) => r.json())
       .then((d) => setCasos(d.casos || []))
       .catch(() => setCasos([]))
       .finally(() => setCargando(false));
-  }, [busqueda, filtroAgente, soloValidados]);
+  }, [busqueda, filtroAgente, filtroValidacion]);
 
   useEffect(() => {
     cargar();
@@ -737,8 +742,19 @@ function Biblioteca({ agentes, usuarioId, onVolver, onContinuar }) {
                 {a.nombre}
               </Chip>
             ))}
-            <Chip activo={soloValidados} color="#2C6E52" onClick={() => setSoloValidados((v) => !v)}>
-              Solo validados
+            <Chip
+              activo={filtroValidacion === "pendientes"}
+              color="#A8854A"
+              onClick={() => setFiltroValidacion((v) => (v === "pendientes" ? "" : "pendientes"))}
+            >
+              Sin validar
+            </Chip>
+            <Chip
+              activo={filtroValidacion === "validados"}
+              color="#2C6E52"
+              onClick={() => setFiltroValidacion((v) => (v === "validados" ? "" : "validados"))}
+            >
+              Validados
             </Chip>
           </div>
         </div>
@@ -749,7 +765,11 @@ function Biblioteca({ agentes, usuarioId, onVolver, onContinuar }) {
             <div style={{ padding: "26px", fontSize: 12.5, color: GRIS, lineHeight: 1.7 }}>
               {busqueda
                 ? `Ningun caso menciona "${busqueda}".`
-                : "Todavia no hay casos guardados. En cuanto plantees una consulta a cualquiera de los agentes aparecera aqui."}
+                : filtroValidacion === "pendientes"
+                  ? "No queda ningun caso sin validar."
+                  : filtroValidacion === "validados"
+                    ? "Todavia no hay ningun caso validado. Al validar uno, su criterio pasa a ser el de la casa y los agentes lo citan."
+                    : "Todavia no hay casos guardados. En cuanto plantees una consulta a cualquiera de los agentes aparecera aqui."}
             </div>
           )}
           {casos.map((c) => {
