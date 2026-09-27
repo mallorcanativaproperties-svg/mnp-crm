@@ -1717,8 +1717,7 @@ function GrupoDia({ fecha, visitas, propiedadId, propiedadNombre, currentUser, o
   );
 }
 
-function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, onActualizado, informesPendientes }) {
-  const [abierto, setAbierto] = useState(false);
+function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, onActualizado, informesPendientes, abierto, onToggle }) {
   const [nuevaVisita, setNuevaVisita] = useState(false);
   const [compradorNueva, setCompradorNueva] = useState(null);
   const [notasNueva, setNotasNueva] = useState("");
@@ -1784,7 +1783,7 @@ function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, on
       {/* Header del grupo */}
       <div style={{ padding: "16px 18px", cursor: "pointer",
         borderBottom: abierto ? `1.5px solid ${BORDER}` : "none" }}
-        onClick={() => setAbierto(o => !o)}>
+        onClick={onToggle}>
         <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
           {/* Ícono propiedad */}
           <div style={{ width: 46, height: 46, borderRadius: 12, background: `${DARK}0a`,
@@ -1921,6 +1920,7 @@ export default function Visitas({ currentUser }) {
   });
   const [nvGuardando, setNvGuardando] = useState(false);
   const [propsAgente, setPropsAgente] = useState([]);
+  const [gruposAbiertos, setGruposAbiertos] = useState(new Set()); // persiste entre refreshes
 
   async function crearVisitaGlobal() {
     if (!nvPropiedad || nvCompradores.length === 0) return;
@@ -2113,7 +2113,13 @@ export default function Visitas({ currentUser }) {
             return (
               <GrupoPropiedad key={pid} propiedadId={pid} propiedadNombre={nombre}
                 visitas={vis} currentUser={currentUser} onActualizado={cargar}
-                informesPendientes={informes} />
+                informesPendientes={informes}
+                abierto={gruposAbiertos.has(pid)}
+                onToggle={() => setGruposAbiertos(prev => {
+                  const next = new Set(prev);
+                  next.has(pid) ? next.delete(pid) : next.add(pid);
+                  return next;
+                })} />
             );
           })
         )}
