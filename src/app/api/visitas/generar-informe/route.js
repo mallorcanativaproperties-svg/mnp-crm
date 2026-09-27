@@ -49,11 +49,11 @@ export async function POST(req) {
       const asistentes = [];
       if (v.compradores) {
         const c = v.compradores;
-        asistentes.push(`${c.nombre || ""} ${c.apellidos || ""}`.trim() + ` — DNI: ${c.dni || "no indicado"} — Nacionalidad: ${c.pais || "España"}`);
+        asistentes.push(`${c.nombre || ""} ${c.apellidos || ""}`.trim() + ` — DNI: ${c.dni || "no indicado"}`);
       }
       (v.visita_compradores || []).forEach(vc => {
         const c = vc.compradores;
-        if (c) asistentes.push(`${c.nombre || ""} ${c.apellidos || ""}`.trim() + ` — DNI: ${c.dni || "no indicado"} — Nacionalidad: ${c.pais || "España"}`);
+        if (c) asistentes.push(`${c.nombre || ""} ${c.apellidos || ""}`.trim() + ` — DNI: ${c.dni || "no indicado"}`);
       });
 
       const fb = v.feedback;
