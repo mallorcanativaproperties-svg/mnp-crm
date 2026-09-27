@@ -250,7 +250,7 @@ export default function FirmarVisita() {
         <div style={{ fontSize:11, color:"rgba(255,255,255,0.5)" }}>{tipoNombre}</div>
       </div>
 
-      <div style={{ maxWidth:680, margin:"0 auto", padding:"24px 16px" }}>
+      <div style={{ maxWidth:680, margin:"0 auto", padding:"24px 16px", boxSizing:"border-box", width:"100%" }}>
 
         {/* Estado co-firmantes (solo comprador, cuando hay más de uno) */}
         {tipo === "comprador" && coFirmantes.length > 0 && (
@@ -270,11 +270,12 @@ export default function FirmarVisita() {
 
         {/* Documento PDF — botón grande para abrir, sin iframe */}
         {pdfUrl && (
-          <div style={{ marginBottom:20 }}>
+          <div style={{ marginBottom:20, boxSizing:"border-box", width:"100%" }}>
             <a href={pdfUrl} target="_blank" rel="noopener noreferrer"
               style={{ display:"flex", alignItems:"center", gap:14, padding:"18px 20px",
                 background:WHITE, border:`1.5px solid ${BORDER}`, borderRadius:10,
-                textDecoration:"none", boxShadow:"0 1px 4px rgba(0,0,0,0.06)" }}>
+                textDecoration:"none", boxShadow:"0 1px 4px rgba(0,0,0,0.06)",
+                boxSizing:"border-box", width:"100%" }}>
               <div style={{ width:44, height:44, background:`${GOLD}15`, borderRadius:8,
                 display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -302,7 +303,7 @@ export default function FirmarVisita() {
             <label style={{ display:"flex", alignItems:"flex-start", gap:10, marginTop:14,
               padding:"14px 16px", background:leido ? `${SUCCESS}10` : WHITE,
               border:`1.5px solid ${leido ? SUCCESS : BORDER}`, borderRadius:10,
-              cursor:"pointer", transition:"all 0.15s", boxSizing:"border-box", width:"100%" }}>
+              cursor:"pointer", transition:"all 0.15s", boxSizing:"border-box" }}>
               <input type="checkbox" checked={leido} onChange={e => setLeido(e.target.checked)}
                 style={{ width:18, height:18, accentColor:SUCCESS, flexShrink:0, marginTop:1 }} />
               <span style={{ fontSize:13, color: leido ? SUCCESS : TEXT,
