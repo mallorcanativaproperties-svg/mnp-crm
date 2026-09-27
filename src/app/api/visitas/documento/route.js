@@ -516,7 +516,21 @@ export async function POST(req) {
     try {
       const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://crm.mallorcanativaproperties.com";
 
-      // 2a. Regenerar PDF firmado (llamada al propio GET con todas las firmas ya guardadas)
+      // 2a. Verificar que la firma del agente ya está en BD antes de regenerar el PDF
+      //     (evita race condition: GET podría leer antes de que el UPDATE se propague)
+      let firmaConfirmada = false;
+      for (let intento = 0; intento < 5; intento++) {
+        await new Promise(r => setTimeout(r, 300));
+        const { data: check } = await supabase
+          .from("visita_documentos")
+          .select("firma_agente_data")
+          .eq("id", docId)
+          .single();
+        if (check?.firma_agente_data) { firmaConfirmada = true; break; }
+      }
+      if (!firmaConfirmada) {
+        console.error("[documento/agente] firma_agente_data no propagada tras 5 intentos");
+      }
       const pdfRes = await fetch(`${BASE_URL}/api/visitas/documento?id=${docId}`);
       if (!pdfRes.ok) throw new Error(`PDF regen error ${pdfRes.status}`);
       const pdfBytes = Buffer.from(await pdfRes.arrayBuffer());
