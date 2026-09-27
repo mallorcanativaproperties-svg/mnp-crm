@@ -27,10 +27,18 @@ export async function POST(req) {
     const diasMercado = fechaRef ? Math.floor((Date.now() - new Date(fechaRef)) / 86400000) : 0;
     const esRojo  = diasMercado >= 45 || totalVisitasHistorico >= 10;
     const esAmbar = !esRojo && (diasMercado >= 30 || (totalVisitasHistorico >= 5 && !tieneOferta));
+    const textoRojo = diasMercado > 0
+      ? `La propiedad lleva ${diasMercado} días en mercado y ha recibido ${totalVisitasHistorico} visita${totalVisitasHistorico !== 1 ? "s" : ""} sin llegar a una oferta. Es momento de valorar una revisión del precio de salida.`
+      : `La propiedad ha recibido ${totalVisitasHistorico} visita${totalVisitasHistorico !== 1 ? "s" : ""} sin llegar a una oferta. Es momento de valorar una revisión del precio de salida.`;
+    const textoAmbar = totalVisitasHistorico >= 5 && !tieneOferta
+      ? `Llevamos ${totalVisitasHistorico} visitas sin que se haya presentado una oferta. Puede ser el momento de revisar la estrategia de precio.`
+      : diasMercado > 0
+        ? `La propiedad lleva ${diasMercado} días publicada sin oferta. Le recomendamos valorar ajustes en la presentación o el precio.`
+        : `La propiedad lleva varias semanas publicada sin oferta. Le recomendamos valorar ajustes en la presentación o el precio.`;
     const semaforo = esRojo
-      ? { emoji: "🔴", estado: "ROJO", texto: `La propiedad lleva ${diasMercado} días en mercado y ha recibido ${totalVisitasHistorico} visitas sin llegar a una oferta. Es momento de valorar una revisión del precio de salida.` }
+      ? { emoji: "🔴", estado: "ROJO", texto: textoRojo }
       : esAmbar
-      ? { emoji: "🟡", estado: "ÁMBAR", texto: totalVisitasHistorico >= 5 && !tieneOferta ? `Llevamos ${totalVisitasHistorico} visitas sin que se haya presentado una oferta. Puede ser el momento de revisar la estrategia de precio.` : `La propiedad lleva ${diasMercado} días publicada sin oferta. Le recomendamos valorar ajustes en la presentación o el precio.` }
+      ? { emoji: "🟡", estado: "ÁMBAR", texto: textoAmbar }
       : { emoji: "🟢", estado: "VERDE", texto: `La propiedad tiene buena tracción en el mercado. Seguimos trabajando para encontrar al comprador ideal.` };
 
     // Construir datos de cada visita para el prompt
