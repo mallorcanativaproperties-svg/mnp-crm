@@ -775,14 +775,160 @@ function SilviaPanel({ convs, selectedId, setSelectedId }) {
 }
 // ════════════════════════════════════════════════════════════════
 
+// ═══ PANEL DE OTROS — mensajes sistema, CRM, etc. ═══════════════
+function OtrosPanel({ convs, selectedId, setSelectedId }) {
+  const OTROS_COLOR = "#7A6B5A";
+  const selected = convs.find(c => c.id === selectedId) || convs[0] || null;
+
+  const FROM_LABEL = {
+    cliente: "Cliente",
+    claudia: "Claudia",
+    ana: "Ana",
+    agente: "Agente",
+    agente_manual: "Agente",
+    sistema: "CRM",
+    silvia: "Silvia",
+  };
+  const FROM_COLOR = {
+    cliente: "#3B8BD4",
+    claudia: "#3D577E",
+    ana: "#9C6E1B",
+    agente: "#2C6E52",
+    agente_manual: "#2C6E52",
+    sistema: "#7A6B5A",
+    silvia: "#6B4FA0",
+  };
+
+  if (convs.length === 0) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 400, flexDirection: "column", gap: 12 }}>
+        <div style={{ fontSize: 32 }}>📋</div>
+        <div style={{ fontSize: 14, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>Sin mensajes sin clasificar</div>
+        <div style={{ fontSize: 12, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>Aquí aparecerán mensajes CRM, firmas enviadas, PDFs, notificaciones y cualquier WhatsApp no asignado a Ana o Claudia</div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: "flex", height: "calc(100vh - 160px)", border: "1px solid #E7E1D4", borderTop: "none" }}>
+      {/* Lista */}
+      <div style={{ width: 300, borderRight: "1px solid #E7E1D4", overflowY: "auto", background: "#FFFFFF" }}>
+        {convs.map(c => {
+          const lastMsg = c.mensajes?.[c.mensajes.length - 1];
+          const sel = c.id === selected?.id;
+          const tieneContacto = c.contacto || c.telefono;
+          return (
+            <div key={c.id} onClick={() => setSelectedId(c.id)}
+              style={{ padding: "12px 16px", borderBottom: "1px solid #F0ECE6", cursor: "pointer",
+                background: sel ? OTROS_COLOR + "0D" : "#FFFFFF",
+                borderLeft: sel ? "3px solid " + OTROS_COLOR : "3px solid transparent" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: "#22262E", fontFamily: "Inter, sans-serif" }}>
+                  {c.contacto || c.telefono || "Sin nombre"}
+                </div>
+                <div style={{ fontSize: 10, color: "#9A968A" }}>
+                  {c.updated_at ? new Date(c.updated_at).toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit" }) : ""}
+                </div>
+              </div>
+              {tieneContacto && c.contacto !== c.telefono && (
+                <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 2 }}>{c.telefono}</div>
+              )}
+              <div style={{ fontSize: 11, color: "#9A968A", fontFamily: "Inter, sans-serif", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                {lastMsg ? `${FROM_LABEL[lastMsg.from] || lastMsg.from}: ${lastMsg.text}` : "—"}
+              </div>
+              {c.agente_ia && (
+                <div style={{ marginTop: 4, display: "inline-block", fontSize: 9, padding: "2px 8px", background: "#7A6B5A18", color: "#7A6B5A", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                  {c.agente_ia}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Chat */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "#F8F6F1" }}>
+        {selected ? (
+          <>
+            <div style={{ padding: "14px 20px", borderBottom: "1px solid #E7E1D4", background: "#FFFFFF" }}>
+              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                <div style={{ width: 36, height: 36, borderRadius: "50%", background: OTROS_COLOR + "22", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>📋</div>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: "#22262E", fontFamily: "Inter, sans-serif" }}>
+                    {selected.contacto || selected.telefono || "Sin nombre"}
+                  </div>
+                  <div style={{ fontSize: 11, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>
+                    {selected.telefono} · {selected.canal || "whatsapp"} · {selected.agente_ia || "sin agente"}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px", display: "flex", flexDirection: "column", gap: 8 }}>
+              {(selected.mensajes || []).map((m, i) => {
+                const esSistema = m.from === "sistema";
+                const esCliente = m.from === "cliente";
+                const color = FROM_COLOR[m.from] || "#7A6B5A";
+                const label = FROM_LABEL[m.from] || m.from;
+                if (esSistema) {
+                  return (
+                    <div key={i} style={{ textAlign: "center", margin: "4px 0" }}>
+                      <span style={{ fontSize: 10, color: "#7A6B5A", padding: "3px 12px", background: "#7A6B5A15", borderRadius: 10, border: "1px solid #7A6B5A22" }}>
+                        🤖 CRM: {m.text}
+                      </span>
+                      {m.ts && <div style={{ fontSize: 9, color: "#C0BAB0", marginTop: 2 }}>{m.ts}</div>}
+                    </div>
+                  );
+                }
+                return (
+                  <div key={i} style={{ display: "flex", justifyContent: esCliente ? "flex-start" : "flex-end" }}>
+                    <div style={{ maxWidth: "75%" }}>
+                      <div style={{ fontSize: 9, color: color, marginBottom: 2, textAlign: esCliente ? "left" : "right", textTransform: "uppercase", letterSpacing: "0.08em" }}>{label}</div>
+                      <div style={{
+                        padding: "10px 14px",
+                        background: esCliente ? "#FFFFFF" : color + "15",
+                        color: "#22262E",
+                        fontSize: 13, fontFamily: "Inter, sans-serif", lineHeight: 1.5,
+                        border: "1px solid " + (esCliente ? "#E7E1D4" : color + "33"),
+                      }}>
+                        {m.text}
+                        <div style={{ fontSize: 9, color: "#9A968A", marginTop: 4, textAlign: esCliente ? "left" : "right" }}>{m.ts}</div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              {(selected.mensajes || []).length === 0 && (
+                <div style={{ textAlign: "center", color: "#9A968A", fontSize: 12, padding: 40 }}>Sin mensajes en esta conversación</div>
+              )}
+            </div>
+
+            <div style={{ padding: "12px 20px", borderTop: "1px solid #E7E1D4", background: "#FFFFFF", fontSize: 11, color: "#9A968A", fontFamily: "Inter, sans-serif", textAlign: "center" }}>
+              Vista de solo lectura · Los mensajes de esta sección son automáticos del CRM o no están asignados a ningún agente
+            </div>
+          </>
+        ) : (
+          <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "#9A968A", fontSize: 13 }}>
+            Selecciona una conversación
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+// ════════════════════════════════════════════════════════════════
+
 export default function AgentesIA() {
   const [tab, setTab] = useState("ana");
   const [anaConvs, setAnaConvs] = useState([]);
   const [claudiaConvs, setClaudiaConvs] = useState([]);
+  const [otrosConvs, setOtrosConvs] = useState([]);
   const [anaSelected, setAnaSelected] = useState(null);
   const [silviaConvs, setSilviaConvs] = useState([]);
   const [silviaSelected, setSilviaSelected] = useState(null);
+  const [otrosSelected, setOtrosSelected] = useState(null);
   const [loadingSilvia, setLoadingSilvia] = useState(false);
+  const [loadingAna, setLoadingAna] = useState(false);
   const [claudiaSelected, setClaudiaSelected] = useState(null);
   const [editPrompt, setEditPrompt] = useState(null);
   const [loadingClaudia, setLoadingClaudia] = useState(false);
@@ -866,6 +1012,29 @@ export default function AgentesIA() {
     setLoadingAna(false);
   }, []);
 
+  // Helper: carga mensajes de una lista de conversaciones
+  const loadMensajes = useCallback(async (convs) => {
+    return Promise.all(
+      convs.map(async (c) => {
+        const { data: msgs } = await supabase
+          .from("mensajes")
+          .select("*")
+          .eq("conversacion_id", c.id)
+          .order("created_at", { ascending: true });
+        return {
+          ...c,
+          mensajes: (msgs || []).map((m) => ({
+            from: m.from_who || "cliente",
+            text: m.texto || "",
+            ts: m.timestamp ? new Date(m.timestamp).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) : "",
+          })),
+          alertas: c.alertas || [],
+          propiedad: c.referencia ? `${c.referencia}${c.enlace ? " · " + c.enlace : ""}` : c.interes || c.contacto || c.canal || "WhatsApp",
+        };
+      })
+    );
+  }, []);
+
   // Load real CLAUDIA conversations from Supabase
   const loadClaudiaConvs = useCallback(async () => {
     setLoadingClaudia(true);
@@ -873,40 +1042,76 @@ export default function AgentesIA() {
       const { data: convs } = await supabase
         .from("conversaciones")
         .select("*")
+        .eq("agente_ia", "claudia")
         .order("updated_at", { ascending: false });
 
       if (convs && convs.length > 0) {
-        // Load messages for each conversation
-        const convsWithMessages = await Promise.all(
-          convs.map(async (c) => {
-            const { data: msgs } = await supabase
-              .from("mensajes")
-              .select("*")
-              .eq("conversacion_id", c.id)
-              .order("created_at", { ascending: true });
-
-            return {
-              ...c,
-              mensajes: (msgs || []).map((m) => ({
-                from: m.from_who || "cliente",
-                text: m.texto || "",
-                ts: m.timestamp ? new Date(m.timestamp).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }) : "",
-              })),
-              alertas: [],
-              propiedad: c.referencia ? `${c.referencia} - ${c.enlace || ""}` : c.canal || "WhatsApp",
-            };
-          })
-        );
+        const convsWithMessages = await loadMensajes(convs);
         setClaudiaConvs(convsWithMessages);
         if (!claudiaSelected && convsWithMessages.length > 0) {
           setClaudiaSelected(convsWithMessages[0].id);
         }
+      } else {
+        setClaudiaConvs([]);
       }
     } catch (err) {
       console.error("Error loading CLAUDIA convs:", err);
     }
     setLoadingClaudia(false);
-  }, []);
+  }, [loadMensajes]);
+
+  // Load OTROS — conversaciones que no son de Ana ni Claudia ni Instagram
+  // Incluye notificaciones del CRM (firma, PDF enviado, etc.)
+  const loadOtrosConvs = useCallback(async () => {
+    try {
+      const { data: convs } = await supabase
+        .from("conversaciones")
+        .select("*")
+        .not("agente_ia", "in", '("ana","claudia")')
+        .order("updated_at", { ascending: false });
+
+      if (convs && convs.length > 0) {
+        const convsWithMessages = await loadMensajes(convs);
+        setOtrosConvs(convsWithMessages);
+        if (!otrosSelected && convsWithMessages.length > 0) {
+          setOtrosSelected(convsWithMessages[0].id);
+        }
+      } else {
+        // También buscar convs de Ana/Claudia que tengan mensajes de "sistema"
+        // (notificaciones CRM — firma enviada, PDF, etc.)
+        const { data: allConvs } = await supabase
+          .from("conversaciones")
+          .select("*")
+          .order("updated_at", { ascending: false })
+          .limit(200);
+
+        if (allConvs && allConvs.length > 0) {
+          // Para cada conv, verificar si tiene mensajes de tipo "sistema"
+          const convsWithSistema = [];
+          for (const c of allConvs) {
+            const { data: sisMsgs } = await supabase
+              .from("mensajes")
+              .select("id")
+              .eq("conversacion_id", c.id)
+              .eq("from_who", "sistema")
+              .limit(1);
+            if (sisMsgs && sisMsgs.length > 0) convsWithSistema.push(c);
+          }
+          if (convsWithSistema.length > 0) {
+            const convsWithMessages = await loadMensajes(convsWithSistema);
+            setOtrosConvs(convsWithMessages);
+            if (!otrosSelected && convsWithMessages.length > 0) setOtrosSelected(convsWithMessages[0].id);
+          } else {
+            setOtrosConvs([]);
+          }
+        } else {
+          setOtrosConvs([]);
+        }
+      }
+    } catch (err) {
+      console.error("Error loading OTROS convs:", err);
+    }
+  }, [loadMensajes]);
 
   // Load on mount and auto-refresh every 10 seconds
   useEffect(() => {
@@ -914,7 +1119,6 @@ export default function AgentesIA() {
     const intervalSilvia = setInterval(loadSilviaConvs, 10000);
     return () => clearInterval(intervalSilvia);
   }, [loadSilviaConvs]);
-
 
   useEffect(() => {
     loadAnaConvs();
@@ -927,6 +1131,12 @@ export default function AgentesIA() {
     const interval = setInterval(loadClaudiaConvs, 10000);
     return () => clearInterval(interval);
   }, [loadClaudiaConvs]);
+
+  useEffect(() => {
+    loadOtrosConvs();
+    const interval = setInterval(loadOtrosConvs, 15000);
+    return () => clearInterval(interval);
+  }, [loadOtrosConvs]);
 
   const anaAlertas = anaConvs.reduce((s, c) => s + c.alertas.length, 0);
   const claudiaAlertas = claudiaConvs.reduce((s, c) => s + (c.alertas?.length || 0), 0);
@@ -975,6 +1185,10 @@ export default function AgentesIA() {
           Silvia - Instagram
           <span style={{ marginLeft: 8, fontSize: 10 }}>({silviaConvs.length})</span>
         </button>
+        <button onClick={() => setTab("otros")} style={tabSt(tab === "otros", "#7A6B5A")}>
+          Otros
+          <span style={{ marginLeft: 8, fontSize: 10 }}>({otrosConvs.length})</span>
+        </button>
       </div>
 
       {/* Panel */}
@@ -983,8 +1197,8 @@ export default function AgentesIA() {
           <AgentPanel convs={anaConvs} setConvs={setAnaConvs} isAna={true} selectedId={anaSelected} setSelectedId={setAnaSelected} />
         ) : tab === "silvia" ? (
           <SilviaPanel convs={silviaConvs} selectedId={silviaSelected} setSelectedId={setSilviaSelected} />
-        ) : tab === "silvia" ? (
-          <SilviaPanel convs={silviaConvs} selectedId={silviaSelected} setSelectedId={setSilviaSelected} />
+        ) : tab === "otros" ? (
+          <OtrosPanel convs={otrosConvs} selectedId={otrosSelected} setSelectedId={setOtrosSelected} />
         ) : (
           <AgentPanel convs={claudiaConvs} setConvs={setClaudiaConvs} isAna={false} selectedId={claudiaSelected} setSelectedId={setClaudiaSelected} />
         )}
