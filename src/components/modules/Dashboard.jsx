@@ -11,7 +11,7 @@ const COLS = [
   { key: "retirada", label: "Retirada", accent: "#9A968A" },
 ];
 
-// Datos cargados desde Supabase â sin hardcoding
+// Datos cargados desde Supabase — sin hardcoding
 
 function fmtP(n) {
   if (!n) return "-";
@@ -33,7 +33,7 @@ function Tag({ children, color }) {
   );
 }
 
-/* ââ Login Screen ââ */
+/* ── Login Screen ── */
 function LoginScreen({ users, onLogin }) {
   const [user, setUser] = useState("");
   const [pass, setPass] = useState("");
@@ -67,9 +67,11 @@ function LoginScreen({ users, onLogin }) {
     <div style={{ fontFamily: "Inter, sans-serif", background: "#F8F6F1", minHeight: "100vh", color: "#22262E", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
       <div style={{ width: "100%", maxWidth: 380 }}>
         <div style={{ textAlign: "center", marginBottom: 40 }}>
+          <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.25em", marginBottom: 12, fontWeight: 500 }}>Nativa Properties</div>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Dashboard</h1>
-            <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>VisiÃ³n global del negocio y actividad del equipo en tiempo real</p>
-            <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} /></div>
+        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Visión global del negocio y actividad del equipo en tiempo real</p>
+        <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />
+        </div>
 
         <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "32px 28px" }}>
           <div style={{ marginBottom: 18 }}>
@@ -119,12 +121,15 @@ function LoginScreen({ users, onLogin }) {
           </button>
         </div>
 
+        <div style={{ textAlign: "center", marginTop: 20, fontSize: 10, color: "#7A787055" }}>
+          Nativa Properties - CRM v1.0
         </div>
+      </div>
     </div>
   );
 }
 
-/* ââ Kanban Card ââ */
+/* ── Kanban Card ── */
 function KanbanCard({ prop }) {
   return (
     <div
@@ -153,7 +158,7 @@ function KanbanCard({ prop }) {
   );
 }
 
-/* ââ Kanban Column ââ */
+/* ── Kanban Column ── */
 function KanbanCol({ col, props, onDrop, showValue }) {
   const [dragOver, setDragOver] = useState(false);
   const total = props.reduce((s, p) => s + p.precio, 0);
@@ -188,7 +193,7 @@ function KanbanCol({ col, props, onDrop, showValue }) {
   );
 }
 
-/* ââ Dashboard Content ââ */
+/* ── Dashboard Content ── */
 function DashboardContent({ currentUser, onLogout, users, setUsers }) {
   const [props, setProps] = useState([]);
   const [activity, setActivity] = useState([]);
@@ -207,17 +212,17 @@ function DashboardContent({ currentUser, onLogout, users, setUsers }) {
       if (propsData) {
         setProps(propsData.map(p => ({
           id: p.id,
-          ref: p.ref || "â",
-          titulo: p.titulo || "Sin tÃ­tulo",
-          tipo: p.tipo || "â",
-          zona: p.municipio || "â",
+          ref: p.ref || "—",
+          titulo: p.titulo || "Sin título",
+          tipo: p.tipo || "—",
+          zona: p.municipio || "—",
           precio: p.op === "Alquiler" ? (p.precio_alquiler || 0) : p.op === "Traspaso" ? (p.precio_traspaso || 0) : (p.precio_venta || 0),
           mConst: 0,
           hab: p.total_hab || (Number(p.hab_dobles)||0) + (Number(p.hab_simples)||0),
-          agente: p.agente || "â",
+          agente: p.agente || "—",
           estado: p.estado || "captada",
           visitas: 0,
-          fechaCap: p.created_at ? new Date(p.created_at).toLocaleDateString("es-ES") : "â",
+          fechaCap: p.created_at ? new Date(p.created_at).toLocaleDateString("es-ES") : "—",
         })));
       }
 
@@ -229,17 +234,17 @@ function DashboardContent({ currentUser, onLogout, users, setUsers }) {
       const { count: mCount } = await supabase.from("propiedades_compradores").select("id", { count: "exact", head: true }).eq("estado", "interesado");
       setMatches(mCount || 0);
 
-      // Particulares en prospecciÃ³n
+      // Particulares en prospección
       const { count: pCount } = await supabase.from("captacion_particulares").select("id", { count: "exact", head: true }).eq("estado", "pendiente");
       setParticulares(pCount || 0);
 
-      // Actividad reciente â Ãºltimas propiedades modificadas
+      // Actividad reciente — últimas propiedades modificadas
       const { data: recent } = await supabase.from("propiedades").select("ref, titulo, estado, updated_at, agente").order("updated_at", { ascending: false }).limit(8);
       if (recent) {
         setActivity(recent.map(p => ({
-          text: `${p.ref} â ${p.titulo?.slice(0, 40)}`,
+          text: `${p.ref} — ${p.titulo?.slice(0, 40)}`,
           agent: p.agente || "Sistema",
-          date: p.updated_at ? new Date(p.updated_at).toLocaleDateString("es-ES") : "â",
+          date: p.updated_at ? new Date(p.updated_at).toLocaleDateString("es-ES") : "—",
           color: p.estado === "vendida" ? "#2C6E52" : p.estado === "reservada" ? "#9C6E1B" : "#AC8A54",
         })));
       }
@@ -311,31 +316,10 @@ function DashboardContent({ currentUser, onLogout, users, setUsers }) {
         {/* Header */}
         <div style={{ marginBottom: 28 }}>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Dashboard</h1>
-          <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Visión global del negocio y actividad del equipo en tiempo real</p>
+          <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Panel de control con indicadores clave y actividad reciente</p>
           <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />
         </div>
-        </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ textAlign: "right" }}>
-                <div style={{ fontSize: 12, color: "#22262E" }}>{currentUser.nombre}</div>
-                <div style={{ fontSize: 10, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.08em" }}>{isDirector ? "Director" : "Agente"}</div>
-              </div>
-              <button
-                onClick={onLogout}
-                style={{
-                  padding: "8px 16px", borderRadius: 0, border: "1px solid #2A2926",
-                  background: "transparent", color: "#9A968A", cursor: "pointer",
-                  fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase",
-                  fontFamily: "Inter, sans-serif", transition: "all 0.2s",
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#D4545444"; e.currentTarget.style.color = "#A23A3A"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#E7E1D4"; e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.color = "#9A968A"; }}
-              >
-                Salir
-              </button>
-        </div>
-
-        {/* KPIs */}
+{/* KPIs */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12, marginBottom: 32 }}>
           {kpis.map((s, i) => (
             <div key={i} style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "18px 16px", textAlign: "center" }}>
@@ -517,7 +501,7 @@ function DashboardContent({ currentUser, onLogout, users, setUsers }) {
   );
 }
 
-/* ââ Main App ââ */
+/* ── Main App ── */
 export default function Dashboard({ currentUser }) {
   const [users, setUsers] = useState([]);
 
