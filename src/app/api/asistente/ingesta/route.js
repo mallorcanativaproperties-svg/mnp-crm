@@ -165,7 +165,12 @@ function partirPorArticulos(textoOriginal) {
   // PTIM entero cae en una sola seccion y se pierde la cita "norma 22 del PTIM",
   // que es la que fija los parametros del suelo rustico. Se exige un digito
   // detras para no confundirlo con "Normas de ordenacion del Plan...".
-  const reLegal = /(?:^|\n)\s*((?:Art[íi]cul[oe]|Art[íi]cle|Norm[ae]\s+\d|Disposici[óo]n?\s+(?:adicional|addicional|transitoria|transit[òo]ria|final|derogatoria|derogat[òo]ria))[^\n]{0,140})/gi;
+  // "Art 17" abreviado: asi rotula sus articulos la Ley 1/1991 de espacios
+  // naturales de Baleares, sin el punto y sin la palabra completa. Se exige un
+  // digito detras para no confundirlo con cualquier palabra que empiece por
+  // "Art", y solo cuenta a principio de linea, que es lo que distingue un rotulo
+  // de una remision ("segun el art 12.1.d") en medio de un parrafo.
+  const reLegal = /(?:^|\n)\s*((?:Art[íi]cul[oe]|Art[íi]cle|Art\.?\s+\d|Norm[ae]\s+\d|Disposici[óo]n?\s+(?:adicional|addicional|transitoria|transit[òo]ria|final|derogatoria|derogat[òo]ria))[^\n]{0,140})/gi;
   const reLibre = /(?:^|\n)\s*(#{1,4}\s+[^\n]{1,140}|\d{1,2}(?:\.\d{1,2})*\.\s+[A-ZÁÉÍÓÚÑ][^\n]{0,140})/g;
 
   const recoger = (re) => {
@@ -235,8 +240,15 @@ function numeroDeArticulo(encabezado) {
     if (n) return String(n);
   }
 
+  // Anclado al principio del rotulo: un encabezado empieza por su marca, y asi
+  // "Regimen transitorio de la exencion del articulo 14" no se lleva el numero
+  // del articulo que solo esta citando. Se admite "Art" abreviado porque hay
+  // leyes que rotulan asi (la 1/1991 de espacios naturales, por ejemplo).
   const m = encabezado.match(
-    new RegExp(RE_CABECERA + "\\s+" + RE_NUM_Y_SUFIJO + "(?![a-zç])", "i")
+    new RegExp(
+      "^\\s*(?:Art[íi]cul[oe]|Art[íi]cle|Art\\.?|Norm[ae])\\s+" + RE_NUM_Y_SUFIJO + "(?![a-zç])",
+      "i"
+    )
   );
   if (!m) return null;
   return [m[1], m[2]].filter(Boolean).join(" ").trim().toLowerCase();
