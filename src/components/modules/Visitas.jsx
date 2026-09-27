@@ -497,14 +497,6 @@ function GeneradorDoc({ visita, propiedad, agente, onGuardado, onClose }) {
       created_at: new Date().toISOString(),
     });
 
-    if (tipo === "oferta" || tipo === "reserva") {
-      await fetch("/api/visitas/notificar-admin", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ visitaId: visita.id, tipo, propiedad: { nombre: propiedad?.nombre || propiedad?.id } }),
-      });
-    }
-
     setSaving(false);
     notificarGuardado("Documento guardado");
     onGuardado();
