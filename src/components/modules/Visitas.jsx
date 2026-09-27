@@ -1355,8 +1355,10 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
                               </button>
                             )}
 
-                            {esOfResv && doc.estado === "firmado_comprador" && (() => {
+                            {esOfResv && (() => {
                               const tieneJustificante = !!doc.justificante_deposito_url;
+                              const estadoConJustificante = ["firmado_comprador","deposito_recibido","firmado_vendedor","firmado_agente","completado"].includes(doc.estado) || tieneJustificante;
+                              if (!estadoConJustificante) return null;
                               return (
                                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                                   {/* Justificante de depósito */}
@@ -1397,29 +1399,33 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
                                       {subiendoJustificante ? "Subiendo…" : "Adjuntar justificante de depósito"}
                                     </button>
                                   )}
-                                  {/* Enviar firma al propietario — bloqueado sin justificante */}
-                                  <button onClick={() => tieneJustificante ? enviarFirma("vendedor") : null}
-                                    disabled={!tieneJustificante}
-                                    title={!tieneJustificante ? "Adjunta el justificante de depósito primero" : ""}
-                                    style={{ padding: "14px 16px",
-                                      background: tieneJustificante ? SUCCESS : BORDER,
-                                      border: "none", color: tieneJustificante ? WHITE : MUTED,
-                                      cursor: tieneJustificante ? "pointer" : "not-allowed",
-                                      borderRadius: 10, fontSize: 14, fontWeight: 700,
-                                      fontFamily: "Inter, sans-serif", display: "flex",
-                                      alignItems: "center", justifyContent: "center", gap: 8,
-                                      width: "100%", boxSizing: "border-box" }}>
-                                    <PaperAirplaneIcon style={{ width: 18, height: 18, flexShrink: 0 }} />
-                                    <span style={{ flex: 1, textAlign: "center" }}>Enviar firma → Propietario</span>
-                                    {!tieneJustificante && (
-                                      <PaperClipIcon style={{ width: 15, height: 15, flexShrink: 0 }} />
-                                    )}
-                                  </button>
-                                  {!tieneJustificante && (
-                                    <p style={{ margin: 0, fontSize: 11, color: MUTED,
-                                      fontFamily: "Inter, sans-serif", textAlign: "center", lineHeight: 1.4 }}>
-                                      Adjunta el justificante de depósito para desbloquear el envío al propietario
-                                    </p>
+                                  {/* Enviar firma al propietario — solo cuando estado es firmado_comprador y no hay firma del vendedor aún */}
+                                  {doc.estado === "firmado_comprador" && !doc.firmado_vendedor_at && (
+                                    <>
+                                      <button onClick={() => tieneJustificante ? enviarFirma("vendedor") : null}
+                                        disabled={!tieneJustificante}
+                                        title={!tieneJustificante ? "Adjunta el justificante de depósito primero" : ""}
+                                        style={{ padding: "14px 16px",
+                                          background: tieneJustificante ? SUCCESS : BORDER,
+                                          border: "none", color: tieneJustificante ? WHITE : MUTED,
+                                          cursor: tieneJustificante ? "pointer" : "not-allowed",
+                                          borderRadius: 10, fontSize: 14, fontWeight: 700,
+                                          fontFamily: "Inter, sans-serif", display: "flex",
+                                          alignItems: "center", justifyContent: "center", gap: 8,
+                                          width: "100%", boxSizing: "border-box" }}>
+                                        <PaperAirplaneIcon style={{ width: 18, height: 18, flexShrink: 0 }} />
+                                        <span style={{ flex: 1, textAlign: "center" }}>Enviar firma → Propietario</span>
+                                        {!tieneJustificante && (
+                                          <PaperClipIcon style={{ width: 15, height: 15, flexShrink: 0 }} />
+                                        )}
+                                      </button>
+                                      {!tieneJustificante && (
+                                        <p style={{ margin: 0, fontSize: 11, color: MUTED,
+                                          fontFamily: "Inter, sans-serif", textAlign: "center", lineHeight: 1.4 }}>
+                                          Adjunta el justificante de depósito para desbloquear el envío al propietario
+                                        </p>
+                                      )}
+                                    </>
                                   )}
                                 </div>
                               );
