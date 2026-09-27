@@ -1561,8 +1561,12 @@ function GrupoDia({ fecha, visitas, propiedadId, propiedadNombre, currentUser, o
   const fechaDisplay = new Date(fecha + "T12:00:00").toLocaleDateString("es-ES", {
     weekday: "long", day: "numeric", month: "long"
   });
-  const esHoy = fecha === new Date().toISOString().slice(0, 10);
-  const esAyer = fecha === new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  const _hoy = new Date(); const _pad = n => String(n).padStart(2,"0");
+  const _hoyStr  = `${_hoy.getFullYear()}-${_pad(_hoy.getMonth()+1)}-${_pad(_hoy.getDate())}`;
+  const _ayer    = new Date(_hoy - 86400000);
+  const _ayerStr = `${_ayer.getFullYear()}-${_pad(_ayer.getMonth()+1)}-${_pad(_ayer.getDate())}`;
+  const esHoy  = fecha === _hoyStr;
+  const esAyer = fecha === _ayerStr;
   const etiquetaDia = esHoy ? "Hoy" : esAyer ? "Ayer" : fechaDisplay;
 
   return (
@@ -1620,7 +1624,12 @@ function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, on
   const [nuevaVisita, setNuevaVisita] = useState(false);
   const [compradorNueva, setCompradorNueva] = useState(null);
   const [notasNueva, setNotasNueva] = useState("");
-  const [horaVisita, setHoraVisita] = useState(new Date().toISOString().slice(0, 16));
+  const [horaVisita, setHoraVisita] = useState(() => {
+    // datetime-local necesita hora LOCAL, no UTC
+    const now = new Date();
+    const pad = n => String(n).padStart(2, "0");
+    return `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  });
   const [guardando, setGuardando] = useState(false);
   const isAdmin = ["director", "administrador"].includes(currentUser?.role?.toLowerCase());
   const esPropio = visitas.some(v => v.agente_login === currentUser?.user_login);
@@ -1633,7 +1642,9 @@ function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, on
   // Agrupar visitas por día (YYYY-MM-DD)
   const visitasPorDia = {};
   visitas.forEach(v => {
-    const dia = new Date(v.fecha_visita).toISOString().slice(0, 10);
+    const _d = new Date(v.fecha_visita);
+    const pad = n => String(n).padStart(2, "0");
+    const dia = `${_d.getFullYear()}-${pad(_d.getMonth()+1)}-${pad(_d.getDate())}`;
     if (!visitasPorDia[dia]) visitasPorDia[dia] = [];
     visitasPorDia[dia].push(v);
   });
@@ -1805,7 +1816,11 @@ export default function Visitas({ currentUser }) {
   const [modalNuevaVisita, setModalNuevaVisita] = useState(false);
   const [nvPropiedad, setNvPropiedad] = useState(null);
   const [nvCompradores, setNvCompradores] = useState([]);
-  const [nvHora, setNvHora] = useState(new Date().toISOString().slice(0,16));
+  const [nvHora, setNvHora] = useState(() => {
+    const now = new Date();
+    const pad = n => String(n).padStart(2, "0");
+    return `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  });
   const [nvGuardando, setNvGuardando] = useState(false);
   const [propsAgente, setPropsAgente] = useState([]);
 
@@ -1838,7 +1853,7 @@ export default function Visitas({ currentUser }) {
     setNvGuardando(false);
     setModalNuevaVisita(false);
     setNvPropiedad(null); setNvCompradores([]);
-    setNvHora(new Date().toISOString().slice(0,16));
+    setNvHora((() => { const now = new Date(); const pad = n => String(n).padStart(2,"0"); return `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`; })());
     cargar();
   }
 
