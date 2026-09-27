@@ -299,19 +299,24 @@ export default function FirmarVisita() {
             </a>
 
             {/* Checkbox He leído — siempre visible justo debajo */}
-            <label style={{ display:"block", marginTop:14,
-              padding:"14px 16px", background:leido ? `${SUCCESS}10` : WHITE,
+            <div style={{ marginTop:14, boxSizing:"border-box", width:"100%", overflow:"hidden",
+              background:leido ? `${SUCCESS}10` : WHITE,
               border:`1.5px solid ${leido ? SUCCESS : BORDER}`, borderRadius:10,
-              cursor:"pointer", transition:"all 0.15s" }}>
-              <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-                <input type="checkbox" checked={leido} onChange={e => setLeido(e.target.checked)}
-                  style={{ width:18, height:18, accentColor:SUCCESS, flexShrink:0 }} />
-                <span style={{ fontSize:13, color: leido ? SUCCESS : TEXT,
-                  fontWeight: leido ? 700 : 400, fontFamily:"Inter, sans-serif", lineHeight:1.4 }}>
+              transition:"all 0.15s" }}
+              onClick={() => setLeido(v => !v)}>
+              <div style={{ display:"flex", alignItems:"flex-start", gap:12, cursor:"pointer",
+                padding:"14px 16px", boxSizing:"border-box", width:"100%" }}>
+                <div style={{ marginTop:2, flexShrink:0 }}>
+                  <input type="checkbox" checked={leido} onChange={e => { e.stopPropagation(); setLeido(e.target.checked); }}
+                    style={{ width:18, height:18, accentColor:SUCCESS, cursor:"pointer", display:"block" }} />
+                </div>
+                <p style={{ fontSize:13, color: leido ? SUCCESS : TEXT,
+                  fontWeight: leido ? 700 : 400, fontFamily:"Inter, sans-serif",
+                  lineHeight:1.6, margin:0, flex:1, minWidth:0, wordBreak:"break-word" }}>
                   He leído y entendido el documento en su totalidad
-                </span>
+                </p>
               </div>
-            </label>
+            </div>
           </div>
         )}
 
