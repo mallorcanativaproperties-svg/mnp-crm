@@ -179,15 +179,15 @@ const TIPO_GROUPS = [
 ];
 
 const ESTADOS = [
-  { key: "borrador",  label: "Borrador",  accent: "#9A968A" },
-  { key: "captada",   label: "Captada",   accent: "#AC8A54" },
-  { key: "publicada", label: "Publicada", accent: "#2C6E52" },
-  { key: "reservada", label: "Reservada", accent: "#9C6E1B" },
+  { key: "borrador",  label: "Borrador",  accent: "var(--muted)" },
+  { key: "captada",   label: "Captada",   accent: "var(--gold)" },
+  { key: "publicada", label: "Publicada", accent: "var(--success)" },
+  { key: "reservada", label: "Reservada", accent: "var(--amber)" },
   { key: "arras",     label: "Arras",     accent: "#B05D00" },
-  { key: "notaria",   label: "Notaría",   accent: "#185FA5" },
-  { key: "vendida",   label: "Vendida",   accent: "#2C6E52" },
-  { key: "caida",     label: "Caída",     accent: "#A23A3A" },
-  { key: "retirada",  label: "Retirada",  accent: "#9A968A" },
+  { key: "notaria",   label: "Notaría",   accent: "var(--blue)" },
+  { key: "vendida",   label: "Vendida",   accent: "var(--success)" },
+  { key: "caida",     label: "Caída",     accent: "var(--danger)" },
+  { key: "retirada",  label: "Retirada",  accent: "var(--muted)" },
 ];
 
 const DESTINOS = ["Web propia", "Idealista", "Marketplace Facebook", "Catalogo WhatsApp"];
@@ -341,7 +341,7 @@ function calcHon(p) {
 
 
 function Tag({ children, color }) {
-  const c = color || "#AC8A54";
+  const c = color || "var(--gold)";
   return (
     <span style={{ display: "inline-block", fontSize: 10, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", padding: "4px 12px", borderRadius: 0, background: c + "18", color: c }}>
       {children}
@@ -355,11 +355,11 @@ function Sec({ title, children, startOpen, forceOpen }) {
   return (
     <div style={{ marginBottom: 0 }}>
       <div onClick={() => { if (forceOpen === undefined) setOpenLocal(o => !o); else setOpenLocal(o => !o); }}
-        style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", padding: "10px 0", borderBottom: open ? "none" : "1px solid #E7E1D4", marginBottom: open ? 12 : 0 }}>
-        <span style={{ fontSize: 9, color: "#AC8A54", transform: open ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s", display: "inline-block" }}>▶</span>
-        <span style={{ fontSize: 10.5, fontWeight: 600, color: "#8C6E3F", textTransform: "uppercase", letterSpacing: "0.12em" }}>{title}</span>
+        style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", padding: "10px 0", borderBottom: open ? "none" : "1px solid var(--border)", marginBottom: open ? 12 : 0 }}>
+        <span style={{ fontSize: 9, color: "var(--gold)", transform: open ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s", display: "inline-block" }}>▶</span>
+        <span style={{ fontSize: 10.5, fontWeight: 600, color: "var(--gold-dark)", textTransform: "uppercase", letterSpacing: "0.12em" }}>{title}</span>
       </div>
-      {open && <div style={{ paddingBottom: 16, borderBottom: "1px solid #E7E1D4", marginBottom: 4 }}>{children}</div>}
+      {open && <div style={{ paddingBottom: 16, borderBottom: "1px solid var(--border)", marginBottom: 4 }}>{children}</div>}
     </div>
   );
 }
@@ -401,13 +401,13 @@ function DatosVentaPanel({ d, editMode, calcDesde, setCalcDesde, EFl, upd, draft
   const g3  = { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 };
 
   // Etiqueta para campo calculado
-  function CampoCalc({ label, value, color = "#16294A" }) {
+  function CampoCalc({ label, value, color = "var(--navy)" }) {
     return (
       <div>
-        <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 5 }}>
+        <div style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 5 }}>
           {label}
         </div>
-        <div style={{ padding: "10px 14px", background: "#F8F6F1", border: "1px solid #E7E1D4", fontSize: 14, color, fontWeight: 700, minHeight: 40, display: "flex", alignItems: "center" }}>
+        <div style={{ padding: "10px 14px", background: "var(--cream)", border: "1px solid var(--border)", fontSize: 14, color, fontWeight: 700, minHeight: 40, display: "flex", alignItems: "center" }}>
           {value || "—"}
         </div>
       </div>
@@ -426,7 +426,7 @@ function DatosVentaPanel({ d, editMode, calcDesde, setCalcDesde, EFl, upd, draft
         )}
         {d.op === "Compraventa" && (
           !desProp && editMode
-            ? <CampoCalc label="Neto propietario (calculado)" value={fmtP(Math.round(netoVend))} color="#2C6E52" />
+            ? <CampoCalc label="Neto propietario (calculado)" value={fmtP(Math.round(netoVend))} color="var(--success)" />
             : EFl({label: "Precio propietario", field: "precioProp", pub: false, type: "number"})
         )}
 
@@ -441,11 +441,11 @@ function DatosVentaPanel({ d, editMode, calcDesde, setCalcDesde, EFl, upd, draft
 
       {/* Datos del contrato (traspaso) */}
       {(d.tipo === "Local comercial" || d.tipo === "Nave industrial" || d.tipo === "Local" || d.tipo === "Nave" || d.tipo === "Almacen" || d.tipo === "Negocio") && d.op === "Traspaso" && (() => {
-        const LBL = { fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 };
-        const INP = { width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" };
+        const LBL = { fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 };
+        const INP = { width: "100%", padding: "10px 14px", background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, color: "var(--text)", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" };
         return (
-          <div style={{ borderTop: "1px solid #E7E1D4", paddingTop: 14, marginTop: 16 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 12 }}>
+          <div style={{ borderTop: "1px solid var(--border)", paddingTop: 14, marginTop: 16 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: "var(--gold)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 12 }}>
               Datos del contrato (traspaso)
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
@@ -505,15 +505,15 @@ function DatosVentaPanel({ d, editMode, calcDesde, setCalcDesde, EFl, upd, draft
       {/* Panel resumen de cálculo */}
       <div style={{ padding: "14px 18px", background: "#F4EEE0", border: "1px solid #E7D9C0", marginBottom: 8 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
-          <div style={{ fontSize: 10, color: "#8C6E3F", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>Cálculo automático</div>
+          <div style={{ fontSize: 10, color: "var(--gold-dark)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>Cálculo automático</div>
           {!esAlq && d.op !== "Traspaso" && (
             <div style={{ display: "flex", gap: 6 }}>
               <button onClick={() => setCalcDesde("venta")}
-                style={{ fontSize: 10, padding: "5px 12px", border: "1px solid #AC8A54", borderRadius: 0, background: calcDesde === "venta" ? "#AC8A54" : "transparent", color: calcDesde === "venta" ? "#fff" : "#AC8A54", cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
+                style={{ fontSize: 10, padding: "5px 12px", border: "1px solid var(--gold)", borderRadius: 0, background: calcDesde === "venta" ? "var(--gold)" : "transparent", color: calcDesde === "venta" ? "#fff" : "var(--gold)", cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
                 Desde precio venta
               </button>
               <button onClick={() => setCalcDesde("propietario")}
-                style={{ fontSize: 10, padding: "5px 12px", border: "1px solid #AC8A54", borderRadius: 0, background: calcDesde === "propietario" ? "#AC8A54" : "transparent", color: calcDesde === "propietario" ? "#fff" : "#AC8A54", cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
+                style={{ fontSize: 10, padding: "5px 12px", border: "1px solid var(--gold)", borderRadius: 0, background: calcDesde === "propietario" ? "var(--gold)" : "transparent", color: calcDesde === "propietario" ? "#fff" : "var(--gold)", cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
                 Desde precio propietario
               </button>
             </div>
@@ -521,19 +521,19 @@ function DatosVentaPanel({ d, editMode, calcDesde, setCalcDesde, EFl, upd, draft
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "10px 20px" }}>
           {[
-            { label: esAlq ? "Renta mensual" : "Precio de venta", value: desProp ? precioCalc : pv,  color: "#16294A" },
-            { label: "Hon. neto",                                  value: honBase,                     color: "#16294A" },
-            { label: `IVA (${Number(d.ivaHon)||21}%)`,            value: iva,                         color: "#16294A" },
-            { label: "Hon. total (neto+IVA)",                      value: honTotal,                    color: "#AC8A54" },
+            { label: esAlq ? "Renta mensual" : "Precio de venta", value: desProp ? precioCalc : pv,  color: "var(--navy)" },
+            { label: "Hon. neto",                                  value: honBase,                     color: "var(--navy)" },
+            { label: `IVA (${Number(d.ivaHon)||21}%)`,            value: iva,                         color: "var(--navy)" },
+            { label: "Hon. total (neto+IVA)",                      value: honTotal,                    color: "var(--gold)" },
           ].map(({ label, value, color }) => (
             <div key={label}>
-              <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 4 }}>{label}</div>
+              <div style={{ fontSize: 10, color: "var(--muted)", marginBottom: 4 }}>{label}</div>
               <div style={{ fontSize: 14, fontWeight: 700, color }}>{value > 0 ? fmtP(Math.round(value)) : "—"}</div>
             </div>
           ))}
           <div style={{ gridColumn: "span 2" }}>
-            <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 4 }}>Neto propietario</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: "#2C6E52" }}>{netoVend > 0 ? fmtP(Math.round(netoVend)) : "—"}</div>
+            <div style={{ fontSize: 10, color: "var(--muted)", marginBottom: 4 }}>Neto propietario</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "var(--success)" }}>{netoVend > 0 ? fmtP(Math.round(netoVend)) : "—"}</div>
           </div>
         </div>
         {editMode && (
@@ -546,7 +546,7 @@ function DatosVentaPanel({ d, editMode, calcDesde, setCalcDesde, EFl, upd, draft
             };
             Object.entries(updates).forEach(([k, v]) => upd(k, v));
             setTimeout(() => autoSave({ ...draft, ...updates }), 100);
-          }} style={{ marginTop: 14, padding: "8px 16px", background: "#AC8A54", border: "none", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.06em" }}>
+          }} style={{ marginTop: 14, padding: "8px 16px", background: "var(--gold)", border: "none", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.06em" }}>
             ↓ Aplicar valores a la ficha
           </button>
         )}
@@ -558,7 +558,7 @@ function DatosVentaPanel({ d, editMode, calcDesde, setCalcDesde, EFl, upd, draft
 // ── Sección grande (contenedor de nivel 1) ────────────────────────────────────
 // Las secciones grandes agrupan las subsecciones Sec.
 // defaultOpen: estado inicial; el usuario siempre puede abrirla/cerrarla manualmente.
-function SeccionGrande({ title, badge, badgeColor, children, defaultOpen = true, accentColor = "#AC8A54" }) {
+function SeccionGrande({ title, badge, badgeColor, children, defaultOpen = true, accentColor = "var(--gold)" }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div style={{ marginBottom: 2 }}>
@@ -605,7 +605,7 @@ function SeccionGrande({ title, badge, badgeColor, children, defaultOpen = true,
       {open && (
         <div style={{
           padding: "4px 0 0 0",
-          background: "#F8F6F1",
+          background: "var(--cream)",
           borderLeft: `3px solid ${accentColor}22`,
         }}>
           {children}
@@ -630,10 +630,10 @@ function Fl({ label, value, pub, gold, req }) {
   return (
     <div style={{ marginBottom: 10 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}>
-        <span style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>{label}</span>
-        {req && <span style={{ color: "#A23A3A", fontSize: 14, fontWeight: 700 }}>*</span>}
+        <span style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em" }}>{label}</span>
+        {req && <span style={{ color: "var(--danger)", fontSize: 14, fontWeight: 700 }}>*</span>}
       </div>
-      <div style={{ fontSize: gold ? 16 : 13, color: gold ? "#AC8A54" : "#22262E", fontFamily: gold ? "'Playfair Display', serif" : "Inter, sans-serif" }}>
+      <div style={{ fontSize: gold ? 16 : 13, color: gold ? "var(--gold)" : "var(--text)", fontFamily: gold ? "'Playfair Display', serif" : "Inter, sans-serif" }}>
         {value || "-"}
       </div>
     </div>
@@ -641,9 +641,9 @@ function Fl({ label, value, pub, gold, req }) {
 }
 
 const MEDIA_TIPOS = [
-  { key: "foto", label: "Fotos", icon: "📷", accept: "image/*", color: "#AC8A54" },
+  { key: "foto", label: "Fotos", icon: "📷", accept: "image/*", color: "var(--gold)" },
   { key: "video", label: "Videos", icon: "🎬", accept: "video/*", color: "#3D577E" },
-  { key: "plano", label: "Planos", icon: "📐", accept: "image/*,.pdf", color: "#2C6E52" },
+  { key: "plano", label: "Planos", icon: "📐", accept: "image/*,.pdf", color: "var(--success)" },
 ];
 
 
@@ -1071,7 +1071,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
     }
   }
 
-  const btnBase = { padding: "6px 14px", borderRadius: 0, border: "1px solid #2A2926", background: "transparent", color: "#9A968A", cursor: "pointer", fontSize: 11, fontWeight: 500, letterSpacing: "0.04em", fontFamily: "Inter, sans-serif", transition: "all 0.2s", display: "flex", alignItems: "center", gap: 6 };
+  const btnBase = { padding: "6px 14px", borderRadius: 0, border: "1px solid var(--text)", background: "transparent", color: "var(--muted)", cursor: "pointer", fontSize: 11, fontWeight: 500, letterSpacing: "0.04em", fontFamily: "Inter, sans-serif", transition: "all 0.2s", display: "flex", alignItems: "center", gap: 6 };
 
   return (
     <div>
@@ -1080,19 +1080,19 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
         {TIPOS_ACTIVOS.map((t) => (
           <div key={t.key} style={{ textAlign: "center", minWidth: 60 }}>
             <div style={{ fontSize: 24, color: t.color, fontFamily: "'Playfair Display', serif" }}>{counts[t.key]}</div>
-            <div style={{ fontSize: 10, color: "#9A968A", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.08em" }}>{t.label}</div>
+            <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.08em" }}>{t.label}</div>
           </div>
         ))}
       </div>
 
       {/* Tabs */}
-      <div style={{ display: "flex", gap: 4, marginBottom: 16, borderBottom: "1px solid #2A2926", paddingBottom: 0 }}>
+      <div style={{ display: "flex", gap: 4, marginBottom: 16, borderBottom: "1px solid var(--text)", paddingBottom: 0 }}>
         {MEDIA_TIPOS.map((t) => {
           const active = activeTab === t.key;
           return (
             <button key={t.key} onClick={() => setActiveTab(t.key)} style={{
               padding: "10px 18px", border: "none", borderBottom: active ? `2px solid ${t.color}` : "2px solid transparent",
-              background: "transparent", color: active ? t.color : "#9A968A", cursor: "pointer",
+              background: "transparent", color: active ? t.color : "var(--muted)", cursor: "pointer",
               fontSize: 11, fontWeight: active ? 600 : 400, letterSpacing: "0.06em", textTransform: "uppercase",
               fontFamily: "Inter, sans-serif", transition: "all 0.2s",
             }}>
@@ -1107,8 +1107,8 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
               <button
                 onClick={handleDeleteSeleccionadas}
                 style={{
-                  padding: "6px 14px", border: "1px solid #A23A3A",
-                  background: "#A23A3A", color: "#fff",
+                  padding: "6px 14px", border: "1px solid var(--danger)",
+                  background: "var(--danger)", color: "#fff",
                   cursor: "pointer", fontSize: 10, fontWeight: 600,
                   letterSpacing: "0.1em", textTransform: "uppercase",
                   fontFamily: "Inter, sans-serif", borderRadius: 0, whiteSpace: "nowrap",
@@ -1121,9 +1121,9 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
               onClick={abrirModalMejora}
               disabled={mejorandoTodas || iaLoading}
               style={{
-                padding: "6px 16px", border: "1px solid #C8A97E",
-                background: mejorandoTodas ? "#F8F6F1" : "transparent",
-                color: mejorandoTodas ? "#9A968A" : "#AC8A54",
+                padding: "6px 16px", border: "1px solid var(--gold-l)",
+                background: mejorandoTodas ? "var(--cream)" : "transparent",
+                color: mejorandoTodas ? "var(--muted)" : "var(--gold)",
                 cursor: (mejorandoTodas || iaLoading) ? "not-allowed" : "pointer",
                 fontSize: 10, fontWeight: 600, letterSpacing: "0.1em",
                 textTransform: "uppercase", fontFamily: "Inter, sans-serif",
@@ -1141,23 +1141,23 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
       {mejorandoTodas && mejoraBatchProgreso && (
         <div style={{
           display: "flex", alignItems: "center", gap: 12,
-          background: "#F8F6F1", border: "1px solid #E7E1D4",
+          background: "var(--cream)", border: "1px solid var(--border)",
           padding: "10px 16px", marginBottom: 12,
         }}>
-          <span style={{ fontSize: 13, color: "#AC8A54" }}>✦</span>
+          <span style={{ fontSize: 13, color: "var(--gold)" }}>✦</span>
           <span style={{ fontSize: 12, color: "#5C5347", fontFamily: "Inter, sans-serif", fontWeight: 500 }}>
             {mejoraBatchProgreso.procesando <= mejoraBatchProgreso.total
               ? `Mejorando fotografía ${mejoraBatchProgreso.procesando} de ${mejoraBatchProgreso.total}...`
               : `${mejoraBatchProgreso.actual} de ${mejoraBatchProgreso.total} completadas`}
           </span>
-          <div style={{ flex: 1, height: 3, background: "#E7E1D4", borderRadius: 2 }}>
+          <div style={{ flex: 1, height: 3, background: "var(--border)", borderRadius: 2 }}>
             <div style={{
-              height: 3, borderRadius: 2, background: "#AC8A54",
+              height: 3, borderRadius: 2, background: "var(--gold)",
               width: `${mejoraBatchProgreso.total > 0 ? (mejoraBatchProgreso.actual / mejoraBatchProgreso.total) * 100 : 0}%`,
               transition: "width 0.5s ease",
             }} />
           </div>
-          <span style={{ fontSize: 11, color: "#9A968A", fontFamily: "Inter, sans-serif", whiteSpace: "nowrap" }}>
+          <span style={{ fontSize: 11, color: "var(--muted)", fontFamily: "Inter, sans-serif", whiteSpace: "nowrap" }}>
             Recibirás un WhatsApp al terminar
           </span>
         </div>
@@ -1176,7 +1176,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
         onDragOver={onFileDragOver}
         onDragLeave={() => setDropZoneOver(false)}
         style={{
-          border: `2px dashed ${dropZoneOver ? currentTipo.color : "#E7E1D4"}`,
+          border: `2px dashed ${dropZoneOver ? currentTipo.color : "var(--border)"}`,
           borderRadius: 0, padding: "24px 20px", textAlign: "center",
           background: dropZoneOver ? currentTipo.color + "0A" : "#1C1B1800",
           transition: "all 0.2s", marginBottom: 16, cursor: "pointer", position: "relative",
@@ -1192,7 +1192,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
           onChange={(e) => handleUpload(Array.from(e.target.files), activeTab)}
         />
         <div style={{ fontSize: 28, marginBottom: 8, opacity: 0.5 }}>{currentTipo.icon}</div>
-        <div style={{ fontSize: 12, color: dropZoneOver ? currentTipo.color : "#9A968A", fontWeight: 500 }}>
+        <div style={{ fontSize: 12, color: dropZoneOver ? currentTipo.color : "var(--muted)", fontWeight: 500 }}>
           {uploading ? uploadProgress : `Arrastra ${currentTipo.label.toLowerCase()} aqui o haz clic para subir`}
         </div>
         <div style={{ fontSize: 10, color: "#C8BFB0", marginTop: 6 }}>
@@ -1202,7 +1202,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
           {activeTab === "tour360" && "JPG, PNG (equirectangular) — max 20MB"}
         </div>
         {uploading && (
-          <div style={{ marginTop: 12, height: 3, background: "#E7E1D4", borderRadius: 0, overflow: "hidden" }}>
+          <div style={{ marginTop: 12, height: 3, background: "var(--border)", borderRadius: 0, overflow: "hidden" }}>
             <div style={{ height: "100%", background: currentTipo.color, borderRadius: 0, animation: "pulse 1.5s infinite", width: "60%" }} />
           </div>
         )}
@@ -1210,7 +1210,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
 
       {/* Gallery grid */}
       {loading ? (
-        <div style={{ textAlign: "center", padding: 30, color: "#9A968A", fontSize: 12 }}>Cargando archivos...</div>
+        <div style={{ textAlign: "center", padding: 30, color: "var(--muted)", fontSize: 12 }}>Cargando archivos...</div>
       ) : filteredMedia.length === 0 ? (
         <div style={{ textAlign: "center", padding: 30, color: "#C8BFB0", fontSize: 12, fontStyle: "italic" }}>
           No hay {currentTipo.label.toLowerCase()} subidos
@@ -1233,10 +1233,10 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
               style={{
                 position: "relative", borderRadius: 0, overflow: "hidden",
                 border: dragOverItem === item.id ? "2px solid " + currentTipo.color :
-                        fotosSeleccionadas.has(item.id) ? "2px solid #AC8A54" :
-                        item.es_portada ? "2px solid #C8A97E" : "1px solid #2A2926",
+                        fotosSeleccionadas.has(item.id) ? "2px solid var(--gold)" :
+                        item.es_portada ? "2px solid var(--gold-l)" : "1px solid var(--text)",
                 background: dragOverItem === item.id ? currentTipo.color + "0A" :
-                            fotosSeleccionadas.has(item.id) ? "#AC8A5411" : "#FFFFFF",
+                            fotosSeleccionadas.has(item.id) ? "var(--gold)11" : "var(--white)",
                 transition: "all 0.15s",
                 opacity: dragItem && dragItem.id === item.id ? 0.4 : 1,
                 cursor: "grab",
@@ -1245,7 +1245,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
               {/* Order number */}
               <div style={{
                 position: "absolute", top: 6, right: 6, zIndex: 2,
-                background: "#111110CC", color: "#9A968A", fontSize: 10, fontWeight: 700,
+                background: "#111110CC", color: "var(--muted)", fontSize: 10, fontWeight: 700,
                 width: 22, height: 22, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
               }}>
                 {idx + 1}
@@ -1255,7 +1255,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
               {item.es_portada && (
                 <div style={{
                   position: "absolute", top: 6, left: 6, zIndex: 2,
-                  background: "#AC8A54", color: "#F8F6F1", fontSize: 9, fontWeight: 700,
+                  background: "var(--gold)", color: "var(--cream)", fontSize: 9, fontWeight: 700,
                   padding: "2px 8px", borderRadius: 0, letterSpacing: "0.08em", textTransform: "uppercase",
                 }}>
                   Portada
@@ -1264,7 +1264,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
               {(item.nombre?.startsWith("ia-") || item.ia_generada) && (
                 <div style={{
                   position: "absolute", top: item.es_portada ? 28 : 6, left: 6, zIndex: 2,
-                  background: "#1a2528", color: "#C8A97E", fontSize: 9, fontWeight: 700,
+                  background: "#1a2528", color: "var(--gold-l)", fontSize: 9, fontWeight: 700,
                   padding: "2px 8px", borderRadius: 0, letterSpacing: "0.08em", textTransform: "uppercase",
                 }}>
                   ✦ IA
@@ -1283,7 +1283,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                   style={{ width: "100%", height: 140, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "#1A1917" }}
                 >
                   <span style={{ fontSize: 32, marginBottom: 4 }}>📄</span>
-                  <span style={{ fontSize: 10, color: "#9A968A" }}>PDF</span>
+                  <span style={{ fontSize: 10, color: "var(--muted)" }}>PDF</span>
                 </div>
               ) : (
                 <div style={{ position: "relative" }}>
@@ -1300,7 +1300,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                       style={{
                         position: "absolute", bottom: 6, left: 6, zIndex: 3,
                         width: 22, height: 22,
-                        background: fotosSeleccionadas.has(item.id) ? "#AC8A54" : "rgba(0,0,0,0.6)",
+                        background: fotosSeleccionadas.has(item.id) ? "var(--gold)" : "rgba(0,0,0,0.6)",
                         border: `2px solid ${fotosSeleccionadas.has(item.id) ? "#fff" : "rgba(255,255,255,0.7)"}`,
                         display: "flex", alignItems: "center", justifyContent: "center",
                         cursor: "pointer", transition: "all 0.15s",
@@ -1320,7 +1320,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                     value={item.etiqueta || ""}
                     onChange={(e) => { e.stopPropagation(); handleEtiqueta(item, e.target.value); }}
                     onClick={(e) => e.stopPropagation()}
-                    style={{ width: "100%", padding: "4px 6px", fontSize: 10, background: "#F8F6F1", border: "1px solid #E7E1D4", color: item.etiqueta ? "#1a2528" : "#9A968A", fontFamily: "Inter, sans-serif", outline: "none", cursor: "pointer", appearance: "none", WebkitAppearance: "none" }}
+                    style={{ width: "100%", padding: "4px 6px", fontSize: 10, background: "var(--cream)", border: "1px solid var(--border)", color: item.etiqueta ? "#1a2528" : "var(--muted)", fontFamily: "Inter, sans-serif", outline: "none", cursor: "pointer", appearance: "none", WebkitAppearance: "none" }}
                   >
                     {ETIQUETAS_IDEALISTA.map(e => (
                       <option key={e.value} value={e.value}>{e.label}</option>
@@ -1330,7 +1330,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
               )}
               {/* Info + actions bar */}
               <div style={{ padding: "4px 8px 6px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: 10, color: "#9A968A", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "50%" }}>
+                <span style={{ fontSize: 10, color: "var(--muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "50%" }}>
                   {item.nombre || `${activeTab}-${idx + 1}`}
                 </span>
                 <div style={{ display: "flex", gap: 4 }}>
@@ -1338,14 +1338,14 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                   <button onClick={(e) => { e.stopPropagation(); setLightbox(item); }} style={{ ...btnBase, padding: "2px 5px", fontSize: 10 }} title="Ver">👁</button>
                   {/* Set as portada (only photos) */}
                   {activeTab === "foto" && !item.es_portada && (
-                    <button onClick={(e) => { e.stopPropagation(); handleSetPortada(item); }} style={{ ...btnBase, padding: "2px 5px", fontSize: 10, color: "#AC8A54", borderColor: "#C8A97E33" }} title="Hacer portada">★</button>
+                    <button onClick={(e) => { e.stopPropagation(); handleSetPortada(item); }} style={{ ...btnBase, padding: "2px 5px", fontSize: 10, color: "var(--gold)", borderColor: "var(--gold-l)33" }} title="Hacer portada">★</button>
                   )}
                   {/* Editar con IA — solo fotos */}
                   {activeTab === "foto" && (
                     <button onClick={(e) => { e.stopPropagation(); setIaModal({ item }); setIaVariaciones([]); setIaSeleccionada(null); }} style={{ ...btnBase, padding: "2px 5px", fontSize: 10, color: "#405c6b", borderColor: "#405c6b44" }} title="Editar con IA">✦</button>
                   )}
                   {/* Delete */}
-                  <button onClick={(e) => { e.stopPropagation(); if (confirm("Eliminar este archivo?")) handleDelete(item); }} style={{ ...btnBase, padding: "2px 5px", fontSize: 10, color: "#A23A3A", borderColor: "#A23A3A44" }} title="Eliminar">✕</button>
+                  <button onClick={(e) => { e.stopPropagation(); if (confirm("Eliminar este archivo?")) handleDelete(item); }} style={{ ...btnBase, padding: "2px 5px", fontSize: 10, color: "var(--danger)", borderColor: "var(--danger)44" }} title="Eliminar">✕</button>
                 </div>
               </div>
             </div>
@@ -1357,9 +1357,9 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
       {iaModal && (
         <div onClick={() => { if (!iaLoading) { setIaModal(null); setIaVariaciones([]); setIaSeleccionada(null); } }}
           style={{ position: "fixed", inset: 0, background: "rgba(10,14,15,0.94)", backdropFilter: "blur(20px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2100 }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: "#F8F6F1", width: "min(1120px, 96vw)", maxHeight: "95vh", overflowY: "auto", position: "relative", boxShadow: "0 32px 80px rgba(0,0,0,0.5)" }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: "var(--cream)", width: "min(1120px, 96vw)", maxHeight: "95vh", overflowY: "auto", position: "relative", boxShadow: "0 32px 80px rgba(0,0,0,0.5)" }}>
 
-            <div style={{ background: "#AC8A54", height: 3, width: "100%" }} />
+            <div style={{ background: "var(--gold)", height: 3, width: "100%" }} />
 
             {/* Header */}
             <div style={{ padding: "24px 32px 0", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -1367,22 +1367,22 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                 <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 22, fontWeight: 400, color: "#1a2528", lineHeight: 1.2 }}>
                   Edición con Inteligencia Artificial
                 </div>
-                <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, color: "#AC8A54", marginTop: 4, letterSpacing: "0.06em" }}>
+                <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, color: "var(--gold)", marginTop: 4, letterSpacing: "0.06em" }}>
                   {iaModal.item.nombre}
                 </div>
               </div>
               {!iaLoading && (
                 <button onClick={() => { setIaModal(null); setIaVariaciones([]); setIaSeleccionada(null); }}
-                  style={{ background: "none", border: "none", color: "#9A968A", fontSize: 22, cursor: "pointer", lineHeight: 1, padding: "4px 0 0 16px" }}>✕</button>
+                  style={{ background: "none", border: "none", color: "var(--muted)", fontSize: 22, cursor: "pointer", lineHeight: 1, padding: "4px 0 0 16px" }}>✕</button>
               )}
             </div>
 
-            <div style={{ height: 1, background: "#E7E1D4", margin: "20px 32px" }} />
+            <div style={{ height: 1, background: "var(--border)", margin: "20px 32px" }} />
 
             {/* Vista variaciones Home Staging (pantalla completa en el modal) */}
             {iaVariaciones.length > 0 ? (
               <div style={{ padding: "0 32px 28px" }}>
-                <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 10, color: "#9A968A", letterSpacing: "0.12em", marginBottom: 16 }}>
+                <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 10, color: "var(--muted)", letterSpacing: "0.12em", marginBottom: 16 }}>
                   VARIACIONES HOME STAGING — {iaVariaciones.length}/3 · Selecciona la que más te guste
                 </div>
 
@@ -1390,19 +1390,19 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                 <div style={{ display: "grid", gridTemplateColumns: `repeat(${1 + iaVariaciones.length}, 1fr)`, gap: 12, marginBottom: 24 }}>
                   {/* Original */}
                   <div>
-                    <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 10, color: "#9A968A", letterSpacing: "0.1em", marginBottom: 8 }}>ORIGINAL</div>
-                    <img src={iaModal.item.url} alt="original" style={{ width: "100%", height: 340, objectFit: "cover", border: "2px solid #E7E1D4", display: "block" }} />
+                    <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 10, color: "var(--muted)", letterSpacing: "0.1em", marginBottom: 8 }}>ORIGINAL</div>
+                    <img src={iaModal.item.url} alt="original" style={{ width: "100%", height: 340, objectFit: "cover", border: "2px solid var(--border)", display: "block" }} />
                   </div>
                   {/* Variaciones */}
                   {iaVariaciones.map((v, i) => (
                     <div key={i} onClick={() => setIaSeleccionada(i)} style={{ cursor: "pointer" }}>
-                      <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 10, color: iaSeleccionada === i ? "#AC8A54" : "#9A968A", letterSpacing: "0.1em", marginBottom: 8, fontWeight: iaSeleccionada === i ? 700 : 400 }}>
+                      <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 10, color: iaSeleccionada === i ? "var(--gold)" : "var(--muted)", letterSpacing: "0.1em", marginBottom: 8, fontWeight: iaSeleccionada === i ? 700 : 400 }}>
                         {iaSeleccionada === i ? "✓ " : ""}{v.label.toUpperCase()}
                       </div>
                       <div style={{ position: "relative" }}>
-                        <img src={v.url} alt={v.label} style={{ width: "100%", height: 340, objectFit: "cover", border: `2px solid ${iaSeleccionada === i ? "#AC8A54" : "#E7E1D4"}`, display: "block", transition: "border-color 0.2s" }} />
+                        <img src={v.url} alt={v.label} style={{ width: "100%", height: 340, objectFit: "cover", border: `2px solid ${iaSeleccionada === i ? "var(--gold)" : "var(--border)"}`, display: "block", transition: "border-color 0.2s" }} />
                         {iaSeleccionada === i && (
-                          <div style={{ position: "absolute", top: 10, right: 10, background: "#AC8A54", color: "#fff", width: 26, height: 26, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700 }}>✓</div>
+                          <div style={{ position: "absolute", top: 10, right: 10, background: "var(--gold)", color: "#fff", width: 26, height: 26, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700 }}>✓</div>
                         )}
                       </div>
                     </div>
@@ -1411,10 +1411,10 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
 
                 {/* Loading mientras genera */}
                 {iaLoading && (
-                  <div style={{ textAlign: "center", padding: "20px 0", borderTop: "1px solid #E7E1D4", marginBottom: 16 }}>
-                    <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 24, color: "#AC8A54", marginBottom: 8 }}>✦</div>
+                  <div style={{ textAlign: "center", padding: "20px 0", borderTop: "1px solid var(--border)", marginBottom: 16 }}>
+                    <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 24, color: "var(--gold)", marginBottom: 8 }}>✦</div>
                     <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 13, color: "#1a2528" }}>Generando variación...</div>
-                    <div style={{ fontSize: 11, color: "#9A968A", marginTop: 4 }}>20 — 40 segundos</div>
+                    <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>20 — 40 segundos</div>
                   </div>
                 )}
 
@@ -1425,7 +1425,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                     {iaVariaciones.length < 3 && !iaLoading && (
                       <div style={{ display: "flex", gap: 0 }}>
                         <select value={iaEstilo} onChange={e => setIaEstilo(e.target.value)}
-                          style={{ padding: "10px 14px", background: "#fff", border: "1px solid #E7E1D4", borderRight: "none", color: "#1a2528", fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, outline: "none", cursor: "pointer", appearance: "none", WebkitAppearance: "none" }}>
+                          style={{ padding: "10px 14px", background: "#fff", border: "1px solid var(--border)", borderRight: "none", color: "#1a2528", fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, outline: "none", cursor: "pointer", appearance: "none", WebkitAppearance: "none" }}>
                           {["Nórdico","Industrial","Ecléctico","Minimalista","Bohemio","Art Deco"].map(e => (
                             <option key={e} value={e.toLowerCase()}>{e}</option>
                           ))}
@@ -1435,23 +1435,23 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                             const result = await generarVariacionIA(iaModal.item, iaEstilo);
                             if (result) setIaVariaciones(prev => [...prev, { url: result.url, storageKey: result.storageKey, label: `${iaEstilo.charAt(0).toUpperCase() + iaEstilo.slice(1)} ${prev.length + 1}` }]);
                           }}
-                          style={{ padding: "10px 18px", background: "#AC8A54", border: "none", color: "#F8F6F1", fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.06em", cursor: "pointer" }}>
+                          style={{ padding: "10px 18px", background: "var(--gold)", border: "none", color: "var(--cream)", fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.06em", cursor: "pointer" }}>
                           + Generar otra
                         </button>
                       </div>
                     )}
                     {iaVariaciones.length >= 3 && !iaLoading && (
-                      <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 11, color: "#9A968A" }}>Máximo 3 variaciones alcanzado</div>
+                      <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 11, color: "var(--muted)" }}>Máximo 3 variaciones alcanzado</div>
                     )}
                   </div>
                   <div style={{ display: "flex", gap: 10 }}>
                     <button onClick={() => { setIaVariaciones([]); setIaSeleccionada(null); }}
-                      style={{ padding: "11px 20px", background: "none", border: "1px solid #E7E1D4", color: "#9A968A", fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, cursor: "pointer" }}>
+                      style={{ padding: "11px 20px", background: "none", border: "1px solid var(--border)", color: "var(--muted)", fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, cursor: "pointer" }}>
                       Volver
                     </button>
                     {iaSeleccionada !== null && (
                       <button onClick={() => aplicarVariacionIA(iaVariaciones[iaSeleccionada])}
-                        style={{ padding: "11px 28px", background: "#1a2528", border: "none", color: "#F8F6F1", fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", cursor: "pointer" }}>
+                        style={{ padding: "11px 28px", background: "#1a2528", border: "none", color: "var(--cream)", fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, fontWeight: 700, letterSpacing: "0.1em", cursor: "pointer" }}>
                         USAR ESTA IMAGEN
                       </button>
                     )}
@@ -1465,35 +1465,35 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
 
                 {/* Foto original */}
                 <div style={{ paddingRight: 28 }}>
-                  <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 10, color: "#9A968A", letterSpacing: "0.12em", marginBottom: 10 }}>IMAGEN ORIGINAL</div>
-                  <img src={iaModal.item.url} alt="original" style={{ width: "100%", height: 440, objectFit: "cover", display: "block", border: "1px solid #E7E1D4" }} />
+                  <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 10, color: "var(--muted)", letterSpacing: "0.12em", marginBottom: 10 }}>IMAGEN ORIGINAL</div>
+                  <img src={iaModal.item.url} alt="original" style={{ width: "100%", height: 440, objectFit: "cover", display: "block", border: "1px solid var(--border)" }} />
                 </div>
 
                 {/* Panel de controles */}
-                <div style={{ borderLeft: "1px solid #E7E1D4", paddingLeft: 28, display: "flex", flexDirection: "column" }}>
+                <div style={{ borderLeft: "1px solid var(--border)", paddingLeft: 28, display: "flex", flexDirection: "column" }}>
 
                   {/* Mejora automática */}
                   <div style={{ marginBottom: 28 }}>
-                    <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 10, color: "#9A968A", letterSpacing: "0.12em", marginBottom: 10 }}>MEJORA AUTOMÁTICA</div>
+                    <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 10, color: "var(--muted)", letterSpacing: "0.12em", marginBottom: 10 }}>MEJORA AUTOMÁTICA</div>
                     <p style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, color: "#6B7280", lineHeight: 1.6, marginBottom: 14 }}>
                       Optimiza iluminación, ángulo y encuadre. Retira desorden. Alta definición 16:9. Reemplaza la foto original directamente.
                     </p>
                     <button onClick={() => mejorarFoto(iaModal.item)} disabled={iaLoading}
-                      style={{ width: "100%", padding: "13px 0", background: iaLoading ? "#E7E1D4" : "#1a2528", border: "none", color: iaLoading ? "#9A968A" : "#F8F6F1", fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", cursor: iaLoading ? "not-allowed" : "pointer" }}>
+                      style={{ width: "100%", padding: "13px 0", background: iaLoading ? "var(--border)" : "#1a2528", border: "none", color: iaLoading ? "var(--muted)" : "var(--cream)", fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", cursor: iaLoading ? "not-allowed" : "pointer" }}>
                       Mejorar fotografía
                     </button>
                   </div>
 
-                  <div style={{ height: 1, background: "#E7E1D4", marginBottom: 28 }} />
+                  <div style={{ height: 1, background: "var(--border)", marginBottom: 28 }} />
 
                   {/* Home Staging */}
                   <div style={{ marginBottom: 28 }}>
-                    <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 10, color: "#9A968A", letterSpacing: "0.12em", marginBottom: 10 }}>HOME STAGING VIRTUAL</div>
+                    <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 10, color: "var(--muted)", letterSpacing: "0.12em", marginBottom: 10 }}>HOME STAGING VIRTUAL</div>
                     <p style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, color: "#6B7280", lineHeight: 1.6, marginBottom: 14 }}>
                       Rediseño visual del espacio manteniendo la estructura. Genera hasta 3 variaciones para comparar antes de elegir.
                     </p>
                     <select value={iaEstilo} onChange={e => setIaEstilo(e.target.value)}
-                      style={{ width: "100%", padding: "11px 14px", marginBottom: 10, background: "#fff", border: "1px solid #E7E1D4", color: "#1a2528", fontFamily: "Raleway, Inter, sans-serif", fontSize: 13, outline: "none", cursor: "pointer", appearance: "none", WebkitAppearance: "none" }}>
+                      style={{ width: "100%", padding: "11px 14px", marginBottom: 10, background: "#fff", border: "1px solid var(--border)", color: "#1a2528", fontFamily: "Raleway, Inter, sans-serif", fontSize: 13, outline: "none", cursor: "pointer", appearance: "none", WebkitAppearance: "none" }}>
                       {["Nórdico","Industrial","Ecléctico","Minimalista","Bohemio","Art Deco"].map(e => (
                         <option key={e} value={e.toLowerCase()}>{e}</option>
                       ))}
@@ -1504,24 +1504,24 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                         if (result) setIaVariaciones([{ url: result.url, storageKey: result.storageKey, label: `${iaEstilo.charAt(0).toUpperCase() + iaEstilo.slice(1)} 1` }]);
                       }}
                       disabled={iaLoading}
-                      style={{ width: "100%", padding: "13px 0", background: iaLoading ? "#E7E1D4" : "#AC8A54", border: "none", color: iaLoading ? "#9A968A" : "#F8F6F1", fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", cursor: iaLoading ? "not-allowed" : "pointer" }}>
+                      style={{ width: "100%", padding: "13px 0", background: iaLoading ? "var(--border)" : "var(--gold)", border: "none", color: iaLoading ? "var(--muted)" : "var(--cream)", fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", cursor: iaLoading ? "not-allowed" : "pointer" }}>
                       Generar Home Staging
                     </button>
                   </div>
 
                   {/* Loading */}
                   {iaLoading && (
-                    <div style={{ textAlign: "center", padding: "20px 0", borderTop: "1px solid #E7E1D4" }}>
-                      <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 28, color: "#AC8A54", marginBottom: 10, lineHeight: 1 }}>✦</div>
+                    <div style={{ textAlign: "center", padding: "20px 0", borderTop: "1px solid var(--border)" }}>
+                      <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 28, color: "var(--gold)", marginBottom: 10, lineHeight: 1 }}>✦</div>
                       <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 13, color: "#1a2528", fontWeight: 500 }}>Generando imagen...</div>
-                      <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 11, color: "#9A968A", marginTop: 6 }}>20 — 40 segundos</div>
+                      <div style={{ fontFamily: "Raleway, Inter, sans-serif", fontSize: 11, color: "var(--muted)", marginTop: 6 }}>20 — 40 segundos</div>
                     </div>
                   )}
 
                   {!iaLoading && (
-                    <div style={{ marginTop: "auto", paddingTop: 20, borderTop: "1px solid #E7E1D4" }}>
+                    <div style={{ marginTop: "auto", paddingTop: 20, borderTop: "1px solid var(--border)" }}>
                       <button onClick={() => { setIaModal(null); setIaVariaciones([]); setIaSeleccionada(null); }}
-                        style={{ width: "100%", padding: "11px 0", background: "none", border: "1px solid #E7E1D4", color: "#9A968A", fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, cursor: "pointer" }}>
+                        style={{ width: "100%", padding: "11px 0", background: "none", border: "1px solid var(--border)", color: "var(--muted)", fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, cursor: "pointer" }}>
                         Cancelar
                       </button>
                     </div>
@@ -1626,21 +1626,21 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
       return (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 2000,
           display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-          <div style={{ background: "#fff", border: "1px solid #2A2926", maxWidth: 680, width: "100%",
+          <div style={{ background: "#fff", border: "1px solid var(--text)", maxWidth: 680, width: "100%",
             maxHeight: "85vh", display: "flex", flexDirection: "column", borderRadius: 0 }}>
-            <div style={{ padding: "20px 24px 16px", borderBottom: "1px solid #E7E1D4" }}>
-              <div style={{ fontSize: 10, color: "#AC8A54", letterSpacing: "0.2em",
+            <div style={{ padding: "20px 24px 16px", borderBottom: "1px solid var(--border)" }}>
+              <div style={{ fontSize: 10, color: "var(--gold)", letterSpacing: "0.2em",
                 textTransform: "uppercase", fontFamily: "Inter, sans-serif", marginBottom: 4 }}>
                 Nativa Properties · IA
               </div>
               <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 400 }}>
                 Mejorar <em>fotografías</em>
               </div>
-              <div style={{ fontSize: 11, color: "#9A968A", marginTop: 6, fontFamily: "Inter, sans-serif" }}>
+              <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 6, fontFamily: "Inter, sans-serif" }}>
                 Selecciona las fotografías que quieres mejorar. Se procesarán en secuencia.
               </div>
             </div>
-            <div style={{ padding: "10px 24px", borderBottom: "1px solid #E7E1D4",
+            <div style={{ padding: "10px 24px", borderBottom: "1px solid var(--border)",
               display: "flex", gap: 12, alignItems: "center" }}>
               <button onClick={() => setFotosSeleccionadas(new Set(fotosDisp.map(f => f.id)))}
                 style={{ fontSize: 11, color: "#405c6b", background: "none", border: "1px solid #405c6b",
@@ -1648,11 +1648,11 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                 Seleccionar todas
               </button>
               <button onClick={() => setFotosSeleccionadas(new Set())}
-                style={{ fontSize: 11, color: "#9A968A", background: "none", border: "1px solid #E7E1D4",
+                style={{ fontSize: 11, color: "var(--muted)", background: "none", border: "1px solid var(--border)",
                   padding: "4px 12px", cursor: "pointer", fontFamily: "Inter, sans-serif", borderRadius: 0 }}>
                 Deseleccionar todas
               </button>
-              <span style={{ marginLeft: "auto", fontSize: 11, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>
+              <span style={{ marginLeft: "auto", fontSize: 11, color: "var(--muted)", fontFamily: "Inter, sans-serif" }}>
                 {fotosSeleccionadas.size} de {fotosDisp.length} seleccionadas
               </span>
             </div>
@@ -1668,7 +1668,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                         setFotosSeleccionadas(next);
                       }}
                       style={{ position: "relative", cursor: "pointer",
-                        border: sel ? "2px solid #C8A97E" : "2px solid #E7E1D4",
+                        border: sel ? "2px solid var(--gold-l)" : "2px solid var(--border)",
                         transition: "border-color 0.15s" }}>
                       <img src={foto.url} alt=""
                         style={{ width: "100%", height: 100, objectFit: "cover", display: "block" }} />
@@ -1678,7 +1678,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                         {i + 1}
                       </div>
                       <div style={{ position: "absolute", top: 4, right: 4, width: 20, height: 20,
-                        borderRadius: "50%", background: sel ? "#C8A97E" : "rgba(255,255,255,0.85)",
+                        borderRadius: "50%", background: sel ? "var(--gold-l)" : "rgba(255,255,255,0.85)",
                         border: sel ? "none" : "2px solid #ccc",
                         display: "flex", alignItems: "center", justifyContent: "center" }}>
                         {sel && <span style={{ color: "#fff", fontSize: 12, fontWeight: 700, lineHeight: 1 }}>✓</span>}
@@ -1688,18 +1688,18 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
                 })}
               </div>
             </div>
-            <div style={{ padding: "14px 24px", borderTop: "1px solid #E7E1D4",
+            <div style={{ padding: "14px 24px", borderTop: "1px solid var(--border)",
               display: "flex", justifyContent: "flex-end", gap: 10 }}>
               <button onClick={() => setShowModalMejora(false)}
-                style={{ padding: "9px 20px", border: "1px solid #E7E1D4", background: "transparent",
-                  color: "#9A968A", cursor: "pointer", fontSize: 11, fontFamily: "Inter, sans-serif",
+                style={{ padding: "9px 20px", border: "1px solid var(--border)", background: "transparent",
+                  color: "var(--muted)", cursor: "pointer", fontSize: 11, fontFamily: "Inter, sans-serif",
                   fontWeight: 600, borderRadius: 0 }}>
                 Cancelar
               </button>
               <button onClick={mejorarTodasFotos} disabled={fotosSeleccionadas.size === 0}
-                style={{ padding: "9px 24px", border: "1px solid #C8A97E",
-                  background: fotosSeleccionadas.size === 0 ? "#F8F6F1" : "#1a2528",
-                  color: fotosSeleccionadas.size === 0 ? "#9A968A" : "#C8A97E",
+                style={{ padding: "9px 24px", border: "1px solid var(--gold-l)",
+                  background: fotosSeleccionadas.size === 0 ? "var(--cream)" : "#1a2528",
+                  color: fotosSeleccionadas.size === 0 ? "var(--muted)" : "var(--gold-l)",
                   cursor: fotosSeleccionadas.size === 0 ? "not-allowed" : "pointer",
                   fontSize: 11, fontFamily: "Inter, sans-serif", fontWeight: 600,
                   letterSpacing: "0.08em", textTransform: "uppercase", borderRadius: 0 }}>
@@ -1831,30 +1831,30 @@ function DocsSection({ propiedadId, propRef }) {
   const tiposConDocs = DOC_TIPOS.filter((t) => groupedDocs[t.key].length > 0);
   const tiposSinDocs = DOC_TIPOS.filter((t) => groupedDocs[t.key].length === 0);
 
-  const ss = { padding: "8px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#A09D93", fontSize: 11, fontFamily: "Inter, sans-serif", letterSpacing: "0.04em", cursor: "pointer" };
-  const btnDel = { background: "none", border: "1px solid #D4545433", borderRadius: 0, color: "#A23A3A", cursor: "pointer", fontSize: 10, padding: "2px 6px", fontFamily: "Inter, sans-serif" };
+  const ss = { padding: "8px 14px", background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, color: "#A09D93", fontSize: 11, fontFamily: "Inter, sans-serif", letterSpacing: "0.04em", cursor: "pointer" };
+  const btnDel = { background: "none", border: "1px solid #D4545433", borderRadius: 0, color: "var(--danger)", cursor: "pointer", fontSize: 10, padding: "2px 6px", fontFamily: "Inter, sans-serif" };
 
   return (
     <div>
       {/* Resumen */}
       <div style={{ display: "flex", gap: 16, marginBottom: 18, flexWrap: "wrap", alignItems: "center" }}>
         <div style={{ textAlign: "center", minWidth: 60 }}>
-          <div style={{ fontSize: 24, color: "#AC8A54", fontFamily: "'Playfair Display', serif" }}>{docs.length}</div>
-          <div style={{ fontSize: 10, color: "#9A968A", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.08em" }}>Total</div>
+          <div style={{ fontSize: 24, color: "var(--gold)", fontFamily: "'Playfair Display', serif" }}>{docs.length}</div>
+          <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.08em" }}>Total</div>
         </div>
         <div style={{ textAlign: "center", minWidth: 60 }}>
-          <div style={{ fontSize: 24, color: "#2C6E52", fontFamily: "'Playfair Display', serif" }}>{tiposConDocs.length}</div>
-          <div style={{ fontSize: 10, color: "#9A968A", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.08em" }}>Tipos</div>
+          <div style={{ fontSize: 24, color: "var(--success)", fontFamily: "'Playfair Display', serif" }}>{tiposConDocs.length}</div>
+          <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.08em" }}>Tipos</div>
         </div>
         <div style={{ textAlign: "center", minWidth: 60 }}>
-          <div style={{ fontSize: 24, color: tiposSinDocs.length > 0 ? "#9C6E1B" : "#2C6E52", fontFamily: "'Playfair Display', serif" }}>{tiposSinDocs.length}</div>
-          <div style={{ fontSize: 10, color: "#9A968A", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.08em" }}>Pendientes</div>
+          <div style={{ fontSize: 24, color: tiposSinDocs.length > 0 ? "var(--amber)" : "var(--success)", fontFamily: "'Playfair Display', serif" }}>{tiposSinDocs.length}</div>
+          <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.08em" }}>Pendientes</div>
         </div>
       </div>
 
       {/* Upload */}
-      <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "16px 20px", marginBottom: 18 }}>
-        <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12, fontWeight: 600 }}>Subir documento</div>
+      <div style={{ background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, padding: "16px 20px", marginBottom: 18 }}>
+        <div style={{ fontSize: 10, color: "var(--gold)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12, fontWeight: 600 }}>Subir documento</div>
         <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
           <select value={selectedTipo} onChange={(e) => setSelectedTipo(e.target.value)} style={ss}>
             {DOC_TIPOS.map((t) => (
@@ -1862,8 +1862,8 @@ function DocsSection({ propiedadId, propRef }) {
             ))}
           </select>
           <label style={{
-            padding: "8px 18px", borderRadius: 0, border: "1px solid #C8A97E", background: "transparent",
-            color: "#AC8A54", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.08em",
+            padding: "8px 18px", borderRadius: 0, border: "1px solid var(--gold-l)", background: "transparent",
+            color: "var(--gold)", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.08em",
             textTransform: "uppercase", fontFamily: "Inter, sans-serif", transition: "all 0.2s",
             display: "inline-flex", alignItems: "center", gap: 6,
           }}>
@@ -1882,7 +1882,7 @@ function DocsSection({ propiedadId, propRef }) {
 
       {/* Documents list grouped by tipo */}
       {loading ? (
-        <div style={{ textAlign: "center", padding: 20, color: "#9A968A", fontSize: 12 }}>Cargando documentos...</div>
+        <div style={{ textAlign: "center", padding: 20, color: "var(--muted)", fontSize: 12 }}>Cargando documentos...</div>
       ) : docs.length === 0 ? (
         <div style={{ textAlign: "center", padding: 30, color: "#C8BFB0", fontSize: 12, fontStyle: "italic" }}>
           No hay documentos subidos para esta propiedad
@@ -1891,25 +1891,25 @@ function DocsSection({ propiedadId, propRef }) {
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {tiposConDocs.map((tipo) => (
             <div key={tipo.key}>
-              <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8, fontWeight: 600 }}>
+              <div style={{ fontSize: 10, color: "var(--gold)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8, fontWeight: 600 }}>
                 {tipo.icon} {tipo.label}
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                 {groupedDocs[tipo.key].map((doc) => (
                   <div key={doc.id} style={{
                     display: "flex", alignItems: "center", gap: 10, padding: "10px 14px",
-                    background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0,
+                    background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0,
                     transition: "all 0.2s",
                   }}>
                     <span style={{ fontSize: 20, flexShrink: 0 }}>{getIcon(doc.mime_type, doc.nombre)}</span>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 12, color: "#22262E", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{doc.nombre}</div>
+                      <div style={{ fontSize: 12, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{doc.nombre}</div>
                       <div style={{ fontSize: 10, color: "#C8BFB0", marginTop: 2 }}>
                         {formatSize(doc.tamano)} — {new Date(doc.created_at).toLocaleDateString("es-ES")}
                       </div>
                     </div>
                     <a href={doc.url} target="_blank" rel="noopener noreferrer"
-                      style={{ fontSize: 10, color: "#2C6E52", textDecoration: "none", padding: "4px 10px", border: "1px solid #8FA88A33", borderRadius: 0 }}>
+                      style={{ fontSize: 10, color: "var(--success)", textDecoration: "none", padding: "4px 10px", border: "1px solid #8FA88A33", borderRadius: 0 }}>
                       Abrir
                     </a>
                     <button onClick={() => { if (confirm("Eliminar " + doc.nombre + "?")) handleDelete(doc); }} style={btnDel}>✕</button>
@@ -1923,11 +1923,11 @@ function DocsSection({ propiedadId, propRef }) {
 
       {/* Checklist de documentos pendientes */}
       {tiposSinDocs.length > 0 && docs.length > 0 && (
-        <div style={{ marginTop: 16, padding: "14px 18px", background: "#1C1B1800", border: "1px dashed #2A2926", borderRadius: 0 }}>
-          <div style={{ fontSize: 10, color: "#9C6E1B", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8, fontWeight: 600 }}>Documentos pendientes</div>
+        <div style={{ marginTop: 16, padding: "14px 18px", background: "#1C1B1800", border: "1px dashed var(--text)", borderRadius: 0 }}>
+          <div style={{ fontSize: 10, color: "var(--amber)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8, fontWeight: 600 }}>Documentos pendientes</div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             {tiposSinDocs.map((t) => (
-              <span key={t.key} style={{ fontSize: 10, padding: "4px 10px", borderRadius: 0, background: "#D4956A0D", color: "#9C6E1B", border: "1px solid #D4956A15" }}>
+              <span key={t.key} style={{ fontSize: 10, padding: "4px 10px", borderRadius: 0, background: "#D4956A0D", color: "var(--amber)", border: "1px solid #D4956A15" }}>
                 {t.icon} {t.label}
               </span>
             ))}
@@ -1972,7 +1972,7 @@ function QualRow({ items, onChange, color, symbol }) {
             value={item}
             onChange={(e) => update(i, e.target.value)}
             placeholder={"Punto " + (i + 1)}
-            style={{ flex: 1, padding: "8px 12px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 12, fontFamily: "Inter, sans-serif", outline: "none", boxSizing: "border-box" }}
+            style={{ flex: 1, padding: "8px 12px", background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, color: "var(--text)", fontSize: 12, fontFamily: "Inter, sans-serif", outline: "none", boxSizing: "border-box" }}
           />
           <button onClick={() => removeRow(i)} style={{ background: "none", border: "none", color: "#C8BFB0", cursor: "pointer", fontSize: 16, lineHeight: 1, padding: "0 4px", flexShrink: 0 }}>×</button>
         </div>
@@ -1989,9 +1989,9 @@ function PropCard({ p, onClick }) {
   return (
     <div
       onClick={onClick}
-      style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "22px 26px", cursor: "pointer", transition: "all 0.3s", position: "relative", overflow: "hidden" }}
-      onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#AC8A54"; e.currentTarget.style.boxShadow = "0 0 0 2px #AC8A54, 0 0 8px 2px rgba(172,138,84,0.5), 0 0 20px 6px rgba(172,138,84,0.2), 0 0 40px 12px rgba(172,138,84,0.08)"; e.currentTarget.style.background = "#FFFFFF"; }}
-      onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#E7E1D4"; e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.background = "#FFFFFF"; }}
+      style={{ background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, padding: "22px 26px", cursor: "pointer", transition: "all 0.3s", position: "relative", overflow: "hidden" }}
+      onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--gold)"; e.currentTarget.style.boxShadow = "0 0 0 2px var(--gold), 0 0 8px 2px rgba(172,138,84,0.5), 0 0 20px 6px rgba(172,138,84,0.2), 0 0 40px 12px rgba(172,138,84,0.08)"; e.currentTarget.style.background = "var(--white)"; }}
+      onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.background = "var(--white)"; }}
     >
       <div style={{ position: "absolute", top: 0, left: 0, width: 3, height: "100%", background: est.accent, opacity: 0.6 }} />
       <div style={{ display: "flex", gap: 16, alignItems: "stretch" }}>
@@ -2010,17 +2010,17 @@ function PropCard({ p, onClick }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
         <div style={{ minWidth: 0, flex: 1 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 10, color: "#9A968A", letterSpacing: "0.08em" }}>{p.ref}</span>
+            <span style={{ fontSize: 10, color: "var(--muted)", letterSpacing: "0.08em" }}>{p.ref}</span>
             <Tag color={est.accent}>{est.label}</Tag>
             <Tag>{p.op}</Tag>
           </div>
-          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 400, color: "#22262E", lineHeight: 1.3 }}>{p.ref} – {p.titulo}</div>
-          <div style={{ fontSize: 12, color: "#9A968A", marginTop: 4 }}>{p.zona}, {p.municipio} - {p.tipo}</div>
+          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 400, color: "var(--text)", lineHeight: 1.3 }}>{p.ref} – {p.titulo}</div>
+          <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 4 }}>{p.zona}, {p.municipio} - {p.tipo}</div>
         </div>
         <div style={{ textAlign: "right", flexShrink: 0 }}>
-          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, color: "#AC8A54" }}>{fmtP(p.precioVenta)}</div>
-          {p.precioAnt > 0 && <div style={{ fontSize: 11, color: "#9C6E1B", textDecoration: "line-through" }}>{fmtP(p.precioAnt)}</div>}
-          <div style={{ fontSize: 11, color: "#9A968A", marginTop: 2 }}>{p.mConst} m2 - {p.habDobles + p.habSimples} hab - {(p.banos || 0) + (p.aseos || 0)} ban.</div>
+          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, color: "var(--gold)" }}>{fmtP(p.precioVenta)}</div>
+          {p.precioAnt > 0 && <div style={{ fontSize: 11, color: "var(--amber)", textDecoration: "line-through" }}>{fmtP(p.precioAnt)}</div>}
+          <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 2 }}>{p.mConst} m2 - {p.habDobles + p.habSimples} hab - {(p.banos || 0) + (p.aseos || 0)} ban.</div>
         </div>
       </div>
       <div style={{ display: "flex", gap: 16, marginTop: 14, fontSize: 12, color: "#A09D93", flexWrap: "wrap", alignItems: "center" }}>
@@ -2035,9 +2035,9 @@ function PropCard({ p, onClick }) {
         {/* Badge estado Idealista */}
         {p.destinos?.includes("Idealista") && (
           <span style={{ fontSize: 9, padding: "2px 7px", letterSpacing: "0.06em",
-            background: p.idealista_estado === "publicada" ? "#2C6E5218" : p.idealista_estado === "no_publicada" ? "#A23A3A18" : "#AC8A5418",
-            color: p.idealista_estado === "publicada" ? "#2C6E52" : p.idealista_estado === "no_publicada" ? "#A23A3A" : "#AC8A54",
-            border: "1px solid " + (p.idealista_estado === "publicada" ? "#2C6E5244" : p.idealista_estado === "no_publicada" ? "#A23A3A44" : "#AC8A5444")
+            background: p.idealista_estado === "publicada" ? "var(--success)18" : p.idealista_estado === "no_publicada" ? "var(--danger)18" : "var(--gold)18",
+            color: p.idealista_estado === "publicada" ? "var(--success)" : p.idealista_estado === "no_publicada" ? "var(--danger)" : "var(--gold)",
+            border: "1px solid " + (p.idealista_estado === "publicada" ? "var(--success)44" : p.idealista_estado === "no_publicada" ? "var(--danger)44" : "var(--gold)44")
           }}>
             {p.idealista_estado === "publicada" ? "✓ Idealista" : p.idealista_estado === "no_publicada" ? "✗ No en Idealista" : "⟳ Idealista"}
           </span>
@@ -2047,7 +2047,7 @@ function PropCard({ p, onClick }) {
           return (
             <button
               onClick={e => { e.stopPropagation(); navigator.clipboard.writeText(webUrl); e.currentTarget.textContent = "✓ Copiado"; setTimeout(() => { if(e.currentTarget) e.currentTarget.textContent = "Copiar link web"; }, 2000); }}
-              style={{ marginLeft: "auto", fontSize: 11, color: "#AC8A54", background: "none", border: "1px solid #C8A97E33", padding: "2px 10px", cursor: "pointer", letterSpacing: "0.04em", flexShrink: 0, fontFamily: "Inter, sans-serif" }}>
+              style={{ marginLeft: "auto", fontSize: 11, color: "var(--gold)", background: "none", border: "1px solid var(--gold-l)33", padding: "2px 10px", cursor: "pointer", letterSpacing: "0.04em", flexShrink: 0, fontFamily: "Inter, sans-serif" }}>
               Copiar link web
             </button>
           );
@@ -2056,20 +2056,20 @@ function PropCard({ p, onClick }) {
       {p.estado === "publicada" && p.destinos.length > 0 && (
         <div style={{ display: "flex", gap: 5, marginTop: 10, flexWrap: "wrap" }}>
           {p.destinos.map((d, i) => (
-            <span key={i} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 0, background: "#8FA88A0D", color: "#2C6E52", border: "1px solid #8FA88A22" }}>{d}</span>
+            <span key={i} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 0, background: "#8FA88A0D", color: "var(--success)", border: "1px solid #8FA88A22" }}>{d}</span>
           ))}
         </div>
       )}
       <div style={{ display: "flex", gap: 5, marginTop: 8, flexWrap: "wrap" }}>
-        {p.terraza && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E15" }}>Terraza</span>}
-        {p.piscina && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E15" }}>Piscina</span>}
-        {p.aireAcondTipo && p.aireAcondTipo !== "No disponible" && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E15" }}>AC {p.aireAcondTipo.toLowerCase()}</span>}
-        {p.ascensor && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E15" }}>Ascensor</span>}
-        {p.balcon && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E15" }}>Balcon</span>}
-        {p.jardin && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E15" }}>Jardin</span>}
-        {p.armarios && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E15" }}>Armarios empotrados</span>}
-        {p.trastero && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E15" }}>Trastero</span>}
-        {p.parking === "Si" && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#C8A97E0D", color: "#AC8A54", border: "1px solid #C8A97E15" }}>Parking</span>}
+        {p.terraza && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "var(--gold-l)0D", color: "var(--gold)", border: "1px solid var(--gold-l)15" }}>Terraza</span>}
+        {p.piscina && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "var(--gold-l)0D", color: "var(--gold)", border: "1px solid var(--gold-l)15" }}>Piscina</span>}
+        {p.aireAcondTipo && p.aireAcondTipo !== "No disponible" && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "var(--gold-l)0D", color: "var(--gold)", border: "1px solid var(--gold-l)15" }}>AC {p.aireAcondTipo.toLowerCase()}</span>}
+        {p.ascensor && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "var(--gold-l)0D", color: "var(--gold)", border: "1px solid var(--gold-l)15" }}>Ascensor</span>}
+        {p.balcon && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "var(--gold-l)0D", color: "var(--gold)", border: "1px solid var(--gold-l)15" }}>Balcon</span>}
+        {p.jardin && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "var(--gold-l)0D", color: "var(--gold)", border: "1px solid var(--gold-l)15" }}>Jardin</span>}
+        {p.armarios && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "var(--gold-l)0D", color: "var(--gold)", border: "1px solid var(--gold-l)15" }}>Armarios empotrados</span>}
+        {p.trastero && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "var(--gold-l)0D", color: "var(--gold)", border: "1px solid var(--gold-l)15" }}>Trastero</span>}
+        {p.parking === "Si" && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "var(--gold-l)0D", color: "var(--gold)", border: "1px solid var(--gold-l)15" }}>Parking</span>}
       </div>
         </div>
       </div>
@@ -2133,8 +2133,8 @@ function PropDetail({ p, currentUser, onClose, onUpdate, onDelete, onDuplicate }
   const g2 = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "10px 24px" };
   const g3 = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "10px 24px" };
   const g4 = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "10px 24px" };
-  const sep = { borderBottom: "1px solid #2A2926", margin: "18px 0" };
-  const intBox = { background: "#FFFFFF", border: "1px solid #D4545422", borderRadius: 0, padding: "16px 20px" };
+  const sep = { borderBottom: "1px solid var(--text)", margin: "18px 0" };
+  const intBox = { background: "var(--white)", border: "1px solid #D4545422", borderRadius: 0, padding: "16px 20px" };
 
   // Create text versions of arrays for editing
   const pWithTexts = { ...p, 
@@ -2229,14 +2229,14 @@ function PropDetail({ p, currentUser, onClose, onUpdate, onDelete, onDuplicate }
 
   function EFl({ label, field, pub, gold, type = "text", options, req }) {
     const hasErr = editMode && idealistaFieldErrors.has(field);
-    const borderColor = hasErr ? "#A23A3A" : "#2A2926";
-    const inputStyle = { width: "100%", background: "#FFFFFF", border: "1px solid " + borderColor, borderRadius: 0, color: "#22262E", padding: "10px 14px", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" };
+    const borderColor = hasErr ? "var(--danger)" : "var(--text)";
+    const inputStyle = { width: "100%", background: "var(--white)", border: "1px solid " + borderColor, borderRadius: 0, color: "var(--text)", padding: "10px 14px", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" };
 
     return (
       <div style={{ marginBottom: 14 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 5 }}>
-          <span style={{ fontSize: 10, fontWeight: 600, color: hasErr ? "#A23A3A" : "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>{label}</span>
-          {req && <span style={{ color: "#A23A3A", fontSize: 14, fontWeight: 700 }}>*</span>}
+          <span style={{ fontSize: 10, fontWeight: 600, color: hasErr ? "var(--danger)" : "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em" }}>{label}</span>
+          {req && <span style={{ color: "var(--danger)", fontSize: 14, fontWeight: 700 }}>*</span>}
         </div>
         {type === "bool" ? (
           <select value={d[field] === null || d[field] === undefined ? "" : (d[field] ? "true" : "false")} onChange={e => upd(field, e.target.value === "" ? null : e.target.value === "true")} onBlur={() => autoSave(draft)} style={inputStyle}>
@@ -2254,7 +2254,7 @@ function PropDetail({ p, currentUser, onClose, onUpdate, onDelete, onDuplicate }
           <input type={type === "number" ? "number" : "text"} value={d[field] ?? ""} onChange={e => upd(field, type === "number" ? (e.target.value === "" ? 0 : Number(e.target.value)) : e.target.value)} onFocus={e => { if (type === "number" && e.target.value === "0") e.target.select(); }} onBlur={() => autoSave(draft)}
             style={inputStyle} />
         )}
-        {hasErr && <div style={{ fontSize: 10, color: "#A23A3A", marginTop: 3 }}>Requerido para Idealista</div>}
+        {hasErr && <div style={{ fontSize: 10, color: "var(--danger)", marginTop: 3 }}>Requerido para Idealista</div>}
       </div>
     );
   }
@@ -2570,7 +2570,7 @@ REGLAS:
   }
 
   return (
-    <div style={{ fontFamily: "Inter, sans-serif", background: "#F8F6F1", minHeight: "100vh", color: "#22262E", padding: "clamp(16px, 4vw, 40px) clamp(12px, 3vw, 24px)" }}>
+    <div style={{ fontFamily: "Inter, sans-serif", background: "var(--cream)", minHeight: "100vh", color: "var(--text)", padding: "clamp(16px, 4vw, 40px) clamp(12px, 3vw, 24px)" }}>
       <div style={{ maxWidth: 760, margin: "0 auto" }}>
 
         
@@ -2600,13 +2600,13 @@ REGLAS:
           style={{ display: "none" }}>Guardar</button>}
 
         {/* Header pantalla completa — estilo cuestionario */}
-        <div style={{ marginBottom: 36, borderBottom: "1px solid #E7E1D4", paddingBottom: 28, display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
+        <div style={{ marginBottom: 36, borderBottom: "1px solid var(--border)", paddingBottom: 28, display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
           <div>
-            <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Nativa Properties</div>
+            <div style={{ fontSize: 10, color: "var(--gold)", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Nativa Properties</div>
             <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.1 }}>
               Ficha de <em>Propiedad</em>
             </h1>
-            <p style={{ fontSize: 12, color: "#9A968A", margin: "10px 0 0", letterSpacing: "0.04em" }}>Completa y publica la ficha desde el CRM. Los campos marcados con * se sincronizan con Idealista.</p>
+            <p style={{ fontSize: 12, color: "var(--muted)", margin: "10px 0 0", letterSpacing: "0.04em" }}>Completa y publica la ficha desde el CRM. Los campos marcados con * se sincronizan con Idealista.</p>
           </div>
           {/* Botones de acción en header */}
           <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
@@ -2616,7 +2616,7 @@ REGLAS:
                 navigator.clipboard.writeText(url);
                 e.currentTarget.textContent = "✓ Copiado";
                 setTimeout(() => { if(e.currentTarget) e.currentTarget.textContent = "Copiar link web"; }, 2000);
-              }} style={{ padding: "8px 16px", borderRadius: 0, border: "1px solid #AC8A5444", background: "transparent", color: "#AC8A54", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
+              }} style={{ padding: "8px 16px", borderRadius: 0, border: "1px solid var(--gold)44", background: "transparent", color: "var(--gold)", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
                 Copiar link web
               </button>
             )}
@@ -2627,13 +2627,13 @@ REGLAS:
                 if (!confirm("⚠️ Campos con * sin completar:\n\n• " + faltantes + "\n\n¿Volver sin guardar igualmente?")) return;
               }
               onClose();
-            }} style={{ padding: "8px 20px", borderRadius: 0, border: "1px solid #E7E1D4", background: "transparent", color: "#9A968A", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
+            }} style={{ padding: "8px 20px", borderRadius: 0, border: "1px solid var(--border)", background: "transparent", color: "var(--muted)", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
               ← Volver
             </button>
-            {puedeEditar && <button onClick={() => { if (onDuplicate) onDuplicate(p); }} style={{ padding: "8px 20px", borderRadius: 0, border: "1px solid #AC8A5444", background: "transparent", color: "#AC8A54", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
+            {puedeEditar && <button onClick={() => { if (onDuplicate) onDuplicate(p); }} style={{ padding: "8px 20px", borderRadius: 0, border: "1px solid var(--gold)44", background: "transparent", color: "var(--gold)", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
               Duplicar
             </button>}
-            {puedeEliminar && <button onClick={() => { if (onDelete) onDelete(p); }} style={{ padding: "8px 20px", borderRadius: 0, border: "1px solid #D4545433", background: "transparent", color: "#A23A3A", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
+            {puedeEliminar && <button onClick={() => { if (onDelete) onDelete(p); }} style={{ padding: "8px 20px", borderRadius: 0, border: "1px solid #D4545433", background: "transparent", color: "var(--danger)", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
               Eliminar
             </button>}
             {puedeEditar && <button onClick={() => {
@@ -2655,14 +2655,14 @@ REGLAS:
                 }
               }
               if (onUpdate) onUpdate(toSave);
-            }} style={{ padding: "8px 24px", borderRadius: 0, border: "none", background: "linear-gradient(135deg, #C8A97E, #D4B896)", color: "#F8F6F1", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
+            }} style={{ padding: "8px 24px", borderRadius: 0, border: "none", background: "linear-gradient(135deg, var(--gold-l), #D4B896)", color: "var(--cream)", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
               Guardar
             </button>}
           </div>
         </div>
         {/* Indicador autoguardado */}
         {editMode && autoSaveStatus && (
-          <div style={{ position: "absolute", top: 22, left: 220, fontSize: 10, color: autoSaveStatus === "saved" ? "#2C6E52" : autoSaveStatus === "error" ? "#A23A3A" : "#9A968A", display: "flex", alignItems: "center", gap: 4 }}>
+          <div style={{ position: "absolute", top: 22, left: 220, fontSize: 10, color: autoSaveStatus === "saved" ? "var(--success)" : autoSaveStatus === "error" ? "var(--danger)" : "var(--muted)", display: "flex", alignItems: "center", gap: 4 }}>
             {autoSaveStatus === "saving" && <span>⏳ Guardando...</span>}
             {autoSaveStatus === "saved" && <span>✓ Guardado</span>}
             {autoSaveStatus === "error" && <span>✗ Error al guardar</span>}
@@ -2671,9 +2671,9 @@ REGLAS:
         {/* Banner estado Idealista — solo visible en modo edición */}
         {/* Aviso Idealista */}
         {editMode && (
-          <div style={{ marginBottom: 24, padding: "12px 18px", background: idealistaReady ? "#2C6E5210" : "#A23A3A08", border: "1px solid " + (idealistaReady ? "#2C6E5230" : "#A23A3A25"), display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ marginBottom: 24, padding: "12px 18px", background: idealistaReady ? "var(--success)10" : "var(--danger)08", border: "1px solid " + (idealistaReady ? "var(--success)30" : "var(--danger)25"), display: "flex", alignItems: "center", gap: 12 }}>
             <span style={{ fontSize: 18 }}>{idealistaReady ? "✅" : "⚠️"}</span>
-            <span style={{ fontSize: 12, color: idealistaReady ? "#2C6E52" : "#A23A3A", fontWeight: 600, fontFamily: "Inter, sans-serif", letterSpacing: "0.02em" }}>
+            <span style={{ fontSize: 12, color: idealistaReady ? "var(--success)" : "var(--danger)", fontWeight: 600, fontFamily: "Inter, sans-serif", letterSpacing: "0.02em" }}>
               {idealistaReady
                 ? "Propiedad lista para Idealista — todos los campos requeridos están completos"
                 : idealistaFieldErrors.size + " campo(s) requerido(s) para Idealista sin completar"}
@@ -2688,13 +2688,13 @@ REGLAS:
               {/* Fila: REF + Operación + Tipo */}
               {/* Título — primero, igual que en el formulario */}
               <input type="text" value={d.titulo || ""} onChange={e => upd("titulo", e.target.value)} onBlur={() => autoSave(draft)} placeholder="Título de la propiedad"
-                style={{ width: "100%", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "10px 14px", fontSize: 20, fontFamily: "'Playfair Display', serif", marginBottom: 16, boxSizing: "border-box" }} />
+                style={{ width: "100%", background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, color: "var(--text)", padding: "10px 14px", fontSize: 20, fontFamily: "'Playfair Display', serif", marginBottom: 16, boxSizing: "border-box" }} />
 
               {/* Agente, Referencia, Tipo operación — misma estética que formulario */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0 16px" }}>
                 <div style={{ marginBottom: 14 }}>
-                  <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
-                    Agente captador<span style={{ color: "#9C6E1B", marginLeft: 3 }}>*</span>
+                  <label style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
+                    Agente captador<span style={{ color: "var(--amber)", marginLeft: 3 }}>*</span>
                   </label>
                   <select value={d.agente || ""} onChange={async e => {
                     const agente = e.target.value;
@@ -2704,24 +2704,24 @@ REGLAS:
                       if (newRef) upd("ref", newRef);
                     }
                   }} onBlur={() => autoSave(draft)}
-                    style={{ width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" }}>
+                    style={{ width: "100%", padding: "10px 14px", background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, color: "var(--text)", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" }}>
                     <option value="">Seleccionar agente...</option>
                     {AGENTES_LIST.map(a => <option key={a} value={a}>{a}</option>)}
                   </select>
                 </div>
                 <div style={{ marginBottom: 14 }}>
-                  <label style={{ fontSize: 10, fontWeight: 600, color: idealistaFieldErrors.has("ref") ? "#A23A3A" : "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
-                    Referencia<span style={{ color: "#9C6E1B", marginLeft: 3 }}>*</span>
+                  <label style={{ fontSize: 10, fontWeight: 600, color: idealistaFieldErrors.has("ref") ? "var(--danger)" : "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
+                    Referencia<span style={{ color: "var(--amber)", marginLeft: 3 }}>*</span>
                   </label>
                   <input type="text" value={d.ref || ""} onChange={e => upd("ref", e.target.value)} onBlur={() => autoSave(draft)}
-                    style={{ width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid " + (d.ref ? "#6AAF8D44" : "#E7E1D4"), borderRadius: 0, color: d.ref ? "#2C6E52" : "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", fontWeight: 700, boxSizing: "border-box" }} />
+                    style={{ width: "100%", padding: "10px 14px", background: "var(--white)", border: "1px solid " + (d.ref ? "var(--success-l)44" : "var(--border)"), borderRadius: 0, color: d.ref ? "var(--success)" : "var(--text)", fontSize: 13, fontFamily: "Inter, sans-serif", fontWeight: 700, boxSizing: "border-box" }} />
                 </div>
                 <div style={{ marginBottom: 14 }}>
-                  <label style={{ fontSize: 10, fontWeight: 600, color: idealistaFieldErrors.has("op") ? "#A23A3A" : "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
-                    Tipo de operacion<span style={{ color: "#9C6E1B", marginLeft: 3 }}>*</span>
+                  <label style={{ fontSize: 10, fontWeight: 600, color: idealistaFieldErrors.has("op") ? "var(--danger)" : "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
+                    Tipo de operacion<span style={{ color: "var(--amber)", marginLeft: 3 }}>*</span>
                   </label>
                   <select value={d.op || "Compraventa"} onChange={e => upd("op", e.target.value)} onBlur={() => autoSave(draft)}
-                    style={{ width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid " + (idealistaFieldErrors.has("op") ? "#A23A3A" : "#2A2926"), borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" }}>
+                    style={{ width: "100%", padding: "10px 14px", background: "var(--white)", border: "1px solid " + (idealistaFieldErrors.has("op") ? "var(--danger)" : "var(--text)"), borderRadius: 0, color: "var(--text)", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" }}>
                     {OPS_LIST.map(o => <option key={o} value={o}>{o}</option>)}
                   </select>
                 </div>
@@ -2729,11 +2729,11 @@ REGLAS:
 
               {/* Tipo de propiedad — ancho completo con groups, igual que formulario */}
               <div style={{ marginBottom: 14 }}>
-                <label style={{ fontSize: 10, fontWeight: 600, color: idealistaFieldErrors.has("tipo") ? "#A23A3A" : "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
-                  Tipo de propiedad<span style={{ color: "#9C6E1B", marginLeft: 3 }}>*</span>
+                <label style={{ fontSize: 10, fontWeight: 600, color: idealistaFieldErrors.has("tipo") ? "var(--danger)" : "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
+                  Tipo de propiedad<span style={{ color: "var(--amber)", marginLeft: 3 }}>*</span>
                 </label>
                 <select value={d.tipo || ""} onChange={e => upd("tipo", e.target.value)} onBlur={() => autoSave(draft)}
-                  style={{ width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid " + (idealistaFieldErrors.has("tipo") ? "#A23A3A" : "#2A2926"), borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" }}>
+                  style={{ width: "100%", padding: "10px 14px", background: "var(--white)", border: "1px solid " + (idealistaFieldErrors.has("tipo") ? "var(--danger)" : "var(--text)"), borderRadius: 0, color: "var(--text)", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" }}>
                   <option value="">Seleccionar tipo...</option>
                   {TIPO_GROUPS.map(g => (
                     <optgroup key={g.label} label={g.label}>
@@ -2746,21 +2746,21 @@ REGLAS:
           ) : (
             <>
               <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 10, flexWrap: "wrap" }}>
-                <span style={{ fontSize: 10, color: "#AC8A54", fontWeight: 700, letterSpacing: "0.12em" }}>{p.ref}</span>
+                <span style={{ fontSize: 10, color: "var(--gold)", fontWeight: 700, letterSpacing: "0.12em" }}>{p.ref}</span>
                 <Tag color={est.accent}>{est.label}</Tag>
                 <Tag color="#3D577E">{p.op}</Tag>
                 <Tag>{p.tipo}</Tag>
               </div>
-              <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 400, color: "#22262E", margin: 0, lineHeight: 1.2 }}>{p.titulo}</h2>
-              <div style={{ fontSize: 12, color: "#9A968A", marginTop: 8 }}>Captada {p.fechaCap} · Agente: <strong style={{ color: "#22262E" }}>{p.agente}</strong></div>
+              <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 400, color: "var(--text)", margin: 0, lineHeight: 1.2 }}>{p.titulo}</h2>
+              <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 8 }}>Captada {p.fechaCap} · Agente: <strong style={{ color: "var(--text)" }}>{p.agente}</strong></div>
               {p.destinos?.includes("Idealista") && <div style={{ marginTop: 6 }}>
                 <span style={{ fontSize: 10, padding: "3px 10px", letterSpacing: "0.06em",
-                  background: p.idealistaEstado === "publicada" ? "#2C6E5218" : p.idealistaEstado === "no_publicada" ? "#A23A3A18" : "#AC8A5418",
-                  color: p.idealistaEstado === "publicada" ? "#2C6E52" : p.idealistaEstado === "no_publicada" ? "#A23A3A" : "#AC8A54",
-                  border: "1px solid " + (p.idealistaEstado === "publicada" ? "#2C6E5244" : p.idealistaEstado === "no_publicada" ? "#A23A3A44" : "#AC8A5444")
+                  background: p.idealistaEstado === "publicada" ? "var(--success)18" : p.idealistaEstado === "no_publicada" ? "var(--danger)18" : "var(--gold)18",
+                  color: p.idealistaEstado === "publicada" ? "var(--success)" : p.idealistaEstado === "no_publicada" ? "var(--danger)" : "var(--gold)",
+                  border: "1px solid " + (p.idealistaEstado === "publicada" ? "var(--success)44" : p.idealistaEstado === "no_publicada" ? "var(--danger)44" : "var(--gold)44")
                 }}>
                   {p.idealistaEstado === "publicada" ? "✓ Confirmado en Idealista" : p.idealistaEstado === "no_publicada" ? "⚠ No encontrado en Idealista — revisar" : "⟳ Pendiente verificación"}
-                  {p.idealistaCheck && <span style={{ color: "#9A968A", marginLeft: 6 }}>· {new Date(p.idealistaCheck).toLocaleDateString("es-ES")}</span>}
+                  {p.idealistaCheck && <span style={{ color: "var(--muted)", marginLeft: 6 }}>· {new Date(p.idealistaCheck).toLocaleDateString("es-ES")}</span>}
                 </span>
               </div>}
             </>
@@ -2768,8 +2768,8 @@ REGLAS:
         </div>
 
         {/* Legend */}
-        <div style={{ display: "flex", gap: 16, marginBottom: 16, fontSize: 10, color: "#9A968A", background: "#FFFFFF", padding: "8px 14px", borderRadius: 0 }}>
-          <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ color: "#A23A3A", fontSize: 14, fontWeight: 700 }}>*</span> Sincronizado con Idealista</span>
+        <div style={{ display: "flex", gap: 16, marginBottom: 16, fontSize: 10, color: "var(--muted)", background: "var(--white)", padding: "8px 14px", borderRadius: 0 }}>
+          <span style={{ display: "flex", alignItems: "center", gap: 4 }}><span style={{ color: "var(--danger)", fontSize: 14, fontWeight: 700 }}>*</span> Sincronizado con Idealista</span>
         </div>
 
         <div style={sep} />
@@ -2783,7 +2783,7 @@ REGLAS:
             <SeccionGrande
               title="Información de la propiedad"
               defaultOpen={secs.informacion}
-              accentColor="#AC8A54"
+              accentColor="var(--gold)"
             >
               <div style={{ paddingTop: 8 }} />
               <Sec title="Resumen de la propiedad">
@@ -2795,7 +2795,7 @@ REGLAS:
           <div style={{ marginTop: 10 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 5 }}>
               
-              <span style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>Estado de la propiedad</span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Estado de la propiedad</span>
             </div>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               {/* ── Semáforo de precio — solo cuando está publicada ── */}
@@ -2807,10 +2807,10 @@ REGLAS:
                 const esRojo = diasMercado >= 45 || totalVisitas >= 10;
                 const esAmbar = !esRojo && (diasMercado >= 30 || (totalVisitas >= 5 && !tieneOferta));
                 const semaforo = esRojo
-                  ? { color: "#A23A3A", icon: "🔴", label: `${diasMercado} días en mercado · ${totalVisitas} visita${totalVisitas !== 1 ? "s" : ""} — Revisar precio`, msg: "Solicita una valoración actualizada a tu Agente de Referencia." }
+                  ? { color: "var(--danger)", icon: "🔴", label: `${diasMercado} días en mercado · ${totalVisitas} visita${totalVisitas !== 1 ? "s" : ""} — Revisar precio`, msg: "Solicita una valoración actualizada a tu Agente de Referencia." }
                   : esAmbar
                   ? { color: "#C8820A", icon: "🟡", label: `${diasMercado} días en mercado · ${totalVisitas} visita${totalVisitas !== 1 ? "s" : ""} — Atención`, msg: totalVisitas >= 5 ? "Hay visitas pero sin oferta. Considera revisar el precio." : "La propiedad lleva más de 30 días publicada. Considera revisar la estrategia de precio." }
-                  : { color: "#2C6E52", icon: "🟢", label: `${diasMercado} días en mercado · ${totalVisitas} visita${totalVisitas !== 1 ? "s" : ""}`, msg: null };
+                  : { color: "var(--success)", icon: "🟢", label: `${diasMercado} días en mercado · ${totalVisitas} visita${totalVisitas !== 1 ? "s" : ""}`, msg: null };
                 return (
                   <div style={{
                     gridColumn: "1/-1", padding: "10px 14px", marginBottom: 8,
@@ -2859,9 +2859,9 @@ REGLAS:
                     }}
                     style={{
                       padding: "8px 18px", borderRadius: 0,
-                      border: "1px solid " + (active ? e.accent : "#E7E1D4"),
+                      border: "1px solid " + (active ? e.accent : "var(--border)"),
                       background: active ? e.accent + "22" : "transparent",
-                      color: active ? e.accent : "#9A968A",
+                      color: active ? e.accent : "var(--muted)",
                       cursor: "pointer", fontSize: 11, fontWeight: active ? 600 : 400,
                       letterSpacing: "0.06em", textTransform: "uppercase",
                       fontFamily: "Inter, sans-serif", transition: "all 0.2s",
@@ -2888,29 +2888,29 @@ REGLAS:
             {/* Municipio — desplegable con ZONAS_MAP */}
             {(() => {
               const hasErr = editMode && idealistaFieldErrors.has("municipio");
-              const inputStyle = { width: "100%", background: "#FFFFFF", border: `1px solid ${hasErr ? "#A23A3A" : "#2A2926"}`, borderRadius: 0, color: "#22262E", padding: "10px 14px", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" };
+              const inputStyle = { width: "100%", background: "var(--white)", border: `1px solid ${hasErr ? "var(--danger)" : "var(--text)"}`, borderRadius: 0, color: "var(--text)", padding: "10px 14px", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" };
               return (
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 5 }}>
-                    <span style={{ fontSize: 10, fontWeight: 600, color: hasErr ? "#A23A3A" : "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>Municipio</span>
-                    <span style={{ color: "#A23A3A", fontSize: 14, fontWeight: 700 }}>*</span>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: hasErr ? "var(--danger)" : "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Municipio</span>
+                    <span style={{ color: "var(--danger)", fontSize: 14, fontWeight: 700 }}>*</span>
                   </div>
                   <select value={d.municipio || ""} onChange={e => { upd("municipio", e.target.value); upd("zona", ""); }} onBlur={() => autoSave({ ...draft, municipio: d.municipio, zona: "" })} style={inputStyle}>
                     <option value="">-</option>
                     {Object.keys(ZONAS_MAP).map(m => <option key={m} value={m}>{m}</option>)}
                   </select>
-                  {hasErr && <div style={{ fontSize: 10, color: "#A23A3A", marginTop: 3 }}>Requerido para Idealista</div>}
+                  {hasErr && <div style={{ fontSize: 10, color: "var(--danger)", marginTop: 3 }}>Requerido para Idealista</div>}
                 </div>
               );
             })()}
             {/* Zona — dependiente del municipio seleccionado */}
             {(() => {
               const zonaOpts = d.municipio && ZONAS_MAP[d.municipio] ? ZONAS_MAP[d.municipio] : [];
-              const inputStyle = { width: "100%", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "10px 14px", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" };
+              const inputStyle = { width: "100%", background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, color: "var(--text)", padding: "10px 14px", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" };
               return (
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ marginBottom: 5 }}>
-                    <span style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>Zona</span>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Zona</span>
                   </div>
                   <select value={d.zona || ""} onChange={e => upd("zona", e.target.value)} onBlur={() => autoSave(draft)} style={inputStyle} disabled={zonaOpts.length === 0}>
                     <option value="">-</option>
@@ -2981,21 +2981,21 @@ REGLAS:
             </div>
             <div style={{ ...g3, marginTop: 8 }}>
               <div style={{ marginBottom: 10 }}>
-                <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Total hab. (Idealista) *</div>
+                <div style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Total hab. (Idealista) *</div>
                 <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                  <div style={{ width: 80, background: "#F8F6F1", border: "1px solid #E7E1D4", borderRadius: 0, color: "#AC8A54", padding: "6px 8px", fontSize: 13, fontFamily: "Inter, sans-serif", fontWeight: 700, textAlign: "center" }}>
+                  <div style={{ width: 80, background: "var(--cream)", border: "1px solid var(--border)", borderRadius: 0, color: "var(--gold)", padding: "6px 8px", fontSize: 13, fontFamily: "Inter, sans-serif", fontWeight: 700, textAlign: "center" }}>
                     {(Number(d.habDobles)||0)+(Number(d.habSimples)||0)}
                   </div>
-                  <span style={{ fontSize: 10, color: "#9A968A" }}>Calculado automáticamente — se envía a Idealista</span>
+                  <span style={{ fontSize: 10, color: "var(--muted)" }}>Calculado automáticamente — se envía a Idealista</span>
                 </div>
               </div>
               <div style={{ marginBottom: 10 }}>
-                <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Total baños (Idealista) *</div>
+                <div style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Total baños (Idealista) *</div>
                 <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                  <div style={{ width: 80, background: "#F8F6F1", border: "1px solid #E7E1D4", borderRadius: 0, color: "#AC8A54", padding: "6px 8px", fontSize: 13, fontFamily: "Inter, sans-serif", fontWeight: 700, textAlign: "center" }}>
+                  <div style={{ width: 80, background: "var(--cream)", border: "1px solid var(--border)", borderRadius: 0, color: "var(--gold)", padding: "6px 8px", fontSize: 13, fontFamily: "Inter, sans-serif", fontWeight: 700, textAlign: "center" }}>
                     {(Number(d.banos)||0)+(Number(d.aseos)||0)}
                   </div>
-                  <span style={{ fontSize: 10, color: "#9A968A" }}>Baños + aseos — se envía a Idealista como bathNumber</span>
+                  <span style={{ fontSize: 10, color: "var(--muted)" }}>Baños + aseos — se envía a Idealista como bathNumber</span>
                 </div>
               </div>
             </div>
@@ -3063,8 +3063,8 @@ REGLAS:
 
           {/* Local / Nave: características específicas */}
           {esComercial && (() => {
-            const LBL = { fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 };
-            const INP = { width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" };
+            const LBL = { fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 };
+            const INP = { width: "100%", padding: "10px 14px", background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, color: "var(--text)", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" };
             const SEL = { ...INP, appearance: "none", WebkitAppearance: "none" };
             return (
               <div style={{ marginTop: 16 }}>
@@ -3102,7 +3102,7 @@ REGLAS:
                     { grupo: "Otras actividades", opciones: ["Taller / reparación","Almacén / logística","Industria ligera"] },
                   ].map(({ grupo, opciones }) => (
                     <div key={grupo} style={{ marginBottom: 10 }}>
-                      <div style={{ fontSize: 9, fontWeight: 700, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>{grupo}</div>
+                      <div style={{ fontSize: 9, fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>{grupo}</div>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                         {opciones.map(o => {
                           const sel = (d.localActividad || []).includes(o);
@@ -3114,12 +3114,12 @@ REGLAS:
                               }}
                               style={{
                                 padding: "5px 10px", fontSize: 11, fontFamily: "Inter, sans-serif",
-                                border: sel ? "2px solid #AC8A54" : "1px solid #D5CFC4",
-                                background: sel ? "#FBF6EC" : "#FFFFFF",
+                                border: sel ? "2px solid var(--gold)" : "1px solid #D5CFC4",
+                                background: sel ? "#FBF6EC" : "var(--white)",
                                 color: sel ? "#7A5C2E" : "#5C5850",
                                 fontWeight: sel ? 600 : 400,
                                 cursor: "pointer", borderRadius: 0,
-                                boxShadow: sel ? "0 0 0 1px #AC8A54" : "none",
+                                boxShadow: sel ? "0 0 0 1px var(--gold)" : "none",
                                 transition: "all 0.15s",
                               }}
                             >{o}</button>
@@ -3144,7 +3144,7 @@ REGLAS:
                     ].map(([key, lbl]) => (
                       <label key={key} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#3A3731", cursor: "pointer" }}>
                         <input type="checkbox" checked={!!d[key]} onChange={e => upd(key, e.target.checked)}
-                          style={{ accentColor: "#AC8A54", width: 14, height: 14 }} />
+                          style={{ accentColor: "var(--gold)", width: 14, height: 14 }} />
                         {lbl}
                       </label>
                     ))}
@@ -3172,9 +3172,9 @@ REGLAS:
               const aireVal = draft?.aireAcond;
               return (<>
                 <div>
-                  <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4, display: "flex", alignItems: "center", gap: 4 }}>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4, display: "flex", alignItems: "center", gap: 4 }}>
                     Aire acond.
-                    <span style={{ fontSize: 8, color: "#AC8A54" }}>★</span>
+                    <span style={{ fontSize: 8, color: "var(--gold)" }}>★</span>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <button onClick={() => {
@@ -3182,7 +3182,7 @@ REGLAS:
                       upd("aireAcond", newVal);
                       if (newVal && (!draft?.aireAcondTipo || draft?.aireAcondTipo === "No disponible")) upd("aireAcondTipo", "Frio/Calor");
                       if (!newVal) upd("aireAcondTipo", "");
-                    }} style={{ width: 36, height: 20, borderRadius: 10, border: "none", background: aireVal ? "#2C6E52" : "#E7E1D4", cursor: "pointer", position: "relative", transition: "background 0.2s", flexShrink: 0 }}>
+                    }} style={{ width: 36, height: 20, borderRadius: 10, border: "none", background: aireVal ? "var(--success)" : "var(--border)", cursor: "pointer", position: "relative", transition: "background 0.2s", flexShrink: 0 }}>
                       <span style={{ position: "absolute", top: 2, left: aireVal ? 18 : 2, width: 16, height: 16, borderRadius: "50%", background: "#fff", transition: "left 0.2s", display: "block" }} />
                     </button>
                     <span style={{ fontSize: 12 }}>{aireVal ? "Sí" : "No"}</span>
@@ -3190,7 +3190,7 @@ REGLAS:
                 </div>
                 {aireVal && (
                   <select value={draft?.aireAcondTipo || ""} onChange={e => upd("aireAcondTipo", e.target.value)}
-                    style={{ background:"#FFFFFF",border:"1px solid #E7E1D4",borderRadius:0,color:"#22262E",padding:"8px 12px",fontSize:12,fontFamily:"Inter, sans-serif" }}>
+                    style={{ background:"var(--white)",border:"1px solid var(--border)",borderRadius:0,color:"var(--text)",padding:"8px 12px",fontSize:12,fontFamily:"Inter, sans-serif" }}>
                     <option value="">-- Tipo</option>
                     {["Solo frio","Frio/Calor","Preinstalacion"].map(o => <option key={o}>{o}</option>)}
                   </select>
@@ -3224,7 +3224,7 @@ REGLAS:
           </div>}
           {!esGaraje && (draft?.parking === "Si" || draft?.parking === "Opcional") && <div style={{ ...g2, marginTop: 8 }}>
             {EFl({label: "Precio garaje aparte (€)", field: "precioParking", pub: true, type: "number"})}
-            <div><div style={{ fontSize: 10, color: "#9A968A", marginTop: 4 }}>Dejar vacío si el garaje va incluido en el precio</div></div>
+            <div><div style={{ fontSize: 10, color: "var(--muted)", marginTop: 4 }}>Dejar vacío si el garaje va incluido en el precio</div></div>
           </div>}
         </Sec>}
         <div style={sep} />
@@ -3270,8 +3270,8 @@ REGLAS:
               disabled={aiLoading}
               style={{
                 padding: "10px 24px", borderRadius: 0, border: "none",
-                background: aiLoading ? "#E7E1D4" : "linear-gradient(135deg, #C8A97E, #D4B896)",
-                color: aiLoading ? "#9A968A" : "#F8F6F1",
+                background: aiLoading ? "var(--border)" : "linear-gradient(135deg, var(--gold-l), #D4B896)",
+                color: aiLoading ? "var(--muted)" : "var(--cream)",
                 cursor: aiLoading ? "default" : "pointer",
                 fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase",
                 fontFamily: "Inter, sans-serif", transition: "all 0.3s",
@@ -3291,7 +3291,7 @@ REGLAS:
           </div>
 
           {aiError && (
-            <div style={{ marginTop: 10, padding: "10px 14px", background: "#D4545418", borderRadius: 0, border: "1px solid #D4545433", fontSize: 12, color: "#A23A3A" }}>
+            <div style={{ marginTop: 10, padding: "10px 14px", background: "#D4545418", borderRadius: 0, border: "1px solid #D4545433", fontSize: 12, color: "var(--danger)" }}>
               {aiError}
             </div>
           )}
@@ -3299,10 +3299,10 @@ REGLAS:
           {/* Descripción ES — obligatoria */}
           <div style={{ marginTop: 16 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 3 }}>
-              <span style={{ fontSize: 10, fontWeight: 600, color: idealistaFieldErrors.has("desc") ? "#A23A3A" : "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>
-                Descripcion ES <span style={{ color: "#A23A3A" }}>*</span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: idealistaFieldErrors.has("desc") ? "var(--danger)" : "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                Descripcion ES <span style={{ color: "var(--danger)" }}>*</span>
               </span>
-              <span id="desc-counter" style={{ fontSize: 10, color: "#9A968A" }}>{(d.desc || "").length} / 4.000</span>
+              <span id="desc-counter" style={{ fontSize: 10, color: "var(--muted)" }}>{(d.desc || "").length} / 4.000</span>
             </div>
             <textarea
               key={"desc-" + (aiDesc ? "ai" : "manual")}
@@ -3310,31 +3310,31 @@ REGLAS:
               onBlur={e => { upd("desc", e.target.value); draft.desc = e.target.value; }}
               onInput={e => {
                 const counter = document.getElementById("desc-counter");
-                if (counter) { const len = e.target.value.length; counter.textContent = len + " / 4.000"; counter.style.color = len > 4000 ? "#A23A3A" : "#9A968A"; }
+                if (counter) { const len = e.target.value.length; counter.textContent = len + " / 4.000"; counter.style.color = len > 4000 ? "var(--danger)" : "var(--muted)"; }
                 draft.desc = e.target.value;
               }}
-              style={{ width: "100%", background: "#FFFFFF", border: "1px solid " + (idealistaFieldErrors.has("desc") ? "#A23A3A" : "#E7E1D4"), borderRadius: 0, color: "#22262E", padding: "14px 18px", fontSize: 13, fontFamily: "Inter, sans-serif", minHeight: 180, resize: "vertical", lineHeight: 1.6 }} />
-            {idealistaFieldErrors.has("desc") && <div style={{ fontSize: 10, color: "#A23A3A", marginTop: 3 }}>Requerido para Idealista</div>}
+              style={{ width: "100%", background: "var(--white)", border: "1px solid " + (idealistaFieldErrors.has("desc") ? "var(--danger)" : "var(--border)"), borderRadius: 0, color: "var(--text)", padding: "14px 18px", fontSize: 13, fontFamily: "Inter, sans-serif", minHeight: 180, resize: "vertical", lineHeight: 1.6 }} />
+            {idealistaFieldErrors.has("desc") && <div style={{ fontSize: 10, color: "var(--danger)", marginTop: 3 }}>Requerido para Idealista</div>}
           </div>
 
           {/* Botones de traducción */}
           <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
             <button onClick={traducirAIngles} disabled={translatingEn || translatingDe}
-              style={{ padding: "9px 18px", borderRadius: 0, border: "1px solid #405c6b", background: translatingEn ? "#E7E1D4" : "transparent", color: translatingEn ? "#9A968A" : "#405c6b", cursor: (translatingEn || translatingDe) ? "default" : "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 8 }}>
-              {translatingEn ? (<><span style={{ display: "inline-block", width: 12, height: 12, border: "2px solid #9A968A", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />Traduciendo...</>) : "✦ Traducir al inglés"}
+              style={{ padding: "9px 18px", borderRadius: 0, border: "1px solid #405c6b", background: translatingEn ? "var(--border)" : "transparent", color: translatingEn ? "var(--muted)" : "#405c6b", cursor: (translatingEn || translatingDe) ? "default" : "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 8 }}>
+              {translatingEn ? (<><span style={{ display: "inline-block", width: 12, height: 12, border: "2px solid var(--muted)", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />Traduciendo...</>) : "✦ Traducir al inglés"}
             </button>
             <button onClick={traducirAAleman} disabled={translatingEn || translatingDe}
-              style={{ padding: "9px 18px", borderRadius: 0, border: "1px solid #405c6b", background: translatingDe ? "#E7E1D4" : "transparent", color: translatingDe ? "#9A968A" : "#405c6b", cursor: (translatingEn || translatingDe) ? "default" : "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 8 }}>
-              {translatingDe ? (<><span style={{ display: "inline-block", width: 12, height: 12, border: "2px solid #9A968A", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />Traduciendo...</>) : "✦ Traducir al alemán"}
+              style={{ padding: "9px 18px", borderRadius: 0, border: "1px solid #405c6b", background: translatingDe ? "var(--border)" : "transparent", color: translatingDe ? "var(--muted)" : "#405c6b", cursor: (translatingEn || translatingDe) ? "default" : "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 8 }}>
+              {translatingDe ? (<><span style={{ display: "inline-block", width: 12, height: 12, border: "2px solid var(--muted)", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />Traduciendo...</>) : "✦ Traducir al alemán"}
             </button>
-            {translateError && <span style={{ fontSize: 11, color: "#A23A3A" }}>{translateError}</span>}
+            {translateError && <span style={{ fontSize: 11, color: "var(--danger)" }}>{translateError}</span>}
           </div>
 
           {/* Descripción EN — opcional */}
           <div style={{ marginTop: 16 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 3 }}>
-              <span style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>Descripcion EN <span style={{ fontSize: 9, color: "#9A968A", fontWeight: 400 }}>(opcional — Idealista usuarios inglés)</span></span>
-              <span id="desc-en-counter" style={{ fontSize: 10, color: "#9A968A" }}>{(d.descEn || "").length} / 4.000</span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Descripcion EN <span style={{ fontSize: 9, color: "var(--muted)", fontWeight: 400 }}>(opcional — Idealista usuarios inglés)</span></span>
+              <span id="desc-en-counter" style={{ fontSize: 10, color: "var(--muted)" }}>{(d.descEn || "").length} / 4.000</span>
             </div>
             <textarea
               key={"descEn-" + (d.descEn || "").length}
@@ -3342,17 +3342,17 @@ REGLAS:
               onBlur={e => { upd("descEn", e.target.value); draft.descEn = e.target.value; }}
               onInput={e => {
                 const counter = document.getElementById("desc-en-counter");
-                if (counter) { const len = e.target.value.length; counter.textContent = len + " / 4.000"; counter.style.color = len > 4000 ? "#A23A3A" : "#9A968A"; }
+                if (counter) { const len = e.target.value.length; counter.textContent = len + " / 4.000"; counter.style.color = len > 4000 ? "var(--danger)" : "var(--muted)"; }
                 draft.descEn = e.target.value;
               }}
-              style={{ width: "100%", background: "#FFFFFF", border: "1px solid #E7E1D4", borderRadius: 0, color: "#22262E", padding: "14px 18px", fontSize: 13, fontFamily: "Inter, sans-serif", minHeight: 140, resize: "vertical", lineHeight: 1.6 }} />
+              style={{ width: "100%", background: "var(--white)", border: "1px solid var(--border)", borderRadius: 0, color: "var(--text)", padding: "14px 18px", fontSize: 13, fontFamily: "Inter, sans-serif", minHeight: 140, resize: "vertical", lineHeight: 1.6 }} />
           </div>
 
           {/* Descripción DE — opcional */}
           <div style={{ marginTop: 16 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 3 }}>
-              <span style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>Descripcion DE <span style={{ fontSize: 9, color: "#9A968A", fontWeight: 400 }}>(opcional — Idealista usuarios alemán)</span></span>
-              <span id="desc-de-counter" style={{ fontSize: 10, color: "#9A968A" }}>{(d.descDe || "").length} / 4.000</span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Descripcion DE <span style={{ fontSize: 9, color: "var(--muted)", fontWeight: 400 }}>(opcional — Idealista usuarios alemán)</span></span>
+              <span id="desc-de-counter" style={{ fontSize: 10, color: "var(--muted)" }}>{(d.descDe || "").length} / 4.000</span>
             </div>
             <textarea
               key={"descDe-" + (d.descDe || "").length}
@@ -3360,10 +3360,10 @@ REGLAS:
               onBlur={e => { upd("descDe", e.target.value); draft.descDe = e.target.value; }}
               onInput={e => {
                 const counter = document.getElementById("desc-de-counter");
-                if (counter) { const len = e.target.value.length; counter.textContent = len + " / 4.000"; counter.style.color = len > 4000 ? "#A23A3A" : "#9A968A"; }
+                if (counter) { const len = e.target.value.length; counter.textContent = len + " / 4.000"; counter.style.color = len > 4000 ? "var(--danger)" : "var(--muted)"; }
                 draft.descDe = e.target.value;
               }}
-              style={{ width: "100%", background: "#FFFFFF", border: "1px solid #E7E1D4", borderRadius: 0, color: "#22262E", padding: "14px 18px", fontSize: 13, fontFamily: "Inter, sans-serif", minHeight: 140, resize: "vertical", lineHeight: 1.6 }} />
+              style={{ width: "100%", background: "var(--white)", border: "1px solid var(--border)", borderRadius: 0, color: "var(--text)", padding: "14px 18px", fontSize: 13, fontFamily: "Inter, sans-serif", minHeight: 140, resize: "vertical", lineHeight: 1.6 }} />
           </div>
         </Sec>
         <div style={sep} />
@@ -3373,7 +3373,7 @@ REGLAS:
           {tieneTour && <div style={{ marginBottom: 16 }}>
             {EFl({label: "Tour virtual (URL)", field: "tour360", pub: true})}
             {d.tour360 && d.tour360.startsWith("http") && (
-              <a href={d.tour360} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: "#AC8A54", textDecoration: "underline" }}>Abrir tour virtual</a>
+              <a href={d.tour360} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: "var(--gold)", textDecoration: "underline" }}>Abrir tour virtual</a>
             )}
           </div>}
           {p.id ? (
@@ -3384,7 +3384,7 @@ REGLAS:
               onCountUpdate={(counts) => { if (onUpdate) onUpdate({ ...p, fotos: counts.foto, videos: counts.video, planos: counts.plano }); }}
             />
           ) : (
-            <div style={{ padding: "20px", textAlign: "center", color: "#9A968A", fontSize: 12, background: "#FFFFFF", borderRadius: 0 }}>
+            <div style={{ padding: "20px", textAlign: "center", color: "var(--muted)", fontSize: 12, background: "var(--white)", borderRadius: 0 }}>
               Guarda la propiedad primero para poder subir fotos, videos y planos
             </div>
           )}
@@ -3396,7 +3396,7 @@ REGLAS:
           {p.id ? (
             <DocsSection propiedadId={p.id} propRef={p.ref} />
           ) : (
-            <div style={{ padding: "20px", textAlign: "center", color: "#9A968A", fontSize: 12, background: "#FFFFFF", borderRadius: 0 }}>
+            <div style={{ padding: "20px", textAlign: "center", color: "var(--muted)", fontSize: 12, background: "var(--white)", borderRadius: 0 }}>
               Guarda la propiedad primero para poder subir documentos
             </div>
           )}
@@ -3408,7 +3408,7 @@ REGLAS:
         <Sec title="Exportar a portales">
           {/* Solo se pueden marcar portales si el estado es "publicada" */}
           {d.estado !== "publicada" && editMode && (
-            <div style={{ fontSize: 11, color: "#9A968A", marginBottom: 10 }}>Marca el estado como <strong style={{color:"#AC8A54"}}>Publicada</strong> para seleccionar portales.</div>
+            <div style={{ fontSize: 11, color: "var(--muted)", marginBottom: 10 }}>Marca el estado como <strong style={{color:"var(--gold)"}}>Publicada</strong> para seleccionar portales.</div>
           )}
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             {DESTINOS.map((dest) => {
@@ -3425,16 +3425,16 @@ REGLAS:
                     const next = on ? current.filter(x => x !== dest) : [...current, dest];
                     upd("destinos", next);
                   }}
-                  style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", borderRadius: 0, border: "2px solid " + (on ? "#2C6E52" : "#9A968A"), background: on ? "#2C6E5215" : "#FFFFFF", cursor: canEdit ? "pointer" : "default", opacity: editMode && !canEdit ? 0.6 : 1, transition: "all 0.15s" }}>
-                  <div style={{ width: 18, height: 18, borderRadius: 0, border: "2px solid " + (on ? "#2C6E52" : "#9A968A"), background: on ? "#2C6E52" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    {on && <span style={{ color: "#FFFFFF", fontSize: 12, fontWeight: 700, lineHeight: 1 }}>✓</span>}
+                  style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", borderRadius: 0, border: "2px solid " + (on ? "var(--success)" : "var(--muted)"), background: on ? "var(--success)15" : "var(--white)", cursor: canEdit ? "pointer" : "default", opacity: editMode && !canEdit ? 0.6 : 1, transition: "all 0.15s" }}>
+                  <div style={{ width: 18, height: 18, borderRadius: 0, border: "2px solid " + (on ? "var(--success)" : "var(--muted)"), background: on ? "var(--success)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    {on && <span style={{ color: "var(--white)", fontSize: 12, fontWeight: 700, lineHeight: 1 }}>✓</span>}
                   </div>
-                  <span style={{ fontSize: 13, fontWeight: 600, color: on ? "#2C6E52" : "#22262E", fontFamily: "Inter, sans-serif" }}>{dest}</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: on ? "var(--success)" : "var(--text)", fontFamily: "Inter, sans-serif" }}>{dest}</span>
                 </div>
               );
             })}
           </div>
-          {editMode && d.estado === "publicada" && <div style={{ fontSize: 10, color: "#9A968A", marginTop: 8 }}>Haz clic para activar o desactivar cada portal</div>}
+          {editMode && d.estado === "publicada" && <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 8 }}>Haz clic para activar o desactivar cada portal</div>}
           <div style={{ ...g2, marginTop: 12 }}>
             {EFl({label: "Idealista ID", field: "idealistaId", pub: false})}
           </div>
@@ -3446,7 +3446,7 @@ REGLAS:
           <div style={intBox}>
             <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 12 }}>
               
-              <span style={{ fontSize: 10, fontWeight: 600, color: "#A23A3A", textTransform: "uppercase", letterSpacing: "0.1em" }}>No se publica</span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "var(--danger)", textTransform: "uppercase", letterSpacing: "0.1em" }}>No se publica</span>
             </div>
             <PropietariosEditor
               propietarios={d.propietarios || [{ ...PROPIETARIO_VACIO }]}
@@ -3461,20 +3461,20 @@ REGLAS:
 
         {/* Cualificacion */}
         <Sec title="Cualificacion del inmueble" startOpen={true}>
-          <div style={{ background: "#FFFFFF", border: "1px solid #E7E1D4", padding: "16px 20px" }}>
+          <div style={{ background: "var(--white)", border: "1px solid var(--border)", padding: "16px 20px" }}>
             <div style={{ marginBottom: 16 }}>
-              <span style={{ fontSize: 10, fontWeight: 600, color: "#2C6E52", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 8 }}>Puntos positivos del inmueble</span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "var(--success)", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 8 }}>Puntos positivos del inmueble</span>
               <QualRow
                 items={Array.isArray(d.cualPosArr) && d.cualPosArr.length > 0 ? d.cualPosArr : (Array.isArray(d.cualPos) && d.cualPos.length > 0 ? [...d.cualPos, "", "", ""].slice(0, Math.max(d.cualPos.length, 3)) : ["", "", "", "", "", ""])}
                 onChange={v => { upd("cualPosArr", v); upd("cualPosText", v.filter(Boolean).join("\n")); }}
-                color="#2C6E52" symbol="+" />
+                color="var(--success)" symbol="+" />
             </div>
             <div>
-              <span style={{ fontSize: 10, fontWeight: 600, color: "#A23A3A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 8 }}>Puntos negativos o limitaciones</span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "var(--danger)", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 8 }}>Puntos negativos o limitaciones</span>
               <QualRow
                 items={Array.isArray(d.cualNegArr) && d.cualNegArr.length > 0 ? d.cualNegArr : (Array.isArray(d.cualNeg) && d.cualNeg.length > 0 ? [...d.cualNeg, "", ""].slice(0, Math.max(d.cualNeg.length, 3)) : ["", "", ""])}
                 onChange={v => { upd("cualNegArr", v); upd("cualNegText", v.filter(Boolean).join("\n")); }}
-                color="#A23A3A" symbol="-" />
+                color="var(--danger)" symbol="-" />
             </div>
           </div>
         </Sec>
@@ -3485,7 +3485,7 @@ REGLAS:
             <SeccionGrande
               title="Visitas y documentos"
               defaultOpen={secs.visitas}
-              accentColor="#2C6E52"
+              accentColor="var(--success)"
             >
               <div style={{ padding: "20px 0" }}>
                 <VisitasResumen propiedadId={p.id} />
@@ -3496,11 +3496,11 @@ REGLAS:
             <SeccionGrande
               title="Reserva a arras"
               defaultOpen={secs.arras}
-              accentColor="#9C6E1B"
+              accentColor="var(--amber)"
               badge="Próximamente"
               badgeColor="#C8820A"
             >
-              <div style={{ padding: "32px 0", textAlign: "center", color: "#9A968A", fontSize: 13, fontFamily: "Inter, sans-serif" }}>
+              <div style={{ padding: "32px 0", textAlign: "center", color: "var(--muted)", fontSize: 13, fontFamily: "Inter, sans-serif" }}>
                 Esta sección se habilitará cuando la reserva esté completada (firmada por comprador, vendedor y pago confirmado).
               </div>
             </SeccionGrande>
@@ -3509,11 +3509,11 @@ REGLAS:
             <SeccionGrande
               title="Arras a notaría"
               defaultOpen={secs.notaria}
-              accentColor="#185FA5"
+              accentColor="var(--blue)"
               badge="Próximamente"
-              badgeColor="#185FA5"
+              badgeColor="var(--blue)"
             >
-              <div style={{ padding: "32px 0", textAlign: "center", color: "#9A968A", fontSize: 13, fontFamily: "Inter, sans-serif" }}>
+              <div style={{ padding: "32px 0", textAlign: "center", color: "var(--muted)", fontSize: 13, fontFamily: "Inter, sans-serif" }}>
                 Esta sección se habilitará cuando las arras estén firmadas por todas las partes.
               </div>
             </SeccionGrande>
@@ -3523,13 +3523,13 @@ REGLAS:
         })()}
 
         {/* Barra de acciones inferior */}
-        <div style={{ borderTop: "1px solid #E7E1D4", paddingTop: 28, marginTop: 12, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-          <button onClick={() => onClose()} style={{ padding: "12px 24px", borderRadius: 0, border: "1px solid #E7E1D4", background: "transparent", color: "#9A968A", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
+        <div style={{ borderTop: "1px solid var(--border)", paddingTop: 28, marginTop: 12, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+          <button onClick={() => onClose()} style={{ padding: "12px 24px", borderRadius: 0, border: "1px solid var(--border)", background: "transparent", color: "var(--muted)", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
             ← Volver a propiedades
           </button>
           <div style={{ display: "flex", gap: 8 }}>
-            {puedeEditar && <button onClick={() => { if (onDuplicate) onDuplicate(p); }} style={{ padding: "12px 20px", borderRadius: 0, border: "1px solid #AC8A5444", background: "transparent", color: "#AC8A54", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>Duplicar</button>}
-            {puedeEliminar && <button onClick={() => { if (onDelete) onDelete(p); }} style={{ padding: "12px 20px", borderRadius: 0, border: "1px solid #D4545433", background: "transparent", color: "#A23A3A", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>Eliminar</button>}
+            {puedeEditar && <button onClick={() => { if (onDuplicate) onDuplicate(p); }} style={{ padding: "12px 20px", borderRadius: 0, border: "1px solid var(--gold)44", background: "transparent", color: "var(--gold)", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>Duplicar</button>}
+            {puedeEliminar && <button onClick={() => { if (onDelete) onDelete(p); }} style={{ padding: "12px 20px", borderRadius: 0, border: "1px solid #D4545433", background: "transparent", color: "var(--danger)", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>Eliminar</button>}
             {puedeEditar && <button onClick={() => {
               const toSave = { ...draft,
                 suministros: (draft.suministrosText || "").split(",").map(s => s.trim()).filter(Boolean),
@@ -3545,7 +3545,7 @@ REGLAS:
                 else { if (!confirm("⚠️ Campos * sin completar:\n\n• " + faltantes + "\n\n¿Guardar igualmente?")) return; }
               }
               if (onUpdate) onUpdate(toSave);
-            }} style={{ padding: "12px 28px", borderRadius: 0, border: "none", background: "linear-gradient(135deg, #C8A97E, #D4B896)", color: "#F8F6F1", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
+            }} style={{ padding: "12px 28px", borderRadius: 0, border: "none", background: "linear-gradient(135deg, var(--gold-l), #D4B896)", color: "var(--cream)", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
               Guardar ficha
             </button>}
           </div>
@@ -3566,16 +3566,16 @@ function TabVisitasReadOnly({ propiedadId }) {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
 
-  const GOLD = "#AC8A54"; const BORDER = "#E7E1D4"; const MUTED = "#9A968A";
-  const TEXT = "#22262E"; const CREAM = "#F8F6F1"; const WHITE = "#FFFFFF";
+  const GOLD = "var(--gold)"; const BORDER = "var(--border)"; const MUTED = "var(--muted)";
+  const TEXT = "var(--text)"; const CREAM = "var(--cream)"; const WHITE = "var(--white)";
 
   const ESTADO_DOC = {
     borrador:           { label: "Borrador",            color: MUTED    },
-    enviado:            { label: "Enviado",             color: "#185FA5" },
+    enviado:            { label: "Enviado",             color: "var(--blue)" },
     firmado_comprador:  { label: "Firmado comprador",   color: GOLD     },
-    deposito_recibido:  { label: "Depósito recibido",   color: "#9C6E1B" },
-    firmado_vendedor:   { label: "Firmado vendedor",    color: "#2C6E52" },
-    completado:         { label: "Completado",          color: "#2C6E52" },
+    deposito_recibido:  { label: "Depósito recibido",   color: "var(--amber)" },
+    firmado_vendedor:   { label: "Firmado vendedor",    color: "var(--success)" },
+    completado:         { label: "Completado",          color: "var(--success)" },
   };
   const TIPO_DOC = {
     hoja_visita:  "Hoja de visita",
@@ -3651,7 +3651,7 @@ function TabVisitasReadOnly({ propiedadId }) {
                         {v.notas && <div style={{ fontSize: 11, color: TEXT, marginTop: 4, fontStyle: "italic" }}>{v.notas}</div>}
                       </div>
                       {v.resumen_ia && (
-                        <span style={{ fontSize: 10, background: "#2C6E5218", color: "#2C6E52", padding: "2px 8px", borderRadius: 10, whiteSpace: "nowrap", flexShrink: 0 }}>✓ Resumen IA</span>
+                        <span style={{ fontSize: 10, background: "var(--success)18", color: "var(--success)", padding: "2px 8px", borderRadius: 10, whiteSpace: "nowrap", flexShrink: 0 }}>✓ Resumen IA</span>
                       )}
                     </div>
                     {docs.length > 0 && (
@@ -3684,7 +3684,7 @@ function TabVisitasReadOnly({ propiedadId }) {
                     <div style={{ fontSize: 12, color: TEXT, fontFamily: "Inter, sans-serif" }}>
                       Informe del {new Date(inf.fecha_informe).toLocaleDateString("es-ES", { day: "2-digit", month: "long", year: "numeric" })}
                     </div>
-                    <span style={{ fontSize: 10, fontWeight: 600, color: inf.estado === "enviado" ? "#2C6E52" : inf.estado === "confirmado" ? GOLD : MUTED, fontFamily: "Inter, sans-serif" }}>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: inf.estado === "enviado" ? "var(--success)" : inf.estado === "confirmado" ? GOLD : MUTED, fontFamily: "Inter, sans-serif" }}>
                       {inf.estado === "enviado" ? "✓ Enviado" : inf.estado === "confirmado" ? "Confirmado" : "Borrador"}
                     </span>
                   </div>
@@ -4017,12 +4017,12 @@ function IdealistaJsonButton({ supabase }) {
   return (
     <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:6}}>
       <button onClick={generarJSON} disabled={loading}
-        style={{background:loading?"#E7E1D4":"transparent",border:"1px solid "+(loading?"#3A3A38":"#2C6E52"),borderRadius:3,color:loading?"#9A968A":"#2C6E52",fontSize:11,fontWeight:600,cursor:loading?"not-allowed":"pointer",padding:"12px 20px",fontFamily:"Inter, sans-serif",letterSpacing:"0.1em",whiteSpace:"nowrap",textTransform:"uppercase",transition:"all 0.3s"}}
-        onMouseEnter={e=>{if(!loading){e.currentTarget.style.background="#2C6E52";e.currentTarget.style.color="#F8F6F1";}}}
-        onMouseLeave={e=>{if(!loading){e.currentTarget.style.background="transparent";e.currentTarget.style.color="#2C6E52";}}}>
+        style={{background:loading?"var(--border)":"transparent",border:"1px solid "+(loading?"#3A3A38":"var(--success)"),borderRadius:3,color:loading?"var(--muted)":"var(--success)",fontSize:11,fontWeight:600,cursor:loading?"not-allowed":"pointer",padding:"12px 20px",fontFamily:"Inter, sans-serif",letterSpacing:"0.1em",whiteSpace:"nowrap",textTransform:"uppercase",transition:"all 0.3s"}}
+        onMouseEnter={e=>{if(!loading){e.currentTarget.style.background="var(--success)";e.currentTarget.style.color="var(--cream)";}}}
+        onMouseLeave={e=>{if(!loading){e.currentTarget.style.background="transparent";e.currentTarget.style.color="var(--success)";}}}>
         {loading?"Generando...":"⬇ JSON Idealista"}
       </button>
-      {(status||loading)&&<div style={{fontSize:10,color:status==="ok"?"#2C6E52":status==="error"?"#A23A3A":"#9A968A",textAlign:"right"}}>{msg}</div>}
+      {(status||loading)&&<div style={{fontSize:10,color:status==="ok"?"var(--success)":status==="error"?"var(--danger)":"var(--muted)",textAlign:"right"}}>{msg}</div>}
     </div>
   );
 }
@@ -4135,31 +4135,31 @@ function CatastroImport({ draft, upd, editMode }) {
   }
 
   return (
-    <div style={{ marginBottom: 16, padding: "14px 16px", background: "#F4EEE0", border: "1px solid #2A2926", borderRadius: 0 }}>
-      <div style={{ fontSize: 10, fontWeight: 700, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>
+    <div style={{ marginBottom: 16, padding: "14px 16px", background: "#F4EEE0", border: "1px solid var(--text)", borderRadius: 0 }}>
+      <div style={{ fontSize: 10, fontWeight: 700, color: "var(--gold)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>
         Importar del Catastro
       </div>
       <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 4 }}>Referencia catastral</div>
+          <div style={{ fontSize: 10, color: "var(--muted)", marginBottom: 4 }}>Referencia catastral</div>
           <input
             type="text"
             value={refCat}
             onChange={e => setRefCat(e.target.value.toUpperCase())}
             onKeyDown={e => e.key === "Enter" && importarCatastro()}
             placeholder="Ej: 9872023VH5797S0001WX"
-            style={{ width: "100%", background: "#F8F6F1", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", padding: "7px 10px", fontSize: 12, fontFamily: "Inter, sans-serif", boxSizing: "border-box" }}
+            style={{ width: "100%", background: "var(--cream)", border: "1px solid var(--text)", borderRadius: 0, color: "var(--text)", padding: "7px 10px", fontSize: 12, fontFamily: "Inter, sans-serif", boxSizing: "border-box" }}
           />
         </div>
         <button
           onClick={importarCatastro}
           disabled={loading || !refCat.trim()}
-          style={{ background: loading || !refCat.trim() ? "#E7E1D4" : "#AC8A54", border: "none", borderRadius: 0, color: loading || !refCat.trim() ? "#C8BFB0" : "#F8F6F1", fontSize: 11, fontWeight: 700, cursor: loading || !refCat.trim() ? "not-allowed" : "pointer", padding: "7px 16px", fontFamily: "Inter, sans-serif", whiteSpace: "nowrap" }}>
+          style={{ background: loading || !refCat.trim() ? "var(--border)" : "var(--gold)", border: "none", borderRadius: 0, color: loading || !refCat.trim() ? "#C8BFB0" : "var(--cream)", fontSize: 11, fontWeight: 700, cursor: loading || !refCat.trim() ? "not-allowed" : "pointer", padding: "7px 16px", fontFamily: "Inter, sans-serif", whiteSpace: "nowrap" }}>
           {loading ? "Consultando..." : "Importar"}
         </button>
       </div>
       {msg && (
-        <div style={{ fontSize: 11, color: msg.type === "ok" ? "#2C6E52" : msg.type === "warn" ? "#AC8A54" : "#A23A3A", marginTop: 8, padding: "6px 10px", background: msg.type === "ok" ? "#6AAF8D11" : msg.type === "warn" ? "#C8A97E11" : "#F6E7E5", borderRadius: 0, border: "1px solid " + (msg.type === "ok" ? "#6AAF8D44" : msg.type === "warn" ? "#C8A97E44" : "#D4545444") }}>
+        <div style={{ fontSize: 11, color: msg.type === "ok" ? "var(--success)" : msg.type === "warn" ? "var(--gold)" : "var(--danger)", marginTop: 8, padding: "6px 10px", background: msg.type === "ok" ? "var(--success-l)11" : msg.type === "warn" ? "var(--gold-l)11" : "var(--danger-bg)", borderRadius: 0, border: "1px solid " + (msg.type === "ok" ? "var(--success-l)44" : msg.type === "warn" ? "var(--gold-l)44" : "#D4545444") }}>
           {msg.text}
         </div>
       )}
@@ -4203,7 +4203,7 @@ function IdealistaImportButton() {
         <input type="file" accept=".xml" onChange={handleFile} style={{ display: 'none' }} disabled={loading} />
       </label>
       {result && (
-        <div style={{ fontSize: 10, textAlign: 'right', color: result.error ? '#D45454' : '#6AAF8D' }}>
+        <div style={{ fontSize: 10, textAlign: 'right', color: result.error ? '#D45454' : 'var(--success-l)' }}>
           {result.error ? `Error: ${result.error}` : `✅ ${result.imported} importadas · ${result.skipped} ya existían · ${result.errors} errores`}
         </div>
       )}
@@ -4448,13 +4448,13 @@ export default function CRMPropiedades({ currentUser }) {
   const avg = Math.round(data.reduce((s, p) => s + p.precioVenta, 0) / data.length);
   const pub = data.filter((p) => p.estado === "publicada").length;
   const vis = data.reduce((s, p) => s + p.visitas, 0);
-  const ss = { padding: "8px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#A09D93", fontSize: 11, fontFamily: "Inter, sans-serif", letterSpacing: "0.04em", cursor: "pointer" };
+  const ss = { padding: "8px 14px", background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, color: "#A09D93", fontSize: 11, fontFamily: "Inter, sans-serif", letterSpacing: "0.04em", cursor: "pointer" };
 
   if (loading) {
     return (
-      <div style={{ fontFamily: "Inter, sans-serif", background: "#F8F6F1", minHeight: "100vh", color: "#22262E", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ fontFamily: "Inter, sans-serif", background: "var(--cream)", minHeight: "100vh", color: "var(--text)", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 12, color: "#9A968A", letterSpacing: "0.1em", textTransform: "uppercase" }}>Cargando propiedades...</div>
+          <div style={{ fontSize: 12, color: "var(--muted)", letterSpacing: "0.1em", textTransform: "uppercase" }}>Cargando propiedades...</div>
         </div>
       </div>
     );
@@ -4466,7 +4466,7 @@ export default function CRMPropiedades({ currentUser }) {
   }
 
   return (
-    <div style={{ fontFamily: "Inter, sans-serif", background: "#F8F6F1", minHeight: "100vh", color: "#22262E", padding: "clamp(16px, 4vw, 40px) clamp(12px, 3vw, 24px)" }}>
+    <div style={{ fontFamily: "Inter, sans-serif", background: "var(--cream)", minHeight: "100vh", color: "var(--text)", padding: "clamp(16px, 4vw, 40px) clamp(12px, 3vw, 24px)" }}>
       <div style={{ maxWidth: 920, margin: "0 auto" }}>
 
         {/* Banner aviso IEE — no bloqueante */}
@@ -4478,14 +4478,14 @@ export default function CRMPropiedades({ currentUser }) {
         )}
 
         {/* Header */}
-        <div style={{ marginBottom: 40, borderBottom: "1px solid #2A2926", paddingBottom: 32 }}>
+        <div style={{ marginBottom: 40, borderBottom: "1px solid var(--text)", paddingBottom: 32 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 16 }}>
             <div>
-              <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Nativa Properties</div>
+              <div style={{ fontSize: 10, color: "var(--gold)", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Nativa Properties</div>
               <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 400, margin: 0, lineHeight: 1.1 }}>
                 Cartera de <em>Propiedades</em>
               </h1>
-              <p style={{ fontSize: 12, color: "#9A968A", margin: "10px 0 0", letterSpacing: "0.04em" }}>{data.length} inmuebles - {pub} publicados</p>
+              <p style={{ fontSize: 12, color: "var(--muted)", margin: "10px 0 0", letterSpacing: "0.04em" }}>{data.length} inmuebles - {pub} publicados</p>
             </div>
             {isAdmin && <IdealistaJsonButton supabase={supabase} />}
             {isAdmin && <IdealistaImportButton />}
@@ -4514,9 +4514,9 @@ export default function CRMPropiedades({ currentUser }) {
                 };
                 setSel(newProp);
               }}
-              style={{ padding: "12px 28px", borderRadius: 0, border: "1px solid #C8A97E", background: "transparent", color: "#AC8A54", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", transition: "all 0.3s" }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "#AC8A54"; e.currentTarget.style.color = "#F8F6F1"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#AC8A54"; }}
+              style={{ padding: "12px 28px", borderRadius: 0, border: "1px solid var(--gold-l)", background: "transparent", color: "var(--gold)", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", transition: "all 0.3s" }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "var(--gold)"; e.currentTarget.style.color = "var(--cream)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--gold)"; }}
             >
               + Nueva propiedad
             </button>
@@ -4526,9 +4526,9 @@ export default function CRMPropiedades({ currentUser }) {
         {/* Stats */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 16, marginBottom: 36 }}>
           {[{ n: data.length, l: "Inmuebles" }, { n: fmtP(avg), l: "Precio medio" }, { n: pub, l: "Publicadas" }, { n: vis, l: "Visitas totales" }].map((s, i) => (
-            <div key={i} style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "20px 24px", textAlign: "center" }}>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: "#22262E", fontWeight: 400 }}>{s.n}</div>
-              <div style={{ fontSize: 10, color: "#9A968A", marginTop: 6, textTransform: "uppercase", letterSpacing: "0.1em" }}>{s.l}</div>
+            <div key={i} style={{ background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, padding: "20px 24px", textAlign: "center" }}>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: "var(--text)", fontWeight: 400 }}>{s.n}</div>
+              <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 6, textTransform: "uppercase", letterSpacing: "0.1em" }}>{s.l}</div>
             </div>
           ))}
         </div>
@@ -4536,7 +4536,7 @@ export default function CRMPropiedades({ currentUser }) {
         {/* Filters */}
         <div style={{ display: "flex", gap: 10, marginBottom: 24, flexWrap: "wrap", alignItems: "center" }}>
           <input type="text" placeholder="Buscar ref, titulo, zona..." value={q} onChange={(e) => setQ(e.target.value)}
-            style={{ flex: 1, minWidth: 200, padding: "10px 16px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 12, fontFamily: "Inter, sans-serif", outline: "none" }} />
+            style={{ flex: 1, minWidth: 200, padding: "10px 16px", background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, color: "var(--text)", fontSize: 12, fontFamily: "Inter, sans-serif", outline: "none" }} />
           <select value={fEst} onChange={(e) => setFEst(e.target.value)} style={ss}>
             <option value="todos">Todos estados</option>
             {ESTADOS.map((s) => (<option key={s.key} value={s.key}>{s.label}</option>))}
@@ -4558,12 +4558,12 @@ export default function CRMPropiedades({ currentUser }) {
           </select>
         </div>
 
-        <div style={{ fontSize: 11, color: "#9A968A", marginBottom: 12, letterSpacing: "0.06em" }}>{list.length} de {data.length} propiedades</div>
+        <div style={{ fontSize: 11, color: "var(--muted)", marginBottom: 12, letterSpacing: "0.06em" }}>{list.length} de {data.length} propiedades</div>
 
         {/* List */}
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {list.map((p) => (<PropCard key={p.id} p={p} onClick={() => { setSel(p); setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 50); }} />))}
-          {list.length === 0 && <div style={{ textAlign: "center", padding: 60, color: "#9A968A", fontSize: 13, fontStyle: "italic" }}>Sin resultados</div>}
+          {list.length === 0 && <div style={{ textAlign: "center", padding: 60, color: "var(--muted)", fontSize: 13, fontStyle: "italic" }}>Sin resultados</div>}
         </div>
 
       </div>
