@@ -1188,7 +1188,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
                           {esOfResv && <PipelineDoc estado={doc.estado} />}
 
                           {/* Datos bancarios */}
-                          {esOfResv && doc.deposito_tipo === "transferencia" && doc.estado === "enviado" && (
+                          {esOfResv && doc.deposito_tipo === "transferencia" && ["enviado","firmado_comprador","deposito_recibido","firmado_vendedor","firmado_agente","completado"].includes(doc.estado) && (
                             <div style={{ marginTop: 10, padding: "10px 12px", background: CREAM,
                               borderRadius: 10, fontSize: 12, color: TEXT, fontFamily: "Inter, sans-serif",
                               lineHeight: 1.6 }}>
@@ -1288,28 +1288,40 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
                             </div>
                           )}
                           {/* Fallback: link propietario legacy (token único) */}
-                          {!firmasLinksVend[doc.id]?.length && doc.token_firma_vendedor && !doc.firmado_vendedor_at && (
+                          {!firmasLinksVend[doc.id]?.length && doc.token_firma_vendedor && (
                             <div style={{ marginTop: 12, padding: "10px 12px", background: `${GOLD}10`,
                               borderRadius: 10, border: `1px solid ${GOLD}40` }}>
-                              <div style={{ fontSize: 11, fontWeight: 700, color: GOLD,
-                                fontFamily: "Inter, sans-serif", marginBottom: 6 }}>
-                                🔗 Link firma propietario
+                              <div style={{ fontSize: 10, color: GOLD, fontWeight: 800,
+                                letterSpacing: "0.1em", marginBottom: 6, fontFamily: "Inter, sans-serif" }}>
+                                🔗 LINK FIRMA PROPIETARIO
                               </div>
-                              <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                                <input readOnly
-                                  value={`https://crm.mallorcanativaproperties.com/firmar-visita?token=${doc.token_firma_vendedor}&tipo=vendedor`}
-                                  style={{ flex: 1, fontSize: 10, padding: "5px 8px", border: `1px solid ${BORDER}`,
-                                    borderRadius: 6, color: MUTED, fontFamily: "Inter, sans-serif",
-                                    background: WHITE, cursor: "text" }} />
-                                <button onClick={() => {
-                                  navigator.clipboard.writeText(`https://crm.mallorcanativaproperties.com/firmar-visita?token=${doc.token_firma_vendedor}&tipo=vendedor`);
-                                  alert("✅ Link copiado");
-                                }} style={{ padding: "5px 10px", background: GOLD, border: "none",
-                                  color: WHITE, borderRadius: 6, fontSize: 11, cursor: "pointer",
-                                  fontFamily: "Inter, sans-serif", whiteSpace: "nowrap" }}>
-                                  Copiar
-                                </button>
+                              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: doc.firmado_vendedor_at ? 0 : 6 }}>
+                                <span style={{ fontSize: 13 }}>{doc.firmado_vendedor_at ? "✅" : "⏳"}</span>
+                                <span style={{ fontSize: 12, fontWeight: 600, color: doc.firmado_vendedor_at ? SUCCESS : TEXT,
+                                  fontFamily: "Inter, sans-serif" }}>Propietario</span>
+                                {doc.firmado_vendedor_at && (
+                                  <span style={{ fontSize: 10, color: MUTED, fontFamily: "Inter, sans-serif" }}>
+                                    {new Date(doc.firmado_vendedor_at).toLocaleDateString("es-ES")}
+                                  </span>
+                                )}
                               </div>
+                              {!doc.firmado_vendedor_at && (
+                                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                                  <input readOnly
+                                    value={`https://crm.mallorcanativaproperties.com/firmar-visita?token=${doc.token_firma_vendedor}&tipo=vendedor`}
+                                    style={{ flex: 1, fontSize: 10, padding: "5px 8px", border: `1px solid ${BORDER}`,
+                                      borderRadius: 6, color: MUTED, fontFamily: "Inter, sans-serif",
+                                      background: WHITE, cursor: "text" }} />
+                                  <button onClick={() => {
+                                    navigator.clipboard.writeText(`https://crm.mallorcanativaproperties.com/firmar-visita?token=${doc.token_firma_vendedor}&tipo=vendedor`);
+                                    alert("✅ Link copiado");
+                                  }} style={{ padding: "5px 10px", background: GOLD, border: "none",
+                                    color: WHITE, borderRadius: 6, fontSize: 11, cursor: "pointer",
+                                    fontFamily: "Inter, sans-serif", whiteSpace: "nowrap" }}>
+                                    Copiar
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           )}
 
