@@ -96,6 +96,59 @@ export async function markAsRead(remoteJidOrPhone, messageId) {
   });
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Logging: guarda un mensaje en la tabla `mensajes` buscando/creando la conv.
+// supabase  — cliente ya instanciado
+// phone     — teléfono destino (se normaliza internamente)
+// texto     — texto del mensaje tal como se envió
+// fromWho   — "claudia" | "agente" | "sistema" (por defecto "sistema")
+// label     — etiqueta opcional que se antepone al texto en el panel (p.ej. "[PDF enviado]")
+// ─────────────────────────────────────────────────────────────────────────────
+export async function logMensajeWA(supabase, phone, texto, fromWho = "sistema", label = "") {
+  try {
+    const phoneClean = normalizePhone(phone);
+    const phoneWithout34 = phoneClean.startsWith("34") ? phoneClean.slice(2) : phoneClean;
+    const phoneWith34    = phoneClean.startsWith("34") ? phoneClean : "34" + phoneClean;
+
+    // Buscar conversación existente
+    const { data: convs } = await supabase
+      .from("conversaciones")
+      .select("id, referencia")
+      .or(`telefono.eq.${phoneClean},telefono.eq.${phoneWithout34},telefono.eq.${phoneWith34}`)
+      .order("created_at", { ascending: false })
+      .limit(5);
+
+    let convId = null;
+    if (convs && convs.length > 0) {
+      const best = convs.find(c => c.referencia) || convs[0];
+      convId = best.id;
+    } else {
+      // Crear conversación mínima para que el mensaje aparezca
+      const { data: newConv } = await supabase.from("conversaciones").insert({
+        telefono:  phoneWith34,
+        canal:     "whatsapp",
+        estado:    "activo",
+        agente_ia: "claudia",
+        contacto:  phoneWith34,
+        interes:   texto.slice(0, 200),
+      }).select("id").single();
+      convId = newConv?.id;
+    }
+
+    if (!convId) return;
+
+    const textoFinal = label ? `${label} ${texto}` : texto;
+    await supabase.from("mensajes").insert({
+      conversacion_id: convId,
+      from_who:        fromWho,
+      texto:           textoFinal,
+      timestamp:       new Date().toISOString(),
+    });
+  } catch (e) {
+    console.error("[logMensajeWA] error:", e.message);
+  }
+}
+
 // Extrae el texto de un mensaje entrante de Baileys, sea cual sea su tipo.
 export function extractIncomingText(message) {
   if (!message) return "";
