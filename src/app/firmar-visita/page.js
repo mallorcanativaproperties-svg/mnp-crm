@@ -268,44 +268,47 @@ export default function FirmarVisita() {
           </div>
         )}
 
-        {/* Documento PDF */}
+        {/* Documento PDF — botón grande para abrir, sin iframe */}
         {pdfUrl && (
-          <div style={{ marginBottom:24 }}>
-            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:8 }}>
-              <div style={{ fontSize:12, color:TEXT, fontWeight:600 }}>
-                Lea el documento completo antes de firmar:
+          <div style={{ marginBottom:20 }}>
+            <a href={pdfUrl} target="_blank" rel="noopener noreferrer"
+              style={{ display:"flex", alignItems:"center", gap:14, padding:"18px 20px",
+                background:WHITE, border:`1.5px solid ${BORDER}`, borderRadius:10,
+                textDecoration:"none", boxShadow:"0 1px 4px rgba(0,0,0,0.06)" }}>
+              <div style={{ width:44, height:44, background:`${GOLD}15`, borderRadius:8,
+                display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                  strokeWidth={1.5} stroke={GOLD} style={{ width:24, height:24 }}>
+                  <path strokeLinecap="round" strokeLinejoin="round"
+                    d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                </svg>
               </div>
-              <a href={pdfUrl} target="_blank" rel="noopener noreferrer"
-                style={{ fontSize:12, color:GOLD, fontWeight:700, textDecoration:"none",
-                  padding:"6px 12px", border:`1px solid ${GOLD}`, borderRadius:6 }}>
-                ↗ Abrir PDF
-              </a>
-            </div>
-            <div style={{ border:`1px solid ${BORDER}`, borderRadius:3, overflow:"hidden", height:520 }}>
-              <object
-                data={pdfUrl}
-                type="application/pdf"
-                style={{ width:"100%", height:"100%", border:"none" }}
-                onLoad={() => setLeido(true)}
-              >
-                {/* Fallback para iOS Safari que no soporta object/iframe con PDF */}
-                <div style={{ padding:24, textAlign:"center" }}>
-                  <div style={{ fontSize:40, marginBottom:12 }}>📄</div>
-                  <div style={{ fontSize:14, color:TEXT, marginBottom:16 }}>
-                    Tu dispositivo no puede mostrar el PDF en esta pantalla.
-                  </div>
-                  <a href={pdfUrl} target="_blank" rel="noopener noreferrer"
-                    style={{ display:"inline-block", padding:"12px 24px", background:DARK, color:WHITE,
-                      borderRadius:8, fontSize:14, fontWeight:700, textDecoration:"none" }}>
-                    Abrir documento PDF
-                  </a>
+              <div style={{ flex:1 }}>
+                <div style={{ fontSize:14, fontWeight:700, color:TEXT, fontFamily:"Inter, sans-serif" }}>
+                  Abrir documento
                 </div>
-              </object>
-            </div>
-            <label style={{ display:"flex", alignItems:"center", gap:8, marginTop:12, cursor:"pointer" }}>
+                <div style={{ fontSize:12, color:MUTED, marginTop:2, fontFamily:"Inter, sans-serif" }}>
+                  Léalo antes de firmar — se abre en una nueva pestaña
+                </div>
+              </div>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                strokeWidth={1.5} stroke={MUTED} style={{ width:18, height:18, flexShrink:0 }}>
+                <path strokeLinecap="round" strokeLinejoin="round"
+                  d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+              </svg>
+            </a>
+
+            {/* Checkbox He leído — siempre visible justo debajo */}
+            <label style={{ display:"flex", alignItems:"center", gap:10, marginTop:14,
+              padding:"14px 16px", background:leido ? `${SUCCESS}10` : WHITE,
+              border:`1.5px solid ${leido ? SUCCESS : BORDER}`, borderRadius:10,
+              cursor:"pointer", transition:"all 0.15s" }}>
               <input type="checkbox" checked={leido} onChange={e => setLeido(e.target.checked)}
-                style={{ width:16, height:16, accentColor:GOLD }} />
-              <span style={{ fontSize:13, color:TEXT }}>He leído y entendido el documento en su totalidad</span>
+                style={{ width:18, height:18, accentColor:SUCCESS, flexShrink:0 }} />
+              <span style={{ fontSize:13, color: leido ? SUCCESS : TEXT,
+                fontWeight: leido ? 700 : 400, fontFamily:"Inter, sans-serif" }}>
+                He leído y entendido el documento en su totalidad
+              </span>
             </label>
           </div>
         )}
