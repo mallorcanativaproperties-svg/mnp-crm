@@ -410,8 +410,17 @@ export async function POST(request) {
       );
     }
 
-    // Comprobación en seco: no escribe nada
+    // Comprobación en seco: no escribe nada. Avisa tambien de lo que la recarga
+    // se va a encontrar: un documento con este mismo titulo que no se va a
+    // reemplazar. Es el aviso que habria evitado que la guia interna del ITP
+    // quedara duplicada, la version corregida junto a la que tenia los numeros
+    // mal, asi que se da ANTES de escribir y no solo despues.
     if (b.seco) {
+      const { data: yaHay } = await sbAdmin
+        .from("ia_documentos")
+        .select("id, referencia_legal, created_at")
+        .eq("agente_slug", b.agenteSlug)
+        .eq("titulo", b.titulo);
       return NextResponse.json({
         seco: true,
         titulo_de_la_pagina: tituloPagina,
@@ -421,6 +430,12 @@ export async function POST(request) {
         fragmentos: trozos.length,
         articulos: [...new Set(trozos.map((t) => t.articulo))].slice(0, 60),
         muestra: trozos[0].contenido.slice(0, 700),
+        ...((yaHay || []).length
+          ? {
+              mismo_titulo: yaHay,
+              aviso: `Ya hay ${yaHay.length} documento(s) de este agente con este titulo. Si es la version anterior de este material, recarga con "reemplazarPorTitulo": true para que no queden las dos.`,
+            }
+          : {}),
       });
     }
 
@@ -438,12 +453,48 @@ export async function POST(request) {
         // La identidad de un modulo de formacion es su slug, no su titulo: asi se
         // le puede afinar el titulo (que es lo que usa la busqueda) sin que la
         // recarga duplique el documento en vez de reemplazarlo.
-        `${b.agenteSlug}|${b.url || (b.formacion ? `formacion:${b.formacion}` : `texto:${b.titulo}`)}|${(b.articulos || []).join(",")}` +
+        // Un documento pegado como `texto` no tiene origen externo del que colgar
+        // su identidad, asi que por defecto cuelga del titulo — y ahi si le
+        // afecta el problema que el resto evita: retitularlo lo duplica en la
+        // siguiente recarga. `identidad` permite darle una clave estable
+        // independiente del titulo. Paso de verdad con la guia interna del ITP:
+        // se recargo corregida y quedaron las dos versiones, la buena y la que
+        // tenia los numeros mal.
+        `${b.agenteSlug}|${
+          b.url ||
+          (b.formacion
+            ? `formacion:${b.formacion}`
+            : b.identidad
+              ? `id:${b.identidad}`
+              : `texto:${b.titulo}`)
+        }|${(b.articulos || []).join(",")}` +
           (b.recorte?.desde ? `|${b.recorte.desde}` : "")
       )
       .digest("hex");
 
     await sbAdmin.from("ia_documentos").delete().eq("hash", hash); // recarga limpia
+
+    // Red de seguridad del parrafo anterior: si queda otro documento del mismo
+    // agente con el mismo titulo y otro hash, lo normal es que sea la version
+    // anterior de ESTE documento, que no se ha borrado porque su identidad
+    // cambio. Dos versiones del mismo material en el corpus es peor que
+    // ninguna: el agente recupera la que gane el ranking, que puede ser la
+    // vieja. No se borra por las bravas (dos recortes distintos de la misma ley
+    // comparten titulo legitimamente): se avisa en la respuesta, y con
+    // `reemplazarPorTitulo` se borra.
+    const { data: mismoTitulo } = await sbAdmin
+      .from("ia_documentos")
+      .select("id, titulo, referencia_legal, hash, created_at")
+      .eq("agente_slug", b.agenteSlug)
+      .eq("titulo", b.titulo)
+      .neq("hash", hash);
+    const duplicados = mismoTitulo || [];
+    if (duplicados.length && b.reemplazarPorTitulo) {
+      await sbAdmin
+        .from("ia_documentos")
+        .delete()
+        .in("id", duplicados.map((d) => d.id));
+    }
 
     const { data: doc, error: errDoc } = await sbAdmin
       .from("ia_documentos")
@@ -521,6 +572,18 @@ export async function POST(request) {
         caracteres: texto.length,
         fragmentos: filas.length,
         articulos: [...new Set(trozos.map((t) => t.articulo))].slice(0, 60),
+        ...(duplicados.length
+          ? {
+              aviso: b.reemplazarPorTitulo
+                ? `Borrados ${duplicados.length} documento(s) del mismo agente con este mismo titulo y otra identidad.`
+                : `ATENCION: quedan ${duplicados.length} documento(s) del mismo agente con este mismo titulo y otra identidad. Si es la version anterior de este material, el corpus tiene ahora las dos y el agente puede recuperar la vieja. Recarga con "reemplazarPorTitulo": true para borrarla.`,
+              mismo_titulo: duplicados.map((d) => ({
+                id: d.id,
+                referencia_legal: d.referencia_legal,
+                created_at: d.created_at,
+              })),
+            }
+          : {}),
       });
     } catch (e) {
       await sbAdmin
