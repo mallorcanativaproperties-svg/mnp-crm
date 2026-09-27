@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { logMensajeWA } from "@/lib/evolutionApi";
 
 function getSupabase() {
   return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
@@ -26,11 +27,13 @@ export async function POST(req) {
     ? `✅ *El comprador ha firmado el ${TIPO[doc.tipo] || doc.tipo}* del inmueble en ${dir}.\n\nYa puedes enviar el documento al propietario para su firma desde la sección Visitas del CRM.\n\n_Nativa Properties_`
     : `✅ *El propietario ha firmado el ${TIPO[doc.tipo] || doc.tipo}* del inmueble en ${dir}.\n\nDocumento completamente firmado. Revísalo en la sección Visitas del CRM.\n\n_Nativa Properties_`;
 
+  const agentePhone = agenteDatos.agente_telefono.replace(/\D/g, "");
   await fetch(`${process.env.EVOLUTION_API_URL}/message/sendText/${process.env.EVOLUTION_INSTANCE}`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "apikey": process.env.EVOLUTION_API_KEY },
-    body: JSON.stringify({ number: agenteDatos.agente_telefono.replace(/\D/g, ""), text: msg }),
+    body: JSON.stringify({ number: agentePhone, text: msg }),
   });
+  await logMensajeWA(sb, agentePhone, msg, "sistema");
 
   return NextResponse.json({ ok: true });
 }
