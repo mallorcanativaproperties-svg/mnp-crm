@@ -156,7 +156,7 @@ function WhatsAppCrucePanel({ buyer, prop, onClose }) {
   const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
 
   return (
-    <div style={{ position: "fixed", top: 0, bottom: 0, right: 0, zIndex: 1100, width: isMobile ? "100vw" : "min(420px,100vw)", background: CREAM, borderLeft: "1px solid var(--border)", boxShadow: "-4px 0 40px rgba(26,37,40,0.18)", display: "flex", flexDirection: "column", fontFamily: "Raleway, Inter, sans-serif" }}>
+    <div style={{ position: "fixed", top: 0, bottom: 0, right: 0, zIndex: 1100, width: isMobile ? "100vw" : "min(420px,100vw)", background: CREAM, borderLeft: "1px solid var(--border)", boxShadow: "-4px 0 40px rgba(26,37,40,0.18)", display: "flex", flexDirection: "column", fontFamily: "Inter, sans-serif" }}>
 
       <div style={{ height: 3, background: BRONZE, flexShrink: 0 }} />
 
@@ -164,7 +164,7 @@ function WhatsAppCrucePanel({ buyer, prop, onClose }) {
       <div style={{ background: PETROL, padding: "14px 18px", flexShrink: 0 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 38, height: 38, background: BRONZE, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 16, color: CREAM, flexShrink: 0 }}>
+            <div style={{ width: 38, height: 38, background: BRONZE, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 16, color: CREAM, flexShrink: 0 }}>
               {buyer.nombre?.charAt(0)?.toUpperCase() || "?"}
             </div>
             <div>
@@ -173,7 +173,7 @@ function WhatsAppCrucePanel({ buyer, prop, onClose }) {
             </div>
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <button onClick={toggleModo} style={{ padding: "4px 10px", background: modoManual ? "rgba(172,138,84,0.15)" : "rgba(64,92,107,0.3)", border: `1px solid ${modoManual ? BRONZE : "#405c6b"}`, color: modoManual ? BRONZE : "#7aafc4", cursor: "pointer", fontSize: 9, fontWeight: 600, letterSpacing: "0.08em", fontFamily: "Raleway, Inter, sans-serif" }}>
+            <button onClick={toggleModo} style={{ padding: "4px 10px", background: modoManual ? "rgba(172,138,84,0.15)" : "rgba(64,92,107,0.3)", border: `1px solid ${modoManual ? BRONZE : "#405c6b"}`, color: modoManual ? BRONZE : "#7aafc4", cursor: "pointer", fontSize: 9, fontWeight: 600, letterSpacing: "0.08em", fontFamily: "Inter, sans-serif" }}>
               {modoManual ? "MANUAL" : "IA ACTIVA"}
             </button>
             <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(248,246,241,0.4)", fontSize: 18, cursor: "pointer", lineHeight: 1 }}>✕</button>
@@ -188,7 +188,7 @@ function WhatsAppCrucePanel({ buyer, prop, onClose }) {
               <span style={{ fontSize: 11, color: "rgba(248,246,241,0.5)", wordBreak: "break-all", flex: 1 }}>{propUrl}</span>
               <button
                 onClick={e => { navigator.clipboard.writeText(propUrl); e.currentTarget.textContent = "✓"; setTimeout(() => { if(e.currentTarget) e.currentTarget.innerHTML = `<span style="display:flex;align-items:center;gap:4px"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"2\" stroke=\"currentColor\" style=\"width:13px;height:13px\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244\"/></svg>Copiar</span>`; }, 2000); }}
-                style={{ fontSize: 10, color: BRONZE, background: "none", border: `1px solid ${BRONZE}44`, padding: "2px 8px", cursor: "pointer", flexShrink: 0, fontFamily: "Raleway, Inter, sans-serif", letterSpacing: "0.06em" }}>
+                style={{ fontSize: 10, color: BRONZE, background: "none", border: `1px solid ${BRONZE}44`, padding: "2px 8px", cursor: "pointer", flexShrink: 0, fontFamily: "Inter, sans-serif", letterSpacing: "0.06em" }}>
                 Copiar
               </button>
             </div>
@@ -202,7 +202,7 @@ function WhatsAppCrucePanel({ buyer, prop, onClose }) {
           <div style={{ textAlign: "center", padding: 40, color: "var(--muted)", fontSize: 12 }}>Cargando...</div>
         ) : mensajes.length === 0 ? (
           <div style={{ textAlign: "center", padding: 40 }}>
-            <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 24, color: "#C8BFB0", marginBottom: 10 }}>✦</div>
+            <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 24, color: "#C8BFB0", marginBottom: 10 }}>✦</div>
             <div style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.6 }}>Sin mensajes. El mensaje de presentación<br/>está listo en el campo de texto.</div>
           </div>
         ) : (() => {
@@ -211,9 +211,9 @@ function WhatsAppCrucePanel({ buyer, prop, onClose }) {
             const ds = m.date ? fmtDate(m.date) : null;
             if (ds && ds !== lastDate) {
               lastDate = ds;
-              elements.push(<div key={`d-${i}`} style={{ textAlign: "center", margin: "12px 0 6px" }}><span style={{ fontSize: 10, color: "var(--muted)", padding: "3px 12px", background: "#D6D0C8", borderRadius: 12 }}>{ds}</span></div>);
+              elements.push(<div key={`d-${i}`} style={{ textAlign: "center", margin: "12px 0 6px" }}><span style={{ fontSize: 10, color: "var(--muted)", padding: "3px 12px", background: "#D6D0C8", borderRadius: 0 }}>{ds}</span></div>);
             }
-            if (m.from === "sistema") { elements.push(<div key={i} style={{ textAlign: "center", margin: "4px 0" }}><span style={{ fontSize: 10, color: "var(--muted)", padding: "2px 10px", background: "#D6D0C8", borderRadius: 10 }}>{m.text}</span></div>); return; }
+            if (m.from === "sistema") { elements.push(<div key={i} style={{ textAlign: "center", margin: "4px 0" }}><span style={{ fontSize: 10, color: "var(--muted)", padding: "2px 10px", background: "#D6D0C8", borderRadius: 0 }}>{m.text}</span></div>); return; }
             const isAgent = m.from !== "cliente";
             elements.push(
               <div key={i} style={{ display: "flex", justifyContent: isAgent ? "flex-end" : "flex-start", marginBottom: 4 }}>
@@ -237,9 +237,9 @@ function WhatsAppCrucePanel({ buyer, prop, onClose }) {
           placeholder="Escribe un mensaje..."
           disabled={!modoManual}
           rows={input.split("\n").length > 3 ? 5 : 3}
-          style={{ width: "100%", padding: "10px 14px", background: modoManual ? "var(--white)" : "#F0ECE6", border: "1px solid var(--border)", color: "#1a2528", fontSize: 13, fontFamily: "Raleway, Inter, sans-serif", outline: "none", resize: "none", cursor: modoManual ? "text" : "not-allowed", borderRadius: 8, boxSizing: "border-box", marginBottom: 8, lineHeight: 1.5 }} />
+          style={{ width: "100%", padding: "10px 14px", background: modoManual ? "var(--white)" : "#F0ECE6", border: "1px solid var(--border)", color: "#1a2528", fontSize: 13, fontFamily: "Inter, sans-serif", outline: "none", resize: "none", cursor: modoManual ? "text" : "not-allowed", borderRadius: 0, boxSizing: "border-box", marginBottom: 8, lineHeight: 1.5 }} />
         <button onClick={handleSend} disabled={!modoManual || !input.trim() || loading}
-          style={{ width: "100%", padding: "11px 0", borderRadius: 0, background: (modoManual && input.trim() && !loading) ? BRONZE : "var(--border)", border: "none", color: (modoManual && input.trim() && !loading) ? CREAM : "var(--muted)", fontFamily: "Raleway, Inter, sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", cursor: (modoManual && input.trim() && !loading) ? "pointer" : "default" }}>
+          style={{ width: "100%", padding: "11px 0", borderRadius: 0, background: (modoManual && input.trim() && !loading) ? BRONZE : "var(--border)", border: "none", color: (modoManual && input.trim() && !loading) ? CREAM : "var(--muted)", fontFamily: "Inter, sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", cursor: (modoManual && input.trim() && !loading) ? "pointer" : "default" }}>
           {loading ? "Enviando..." : "Enviar por WhatsApp"}
         </button>
       </div>
@@ -711,7 +711,7 @@ export default function MotorCruce() {
                           return (
                             <button
                               onClick={e => { navigator.clipboard.writeText(webUrl); e.currentTarget.textContent = "✓ Copiado"; setTimeout(() => { if(e.currentTarget) e.currentTarget.textContent = "Copiar link web"; }, 2000); }}
-                              style={{ marginTop: 8, fontSize: 11, color: "var(--gold)", background: "none", border: "1px solid var(--gold-l)33", padding: "3px 10px", cursor: "pointer", letterSpacing: "0.04em", fontFamily: "Raleway, Inter, sans-serif", display: "inline-block" }}>
+                              style={{ marginTop: 8, fontSize: 11, color: "var(--gold)", background: "none", border: "1px solid var(--gold-l)33", padding: "3px 10px", cursor: "pointer", letterSpacing: "0.04em", fontFamily: "Inter, sans-serif", display: "inline-block" }}>
                               Copiar link web
                             </button>
                           );
