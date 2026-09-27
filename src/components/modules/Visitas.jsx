@@ -1121,7 +1121,11 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
                             .getPublicUrl(path);
                           const { error: dbErr } = await supabase
                             .from("visita_documentos")
-                            .update({ justificante_deposito_url: publicUrl })
+                            .update({
+                              justificante_deposito_url: publicUrl,
+                              estado: "deposito_recibido",
+                              deposito_confirmado_at: new Date().toISOString(),
+                            })
                             .eq("id", docId);
                           if (dbErr) throw dbErr;
                           notificarGuardado("Justificante de depósito adjuntado ✅");
