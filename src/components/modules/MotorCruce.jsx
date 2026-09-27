@@ -256,7 +256,7 @@ function MatchCard({ buyer, prop, view, onWa }) {
   });
 
   return (
-    <div style={{ background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, padding: "16px 20px", transition: "all 0.2s" }}
+    <div style={{ background: "var(--white)", border: "1px solid var(--border)", borderRadius: 0, padding: "16px 20px", transition: "all 0.2s" }}
       onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--gold-l)33"; }}
       onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.boxShadow = "none"; }}
     >
@@ -577,7 +577,7 @@ export default function MotorCruce() {
         {/* Header */}
         <div style={{ marginBottom: 40, borderBottom: "1px solid var(--text)", paddingBottom: 32 }}>
           <div style={{ fontSize: 10, color: "var(--gold)", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Nativa Properties</div>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 400, margin: 0, lineHeight: 1.1 }}>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 600, margin: 0, lineHeight: 1.1 }}>
             Motor de <em>Cruce</em>
           </h1>
           <p style={{ fontSize: 12, color: "var(--muted)", margin: "10px 0 0", letterSpacing: "0.04em" }}>
@@ -594,7 +594,7 @@ export default function MotorCruce() {
             { n: propWithMost ? (matchesByProp[propWithMost.id] || []).length : 0, l: "Max matches/prop" },
           ].map((s, i) => (
             <div key={i} style={{ background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, padding: "20px 24px", textAlign: "center" }}>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: "var(--text)", fontWeight: 400 }}>{s.n}</div>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: "var(--text)", fontWeight: 600 }}>{s.n}</div>
               <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 6, textTransform: "uppercase", letterSpacing: "0.1em" }}>{s.l}</div>
             </div>
           ))}
