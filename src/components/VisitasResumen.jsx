@@ -74,7 +74,7 @@ export default function VisitasResumen({ propiedadId }) {
           id, fecha_visita, agente_login, created_at, feedback, resumen_ia,
           visita_compradores(orden, compradores(id, nombre, apellidos)),
           visita_documentos(id, tipo, estado, deposito_tipo, deposito_confirmado_at,
-            firmado_comprador_at, firmado_vendedor_at, contenido, created_at)
+            firmado_comprador_at, firmado_vendedor_at, contenido, created_at, token_firma_vendedor)
         `)
         .eq("propiedad_id", propiedadId)
         .eq("activo", true)
@@ -186,21 +186,41 @@ export default function VisitasResumen({ propiedadId }) {
               }
               return (
                 <div key={doc.id} style={{
-                  display: "flex", alignItems: "center", justifyContent: "space-between",
-                  background: "#fff", border: `1px solid ${BORDER}`, padding: "8px 14px", gap: 10,
+                  background: "#fff", border: `1px solid ${BORDER}`, padding: "8px 14px",
                 }}>
-                  <div style={{ fontSize: 12, color: DARK }}>
-                    {TIPO_DOC[doc.tipo] || doc.tipo}
-                    <span style={{ fontSize: 10, color: MUTED, marginLeft: 8 }}>{fmtFecha(doc.created_at)}</span>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+                    <div style={{ fontSize: 12, color: DARK }}>
+                      {TIPO_DOC[doc.tipo] || doc.tipo}
+                      <span style={{ fontSize: 10, color: MUTED, marginLeft: 8 }}>{fmtFecha(doc.created_at)}</span>
+                    </div>
+                    <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+                      <Badge label={est.label} color={est.color} />
+                      {faltanFirmas.length > 0 && (
+                        <span style={{ fontSize: 10, color: DANGER, fontWeight: 600 }}>
+                          Falta: {faltanFirmas.join(", ")}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
-                    <Badge label={est.label} color={est.color} />
-                    {faltanFirmas.length > 0 && (
-                      <span style={{ fontSize: 10, color: DANGER, fontWeight: 600 }}>
-                        Falta: {faltanFirmas.join(", ")}
-                      </span>
-                    )}
-                  </div>
+                  {doc.token_firma_vendedor && (
+                    <div style={{ marginTop: 6, display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ fontSize: 10, color: MUTED, fontFamily: "Inter, sans-serif" }}>Link propietario:</span>
+                      <a
+                        href={`https://crm.mallorcanativaproperties.com/firmar-visita?token=${doc.token_firma_vendedor}&tipo=vendedor`}
+                        target="_blank" rel="noopener noreferrer"
+                        style={{ fontSize: 10, color: GOLD, fontFamily: "Inter, sans-serif", wordBreak: "break-all" }}
+                      >
+                        {`/firmar-visita?token=${doc.token_firma_vendedor.slice(0,8)}…`}
+                      </a>
+                      <button
+                        onClick={() => navigator.clipboard.writeText(`https://crm.mallorcanativaproperties.com/firmar-visita?token=${doc.token_firma_vendedor}&tipo=vendedor`)}
+                        style={{ fontSize: 10, padding: "2px 6px", border: `1px solid ${BORDER}`, borderRadius: 4,
+                          background: "#fff", cursor: "pointer", color: DARK, fontFamily: "Inter, sans-serif", flexShrink: 0 }}
+                      >
+                        Copiar
+                      </button>
+                    </div>
+                  )}
                 </div>
               );
             })}
