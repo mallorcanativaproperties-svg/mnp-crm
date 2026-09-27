@@ -2103,7 +2103,21 @@ function PropDetail({ p, currentUser, onClose, onUpdate, onDelete, onDuplicate }
   const [editMode, setEditMode] = useState(puedeEditar);
   const [autoSaveStatus, setAutoSaveStatus] = useState(null);
   const [calcDesde, setCalcDesde] = useState("venta"); // null | "saving" | "saved" | "error"
+  const [semaforoStats, setSemaforoStats] = useState({ totalVisitas: 0, tieneOferta: false });
 
+  // Cargar stats para semáforo de precio
+  useEffect(() => {
+    if (p.estado !== "publicada") return;
+    (async () => {
+      const { data: vis } = await supabase.from("visitas")
+        .select("id, visita_documentos(tipo, estado)").eq("propiedad_id", p.id).eq("activo", true);
+      const totalVisitas = vis?.length || 0;
+      const tieneOferta = vis?.some(v => v.visita_documentos?.some(d =>
+        ["oferta","reserva"].includes(d.tipo) && d.estado !== "borrador"
+      )) || false;
+      setSemaforoStats({ totalVisitas, tieneOferta });
+    })();
+  }, [p.id, p.estado]);
 
   const [draft, setDraft] = useState({ ...p, 
     suministrosText: (p.suministros || []).join(", "),
@@ -2786,12 +2800,14 @@ REGLAS:
                 const diasMercado = p.fechaPublicacion
                   ? Math.floor((Date.now() - new Date(p.fechaPublicacion)) / 86400000)
                   : p.fecha_cap ? Math.floor((Date.now() - new Date(p.fecha_cap)) / 86400000) : 0;
-                // totalVisitasCount vendrá del prop si está disponible, si no se omite
-                const semaforo = diasMercado >= 45
-                  ? { color: "#A23A3A", icon: "🔴", label: `${diasMercado} días en mercado — Revisar precio`, msg: "Solicita valoración actualizada a tu Agente de Referencia." }
-                  : diasMercado >= 30
-                  ? { color: "#C8820A", icon: "🟡", label: `${diasMercado} días en mercado — Atención`, msg: "Considera revisar la estrategia de precio." }
-                  : { color: "#2C6E52", icon: "🟢", label: `${diasMercado} días en mercado`, msg: null };
+                const { totalVisitas, tieneOferta } = semaforoStats;
+                const esRojo = diasMercado >= 45 || totalVisitas >= 10;
+                const esAmbar = !esRojo && (diasMercado >= 30 || (totalVisitas >= 5 && !tieneOferta));
+                const semaforo = esRojo
+                  ? { color: "#A23A3A", icon: "🔴", label: `${diasMercado} días en mercado · ${totalVisitas} visita${totalVisitas !== 1 ? "s" : ""} — Revisar precio`, msg: "Solicita una valoración actualizada a tu Agente de Referencia." }
+                  : esAmbar
+                  ? { color: "#C8820A", icon: "🟡", label: `${diasMercado} días en mercado · ${totalVisitas} visita${totalVisitas !== 1 ? "s" : ""} — Atención`, msg: totalVisitas >= 5 ? "Hay visitas pero sin oferta. Considera revisar el precio." : "La propiedad lleva más de 30 días publicada. Considera revisar la estrategia de precio." }
+                  : { color: "#2C6E52", icon: "🟢", label: `${diasMercado} días en mercado · ${totalVisitas} visita${totalVisitas !== 1 ? "s" : ""}`, msg: null };
                 return (
                   <div style={{
                     gridColumn: "1/-1", padding: "10px 14px", marginBottom: 8,
