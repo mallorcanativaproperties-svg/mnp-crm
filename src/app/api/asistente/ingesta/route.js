@@ -72,7 +72,12 @@ function partirPorArticulos(texto) {
   // fiscales de los municipios de Mallorca están casi todas en catalán, y sin
   // esto el texto cae al patrón amplio y se trocea por apartados internos — se
   // pierde la numeración del articulado y con ella la cita.
-  const reLegal = /(?:^|\n)\s*((?:Art[íi]cul[oe]|Art[íi]cle|Disposici[óo]n?\s+(?:adicional|addicional|transitoria|transit[òo]ria|final|derogatoria|derogat[òo]ria))[^\n]{0,140})/gi;
+  // "Norma 19": los planes territoriales insulares de Baleares (PTIM, PTI de
+  // Menorca y Eivissa) no numeran por articulos sino por normas. Sin esto el
+  // PTIM entero cae en una sola seccion y se pierde la cita "norma 22 del PTIM",
+  // que es la que fija los parametros del suelo rustico. Se exige un digito
+  // detras para no confundirlo con "Normas de ordenacion del Plan...".
+  const reLegal = /(?:^|\n)\s*((?:Art[íi]cul[oe]|Art[íi]cle|Norm[ae]\s+\d|Disposici[óo]n?\s+(?:adicional|addicional|transitoria|transit[òo]ria|final|derogatoria|derogat[òo]ria))[^\n]{0,140})/gi;
   const reLibre = /(?:^|\n)\s*(#{1,4}\s+[^\n]{1,140}|\d{1,2}(?:\.\d{1,2})*\.\s+[A-ZÁÉÍÓÚÑ][^\n]{0,140})/g;
 
   const recoger = (re) => {
@@ -113,8 +118,11 @@ function numeroDeArticulo(encabezado) {
   if (!encabezado) return null;
   // "Article 9è", "Artículo 9º", "Artículo 41 bis": el ordinal catalán o
   // castellano no forma parte del numero con el que se cita.
+  // Los ordinales latinos altos (sexies, septies... sexdecies) tienen que estar
+  // en la lista: si no, "Articulo 158 septies" devuelve "158" y un filtro por el
+  // 158 se lleva doce articulos de mas sin avisar.
   const m = encabezado.match(
-    /(?:Art[íi]cul[oe]|Art[íi]cle)\s+([0-9]+)\s*(?:º|ª|è|é|er|r|n|t|a)?\.?\s*(bis|ter|quater|qu[íi]nquies)?/i
+    /(?:Art[íi]cul[oe]|Art[íi]cle|Norm[ae])\s+([0-9]+)\s*(?:º|ª|è|é|er|r|n|t|a)?\.?\s*(bis|ter|quater|qu[íi]nquies|sexies|septies|octies|nonies|decies|undecies|duodecies|terdecies|quaterdecies|quindecies|sexdecies)?/i
   );
   if (!m) return null;
   return [m[1], m[2]].filter(Boolean).join(" ").trim().toLowerCase();
