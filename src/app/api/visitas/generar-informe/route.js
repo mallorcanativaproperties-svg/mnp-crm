@@ -1,9 +1,7 @@
 export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import Anthropic from "@anthropic-ai/sdk";
 const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 export async function POST(req) {
   try {
@@ -47,13 +45,8 @@ ${v.notas ? `Notas del agente: ${v.notas}` : ""}`;
     const visitasConObjeciones = visitas.filter(v => v.feedback?.objeciones?.length && !v.feedback.objeciones.includes("Sin objeciones")).length;
     const siguientesPasos = visitas.map(v => v.feedback?.siguiente_paso).filter(Boolean).filter(p => p !== "Sin acción" && p !== "Descartada");
 
-    // Generar informe con Claude
-    const msg = await anthropic.messages.create({
-      model: "claude-sonnet-4-6",
-      max_tokens: 1500,
-      messages: [{
-        role: "user",
-        content: `Eres ${agente}, agente inmobiliario de Nativa Properties. Redacta una carta de informe diario para el propietario de la vivienda en ${prop?.dir || ""}, ${prop?.municipio || ""} (Ref. ${prop?.ref || ""}).
+    // Generar informe con Claude (via fetch directo)
+    const prompt = `Eres ${agente}, agente inmobiliario de Nativa Properties. Redacta una carta de informe diario para el propietario de la vivienda en ${prop?.dir || ""}, ${prop?.municipio || ""} (Ref. ${prop?.ref || ""}).
 
 HOY SE HAN REALIZADO ${totalVisitas} VISITA${totalVisitas > 1 ? "S" : ""}.
 
@@ -75,11 +68,15 @@ INSTRUCCIONES PARA EL INFORME:
 7. Usa un tono profesional, cercano y tranquilizador — el propietario necesita sentir que su propiedad está en buenas manos
 8. Firma como: ${agente} | Nativa Properties
 
-NO incluyas datos internos del CRM como IDs o referencias técnicas. Sé conciso pero completo.`
-      }]
-    });
+NO incluyas datos internos del CRM como IDs o referencias técnicas. Sé conciso pero completo.`;
 
-    const contenidoBorrador = msg.content[0]?.text || "";
+    const claudeRes = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-api-key": process.env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
+      body: JSON.stringify({ model: "claude-sonnet-4-6", max_tokens: 1500, messages: [{ role: "user", content: prompt }] }),
+    });
+    const claudeData = await claudeRes.json();
+    const contenidoBorrador = claudeData.content?.[0]?.text || "";
 
     // Buscar informe existente del día o crear uno nuevo
     const { data: existente } = await sb.from("visita_informes")
