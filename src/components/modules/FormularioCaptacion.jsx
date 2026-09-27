@@ -845,13 +845,15 @@ export default function FormularioCaptacion() {
         <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 600, margin: 0, lineHeight: 1.1, color: "#A8854A" }}>Formulario de Captación</h1>
         <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "10px 0 0" }}>Formulario de captación de nuevas propiedades</p>
         <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginTop: 28, marginBottom: 28 }} />
-      </div>{autoSaveStatus === "saving" && <span style={{ fontSize: 11, color: "#AC8A54", fontFamily: "Inter, sans-serif" }}>⏳ Guardando...</span>}
-            {autoSaveStatus === "saved" && <span style={{ fontSize: 11, color: "#2C6E52", fontFamily: "Inter, sans-serif" }}>✓ Guardado automáticamente</span>}
-            {autoSaveStatus === "error" && <span style={{ fontSize: 11, color: "#A23A3A", fontFamily: "Inter, sans-serif" }}>⚠️ Error al guardar</span>}
-            {fichaId && !autoSaveStatus && <span style={{ fontSize: 10, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>📋 Ficha creada</span>}
-          </div>
-          <p style={{ fontSize: 12, color: "#9A968A", margin: "10px 0 0", letterSpacing: "0.04em" }}>El agente cumplimenta este formulario delante del propietario. Al enviar se crea la ficha en el CRM.</p>
+      </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+          {autoSaveStatus === "saving" && <span style={{ fontSize: 11, color: "#AC8A54", fontFamily: "Inter, sans-serif" }}>⏳ Guardando...</span>}
+          {autoSaveStatus === "saved" && <span style={{ fontSize: 11, color: "#2C6E52", fontFamily: "Inter, sans-serif" }}>✓ Guardado automáticamente</span>}
+          {autoSaveStatus === "error" && <span style={{ fontSize: 11, color: "#A23A3A", fontFamily: "Inter, sans-serif" }}>⚠️ Error al guardar</span>}
+          {fichaId && !autoSaveStatus && <span style={{ fontSize: 10, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>📋 Ficha creada</span>}
         </div>
+        <p style={{ fontSize: 12, color: "#9A968A", margin: "0 0 24px", letterSpacing: "0.04em" }}>El agente cumplimenta este formulario delante del propietario. Al enviar se crea la ficha en el CRM.</p>
 
         {/* 1. Resumen */}
         <Sec title="Resumen de la propiedad">
