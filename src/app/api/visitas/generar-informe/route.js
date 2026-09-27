@@ -117,7 +117,14 @@ Escribe el informe con esta estructura exacta, usando párrafos naturales (no li
    Transmite disponibilidad total, compromiso con el servicio de calidad y que el propietario puede contar con nosotros en todo momento. Por eso le enviamos este informe. Firma como: ${agente} | Nativa Properties
 
 TONO: cercano, asertivo, realista y profesional. Ni rígido ni excesivamente formal. Directo al grano, sin florituras innecesarias.
-Evita expresiones coloquiales o demasiado informales como "no vamos a endulzarlo", "seré directo", "no nos engañemos" o similares. Cuando una visita no ha ido bien, exprésalo con naturalidad y profesionalidad, sin dramatizar ni usar recursos retóricos llamativos.`;
+Evita expresiones coloquiales o demasiado informales como "no vamos a endulzarlo", "seré directo", "no nos engañemos" o similares. Cuando una visita no ha ido bien, exprésalo con naturalidad y profesionalidad, sin dramatizar ni usar recursos retóricos llamativos.
+
+PERCEPCIÓN DEL PROPIETARIO — MUY IMPORTANTE:
+El propietario puede leer entre líneas. Cuida especialmente estos puntos:
+- Nunca debe desprenderse del texto que el agente ha traído a un comprador que no encajaba con la propiedad o que no estaba cualificado financieramente. Si hay objeciones de precio o dudas sobre financiación, preséntalo como parte natural del proceso de negociación, no como un error de filtro previo.
+- Si el nivel de interés fue bajo o hubo muchas objeciones, enmarca la visita como información valiosa de mercado que el equipo utiliza para afinar la estrategia, nunca como tiempo perdido.
+- El agente siempre aparece como proactivo, riguroso y con control del proceso. El trabajo de cualificación y selección de compradores es implícitamente impecable.
+- Evita frases que sugieran sorpresa ante el resultado de una visita ("resultó que...", "finalmente el comprador no..."). El agente ya lo anticipaba y lo gestiona con normalidad.`;
 
     const claudeRes = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
