@@ -11,14 +11,14 @@ import { PlusIcon, PencilSquareIcon, TrashIcon, LinkIcon, EnvelopeIcon, Document
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 
-const BRONZE = "#AC8A54", PETROL = "#1a2528", CREAM = "#F8F6F1", BORDER = "#E7E1D4";
-const ESTADO_COLOR = { borrador: "#9A968A", enviado: "#405c6b", firmado_propietario: "#9C6E1B", completado: "#2C6E52" };
+const BRONZE = "var(--gold)", PETROL = "#1a2528", CREAM = "var(--cream)", BORDER = "var(--border)";
+const ESTADO_COLOR = { borrador: "var(--muted)", enviado: "#405c6b", firmado_propietario: "var(--amber)", completado: "var(--success)" };
 const ESTADO_LABEL = { borrador: "Borrador", enviado: "Enviado", firmado_propietario: "Firmado por propietario", completado: "Completado" };
 
 function fmtP(n) { return n ? Number(n).toLocaleString("es-ES") + " €" : "—"; }
 
 const S = {
-  label: { fontSize: 10, color: "#9A968A", letterSpacing: "0.1em", textTransform: "uppercase", display: "block", marginBottom: 4 },
+  label: { fontSize: 10, color: "var(--muted)", letterSpacing: "0.1em", textTransform: "uppercase", display: "block", marginBottom: 4 },
   input: { width: "100%", padding: "9px 12px", border: `1px solid ${BORDER}`, background: "#fff", color: PETROL, fontSize: 13, fontFamily: "Inter, sans-serif", outline: "none", boxSizing: "border-box" },
   section: { background: "#fff", border: `1px solid ${BORDER}`, padding: "20px 20px", marginBottom: 14 },
   sectionTitle: { fontSize: 10, color: BRONZE, letterSpacing: "0.15em", marginBottom: 16, textTransform: "uppercase" },
@@ -123,31 +123,31 @@ function FirmaAgenteModal({ encargo, onClose, onComplete }) {
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 1100, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }} onClick={onClose}>
-      <div style={{ background: "#F8F6F1", width: "100%", maxWidth: 520 }} onClick={e => e.stopPropagation()}>
+      <div style={{ background: "var(--cream)", width: "100%", maxWidth: 520 }} onClick={e => e.stopPropagation()}>
         <div style={{ background: "#1a2528", padding: "18px 24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
-            <div style={{ fontSize: 9, color: "#AC8A54", letterSpacing: "0.2em", marginBottom: 4 }}>FIRMA DEL AGENTE</div>
-            <div style={{ color: "#F8F6F1", fontSize: 14, fontFamily: "'Libre Baskerville', Georgia, serif" }}>Firmar y generar PDF</div>
+            <div style={{ fontSize: 9, color: "var(--gold)", letterSpacing: "0.2em", marginBottom: 4 }}>FIRMA DEL AGENTE</div>
+            <div style={{ color: "var(--cream)", fontSize: 14, fontFamily: "'Libre Baskerville', Georgia, serif" }}>Firmar y generar PDF</div>
           </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: "#9A968A", fontSize: 20, cursor: "pointer" }}><XMarkIcon style={{ width:14, height:14 }} /></button>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "var(--muted)", fontSize: 20, cursor: "pointer" }}><XMarkIcon style={{ width:14, height:14 }} /></button>
         </div>
         <div style={{ padding: 24 }}>
-          <div style={{ fontSize: 12, color: "#9A968A", marginBottom: 16, lineHeight: 1.6 }}>
+          <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 16, lineHeight: 1.6 }}>
             Al firmar confirmas el encargo de {encargo.categoria} con {(encargo.encargo_firmantes || []).map(f => f.nombre).join(", ")}.<br />
             Se generará el PDF y se enviará por email a todas las partes.
           </div>
           <canvas ref={el => { canvasRef.current = el; if (el) initCanvas(el); }}
             width={460} height={150}
-            style={{ width: "100%", height: 150, border: "2px solid #E7E1D4", background: "#FAFAFA", cursor: "crosshair", touchAction: "none", display: "block" }}
+            style={{ width: "100%", height: 150, border: "2px solid var(--border)", background: "#FAFAFA", cursor: "crosshair", touchAction: "none", display: "block" }}
             onMouseDown={startDraw} onMouseMove={draw} onMouseUp={() => setDrawing(false)} onMouseLeave={() => setDrawing(false)}
             onTouchStart={startDraw} onTouchMove={draw} onTouchEnd={() => setDrawing(false)} />
           <div style={{ display: "flex", justifyContent: "flex-end", margin: "8px 0 16px" }}>
             <button onClick={() => { canvasRef.current.getContext("2d").clearRect(0, 0, 460, 150); setHasSigned(false); }}
-              style={{ fontSize: 11, color: "#9A968A", background: "none", border: "1px solid #E7E1D4", padding: "4px 10px", cursor: "pointer" }}>Borrar</button>
+              style={{ fontSize: 11, color: "var(--muted)", background: "none", border: "1px solid var(--border)", padding: "4px 10px", cursor: "pointer" }}>Borrar</button>
           </div>
-          {error && <div style={{ fontSize: 12, color: "#A23A3A", marginBottom: 12 }}>{error}</div>}
+          {error && <div style={{ fontSize: 12, color: "var(--danger)", marginBottom: 12 }}>{error}</div>}
           <button onClick={handleFirmar} disabled={!hasSigned || generando}
-            style={{ width: "100%", padding: "14px", background: hasSigned && !generando ? "#2C6E52" : "#E7E1D4", border: "none", color: hasSigned && !generando ? "#fff" : "#9A968A", fontSize: 13, fontWeight: 600, cursor: hasSigned && !generando ? "pointer" : "not-allowed", fontFamily: "Inter, sans-serif", letterSpacing: "0.06em" }}>
+            style={{ width: "100%", padding: "14px", background: hasSigned && !generando ? "var(--success)" : "var(--border)", border: "none", color: hasSigned && !generando ? "#fff" : "var(--muted)", fontSize: 13, fontWeight: 600, cursor: hasSigned && !generando ? "pointer" : "not-allowed", fontFamily: "Inter, sans-serif", letterSpacing: "0.06em" }}>
             {generando ? "Generando PDF y enviando emails..." : "Firmar y generar PDF"}
           </button>
         </div>
@@ -359,7 +359,7 @@ export default function EncargosVenta() {
                   <div style={{ fontSize: 10, color: BRONZE, letterSpacing: "0.2em", marginBottom: 4 }}>NUEVO ENCARGO</div>
                   <div style={{ color: CREAM, fontSize: 15, fontFamily: "'Libre Baskerville', Georgia, serif", fontWeight: 400 }}>Hoja de Encargo de Venta</div>
                 </div>
-                <button onClick={() => setShowForm(false)} style={{ background: "none", border: "none", color: "#9A968A", fontSize: 20, cursor: "pointer" }}><XMarkIcon style={{ width:14, height:14 }} /></button>
+                <button onClick={() => setShowForm(false)} style={{ background: "none", border: "none", color: "var(--muted)", fontSize: 20, cursor: "pointer" }}><XMarkIcon style={{ width:14, height:14 }} /></button>
               </div>
 
               <div style={{ padding: "24px" }}>
@@ -452,7 +452,7 @@ export default function EncargosVenta() {
                       <div><label style={S.label}>Superficie aproximada (m²)</label><input type="number" {...F("superficie_m2")} /></div>
                       <div><label style={S.label}>Renta mensual del local (€)</label><input type="number" {...F("renta_local")} /></div>
                     </div>
-                    <div style={{ fontSize: 10, color: "#9A968A", letterSpacing: "0.1em", margin: "8px 0 6px" }}>SITUACIÓN DEL ARRENDAMIENTO</div>
+                    <div style={{ fontSize: 10, color: "var(--muted)", letterSpacing: "0.1em", margin: "8px 0 6px" }}>SITUACIÓN DEL ARRENDAMIENTO</div>
                     <div style={S.grid2}>
                       <div><label style={S.label}>Fecha inicio</label><input type="date" {...F("arrendamiento_fecha_inicio")} /></div>
                       <div><label style={S.label}>Duración</label><input {...F("arrendamiento_duracion")} placeholder="ej: 5 años" /></div>
@@ -466,7 +466,7 @@ export default function EncargosVenta() {
                 {/* Cláusulas específicas */}
                 <div style={S.section}>
                   <div style={S.sectionTitle}>Cláusulas específicas (opcional)</div>
-                  <div style={{ fontSize: 11, color: "#9A968A", marginBottom: 8 }}>Si se cumplimenta, se añadirá al contrato como cláusula adicional.</div>
+                  <div style={{ fontSize: 11, color: "var(--muted)", marginBottom: 8 }}>Si se cumplimenta, se añadirá al contrato como cláusula adicional.</div>
                   <textarea {...F("clausulas_especificas")} placeholder="Escribe aquí las cláusulas adicionales que quieras incluir en el contrato..." rows={4}
                     style={{ width: "100%", padding: "10px 12px", border: `1px solid ${BORDER}`, background: "#fff", color: PETROL, fontSize: 13, fontFamily: "Inter, sans-serif", outline: "none", resize: "vertical", boxSizing: "border-box" }} />
                 </div>
@@ -514,7 +514,7 @@ export default function EncargosVenta() {
                 <div style={{ display: "flex", gap: 10 }}>
                   <button onClick={() => setShowForm(false)} style={{ flex: 1, padding: "12px", background: "none", border: `1px solid ${BORDER}`, color: PETROL, fontSize: 13, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>Cancelar</button>
                   <button onClick={handleSave} disabled={saving || !form.propietarios[0]?.nombre}
-                    style={{ flex: 2, padding: "12px", background: saving || !form.propietarios[0]?.nombre ? "#E7E1D4" : PETROL, border: "none", color: saving || !form.propietarios[0]?.nombre ? "#9A968A" : CREAM, fontSize: 13, fontWeight: 600, cursor: saving || !form.propietarios[0]?.nombre ? "not-allowed" : "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.06em" }}>
+                    style={{ flex: 2, padding: "12px", background: saving || !form.propietarios[0]?.nombre ? "var(--border)" : PETROL, border: "none", color: saving || !form.propietarios[0]?.nombre ? "var(--muted)" : CREAM, fontSize: 13, fontWeight: 600, cursor: saving || !form.propietarios[0]?.nombre ? "not-allowed" : "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.06em" }}>
                     {saving ? "Guardando..." : "Crear encargo y generar enlace"}
                   </button>
                 </div>
@@ -525,14 +525,14 @@ export default function EncargosVenta() {
 
         {/* Lista */}
         {loading ? (
-          <div style={{ textAlign: "center", padding: 60, color: "#9A968A", fontSize: 13, fontStyle: "italic" }}>Cargando...</div>
+          <div style={{ textAlign: "center", padding: 60, color: "var(--muted)", fontSize: 13, fontStyle: "italic" }}>Cargando...</div>
         ) : encargos.length === 0 ? (
           <div style={{ textAlign: "center", padding: 60 }}>
             <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 32, color: "#C8BFB0", marginBottom: 12 }}>◇</div>
-            <div style={{ fontSize: 13, color: "#9A968A" }}>No hay encargos de venta. Pulsa "+ Nuevo encargo" para crear el primero.</div>
+            <div style={{ fontSize: 13, color: "var(--muted)" }}>No hay encargos de venta. Pulsa "+ Nuevo encargo" para crear el primero.</div>
           </div>
         ) : encargos.map(enc => (
-          <div key={enc.id} style={{ background: "#fff", border: `1px solid ${BORDER}`, borderLeft: `3px solid ${ESTADO_COLOR[enc.estado] || "#9A968A"}`, marginBottom: 10, padding: "16px 20px" }}>
+          <div key={enc.id} style={{ background: "#fff", border: `1px solid ${BORDER}`, borderLeft: `3px solid ${ESTADO_COLOR[enc.estado] || "var(--muted)"}`, marginBottom: 10, padding: "16px 20px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, flexWrap: "wrap" }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6, flexWrap: "wrap" }}>
@@ -542,7 +542,7 @@ export default function EncargosVenta() {
                   <span style={{ fontSize: 10, padding: "2px 8px", background: "rgba(64,92,107,0.1)", color: "#405c6b", letterSpacing: "0.06em" }}>
                     {enc.tipo === "premium" || enc.tipo === "exclusiva" ? "EXCLUSIVA" : "ABIERTO"}
                   </span>
-                  <span style={{ fontSize: 10, padding: "2px 8px", background: `${ESTADO_COLOR[enc.estado] || "#9A968A"}11`, color: ESTADO_COLOR[enc.estado] || "#9A968A", letterSpacing: "0.06em" }}>
+                  <span style={{ fontSize: 10, padding: "2px 8px", background: `${ESTADO_COLOR[enc.estado] || "var(--muted)"}11`, color: ESTADO_COLOR[enc.estado] || "var(--muted)", letterSpacing: "0.06em" }}>
                     {ESTADO_LABEL[enc.estado] || enc.estado}
                   </span>
                 </div>
@@ -550,20 +550,20 @@ export default function EncargosVenta() {
                   {enc.propietarios?.[0]?.nombre || enc.prop1_nombre || "Propietario sin nombre"}
                   {enc.propietarios?.length > 1 && ` · ${enc.propietarios[1].nombre}`}
                 </div>
-                <div style={{ fontSize: 12, color: "#9A968A", marginBottom: 4 }}>
+                <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 4 }}>
                   {enc.prop_direccion || enc.propiedades?.titulo || "Propiedad no especificada"}
                   {enc.propiedades?.municipio && ` · ${enc.propiedades.municipio}`}
                 </div>
                 <div style={{ display: "flex", gap: 16, fontSize: 12, flexWrap: "wrap" }}>
                   {enc.honorarios && <span style={{ color: BRONZE }}>Honorarios: {fmtP(enc.honorarios)}</span>}
-                  {enc.importe_publicacion && <span style={{ color: "#9A968A" }}>Precio: {fmtP(enc.importe_publicacion)}</span>}
-                  {enc.duracion_meses && <span style={{ color: "#9A968A" }}>{enc.duracion_meses} meses</span>}
+                  {enc.importe_publicacion && <span style={{ color: "var(--muted)" }}>Precio: {fmtP(enc.importe_publicacion)}</span>}
+                  {enc.duracion_meses && <span style={{ color: "var(--muted)" }}>{enc.duracion_meses} meses</span>}
                 </div>
                 {(enc.encargo_firmantes || []).length > 0 && (
-                  <div style={{ fontSize: 11, color: "#9A968A", marginTop: 6 }}>
+                  <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 6 }}>
                     {enc.encargo_firmantes.filter(f => f.estado === "firmado").length}/{enc.encargo_firmantes.length} firmantes completados
                     {enc.encargo_firmantes.some(f => f.otp_codigo && f.estado === "otp_enviado") && (
-                      <span style={{ marginLeft: 8, color: "#9C6E1B" }}>
+                      <span style={{ marginLeft: 8, color: "var(--amber)" }}>
                         · Código: <strong>{enc.encargo_firmantes.find(f => f.estado === "otp_enviado")?.otp_codigo}</strong>
                       </span>
                     )}
@@ -571,7 +571,7 @@ export default function EncargosVenta() {
                 )}
                 {enc.firma_propietario_fecha && !enc.todos_firmado && (
                   <button onClick={e => { e.stopPropagation(); setFirmaAgenteModal(enc); }}
-                    style={{ marginTop: 8, padding: "6px 14px", background: "#2C6E52", border: "none", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>
+                    style={{ marginTop: 8, padding: "6px 14px", background: "var(--success)", border: "none", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>
                     ✍ Firmar como agente y generar PDF
                   </button>
                 )}
@@ -584,7 +584,7 @@ export default function EncargosVenta() {
                   </div>
                 )}
                 {enc.firma_propietario_fecha && (
-                  <div style={{ fontSize: 11, color: "#2C6E52", marginTop: 4 }}>
+                  <div style={{ fontSize: 11, color: "var(--success)", marginTop: 4 }}>
                     ✓ Todos firmaron el {new Date(enc.firma_propietario_fecha).toLocaleDateString("es-ES")}
                   </div>
                 )}
@@ -592,11 +592,11 @@ export default function EncargosVenta() {
               <div style={{ display: "flex", gap: 8, flexShrink: 0, flexWrap: "wrap", justifyContent: "flex-end", flexDirection: "column", alignItems: "flex-end" }}>
                 {(enc.encargo_firmantes || []).map((f, i) => (
                   <div key={f.id} style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                    <span style={{ fontSize: 10, color: f.estado === "firmado" ? "#2C6E52" : f.estado === "otp_enviado" ? "#9C6E1B" : "#9A968A" }}>
+                    <span style={{ fontSize: 10, color: f.estado === "firmado" ? "var(--success)" : f.estado === "otp_enviado" ? "var(--amber)" : "var(--muted)" }}>
                       {f.nombre || `Prop. ${i+1}`} {f.estado === "firmado" ? "✓" : f.estado === "otp_enviado" ? "⏳" : "○"}
                     </span>
                     <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/encargo?token=${f.token_firma}`); setCopied(f.token_firma); setTimeout(() => setCopied(null), 2000); }}
-                      style={{ padding: "4px 10px", background: "none", border: `1px solid ${BORDER}`, color: copied === f.token_firma ? "#2C6E52" : "#9A968A", fontSize: 10, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>
+                      style={{ padding: "4px 10px", background: "none", border: `1px solid ${BORDER}`, color: copied === f.token_firma ? "var(--success)" : "var(--muted)", fontSize: 10, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>
                       {copied === f.token_firma ? "✓" : "Enlace"}
                     </button>
                     {f.telefono && (
@@ -637,7 +637,7 @@ Gracias.`)}`}
 
       {/* Notificación PDF listo */}
       {pdfListo && (
-        <div style={{ position: "fixed", bottom: 24, right: 24, background: "#2C6E52", color: "#fff", padding: "14px 20px", fontSize: 13, fontFamily: "Inter, sans-serif", zIndex: 2000, display: "flex", gap: 12, alignItems: "center" }}>
+        <div style={{ position: "fixed", bottom: 24, right: 24, background: "var(--success)", color: "#fff", padding: "14px 20px", fontSize: 13, fontFamily: "Inter, sans-serif", zIndex: 2000, display: "flex", gap: 12, alignItems: "center" }}>
           ✓ PDF generado y enviado a todos
           <a href={pdfListo} target="_blank" rel="noopener noreferrer" style={{ color: "#fff", fontSize: 11 }}>Descargar</a>
           <button onClick={() => setPdfListo(null)} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.6)", cursor: "pointer", fontSize: 16 }}><XMarkIcon style={{ width:14, height:14 }} /></button>
