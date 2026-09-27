@@ -1,74 +1,79 @@
+/* =======================================================================
+   NATIVA PROPERTIES - DESIGN TOKENS (Brand Guide v1)
+   ======================================================================= */
+
+:root {
+  --gold:            #AC8A54;
+  --gold-l:          #C8A97E;
+  --gold-xl:         #E7D5B8;
+  --gold-dark:       #8C6E3F;
+  --navy:            #16294A;
+  --navy-mid:        #172040;
+  --cream:           #F8F6F1;
+  --cream-2:         #F0EBE3;
+  --cream-3:         #F4EEE0;
+  --cream-4:         #E7E1D4;
+  --white:           #FFFFFF;
+  --text:            #2A2926;
+  --muted:           #9A968A;
+  --text-brown:      #5C4A2A;
+  --border:          #E7E1D4;
+  --success:         #2C6E52;
+  --danger:          #A23A3A;
+  --amber:           #9C6E1B;
+  --blue:            #185FA5;
+  --orange:          #B05D00;
+  --cream-thumb:     #F0EDE8;
+  --cream-section:   #F0EAE0;
+  --cream-section-b: #E0D9CE;
+  --gold-doc:        #B4A070;
+  --cream-note-b:    #E7D9C0;
+  --font-sans:       'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif:      'Playfair Display', Georgia, serif;
+  --font-display:    'Cormorant Garamond', Georgia, serif;
+  --radius-sm:       4px;
+  --radius-md:       8px;
+  --radius-lg:       12px;
+  --shadow-sm:       0 1px 4px rgba(42,41,38,0.08);
+  --shadow-md:       0 4px 16px rgba(42,41,38,0.10);
+  --shadow-lg:       0 8px 32px rgba(42,41,38,0.12);
+}
+
 * { box-sizing: border-box; }
 
 body {
-  font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-sans);
   font-size: 14px;
-  background: #F8F6F1;
-  color: #22262E;
+  background: var(--cream);
+  color: var(--text);
   margin: 0;
   padding: 0;
   line-height: 1.5;
 }
 
-input, select, textarea, button {
-  font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
-}
+input, select, textarea, button { font-family: var(--font-sans); }
 
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #F8F6F1; }
-::-webkit-scrollbar-thumb { background: #E7E1D4; }
-::-webkit-scrollbar-thumb:hover { background: #AC8A54; }
+::-webkit-scrollbar-track { background: var(--cream); }
+::-webkit-scrollbar-thumb { background: var(--cream-4); }
+::-webkit-scrollbar-thumb:hover { background: var(--gold); }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
-/* ═══ RESPONSIVE GLOBAL ══════════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; }
 
-/* Grids adaptativos */
 @media (max-width: 768px) {
-  /* Grids de 3 y 4 columnas → 1 columna en móvil */
   [style*="gridTemplateColumns: \"1fr 1fr 1fr\""],
-  [style*="gridTemplateColumns: \"1fr 1fr 1fr 1fr\""] {
-    grid-template-columns: 1fr !important;
-  }
-  [style*="gridTemplateColumns: \"1fr 1fr\""] {
-    grid-template-columns: 1fr !important;
-  }
-  /* Padding reducido */
-  [style*="padding: \"40px 24px\""] {
-    padding: 16px !important;
-  }
-  [style*="padding: \"32px 36px\""] {
-    padding: 16px !important;
-  }
-  /* maxWidth completo */
-  [style*="maxWidth: 720"],
-  [style*="maxWidth: 760"],
-  [style*="maxWidth: 920"] {
-    max-width: 100% !important;
-  }
+  [style*="gridTemplateColumns: \"1fr 1fr 1fr 1fr\""] { grid-template-columns: 1fr !important; }
+  [style*="gridTemplateColumns: \"1fr 1fr\""] { grid-template-columns: 1fr !important; }
+  [style*="padding: \"40px 24px\""] { padding: 16px !important; }
+  [style*="padding: \"32px 36px\""] { padding: 16px !important; }
+  [style*="maxWidth: 720"], [style*="maxWidth: 760"], [style*="maxWidth: 920"] { max-width: 100% !important; }
+  input, select, textarea { width: 100% !important; font-size: 16px !important; }
+  button { touch-action: manipulation; }
+  .prop-card-grid { flex-direction: column !important; }
 }
 
 @media (min-width: 769px) and (max-width: 1024px) {
-  /* Tablet: grids de 4 → 2 */
-  [style*="gridTemplateColumns: \"1fr 1fr 1fr 1fr\""] {
-    grid-template-columns: 1fr 1fr !important;
-  }
-}
-
-/* Inputs y selects full width en móvil */
-@media (max-width: 768px) {
-  input, select, textarea {
-    width: 100% !important;
-    font-size: 16px !important; /* evita zoom en iOS */
-  }
-  button {
-    touch-action: manipulation;
-  }
-  /* Tablas de fichas */
-  .prop-card-grid {
-    flex-direction: column !important;
-  }
+  [style*="gridTemplateColumns: \"1fr 1fr 1fr 1fr\""] { grid-template-columns: 1fr 1fr !important; }
 }
