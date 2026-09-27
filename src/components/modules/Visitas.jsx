@@ -1237,6 +1237,32 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
                             </div>
                           )}
 
+                          {/* Link de firma del propietario */}
+                          {doc.token_firma_vendedor && !doc.firmado_vendedor_at && (
+                            <div style={{ marginTop: 12, padding: "10px 12px", background: `${GOLD}10`,
+                              borderRadius: 10, border: `1px solid ${GOLD}40` }}>
+                              <div style={{ fontSize: 11, fontWeight: 700, color: GOLD,
+                                fontFamily: "Inter, sans-serif", marginBottom: 6 }}>
+                                🔗 Link firma propietario
+                              </div>
+                              <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                                <input readOnly
+                                  value={`https://crm.mallorcanativaproperties.com/firmar-visita?token=${doc.token_firma_vendedor}&tipo=vendedor`}
+                                  style={{ flex: 1, fontSize: 10, padding: "5px 8px", border: `1px solid ${BORDER}`,
+                                    borderRadius: 6, color: MUTED, fontFamily: "Inter, sans-serif",
+                                    background: WHITE, cursor: "text" }} />
+                                <button onClick={() => {
+                                  navigator.clipboard.writeText(`https://crm.mallorcanativaproperties.com/firmar-visita?token=${doc.token_firma_vendedor}&tipo=vendedor`);
+                                  alert("✅ Link copiado");
+                                }} style={{ padding: "5px 10px", background: GOLD, border: "none",
+                                  color: WHITE, borderRadius: 6, fontSize: 11, cursor: "pointer",
+                                  fontFamily: "Inter, sans-serif", whiteSpace: "nowrap" }}>
+                                  Copiar
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
                           {/* Estado de firmas */}
                           {(doc.firmado_comprador_at || doc.firmado_vendedor_at) && (
                             <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 4 }}>
