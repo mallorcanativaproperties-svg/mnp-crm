@@ -87,9 +87,27 @@ export async function descargarTexto(url) {
     return { texto, tituloPagina, esPdf: true };
   }
 
-  const html = await res.text();
-  const tituloPagina = (html.match(/<title>([\s\S]*?)<\/title>/i)?.[1] || "").trim().slice(0, 300);
-  return { texto: limpiarHtml(html), tituloPagina, esPdf: false };
+  const cuerpo = await res.text();
+
+  // Un .txt no pasa por el limpiador de HTML. Parece un detalle y no lo es: el
+  // limpiador aplana los saltos de linea, y el troceador reconoce los
+  // encabezados por principio de linea. Con el texto aplanado, la normativa del
+  // Plan General de Palma pasaba de 103 rotulos "Norma X.Y.Z" a 45, y los 58
+  // restantes se perdian sin ningun error a la vista.
+  const esTextoPlano =
+    tipoContenido.includes("text/plain") || /\.(txt|md)(\?|$)/i.test(url);
+  if (esTextoPlano) {
+    const texto = cuerpo
+      .replace(/\r\n?/g, "\n")
+      .replace(/[ \t ]+/g, " ")
+      .replace(/ *\n */g, "\n")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
+    return { texto, tituloPagina: null, esPdf: false };
+  }
+
+  const tituloPagina = (cuerpo.match(/<title>([\s\S]*?)<\/title>/i)?.[1] || "").trim().slice(0, 300);
+  return { texto: limpiarHtml(cuerpo), tituloPagina, esPdf: false };
 }
 
 /** Una marca, con los espacios y los saltos de linea colapsados. */
