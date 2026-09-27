@@ -15,7 +15,7 @@ export async function POST(req) {
       .lte("fecha_visita", `${fecha}T23:59:59`);
 
     const { data: prop } = await sb.from("propiedades")
-      .select("ref,dir,municipio,propNombre,fecha_publicacion,fecha_cap").eq("id", propiedadId).single();
+      .select("ref,dir,municipio,propNombre,fecha_publicacion,fecha_cap,estado").eq("id", propiedadId).single();
 
     if (!visitas?.length) return NextResponse.json({ error: "No hay visitas este día" }, { status: 400 });
 
@@ -23,7 +23,9 @@ export async function POST(req) {
     const { data: todasVisitas } = await sb.from("visitas").select("id, visita_documentos(tipo,estado)").eq("propiedad_id", propiedadId).eq("activo", true);
     const totalVisitasHistorico = todasVisitas?.length || 0;
     const tieneOferta = todasVisitas?.some(v => v.visita_documentos?.some(d => ["oferta","reserva"].includes(d.tipo) && d.estado !== "borrador")) || false;
-    const fechaRef = prop?.fecha_publicacion || prop?.fecha_cap;
+    const fechaRef = prop?.estado === "publicada"
+      ? (prop?.fecha_publicacion || prop?.fecha_cap)
+      : prop?.fecha_cap;
     const diasMercado = fechaRef ? Math.floor((Date.now() - new Date(fechaRef)) / 86400000) : 0;
     const esRojo  = diasMercado >= 45 || totalVisitasHistorico >= 10;
     const esAmbar = !esRojo && (diasMercado >= 30 || (totalVisitasHistorico >= 5 && !tieneOferta));
