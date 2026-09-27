@@ -1629,7 +1629,7 @@ function ModalFirmaAgente({ docId, agente, onFirmado, onClose }) {
 
 // ── Grupo de propiedad ────────────────────────────────────────────────────────
 // ── Agrupador de visitas por día dentro de una propiedad ─────────────────────
-function GrupoDia({ fecha, visitas, propiedadId, propiedadNombre, currentUser, onActualizado, informesPendientes }) {
+function GrupoDia({ fecha, visitas, propiedadId, propiedadNombre, currentUser, onActualizado, informesPendientes, visitasAbiertas, setVisitasAbiertas }) {
   const [informe, setInforme] = useState(null);
   const [generando, setGenerando] = useState(false);
   const agente = { nombre: currentUser?.nombre, user_login: currentUser?.user_login };
@@ -1860,6 +1860,8 @@ function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, on
               currentUser={currentUser}
               onActualizado={onActualizado}
               informesPendientes={informesPendientes}
+              visitasAbiertas={visitasAbiertas}
+              setVisitasAbiertas={setVisitasAbiertas}
             />
           ))}
 
