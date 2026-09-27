@@ -146,7 +146,7 @@ function Toggle({ label, value, onChange }) {
     <div style={{ marginBottom: 14, display: "flex", alignItems: "center", gap: 10 }}>
       <div
         onClick={() => onChange(!value)}
-        style={{ width: 36, height: 20, borderRadius: 10, background: value ? "#2C6E52" : "#E7E1D4", cursor: "pointer", position: "relative", transition: "background 0.2s" }}
+        style={{ width: 36, height: 20, borderRadius: 20, background: value ? "#2C6E52" : "#E7E1D4", cursor: "pointer", position: "relative", transition: "background 0.2s" }}
       >
         <div style={{ width: 16, height: 16, borderRadius: "50%", background: "#22262E", position: "absolute", top: 2, left: value ? 18 : 2, transition: "left 0.2s" }} />
       </div>
@@ -820,7 +820,7 @@ export default function FormularioCaptacion() {
           <div style={{ width: 60, height: 60, borderRadius: "50%", background: "#6AAF8D22", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
             <span style={{ fontSize: 28, color: "#2C6E52" }}>v</span>
           </div>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 400, marginBottom: 12 }}>Propiedad <em>registrada</em></h2>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 600, marginBottom: 12 }}>Propiedad <em>registrada</em></h2>
           <p style={{ color: "#9A968A", fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
             La ficha {ref} se ha creado en la cartera de propiedades con estado "Captada". Puedes completar los campos restantes desde el CRM.
           </p>
@@ -843,7 +843,7 @@ export default function FormularioCaptacion() {
         <div style={{ marginBottom: 36, borderBottom: "1px solid #2A2926", paddingBottom: 28 }}>
           <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Nativa Properties</div>
           <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
-            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 400, margin: 0, lineHeight: 1.1 }}>
+            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 600, margin: 0, lineHeight: 1.1 }}>
               Formulario de <em>Captacion</em>
             </h1>
             {autoSaveStatus === "saving" && <span style={{ fontSize: 11, color: "#AC8A54", fontFamily: "Inter, sans-serif" }}>⏳ Guardando...</span>}
