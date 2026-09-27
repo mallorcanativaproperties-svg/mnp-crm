@@ -787,8 +787,7 @@ function PipelineDoc({ estado }) {
 }
 
 // ── Tarjeta de visita ─────────────────────────────────────────────────────────
-function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }) {
-  const [abierta, setAbierta] = useState(false);
+function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, abierta, onToggleAbierta }) {
   const [showDoc, setShowDoc] = useState(false);
   const [editandoDoc, setEditandoDoc] = useState(null);
   const [firmasLinks, setFirmasLinks] = useState({}); // docId → [{nombre, token, firmado_at}]
@@ -891,7 +890,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado }
 
       {/* Cabecera — tap para expandir */}
       <div style={{ padding: "16px", cursor: "pointer", display: "flex", gap: 14, alignItems: "flex-start" }}
-        onClick={() => setAbierta(o => !o)}>
+        onClick={onToggleAbierta}>
 
         {/* Avatar */}
         <Avatar nombre={comp?.nombre} apellidos={comp?.apellidos} size={48} />
@@ -1703,7 +1702,13 @@ function GrupoDia({ fecha, visitas, propiedadId, propiedadNombre, currentUser, o
       {/* Visitas del día */}
       {visitas.map(v => (
         <TarjetaVisita key={v.id} visita={v} propiedad={{ id: propiedadId, nombre: propiedadNombre }}
-          agente={agente} currentUser={currentUser} onActualizado={onActualizado} />
+          agente={agente} currentUser={currentUser} onActualizado={onActualizado}
+          abierta={visitasAbiertas.has(v.id)}
+          onToggleAbierta={() => setVisitasAbiertas(prev => {
+            const next = new Set(prev);
+            next.has(v.id) ? next.delete(v.id) : next.add(v.id);
+            return next;
+          })} />
       ))}
 
       {/* Modal editor informe */}
@@ -1718,6 +1723,7 @@ function GrupoDia({ fecha, visitas, propiedadId, propiedadNombre, currentUser, o
 }
 
 function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, onActualizado, informesPendientes, abierto, onToggle }) {
+  const [visitasAbiertas, setVisitasAbiertas] = useState(new Set()); // persiste entre refreshes
   const [nuevaVisita, setNuevaVisita] = useState(false);
   const [compradorNueva, setCompradorNueva] = useState(null);
   const [notasNueva, setNotasNueva] = useState("");
