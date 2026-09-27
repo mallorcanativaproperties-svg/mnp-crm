@@ -6,14 +6,16 @@ const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABA
 
 export async function POST(req) {
   try {
-    const { visitaId, docId, tipo, propiedad } = await req.json();
+    const { visitaId, docId, tipo, propiedad, estado } = await req.json();
     const TIPO_LABEL = { oferta: "Propuesta / Oferta", reserva: "Reserva Exclusiva" };
+    const ESTADO_LABEL = { enviado: "📤 Enviada al comprador para firma", firmado_comprador: "✅ Firmada por el comprador" };
 
     // Cargar admins y directores con teléfono
     const { data: admins } = await sb.from("usuarios")
       .select("nombre,agente_telefono").in("role", ["administrador","director"]).eq("activo", true);
 
-    const msg = `🏠 *Nueva ${TIPO_LABEL[tipo] || tipo}*\nPropiedad: ${propiedad?.nombre || propiedad?.id || ""}\nVisita: ${visitaId}\nDocumento ID: ${docId}\n_Nativa Properties CRM_`;
+    const estadoTexto = ESTADO_LABEL[estado] || estado || "";
+    const msg = `🏠 *${TIPO_LABEL[tipo] || tipo}*${estadoTexto ? `\n${estadoTexto}` : ""}\nPropiedad: ${propiedad?.nombre || propiedad?.ref || propiedad?.dir || ""}\nVisita: ${visitaId}\nDocumento ID: ${docId}\n_Nativa Properties CRM_`;
 
     for (const admin of admins || []) {
       if (!admin.agente_telefono) continue;
