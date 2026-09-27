@@ -743,12 +743,15 @@ function SilviaPanel({ convs, selectedId, setSelectedId }) {
         {selected ? (
           <>
             {/* Header */}
-        <div style={{ marginBottom: 28 }}>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Agentes IA</h1>
-          <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Agentes especializados con inteligencia artificial para potenciar cada gestión</p>
-          <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />
-        </div>
-{/* Mensajes */}
+            <div style={{ padding: "14px 20px", borderBottom: "1px solid #E7E1D4", background: "#FFFFFF", display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ width: 36, height: 36, borderRadius: "50%", background: IG_PURPLE + "22", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>📸</div>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: "#22262E", fontFamily: "Inter, sans-serif" }}>{selected.sender_name || selected.sender_id}</div>
+                <div style={{ fontSize: 11, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>Instagram DM · {selected.estado || "activo"}</div>
+              </div>
+            </div>
+
+            {/* Mensajes */}
             <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
               {(selected.mensajes || []).map((m, i) => {
                 const esSilvia = m.from === "silvia" || m.from === "agente";

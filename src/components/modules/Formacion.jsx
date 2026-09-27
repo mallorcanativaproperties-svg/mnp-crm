@@ -127,12 +127,20 @@ function VisorRecurso({ recurso, userLogin, onClose, onCompletado }) {
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(26,37,40,0.95)", zIndex: 1000, display: "flex", flexDirection: "column" }}>
       {/* Header */}
-        <div style={{ marginBottom: 28 }}>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Formación</h1>
-          <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Módulo de capacitación y formación del equipo</p>
-          <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />
+      <div style={{ padding: "14px 24px", background: WHITE, borderBottom: `2px solid ${GOLD}`, display: "flex", alignItems: "center", gap: 14, flexShrink: 0 }}>
+        <span style={{ fontSize: 20 }}>{TIPO_ICON[recurso.tipo]}</span>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 15, fontWeight: 700, color: TEXT, fontFamily: "Inter, sans-serif" }}>{recurso.titulo}</div>
+          {recurso.duracion_min && <div style={{ fontSize: 11, color: GOLD, marginTop: 2 }}>{fmt(recurso.duracion_min)}</div>}
         </div>
-{/* Cuerpo */}
+        <button onClick={toggleCompletado} style={{ padding: "8px 18px", border: `1px solid ${completado ? GOLD : BORDER}`, background: completado ? GOLD : "transparent", color: completado ? WHITE : MUTED, fontSize: 12, cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600, borderRadius: 0, transition: "all 0.2s" }}>
+          {completado ? "✓ Completado" : "Marcar completado"}
+        </button>
+        <button onClick={onClose} style={{ padding:"8px 16px", border:`1px solid ${BORDER}`, background:"transparent", color:MUTED, fontSize:12, cursor:"pointer", fontFamily:"Inter, sans-serif", borderRadius: 0, marginRight:4 }}>← Volver</button>
+        <button onClick={onClose} style={{ background: "transparent", border: "none", color: MUTED, cursor: "pointer", display:"flex", alignItems:"center", padding:4 }}><XMarkIcon style={{ width:22, height:22 }} /></button>
+      </div>
+
+      {/* Cuerpo */}
       <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
         <div style={{ flex: 1, overflow: "hidden", background: "#0D1517" }}>
           {recurso.tipo === "video" && igId && (

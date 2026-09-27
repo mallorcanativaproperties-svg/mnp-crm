@@ -314,12 +314,40 @@ function DashboardContent({ currentUser, onLogout, users, setUsers }) {
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
 
         {/* Header */}
-        <div style={{ marginBottom: 28 }}>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Dashboard</h1>
-          <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Panel de control con indicadores clave y actividad reciente</p>
-          <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />
+        <div style={{ marginBottom: 36, borderBottom: "1px solid #2A2926", paddingBottom: 28 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
+            <div>
+              <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Nativa Properties</div>
+              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 600, margin: 0, lineHeight: 1.1 , color: "#A8854A"}}>
+                {isDirector ? <span>Dashboard General</span> : <span>Mi Dashboard</span>}
+              </h1>
+              <p style={{ fontSize: 12, color: "#9A968A", margin: "10px 0 0", letterSpacing: "0.04em" }}>
+                {isDirector ? "Vista completa del negocio" : "Bienvenido, " + currentUser.nombre}
+              </p>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ textAlign: "right" }}>
+                <div style={{ fontSize: 12, color: "#22262E" }}>{currentUser.nombre}</div>
+                <div style={{ fontSize: 10, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.08em" }}>{isDirector ? "Director" : "Agente"}</div>
+              </div>
+              <button
+                onClick={onLogout}
+                style={{
+                  padding: "8px 16px", borderRadius: 0, border: "1px solid #2A2926",
+                  background: "transparent", color: "#9A968A", cursor: "pointer",
+                  fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase",
+                  fontFamily: "Inter, sans-serif", transition: "all 0.2s",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#D4545444"; e.currentTarget.style.color = "#A23A3A"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#E7E1D4"; e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.color = "#9A968A"; }}
+              >
+                Salir
+              </button>
+            </div>
+          </div>
         </div>
-{/* KPIs */}
+
+        {/* KPIs */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12, marginBottom: 32 }}>
           {kpis.map((s, i) => (
             <div key={i} style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "18px 16px", textAlign: "center" }}>

@@ -1362,12 +1362,24 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
             <div style={{ background: "var(--gold)", height: 3, width: "100%" }} />
 
             {/* Header */}
-        <div style={{ marginBottom: 28 }}>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Cartera de Propiedades</h1>
-          <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Ficha completa de la propiedad con documentación, medios y actividad</p>
-          <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />
-        </div>
-{/* Vista variaciones Home Staging (pantalla completa en el modal) */}
+            <div style={{ padding: "24px 32px 0", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+              <div>
+                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 400, color: "#1a2528", lineHeight: 1.2 }}>
+                  Edición con Inteligencia Artificial
+                </div>
+                <div style={{ fontFamily: "Inter, sans-serif", fontSize: 12, color: "var(--gold)", marginTop: 4, letterSpacing: "0.06em" }}>
+                  {iaModal.item.nombre}
+                </div>
+              </div>
+              {!iaLoading && (
+                <button onClick={() => { setIaModal(null); setIaVariaciones([]); setIaSeleccionada(null); }}
+                  style={{ background: "none", border: "none", color: "var(--muted)", fontSize: 22, cursor: "pointer", lineHeight: 1, padding: "4px 0 0 16px" }}>×</button>
+              )}
+            </div>
+
+            <div style={{ height: 1, background: "var(--border)", margin: "20px 32px" }} />
+
+            {/* Vista variaciones Home Staging (pantalla completa en el modal) */}
             {iaVariaciones.length > 0 ? (
               <div style={{ padding: "0 32px 28px" }}>
                 <div style={{ fontFamily: "Inter, sans-serif", fontSize: 10, color: "var(--muted)", letterSpacing: "0.12em", marginBottom: 16 }}>
