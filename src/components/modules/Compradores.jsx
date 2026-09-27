@@ -1095,7 +1095,7 @@ export default function App({ currentUser }) {
 
   const selSt = { padding: "8px 14px", background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, color: "#A09D93", fontSize: 11, fontFamily: "Inter, sans-serif", letterSpacing: "0.04em", cursor: "pointer", appearance: "auto" };
 
-  return <div style={{ fontFamily: "Inter, sans-serif", background: "var(--cream)", minHeight: "100vh", color: "var(--text)", padding: "40px 24px" }}>
+  return <div style={{ fontFamily: "Inter, sans-serif", background: "var(--cream)", minHeight: "100vh", color: "var(--text)", padding: "40px 32px" }}>
     <div style={{ maxWidth: 920, margin: "0 auto" }}>
 
       {/* Header */}
