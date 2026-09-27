@@ -840,11 +840,12 @@ export default function FormularioCaptacion() {
       <div style={{ maxWidth: 720, margin: "0 auto" }}>
 
         {/* Header */}
-        <div style={{ marginBottom: 36, borderBottom: "1px solid #2A2926", paddingBottom: 28 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
-            <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Formulario de Captación</h1>
-            <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Registro de nuevas propiedades y datos del propietario</p>
-            <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />{autoSaveStatus === "saving" && <span style={{ fontSize: 11, color: "#AC8A54", fontFamily: "Inter, sans-serif" }}>⏳ Guardando...</span>}
+      <div style={{ marginBottom: 40 }}>
+        <div style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 12, fontFamily: "Inter, sans-serif" }}>NATIVA PROPERTIES</div>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 600, margin: 0, lineHeight: 1.1, color: "#A8854A" }}>Formulario de Captación</h1>
+        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "10px 0 0" }}>Formulario de captación de nuevas propiedades</p>
+        <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginTop: 28, marginBottom: 28 }} />
+      </div>{autoSaveStatus === "saving" && <span style={{ fontSize: 11, color: "#AC8A54", fontFamily: "Inter, sans-serif" }}>⏳ Guardando...</span>}
             {autoSaveStatus === "saved" && <span style={{ fontSize: 11, color: "#2C6E52", fontFamily: "Inter, sans-serif" }}>✓ Guardado automáticamente</span>}
             {autoSaveStatus === "error" && <span style={{ fontSize: 11, color: "#A23A3A", fontFamily: "Inter, sans-serif" }}>⚠️ Error al guardar</span>}
             {fichaId && !autoSaveStatus && <span style={{ fontSize: 10, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>📋 Ficha creada</span>}
