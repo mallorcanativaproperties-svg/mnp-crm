@@ -129,87 +129,9 @@ export default function Usuarios({ currentUser }) {
     <div style={{ padding: "40px 48px", maxWidth: 900, margin: "0 auto" }}>
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 40 }}>
-        <div>
-          <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.3em", marginBottom: 8 }}>Nativa Properties</div>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Gestión de Usuarios</h1>
-        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Administración de usuarios, roles y permisos del equipo</p>
-        <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />
-          <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 8 }}>
-            <p style={{ fontSize: 12, color: "#9A968A", margin: 0 }}>{usuarios.filter(u => u.activo).length} activos · {usuarios.filter(u => !u.activo).length} inactivos</p>
-            {usuarios.some(u => !u.activo) && (
-              <button onClick={() => setMostrarInactivos(v => !v)}
-                style={{ fontSize: 11, color: "#9A968A", background: "none", border: "1px solid #E7E1D4", padding: "3px 10px", cursor: "pointer", fontFamily: "Inter, sans-serif" }}>
-                {mostrarInactivos ? "Ocultar inactivos" : "Ver inactivos"}
-              </button>
-            )}
-          </div>
-        </div>
-        <button onClick={abrirNuevo} style={{ padding: "12px 24px", borderRadius: 0, border: "1px solid #C8A97E", background: "transparent", color: "#AC8A54", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}>
-          + Nuevo usuario
-        </button>
-      </div>
-
-      {/* Lista */}
-      {loading ? (
-        <div style={{ color: "#9A968A", fontSize: 13 }}>Cargando...</div>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {usuarios.filter(u => mostrarInactivos || u.activo).map(u => (
-            <div key={u.id} style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "16px 20px", display: "flex", alignItems: "center", gap: 16, opacity: u.activo ? 1 : 0.5 }}>
-              {/* Avatar */}
-              <div style={{ width: 40, height: 40, borderRadius: "50%", background: u.role === "director" ? "#C8A97E22" : u.role === "administrador" ? "#3D577E22" : "#8FA88A22", border: "1px solid " + (u.role === "director" ? "#C8A97E44" : u.role === "administrador" ? "#3D577E44" : "#8FA88A44"), display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>
-                {u.role === "director" ? "◆" : u.role === "administrador" ? "◈" : "◎"}
-              </div>
-              {/* Info */}
-              <div style={{ flex: 1 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 14, fontWeight: 600, color: "#22262E" }}>{u.nombre}</span>
-                  <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: u.role === "director" ? "#C8A97E22" : u.role === "administrador" ? "#3D577E22" : "#8FA88A22", color: u.role === "director" ? "#AC8A54" : u.role === "administrador" ? "#3D577E" : "#2C6E52", textTransform: "uppercase", letterSpacing: "0.05em" }}>{u.role}</span>
-                  {!u.activo && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 0, background: "#D4545422", color: "#A23A3A" }}>Inactivo</span>}
-                </div>
-                <div style={{ fontSize: 11, color: "#9A968A", marginTop: 3 }}>
-                  @{u.user_login}
-                  {u.agente_codigo && <span style={{ marginLeft: 10, color: "#3D577E" }}>{u.agente_codigo}</span>}
-                  {u.agente_telefono && <span style={{ marginLeft: 10 }}>📱 {u.agente_telefono}</span>}
-                  {u.numero_registro && <span style={{ marginLeft: 10, fontSize:11, color:"#2C6E52" }}>🏛 Reg. {u.numero_registro}</span>}
-                </div>
-              </div>
-              {/* Acciones */}
-              <div style={{ display: "flex", gap: 8 }}>
-                {puedeEditar(u) && (
-                  <button onClick={() => abrirEditar(u)} style={{ background: "transparent", border: "1px solid #2A2926", borderRadius: 0, color: "#9A968A", fontSize: 11, cursor: "pointer", padding: "6px 14px", fontFamily: "Inter, sans-serif" }}>Editar</button>
-                )}
-                {u.user_login !== currentUser?.user_login && (<>
-                  {puedeEditar(u) && (
-                    <button onClick={() => toggleActivo(u)} style={{ background: "transparent", border: "1px solid " + (u.activo ? "#A23A3A44" : "#6AAF8D33"), borderRadius: 0, color: u.activo ? "#A23A3A" : "#2C6E52", fontSize: 11, cursor: "pointer", padding: "6px 14px", fontFamily: "Inter, sans-serif" }}>
-                      {u.activo ? "Desactivar" : "Activar"}
-                    </button>
-                  )}
-                  {puedeEliminar(u) && (
-                    <button onClick={() => eliminarUsuario(u)} style={{ background: "transparent", border: "1px solid #D4545433", borderRadius: 0, color: "#A23A3A", fontSize: 11, cursor: "pointer", padding: "6px 14px", fontFamily: "Inter, sans-serif" }} title="Eliminar usuario definitivamente">
-                      x Eliminar
-                    </button>
-                  )}
-                </>)}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Modal */}
-      {modal && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: 24 }}>
-          <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, width: "100%", maxWidth: 480, padding: "32px 36px" }}>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 600, margin: "0 0 24px" }}>
-              {modal === "nuevo" ? "Nuevo usuario" : "Editar usuario"}
-            </h2>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-              <div>
-                <label style={lSt}>Nombre completo *</label>
-                <input style={iSt} value={form.nombre || ""} onChange={e => setForm(f => ({ ...f, nombre: e.target.value }))} />
-              </div>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Gestión de Usuarios</h1>
+            <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Administración de usuarios, roles y permisos del equipo</p>
+            <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 <div>
                   <label style={lSt}>Usuario (login) *</label>

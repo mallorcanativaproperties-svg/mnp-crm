@@ -67,11 +67,9 @@ function LoginScreen({ users, onLogin }) {
     <div style={{ fontFamily: "Inter, sans-serif", background: "#F8F6F1", minHeight: "100vh", color: "#22262E", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
       <div style={{ width: "100%", maxWidth: 380 }}>
         <div style={{ textAlign: "center", marginBottom: 40 }}>
-          <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.25em", marginBottom: 12, fontWeight: 500 }}>Nativa Properties</div>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Dashboard</h1>
-        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Visión global del negocio y actividad del equipo en tiempo real</p>
-        <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />
-        </div>
+            <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Visión global del negocio y actividad del equipo en tiempo real</p>
+            <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} /></div>
 
         <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "32px 28px" }}>
           <div style={{ marginBottom: 18 }}>
@@ -121,10 +119,7 @@ function LoginScreen({ users, onLogin }) {
           </button>
         </div>
 
-        <div style={{ textAlign: "center", marginTop: 20, fontSize: 10, color: "#7A787055" }}>
-          Nativa Properties - CRM v1.0
         </div>
-      </div>
     </div>
   );
 }
@@ -317,7 +312,6 @@ function DashboardContent({ currentUser, onLogout, users, setUsers }) {
         <div style={{ marginBottom: 36, borderBottom: "1px solid #2A2926", paddingBottom: 28 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
             <div>
-              <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Nativa Properties</div>
               <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 600, margin: 0, lineHeight: 1.1 , color: "#A8854A"}}>
                 {isDirector ? <span>Dashboard General</span> : <span>Mi Dashboard</span>}
               </h1>
