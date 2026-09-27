@@ -1450,14 +1450,14 @@ function WhatsAppPanel({ buyer, onClose }) {
   const isMobile = typeof window !== "undefined" && window.innerWidth < 640;
 
   return (
-    <div style={{ position: "fixed", top: 0, bottom: 0, zIndex: 1100, left: 0, width: isMobile ? "100vw" : "min(420px,100vw)", background: CREAM, borderRight: isMobile ? "none" : "1px solid var(--border)", boxShadow: "4px 0 40px rgba(26,37,40,0.18)", display: "flex", flexDirection: "column", fontFamily: "Raleway, Inter, sans-serif" }}>
+    <div style={{ position: "fixed", top: 0, bottom: 0, zIndex: 1100, left: 0, width: isMobile ? "100vw" : "min(420px,100vw)", background: CREAM, borderRight: isMobile ? "none" : "1px solid var(--border)", boxShadow: "4px 0 40px rgba(26,37,40,0.18)", display: "flex", flexDirection: "column", fontFamily: "Inter, sans-serif" }}>
 
       <div style={{ height: 3, background: BRONZE, flexShrink: 0 }} />
 
       <div style={{ background: PETROL, padding: "16px 20px", flexShrink: 0 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ width: 40, height: 40, background: BRONZE, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 17, color: CREAM, fontWeight: 400, flexShrink: 0 }}>
+            <div style={{ width: 40, height: 40, background: BRONZE, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 17, color: CREAM, fontWeight: 400, flexShrink: 0 }}>
               {buyer.nombre?.charAt(0)?.toUpperCase() || "?"}
             </div>
             <div>
@@ -1466,7 +1466,7 @@ function WhatsAppPanel({ buyer, onClose }) {
             </div>
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <button onClick={toggleModo} style={{ padding: "5px 12px", background: modoManual ? "rgba(172,138,84,0.15)" : "rgba(64,92,107,0.3)", border: `1px solid ${modoManual ? BRONZE : "#405c6b"}`, color: modoManual ? BRONZE : "#7aafc4", cursor: "pointer", fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", fontFamily: "Raleway, Inter, sans-serif" }}>
+            <button onClick={toggleModo} style={{ padding: "5px 12px", background: modoManual ? "rgba(172,138,84,0.15)" : "rgba(64,92,107,0.3)", border: `1px solid ${modoManual ? BRONZE : "#405c6b"}`, color: modoManual ? BRONZE : "#7aafc4", cursor: "pointer", fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", fontFamily: "Inter, sans-serif" }}>
               {modoManual ? "MANUAL" : "IA ACTIVA"}
             </button>
             <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(248,246,241,0.4)", fontSize: 18, cursor: "pointer", lineHeight: 1, padding: "0 0 0 8px" }}>✕</button>
@@ -1488,7 +1488,7 @@ function WhatsAppPanel({ buyer, onClose }) {
           <div style={{ textAlign: "center", padding: 48, color: "var(--muted)", fontSize: 12 }}>Cargando conversación...</div>
         ) : mensajes.length === 0 ? (
           <div style={{ textAlign: "center", padding: 48 }}>
-            <div style={{ fontFamily: "'Libre Baskerville', Georgia, serif", fontSize: 28, color: "#C8BFB0", marginBottom: 12 }}>✦</div>
+            <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 28, color: "#C8BFB0", marginBottom: 12 }}>✦</div>
             <div style={{ fontSize: 13, color: "var(--muted)", lineHeight: 1.6 }}>Sin mensajes aún.<br/>Inicia la conversación con {buyer.nombre}.</div>
           </div>
         ) : (() => {
@@ -1498,10 +1498,10 @@ function WhatsAppPanel({ buyer, onClose }) {
             const dateStr = m.date ? fmtDate(m.date) : null;
             if (dateStr && dateStr !== lastDateStr) {
               lastDateStr = dateStr;
-              elements.push(<div key={`d-${i}`} style={{ textAlign: "center", margin: "16px 0 8px" }}><span style={{ fontSize: 11, color: "var(--muted)", padding: "4px 14px", background: "#D6D0C8", borderRadius: 12 }}>{dateStr}</span></div>);
+              elements.push(<div key={`d-${i}`} style={{ textAlign: "center", margin: "16px 0 8px" }}><span style={{ fontSize: 11, color: "var(--muted)", padding: "4px 14px", background: "#D6D0C8", borderRadius: 0 }}>{dateStr}</span></div>);
             }
             if (m.from === "sistema") {
-              elements.push(<div key={i} style={{ textAlign: "center", margin: "4px 0 8px" }}><span style={{ fontSize: 10, color: "var(--muted)", padding: "3px 12px", background: "#D6D0C8", borderRadius: 10 }}>{m.text}</span></div>);
+              elements.push(<div key={i} style={{ textAlign: "center", margin: "4px 0 8px" }}><span style={{ fontSize: 10, color: "var(--muted)", padding: "3px 12px", background: "#D6D0C8", borderRadius: 0 }}>{m.text}</span></div>);
               return;
             }
             const isAgent = m.from !== "cliente";
@@ -1524,7 +1524,7 @@ function WhatsAppPanel({ buyer, onClose }) {
         })()}
         {loading && (
           <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
-            <div style={{ padding: "9px 14px", background: "rgba(26,37,40,0.2)", borderRadius: 12, fontSize: 12, color: PETROL }}>enviando...</div>
+            <div style={{ padding: "9px 14px", background: "rgba(26,37,40,0.2)", borderRadius: 0, fontSize: 12, color: PETROL }}>enviando...</div>
           </div>
         )}
       </div>
@@ -1535,7 +1535,7 @@ function WhatsAppPanel({ buyer, onClose }) {
             onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
             placeholder={modoManual ? "Escribe un mensaje..." : "Activa modo manual para escribir"}
             disabled={!modoManual}
-            style={{ flex: 1, padding: "11px 16px", background: modoManual ? "var(--white)" : "#F0ECE6", border: "1px solid var(--border)", color: "#1a2528", fontSize: 14, fontFamily: "Raleway, Inter, sans-serif", outline: "none", cursor: modoManual ? "text" : "not-allowed", borderRadius: 20 }} />
+            style={{ flex: 1, padding: "11px 16px", background: modoManual ? "var(--white)" : "#F0ECE6", border: "1px solid var(--border)", color: "#1a2528", fontSize: 14, fontFamily: "Inter, sans-serif", outline: "none", cursor: modoManual ? "text" : "not-allowed", borderRadius: 0 }} />
           <button onClick={handleSend} disabled={!modoManual || !input.trim() || loading}
             style={{ width: 42, height: 42, borderRadius: "50%", background: (modoManual && input.trim() && !loading) ? BRONZE : "var(--border)", border: "none", color: (modoManual && input.trim() && !loading) ? CREAM : "var(--muted)", cursor: (modoManual && input.trim() && !loading) ? "pointer" : "default", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
             ➤
