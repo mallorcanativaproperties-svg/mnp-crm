@@ -139,7 +139,10 @@ function partirPorArticulos(textoOriginal) {
     let m;
     re.lastIndex = 0;
     while ((m = re.exec(texto)) !== null) {
-      const encabezado = m[1].trim();
+      // Se le quita el "## " a los encabezados marcados: el encabezado se guarda
+      // como metadato y se le cita al usuario, y "## Lección 12" en una cita
+      // queda como un error del sistema.
+      const encabezado = m[1].trim().replace(/^#{1,4}\s*/, "");
       // Un encabezado nunca empieza en minuscula. Si lo hace es una frase que
       // ha caido al principio de linea ("artículo 106 de la Ley..."), y tratarla
       // como encabezado parte el articulo de verdad en dos.
