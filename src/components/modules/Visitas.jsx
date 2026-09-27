@@ -231,7 +231,7 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
             style={{ ...iSt, paddingLeft: 40 }} />
         </div>
         <button onClick={() => setShowNew(true)} style={{
-          padding: "14px 18px", background: DARK, border: "none", color: WHITE, cursor: "pointer",
+          padding: "14px 18px", background: `linear-gradient(135deg, ${GOLD}, ${GOLD_L})`, border: "none", color: WHITE, cursor: "pointer",
           borderRadius: 0, display: "flex", alignItems: "center", gap: 6, fontSize: 13,
           fontWeight: 700, fontFamily: "Inter, sans-serif", whiteSpace: "nowrap", minHeight: 50,
         }}>
@@ -2209,15 +2209,15 @@ export default function Visitas({ currentUser }) {
       maxWidth: "100vw", overflowX: "hidden" }}>
 
       {/* ── Header ── */}
-      <div style={{ background: DARK, padding: "24px 20px 20px" }}>
+      <div style={{ background: "var(--cream)", padding: "24px 20px 20px", borderBottom: "1px solid var(--border)" }}>
         <div style={{ fontSize: 10, color: GOLD_L, letterSpacing: "0.2em", fontWeight: 700, marginBottom: 4 }}>
           MALLORCA NATIVA
         </div>
-        <h1 style={{ fontSize: 28, fontWeight: 600, color: WHITE, margin: "0 0 4px",
+        <h1 style={{ fontSize: 28, fontWeight: 600, color: "var(--text)", margin: "0 0 4px",
           fontFamily: "'Playfair Display', Georgia, serif" }}>
           Visitas
         </h1>
-        <p style={{ fontSize: 13, color: `${WHITE}70`, margin: 0 }}>
+        <p style={{ fontSize: 13, color: "var(--muted)", margin: 0 }}>
           Gestiona visitas, documentos y compradores
         </p>
       </div>
@@ -2231,7 +2231,7 @@ export default function Visitas({ currentUser }) {
               padding: "16px 20px", textAlign: "center", minWidth: 80,
               borderRight: i < statsData.length - 1 ? `1px solid ${BORDER}` : "none",
             }}>
-              <div style={{ fontSize: 10, marginBottom: 4 }}>{s.emoji}</div>
+              <div style={{ fontSize: 16, marginBottom: 2, fontFamily: '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif' }}>{s.emoji}</div>
               <div style={{ fontSize: 26, fontWeight: 300, color: s.color,
                 fontFamily: "'Cormorant Garamond', Georgia, serif", lineHeight: 1 }}>
                 {s.value}
