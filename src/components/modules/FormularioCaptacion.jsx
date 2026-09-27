@@ -844,7 +844,7 @@ export default function FormularioCaptacion() {
           <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Nativa Properties</div>
           <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
             <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 600, margin: 0, lineHeight: 1.1 , color: "#A8854A"}}>
-              Formulario de <em>Captacion</em>
+              Formulario de Captacion
             </h1>
             {autoSaveStatus === "saving" && <span style={{ fontSize: 11, color: "#AC8A54", fontFamily: "Inter, sans-serif" }}>⏳ Guardando...</span>}
             {autoSaveStatus === "saved" && <span style={{ fontSize: 11, color: "#2C6E52", fontFamily: "Inter, sans-serif" }}>✓ Guardado automáticamente</span>}

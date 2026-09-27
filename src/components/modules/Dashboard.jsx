@@ -69,7 +69,7 @@ function LoginScreen({ users, onLogin }) {
         <div style={{ textAlign: "center", marginBottom: 40 }}>
           <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.25em", marginBottom: 12, fontWeight: 500 }}>Nativa Properties</div>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 600, margin: 0, lineHeight: 1.2 , color: "#A8854A"}}>
-            <em>CRM</em>
+            CRM
           </h1>
           <p style={{ fontSize: 12, color: "#9A968A", marginTop: 8 }}>Accede a tu panel de control</p>
         </div>
@@ -320,7 +320,7 @@ function DashboardContent({ currentUser, onLogout, users, setUsers }) {
             <div>
               <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Nativa Properties</div>
               <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 600, margin: 0, lineHeight: 1.1 , color: "#A8854A"}}>
-                {isDirector ? <span><em>Dashboard</em> General</span> : <span>Mi <em>Dashboard</em></span>}
+                {isDirector ? <span>Dashboard General</span> : <span>Mi Dashboard</span>}
               </h1>
               <p style={{ fontSize: 12, color: "#9A968A", margin: "10px 0 0", letterSpacing: "0.04em" }}>
                 {isDirector ? "Vista completa del negocio" : "Bienvenido, " + currentUser.nombre}

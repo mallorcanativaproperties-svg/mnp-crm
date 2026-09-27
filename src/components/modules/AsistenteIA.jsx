@@ -117,8 +117,8 @@ function Portada({ agentes, cargando, onAbrirAgente, onAbrirBiblioteca }) {
 
   return (
     <div style={{ padding: "32px 28px", fontFamily: FUENTE, maxWidth: 1100 }}>
-      <h1 style={{ fontFamily: SERIF, fontSize: 34, fontWeight: 600, color: TINTA, margin: "0 0 8px" }}>
-        Asistente <em>IA</em>
+      <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 600, color: "#A8854A", margin: "0 0 8px" }}>
+        Asistente IA
       </h1>
       <p style={{ fontSize: 13, color: GRIS, margin: "0 0 28px", maxWidth: 620, lineHeight: 1.6 }}>
         Tres especialistas independientes. Cada uno responde solo desde su propia base de
@@ -156,7 +156,7 @@ function Portada({ agentes, cargando, onAbrirAgente, onAbrirBiblioteca }) {
               onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "none")}
             >
               <div style={{ fontSize: 26, marginBottom: 14 }}>{a.icono}</div>
-              <div style={{ fontFamily: SERIF, fontSize: 19, color: TINTA, marginBottom: 8 }}>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 19, color: TINTA, marginBottom: 8 }}>
                 {a.nombre}
               </div>
               <div style={{ fontSize: 12, color: GRIS, lineHeight: 1.6, minHeight: 54 }}>
@@ -191,7 +191,7 @@ function Portada({ agentes, cargando, onAbrirAgente, onAbrirBiblioteca }) {
       >
         <BookOpenIcon style={{ width: 22, height: 22, color: TINTA, flexShrink: 0 }} />
         <div style={{ flex: 1 }}>
-          <div style={{ fontFamily: SERIF, fontSize: 17, color: TINTA, marginBottom: 4 }}>
+          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, color: TINTA, marginBottom: 4 }}>
             Biblioteca de casos
           </div>
           <div style={{ fontSize: 12, color: GRIS, lineHeight: 1.6 }}>
@@ -201,7 +201,7 @@ function Portada({ agentes, cargando, onAbrirAgente, onAbrirBiblioteca }) {
         </div>
         {resumen && (
           <div style={{ textAlign: "right", flexShrink: 0 }}>
-            <div style={{ fontFamily: SERIF, fontSize: 24, color: TINTA, lineHeight: 1 }}>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, color: TINTA, lineHeight: 1 }}>
               {resumen.total}
             </div>
             <div style={{ ...rotulo, fontSize: 9, color: GRIS, marginTop: 4 }}>
@@ -499,7 +499,7 @@ function Chat({ agente, usuarioId, casoInicial, onVolver }) {
           </button>
           <span style={{ fontSize: 22 }}>{agente.icono}</span>
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontFamily: SERIF, fontSize: 18, color: TINTA }}>{agente.nombre}</div>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, color: TINTA }}>{agente.nombre}</div>
             <div style={{ fontSize: 11, color: GRIS }}>{agente.descripcion}</div>
           </div>
 
@@ -693,7 +693,7 @@ function Biblioteca({ agentes, usuarioId, onVolver, onContinuar }) {
               <ArrowLeftIcon style={{ width: 18, height: 18 }} />
             </button>
             <div>
-              <div style={{ fontFamily: SERIF, fontSize: 19, color: TINTA }}>Biblioteca de casos</div>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 19, color: TINTA }}>Biblioteca de casos</div>
               <div style={{ fontSize: 11, color: GRIS }}>
                 {cargando ? "Cargando..." : `${casos.length} caso${casos.length === 1 ? "" : "s"}`}
               </div>
@@ -902,7 +902,7 @@ function DetalleCaso({ caso, usuarioId, nombreAgente, color, onCerrar, onContinu
       <div style={{ padding: "20px 26px", borderBottom: `1px solid ${LINEA}`, display: "flex", alignItems: "flex-start", gap: 14, flexShrink: 0 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ ...rotulo, fontSize: 9, color, marginBottom: 6 }}>{nombreAgente}</div>
-          <div style={{ fontFamily: SERIF, fontSize: 18, color: TINTA, lineHeight: 1.35 }}>
+          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, color: TINTA, lineHeight: 1.35 }}>
             {caso.titulo || "Sin titulo"}
           </div>
           <div style={{ fontSize: 11, color: GRIS, marginTop: 6 }}>
@@ -1088,7 +1088,7 @@ function PanelValidacion({ conversacionId, agenteColor, respuesta, usuarioId, on
       >
         <div style={{ padding: "22px 26px", borderBottom: `1px solid ${LINEA}`, display: "flex", alignItems: "flex-start", gap: 14 }}>
           <div style={{ flex: 1 }}>
-            <div style={{ fontFamily: SERIF, fontSize: 19, color: TINTA, marginBottom: 6 }}>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 19, color: TINTA, marginBottom: 6 }}>
               Validar el caso
             </div>
             <div style={{ fontSize: 12, color: GRIS, lineHeight: 1.65 }}>
