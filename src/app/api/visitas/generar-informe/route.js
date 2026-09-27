@@ -1,9 +1,24 @@
 export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import Anthropic from "@anthropic-ai/sdk";
 const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+// La llamada a Claude va por fetch, como en el resto del proyecto, y no por el
+// SDK: el import de "@anthropic-ai/sdk" estaba sin dependencia en package.json,
+// asi que este fichero rompia el build entero y ningun despliegue pasaba.
+async function pedirAClaude({ model, max_tokens, messages }) {
+  const r = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "x-api-key": process.env.ANTHROPIC_API_KEY,
+      "anthropic-version": "2023-06-01",
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({ model, max_tokens, messages }),
+  });
+  if (!r.ok) throw new Error(`Anthropic ${r.status}: ${(await r.text()).slice(0, 300)}`);
+  return r.json();
+}
 
 export async function POST(req) {
   try {
@@ -34,7 +49,7 @@ ${v.resumen_ia ? `Resumen IA: ${v.resumen_ia}` : ""}`;
     }).join("\n\n---\n\n");
 
     // Generar informe con Claude
-    const msg = await anthropic.messages.create({
+    const msg = await pedirAClaude({
       model: "claude-sonnet-4-6",
       max_tokens: 1000,
       messages: [{

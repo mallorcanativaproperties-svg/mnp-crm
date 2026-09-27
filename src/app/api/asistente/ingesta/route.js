@@ -122,7 +122,7 @@ function numeroDeArticulo(encabezado) {
   // en la lista: si no, "Articulo 158 septies" devuelve "158" y un filtro por el
   // 158 se lleva doce articulos de mas sin avisar.
   const m = encabezado.match(
-    /(?:Art[íi]cul[oe]|Art[íi]cle|Norm[ae])\s+([0-9]+)\s*(?:º|ª|è|é|er|r|n|t|a)?\.?\s*(bis|ter|quater|qu[íi]nquies|sexies|septies|octies|nonies|decies|undecies|duodecies|terdecies|quaterdecies|quindecies|sexdecies)?/i
+    /(?:Art[íi]cul[oe]|Art[íi]cle|Norm[ae])\s+([0-9]+)(?:º|ª|è|é|er|r|n|t|a)?\.?\s*(bis|ter|quater|qu[íi]nquies|sexies|septies|octies|nonies|decies|undecies|duodecies|terdecies|quaterdecies|quindecies|sexdecies)?/i
   );
   if (!m) return null;
   return [m[1], m[2]].filter(Boolean).join(" ").trim().toLowerCase();
