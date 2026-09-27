@@ -286,7 +286,7 @@ export default function FirmarVisita() {
             </div>
             {/* Visor Google Docs — funciona en iOS/Android sin plugins */}
             <div style={{ border:`1px solid ${BORDER}`, borderRadius:10, overflow:"hidden",
-              height:320, background:CREAM }}>
+              height:500, background:CREAM }}>
               <iframe
                 src={`https://docs.google.com/viewer?url=${encodeURIComponent(pdfUrl)}&embedded=true`}
                 style={{ width:"100%", height:"100%", border:"none" }}
