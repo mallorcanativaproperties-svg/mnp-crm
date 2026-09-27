@@ -6,6 +6,7 @@ import crypto from "crypto";
 import { sbAdmin } from "@/lib/ia/rag";
 import { generarEmbeddings } from "@/lib/ia/embeddings";
 import { descargarTexto, huellaContenido, recortar, aplanar, indexarSinEspacios } from "@/lib/ia/extraer";
+import { textoDeFormacion, modulosDisponibles } from "@/lib/ia/formacion";
 
 /**
  * Ingesta de conocimiento para los agentes del Asistente IA.
@@ -268,8 +269,22 @@ export async function POST(request) {
     // 1. Texto
     let texto = b.texto || "";
     let tituloPagina = null;
+    // `formacion: "modulo-09"` carga un modulo de la formacion interna desde el
+    // propio codigo. No va por URL porque no esta publicado en ningun sitio: es
+    // documentacion interna de la casa, y en public/ quedaria accesible en
+    // internet a quien acertara la ruta.
+    if (!texto && b.formacion) {
+      texto = await textoDeFormacion(b.formacion);
+      if (!texto) {
+        return NextResponse.json(
+          { error: `No existe el modulo de formacion "${b.formacion}"`, disponibles: modulosDisponibles() },
+          { status: 404 }
+        );
+      }
+      tituloPagina = b.formacion;
+    }
     if (!texto) {
-      if (!b.url) return NextResponse.json({ error: "Falta url o texto" }, { status: 400 });
+      if (!b.url) return NextResponse.json({ error: "Falta url, texto o formacion" }, { status: 400 });
       try {
         const bajado = await descargarTexto(b.url);
         texto = bajado.texto;
@@ -342,7 +357,10 @@ export async function POST(request) {
         // vacio, cambiaria el hash de todos los documentos ya cargados y la
         // siguiente recarga de cualquiera de ellos crearia un duplicado en vez
         // de reemplazarlo.
-        `${b.agenteSlug}|${b.url || `texto:${b.titulo}`}|${(b.articulos || []).join(",")}` +
+        // La identidad de un modulo de formacion es su slug, no su titulo: asi se
+        // le puede afinar el titulo (que es lo que usa la busqueda) sin que la
+        // recarga duplique el documento en vez de reemplazarlo.
+        `${b.agenteSlug}|${b.url || (b.formacion ? `formacion:${b.formacion}` : `texto:${b.titulo}`)}|${(b.articulos || []).join(",")}` +
           (b.recorte?.desde ? `|${b.recorte.desde}` : "")
       )
       .digest("hex");
