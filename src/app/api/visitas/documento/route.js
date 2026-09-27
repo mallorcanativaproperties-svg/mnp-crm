@@ -7,6 +7,7 @@ import path from "path";
 import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
 import { PDFDocument, rgb } from "pdf-lib";
+import { logMensajeWA } from "@/lib/evolutionApi";
 
 function sb() {
   return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
@@ -663,6 +664,9 @@ export async function POST(req) {
             }),
           });
           console.log(`[documento/agente] PDF enviado a ${dest.nombre} (${numero})`);
+          // Registrar en panel AgentesIA
+          const textoLog = `📄 *${tipoDoc} firmado* enviado a ${dest.nombre}${docFull?.justificante_deposito_url ? " (incluye justificante de depósito)" : ""}`;
+          await logMensajeWA(supabase, numero, textoLog, "sistema").catch(() => {});
         } catch (e) {
           console.error(`[documento/agente] error enviando a ${dest.nombre}:`, e.message);
         }
