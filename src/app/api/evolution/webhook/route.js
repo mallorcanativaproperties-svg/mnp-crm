@@ -239,17 +239,21 @@ export async function POST(request) {
 
     const eventName = (body.event || "").toLowerCase();
 
-    // Procesar MESSAGES_UPDATE — marcar mensajes como leídos
+    // Procesar MESSAGES_UPDATE — actualizar estado de lectura WhatsApp
     if (eventName === "messages.update" || eventName === "messages_update") {
       const updates = Array.isArray(body.data) ? body.data : body.data ? [body.data] : [];
       for (const upd of updates) {
-        const status = upd?.update?.status || upd?.status || "";
+        const rawStatus = upd?.update?.status || upd?.status || "";
         const msgId = upd?.key?.id || upd?.id || "";
-        if ((status === "READ" || status === "read") && msgId) {
-          await supabase.from("mensajes")
-            .update({ leido: true })
-            .eq("wa_message_id", msgId);
-        }
+        if (!msgId || !rawStatus) continue;
+        // Normalizar a enum: PENDING | SENT | DELIVERED | READ
+        const STATUS_MAP = { "0": "PENDING", "1": "SENT", "2": "DELIVERED", "3": "READ",
+          pending: "PENDING", sent: "SENT", delivered: "DELIVERED", read: "READ",
+          PENDING: "PENDING", SENT: "SENT", DELIVERED: "DELIVERED", READ: "READ" };
+        const waStatus = STATUS_MAP[rawStatus] || rawStatus.toUpperCase();
+        await supabase.from("mensajes")
+          .update({ wa_status: waStatus, ...(waStatus === "READ" ? { leido: true } : {}) })
+          .eq("wa_message_id", msgId);
       }
       return NextResponse.json({ status: "ok" });
     }
@@ -539,10 +543,12 @@ export async function POST(request) {
 
         // Enviar respuesta al cliente
         if (claudiaResponse) {
-          await sendWhatsApp(from, claudiaResponse);
+          const sendResult = await sendWhatsApp(from, claudiaResponse);
           await supabase.from("mensajes").insert({
             conversacion_id: conv.id, from_who: "claudia",
             texto: claudiaResponse, timestamp: new Date().toISOString(), sent_by: "CLAUDIA",
+            wa_message_id: sendResult?.waMessageId || null,
+            wa_status: "SENT",
           });
         }
 
