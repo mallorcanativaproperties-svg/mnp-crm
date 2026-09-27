@@ -179,7 +179,7 @@ function fmt(n) { return n ? n.toLocaleString("es-ES") + " €" : "—"; }
 function Badge({ children, color, hollow }) {
   return <span style={{
     display: "inline-block", fontSize: 10, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase",
-    padding: "4px 12px", borderRadius: 0,
+    padding: "4px 12px", borderRadius: 20,
     background: hollow ? "transparent" : (color || "var(--gold)") + "18",
     color: color || "var(--gold)",
     border: hollow ? `1px solid ${color || "var(--gold)"}44` : "none",
@@ -231,7 +231,7 @@ function Card({ b, onClick, onWhatsApp }) {
       <span>{b.fin === "Sí" ? "Financiación ✓" : b.fin === "No" ? "Sin financiación" : "Abierto a mejorar"}</span>
     </div>
     <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 12 }}>
-      {b.zd.map((z, i) => <span key={i} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 0, fontFamily: "Inter, sans-serif", background: "var(--gold-l)0D", color: "var(--gold)", border: "1px solid var(--gold-l)22", letterSpacing: "0.03em" }}>{z}</span>)}
+      {b.zd.map((z, i) => <span key={i} style={{ fontSize: 11, padding: "2px 8px", borderRadius: 0, fontFamily: "Inter, sans-serif", background: "rgba(200,169,126,0.05)", color: "var(--gold)", border: "1px solid rgba(172,138,84,0.3)", letterSpacing: "0.05em" }}>{z}</span>)}
       {b.ze.map((z, i) => <span key={"e" + i} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 0, fontFamily: "Inter, sans-serif", background: "#D4956A0D", color: "var(--amber)", border: "1px solid #D4956A22", letterSpacing: "0.03em" }}>✕ {z}</span>)}
     </div>
     {b.ag && <div style={{ marginTop: 10, fontSize: 11, color: "#3D577E", fontFamily: "Inter, sans-serif", fontWeight: 500 }}>Agente: {b.ag}</div>}
