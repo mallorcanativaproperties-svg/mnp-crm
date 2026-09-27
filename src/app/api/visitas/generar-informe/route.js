@@ -7,68 +7,116 @@ export async function POST(req) {
   try {
     const { propiedadId, agente, fecha } = await req.json();
 
-    // Cargar visitas del día con compradores y documentos
+    // Cargar visitas del día con todos los asistentes y documentos
     const { data: visitas } = await sb.from("visitas")
-      .select("*, compradores(nombre,apellidos,dni,pais), visita_documentos(*)")
+      .select("*, compradores(nombre,apellidos,dni,pais), visita_documentos(*), visita_compradores(*, compradores(nombre,apellidos,dni,pais))")
       .eq("propiedad_id", propiedadId).eq("activo", true)
       .gte("fecha_visita", `${fecha}T00:00:00`)
       .lte("fecha_visita", `${fecha}T23:59:59`);
 
     const { data: prop } = await sb.from("propiedades")
-      .select("ref,dir,municipio,propNombre").eq("id", propiedadId).single();
+      .select("ref,dir,municipio,propNombre,fecha_publicacion,fecha_cap").eq("id", propiedadId).single();
 
     if (!visitas?.length) return NextResponse.json({ error: "No hay visitas este día" }, { status: 400 });
 
-    // Construir contexto para Claude
-    const NIVEL_LABEL = ["","Sin interés","Interés bajo","Interés moderado","Interés alto","Muy interesado"];
-    const visitasTexto = visitas.map((v, i) => {
-      const c = v.compradores;
-      const hora = new Date(v.fecha_visita).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
-      const docs = v.visita_documentos?.map(d => d.tipo).join(", ") || "Sin documentos";
-      const fb = v.feedback;
-      const feedbackTexto = fb ? [
-        fb.nivel_interes ? `Nivel de interés: ${NIVEL_LABEL[fb.nivel_interes] || fb.nivel_interes} (${fb.nivel_interes}/5)` : null,
-        fb.valoracion_precio ? `Valoración del precio: ${fb.valoracion_precio}` : null,
-        fb.objeciones?.length ? `Objeciones detectadas: ${fb.objeciones.join(", ")}` : null,
-        fb.siguiente_paso ? `Siguiente paso acordado: ${fb.siguiente_paso}` : null,
-      ].filter(Boolean).join("\n") : null;
-      return `Visita ${i+1} — ${hora}h
-Interesado: ${c?.nombre} ${c?.apellidos || ""} (DNI: ${c?.dni || "no indicado"}, Nacionalidad: ${c?.pais || "España"})
-Documentos generados: ${docs}
-${v.resumen_ia ? `Resumen de la visita: ${v.resumen_ia}` : ""}
-${feedbackTexto ? `Análisis estructurado:\n${feedbackTexto}` : ""}
-${v.notas ? `Notas del agente: ${v.notas}` : ""}`;
-    }).join("\n\n---\n\n");
+    // Semáforo: calcular días en mercado y visitas totales (todas, no solo hoy)
+    const { data: todasVisitas } = await sb.from("visitas").select("id, visita_documentos(tipo,estado)").eq("propiedad_id", propiedadId).eq("activo", true);
+    const totalVisitasHistorico = todasVisitas?.length || 0;
+    const tieneOferta = todasVisitas?.some(v => v.visita_documentos?.some(d => ["oferta","reserva"].includes(d.tipo) && d.estado !== "borrador")) || false;
+    const fechaRef = prop?.fecha_publicacion || prop?.fecha_cap;
+    const diasMercado = fechaRef ? Math.floor((Date.now() - new Date(fechaRef)) / 86400000) : 0;
+    const esRojo  = diasMercado >= 45 || totalVisitasHistorico >= 10;
+    const esAmbar = !esRojo && (diasMercado >= 30 || (totalVisitasHistorico >= 5 && !tieneOferta));
+    const semaforo = esRojo
+      ? { emoji: "🔴", estado: "ROJO", texto: `La propiedad lleva ${diasMercado} días en mercado y ha recibido ${totalVisitasHistorico} visitas sin llegar a una oferta. Es momento de valorar una revisión del precio de salida.` }
+      : esAmbar
+      ? { emoji: "🟡", estado: "ÁMBAR", texto: totalVisitasHistorico >= 5 && !tieneOferta ? `Llevamos ${totalVisitasHistorico} visitas sin que se haya presentado una oferta. Puede ser el momento de revisar la estrategia de precio.` : `La propiedad lleva ${diasMercado} días publicada sin oferta. Le recomendamos valorar ajustes en la presentación o el precio.` }
+      : { emoji: "🟢", estado: "VERDE", texto: `La propiedad tiene buena tracción en el mercado. Seguimos trabajando para encontrar al comprador ideal.` };
+
+    // Construir datos de cada visita para el prompt
+    const NIVEL_LABEL = ["","Sin interés","Interés bajo","Interés moderado, quiere pensar","Interés alto, pide más info","Muy interesado, listo para avanzar"];
+    const NIVEL_STARS  = ["","⭐","⭐⭐","⭐⭐⭐","⭐⭐⭐⭐","⭐⭐⭐⭐⭐"];
+    const TIPO_DOC_LABEL = { hoja_visita: "Hoja de visita", oferta: "Propuesta / Oferta", reserva: "Reserva exclusiva", contraoferta: "Contraoferta" };
 
     const totalVisitas = visitas.length;
     const visitasConInteres = visitas.filter(v => v.feedback?.nivel_interes >= 4).length;
-    const visitasConObjeciones = visitas.filter(v => v.feedback?.objeciones?.length && !v.feedback.objeciones.includes("Sin objeciones")).length;
-    const siguientesPasos = visitas.map(v => v.feedback?.siguiente_paso).filter(Boolean).filter(p => p !== "Sin acción" && p !== "Descartada");
+    const siguientesPasos = [...new Set(visitas.map(v => v.feedback?.siguiente_paso).filter(Boolean).filter(p => p !== "Sin acción" && p !== "Descartada"))];
+
+    const visitasTexto = visitas.map((v, i) => {
+      const hora = new Date(v.fecha_visita).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+
+      // Todos los asistentes: comprador principal + adicionales
+      const asistentes = [];
+      if (v.compradores) {
+        const c = v.compradores;
+        asistentes.push(`${c.nombre || ""} ${c.apellidos || ""}`.trim() + ` — DNI: ${c.dni || "no indicado"} — Nacionalidad: ${c.pais || "España"}`);
+      }
+      (v.visita_compradores || []).forEach(vc => {
+        const c = vc.compradores;
+        if (c) asistentes.push(`${c.nombre || ""} ${c.apellidos || ""}`.trim() + ` — DNI: ${c.dni || "no indicado"} — Nacionalidad: ${c.pais || "España"}`);
+      });
+
+      const fb = v.feedback;
+      const nivelTexto = fb?.nivel_interes ? `${NIVEL_STARS[fb.nivel_interes]} ${NIVEL_LABEL[fb.nivel_interes]} (${fb.nivel_interes}/5)` : "No registrado";
+      const objecionesTexto = fb?.objeciones?.length ? fb.objeciones.join(", ") : "Sin objeciones registradas";
+      const siguientePasoTexto = fb?.siguiente_paso || "Sin acción definida";
+      const valoracionPrecioTexto = fb?.valoracion_precio || null;
+
+      const docsTexto = v.visita_documentos?.length
+        ? v.visita_documentos.map(d => TIPO_DOC_LABEL[d.tipo] || d.tipo).join(", ")
+        : "Ninguno";
+
+      return `VISITA ${i+1} — ${hora}h
+Asistentes (${asistentes.length}):
+${asistentes.map(a => `  • ${a}`).join("\n")}
+Nivel de interés: ${nivelTexto}
+Objeciones: ${objecionesTexto}
+${valoracionPrecioTexto ? `Valoración del precio por el comprador: ${valoracionPrecioTexto}` : ""}
+Siguiente paso acordado: ${siguientePasoTexto}
+Documentos firmados: ${docsTexto}
+${v.resumen_ia ? `Resumen de la visita: ${v.resumen_ia}` : ""}
+${v.notas ? `Notas del agente: ${v.notas}` : ""}`;
+    }).join("\n\n---\n\n");
 
     // Generar informe con Claude (via fetch directo)
-    const prompt = `Eres ${agente}, agente inmobiliario de Nativa Properties. Redacta una carta de informe diario para el propietario de la vivienda en ${prop?.dir || ""}, ${prop?.municipio || ""} (Ref. ${prop?.ref || ""}).
+    const prompt = `Eres ${agente}, agente de Nativa Properties. Redacta el informe diario de visitas para el propietario de la vivienda en ${prop?.dir || ""}${prop?.municipio ? `, ${prop.municipio}` : ""}.
 
-HOY SE HAN REALIZADO ${totalVisitas} VISITA${totalVisitas > 1 ? "S" : ""}.
-
-DATOS DE LAS VISITAS:
+DATOS DE LAS VISITAS DE HOY (${fecha}):
 ${visitasTexto}
 
-RESUMEN GLOBAL DEL DÍA:
-- Visitas con alto interés (nivel 4-5): ${visitasConInteres} de ${totalVisitas}
-- Visitas con objeciones detectadas: ${visitasConObjeciones} de ${totalVisitas}
-${siguientesPasos.length ? `- Próximos pasos activos: ${[...new Set(siguientesPasos)].join(", ")}` : "- Sin acciones inmediatas pendientes"}
+SEMÁFORO DE PRECIO:
+Estado: ${semaforo.emoji} ${semaforo.estado}
+Contexto: ${semaforo.texto}
 
-INSTRUCCIONES PARA EL INFORME:
-1. Redacta una carta formal dirigida al propietario, comenzando con "Estimado/a propietario/a,"
-2. Describe brevemente cada visita: quién vino, a qué hora, su interés y si firmó algún documento
-3. Para cada visita, menciona de forma natural las objeciones detectadas (si las hay) y el siguiente paso acordado
-4. Si hay compradores con alto interés, destácalo positivamente
-5. Si hay objeciones de precio, comunícalas con tacto y de forma constructiva (sin alarmar)
-6. Cierra con una valoración general del día y los próximos pasos globales
-7. Usa un tono profesional, cercano y tranquilizador — el propietario necesita sentir que su propiedad está en buenas manos
-8. Firma como: ${agente} | Nativa Properties
+INSTRUCCIONES DE REDACCIÓN:
+Escribe el informe con esta estructura exacta, usando párrafos naturales (no listas con bullets):
 
-NO incluyas datos internos del CRM como IDs o referencias técnicas. Sé conciso pero completo.`;
+1. SALUDO Y CONTEXTO (2-3 líneas)
+   Saluda al propietario por su nombre si lo tienes, si no usa "Estimado/a propietario/a,". Indica que hoy se han realizado ${totalVisitas} visita${totalVisitas > 1 ? "s" : ""} y que le escribes para mantenerle informado.
+
+2. DETALLE DE CADA VISITA (una sección por visita, en orden)
+   Para cada visita incluye:
+   - Hora y nombre completo + DNI de TODOS los asistentes (son datos importantes para el propietario)
+   - Nivel de interés con las estrellas y la etiqueta tal cual (ej: ⭐⭐⭐ Interés moderado, quiere pensar)
+   - Objeciones mencionadas, explicadas con naturalidad y sin alarmar
+   - Siguiente paso acordado
+   - Si firmaron algún documento, mencionarlo
+   - Si hay resumen de la visita, úsalo para enriquecer el texto
+   NO omitas ningún dato. El agente revisará y podrá editar si algo no encaja.
+
+3. VALORACIÓN GLOBAL (3-4 líneas)
+   ${visitasConInteres > 0 ? `Hay ${visitasConInteres} visita${visitasConInteres > 1 ? "s" : ""} con alto interés — destácalo.` : "Sé honesto sobre el nivel de interés general sin ser pesimista."}
+   ${siguientesPasos.length ? `Próximos pasos activos: ${siguientesPasos.join(", ")}.` : ""}
+
+4. SEMÁFORO DE PRECIO (al final, antes del cierre)
+   Escribe literalmente: "${semaforo.emoji} Indicador de mercado: ${semaforo.estado}"
+   Luego el texto: "${semaforo.texto}"
+   ${esRojo ? `Añade: "Desde Nativa Properties le recomendamos solicitar una valoración actualizada a su Agente de Referencia para estudiar un ajuste de precio."` : ""}
+
+5. CIERRE (2-3 líneas)
+   Transmite disponibilidad total, compromiso con el servicio de calidad y que el propietario puede contar con nosotros en todo momento. Por eso le enviamos este informe. Firma como: ${agente} | Nativa Properties
+
+TONO: cercano, asertivo, realista y profesional. Ni rígido ni excesivamente formal. Directo al grano, sin florituras innecesarias.`;
 
     const claudeRes = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
