@@ -68,7 +68,7 @@ function LoginScreen({ users, onLogin }) {
       <div style={{ width: "100%", maxWidth: 380 }}>
         <div style={{ textAlign: "center", marginBottom: 40 }}>
           <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.25em", marginBottom: 12, fontWeight: 500 }}>Nativa Properties</div>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 400, margin: 0, lineHeight: 1.2 }}>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 600, margin: 0, lineHeight: 1.2 }}>
             <em>CRM</em>
           </h1>
           <p style={{ fontSize: 12, color: "#9A968A", marginTop: 8 }}>Accede a tu panel de control</p>
@@ -319,7 +319,7 @@ function DashboardContent({ currentUser, onLogout, users, setUsers }) {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
             <div>
               <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Nativa Properties</div>
-              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 400, margin: 0, lineHeight: 1.1 }}>
+              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 36, fontWeight: 600, margin: 0, lineHeight: 1.1 }}>
                 {isDirector ? <span><em>Dashboard</em> General</span> : <span>Mi <em>Dashboard</em></span>}
               </h1>
               <p style={{ fontSize: 12, color: "#9A968A", margin: "10px 0 0", letterSpacing: "0.04em" }}>
@@ -352,7 +352,7 @@ function DashboardContent({ currentUser, onLogout, users, setUsers }) {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12, marginBottom: 32 }}>
           {kpis.map((s, i) => (
             <div key={i} style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "18px 16px", textAlign: "center" }}>
-              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, color: s.color, fontWeight: 400 }}>{s.n}</div>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, color: s.color, fontWeight: 600 }}>{s.n}</div>
               <div style={{ fontSize: 9, color: "#9A968A", marginTop: 5, textTransform: "uppercase", letterSpacing: "0.1em" }}>{s.l}</div>
             </div>
           ))}

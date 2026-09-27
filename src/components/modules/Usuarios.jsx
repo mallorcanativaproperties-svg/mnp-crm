@@ -131,7 +131,7 @@ export default function Usuarios({ currentUser }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 40 }}>
         <div>
           <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.3em", marginBottom: 8 }}>Nativa Properties</div>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 400, margin: 0 }}>Gestión de <em>Usuarios</em></h1>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 32, fontWeight: 600, margin: 0 }}>Gestión de <em>Usuarios</em></h1>
           <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 8 }}>
             <p style={{ fontSize: 12, color: "#9A968A", margin: 0 }}>{usuarios.filter(u => u.activo).length} activos · {usuarios.filter(u => !u.activo).length} inactivos</p>
             {usuarios.some(u => !u.activo) && (
@@ -199,7 +199,7 @@ export default function Usuarios({ currentUser }) {
       {modal && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: 24 }}>
           <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, width: "100%", maxWidth: 480, padding: "32px 36px" }}>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 400, margin: "0 0 24px" }}>
+            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 600, margin: "0 0 24px" }}>
               {modal === "nuevo" ? "Nuevo usuario" : "Editar usuario"}
             </h2>
 
