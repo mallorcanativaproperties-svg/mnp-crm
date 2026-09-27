@@ -1183,6 +1183,35 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                             <BadgeEstado estado={doc.estado} size="lg" />
                           </div>
 
+                          {/* ✅ Banner COMPLETADO + descarga */}
+                          {doc.estado === "completado" && (
+                            <div style={{ margin: "10px 0 6px", padding: "14px 16px",
+                              background: `${SUCCESS}12`, border: `1.5px solid ${SUCCESS}40`,
+                              borderRadius: 12, display: "flex", alignItems: "center",
+                              justifyContent: "space-between", gap: 12 }}>
+                              <div>
+                                <div style={{ fontSize: 13, fontWeight: 800, color: SUCCESS,
+                                  fontFamily: "Inter, sans-serif", marginBottom: 2 }}>
+                                  ✅ Proceso completado
+                                </div>
+                                <div style={{ fontSize: 11, color: SUCCESS, fontFamily: "Inter, sans-serif",
+                                  opacity: 0.8 }}>
+                                  Todas las partes han firmado
+                                </div>
+                              </div>
+                              {doc.pdf_url && (
+                                <a href={doc.pdf_url} target="_blank" rel="noopener noreferrer"
+                                  style={{ display: "flex", alignItems: "center", gap: 6,
+                                    padding: "10px 16px", background: SUCCESS, color: WHITE,
+                                    borderRadius: 9, fontSize: 13, fontWeight: 700,
+                                    fontFamily: "Inter, sans-serif", textDecoration: "none",
+                                    whiteSpace: "nowrap", flexShrink: 0 }}>
+                                  ⬇️ Descargar PDF
+                                </a>
+                              )}
+                            </div>
+                          )}
+
                           {/* Pipeline visual */}
                           {esOfResv && <PipelineDoc estado={doc.estado} />}
 
