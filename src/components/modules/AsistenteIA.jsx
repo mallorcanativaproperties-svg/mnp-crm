@@ -194,8 +194,11 @@ function Texto({ contenido, color }) {
  */
 function Respuesta({ contenido, color, enCurso }) {
   const texto = String(contenido || "");
-  // Corta por los rotulos de parte, aceptando "# PARTE 1", "### PARTE 2 —", etc.
-  const cortes = [...texto.matchAll(/^#{1,4}\s*PARTE\s+(\d)[^\n]*$/gim)];
+  // Corta por los rotulos de parte. Hay que aceptar las tres formas en las que
+  // el agente los escribe, porque las usa indistintamente: "### PARTE 1 — ...",
+  // "**PARTE 1 — ...**" y "PARTE 1 — ..." a secas. Reconocer solo la de la
+  // almohadilla dejaba la respuesta sin partir y sin botones de copiar.
+  const cortes = [...texto.matchAll(/^[ \t]*(?:#{1,4}[ \t]*)?\*{0,2}[ \t]*PARTE[ \t]+(\d)[^\n]*$/gim)];
 
   if (cortes.length < 2) {
     return (
@@ -212,7 +215,10 @@ function Respuesta({ contenido, color, enCurso }) {
     const trozo = texto.slice(desde, hasta);
     const salto = trozo.indexOf("\n");
     return {
-      titulo: (salto === -1 ? trozo : trozo.slice(0, salto)).replace(/^#{1,4}\s*/, "").trim(),
+      titulo: (salto === -1 ? trozo : trozo.slice(0, salto))
+        .replace(/^[ \t]*#{1,4}[ \t]*/, "")
+        .replace(/^\*{2}|\*{2}$/g, "")
+        .trim(),
       cuerpo: (salto === -1 ? "" : trozo.slice(salto + 1)).trim(),
       n: m[1],
     };
