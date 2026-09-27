@@ -17,18 +17,18 @@ const ESTADO_CONFIG = {
 };
 
 const CHIVATO_CONFIG = {
-  recien_publicado: { label: "Recién publicado", color: "#2C6E52" },
+  recien_publicado: { label: "ReciÃ©n publicado", color: "#2C6E52" },
   mas_3_meses:      { label: "+3 meses",          color: "#9C6E1B" },
   bajada_precio:    { label: "Bajada de precio",  color: "#A23A3A" },
   palabra_clave:    { label: "Urgente",           color: "#405c6b" },
 };
 
-function fmtP(n) { if (!n) return "—"; return n.toLocaleString("es-ES") + " €"; }
+function fmtP(n) { if (!n) return "â"; return n.toLocaleString("es-ES") + " â¬"; }
 function fmtDias(d) {
   if (d === null || d === undefined) return null;
   if (d === 0) return "Publicado hoy";
   if (d === 1) return "Publicado ayer";
-  return `Hace ${d} días`;
+  return `Hace ${d} dÃ­as`;
 }
 
 function ChivatoTag({ chivato }) {
@@ -52,9 +52,9 @@ function Carrusel({ fotos }) {
       <img src={fotos[idx]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
       {fotos.length > 1 && <>
         <button onClick={e => { e.stopPropagation(); setIdx(i => (i - 1 + fotos.length) % fotos.length); }}
-          style={{ position: "absolute", left: 6, top: "50%", transform: "translateY(-50%)", background: "rgba(0,0,0,0.5)", border: "none", color: "#fff", width: 28, height: 28, cursor: "pointer", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>‹</button>
+          style={{ position: "absolute", left: 6, top: "50%", transform: "translateY(-50%)", background: "rgba(0,0,0,0.5)", border: "none", color: "#fff", width: 28, height: 28, cursor: "pointer", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>â¹</button>
         <button onClick={e => { e.stopPropagation(); setIdx(i => (i + 1) % fotos.length); }}
-          style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", background: "rgba(0,0,0,0.5)", border: "none", color: "#fff", width: 28, height: 28, cursor: "pointer", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>›</button>
+          style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", background: "rgba(0,0,0,0.5)", border: "none", color: "#fff", width: 28, height: 28, cursor: "pointer", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>âº</button>
         <div style={{ position: "absolute", bottom: 6, right: 8, background: "rgba(0,0,0,0.5)", color: "#fff", fontSize: 10, padding: "2px 6px" }}>{idx + 1}/{fotos.length}</div>
       </>}
     </div>
@@ -82,11 +82,11 @@ function FichaModal({ item, onClose, onUpdate, onAna }) {
         {/* Header */}
         <div style={{ background: PETROL, padding: "20px 24px", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div>
-            <div style={{ fontSize: 10, color: BRONZE, letterSpacing: "0.2em", marginBottom: 6 }}>PROSPECCIÓN · {item.distrito?.toUpperCase() || "MALLORCA"}</div>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, color: CREAM, fontWeight: 600 }}>{item.titulo || "Sin título"}</div>
+            <div style={{ fontSize: 10, color: BRONZE, letterSpacing: "0.2em", marginBottom: 6 }}>PROSPECCIÃN Â· {item.distrito?.toUpperCase() || "MALLORCA"}</div>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, color: CREAM, fontWeight: 600 }}>{item.titulo || "Sin tÃ­tulo"}</div>
             <div style={{ fontSize: 12, color: "#9A968A", marginTop: 4 }}>{item.direccion}</div>
           </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: "#9A968A", fontSize: 20, cursor: "pointer", padding: 4 }}>✕</button>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "#9A968A", fontSize: 20, cursor: "pointer", padding: 4 }}>â</button>
         </div>
 
         {/* Carrusel */}
@@ -105,18 +105,18 @@ function FichaModal({ item, onClose, onUpdate, onAna }) {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12, marginBottom: 20 }}>
             {[
               { label: "Precio", value: fmtP(item.precio) },
-              { label: "Precio/m²", value: item.precio_m2 ? `${item.precio_m2.toLocaleString("es-ES")} €/m²` : "—" },
-              { label: "Precio anterior", value: item.precio_anterior ? fmtP(item.precio_anterior) : "—" },
-              { label: "Bajada", value: item.bajada_precio ? `Sí${item.porcentaje_bajada ? ` (${Math.round(item.porcentaje_bajada)}%)` : ""}` : "No" },
-              { label: "Superficie", value: item.superficie ? `${item.superficie} m²` : "—" },
-              { label: "Habitaciones", value: item.habitaciones || "—" },
-              { label: "Publicado", value: fmtDias(item.dias_publicado) || "—" },
-              { label: "Distrito", value: item.distrito || "—" },
-              { label: "Municipio", value: item.municipio || "—" },
-              { label: "Baños", value: item.banos || "—" },
-              { label: "Ascensor", value: (item.features || []).includes("5") || (item.features || []).includes(5) ? "Sí" : "—" },
-              { label: "Días publicado", value: item.dias_publicado !== null && item.dias_publicado !== undefined ? fmtDias(item.dias_publicado) : "—" },
-              { label: "Fecha publicación", value: item.fecha_publicacion ? new Date(item.fecha_publicacion).toLocaleDateString("es-ES") : "—" },
+              { label: "Precio/mÂ²", value: item.precio_m2 ? `${item.precio_m2.toLocaleString("es-ES")} â¬/mÂ²` : "â" },
+              { label: "Precio anterior", value: item.precio_anterior ? fmtP(item.precio_anterior) : "â" },
+              { label: "Bajada", value: item.bajada_precio ? `SÃ­${item.porcentaje_bajada ? ` (${Math.round(item.porcentaje_bajada)}%)` : ""}` : "No" },
+              { label: "Superficie", value: item.superficie ? `${item.superficie} mÂ²` : "â" },
+              { label: "Habitaciones", value: item.habitaciones || "â" },
+              { label: "Publicado", value: fmtDias(item.dias_publicado) || "â" },
+              { label: "Distrito", value: item.distrito || "â" },
+              { label: "Municipio", value: item.municipio || "â" },
+              { label: "BaÃ±os", value: item.banos || "â" },
+              { label: "Ascensor", value: (item.features || []).includes("5") || (item.features || []).includes(5) ? "SÃ­" : "â" },
+              { label: "DÃ­as publicado", value: item.dias_publicado !== null && item.dias_publicado !== undefined ? fmtDias(item.dias_publicado) : "â" },
+              { label: "Fecha publicaciÃ³n", value: item.fecha_publicacion ? new Date(item.fecha_publicacion).toLocaleDateString("es-ES") : "â" },
               { label: "Contacto", value: item.nombre_contacto || "Particular" },
             ].map(({ label, value }) => (
               <div key={label} style={{ background: "#fff", border: `1px solid ${BORDER}`, padding: "12px 14px" }}>
@@ -129,23 +129,23 @@ function FichaModal({ item, onClose, onUpdate, onAna }) {
           {/* Mapa si hay coordenadas */}
           {item.latitud && item.longitud && (
             <div style={{ marginBottom: 20 }}>
-              <div style={{ fontSize: 10, color: "#9A968A", letterSpacing: "0.08em", marginBottom: 8 }}>UBICACIÓN</div>
+              <div style={{ fontSize: 10, color: "#9A968A", letterSpacing: "0.08em", marginBottom: 8 }}>UBICACIÃN</div>
               <a href={`https://www.google.com/maps?q=${item.latitud},${item.longitud}`} target="_blank" rel="noopener noreferrer"
                 style={{ display: "block", background: "#fff", border: `1px solid ${BORDER}`, padding: "10px 14px", fontSize: 12, color: BRONZE, textDecoration: "none", fontFamily: "Inter, sans-serif" }}>
-                Ver en Google Maps → {item.latitud.toFixed(5)}, {item.longitud.toFixed(5)}
+                Ver en Google Maps â {item.latitud.toFixed(5)}, {item.longitud.toFixed(5)}
               </a>
             </div>
           )}
 
-          {/* Teléfono */}
+          {/* TelÃ©fono */}
           <div style={{ marginBottom: 20 }}>
-            <div style={{ fontSize: 10, color: "#9A968A", letterSpacing: "0.08em", marginBottom: 8 }}>TELÉFONO</div>
+            <div style={{ fontSize: 10, color: "#9A968A", letterSpacing: "0.08em", marginBottom: 8 }}>TELÃFONO</div>
             <div style={{ display: "flex", gap: 8 }}>
-              <input value={telEdit} onChange={e => setTelEdit(e.target.value)} placeholder="Añadir teléfono del propietario..."
+              <input value={telEdit} onChange={e => setTelEdit(e.target.value)} placeholder="AÃ±adir telÃ©fono del propietario..."
                 style={{ flex: 1, padding: "10px 14px", border: `1px solid ${BORDER}`, background: "#fff", color: PETROL, fontSize: 13, fontFamily: "Inter, sans-serif", outline: "none" }} />
               {telEdit && (
                 <>
-                  <a href={`https://wa.me/${telEdit.replace(/\D/g, "")}?text=${encodeURIComponent(`Hola! Soy de Nativa Properties. He visto tu anuncio en Fotocasa y me gustaría hablar contigo.`)}`}
+                  <a href={`https://wa.me/${telEdit.replace(/\D/g, "")}?text=${encodeURIComponent(`Hola! Soy de Nativa Properties. He visto tu anuncio en Fotocasa y me gustarÃ­a hablar contigo.`)}`}
                     target="_blank" rel="noopener noreferrer"
                     style={{ padding: "10px 14px", background: "#2C6E52", color: CREAM, fontSize: 11, textDecoration: "none", fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center" }}>
                     WhatsApp
@@ -177,7 +177,7 @@ function FichaModal({ item, onClose, onUpdate, onAna }) {
           <div style={{ display: "flex", gap: 10, justifyContent: "space-between", alignItems: "center" }}>
             <a href={item.url} target="_blank" rel="noopener noreferrer"
               style={{ fontSize: 12, color: BRONZE, textDecoration: "none", border: `1px solid ${BRONZE}44`, padding: "8px 16px", fontFamily: "Inter, sans-serif" }}>
-              Ver anuncio en {item.portal ? item.portal.charAt(0).toUpperCase() + item.portal.slice(1) : "portal"} →
+              Ver anuncio en {item.portal ? item.portal.charAt(0).toUpperCase() + item.portal.slice(1) : "portal"} â
             </a>
             <button onClick={guardar} disabled={guardando}
               style={{ padding: "10px 24px", background: PETROL, border: "none", color: CREAM, fontSize: 12, fontWeight: 600, cursor: guardando ? "not-allowed" : "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.06em" }}>
@@ -208,24 +208,24 @@ function TarjetaParticular({ item, onUpdate, onClick, onAna }) {
           </div>
         )}
 
-        {/* Título y dirección */}
-        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, color: PETROL, marginBottom: 3, lineHeight: 1.3 }}>{item.titulo || "Sin título"}</div>
+        {/* TÃ­tulo y direcciÃ³n */}
+        <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, color: PETROL, marginBottom: 3, lineHeight: 1.3 }}>{item.titulo || "Sin tÃ­tulo"}</div>
         <div style={{ fontSize: 11, color: "#9A968A", marginBottom: 10, display: "flex", gap: 8, alignItems: "center" }}>
-          <span>{item.distrito} · {item.municipio}</span>
+          <span>{item.distrito} Â· {item.municipio}</span>
           {item.portal && <span style={{ fontSize: 9, padding: "1px 6px", background: item.portal === "fotocasa" ? "rgba(255,107,53,0.1)" : item.portal === "habitaclia" ? "rgba(0,122,255,0.1)" : "rgba(44,110,82,0.1)", color: item.portal === "fotocasa" ? "#E8450A" : item.portal === "habitaclia" ? "#0066CC" : "#2C6E52", letterSpacing: "0.06em", textTransform: "uppercase" }}>{item.portal}</span>}
         </div>
 
         {/* Datos clave */}
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center", marginBottom: 6 }}>
           <span style={{ fontSize: 15, color: BRONZE, fontWeight: 700 }}>{fmtP(item.precio)}</span>
-          {item.precio_m2 && <span style={{ fontSize: 11, color: "#9A968A" }}>{Math.round(item.precio_m2).toLocaleString("es-ES")} €/m²</span>}
-          {item.bajada_precio && <span style={{ fontSize: 11, color: "#A23A3A", background: "rgba(162,58,58,0.08)", padding: "2px 6px" }}>↓ Rebajado</span>}
+          {item.precio_m2 && <span style={{ fontSize: 11, color: "#9A968A" }}>{Math.round(item.precio_m2).toLocaleString("es-ES")} â¬/mÂ²</span>}
+          {item.bajada_precio && <span style={{ fontSize: 11, color: "#A23A3A", background: "rgba(162,58,58,0.08)", padding: "2px 6px" }}>â Rebajado</span>}
         </div>
 
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center", marginBottom: 6 }}>
           {item.habitaciones && <span style={{ fontSize: 11, color: "#9A968A" }}>{item.habitaciones} hab.</span>}
-          {item.superficie && <span style={{ fontSize: 11, color: "#9A968A" }}>{item.superficie} m²</span>}
-          {item.banos && <span style={{ fontSize: 11, color: "#9A968A" }}>{item.banos} baños</span>}
+          {item.superficie && <span style={{ fontSize: 11, color: "#9A968A" }}>{item.superficie} mÂ²</span>}
+          {item.banos && <span style={{ fontSize: 11, color: "#9A968A" }}>{item.banos} baÃ±os</span>}
         </div>
 
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
@@ -235,7 +235,7 @@ function TarjetaParticular({ item, onUpdate, onClick, onAna }) {
           <span style={{ fontSize: 10, padding: "2px 8px", background: cfg.bg, color: cfg.color, fontFamily: "Inter, sans-serif", marginLeft: "auto" }}>{cfg.label}</span>
         </div>
 
-        {/* Botones acción */}
+        {/* Botones acciÃ³n */}
         <div style={{ display: "flex", gap: 8, marginTop: 10, paddingTop: 10, borderTop: `1px solid ${BORDER}` }} onClick={e => e.stopPropagation()}>
           <a href={item.url} target="_blank" rel="noopener noreferrer"
             style={{ flex: 1, textAlign: "center", fontSize: 11, color: BRONZE, textDecoration: "none", border: `1px solid ${BRONZE}44`, padding: "6px 8px", fontFamily: "Inter, sans-serif" }}>
@@ -360,7 +360,7 @@ function AnaPanel({ item, onClose }) {
     setModoManual(nuevo);
     if (convId) {
       await supabase.from("conversaciones").update({ estado: nuevo ? "manual" : "activo", updated_at: new Date().toISOString() }).eq("id", convId);
-      const txt = nuevo ? "Modo manual activado — ANA en pausa" : "IA reactivada — ANA responde automáticamente";
+      const txt = nuevo ? "Modo manual activado â ANA en pausa" : "IA reactivada â ANA responde automÃ¡ticamente";
       setMensajes(prev => [...prev, { from: "sistema", text: txt, ts: "" }]);
       await supabase.from("mensajes").insert({ conversacion_id: convId, texto: txt, from_who: "sistema", timestamp: new Date().toISOString() });
     }
@@ -381,39 +381,39 @@ function AnaPanel({ item, onClose }) {
             </div>
             <div>
               <div style={{ fontSize: 14, fontWeight: 600, color: CREAM, lineHeight: 1.3 }}>{nombre}</div>
-              <div style={{ fontSize: 11, color: BRONZE, marginTop: 1 }}>{telefono || "Sin teléfono"}</div>
+              <div style={{ fontSize: 11, color: BRONZE, marginTop: 1 }}>{telefono || "Sin telÃ©fono"}</div>
             </div>
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <button onClick={toggleModo} style={{ padding: "5px 12px", background: modoManual ? "rgba(172,138,84,0.15)" : "rgba(64,92,107,0.3)", border: `1px solid ${modoManual ? BRONZE : "#405c6b"}`, color: modoManual ? BRONZE : "#7aafc4", cursor: "pointer", fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", fontFamily: "Raleway, Inter, sans-serif" }}>
               {modoManual ? "MANUAL" : "ANA ACTIVA"}
             </button>
-            <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(248,246,241,0.4)", fontSize: 18, cursor: "pointer", padding: "0 0 0 8px" }}>✕</button>
+            <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(248,246,241,0.4)", fontSize: 18, cursor: "pointer", padding: "0 0 0 8px" }}>â</button>
           </div>
         </div>
         <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid rgba(255,255,255,0.06)", fontSize: 10, color: "rgba(248,246,241,0.3)", letterSpacing: "0.12em" }}>
-          ANA · CAPTACIÓN PARTICULARES
+          ANA Â· CAPTACIÃN PARTICULARES
         </div>
       </div>
 
       {modoManual && (
         <div style={{ padding: "8px 20px", background: "rgba(172,138,84,0.08)", borderBottom: "1px solid rgba(172,138,84,0.2)", fontSize: 11, color: "#8f7141", flexShrink: 0 }}>
-          ANA en pausa — tus mensajes llegan directamente al propietario
+          ANA en pausa â tus mensajes llegan directamente al propietario
         </div>
       )}
 
       {!telefono && (
         <div style={{ padding: "20px", background: "rgba(162,58,58,0.06)", borderBottom: "1px solid rgba(162,58,58,0.15)", fontSize: 12, color: "#A23A3A", flexShrink: 0 }}>
-          Este propietario no tiene teléfono. Añádelo en la ficha para poder contactar.
+          Este propietario no tiene telÃ©fono. AÃ±Ã¡delo en la ficha para poder contactar.
         </div>
       )}
 
       <div ref={chatRef} style={{ flex: 1, overflowY: "auto", padding: "20px 16px", background: "#EDEAE4" }}>
         {loadingConv ? (
-          <div style={{ textAlign: "center", padding: 48, color: "#9A968A", fontSize: 12 }}>Cargando conversación...</div>
+          <div style={{ textAlign: "center", padding: 48, color: "#9A968A", fontSize: 12 }}>Cargando conversaciÃ³n...</div>
         ) : mensajes.length === 0 ? (
           <div style={{ textAlign: "center", padding: 48, color: "#9A968A", fontSize: 12, fontStyle: "italic" }}>
-            {telefono ? "Sin mensajes aún. Escribe el primer mensaje." : "Añade un teléfono para iniciar la conversación."}
+            {telefono ? "Sin mensajes aÃºn. Escribe el primer mensaje." : "AÃ±ade un telÃ©fono para iniciar la conversaciÃ³n."}
           </div>
         ) : (
           mensajes.map((m, i) => {
@@ -440,12 +440,12 @@ function AnaPanel({ item, onClose }) {
         <div style={{ display: "flex", gap: 8 }}>
           <input value={input} onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === "Enter" && !e.shiftKey && handleSend()}
-            placeholder={telefono ? "Escribe un mensaje..." : "Sin teléfono"}
+            placeholder={telefono ? "Escribe un mensaje..." : "Sin telÃ©fono"}
             disabled={!telefono || loading}
             style={{ flex: 1, padding: "10px 14px", border: "1px solid #E7E1D4", background: telefono ? "#fff" : "#F5F5F5", color: PETROL, fontSize: 13, fontFamily: "Inter, sans-serif", outline: "none" }} />
           <button onClick={handleSend} disabled={!telefono || loading || !input.trim()}
             style={{ padding: "10px 16px", background: input.trim() && telefono ? PETROL : "#E7E1D4", border: "none", color: input.trim() && telefono ? CREAM : "#9A968A", cursor: input.trim() && telefono ? "pointer" : "not-allowed", fontSize: 13, fontFamily: "Inter, sans-serif" }}>
-            {loading ? "..." : "→"}
+            {loading ? "..." : "â"}
           </button>
         </div>
       </div>
@@ -497,11 +497,11 @@ export default function Captacion() {
       clearTimeout(timeout);
       const data = await res.json();
       if (data.ok) {
-        setScrapingMsg(`✓ Completado — ${data.guardados} guardados de ${data.encontrados} encontrados`);
+        setScrapingMsg(`â Completado â ${data.guardados} guardados de ${data.encontrados} encontrados`);
         await load();
       } else setScrapingMsg("Error: " + data.error);
     } catch (e) {
-      if (e.name === "AbortError") { setScrapingMsg("✓ Scraping en curso — recarga en unos minutos"); await load(); }
+      if (e.name === "AbortError") { setScrapingMsg("â Scraping en curso â recarga en unos minutos"); await load(); }
       else setScrapingMsg("Error: " + e.message);
     } finally { setScrapingManual(false); }
   }
@@ -525,16 +525,16 @@ export default function Captacion() {
 
         {/* Header */}
         <div style={{ marginBottom: 28 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 16 }}>
-            <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Particulares en captación</h1>
-            <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Gestión y seguimiento de particulares en proceso de captación</p>
-            <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} /><button onClick={handleScrapingManual} disabled={scrapingManual}
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Particulares en captación</h1>
+          <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Gestión y seguimiento de particulares en proceso de captación</p>
+          <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />
+        </div>
+        <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} /><button onClick={handleScrapingManual} disabled={scrapingManual}
               style={{ padding: "10px 20px", background: scrapingManual ? "#E7E1D4" : PETROL, border: "none", color: scrapingManual ? "#9A968A" : CREAM, fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", cursor: scrapingManual ? "not-allowed" : "pointer", fontFamily: "Inter, sans-serif" }}>
               {scrapingManual ? "Buscando..." : "Buscar en portales"}
             </button>
           </div>
-          {scrapingMsg && <div style={{ marginTop: 10, fontSize: 12, color: scrapingMsg.startsWith("✓") ? "#2C6E52" : "#A23A3A" }}>{scrapingMsg}</div>}
-        </div>
+          {scrapingMsg && <div style={{ marginTop: 10, fontSize: 12, color: scrapingMsg.startsWith("â") ? "#2C6E52" : "#A23A3A" }}>{scrapingMsg}</div>}
 
         {/* Stats */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))", gap: 10, marginBottom: 24 }}>
@@ -569,7 +569,7 @@ export default function Captacion() {
         </div>
 
         <div style={{ fontSize: 11, color: "#9A968A", marginBottom: 16 }}>
-          Scraping automático cada día a las 7:00 y 13:00 · Pulsa una tarjeta para ver la ficha completa
+          Scraping automÃ¡tico cada dÃ­a a las 7:00 y 13:00 Â· Pulsa una tarjeta para ver la ficha completa
         </div>
 
         {/* Grid de tarjetas */}
@@ -577,7 +577,7 @@ export default function Captacion() {
           <div style={{ textAlign: "center", padding: 60, color: "#9A968A", fontSize: 13, fontStyle: "italic" }}>Cargando...</div>
         ) : filtrados.length === 0 ? (
           <div style={{ textAlign: "center", padding: 60 }}>
-            <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 32, fontWeight: 300, color: "#C8BFB0", marginBottom: 12 }}>◇</div>
+            <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 32, fontWeight: 300, color: "#C8BFB0", marginBottom: 12 }}>â</div>
             <div style={{ fontSize: 13, color: "#9A968A" }}>No hay particulares en este estado.<br/>Pulsa "Buscar en portales" para importar.</div>
           </div>
         ) : (

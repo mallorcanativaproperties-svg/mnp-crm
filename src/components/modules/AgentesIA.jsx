@@ -3,7 +3,7 @@ import { CpuChipIcon, ChatBubbleLeftRightIcon, PaperAirplaneIcon, XMarkIcon } fr
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { supabase } from "../../lib/supabase";
 
-/* ── SYSTEM PROMPTS ── */
+/* ââ SYSTEM PROMPTS ââ */
 const ANA_PROMPT = `Eres Ana, agente comercial de Nativa Properties. Contactas por WhatsApp a particulares que publican propiedades en venta.
 
 PERSONALIDAD: Cercana, directa, breve, natural. Escribes como persona real por WhatsApp: mensajes cortos, sin parrafos, sin formalidades. Tuteas siempre. Nunca robotica. Tono como el de una conocida que te escribe, no como vendedora.
@@ -133,7 +133,7 @@ SITUACIONES ESPECIALES:
 
 IMPORTANTE: Respuestas cortas tipo WhatsApp. 1-2 lineas maximo. NUNCA mentir.`;
 
-/* ── INTEREST LEVELS ── */
+/* ââ INTEREST LEVELS ââ */
 const INTERES = [
   { key: "caliente", label: "Caliente", color: "#A23A3A", desc: "Muy interesado, responde rapido" },
   { key: "tibio", label: "Tibio", color: "#AC8A54", desc: "Interesado pero con dudas" },
@@ -141,7 +141,7 @@ const INTERES = [
   { key: "perdido", label: "Perdido", color: "#9A968A", desc: "No responde, dejado en visto" },
 ];
 
-/* ── ANA OBJECTIVES ── */
+/* ââ ANA OBJECTIVES ââ */
 const OBJETIVOS_ANA = [
   { key: "reels", label: "Reels", color: "#E1306C" },
   { key: "valoracion", label: "Valoracion", color: "#AC8A54" },
@@ -251,7 +251,7 @@ const CLAUDIA_CONVS = [
   ], alertas: [] },
 ];
 
-/* ── COMPONENTS ── */
+/* ââ COMPONENTS ââ */
 function Tag({ children, color }) {
   const c = color || "#AC8A54";
   return <span style={{ display: "inline-block", fontSize: 9, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", padding: "3px 10px", borderRadius: 0, background: c + "18", color: c }}>{children}</span>;
@@ -260,10 +260,10 @@ function Tag({ children, color }) {
 function WATicks({ status }) {
   if (!status) return null;
   const s = String(status).toUpperCase();
-  if (s === "READ")      return <span style={{ color: "#34B7F1", fontSize: 11, marginLeft: 3 }}>✓✓</span>;
-  if (s === "DELIVERED") return <span style={{ color: "#9A968A", fontSize: 11, marginLeft: 3 }}>✓✓</span>;
-  if (s === "SENT")      return <span style={{ color: "#9A968A", fontSize: 11, marginLeft: 3 }}>✓</span>;
-  if (s === "PENDING")   return <span style={{ color: "#C8C0B0", fontSize: 11, marginLeft: 3 }}>🕐</span>;
+  if (s === "READ")      return <span style={{ color: "#34B7F1", fontSize: 11, marginLeft: 3 }}>ââ</span>;
+  if (s === "DELIVERED") return <span style={{ color: "#9A968A", fontSize: 11, marginLeft: 3 }}>ââ</span>;
+  if (s === "SENT")      return <span style={{ color: "#9A968A", fontSize: 11, marginLeft: 3 }}>â</span>;
+  if (s === "PENDING")   return <span style={{ color: "#C8C0B0", fontSize: 11, marginLeft: 3 }}>ð</span>;
   return null;
 }
 
@@ -322,7 +322,7 @@ function ChatPanel({ conv, onSendMessage, isAna }) {
     if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
   }, [conv.mensajes]);
 
-  // Activar/desactivar modo manual — actualiza estado en Supabase
+  // Activar/desactivar modo manual â actualiza estado en Supabase
   const toggleModoManual = async () => {
     const nuevoEstado = !modoManual;
     setModoManual(nuevoEstado);
@@ -337,8 +337,8 @@ function ChatPanel({ conv, onSendMessage, isAna }) {
         }),
       });
       onSendMessage(conv.id, nuevoEstado
-        ? `[Modo manual activado — ${agenteName} no responderá automáticamente]`
-        : `[Modo IA reactivado — ${agenteName} vuelve a responder automáticamente]`,
+        ? `[Modo manual activado â ${agenteName} no responderÃ¡ automÃ¡ticamente]`
+        : `[Modo IA reactivado â ${agenteName} vuelve a responder automÃ¡ticamente]`,
         "sistema"
       );
     } catch (e) {
@@ -346,7 +346,7 @@ function ChatPanel({ conv, onSendMessage, isAna }) {
     }
   };
 
-  // Envío manual — envía WhatsApp real + guarda en Supabase
+  // EnvÃ­o manual â envÃ­a WhatsApp real + guarda en Supabase
   const handleManualSend = async () => {
     if (!input.trim() || sendingManual) return;
     const texto = input.trim();
@@ -376,7 +376,7 @@ function ChatPanel({ conv, onSendMessage, isAna }) {
     }
   };
 
-  // Envío simulación IA (modo test)
+  // EnvÃ­o simulaciÃ³n IA (modo test)
   const handleSend = async () => {
     if (!input.trim() || loading) return;
     const texto = input.trim();
@@ -436,13 +436,13 @@ function ChatPanel({ conv, onSendMessage, isAna }) {
               cursor: "pointer", fontSize: 10, fontWeight: 600,
               fontFamily: "Inter, sans-serif", letterSpacing: "0.05em",
             }}>
-              {modoManual ? "⏸ MANUAL ACTIVO" : `🤖 ${agenteName.toUpperCase()} ACTIVA`}
+              {modoManual ? "â¸ MANUAL ACTIVO" : `ð¤ ${agenteName.toUpperCase()} ACTIVA`}
             </button>
           </div>
         </div>
         {modoManual && (
           <div style={{ marginTop: 8, padding: "8px 12px", background: "#D4545412", border: "1px solid #D4545433", borderRadius: 0, fontSize: 11, color: "#A23A3A" }}>
-            ⚠️ {agenteName} está en pausa. Los mensajes que escribas se enviarán directamente al cliente por WhatsApp.
+            â ï¸ {agenteName} estÃ¡ en pausa. Los mensajes que escribas se enviarÃ¡n directamente al cliente por WhatsApp.
           </div>
         )}
         {conv.alertas && conv.alertas.length > 0 && conv.alertas.map((a, i) => (
@@ -475,7 +475,7 @@ function ChatPanel({ conv, onSendMessage, isAna }) {
           <div style={{ display: "flex", gap: 8 }}>
             <input value={input} onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleManualSend(); } }}
-              placeholder={`Escribe como agente — se enviará por WhatsApp al cliente...`}
+              placeholder={`Escribe como agente â se enviarÃ¡ por WhatsApp al cliente...`}
               style={{ flex: 1, padding: "10px 14px", background: "#FFFFFF", border: "1px solid #D4545444", borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", outline: "none", boxSizing: "border-box" }} />
             <button onClick={handleManualSend} disabled={sendingManual || !input.trim()} style={{
               padding: "10px 20px", borderRadius: 0, border: "none",
@@ -600,7 +600,7 @@ function AgentPanel({ convs, setConvs, isAna, selectedId, setSelectedId }) {
   );
 }
 
-/* ── Scan Emails Button ── */
+/* ââ Scan Emails Button ââ */
 function ScanEmailsButton() {
   const [showModal, setShowModal] = useState(false);
   const [emailText, setEmailText] = useState("");
@@ -644,38 +644,38 @@ function ScanEmailsButton() {
         fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase",
         fontFamily: "Inter, sans-serif",
       }}>
-        📧 Lead Idealista
+        ð§ Lead Idealista
       </button>
       {showModal && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => setShowModal(false)}>
           <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "28px 32px", maxWidth: 600, width: "95%" }} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
               <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 600, margin: 0 }}>Procesar email <em>Idealista</em></h3>
-              <button onClick={() => setShowModal(false)} style={{ background: "none", border: "none", color: "#9A968A", cursor: "pointer", fontSize: 18 }}>✕</button>
+              <button onClick={() => setShowModal(false)} style={{ background: "none", border: "none", color: "#9A968A", cursor: "pointer", fontSize: 18 }}>â</button>
             </div>
-            <p style={{ fontSize: 11, color: "#9A968A", marginBottom: 16 }}>Pega el contenido del email de Idealista. CLAUDIA extraerá los datos y enviará WhatsApp al cliente automáticamente.</p>
+            <p style={{ fontSize: 11, color: "#9A968A", marginBottom: 16 }}>Pega el contenido del email de Idealista. CLAUDIA extraerÃ¡ los datos y enviarÃ¡ WhatsApp al cliente automÃ¡ticamente.</p>
             <div style={{ marginBottom: 14 }}>
               <label style={S.label}>Asunto del email</label>
               <input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Nuevo mensaje / Llamada no contestada..." style={S.input} />
             </div>
             <div style={{ marginBottom: 20 }}>
               <label style={S.label}>Contenido del email (pegar todo)</label>
-              <textarea value={emailText} onChange={(e) => setEmailText(e.target.value)} rows={10} placeholder={"Pega aquí el contenido completo del email de Idealista...\n\nEjemplo:\nBara\n602 39 80 54\nbaradiop856@gmail.com\n\nHola, me interesa este piso...\n\nRef. MNAQA00031\nCódigo del anuncio: 110979381\n320.000 €"} style={{ ...S.input, resize: "vertical", lineHeight: 1.5 }} />
+              <textarea value={emailText} onChange={(e) => setEmailText(e.target.value)} rows={10} placeholder={"Pega aquÃ­ el contenido completo del email de Idealista...\n\nEjemplo:\nBara\n602 39 80 54\nbaradiop856@gmail.com\n\nHola, me interesa este piso...\n\nRef. MNAQA00031\nCÃ³digo del anuncio: 110979381\n320.000 â¬"} style={{ ...S.input, resize: "vertical", lineHeight: 1.5 }} />
             </div>
             {result && (
               <div style={{ marginBottom: 16, padding: "12px 16px", borderRadius: 0, background: result.success ? "#6AAF8D12" : "#D4545412", border: "1px solid " + (result.success ? "#6AAF8D33" : "#A23A3A44") }}>
                 {result.success ? (
                   <div>
-                    <div style={{ fontSize: 12, color: "#2C6E52", fontWeight: 500, marginBottom: 4 }}>✓ Lead procesado correctamente</div>
+                    <div style={{ fontSize: 12, color: "#2C6E52", fontWeight: 500, marginBottom: 4 }}>â Lead procesado correctamente</div>
                     <div style={{ fontSize: 11, color: "#A09D93" }}>
-                      {result.nombre && <span>Cliente: {result.nombre} · </span>}
-                      Tel: {result.phone} · Ref: {result.referencia || "N/A"} · Agente: {result.agente || "N/A"}
+                      {result.nombre && <span>Cliente: {result.nombre} Â· </span>}
+                      Tel: {result.phone} Â· Ref: {result.referencia || "N/A"} Â· Agente: {result.agente || "N/A"}
                     </div>
                     <div style={{ fontSize: 10, color: "#AC8A54", marginTop: 4 }}>WhatsApp enviado al cliente</div>
                   </div>
                 ) : (
                   <div style={{ fontSize: 12, color: "#A23A3A" }}>
-                    {result.reason === "duplicate" ? "⚠ Este lead ya fue procesado antes" : `Error: ${result.error || "Desconocido"}`}
+                    {result.reason === "duplicate" ? "â  Este lead ya fue procesado antes" : `Error: ${result.error || "Desconocido"}`}
                   </div>
                 )}
               </div>
@@ -693,9 +693,9 @@ function ScanEmailsButton() {
   );
 }
 
-/* ── MAIN ── */
+/* ââ MAIN ââ */
 
-// ═══ PANEL DE SILVIA — Instagram DMs ═══════════════════════════
+// âââ PANEL DE SILVIA â Instagram DMs âââââââââââââââââââââââââââ
 function SilviaPanel({ convs, selectedId, setSelectedId }) {
   const selected = convs.find(c => c.id === selectedId) || convs[0] || null;
   const IG_PURPLE = "#6B4FA0";
@@ -703,9 +703,9 @@ function SilviaPanel({ convs, selectedId, setSelectedId }) {
   if (convs.length === 0) {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 400, flexDirection: "column", gap: 12 }}>
-        <div style={{ fontSize: 32 }}>📸</div>
-        <div style={{ fontSize: 14, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>No hay conversaciones de Instagram DM aún</div>
-        <div style={{ fontSize: 12, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>Los mensajes directos aparecerán aquí cuando el webhook esté activo</div>
+        <div style={{ fontSize: 32 }}>ð¸</div>
+        <div style={{ fontSize: 14, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>No hay conversaciones de Instagram DM aÃºn</div>
+        <div style={{ fontSize: 12, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>Los mensajes directos aparecerÃ¡n aquÃ­ cuando el webhook estÃ© activo</div>
       </div>
     );
   }
@@ -731,7 +731,7 @@ function SilviaPanel({ convs, selectedId, setSelectedId }) {
                 </div>
               </div>
               <div style={{ fontSize: 11, color: "#9A968A", fontFamily: "Inter, sans-serif", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                {lastMsg?.text || "—"}
+                {lastMsg?.text || "â"}
               </div>
             </div>
           );
@@ -744,10 +744,10 @@ function SilviaPanel({ convs, selectedId, setSelectedId }) {
           <>
             {/* Header */}
             <div style={{ padding: "14px 20px", borderBottom: "1px solid #E7E1D4", background: "#FFFFFF", display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ width: 36, height: 36, borderRadius: "50%", background: IG_PURPLE + "22", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>📸</div>
+              <div style={{ width: 36, height: 36, borderRadius: "50%", background: IG_PURPLE + "22", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>ð¸</div>
               <div>
                 <div style={{ fontSize: 14, fontWeight: 600, color: "#22262E", fontFamily: "Inter, sans-serif" }}>{selected.sender_name || selected.sender_id}</div>
-                <div style={{ fontSize: 11, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>Instagram DM · {selected.estado || "activo"}</div>
+                <div style={{ fontSize: 11, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>Instagram DM Â· {selected.estado || "activo"}</div>
               </div>
             </div>
 
@@ -772,23 +772,23 @@ function SilviaPanel({ convs, selectedId, setSelectedId }) {
               })}
             </div>
 
-            {/* Nota — sin respuesta manual por ahora */}
+            {/* Nota â sin respuesta manual por ahora */}
             <div style={{ padding: "12px 20px", borderTop: "1px solid #E7E1D4", background: "#FFFFFF", fontSize: 11, color: "#9A968A", fontFamily: "Inter, sans-serif", textAlign: "center" }}>
-              Vista de solo lectura · La respuesta automática se configura en el agente IA de Silvia
+              Vista de solo lectura Â· La respuesta automÃ¡tica se configura en el agente IA de Silvia
             </div>
           </>
         ) : (
           <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "#9A968A", fontSize: 13 }}>
-            Selecciona una conversación
+            Selecciona una conversaciÃ³n
           </div>
         )}
       </div>
     </div>
   );
 }
-// ════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
-// ═══ PANEL DE OTROS — mensajes sistema, CRM, etc. ═══════════════
+// âââ PANEL DE OTROS â mensajes sistema, CRM, etc. âââââââââââââââ
 function OtrosPanel({ convs, selectedId, setSelectedId }) {
   const OTROS_COLOR = "#7A6B5A";
   const selected = convs.find(c => c.id === selectedId) || convs[0] || null;
@@ -815,9 +815,9 @@ function OtrosPanel({ convs, selectedId, setSelectedId }) {
   if (convs.length === 0) {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 400, flexDirection: "column", gap: 12 }}>
-        <div style={{ fontSize: 32 }}>📋</div>
+        <div style={{ fontSize: 32 }}>ð</div>
         <div style={{ fontSize: 14, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>Sin mensajes sin clasificar</div>
-        <div style={{ fontSize: 12, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>Aquí aparecerán mensajes CRM, firmas enviadas, PDFs, notificaciones y cualquier WhatsApp no asignado a Ana o Claudia</div>
+        <div style={{ fontSize: 12, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>AquÃ­ aparecerÃ¡n mensajes CRM, firmas enviadas, PDFs, notificaciones y cualquier WhatsApp no asignado a Ana o Claudia</div>
       </div>
     );
   }
@@ -847,7 +847,7 @@ function OtrosPanel({ convs, selectedId, setSelectedId }) {
                 <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 2 }}>{c.telefono}</div>
               )}
               <div style={{ fontSize: 11, color: "#9A968A", fontFamily: "Inter, sans-serif", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                {lastMsg ? `${FROM_LABEL[lastMsg.from] || lastMsg.from}: ${lastMsg.text}` : "—"}
+                {lastMsg ? `${FROM_LABEL[lastMsg.from] || lastMsg.from}: ${lastMsg.text}` : "â"}
               </div>
               {c.agente_ia && (
                 <div style={{ marginTop: 4, display: "inline-block", fontSize: 9, padding: "2px 8px", background: "#7A6B5A18", color: "#7A6B5A", textTransform: "uppercase", letterSpacing: "0.1em" }}>
@@ -865,13 +865,13 @@ function OtrosPanel({ convs, selectedId, setSelectedId }) {
           <>
             <div style={{ padding: "14px 20px", borderBottom: "1px solid #E7E1D4", background: "#FFFFFF" }}>
               <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                <div style={{ width: 36, height: 36, borderRadius: "50%", background: OTROS_COLOR + "22", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>📋</div>
+                <div style={{ width: 36, height: 36, borderRadius: "50%", background: OTROS_COLOR + "22", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>ð</div>
                 <div>
                   <div style={{ fontSize: 14, fontWeight: 600, color: "#22262E", fontFamily: "Inter, sans-serif" }}>
                     {selected.contacto || selected.telefono || "Sin nombre"}
                   </div>
                   <div style={{ fontSize: 11, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>
-                    {selected.telefono} · {selected.canal || "whatsapp"} · {selected.agente_ia || "sin agente"}
+                    {selected.telefono} Â· {selected.canal || "whatsapp"} Â· {selected.agente_ia || "sin agente"}
                   </div>
                 </div>
               </div>
@@ -887,7 +887,7 @@ function OtrosPanel({ convs, selectedId, setSelectedId }) {
                   return (
                     <div key={i} style={{ textAlign: "center", margin: "4px 0" }}>
                       <span style={{ fontSize: 10, color: "#7A6B5A", padding: "3px 12px", background: "#7A6B5A15", borderRadius: 20, border: "1px solid #7A6B5A22" }}>
-                        🤖 CRM: {m.text}
+                        ð¤ CRM: {m.text}
                       </span>
                       {m.ts && <div style={{ fontSize: 9, color: "#C0BAB0", marginTop: 2 }}>{m.ts}</div>}
                     </div>
@@ -912,24 +912,24 @@ function OtrosPanel({ convs, selectedId, setSelectedId }) {
                 );
               })}
               {(selected.mensajes || []).length === 0 && (
-                <div style={{ textAlign: "center", color: "#9A968A", fontSize: 12, padding: 40 }}>Sin mensajes en esta conversación</div>
+                <div style={{ textAlign: "center", color: "#9A968A", fontSize: 12, padding: 40 }}>Sin mensajes en esta conversaciÃ³n</div>
               )}
             </div>
 
             <div style={{ padding: "12px 20px", borderTop: "1px solid #E7E1D4", background: "#FFFFFF", fontSize: 11, color: "#9A968A", fontFamily: "Inter, sans-serif", textAlign: "center" }}>
-              Vista de solo lectura · Los mensajes de esta sección son automáticos del CRM o no están asignados a ningún agente
+              Vista de solo lectura Â· Los mensajes de esta secciÃ³n son automÃ¡ticos del CRM o no estÃ¡n asignados a ningÃºn agente
             </div>
           </>
         ) : (
           <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "#9A968A", fontSize: 13 }}>
-            Selecciona una conversación
+            Selecciona una conversaciÃ³n
           </div>
         )}
       </div>
     </div>
   );
 }
-// ════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 export default function AgentesIA() {
   const [tab, setTab] = useState("ana");
@@ -1044,7 +1044,7 @@ export default function AgentesIA() {
             wa_status: m.wa_status || null,
           })),
           alertas: c.alertas || [],
-          propiedad: c.referencia ? `${c.referencia}${c.enlace ? " · " + c.enlace : ""}` : c.interes || c.contacto || c.canal || "WhatsApp",
+          propiedad: c.referencia ? `${c.referencia}${c.enlace ? " Â· " + c.enlace : ""}` : c.interes || c.contacto || c.canal || "WhatsApp",
         };
       })
     );
@@ -1075,7 +1075,7 @@ export default function AgentesIA() {
     setLoadingClaudia(false);
   }, [loadMensajes]);
 
-  // Load OTROS — conversaciones que no son de Ana ni Claudia ni Instagram
+  // Load OTROS â conversaciones que no son de Ana ni Claudia ni Instagram
   // Incluye notificaciones del CRM (firma, PDF enviado, etc.)
   const loadOtrosConvs = useCallback(async () => {
     try {
@@ -1092,8 +1092,8 @@ export default function AgentesIA() {
           setOtrosSelected(convsWithMessages[0].id);
         }
       } else {
-        // También buscar convs de Ana/Claudia que tengan mensajes de "sistema"
-        // (notificaciones CRM — firma enviada, PDF, etc.)
+        // TambiÃ©n buscar convs de Ana/Claudia que tengan mensajes de "sistema"
+        // (notificaciones CRM â firma enviada, PDF, etc.)
         const { data: allConvs } = await supabase
           .from("conversaciones")
           .select("*")
@@ -1171,17 +1171,18 @@ export default function AgentesIA() {
 
       {/* Top bar */}
       <div style={{ padding: "16px 24px", borderBottom: "1px solid #2A2926" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+        {/* Header */}
+        <div style={{ marginBottom: 28 }}>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Agentes IA</h1>
-            <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Agentes especializados con inteligencia artificial para potenciar cada gestión</p>
-            <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />
+          <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Agentes especializados con inteligencia artificial para potenciar cada gestión</p>
+          <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />
+        </div>
+        <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <ScanEmailsButton />
             <button onClick={() => setEditPrompt("ana")} style={{ padding: "8px 16px", borderRadius: 0, border: "1px solid #D4956A33", background: "transparent", color: "#9C6E1B", cursor: "pointer", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}>Editar Ana</button>
             <button onClick={() => setEditPrompt("claudia")} style={{ padding: "8px 16px", borderRadius: 0, border: "1px solid #A89BC433", background: "transparent", color: "#3D577E", cursor: "pointer", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}>Editar Claudia</button>
           </div>
-        </div>
-      </div>
 
       {/* Tabs */}
       <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", gap: 4, paddingTop: 12, paddingLeft: 24 }}>

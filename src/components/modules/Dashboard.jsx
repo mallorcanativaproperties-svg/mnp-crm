@@ -11,7 +11,7 @@ const COLS = [
   { key: "retirada", label: "Retirada", accent: "#9A968A" },
 ];
 
-// Datos cargados desde Supabase — sin hardcoding
+// Datos cargados desde Supabase â sin hardcoding
 
 function fmtP(n) {
   if (!n) return "-";
@@ -33,7 +33,7 @@ function Tag({ children, color }) {
   );
 }
 
-/* ── Login Screen ── */
+/* ââ Login Screen ââ */
 function LoginScreen({ users, onLogin }) {
   const [user, setUser] = useState("");
   const [pass, setPass] = useState("");
@@ -68,7 +68,7 @@ function LoginScreen({ users, onLogin }) {
       <div style={{ width: "100%", maxWidth: 380 }}>
         <div style={{ textAlign: "center", marginBottom: 40 }}>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Dashboard</h1>
-            <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Visión global del negocio y actividad del equipo en tiempo real</p>
+            <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>VisiÃ³n global del negocio y actividad del equipo en tiempo real</p>
             <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} /></div>
 
         <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "32px 28px" }}>
@@ -124,7 +124,7 @@ function LoginScreen({ users, onLogin }) {
   );
 }
 
-/* ── Kanban Card ── */
+/* ââ Kanban Card ââ */
 function KanbanCard({ prop }) {
   return (
     <div
@@ -153,7 +153,7 @@ function KanbanCard({ prop }) {
   );
 }
 
-/* ── Kanban Column ── */
+/* ââ Kanban Column ââ */
 function KanbanCol({ col, props, onDrop, showValue }) {
   const [dragOver, setDragOver] = useState(false);
   const total = props.reduce((s, p) => s + p.precio, 0);
@@ -188,7 +188,7 @@ function KanbanCol({ col, props, onDrop, showValue }) {
   );
 }
 
-/* ── Dashboard Content ── */
+/* ââ Dashboard Content ââ */
 function DashboardContent({ currentUser, onLogout, users, setUsers }) {
   const [props, setProps] = useState([]);
   const [activity, setActivity] = useState([]);
@@ -207,17 +207,17 @@ function DashboardContent({ currentUser, onLogout, users, setUsers }) {
       if (propsData) {
         setProps(propsData.map(p => ({
           id: p.id,
-          ref: p.ref || "—",
-          titulo: p.titulo || "Sin título",
-          tipo: p.tipo || "—",
-          zona: p.municipio || "—",
+          ref: p.ref || "â",
+          titulo: p.titulo || "Sin tÃ­tulo",
+          tipo: p.tipo || "â",
+          zona: p.municipio || "â",
           precio: p.op === "Alquiler" ? (p.precio_alquiler || 0) : p.op === "Traspaso" ? (p.precio_traspaso || 0) : (p.precio_venta || 0),
           mConst: 0,
           hab: p.total_hab || (Number(p.hab_dobles)||0) + (Number(p.hab_simples)||0),
-          agente: p.agente || "—",
+          agente: p.agente || "â",
           estado: p.estado || "captada",
           visitas: 0,
-          fechaCap: p.created_at ? new Date(p.created_at).toLocaleDateString("es-ES") : "—",
+          fechaCap: p.created_at ? new Date(p.created_at).toLocaleDateString("es-ES") : "â",
         })));
       }
 
@@ -229,17 +229,17 @@ function DashboardContent({ currentUser, onLogout, users, setUsers }) {
       const { count: mCount } = await supabase.from("propiedades_compradores").select("id", { count: "exact", head: true }).eq("estado", "interesado");
       setMatches(mCount || 0);
 
-      // Particulares en prospección
+      // Particulares en prospecciÃ³n
       const { count: pCount } = await supabase.from("captacion_particulares").select("id", { count: "exact", head: true }).eq("estado", "pendiente");
       setParticulares(pCount || 0);
 
-      // Actividad reciente — últimas propiedades modificadas
+      // Actividad reciente â Ãºltimas propiedades modificadas
       const { data: recent } = await supabase.from("propiedades").select("ref, titulo, estado, updated_at, agente").order("updated_at", { ascending: false }).limit(8);
       if (recent) {
         setActivity(recent.map(p => ({
-          text: `${p.ref} — ${p.titulo?.slice(0, 40)}`,
+          text: `${p.ref} â ${p.titulo?.slice(0, 40)}`,
           agent: p.agente || "Sistema",
-          date: p.updated_at ? new Date(p.updated_at).toLocaleDateString("es-ES") : "—",
+          date: p.updated_at ? new Date(p.updated_at).toLocaleDateString("es-ES") : "â",
           color: p.estado === "vendida" ? "#2C6E52" : p.estado === "reservada" ? "#9C6E1B" : "#AC8A54",
         })));
       }
@@ -309,16 +309,12 @@ function DashboardContent({ currentUser, onLogout, users, setUsers }) {
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
 
         {/* Header */}
-        <div style={{ marginBottom: 36, borderBottom: "1px solid #2A2926", paddingBottom: 28 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
-            <div>
-              <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 600, margin: 0, lineHeight: 1.1 , color: "#A8854A"}}>
-                {isDirector ? <span>Dashboard General</span> : <span>Mi Dashboard</span>}
-              </h1>
-              <p style={{ fontSize: 12, color: "#9A968A", margin: "10px 0 0", letterSpacing: "0.04em" }}>
-                {isDirector ? "Vista completa del negocio" : "Bienvenido, " + currentUser.nombre}
-              </p>
-            </div>
+        <div style={{ marginBottom: 28 }}>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Dashboard</h1>
+          <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Visión global del negocio y actividad del equipo en tiempo real</p>
+          <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />
+        </div>
+        </div>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <div style={{ textAlign: "right" }}>
                 <div style={{ fontSize: 12, color: "#22262E" }}>{currentUser.nombre}</div>
@@ -337,8 +333,6 @@ function DashboardContent({ currentUser, onLogout, users, setUsers }) {
               >
                 Salir
               </button>
-            </div>
-          </div>
         </div>
 
         {/* KPIs */}
@@ -523,7 +517,7 @@ function DashboardContent({ currentUser, onLogout, users, setUsers }) {
   );
 }
 
-/* ── Main App ── */
+/* ââ Main App ââ */
 export default function Dashboard({ currentUser }) {
   const [users, setUsers] = useState([]);
 

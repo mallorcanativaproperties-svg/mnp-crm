@@ -15,7 +15,7 @@ const BRONZE = "var(--gold)", PETROL = "#1a2528", CREAM = "var(--cream)", BORDER
 const ESTADO_COLOR = { borrador: "var(--muted)", enviado: "#405c6b", firmado_propietario: "var(--amber)", completado: "var(--success)" };
 const ESTADO_LABEL = { borrador: "Borrador", enviado: "Enviado", firmado_propietario: "Firmado por propietario", completado: "Completado" };
 
-function fmtP(n) { return n ? Number(n).toLocaleString("es-ES") + " €" : "—"; }
+function fmtP(n) { return n ? Number(n).toLocaleString("es-ES") + " â¬" : "â"; }
 
 const S = {
   label: { fontSize: 10, color: "var(--muted)", letterSpacing: "0.1em", textTransform: "uppercase", display: "block", marginBottom: 4 },
@@ -38,14 +38,14 @@ const FORM_INIT = {
   // Inmueble / Negocio
   prop_direccion: "", prop_tipo: "", prop_garaje: "", prop_trastero: "",
   prop_ref_catastral: "", prop_reg_registral: "", prop_ref: "",
-  // Arrendamiento específico
+  // Arrendamiento especÃ­fico
   tipo_arrendamiento: "permanente", // permanente | no_permanente
   renta_mensual: "", fianza: "", honorarios_paga: "propietario",
-  // Traspaso específico
+  // Traspaso especÃ­fico
   tipo_negocio: "", superficie_m2: "", renta_local: "",
   arrendamiento_fecha_inicio: "", arrendamiento_duracion: "", arrendamiento_vencimiento: "",
   arrendamiento_fianza: "", arrendamiento_mensualidades: "",
-  // Económico común
+  // EconÃ³mico comÃºn
   importe_publicacion: "", honorarios: "", iva_honorarios: "", importe_propietario: "",
   // Condiciones
   duracion_meses: 3,
@@ -61,7 +61,7 @@ const CATEGORIA_TIPOS = {
   traspaso:      [["abierto", "Abierto (Sin Exclusividad)"], ["exclusiva", "Exclusiva"]],
 };
 
-// ── Modal firma del agente ──────────────────────────────────────────────────
+// ââ Modal firma del agente ââââââââââââââââââââââââââââââââââââââââââââââââââ
 function FirmaAgenteModal({ encargo, onClose, onComplete }) {
   const canvasRef = useRef(null);
   const [drawing, setDrawing] = useState(false);
@@ -134,7 +134,7 @@ function FirmaAgenteModal({ encargo, onClose, onComplete }) {
         <div style={{ padding: 24 }}>
           <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 16, lineHeight: 1.6 }}>
             Al firmar confirmas el encargo de {encargo.categoria} con {(encargo.encargo_firmantes || []).map(f => f.nombre).join(", ")}.<br />
-            Se generará el PDF y se enviará por email a todas las partes.
+            Se generarÃ¡ el PDF y se enviarÃ¡ por email a todas las partes.
           </div>
           <canvas ref={el => { canvasRef.current = el; if (el) initCanvas(el); }}
             width={460} height={150}
@@ -206,11 +206,11 @@ export default function EncargosVenta() {
   }
 
   async function handlePropChange(propId) {
-    // Primero actualizar el id para que el select muestre la selección
+    // Primero actualizar el id para que el select muestre la selecciÃ³n
     setForm(f => ({ ...f, propiedad_id: propId }));
     if (!propId) return;
 
-    // Buscar en memoria primero, si no releer de BD (más fiable)
+    // Buscar en memoria primero, si no releer de BD (mÃ¡s fiable)
     let prop = propiedades.find(p => p.id === propId);
     if (!prop) {
       const { data } = await supabase
@@ -222,12 +222,12 @@ export default function EncargosVenta() {
     }
     if (!prop) return;
 
-    // Dirección completa con número y municipio
+    // DirecciÃ³n completa con nÃºmero y municipio
     const dirBase = [prop.dir, prop.num].filter(Boolean).join(" ");
     const dirCompleta = [dirBase, prop.municipio].filter(Boolean).join(", ");
 
-    // Garaje según valores reales del desplegable
-    const trasteroVal = prop.trastero === true ? "Sí" : "";
+    // Garaje segÃºn valores reales del desplegable
+    const trasteroVal = prop.trastero === true ? "SÃ­" : "";
     let garajeVal = "";
     if (prop.parking && prop.parking !== "No") {
       const plazasTxt = (prop.n_plazas || 0) > 1 ? ` (${prop.n_plazas} plazas)` : "";
@@ -299,7 +299,7 @@ export default function EncargosVenta() {
       }
     } catch (e) {
       await reportarError({ modulo: "Encargos", accion: "Crear encargo", error: e });
-      alert("Error de conexión al guardar:\n" + e.message);
+      alert("Error de conexiÃ³n al guardar:\n" + e.message);
     } finally {
       setSaving(false);
     }
@@ -313,7 +313,7 @@ export default function EncargosVenta() {
   function getMsgWA(enc) {
     const link = getLinkFirma(enc.token_firma);
     const tipo = enc.tipo === "premium" ? "Premium (con exclusividad)" : "Sin Compromiso";
-    return encodeURIComponent(`Hola${enc.prop1_nombre ? " " + enc.prop1_nombre : ""},\n\nTe enviamos el Encargo de Venta *${tipo}* de Nativa Properties para que lo revises y firmes desde tu móvil:\n\n${link}\n\nSi tienes cualquier duda, estamos a tu disposición. ¡Gracias!`);
+    return encodeURIComponent(`Hola${enc.prop1_nombre ? " " + enc.prop1_nombre : ""},\n\nTe enviamos el Encargo de Venta *${tipo}* de Nativa Properties para que lo revises y firmes desde tu mÃ³vil:\n\n${link}\n\nSi tienes cualquier duda, estamos a tu disposiciÃ³n. Â¡Gracias!`);
   }
 
   function copyLink(token) {
@@ -334,22 +334,21 @@ export default function EncargosVenta() {
 
         {/* Header */}
         <div style={{ marginBottom: 28 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 16 }}>
-            <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Encargos de Venta</h1>
-            <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Control y seguimiento de los encargos de venta en cartera</p>
-            <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} /><button onClick={() => { setShowForm(true); loadCurrentUser(); }}
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Encargos de Venta</h1>
+          <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Control y seguimiento de los encargos de venta en cartera</p>
+          <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />
+        </div>
+        <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} /><button onClick={() => { setShowForm(true); loadCurrentUser(); }}
               style={{ padding: "10px 24px", background: PETROL, border: "none", color: CREAM, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.14em", borderRadius: 0 }}>
               + Nuevo encargo
             </button>
-          </div>
-        </div>
 
         {/* Formulario modal */}
         {showForm && (
           <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.65)", zIndex: 1000, overflowY: "auto", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "32px 16px" }} onClick={e => {
               if (e.target !== e.currentTarget) return; // solo si click directo en overlay
               if (saving) return;
-              if (form.propietarios[0]?.nombre && !confirm("¿Cerrar sin guardar? Se perderán los datos introducidos.")) return;
+              if (form.propietarios[0]?.nombre && !confirm("Â¿Cerrar sin guardar? Se perderÃ¡n los datos introducidos.")) return;
               setShowForm(false);
             }}>
             <div style={{ background: CREAM, width: "100%", maxWidth: 720 }} onClick={e => e.stopPropagation()}>
@@ -364,7 +363,7 @@ export default function EncargosVenta() {
 
               <div style={{ padding: "24px" }}>
 
-                {/* Categoría y tipo */}
+                {/* CategorÃ­a y tipo */}
                 <div style={S.section}>
                   <div style={S.sectionTitle}>Tipo de encargo</div>
                   <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
@@ -390,10 +389,10 @@ export default function EncargosVenta() {
                   <div style={S.sectionTitle}>Propiedad vinculada</div>
                   <select value={form.propiedad_id} onChange={e => handlePropChange(e.target.value)} style={{ ...S.input, marginBottom: 12 }}>
                     <option value="">Seleccionar propiedad del CRM...</option>
-                    {propiedades.map(p => <option key={p.id} value={p.id}>{p.ref} — {p.dir} · {p.municipio}</option>)}
+                    {propiedades.map(p => <option key={p.id} value={p.id}>{p.ref} â {p.dir} Â· {p.municipio}</option>)}
                   </select>
                   <div style={S.grid2}>
-                    <div style={{ gridColumn: "1/-1" }}><label style={S.label}>Dirección propiedad</label><input {...F("prop_direccion")} /></div>
+                    <div style={{ gridColumn: "1/-1" }}><label style={S.label}>DirecciÃ³n propiedad</label><input {...F("prop_direccion")} /></div>
                     <div><label style={S.label}>Tipo de inmueble</label><input {...F("prop_tipo")} /></div>
                     <div><label style={S.label}>Plaza de garaje</label><input {...F("prop_garaje")} /></div>
                     <div><label style={S.label}>Trastero</label><input {...F("prop_trastero")} /></div>
@@ -401,7 +400,7 @@ export default function EncargosVenta() {
                   </div>
                 </div>
 
-                {/* Propietarios dinámicos */}
+                {/* Propietarios dinÃ¡micos */}
                 <div style={S.section}>
                   <div style={S.sectionTitle}>Datos del propietario</div>
                   <PropietariosEditor
@@ -410,7 +409,7 @@ export default function EncargosVenta() {
                   />
                 </div>
 
-                {/* Campos específicos Arrendamiento */}
+                {/* Campos especÃ­ficos Arrendamiento */}
                 {form.categoria === "arrendamiento" && (
                   <div style={S.section}>
                     <div style={S.sectionTitle}>Datos del arrendamiento</div>
@@ -426,8 +425,8 @@ export default function EncargosVenta() {
                       </div>
                     </div>
                     <div style={S.grid2}>
-                      <div><label style={S.label}>Renta mensual solicitada (€)</label><input type="number" {...F("renta_mensual")} /></div>
-                      <div><label style={S.label}>Fianza pactada (€)</label><input type="number" {...F("fianza")} /></div>
+                      <div><label style={S.label}>Renta mensual solicitada (â¬)</label><input type="number" {...F("renta_mensual")} /></div>
+                      <div><label style={S.label}>Fianza pactada (â¬)</label><input type="number" {...F("fianza")} /></div>
                     </div>
                     <div style={{ marginBottom: 12 }}>
                       <label style={S.label}>Parte que abona los honorarios</label>
@@ -443,42 +442,42 @@ export default function EncargosVenta() {
                   </div>
                 )}
 
-                {/* Campos específicos Traspaso */}
+                {/* Campos especÃ­ficos Traspaso */}
                 {form.categoria === "traspaso" && (
                   <div style={S.section}>
                     <div style={S.sectionTitle}>Datos del negocio / traspaso</div>
                     <div style={S.grid2}>
                       <div><label style={S.label}>Tipo de negocio / actividad</label><input {...F("tipo_negocio")} /></div>
-                      <div><label style={S.label}>Superficie aproximada (m²)</label><input type="number" {...F("superficie_m2")} /></div>
-                      <div><label style={S.label}>Renta mensual del local (€)</label><input type="number" {...F("renta_local")} /></div>
+                      <div><label style={S.label}>Superficie aproximada (mÂ²)</label><input type="number" {...F("superficie_m2")} /></div>
+                      <div><label style={S.label}>Renta mensual del local (â¬)</label><input type="number" {...F("renta_local")} /></div>
                     </div>
-                    <div style={{ fontSize: 10, color: "var(--muted)", letterSpacing: "0.1em", margin: "8px 0 6px" }}>SITUACIÓN DEL ARRENDAMIENTO</div>
+                    <div style={{ fontSize: 10, color: "var(--muted)", letterSpacing: "0.1em", margin: "8px 0 6px" }}>SITUACIÃN DEL ARRENDAMIENTO</div>
                     <div style={S.grid2}>
                       <div><label style={S.label}>Fecha inicio</label><input type="date" {...F("arrendamiento_fecha_inicio")} /></div>
-                      <div><label style={S.label}>Duración</label><input {...F("arrendamiento_duracion")} placeholder="ej: 5 años" /></div>
+                      <div><label style={S.label}>DuraciÃ³n</label><input {...F("arrendamiento_duracion")} placeholder="ej: 5 aÃ±os" /></div>
                       <div><label style={S.label}>Vencimiento</label><input type="date" {...F("arrendamiento_vencimiento")} /></div>
-                      <div><label style={S.label}>Fianza (€)</label><input type="number" {...F("arrendamiento_fianza")} /></div>
-                      <div><label style={S.label}>Nº mensualidades depositadas</label><input type="number" {...F("arrendamiento_mensualidades")} /></div>
+                      <div><label style={S.label}>Fianza (â¬)</label><input type="number" {...F("arrendamiento_fianza")} /></div>
+                      <div><label style={S.label}>NÂº mensualidades depositadas</label><input type="number" {...F("arrendamiento_mensualidades")} /></div>
                     </div>
                   </div>
                 )}
 
-                {/* Cláusulas específicas */}
+                {/* ClÃ¡usulas especÃ­ficas */}
                 <div style={S.section}>
-                  <div style={S.sectionTitle}>Cláusulas específicas (opcional)</div>
-                  <div style={{ fontSize: 11, color: "var(--muted)", marginBottom: 8 }}>Si se cumplimenta, se añadirá al contrato como cláusula adicional.</div>
-                  <textarea {...F("clausulas_especificas")} placeholder="Escribe aquí las cláusulas adicionales que quieras incluir en el contrato..." rows={4}
+                  <div style={S.sectionTitle}>ClÃ¡usulas especÃ­ficas (opcional)</div>
+                  <div style={{ fontSize: 11, color: "var(--muted)", marginBottom: 8 }}>Si se cumplimenta, se aÃ±adirÃ¡ al contrato como clÃ¡usula adicional.</div>
+                  <textarea {...F("clausulas_especificas")} placeholder="Escribe aquÃ­ las clÃ¡usulas adicionales que quieras incluir en el contrato..." rows={4}
                     style={{ width: "100%", padding: "10px 12px", border: `1px solid ${BORDER}`, background: "#fff", color: PETROL, fontSize: 13, fontFamily: "Inter, sans-serif", outline: "none", resize: "vertical", boxSizing: "border-box" }} />
                 </div>
 
-                {/* Económico */}
+                {/* EconÃ³mico */}
                 <div style={S.section}>
-                  <div style={S.sectionTitle}>Condiciones económicas</div>
+                  <div style={S.sectionTitle}>Condiciones econÃ³micas</div>
                   <div style={S.grid2}>
-                    <div><label style={S.label}>Importe publicación (€)</label><input type="number" {...F("importe_publicacion")} /></div>
-                    <div><label style={S.label}>Honorarios (€)</label><input type="number" {...F("honorarios")} /></div>
-                    <div><label style={S.label}>IVA honorarios (€)</label><input type="number" {...F("iva_honorarios")} /></div>
-                    <div><label style={S.label}>A percibir propietario (€)</label><input type="number" {...F("importe_propietario")} /></div>
+                    <div><label style={S.label}>Importe publicaciÃ³n (â¬)</label><input type="number" {...F("importe_publicacion")} /></div>
+                    <div><label style={S.label}>Honorarios (â¬)</label><input type="number" {...F("honorarios")} /></div>
+                    <div><label style={S.label}>IVA honorarios (â¬)</label><input type="number" {...F("iva_honorarios")} /></div>
+                    <div><label style={S.label}>A percibir propietario (â¬)</label><input type="number" {...F("importe_propietario")} /></div>
                   </div>
                 </div>
 
@@ -486,7 +485,7 @@ export default function EncargosVenta() {
                 <div style={S.section}>
                   <div style={S.sectionTitle}>Condiciones del contrato</div>
                   <div style={S.grid2}>
-                    <div><label style={S.label}>Duración (meses)</label><input type="number" {...F("duracion_meses")} /></div>
+                    <div><label style={S.label}>DuraciÃ³n (meses)</label><input type="number" {...F("duracion_meses")} /></div>
                     <div><label style={S.label}>Fecha del contrato</label><input type="date" {...F("fecha_contrato")} /></div>
                   </div>
                 </div>
@@ -507,7 +506,7 @@ export default function EncargosVenta() {
                   <div style={S.grid2}>
                     <div><label style={S.label}>Nombre</label><input {...F("consultor_nombre")} /></div>
                     <div><label style={S.label}>DNI/NIE</label><input {...F("consultor_dni")} /></div>
-                    <div style={{ gridColumn: "1/-1" }}><label style={S.label}>Número de póliza RC</label><input {...F("consultor_poliza")} /></div>
+                    <div style={{ gridColumn: "1/-1" }}><label style={S.label}>NÃºmero de pÃ³liza RC</label><input {...F("consultor_poliza")} /></div>
                   </div>
                 </div>
 
@@ -528,7 +527,7 @@ export default function EncargosVenta() {
           <div style={{ textAlign: "center", padding: 60, color: "var(--muted)", fontSize: 13, fontStyle: "italic" }}>Cargando...</div>
         ) : encargos.length === 0 ? (
           <div style={{ textAlign: "center", padding: 60 }}>
-            <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 32, fontWeight: 300, color: "#C8BFB0", marginBottom: 12 }}>◇</div>
+            <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 32, fontWeight: 300, color: "#C8BFB0", marginBottom: 12 }}>â</div>
             <div style={{ fontSize: 13, color: "var(--muted)" }}>No hay encargos de venta. Pulsa "+ Nuevo encargo" para crear el primero.</div>
           </div>
         ) : encargos.map(enc => (
@@ -548,11 +547,11 @@ export default function EncargosVenta() {
                 </div>
                 <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 15, fontWeight: 600, color: PETROL, marginBottom: 2 }}>
                   {enc.propietarios?.[0]?.nombre || enc.prop1_nombre || "Propietario sin nombre"}
-                  {enc.propietarios?.length > 1 && ` · ${enc.propietarios[1].nombre}`}
+                  {enc.propietarios?.length > 1 && ` Â· ${enc.propietarios[1].nombre}`}
                 </div>
                 <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 4 }}>
                   {enc.prop_direccion || enc.propiedades?.titulo || "Propiedad no especificada"}
-                  {enc.propiedades?.municipio && ` · ${enc.propiedades.municipio}`}
+                  {enc.propiedades?.municipio && ` Â· ${enc.propiedades.municipio}`}
                 </div>
                 <div style={{ display: "flex", gap: 16, fontSize: 12, flexWrap: "wrap" }}>
                   {enc.honorarios && <span style={{ color: BRONZE }}>Honorarios: {fmtP(enc.honorarios)}</span>}
@@ -564,7 +563,7 @@ export default function EncargosVenta() {
                     {enc.encargo_firmantes.filter(f => f.estado === "firmado").length}/{enc.encargo_firmantes.length} firmantes completados
                     {enc.encargo_firmantes.some(f => f.otp_codigo && f.estado === "otp_enviado") && (
                       <span style={{ marginLeft: 8, color: "var(--amber)" }}>
-                        · Código: <strong>{enc.encargo_firmantes.find(f => f.estado === "otp_enviado")?.otp_codigo}</strong>
+                        Â· CÃ³digo: <strong>{enc.encargo_firmantes.find(f => f.estado === "otp_enviado")?.otp_codigo}</strong>
                       </span>
                     )}
                   </div>
@@ -572,20 +571,20 @@ export default function EncargosVenta() {
                 {enc.firma_propietario_fecha && !enc.todos_firmado && (
                   <button onClick={e => { e.stopPropagation(); setFirmaAgenteModal(enc); }}
                     style={{ marginTop: 8, padding: "6px 14px", background: "var(--success)", border: "none", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>
-                    ✍ Firmar como agente y generar PDF
+                    â Firmar como agente y generar PDF
                   </button>
                 )}
                 {enc.todos_firmado && enc.pdf_url && (
                   <div style={{ marginTop: 6 }}>
                     <a href={enc.pdf_url} target="_blank" rel="noopener noreferrer"
                       style={{ fontSize: 11, color: BRONZE, textDecoration: "none", border: `1px solid ${BRONZE}44`, padding: "4px 10px" }}>
-                      ↓ Descargar PDF firmado
+                      â Descargar PDF firmado
                     </a>
                   </div>
                 )}
                 {enc.firma_propietario_fecha && (
                   <div style={{ fontSize: 11, color: "var(--success)", marginTop: 4 }}>
-                    ✓ Todos firmaron el {new Date(enc.firma_propietario_fecha).toLocaleDateString("es-ES")}
+                    â Todos firmaron el {new Date(enc.firma_propietario_fecha).toLocaleDateString("es-ES")}
                   </div>
                 )}
               </div>
@@ -593,16 +592,16 @@ export default function EncargosVenta() {
                 {(enc.encargo_firmantes || []).map((f, i) => (
                   <div key={f.id} style={{ display: "flex", gap: 6, alignItems: "center" }}>
                     <span style={{ fontSize: 10, color: f.estado === "firmado" ? "var(--success)" : f.estado === "otp_enviado" ? "var(--amber)" : "var(--muted)" }}>
-                      {f.nombre || `Prop. ${i+1}`} {f.estado === "firmado" ? "✓" : f.estado === "otp_enviado" ? "⏳" : "○"}
+                      {f.nombre || `Prop. ${i+1}`} {f.estado === "firmado" ? "â" : f.estado === "otp_enviado" ? "â³" : "â"}
                     </span>
                     <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/encargo?token=${f.token_firma}`); setCopied(f.token_firma); setTimeout(() => setCopied(null), 2000); }}
                       style={{ padding: "4px 10px", background: "none", border: `1px solid ${BORDER}`, color: copied === f.token_firma ? "var(--success)" : "var(--muted)", fontSize: 10, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>
-                      {copied === f.token_firma ? "✓" : "Enlace"}
+                      {copied === f.token_firma ? "â" : "Enlace"}
                     </button>
                     {f.telefono && (
                       <a href={`https://wa.me/${f.telefono.replace(/\D/g, "")}?text=${encodeURIComponent(`Hola ${f.nombre || ""},
 
-Te enviamos el encargo de gestión de Nativa Properties para que lo revises y firmes desde tu móvil:
+Te enviamos el encargo de gestiÃ³n de Nativa Properties para que lo revises y firmes desde tu mÃ³vil:
 
 https://${typeof window !== "undefined" ? window.location.host : "crm.mallorcanativaproperties.com"}/encargo?token=${f.token_firma}
 
@@ -635,10 +634,10 @@ Gracias.`)}`}
         />
       )}
 
-      {/* Notificación PDF listo */}
+      {/* NotificaciÃ³n PDF listo */}
       {pdfListo && (
         <div style={{ position: "fixed", bottom: 24, right: 24, background: "var(--success)", color: "#fff", padding: "14px 20px", fontSize: 13, fontFamily: "Inter, sans-serif", zIndex: 2000, display: "flex", gap: 12, alignItems: "center" }}>
-          ✓ PDF generado y enviado a todos
+          â PDF generado y enviado a todos
           <a href={pdfListo} target="_blank" rel="noopener noreferrer" style={{ color: "#fff", fontSize: 11 }}>Descargar</a>
           <button onClick={() => setPdfListo(null)} style={{ background: "none", border: "none", color: "rgba(255,255,255,0.6)", cursor: "pointer", fontSize: 16 }}><XMarkIcon style={{ width:14, height:14 }} /></button>
         </div>

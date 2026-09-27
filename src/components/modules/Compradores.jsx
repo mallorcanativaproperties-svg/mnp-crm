@@ -10,7 +10,7 @@ import React, { useState, useMemo, useEffect, useRef, useCallback } from "react"
 import { supabase } from "@/lib/supabase";
 
 
-// ═══ MAPA DE MUNICIPIOS Y ZONAS (igual que en Propiedades) ═══
+// âââ MAPA DE MUNICIPIOS Y ZONAS (igual que en Propiedades) âââ
 const ZONAS_MAP = {
   "Palma": ["Casco Antiguo","Santa Catalina","El Terreno","Son Espanyolet","Son Cotoner","Son Dameto","La Bonanova","Genova","Cala Major","Son Rapinya","La Vileta","Pere Garau","Foners","Plaza de Toros","Son Gotleu","La Soledad","Vivero","Son Oliva","Rafal","Son Cladera","Son Ferriol","Sant Jordi","Can Pastilla","Coll den Rabassa","Nou Llevant","SIndioteria","SAranjassa","Es Pilari","Amanecer","Son Sardina","Establiments","Secar de la Real"],
   "Calvia": ["Palmanova","Magaluf","Santa Ponsa","Peguera","Illetes","Portals Nous","Bendinat","Calvia Vila","Costa de la Calma","Son Ferrer","El Toro"],
@@ -39,14 +39,14 @@ const ZONAS_MAP = {
 };
 const MUNICIPIOS = Object.keys(ZONAS_MAP);
 
-// Selector de zonas con etiquetas — responsive, multiselección por municipio
+// Selector de zonas con etiquetas â responsive, multiselecciÃ³n por municipio
 function SelectorZonas({ value = [], onChange, tipo = "deseada", disabled = false }) {
   const [muniSel, setMuniSel] = useState("");
   const [open, setOpen] = useState(false);
   const accentColor = tipo === "deseada" ? "var(--gold)" : "var(--danger)";
   const accentBg    = tipo === "deseada" ? "var(--gold-l)0D" : "#D4545408";
   const accentBorder= tipo === "deseada" ? "var(--gold-l)33" : "#D4545433";
-  const prefix      = tipo === "excluida" ? "✕ " : "";
+  const prefix      = tipo === "excluida" ? "â " : "";
 
   const zonasDeMuni = muniSel && ZONAS_MAP[muniSel] ? ZONAS_MAP[muniSel] : [];
 
@@ -73,7 +73,7 @@ function SelectorZonas({ value = [], onChange, tipo = "deseada", disabled = fals
         {value.map((z, i) => (
           <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, padding: "4px 10px", background: accentBg, color: accentColor, border: "1px solid " + accentBorder, cursor: disabled ? "default" : "pointer" }}>
             {prefix}{z}
-            {!disabled && <span onClick={() => removeZona(z)} style={{ marginLeft: 2, fontWeight: 700, opacity: 0.7, lineHeight: 1 }}>×</span>}
+            {!disabled && <span onClick={() => removeZona(z)} style={{ marginLeft: 2, fontWeight: 700, opacity: 0.7, lineHeight: 1 }}>Ã</span>}
           </span>
         ))}
       </div>
@@ -99,12 +99,12 @@ function SelectorZonas({ value = [], onChange, tipo = "deseada", disabled = fals
           {muniSel && zonasDeMuni.length > 0 && (
             <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 5 }}>
               {zonasDeMuni.map(z => {
-                const etiqueta = muniSel + " · " + z;
+                const etiqueta = muniSel + " Â· " + z;
                 const sel = value.includes(etiqueta);
                 return (
                   <button key={z} onClick={() => toggleZona(etiqueta)}
                     style={{ padding: "4px 10px", border: "1px solid " + (sel ? accentColor : "var(--border)"), background: sel ? accentBg : "transparent", color: sel ? accentColor : "var(--muted)", fontSize: 11, cursor: "pointer", fontFamily: "Inter, sans-serif", transition: "all 0.15s" }}>
-                    {sel ? "✓ " : ""}{z}
+                    {sel ? "â " : ""}{z}
                   </button>
                 );
               })}
@@ -115,14 +115,14 @@ function SelectorZonas({ value = [], onChange, tipo = "deseada", disabled = fals
     </div>
   );
 }
-// ════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function mapBuyerDb(row) {
   return {
     id: row.id, ts: row.created_at ? new Date(row.created_at).toLocaleDateString("es-ES") : "", 
     email: row.email || "", nombre: row.nombre || "", tel: row.telefono || "",
     fin: row.financiacion || "", ppto: row.presupuesto || 0, finalidad: row.finalidad || "",
-    hab: row.habitaciones || "", zd: row.zona_deseada || [], ze: row.zona_excluida || [], pais: row.pais || "España",
+    hab: row.habitaciones || "", zd: row.zona_deseada || [], ze: row.zona_excluida || [], pais: row.pais || "EspaÃ±a",
     alt: row.altura_max || "", req: row.requisitos || "", st: row.estado || "activo",
     ag: row.agente_asignado || "", notas: row.notas || "", scoring: row.scoring || 0,
     origen: row.origen || "",
@@ -141,19 +141,19 @@ function mapBuyerToDb(b) {
 }
 
 const PAISES = [
-  { pais: "España", prefijo: "+34", flag: "🇪🇸" },
-  { pais: "Alemania", prefijo: "+49", flag: "🇩🇪" },
-  { pais: "Reino Unido", prefijo: "+44", flag: "🇬🇧" },
-  { pais: "Países Bajos", prefijo: "+31", flag: "🇳🇱" },
-  { pais: "Francia", prefijo: "+33", flag: "🇫🇷" },
-  { pais: "Suecia", prefijo: "+46", flag: "🇸🇪" },
-  { pais: "Noruega", prefijo: "+47", flag: "🇳🇴" },
-  { pais: "Dinamarca", prefijo: "+45", flag: "🇩🇰" },
-  { pais: "Suiza", prefijo: "+41", flag: "🇨🇭" },
-  { pais: "Bélgica", prefijo: "+32", flag: "🇧🇪" },
-  { pais: "Italia", prefijo: "+39", flag: "🇮🇹" },
-  { pais: "Estados Unidos", prefijo: "+1", flag: "🇺🇸" },
-  { pais: "Otro", prefijo: "", flag: "🌍" },
+  { pais: "EspaÃ±a", prefijo: "+34", flag: "ðªð¸" },
+  { pais: "Alemania", prefijo: "+49", flag: "ð©ðª" },
+  { pais: "Reino Unido", prefijo: "+44", flag: "ð¬ð§" },
+  { pais: "PaÃ­ses Bajos", prefijo: "+31", flag: "ð³ð±" },
+  { pais: "Francia", prefijo: "+33", flag: "ð«ð·" },
+  { pais: "Suecia", prefijo: "+46", flag: "ð¸ðª" },
+  { pais: "Noruega", prefijo: "+47", flag: "ð³ð´" },
+  { pais: "Dinamarca", prefijo: "+45", flag: "ð©ð°" },
+  { pais: "Suiza", prefijo: "+41", flag: "ð¨ð­" },
+  { pais: "BÃ©lgica", prefijo: "+32", flag: "ð§ðª" },
+  { pais: "Italia", prefijo: "+39", flag: "ð®ð¹" },
+  { pais: "Estados Unidos", prefijo: "+1", flag: "ðºð¸" },
+  { pais: "Otro", prefijo: "", flag: "ð" },
 ];
 
 const ESTADOS = [
@@ -161,20 +161,20 @@ const ESTADOS = [
   { key: "baja", label: "Baja voluntaria", accent: "var(--muted)" },
 ];
 
-const FINALIDADES = ["Primera vivienda", "Inversión", "Cambio de vivienda", "Segunda residencia"];
+const FINALIDADES = ["Primera vivienda", "InversiÃ³n", "Cambio de vivienda", "Segunda residencia"];
 
 function score(b) {
   let s = 0;
-  if (b.fin === "Sí") s += 25; else if (b.fin === "Abierto") s += 15;
+  if (b.fin === "SÃ­") s += 25; else if (b.fin === "Abierto") s += 15;
   if (b.ppto >= 300000) s += 20; else if (b.ppto >= 200000) s += 10; else if (b.ppto > 0) s += 5;
-  if (b.finalidad === "Inversión") s += 20; else if (b.finalidad === "Primera vivienda") s += 15;
+  if (b.finalidad === "InversiÃ³n") s += 20; else if (b.finalidad === "Primera vivienda") s += 15;
   if (b.zd.length > 0 && b.zd.length <= 5) s += 15; else if (b.zd.length > 5) s += 10;
   if (b.hab) s += 10;
   if (b.req && b.req.length > 10) s += 10; else if (b.req) s += 5;
   return Math.min(s, 100);
 }
 
-function fmt(n) { return n ? n.toLocaleString("es-ES") + " €" : "—"; }
+function fmt(n) { return n ? n.toLocaleString("es-ES") + " â¬" : "â"; }
 
 function Badge({ children, color, hollow }) {
   return <span style={{
@@ -197,7 +197,7 @@ function ScoreBar({ value }) {
 }
 
 
-// ═══ WHATSAPP PANEL — Chat con comprador via Claudia ═════════════
+// âââ WHATSAPP PANEL â Chat con comprador via Claudia âââââââââââââ
 const CLAUDIA_PROMPT_SHORT = `Eres Claudia, secretaria coordinadora de Nativa Properties. Recibes leads de compradores por WhatsApp. Cualifica al comprador, entiende su necesidad y deriva al agente correcto.`;
 
 function Card({ b, onClick, onWhatsApp }) {
@@ -214,7 +214,7 @@ function Card({ b, onClick, onWhatsApp }) {
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
       <div style={{ minWidth: 0 }}>
         <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 400, color: "var(--text)", letterSpacing: "0.01em" }}>{b.nombre}</div>
-        <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 4, fontFamily: "Inter, sans-serif" }}>{b.tel} <span style={{ margin: "0 6px", opacity: 0.3 }}>·</span> {b.email}</div>
+        <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 4, fontFamily: "Inter, sans-serif" }}>{b.tel} <span style={{ margin: "0 6px", opacity: 0.3 }}>Â·</span> {b.email}</div>
       </div>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0 }}>
         <Badge color={est.accent}>{est.label}</Badge>
@@ -228,11 +228,11 @@ function Card({ b, onClick, onWhatsApp }) {
       <span style={{ opacity: 0.3 }}>|</span>
       <span style={{ fontStyle: "italic" }}>{b.finalidad}</span>
       <span style={{ opacity: 0.3 }}>|</span>
-      <span>{b.fin === "Sí" ? "Financiación ✓" : b.fin === "No" ? "Sin financiación" : "Abierto a mejorar"}</span>
+      <span>{b.fin === "SÃ­" ? "FinanciaciÃ³n â" : b.fin === "No" ? "Sin financiaciÃ³n" : "Abierto a mejorar"}</span>
     </div>
     <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 12 }}>
       {b.zd.map((z, i) => <span key={i} style={{ fontSize: 11, padding: "2px 8px", borderRadius: 0, fontFamily: "Inter, sans-serif", background: "rgba(200,169,126,0.05)", color: "var(--gold)", border: "1px solid rgba(172,138,84,0.3)", letterSpacing: "0.05em" }}>{z}</span>)}
-      {b.ze.map((z, i) => <span key={"e" + i} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 0, fontFamily: "Inter, sans-serif", background: "#D4956A0D", color: "var(--amber)", border: "1px solid #D4956A22", letterSpacing: "0.03em" }}>✕ {z}</span>)}
+      {b.ze.map((z, i) => <span key={"e" + i} style={{ fontSize: 10, padding: "3px 10px", borderRadius: 0, fontFamily: "Inter, sans-serif", background: "#D4956A0D", color: "var(--amber)", border: "1px solid #D4956A22", letterSpacing: "0.03em" }}>â {z}</span>)}
     </div>
     {b.ag && <div style={{ marginTop: 10, fontSize: 11, color: "#3D577E", fontFamily: "Inter, sans-serif", fontWeight: 500 }}>Agente: {b.ag}</div>}
     <button
@@ -264,29 +264,29 @@ function Card({ b, onClick, onWhatsApp }) {
 
 
 
-// ═══ IMPORTADOR EXCEL ═══════════════════════════════════════════════════════
+// âââ IMPORTADOR EXCEL âââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 // Campos del CRM a los que se puede mapear una columna del Excel
 const CAMPOS_CRM = [
   { key: "nombre",     label: "Nombre completo",     req: true  },
   { key: "email",      label: "Email",                req: false },
-  { key: "tel",        label: "Teléfono",             req: false },
-  { key: "ppto",       label: "Presupuesto (€)",      req: false },
+  { key: "tel",        label: "TelÃ©fono",             req: false },
+  { key: "ppto",       label: "Presupuesto (â¬)",      req: false },
   { key: "zd",         label: "Zona deseada",         req: false },
   { key: "ze",         label: "Zona excluida",        req: false },
-  { key: "fin",        label: "Financiación",         req: false },
+  { key: "fin",        label: "FinanciaciÃ³n",         req: false },
   { key: "finalidad",  label: "Finalidad de compra",  req: false },
   { key: "hab",        label: "Habitaciones",         req: false },
-  { key: "alt",        label: "Altura máx ascensor",  req: false },
+  { key: "alt",        label: "Altura mÃ¡x ascensor",  req: false },
   { key: "req",        label: "Requisitos",           req: false },
   { key: "ag",         label: "Agente asignado",      req: false },
   { key: "notas",      label: "Notas",                req: false },
-  { key: "pais",       label: "País",                 req: false },
-  { key: "_ignorar",   label: "— Ignorar columna —",  req: false },
+  { key: "pais",       label: "PaÃ­s",                 req: false },
+  { key: "_ignorar",   label: "â Ignorar columna â",  req: false },
 ];
 
 function parseExcelManual(buffer) {
-  // Parser básico de CSV / Excel exportado como CSV
-  // Para XLS/XLSX reales usamos la librería sheetjs si está disponible
+  // Parser bÃ¡sico de CSV / Excel exportado como CSV
+  // Para XLS/XLSX reales usamos la librerÃ­a sheetjs si estÃ¡ disponible
   const text = new TextDecoder("utf-8").decode(new Uint8Array(buffer));
   const lines = text.split(/\r?\n/).filter(l => l.trim());
   if (lines.length < 2) return { headers: [], rows: [] };
@@ -317,7 +317,7 @@ function parseExcelManual(buffer) {
 }
 
 function autoMapear(headers) {
-  // Intenta mapear automáticamente columnas comunes
+  // Intenta mapear automÃ¡ticamente columnas comunes
   const map = {};
   const normalize = s => s.toLowerCase().replace(/[^a-z0-9]/g, "");
   headers.forEach(h => {
@@ -344,27 +344,27 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
   const [paso, setPaso] = useState(1); // 1: subir, 2: mapear, 3: revisar
   const [headers, setHeaders] = useState([]);
   const [rows, setRows] = useState([]);
-  const [mapeo, setMapeo] = useState({}); // colExcel → campoCRM
+  const [mapeo, setMapeo] = useState({}); // colExcel â campoCRM
   const [procesados, setProcesados] = useState([]); // {datos, duplicado, accion}
   const [importando, setImportando] = useState(false);
   const [error, setError] = useState("");
 
-  // ─── PASO 1: Subir archivo ───────────────────────────────────
+  // âââ PASO 1: Subir archivo âââââââââââââââââââââââââââââââââââ
   const handleFile = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setError("");
     
-    // Intentar con SheetJS si está disponible
+    // Intentar con SheetJS si estÃ¡ disponible
     try {
       const buffer = await file.arrayBuffer();
       
-      // Intentar SheetJS (si está cargado)
+      // Intentar SheetJS (si estÃ¡ cargado)
       if (typeof XLSX !== "undefined") {
         const wb = XLSX.read(buffer, { type: "array" });
         const ws = wb.Sheets[wb.SheetNames[0]];
         const data = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
-        if (data.length < 2) { setError("El archivo está vacío o solo tiene encabezados."); return; }
+        if (data.length < 2) { setError("El archivo estÃ¡ vacÃ­o o solo tiene encabezados."); return; }
         const hdrs = data[0].map(String);
         const rowsData = data.slice(1)
           .map(r => { const o = {}; hdrs.forEach((h,i) => { o[h] = String(r[i] || ""); }); return o; })
@@ -388,13 +388,13 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
     }
   };
 
-  // ─── PASO 2: Confirmar mapeo ─────────────────────────────────
+  // âââ PASO 2: Confirmar mapeo âââââââââââââââââââââââââââââââââ
   const confirmarMapeo = () => {
     const nombreMapeado = Object.values(mapeo).includes("nombre");
     if (!nombreMapeado) { setError("Debes mapear al menos la columna Nombre."); return; }
     setError("");
     
-    // Convertir filas según el mapeo y detectar duplicados
+    // Convertir filas segÃºn el mapeo y detectar duplicados
     const resultado = rows.map(row => {
       const datos = {};
       Object.entries(mapeo).forEach(([col, campo]) => {
@@ -403,7 +403,7 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
         if (campo === "ppto") datos[campo] = Number(val.replace(/[^0-9.,]/g, "").replace(",", ".")) || 0;
         else if (campo === "zd" || campo === "ze") datos[campo] = val ? val.split(/[,;]/).map(z => z.trim()).filter(Boolean) : [];
         else if (campo === "nombre" && datos["nombre"]) {
-          // Si nombre ya tiene valor (ej: ya se mapeó "Nombre"), concatenar con espacio (ej: "Apellidos")
+          // Si nombre ya tiene valor (ej: ya se mapeÃ³ "Nombre"), concatenar con espacio (ej: "Apellidos")
           datos["nombre"] = (datos["nombre"] + " " + val).trim();
         }
         else datos[campo] = val;
@@ -434,7 +434,7 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
     setPaso(3);
   };
 
-  // ─── PASO 3: Revisar y confirmar ────────────────────────────
+  // âââ PASO 3: Revisar y confirmar ââââââââââââââââââââââââââââ
   const [paso4Wa, setPaso4Wa] = useState(false);
   const [idsImportados, setIdsImportados] = useState([]);
   const [envioWa, setEnvioWa] = useState(null); // null | objeto resultado
@@ -454,7 +454,7 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
     if (!enviarWa) { onClose(); return; }
     const userLogin = localStorage.getItem("mnp_user_login") || "";
 
-    // Obtener los compradores con teléfono
+    // Obtener los compradores con telÃ©fono
     const conTel = procesados
       .filter(r => r.accion === "importar" && (r.datos.tel || "").replace(/\D/g, "").length >= 6)
       .map(r => r.datos);
@@ -464,7 +464,7 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
     setProgresoWa({ ...prog });
     setEnvioWa("enviando");
 
-    // Enviar de uno en uno desde el navegador — sin riesgo de timeout
+    // Enviar de uno en uno desde el navegador â sin riesgo de timeout
     for (const c of conTel) {
       prog.actual = c.nombre || c.email || c.tel;
       setProgresoWa({ ...prog });
@@ -503,11 +503,11 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
 
   return <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)", display: "flex", justifyContent: "center", alignItems: "flex-start", padding: "24px 16px", zIndex: 1500, overflowY: "auto" }}>
     <div style={{ background: "var(--white)", border: "1px solid var(--text)", width: "100%", maxWidth: 780, padding: "36px 40px", position: "relative" }}>
-      <button onClick={onClose} style={{ position: "absolute", top: 16, right: 20, background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "var(--muted)" }}>✕</button>
+      <button onClick={onClose} style={{ position: "absolute", top: 16, right: 20, background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "var(--muted)" }}>â</button>
 
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
-        <div style={{ fontSize: 10, color: "#3D577E", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 6, fontWeight: 700 }}>Importación de compradores</div>
+        <div style={{ fontSize: 10, color: "#3D577E", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 6, fontWeight: 700 }}>ImportaciÃ³n de compradores</div>
         <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, margin: "0 0 16px" }}>
           {paso === 1 ? "Subir archivo Excel" : paso === 2 ? "Mapear columnas" : "Revisar y confirmar"}
         </h3>
@@ -517,7 +517,7 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
             <div key={i} style={{ padding: "6px 20px", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em",
               color: paso === i+1 ? "#3D577E" : paso > i+1 ? "var(--success)" : "#C8C5BC",
               borderBottom: paso === i+1 ? "2px solid #3D577E" : "2px solid transparent" }}>
-              {paso > i+1 ? "✓ " : ""}{s}
+              {paso > i+1 ? "â " : ""}{s}
             </div>
           ))}
         </div>
@@ -525,29 +525,29 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
 
       {error && <div style={{ background: "#FFF5F5", border: "1px solid #D4545433", padding: "10px 16px", marginBottom: 20, fontSize: 12, color: "var(--danger)" }}>{error}</div>}
 
-      {/* ─── PASO 1: Subir ─── */}
+      {/* âââ PASO 1: Subir âââ */}
       {paso === 1 && (
         <div>
           <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 24, lineHeight: 1.6 }}>
-            Sube un archivo Excel (.xlsx, .xls) o CSV. En el siguiente paso podrás indicar qué columna corresponde a cada campo del CRM.
+            Sube un archivo Excel (.xlsx, .xls) o CSV. En el siguiente paso podrÃ¡s indicar quÃ© columna corresponde a cada campo del CRM.
           </p>
           <label style={{ display: "block", border: "2px dashed var(--gold-l)44", padding: "40px 20px", textAlign: "center", cursor: "pointer", background: "#FDFCFA" }}>
-            <div style={{ fontSize: 32, marginBottom: 12 }}>📂</div>
+            <div style={{ fontSize: 32, marginBottom: 12 }}>ð</div>
             <div style={{ fontSize: 13, color: "var(--gold)", fontWeight: 600, marginBottom: 4 }}>Haz clic para seleccionar el archivo</div>
-            <div style={{ fontSize: 11, color: "var(--muted)" }}>Excel (.xlsx, .xls) o CSV — máx 5MB</div>
+            <div style={{ fontSize: 11, color: "var(--muted)" }}>Excel (.xlsx, .xls) o CSV â mÃ¡x 5MB</div>
             <input type="file" accept=".xlsx,.xls,.csv" onChange={handleFile} style={{ display: "none" }} />
           </label>
           <div style={{ marginTop: 16, padding: "12px 16px", background: "#F5F8FF", border: "1px solid #3D577E22", fontSize: 11, color: "#3D577E" }}>
-            💡 <strong>Consejo:</strong> Si tu Excel tiene muchas columnas, puedes ignorar las que no necesitas en el paso siguiente. Solo es obligatorio que haya una columna con el nombre del comprador.
+            ð¡ <strong>Consejo:</strong> Si tu Excel tiene muchas columnas, puedes ignorar las que no necesitas en el paso siguiente. Solo es obligatorio que haya una columna con el nombre del comprador.
           </div>
         </div>
       )}
 
-      {/* ─── PASO 2: Mapear ─── */}
+      {/* âââ PASO 2: Mapear âââ */}
       {paso === 2 && (
         <div>
           <p style={{ fontSize: 12, color: "var(--muted)", marginBottom: 20 }}>
-            Tu Excel tiene <strong style={{ color: "var(--text)" }}>{headers.length} columnas</strong> y <strong style={{ color: "var(--text)" }}>{rows.length} filas</strong>. Indica qué campo del CRM corresponde a cada columna:
+            Tu Excel tiene <strong style={{ color: "var(--text)" }}>{headers.length} columnas</strong> y <strong style={{ color: "var(--text)" }}>{rows.length} filas</strong>. Indica quÃ© campo del CRM corresponde a cada columna:
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 20px 1fr", gap: "8px 12px", marginBottom: 24, maxHeight: 400, overflowY: "auto" }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", padding: "4px 0", borderBottom: "1px solid var(--border)" }}>Columna en tu Excel</div>
@@ -557,9 +557,9 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
               <React.Fragment key={h}>
                 <div style={{ padding: "6px 10px", background: "var(--cream)", border: "1px solid var(--border)", fontSize: 12, color: "var(--text)", display: "flex", alignItems: "center" }}>
                   <span style={{ fontWeight: 600 }}>{h}</span>
-                  <span style={{ fontSize: 10, color: "var(--muted)", marginLeft: 8 }}>ej: {rows[0]?.[h] || "—"}</span>
+                  <span style={{ fontSize: 10, color: "var(--muted)", marginLeft: 8 }}>ej: {rows[0]?.[h] || "â"}</span>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", color: "var(--gold-l)", fontSize: 14 }}>→</div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", color: "var(--gold-l)", fontSize: 14 }}>â</div>
                 <select value={mapeo[h] || "_ignorar"} onChange={e => setMapeo(m => ({ ...m, [h]: e.target.value }))} style={{ ...iSt, borderColor: mapeo[h] && mapeo[h] !== "_ignorar" ? "var(--success)44" : "var(--border)" }}>
                   {CAMPOS_CRM.map(c => <option key={c.key} value={c.key}>{c.label}{c.req ? " *" : ""}</option>)}
                 </select>
@@ -568,20 +568,20 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
           </div>
           <div style={{ fontSize: 11, color: "var(--muted)", marginBottom: 20 }}>* El campo Nombre es obligatorio</div>
           <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-            <button onClick={() => { setPaso(1); setError(""); }} style={{ padding: "10px 20px", border: "1px solid var(--text)", background: "none", color: "var(--muted)", cursor: "pointer", fontSize: 11, fontFamily: "Inter, sans-serif" }}>← Volver</button>
-            <button onClick={confirmarMapeo} style={{ padding: "10px 28px", border: "none", background: "#3D577E", color: "#fff", cursor: "pointer", fontSize: 11, fontWeight: 600, fontFamily: "Inter, sans-serif", textTransform: "uppercase", letterSpacing: "0.08em" }}>Continuar →</button>
+            <button onClick={() => { setPaso(1); setError(""); }} style={{ padding: "10px 20px", border: "1px solid var(--text)", background: "none", color: "var(--muted)", cursor: "pointer", fontSize: 11, fontFamily: "Inter, sans-serif" }}>â Volver</button>
+            <button onClick={confirmarMapeo} style={{ padding: "10px 28px", border: "none", background: "#3D577E", color: "#fff", cursor: "pointer", fontSize: 11, fontWeight: 600, fontFamily: "Inter, sans-serif", textTransform: "uppercase", letterSpacing: "0.08em" }}>Continuar â</button>
           </div>
         </div>
       )}
 
-      {/* ─── PASO 3: Revisar ─── */}
+      {/* âââ PASO 3: Revisar âââ */}
       {paso === 3 && (
         <div>
           {/* Resumen */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 24 }}>
             <div style={{ padding: "16px", background: "var(--success)10", border: "1px solid var(--success)44", textAlign: "center" }}>
               <div style={{ fontSize: 28, fontWeight: 700, color: "var(--success)", fontFamily: "'Playfair Display', serif" }}>{totalImportar}</div>
-              <div style={{ fontSize: 10, color: "var(--success)", textTransform: "uppercase", letterSpacing: "0.1em", marginTop: 4 }}>Se importarán</div>
+              <div style={{ fontSize: 10, color: "var(--success)", textTransform: "uppercase", letterSpacing: "0.1em", marginTop: 4 }}>Se importarÃ¡n</div>
             </div>
             <div style={{ padding: "16px", background: "#E1306C10", border: "1px solid #E1306C44", textAlign: "center" }}>
               <div style={{ fontSize: 28, fontWeight: 700, color: "#E1306C", fontFamily: "'Playfair Display', serif" }}>{totalDups}</div>
@@ -589,15 +589,15 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
             </div>
             <div style={{ padding: "16px", background: "var(--muted)10", border: "1px solid var(--muted)44", textAlign: "center" }}>
               <div style={{ fontSize: 28, fontWeight: 700, color: "var(--muted)", fontFamily: "'Playfair Display', serif" }}>{totalOmitir}</div>
-              <div style={{ fontSize: 10, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em", marginTop: 4 }}>Se omitirán</div>
+              <div style={{ fontSize: 10, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em", marginTop: 4 }}>Se omitirÃ¡n</div>
             </div>
           </div>
 
-          {/* Lista de duplicados con decisión */}
+          {/* Lista de duplicados con decisiÃ³n */}
           {totalDups > 0 && (
             <div style={{ marginBottom: 24 }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: "#E1306C", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12 }}>
-                ⚠ Duplicados detectados — decide qué hacer con cada uno:
+                â  Duplicados detectados â decide quÃ© hacer con cada uno:
               </div>
               <div style={{ maxHeight: 280, overflowY: "auto", border: "1px solid var(--border)" }}>
                 {procesados.map((r, i) => !r.duplicado ? null : (
@@ -605,11 +605,11 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
                     <div>
                       <div style={{ fontSize: 12, fontWeight: 600 }}>{r.datos.nombre}</div>
                       <div style={{ fontSize: 11, color: "var(--muted)" }}>
-                        {r.datos.email && <span style={{ marginRight: 12 }}>📧 {r.datos.email}</span>}
-                        {r.datos.tel && <span>📱 {r.datos.tel}</span>}
+                        {r.datos.email && <span style={{ marginRight: 12 }}>ð§ {r.datos.email}</span>}
+                        {r.datos.tel && <span>ð± {r.datos.tel}</span>}
                       </div>
                       <div style={{ fontSize: 10, color: "#E1306C", marginTop: 2 }}>
-                        Ya existe: <strong>{r.duplicado.nombre}</strong> — {r.duplicado.email || r.duplicado.tel}
+                        Ya existe: <strong>{r.duplicado.nombre}</strong> â {r.duplicado.email || r.duplicado.tel}
                       </div>
                     </div>
                     <div style={{ display: "flex", gap: 6 }}>
@@ -638,18 +638,18 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
                 {procesados.filter(r => r.accion === "importar").slice(0, 3).map((r, i) => (
                   <div key={i} style={{ padding: "8px 14px", borderBottom: "1px solid #F0EDE7", display: "flex", gap: 16, fontSize: 12 }}>
                     <span style={{ fontWeight: 600, minWidth: 180 }}>{r.datos.nombre}</span>
-                    <span style={{ color: "var(--muted)" }}>{r.datos.email || "—"}</span>
-                    <span style={{ color: "var(--muted)" }}>{r.datos.tel || "—"}</span>
-                    {r.datos.ppto > 0 && <span style={{ color: "var(--gold)" }}>{Number(r.datos.ppto).toLocaleString("es-ES")} €</span>}
+                    <span style={{ color: "var(--muted)" }}>{r.datos.email || "â"}</span>
+                    <span style={{ color: "var(--muted)" }}>{r.datos.tel || "â"}</span>
+                    {r.datos.ppto > 0 && <span style={{ color: "var(--gold)" }}>{Number(r.datos.ppto).toLocaleString("es-ES")} â¬</span>}
                   </div>
                 ))}
-                {totalImportar > 3 && <div style={{ padding: "8px 14px", fontSize: 11, color: "var(--muted)", fontStyle: "italic" }}>... y {totalImportar - 3} más</div>}
+                {totalImportar > 3 && <div style={{ padding: "8px 14px", fontSize: 11, color: "var(--muted)", fontStyle: "italic" }}>... y {totalImportar - 3} mÃ¡s</div>}
               </div>
             </div>
           )}
 
           <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
-            <button onClick={() => { setPaso(2); setError(""); }} style={{ padding: "10px 20px", border: "1px solid var(--text)", background: "none", color: "var(--muted)", cursor: "pointer", fontSize: 11, fontFamily: "Inter, sans-serif" }}>← Volver</button>
+            <button onClick={() => { setPaso(2); setError(""); }} style={{ padding: "10px 20px", border: "1px solid var(--text)", background: "none", color: "var(--muted)", cursor: "pointer", fontSize: 11, fontFamily: "Inter, sans-serif" }}>â Volver</button>
             <button onClick={ejecutarImport} disabled={importando || totalImportar === 0}
               style={{ padding: "10px 28px", border: "none", background: totalImportar === 0 ? "#C8C5BC" : "var(--success)", color: "#fff", cursor: totalImportar === 0 ? "default" : "pointer", fontSize: 11, fontWeight: 600, fontFamily: "Inter, sans-serif", textTransform: "uppercase", letterSpacing: "0.08em" }}>
               {importando ? "Importando..." : `Importar ${totalImportar} comprador${totalImportar !== 1 ? "es" : ""}`}
@@ -658,29 +658,29 @@ function ImportadorExcel({ compradores, onClose, onImport }) {
         </div>
       )}
 
-      {/* ─── PASO 4: WhatsApp ─── */}
+      {/* âââ PASO 4: WhatsApp âââ */}
       {paso4Wa && (
         <div>
           {!envioWa ? (
             <>
-              {/* Pantalla de confirmación de envío */}
+              {/* Pantalla de confirmaciÃ³n de envÃ­o */}
               <div style={{ textAlign: "center", padding: "20px 0 28px" }}>
-                <div style={{ fontSize: 40, marginBottom: 12 }}>✅</div>
+                <div style={{ fontSize: 40, marginBottom: 12 }}>â</div>
                 <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, marginBottom: 8 }}>
                   {idsImportados.length} comprador{idsImportados.length !== 1 ? "es" : ""} importado{idsImportados.length !== 1 ? "s" : ""}
                 </div>
-                <div style={{ fontSize: 12, color: "var(--muted)" }}>¿Quieres enviarles un WhatsApp con el formulario de cualificación?</div>
+                <div style={{ fontSize: 12, color: "var(--muted)" }}>Â¿Quieres enviarles un WhatsApp con el formulario de cualificaciÃ³n?</div>
               </div>
 
               {/* Vista previa del mensaje */}
               <div style={{ background: "#F0F8F4", border: "1px solid var(--success)44", padding: "16px 20px", marginBottom: 20, borderRadius: 0 }}>
-                <div style={{ fontSize: 10, color: "var(--success)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Vista previa del mensaje (español)</div>
+                <div style={{ fontSize: 10, color: "var(--success)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Vista previa del mensaje (espaÃ±ol)</div>
                 <div style={{ fontSize: 12, color: "var(--text)", lineHeight: 1.6, whiteSpace: "pre-line" }}>
-                  {`¡Hola! Te escribimos de Nativa Properties. Si quieres tener acceso preferente a propiedades antes de que salgan al mercado, puedes completar este formulario. Así podremos enviarte oportunidades que encajen con tus preferencias antes de su publicación.
+                  {`Â¡Hola! Te escribimos de Nativa Properties. Si quieres tener acceso preferente a propiedades antes de que salgan al mercado, puedes completar este formulario. AsÃ­ podremos enviarte oportunidades que encajen con tus preferencias antes de su publicaciÃ³n.
 
 ${(typeof window !== "undefined" ? window.location.origin : "https://crm.mallorcanativaproperties.com")}/cualificacion`}
                 </div>
-                <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 10 }}>El mensaje se enviará automáticamente en español, inglés, alemán, holandés o francés según el país del contacto.</div>
+                <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 10 }}>El mensaje se enviarÃ¡ automÃ¡ticamente en espaÃ±ol, inglÃ©s, alemÃ¡n, holandÃ©s o francÃ©s segÃºn el paÃ­s del contacto.</div>
               </div>
 
               {/* Toggle enviar/no enviar */}
@@ -688,7 +688,7 @@ ${(typeof window !== "undefined" ? window.location.origin : "https://crm.mallorc
                 <input type="checkbox" checked={enviarWa} onChange={e => setEnviarWa(e.target.checked)}
                   style={{ width: 16, height: 16, cursor: "pointer" }} />
                 <span style={{ fontSize: 13, color: "var(--text)" }}>
-                  Enviar WhatsApp a los contactos que tienen teléfono
+                  Enviar WhatsApp a los contactos que tienen telÃ©fono
                   <span style={{ fontSize: 11, color: "var(--muted)", marginLeft: 6 }}>
                     ({procesados.filter(r => r.accion === "importar" && (r.datos.tel||"").replace(/\D/g,"").length >= 6).length} de {idsImportados.length})
                   </span>
@@ -701,14 +701,14 @@ ${(typeof window !== "undefined" ? window.location.origin : "https://crm.mallorc
                 </button>
                 <button onClick={ejecutarEnvioWa}
                   style={{ padding: "10px 28px", border: "none", background: enviarWa ? "#25D366" : "var(--muted)", color: "#fff", cursor: "pointer", fontSize: 11, fontWeight: 600, fontFamily: "Inter, sans-serif", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                  {enviarWa ? "Enviar WhatsApp →" : "Finalizar sin enviar"}
+                  {enviarWa ? "Enviar WhatsApp â" : "Finalizar sin enviar"}
                 </button>
               </div>
             </>
           ) : envioWa === "enviando" ? (
             <div style={{ padding: "20px 0" }}>
               <div style={{ textAlign: "center", marginBottom: 24 }}>
-                <div style={{ fontSize: 32, marginBottom: 8 }}>📲</div>
+                <div style={{ fontSize: 32, marginBottom: 8 }}>ð²</div>
                 <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 600 }}>Enviando mensajes...</div>
                 <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 4 }}>No cierres esta ventana hasta que termine</div>
               </div>
@@ -734,12 +734,12 @@ ${(typeof window !== "undefined" ? window.location.origin : "https://crm.mallorc
               )}
             </div>
           ) : (
-            /* Resultado del envío */
+            /* Resultado del envÃ­o */
             <div>
               <div style={{ textAlign: "center", padding: "20px 0 24px" }}>
-                <div style={{ fontSize: 40, marginBottom: 12 }}>{envioWa.error ? "⚠️" : "✅"}</div>
+                <div style={{ fontSize: 40, marginBottom: 12 }}>{envioWa.error ? "â ï¸" : "â"}</div>
                 <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, marginBottom: 8 }}>
-                  {envioWa.error ? "Error en el envío" : "Mensajes enviados"}
+                  {envioWa.error ? "Error en el envÃ­o" : "Mensajes enviados"}
                 </div>
               </div>
               {!envioWa.error && (
@@ -750,7 +750,7 @@ ${(typeof window !== "undefined" ? window.location.origin : "https://crm.mallorc
                   </div>
                   <div style={{ padding: 16, background: "var(--muted)10", border: "1px solid var(--muted)44", textAlign: "center" }}>
                     <div style={{ fontSize: 28, fontWeight: 700, color: "var(--muted)", fontFamily: "'Playfair Display', serif" }}>{envioWa.sin_telefono || 0}</div>
-                    <div style={{ fontSize: 10, color: "var(--muted)", textTransform: "uppercase", marginTop: 4 }}>Sin teléfono</div>
+                    <div style={{ fontSize: 10, color: "var(--muted)", textTransform: "uppercase", marginTop: 4 }}>Sin telÃ©fono</div>
                   </div>
                   <div style={{ padding: 16, background: envioWa.errores > 0 ? "var(--danger)10" : "var(--cream)", border: "1px solid " + (envioWa.errores > 0 ? "var(--danger)44" : "var(--border)"), textAlign: "center" }}>
                     <div style={{ fontSize: 28, fontWeight: 700, color: envioWa.errores > 0 ? "var(--danger)" : "var(--muted)", fontFamily: "'Playfair Display', serif" }}>{envioWa.errores || 0}</div>
@@ -770,31 +770,31 @@ ${(typeof window !== "undefined" ? window.location.origin : "https://crm.mallorc
     </div>
   </div>;
 }
-// ════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
-// ═══ MODAL DUPLICADO ════════════════════════════════════════════
+// âââ MODAL DUPLICADO ââââââââââââââââââââââââââââââââââââââââââââ
 function ModalDuplicado({ nuevo, existente, motivo, isAdmin, onAbrir, onFusionar, onIgnorar, onClose }) {
   const [fusionData, setFusionData] = useState(null); // null = no iniciado, objeto = datos fusionados
   const [modofusion, setModoFusion] = useState(false);
   const campos = ["nombre","email","tel","ppto","zd","req","fin","agente_asignado"];
-  const labels = { nombre: "Nombre", email: "Email", tel: "Teléfono", ppto: "Presupuesto", zd: "Zonas", req: "Requisitos", fin: "Hipoteca", agente_asignado: "Agente" };
+  const labels = { nombre: "Nombre", email: "Email", tel: "TelÃ©fono", ppto: "Presupuesto", zd: "Zonas", req: "Requisitos", fin: "Hipoteca", agente_asignado: "Agente" };
 
   return <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", backdropFilter: "blur(8px)", display: "flex", justifyContent: "center", alignItems: "center", padding: 24, zIndex: 2000 }}>
     <div style={{ background: "var(--white)", border: "1px solid var(--text)", width: "100%", maxWidth: 680, maxHeight: "90vh", overflowY: "auto", padding: "36px 40px", position: "relative" }}>
-      <button onClick={onClose} style={{ position: "absolute", top: 16, right: 20, background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "var(--muted)" }}>✕</button>
-      <div style={{ fontSize: 10, color: "#E1306C", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 8, fontWeight: 700 }}>⚠ Posible duplicado detectado</div>
-      <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, margin: "0 0 6px" }}>Este comprador ya podría existir</h3>
-      <p style={{ fontSize: 12, color: "var(--muted)", margin: "0 0 24px" }}>Coincidencia por {motivo}. El nuevo comprador se ha guardado. Elige qué hacer:</p>
+      <button onClick={onClose} style={{ position: "absolute", top: 16, right: 20, background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "var(--muted)" }}>â</button>
+      <div style={{ fontSize: 10, color: "#E1306C", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 8, fontWeight: 700 }}>â  Posible duplicado detectado</div>
+      <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, margin: "0 0 6px" }}>Este comprador ya podrÃ­a existir</h3>
+      <p style={{ fontSize: 12, color: "var(--muted)", margin: "0 0 24px" }}>Coincidencia por {motivo}. El nuevo comprador se ha guardado. Elige quÃ© hacer:</p>
 
       {/* Comparativa */}
       {!modofusion ? (
         <div style={{ display: "grid", gridTemplateColumns: "80px 1fr 1fr", gap: "4px 12px", marginBottom: 24 }}>
           <div style={{ fontSize: 9, color: "var(--muted)", textTransform: "uppercase", paddingBottom: 8, borderBottom: "1px solid var(--border)" }}></div>
-          <div style={{ fontSize: 10, fontWeight: 700, color: "#3D577E", paddingBottom: 8, borderBottom: "1px solid var(--border)" }}>NUEVO (recién creado)</div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "#3D577E", paddingBottom: 8, borderBottom: "1px solid var(--border)" }}>NUEVO (reciÃ©n creado)</div>
           <div style={{ fontSize: 10, fontWeight: 700, color: "var(--success)", paddingBottom: 8, borderBottom: "1px solid var(--border)" }}>EXISTENTE (en BD)</div>
           {campos.map(c => {
-            const vn = Array.isArray(nuevo[c]) ? nuevo[c].join(", ") : String(nuevo[c] ?? "—");
-            const ve = Array.isArray(existente[c]) ? existente[c].join(", ") : String(existente[c] ?? "—");
+            const vn = Array.isArray(nuevo[c]) ? nuevo[c].join(", ") : String(nuevo[c] ?? "â");
+            const ve = Array.isArray(existente[c]) ? existente[c].join(", ") : String(existente[c] ?? "â");
             const diff = vn !== ve;
             return [
               <div key={c+"l"} style={{ fontSize: 10, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.08em", padding: "6px 0", borderBottom: "1px solid #F0EDE7" }}>{labels[c]||c}</div>,
@@ -804,7 +804,7 @@ function ModalDuplicado({ nuevo, existente, motivo, isAdmin, onAbrir, onFusionar
           })}
         </div>
       ) : (
-        /* Modo fusión: elegir campo a campo */
+        /* Modo fusiÃ³n: elegir campo a campo */
         <div style={{ marginBottom: 24 }}>
           <p style={{ fontSize: 12, color: "var(--muted)", marginBottom: 16 }}>Haz clic en el valor que quieres conservar en el registro final:</p>
           {campos.map(c => {
@@ -816,11 +816,11 @@ function ModalDuplicado({ nuevo, existente, motivo, isAdmin, onAbrir, onFusionar
               <div style={{ display: "flex", gap: 8 }}>
                 <button onClick={() => setFusionData(f => ({...(f || existente), [c]: nuevo[c]}))}
                   style={{ flex: 1, padding: "8px 12px", border: "2px solid " + (seleccionado === vn ? "#3D577E" : "var(--border)"), background: seleccionado === vn ? "#3D577E11" : "transparent", cursor: "pointer", fontSize: 12, textAlign: "left" }}>
-                  {vn || "—"} <span style={{ fontSize: 10, color: "var(--muted)" }}>(nuevo)</span>
+                  {vn || "â"} <span style={{ fontSize: 10, color: "var(--muted)" }}>(nuevo)</span>
                 </button>
                 <button onClick={() => setFusionData(f => ({...(f || nuevo), [c]: existente[c]}))}
                   style={{ flex: 1, padding: "8px 12px", border: "2px solid " + (seleccionado === ve ? "var(--success)" : "var(--border)"), background: seleccionado === ve ? "var(--success)11" : "transparent", cursor: "pointer", fontSize: 12, textAlign: "left" }}>
-                  {ve || "—"} <span style={{ fontSize: 10, color: "var(--muted)" }}>(existente)</span>
+                  {ve || "â"} <span style={{ fontSize: 10, color: "var(--muted)" }}>(existente)</span>
                 </button>
               </div>
             </div>;
@@ -843,7 +843,7 @@ function ModalDuplicado({ nuevo, existente, motivo, isAdmin, onAbrir, onFusionar
         {isAdmin && modofusion && (
           <button onClick={() => fusionData && onFusionar({...fusionData, id: existente.id})}
             style={{ padding: "10px 20px", border: "1px solid var(--success)", background: "var(--success)", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", textTransform: "uppercase" }}>
-            Confirmar fusión
+            Confirmar fusiÃ³n
           </button>
         )}
         <button onClick={onIgnorar}
@@ -854,7 +854,7 @@ function ModalDuplicado({ nuevo, existente, motivo, isAdmin, onAbrir, onFusionar
     </div>
   </div>;
 }
-// ════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 function Detail({ b, onClose, onSave, onDelete, onWhatsApp, currentUser, puedeEliminar, puedeVerHistorial }) {
   const [ed, setEd] = useState(false);
@@ -896,11 +896,11 @@ function Detail({ b, onClose, onSave, onDelete, onWhatsApp, currentUser, puedeEl
 
   return <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", display: "flex", justifyContent: "center", alignItems: "flex-start", padding: "40px 16px", zIndex: 1000, overflowY: "auto" }}>
     <div style={{ background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, width: "100%", maxWidth: 620, padding: "36px 40px", position: "relative" }}>
-      <button onClick={onClose} style={{ position: "absolute", top: 20, right: 24, background: "none", border: "none", color: "var(--muted)", fontSize: 20, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>✕</button>
+      <button onClick={onClose} style={{ position: "absolute", top: 20, right: 24, background: "none", border: "none", color: "var(--muted)", fontSize: 20, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>â</button>
       {puedeEliminar && <button onClick={() => { if (onDelete) onDelete(b); }} style={{ position: "absolute", top: 22, right: 60, background: "none", border: "1px solid #D4545433", borderRadius: 0, color: "var(--danger)", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "Inter, sans-serif" }}>Eliminar</button>}
       <button onClick={() => onWhatsApp && onWhatsApp(b)} style={{ position: "absolute", top: 18, right: 110, width: 34, height: 34, display: "flex", alignItems: "center", justifyContent: "center", background: "none", border: "none", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.2))", transition: "transform 0.2s", cursor: "pointer", padding: 0 }} title="Abrir chat WhatsApp" onMouseEnter={e => e.currentTarget.style.transform = "scale(1.12)"} onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}><svg width="34" height="34" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="goldGrad2" cx="40%" cy="35%" r="60%"><stop offset="0%" stopColor="#FFE57A"/><stop offset="40%" stopColor="#D4A017"/><stop offset="100%" stopColor="#8B6500"/></radialGradient><radialGradient id="goldRing2" cx="40%" cy="35%" r="60%"><stop offset="0%" stopColor="#FFD700"/><stop offset="60%" stopColor="#B8860B"/><stop offset="100%" stopColor="#6B4E00"/></radialGradient></defs><circle cx="18" cy="18" r="17" fill="url(#goldRing2)" stroke="#8B6500" strokeWidth="0.5"/><circle cx="18" cy="18" r="14" fill="url(#goldGrad2)"/><path d="M18 8.5C12.75 8.5 8.5 12.75 8.5 18C8.5 19.85 9.02 21.58 9.92 23.05L8.5 27.5L13.1 26.1C14.52 26.92 16.2 27.5 18 27.5C23.25 27.5 27.5 23.25 27.5 18C27.5 12.75 23.25 8.5 18 8.5Z" fill="white" fillOpacity="0.9"/><path d="M23.5 21.2C23.2 21.95 22.1 22.6 21.25 22.75C20.65 22.85 19.85 22.9 17.1 21.8C13.7 20.45 11.55 17 11.4 16.8C11.25 16.6 10.2 15.2 10.2 13.75C10.2 12.3 10.95 11.6 11.25 11.25C11.55 10.95 11.9 10.85 12.1 10.85C12.3 10.85 12.5 10.85 12.7 10.85C12.9 10.85 13.15 10.8 13.4 11.35C13.65 11.9 14.25 13.35 14.3 13.5C14.35 13.65 14.4 13.85 14.3 14.05C14.2 14.3 14.15 14.4 13.95 14.65C13.8 14.85 13.6 15.1 13.45 15.25C13.25 15.45 13.05 15.65 13.25 15.95C13.45 16.3 14.2 17.5 15.3 18.5C16.7 19.75 17.85 20.15 18.2 20.3C18.55 20.45 18.75 20.4 18.95 20.2C19.15 19.95 19.9 19.1 20.1 18.8C20.3 18.45 20.55 18.5 20.85 18.6C21.15 18.7 22.6 19.4 22.9 19.55C23.2 19.7 23.4 19.75 23.5 19.9C23.6 20.05 23.6 20.75 23.5 21.2Z" fill="#B8860B"/></svg></button>
-      {ed && autoSaveStatus && <div style={{ position: "absolute", top: 24, left: 40, fontSize: 10, color: autoSaveStatus === "saved" ? "var(--success)" : autoSaveStatus === "error" ? "var(--danger)" : "var(--muted)" }}>{autoSaveStatus === "saving" ? "⏳ Guardando..." : autoSaveStatus === "saved" ? "✓ Guardado" : "✗ Error"}</div>}
-      {/* Pestañas: Ficha | Historial */}
+      {ed && autoSaveStatus && <div style={{ position: "absolute", top: 24, left: 40, fontSize: 10, color: autoSaveStatus === "saved" ? "var(--success)" : autoSaveStatus === "error" ? "var(--danger)" : "var(--muted)" }}>{autoSaveStatus === "saving" ? "â³ Guardando..." : autoSaveStatus === "saved" ? "â Guardado" : "â Error"}</div>}
+      {/* PestaÃ±as: Ficha | Historial */}
       {puedeVerHistorial && <div style={{ display: "flex", gap: 0, marginBottom: 24, borderBottom: "1px solid var(--border)" }}>
         {["ficha","historial"].map(t => <button key={t} onClick={() => { setTab(t); if (t === "historial") cargarHistorial(); }}
           style={{ padding: "8px 20px", background: "none", border: "none", borderBottom: tab === t ? "2px solid var(--gold)" : "2px solid transparent", color: tab === t ? "var(--gold)" : "var(--muted)", fontSize: 11, fontWeight: 600, cursor: "pointer", textTransform: "uppercase", letterSpacing: "0.1em", fontFamily: "Inter, sans-serif" }}>
@@ -908,10 +908,10 @@ function Detail({ b, onClose, onSave, onDelete, onWhatsApp, currentUser, puedeEl
         </button>)}
       </div>}
       {tab === "historial" && (
-        /* ─── PESTAÑA HISTORIAL ─── */
+        /* âââ PESTAÃA HISTORIAL âââ */
         <div>
           {loadingHistorial ? <div style={{ textAlign: "center", padding: 40, color: "var(--muted)", fontSize: 13 }}>Cargando historial...</div> :
-           historial.length === 0 ? <div style={{ textAlign: "center", padding: 40, color: "var(--muted)", fontSize: 13, fontStyle: "italic" }}>Sin cambios registrados aún</div> :
+           historial.length === 0 ? <div style={{ textAlign: "center", padding: 40, color: "var(--muted)", fontSize: 13, fontStyle: "italic" }}>Sin cambios registrados aÃºn</div> :
            <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
              {historial.map((h, i) => (
                <div key={h.id} style={{ padding: "12px 0", borderBottom: "1px solid var(--border)", display: "grid", gridTemplateColumns: "120px 1fr 1fr", gap: 12, alignItems: "start" }}>
@@ -922,18 +922,18 @@ function Detail({ b, onClose, onSave, onDelete, onWhatsApp, currentUser, puedeEl
                  </div>
                  <div>
                    <div style={{ fontSize: 9, color: "var(--muted)", textTransform: "uppercase", marginBottom: 2 }}>Antes</div>
-                   <div style={{ fontSize: 12, color: "var(--danger)", background: "#FFF5F5", padding: "4px 8px" }}>{h.valor_anterior || "—"}</div>
+                   <div style={{ fontSize: 12, color: "var(--danger)", background: "#FFF5F5", padding: "4px 8px" }}>{h.valor_anterior || "â"}</div>
                  </div>
                  <div>
-                   <div style={{ fontSize: 9, color: "var(--muted)", textTransform: "uppercase", marginBottom: 2 }}>Después</div>
-                   <div style={{ fontSize: 12, color: "var(--success)", background: "#F5FFF8", padding: "4px 8px" }}>{h.valor_nuevo || "—"}</div>
+                   <div style={{ fontSize: 9, color: "var(--muted)", textTransform: "uppercase", marginBottom: 2 }}>DespuÃ©s</div>
+                   <div style={{ fontSize: 12, color: "var(--success)", background: "#F5FFF8", padding: "4px 8px" }}>{h.valor_nuevo || "â"}</div>
                  </div>
                </div>
              ))}
            </div>}
         </div>
       )}
-      {/* ─── PESTAÑA FICHA ─── */}
+      {/* âââ PESTAÃA FICHA âââ */}
       <div style={{ display: tab === "historial" ? "none" : "block" }}>
       <div style={{ borderBottom: "1px solid var(--text)", paddingBottom: 24, marginBottom: 28 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
@@ -950,18 +950,18 @@ function Detail({ b, onClose, onSave, onDelete, onWhatsApp, currentUser, puedeEl
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px 28px", marginBottom: 28 }}>
         <div><L>Email</L>{ed ? <input value={f.email} onChange={e => setF({ ...f, email: e.target.value })} onBlur={e => autoBlur({...f, email: e.target.value})} style={iSt} /> : <div style={{ fontSize: 13, color: "var(--text)", fontFamily: "Inter, sans-serif" }}>{b.email}</div>}</div>
-        <div><L>Teléfono</L>{ed ? <input value={f.tel} onChange={e => setF({ ...f, tel: e.target.value })} onBlur={e => autoBlur({...f, tel: e.target.value})} style={iSt} /> : <div style={{ fontSize: 13, color: "var(--text)", fontFamily: "Inter, sans-serif" }}>{b.tel}</div>}</div>
-        <div style={{ gridColumn: "span 2" }}><L>País de residencia</L>{ed
-          ? <select value={f.pais || "España"} onChange={e => setF({ ...f, pais: e.target.value })} onBlur={() => autoBlur({...f})} style={{ ...iSt, appearance: "auto" }}>
+        <div><L>TelÃ©fono</L>{ed ? <input value={f.tel} onChange={e => setF({ ...f, tel: e.target.value })} onBlur={e => autoBlur({...f, tel: e.target.value})} style={iSt} /> : <div style={{ fontSize: 13, color: "var(--text)", fontFamily: "Inter, sans-serif" }}>{b.tel}</div>}</div>
+        <div style={{ gridColumn: "span 2" }}><L>PaÃ­s de residencia</L>{ed
+          ? <select value={f.pais || "EspaÃ±a"} onChange={e => setF({ ...f, pais: e.target.value })} onBlur={() => autoBlur({...f})} style={{ ...iSt, appearance: "auto" }}>
               {PAISES.map(p => <option key={p.pais} value={p.pais}>{p.flag} {p.pais} {p.prefijo}</option>)}
             </select>
-          : (() => { const p = PAISES.find(x => x.pais === (b.pais || "España")) || PAISES[0]; return <div style={{ fontSize: 13, color: "var(--text)", fontFamily: "Inter, sans-serif" }}>{p.flag} {p.pais} <span style={{ color: "var(--muted)" }}>{p.prefijo}</span></div>; })()
+          : (() => { const p = PAISES.find(x => x.pais === (b.pais || "EspaÃ±a")) || PAISES[0]; return <div style={{ fontSize: 13, color: "var(--text)", fontFamily: "Inter, sans-serif" }}>{p.flag} {p.pais} <span style={{ color: "var(--muted)" }}>{p.prefijo}</span></div>; })()
         }</div>
         <div><L>Presupuesto</L>{ed ? <input type="number" value={f.ppto} onChange={e => setF({ ...f, ppto: +e.target.value })} style={iSt} onFocus={e => e.target.style.borderColor = "var(--gold-l)44"} onBlur={e => { e.target.style.borderColor = "var(--border)"; autoBlur({...f, ppto: +e.target.value}); }} /> : <div style={{ fontSize: 18, color: "var(--gold)", fontFamily: "'Playfair Display', serif" }}>{fmt(b.ppto)}</div>}</div>
         <div><L>Habitaciones</L>{ed ? <input value={f.hab} onChange={e => setF({ ...f, hab: e.target.value })} onBlur={e => autoBlur({...f, hab: e.target.value})} style={iSt} /> : <div style={{ fontSize: 13, color: "var(--text)", fontFamily: "Inter, sans-serif" }}>{b.hab}</div>}</div>
         <div><L>Finalidad de compra</L>{ed ? <select value={f.finalidad} onChange={e => setF({ ...f, finalidad: e.target.value })} style={iSt}>{FINALIDADES.map(x => <option key={x}>{x}</option>)}</select> : <div style={{ fontSize: 13, color: "var(--text)", fontFamily: "Inter, sans-serif", fontStyle: "italic" }}>{b.finalidad}</div>}</div>
-        <div><L>Financiación</L>{ed ? <select value={f.fin} onChange={e => setF({ ...f, fin: e.target.value })} style={iSt}>{["Sí","No","Abierto"].map(x => <option key={x}>{x}</option>)}</select> : <div style={{ fontSize: 13, color: "var(--text)", fontFamily: "Inter, sans-serif" }}>{b.fin === "Sí" ? "Sí, necesita" : b.fin === "No" ? "No necesita" : "Abierto a mejorar condiciones"}</div>}</div>
-        <div><L>Altura máx. sin ascensor</L>{ed ? <input value={f.alt} onChange={e => setF({ ...f, alt: e.target.value })} style={iSt} /> : <div style={{ fontSize: 13, color: "var(--text)", fontFamily: "Inter, sans-serif" }}>{b.alt}</div>}</div>
+        <div><L>FinanciaciÃ³n</L>{ed ? <select value={f.fin} onChange={e => setF({ ...f, fin: e.target.value })} style={iSt}>{["SÃ­","No","Abierto"].map(x => <option key={x}>{x}</option>)}</select> : <div style={{ fontSize: 13, color: "var(--text)", fontFamily: "Inter, sans-serif" }}>{b.fin === "SÃ­" ? "SÃ­, necesita" : b.fin === "No" ? "No necesita" : "Abierto a mejorar condiciones"}</div>}</div>
+        <div><L>Altura mÃ¡x. sin ascensor</L>{ed ? <input value={f.alt} onChange={e => setF({ ...f, alt: e.target.value })} style={iSt} /> : <div style={{ fontSize: 13, color: "var(--text)", fontFamily: "Inter, sans-serif" }}>{b.alt}</div>}</div>
         <div><L>Estado</L>{ed ? <select value={f.st} onChange={e => setF({ ...f, st: e.target.value })} style={iSt}>{ESTADOS.map(x => <option key={x.key} value={x.key}>{x.label}</option>)}</select> : <Badge color={est.accent}>{est.label}</Badge>}</div>
       </div>
       <div style={{ marginBottom: 20 }}><L>Zonas deseadas</L>
@@ -970,7 +970,7 @@ function Detail({ b, onClose, onSave, onDelete, onWhatsApp, currentUser, puedeEl
       <div style={{ marginBottom: 20 }}><L>Zonas excluidas</L>
         <SelectorZonas value={ed ? (f.ze || []) : (b.ze || [])} onChange={ze => setF({ ...f, ze })} tipo="excluida" disabled={!ed} />
       </div>
-      <div style={{ marginBottom: 20 }}><L>Requisitos especiales</L>{ed ? <textarea value={f.req} onChange={e => setF({ ...f, req: e.target.value })} onBlur={e => autoBlur({...f, req: e.target.value})} style={{ ...iSt, minHeight: 80, resize: "vertical" }} /> : <div style={{ fontSize: 13, color: "var(--text)", fontFamily: "Inter, sans-serif", lineHeight: 1.6, background: "var(--white)", padding: "14px 18px", borderRadius: 0 }}>{b.req || "—"}</div>}</div>
+      <div style={{ marginBottom: 20 }}><L>Requisitos especiales</L>{ed ? <textarea value={f.req} onChange={e => setF({ ...f, req: e.target.value })} onBlur={e => autoBlur({...f, req: e.target.value})} style={{ ...iSt, minHeight: 80, resize: "vertical" }} /> : <div style={{ fontSize: 13, color: "var(--text)", fontFamily: "Inter, sans-serif", lineHeight: 1.6, background: "var(--white)", padding: "14px 18px", borderRadius: 0 }}>{b.req || "â"}</div>}</div>
       <div style={{ marginBottom: 28 }}><L>Agente asignado</L>{ed ? <input value={f.ag} onChange={e => setF({ ...f, ag: e.target.value })} onBlur={e => autoBlur({...f, ag: e.target.value})} style={iSt} placeholder="Nombre del agente" /> : <div style={{ fontSize: 13, color: b.ag ? "#3D577E" : "var(--muted)", fontFamily: "Inter, sans-serif" }}>{b.ag || "Sin asignar"}</div>}</div>
       <div style={{ display: "flex", gap: 12, justifyContent: "flex-end", borderTop: "1px solid var(--text)", paddingTop: 20 }}>
         {ed ? <>
@@ -987,26 +987,26 @@ function Detail({ b, onClose, onSave, onDelete, onWhatsApp, currentUser, puedeEl
 }
 
 function NewBuyer({ onClose, onAdd }) {
-  const [f, setF] = useState({ nombre: "", email: "", tel: "", fin: "Sí", ppto: "", finalidad: "Primera vivienda", hab: "", zd: [], ze: [], alt: "", req: "", ag: "", pais: "España" });
-  const add = () => { onAdd({ ...f, id: Date.now(), ts: new Date().toLocaleDateString("es-ES"), ppto: +f.ppto || 0, zd: f.zd, ze: f.ze, st: "activo", pais: f.pais || "España" }); onClose(); };
+  const [f, setF] = useState({ nombre: "", email: "", tel: "", fin: "SÃ­", ppto: "", finalidad: "Primera vivienda", hab: "", zd: [], ze: [], alt: "", req: "", ag: "", pais: "EspaÃ±a" });
+  const add = () => { onAdd({ ...f, id: Date.now(), ts: new Date().toLocaleDateString("es-ES"), ppto: +f.ppto || 0, zd: f.zd, ze: f.ze, st: "activo", pais: f.pais || "EspaÃ±a" }); onClose(); };
   const iSt = { width: "100%", padding: "10px 14px", background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, color: "var(--text)", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box", outline: "none" };
   const L = ({ children }) => <div style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 6, fontFamily: "Inter, sans-serif" }}>{children}</div>;
 
   return <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", display: "flex", justifyContent: "center", alignItems: "flex-start", padding: "40px 16px", zIndex: 1000, overflowY: "auto" }}>
     <div style={{ background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, width: "100%", maxWidth: 560, padding: "36px 40px", position: "relative" }}>
-      <button onClick={onClose} style={{ position: "absolute", top: 20, right: 24, background: "none", border: "none", color: "var(--muted)", fontSize: 20, cursor: "pointer" }}>✕</button>
+      <button onClick={onClose} style={{ position: "absolute", top: 20, right: 24, background: "none", border: "none", color: "var(--muted)", fontSize: 20, cursor: "pointer" }}>â</button>
       <div style={{ fontSize: 10, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.15em", fontFamily: "Inter, sans-serif", marginBottom: 8 }}>Nuevo registro</div>
-      <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 400, color: "var(--text)", margin: "0 0 28px" }}>Añadir <em>comprador</em></h2>
+      <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 400, color: "var(--text)", margin: "0 0 28px" }}>AÃ±adir <em>comprador</em></h2>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px 24px" }}>
         <div style={{ gridColumn: "span 2" }}><L>Nombre y apellidos</L><input value={f.nombre} onChange={e => setF({ ...f, nombre: e.target.value })} style={iSt} /></div>
         <div><L>Email</L><input value={f.email} onChange={e => setF({ ...f, email: e.target.value })} style={iSt} /></div>
-        <div><L>Teléfono</L><input value={f.tel} onChange={e => setF({ ...f, tel: e.target.value })} style={iSt} /></div>
-        <div style={{ gridColumn: "span 2" }}><L>País de residencia</L><select value={f.pais} onChange={e => setF({ ...f, pais: e.target.value })} style={{ ...iSt, appearance: "auto" }}>{PAISES.map(p => <option key={p.pais} value={p.pais}>{p.flag} {p.pais} {p.prefijo}</option>)}</select></div>
-        <div><L>Presupuesto (€)</L><input type="number" value={f.ppto} onChange={e => setF({ ...f, ppto: e.target.value })} style={iSt} /></div>
+        <div><L>TelÃ©fono</L><input value={f.tel} onChange={e => setF({ ...f, tel: e.target.value })} style={iSt} /></div>
+        <div style={{ gridColumn: "span 2" }}><L>PaÃ­s de residencia</L><select value={f.pais} onChange={e => setF({ ...f, pais: e.target.value })} style={{ ...iSt, appearance: "auto" }}>{PAISES.map(p => <option key={p.pais} value={p.pais}>{p.flag} {p.pais} {p.prefijo}</option>)}</select></div>
+        <div><L>Presupuesto (â¬)</L><input type="number" value={f.ppto} onChange={e => setF({ ...f, ppto: e.target.value })} style={iSt} /></div>
         <div><L>Habitaciones</L><input value={f.hab} onChange={e => setF({ ...f, hab: e.target.value })} onBlur={e => autoBlur({...f, hab: e.target.value})} style={iSt} /></div>
         <div><L>Finalidad</L><select value={f.finalidad} onChange={e => setF({ ...f, finalidad: e.target.value })} style={{ ...iSt, appearance: "auto" }}>{FINALIDADES.map(x => <option key={x}>{x}</option>)}</select></div>
-        <div><L>Financiación</L><select value={f.fin} onChange={e => setF({ ...f, fin: e.target.value })} style={{ ...iSt, appearance: "auto" }}>{["Sí","No","Abierto"].map(x => <option key={x}>{x}</option>)}</select></div>
-        <div><L>Altura máx.</L><input value={f.alt} onChange={e => setF({ ...f, alt: e.target.value })} style={iSt} /></div>
+        <div><L>FinanciaciÃ³n</L><select value={f.fin} onChange={e => setF({ ...f, fin: e.target.value })} style={{ ...iSt, appearance: "auto" }}>{["SÃ­","No","Abierto"].map(x => <option key={x}>{x}</option>)}</select></div>
+        <div><L>Altura mÃ¡x.</L><input value={f.alt} onChange={e => setF({ ...f, alt: e.target.value })} style={iSt} /></div>
         <div><L>Agente</L><input value={f.ag} onChange={e => setF({ ...f, ag: e.target.value })} style={iSt} /></div>
         <div style={{ gridColumn: "span 2" }}><L>Zonas deseadas</L><SelectorZonas value={f.zd} onChange={zd => setF({ ...f, zd })} tipo="deseada" /></div>
         <div style={{ gridColumn: "span 2" }}><L>Zonas excluidas</L><SelectorZonas value={f.ze} onChange={ze => setF({ ...f, ze })} tipo="excluida" /></div>
@@ -1014,7 +1014,7 @@ function NewBuyer({ onClose, onAdd }) {
       </div>
       <div style={{ display: "flex", gap: 12, justifyContent: "flex-end", marginTop: 28, borderTop: "1px solid var(--text)", paddingTop: 20 }}>
         <button onClick={onClose} style={{ padding: "10px 24px", borderRadius: 0, border: "1px solid var(--text)", background: "none", color: "#A09D93", cursor: "pointer", fontSize: 12, fontFamily: "Inter, sans-serif", letterSpacing: "0.06em", textTransform: "uppercase" }}>Cancelar</button>
-        <button onClick={add} disabled={!f.nombre} style={{ padding: "10px 24px", borderRadius: 0, border: "none", background: f.nombre ? "var(--gold)" : "var(--border)", color: f.nombre ? "var(--white)" : "var(--muted)", cursor: f.nombre ? "pointer" : "default", fontSize: 12, fontWeight: 600, fontFamily: "Inter, sans-serif", letterSpacing: "0.06em", textTransform: "uppercase" }}>Añadir</button>
+        <button onClick={add} disabled={!f.nombre} style={{ padding: "10px 24px", borderRadius: 0, border: "none", background: f.nombre ? "var(--gold)" : "var(--border)", color: f.nombre ? "var(--white)" : "var(--muted)", cursor: f.nombre ? "pointer" : "default", fontSize: 12, fontWeight: 600, fontFamily: "Inter, sans-serif", letterSpacing: "0.06em", textTransform: "uppercase" }}>AÃ±adir</button>
       </div>
     </div>
   </div>;
@@ -1033,7 +1033,7 @@ export default function App({ currentUser }) {
     const { data: rows } = await supabase.from("compradores").select("*").order("created_at", { ascending: false });
     if (rows) setData(rows.map(mapBuyerDb));
     setLoading(false);
-    setPagina(1); // volver a la primera página al recargar
+    setPagina(1); // volver a la primera pÃ¡gina al recargar
   }
   const [q, setQ] = useState("");
   const [fEst, setFEst] = useState("todos");
@@ -1044,7 +1044,7 @@ export default function App({ currentUser }) {
   const [showNew, setShowNew] = useState(false);
   const [waBuyer, setWaBuyer] = useState(null);
 
-  // Resetear a página 1 cuando cambian los filtros
+  // Resetear a pÃ¡gina 1 cuando cambian los filtros
   useEffect(() => { setPagina(1); }, [q, fEst, fFin, fHip, sort]);
 
   const list = useMemo(() => {
@@ -1054,7 +1054,7 @@ export default function App({ currentUser }) {
     if (fFin !== "todas") r = r.filter(b => b.finalidad === fFin);
     if (fHip !== "todas") r = r.filter(b => {
       const f = (b.fin || "").toLowerCase();
-      if (fHip === "si") return f === "sí" || f === "si";
+      if (fHip === "si") return f === "sÃ­" || f === "si";
       if (fHip === "no") return f === "no";
       if (fHip === "abierto") return f.includes("abierto") || f.includes("mejorar") || f.includes("condiciones");
       return true;
@@ -1066,19 +1066,19 @@ export default function App({ currentUser }) {
   }, [data, q, fEst, fFin, fHip, sort]);
 
   const avg = Math.round(data.reduce((s, b) => s + b.ppto, 0) / data.length);
-  const withFin = data.filter(b => b.fin === "Sí").length;
+  const withFin = data.filter(b => b.fin === "SÃ­").length;
   const bySt = ESTADOS.map(s => ({ ...s, n: data.filter(b => b.st === s.key).length })).filter(s => s.n > 0);
   const [syncing, setSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState(null);
   const [duplicadoPendiente, setDuplicadoPendiente] = useState(null); // {nuevo, existente, motivo}
   const [showImport, setShowImport] = useState(false);
 
-  // ─── PERMISOS ──────────────────────────────────────────────
+  // âââ PERMISOS ââââââââââââââââââââââââââââââââââââââââââââââ
   const rol = currentUser?.role?.toLowerCase() || "agente";
   const isAdmin  = rol === "director" || rol === "administrador";
   const puedeEliminar   = isAdmin;
   const puedeVerHistorial = isAdmin;
-  // ───────────────────────────────────────────────────────────
+  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
   async function syncFromSheet() {
     setSyncing(true); setSyncResult(null);
@@ -1098,33 +1098,33 @@ export default function App({ currentUser }) {
   return <div style={{ fontFamily: "Inter, sans-serif", background: "var(--cream)", minHeight: "100vh", color: "var(--text)", padding: "40px 24px" }}>
     <div style={{ maxWidth: 920, margin: "0 auto" }}>
 
-      <div style={{ marginBottom: 40, borderBottom: "1px solid var(--text)", paddingBottom: 32 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 16 }}>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Base de Compradores</h1>
-            <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Base de datos de compradores activos y sus criterios de búsqueda</p>
-            <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />
+      {/* Header */}
+      <div style={{ marginBottom: 28 }}>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Base de Compradores</h1>
+        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Base de datos de compradores activos y sus criterios de búsqueda</p>
+        <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />
+      </div>
+      <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             {isAdmin && <button onClick={syncFromSheet} disabled={syncing} style={{ padding: "12px 20px", borderRadius: 0, border: "1px solid var(--success-l)", background: "transparent", color: syncing ? "var(--muted)" : "var(--success)", cursor: syncing ? "wait" : "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", transition: "all 0.3s" }}>
-              {syncing ? "Sincronizando..." : "↻ Sync Google Sheet"}
+              {syncing ? "Sincronizando..." : "â» Sync Google Sheet"}
             </button>}
             <button onClick={() => {
               const url = `${window.location.origin}/cualificacion`;
               navigator.clipboard.writeText(url);
-              alert(`✅ Link copiado: ${url}`);
+              alert(`â Link copiado: ${url}`);
             }} style={{ padding: "12px 20px", borderRadius: 0, border: "1px solid #405c6b", background: "transparent", color: "#405c6b", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}>
-              🔗 Copiar link formulario
+              ð Copiar link formulario
             </button>
             {isAdmin && <button onClick={() => setShowImport(true)} style={{ padding: "12px 20px", borderRadius: 0, border: "1px solid #3D577E44", background: "transparent", color: "#3D577E", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}
               onMouseEnter={e => { e.currentTarget.style.background = "#3D577E"; e.currentTarget.style.color = "var(--cream)"; }}
               onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#3D577E"; }}
-            >↑ Importar Excel</button>}
+            >â Importar Excel</button>}
             <button onClick={() => setShowNew(true)} style={{ padding: "12px 28px", borderRadius: 0, border: "1px solid var(--gold-l)", background: "transparent", color: "var(--gold)", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "Inter, sans-serif" }}
               onMouseEnter={e => { e.currentTarget.style.background = "var(--gold)"; e.currentTarget.style.color = "var(--cream)"; }}
               onMouseLeave={e => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--gold)"; }}
             ><PlusIcon style={{ width:15, height:15, marginRight:6, verticalAlign:"middle" }} />Nuevo comprador</button>
           </div>
-        </div>
-      </div>
 
       {syncResult && (
         <div style={{ background: syncResult.error ? "#D4545418" : "var(--success-l)18", border: "1px solid " + (syncResult.error ? "#D4545444" : "var(--success-l)44"), borderRadius: 0, padding: "14px 20px", marginBottom: 20, fontSize: 12 }}>
@@ -1133,14 +1133,14 @@ export default function App({ currentUser }) {
           ) : (
             <div>
               <span style={{ color: "var(--success)" }}>
-                Sincronización completada: <strong>{syncResult.synced}</strong> nuevos importados, {syncResult.skipped} ya existían, {syncResult.errors} errores. Total en Sheet: {syncResult.total_sheet}.
+                SincronizaciÃ³n completada: <strong>{syncResult.synced}</strong> nuevos importados, {syncResult.skipped} ya existÃ­an, {syncResult.errors} errores. Total en Sheet: {syncResult.total_sheet}.
               </span>
               {syncResult.duplicados && syncResult.duplicados.length > 0 && (
                 <div style={{ marginTop: 12, borderTop: "1px solid var(--text)", paddingTop: 10 }}>
                   <div style={{ fontSize: 10, color: "var(--amber)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8, fontWeight: 600 }}>Duplicados detectados (ya existen en el CRM)</div>
                   {syncResult.duplicados.map((d, i) => (
                     <div key={i} style={{ fontSize: 11, color: "#A09D93", padding: "4px 0", borderBottom: "1px solid #1C1B18" }}>
-                      <strong style={{ color: "var(--text)" }}>{d.nombre}</strong> — {d.email || "-"} — {d.telefono || "-"} — <span style={{ color: "var(--amber)" }}>{d.motivo}</span>
+                      <strong style={{ color: "var(--text)" }}>{d.nombre}</strong> â {d.email || "-"} â {d.telefono || "-"} â <span style={{ color: "var(--amber)" }}>{d.motivo}</span>
                     </div>
                   ))}
                 </div>
@@ -1151,7 +1151,7 @@ export default function App({ currentUser }) {
       )}
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 16, marginBottom: 36 }}>
-        {[{ n: data.length, l: "Compradores" }, { n: fmt(avg), l: "Presupuesto medio" }, { n: Math.round(withFin / data.length * 100) + "%", l: "Con financiación" }].map((s, i) => <div key={i} style={{ background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, padding: "20px 24px", textAlign: "center" }}>
+        {[{ n: data.length, l: "Compradores" }, { n: fmt(avg), l: "Presupuesto medio" }, { n: Math.round(withFin / data.length * 100) + "%", l: "Con financiaciÃ³n" }].map((s, i) => <div key={i} style={{ background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, padding: "20px 24px", textAlign: "center" }}>
           <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: "var(--text)", fontWeight: 400 }}>{s.n}</div>
           <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 6, textTransform: "uppercase", letterSpacing: "0.1em" }}>{s.l}</div>
         </div>)}
@@ -1161,19 +1161,19 @@ export default function App({ currentUser }) {
       </div>
 
       <div style={{ display: "flex", gap: 10, marginBottom: 24, flexWrap: "wrap", alignItems: "center" }}>
-        <input type="text" placeholder="Buscar nombre, zona, teléfono..." value={q} onChange={e => setQ(e.target.value)} style={{ flex: 1, minWidth: 200, padding: "10px 16px", background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, color: "var(--text)", fontSize: 12, fontFamily: "Inter, sans-serif", outline: "none", letterSpacing: "0.02em" }} />
+        <input type="text" placeholder="Buscar nombre, zona, telÃ©fono..." value={q} onChange={e => setQ(e.target.value)} style={{ flex: 1, minWidth: 200, padding: "10px 16px", background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, color: "var(--text)", fontSize: 12, fontFamily: "Inter, sans-serif", outline: "none", letterSpacing: "0.02em" }} />
         <select value={fEst} onChange={e => setFEst(e.target.value)} style={selSt}><option value="todos">Todos los estados</option>{ESTADOS.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}</select>
         <select value={fFin} onChange={e => setFFin(e.target.value)} style={selSt}><option value="todas">Toda finalidad</option>{FINALIDADES.map(f => <option key={f} value={f}>{f}</option>)}</select>
         <select value={fHip} onChange={e => setFHip(e.target.value)} style={selSt}>
-          <option value="todas">Toda financiación</option>
+          <option value="todas">Toda financiaciÃ³n</option>
           <option value="si">Con hipoteca</option>
           <option value="no">Sin hipoteca</option>
           <option value="abierto">Abierto a mejora</option>
         </select>
-        <select value={sort} onChange={e => setSort(e.target.value)} style={selSt}><option value="fecha">Más recientes</option><option value="presupuesto">Mayor presupuesto</option><option value="score">Mayor scoring</option><option value="nombre">Nombre A-Z</option></select>
+        <select value={sort} onChange={e => setSort(e.target.value)} style={selSt}><option value="fecha">MÃ¡s recientes</option><option value="presupuesto">Mayor presupuesto</option><option value="score">Mayor scoring</option><option value="nombre">Nombre A-Z</option></select>
       </div>
 
-      {/* Paginación — 100 por página */}
+      {/* PaginaciÃ³n â 100 por pÃ¡gina */}
       {(() => {
         const totalPaginas = Math.ceil(list.length / PAGE_SIZE);
         const paginados = list.slice((pagina - 1) * PAGE_SIZE, pagina * PAGE_SIZE);
@@ -1181,17 +1181,17 @@ export default function App({ currentUser }) {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, flexWrap: "wrap", gap: 8 }}>
             <div style={{ fontSize: 11, color: "var(--muted)", letterSpacing: "0.06em" }}>
               {list.length === data.length ? `${data.length} compradores` : `${list.length} de ${data.length} compradores`}
-              {totalPaginas > 1 && <span style={{ marginLeft: 8, color: "var(--gold)" }}> · Página {pagina} de {totalPaginas}</span>}
+              {totalPaginas > 1 && <span style={{ marginLeft: 8, color: "var(--gold)" }}> Â· PÃ¡gina {pagina} de {totalPaginas}</span>}
             </div>
             {totalPaginas > 1 && <div style={{ display: "flex", gap: 6 }}>
               <button onClick={() => setPagina(p => Math.max(1, p - 1))} disabled={pagina === 1}
-                style={{ padding: "4px 12px", border: "1px solid var(--text)", background: "transparent", color: pagina === 1 ? "#C8C5BC" : "var(--text)", cursor: pagina === 1 ? "default" : "pointer", fontSize: 11, fontFamily: "Inter, sans-serif" }}>← Anterior</button>
+                style={{ padding: "4px 12px", border: "1px solid var(--text)", background: "transparent", color: pagina === 1 ? "#C8C5BC" : "var(--text)", cursor: pagina === 1 ? "default" : "pointer", fontSize: 11, fontFamily: "Inter, sans-serif" }}>â Anterior</button>
               {Array.from({ length: Math.min(totalPaginas, 10) }, (_, i) => i + 1).map(n => (
                 <button key={n} onClick={() => setPagina(n)}
                   style={{ padding: "4px 10px", border: "1px solid " + (n === pagina ? "var(--gold)" : "var(--text)"), background: n === pagina ? "var(--gold)" : "transparent", color: n === pagina ? "#fff" : "var(--text)", cursor: "pointer", fontSize: 11, fontFamily: "Inter, sans-serif" }}>{n}</button>
               ))}
               <button onClick={() => setPagina(p => Math.min(totalPaginas, p + 1))} disabled={pagina === totalPaginas}
-                style={{ padding: "4px 12px", border: "1px solid var(--text)", background: "transparent", color: pagina === totalPaginas ? "#C8C5BC" : "var(--text)", cursor: pagina === totalPaginas ? "default" : "pointer", fontSize: 11, fontFamily: "Inter, sans-serif" }}>Siguiente →</button>
+                style={{ padding: "4px 12px", border: "1px solid var(--text)", background: "transparent", color: pagina === totalPaginas ? "#C8C5BC" : "var(--text)", cursor: pagina === totalPaginas ? "default" : "pointer", fontSize: 11, fontFamily: "Inter, sans-serif" }}>Siguiente â</button>
             </div>}
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -1244,7 +1244,7 @@ export default function App({ currentUser }) {
         }}
         onDelete={async (b) => {
           if (!puedeEliminar) { alert("No tienes permisos para eliminar compradores."); return; }
-          if (confirm("¿Eliminar este comprador? Esta accion no se puede deshacer.")) {
+          if (confirm("Â¿Eliminar este comprador? Esta accion no se puede deshacer.")) {
             await supabase.from("compradores").delete().eq("id", b.id);
             setSel(null); setData(d => d.filter(x => x.id !== b.id));
           }
@@ -1264,13 +1264,13 @@ export default function App({ currentUser }) {
               idsInsertados.push(ins[0].id);
             }
           }
-          // NO cerrar aquí — el ImportadorExcel muestra el paso 4 de WhatsApp
+          // NO cerrar aquÃ­ â el ImportadorExcel muestra el paso 4 de WhatsApp
           return idsInsertados;
         }}
       />}
       {showNew && <NewBuyer onClose={() => setShowNew(false)} onAdd={async n => {
         const dbData = mapBuyerToDb(n);
-        // ─── DETECCIÓN DE DUPLICADOS ───────────────────────────
+        // âââ DETECCIÃN DE DUPLICADOS âââââââââââââââââââââââââââ
         const { data: todos } = await supabase.from("compradores").select("id,nombre,email,telefono").eq("activo", true).limit(2000);
         if (todos) {
           const nombreN = (n.nombre||"").toLowerCase().trim();
@@ -1289,14 +1289,14 @@ export default function App({ currentUser }) {
             if (inserted?.[0]) {
               const nuevo = mapBuyerDb(inserted[0]);
               const existente = mapBuyerDb(dup);
-              const motivo = emailN && (dup.email||"").toLowerCase() === emailN ? "nombre+email" : "nombre+teléfono";
+              const motivo = emailN && (dup.email||"").toLowerCase() === emailN ? "nombre+email" : "nombre+telÃ©fono";
               setData(d => [nuevo, ...d]);
               setDuplicadoPendiente({ nuevo, existente: {...existente, id: dup.id}, motivo });
             }
             return;
           }
         }
-        // ──────────────────────────────────────────────────────
+        // ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
         const { data: inserted, error } = await supabase.from("compradores").insert(dbData).select();
         if (error) { alert("Error al crear comprador: " + error.message); return; }
         if (inserted?.[0]) setData(d => [mapBuyerDb(inserted[0]), ...d]);
@@ -1354,7 +1354,7 @@ function WhatsAppPanel({ buyer, onClose }) {
           }).select().single();
           if (newConv) { setConvId(newConv.id); setModoManual(true); }
         }
-      } catch (e) { console.error("Error cargando conversación:", e); }
+      } catch (e) { console.error("Error cargando conversaciÃ³n:", e); }
       finally { setLoadingConv(false); }
     }
     loadConv();
@@ -1430,7 +1430,7 @@ function WhatsAppPanel({ buyer, onClose }) {
     setModoManual(nuevo);
     if (convId) {
       await supabase.from("conversaciones").update({ estado: nuevo ? "manual" : "activo", updated_at: new Date().toISOString() }).eq("id", convId);
-      const txt = nuevo ? "Modo manual activado — Claudia en pausa" : "IA reactivada — Claudia responde automáticamente";
+      const txt = nuevo ? "Modo manual activado â Claudia en pausa" : "IA reactivada â Claudia responde automÃ¡ticamente";
       setMensajes(prev => [...prev, { from: "sistema", text: txt, ts: "" }]);
       await saveMsg(txt, "sistema");
     }
@@ -1467,27 +1467,27 @@ function WhatsAppPanel({ buyer, onClose }) {
             <button onClick={toggleModo} style={{ padding: "5px 12px", background: modoManual ? "rgba(172,138,84,0.15)" : "rgba(64,92,107,0.3)", border: `1px solid ${modoManual ? BRONZE : "#405c6b"}`, color: modoManual ? BRONZE : "#7aafc4", cursor: "pointer", fontSize: 10, fontWeight: 600, letterSpacing: "0.08em", fontFamily: "Inter, sans-serif" }}>
               {modoManual ? "MANUAL" : "IA ACTIVA"}
             </button>
-            <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(248,246,241,0.4)", fontSize: 18, cursor: "pointer", lineHeight: 1, padding: "0 0 0 8px" }}>✕</button>
+            <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(248,246,241,0.4)", fontSize: 18, cursor: "pointer", lineHeight: 1, padding: "0 0 0 8px" }}>â</button>
           </div>
         </div>
         <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid rgba(255,255,255,0.06)", fontSize: 10, color: "rgba(248,246,241,0.3)", letterSpacing: "0.12em" }}>
-          CLAUDIA · CUALIFICACIÓN COMPRADORES
+          CLAUDIA Â· CUALIFICACIÃN COMPRADORES
         </div>
       </div>
 
       {modoManual && (
         <div style={{ padding: "8px 20px", background: "rgba(172,138,84,0.08)", borderBottom: "1px solid rgba(172,138,84,0.2)", fontSize: 11, color: "#8f7141", letterSpacing: "0.02em", flexShrink: 0 }}>
-          Claudia en pausa — tus mensajes llegan directamente al cliente
+          Claudia en pausa â tus mensajes llegan directamente al cliente
         </div>
       )}
 
       <div ref={chatRef} style={{ flex: 1, overflowY: "auto", padding: "20px 16px", background: "#EDEAE4" }}>
         {loadingConv ? (
-          <div style={{ textAlign: "center", padding: 48, color: "var(--muted)", fontSize: 12 }}>Cargando conversación...</div>
+          <div style={{ textAlign: "center", padding: 48, color: "var(--muted)", fontSize: 12 }}>Cargando conversaciÃ³n...</div>
         ) : mensajes.length === 0 ? (
           <div style={{ textAlign: "center", padding: 48 }}>
-            <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 28, color: "#C8BFB0", marginBottom: 12 }}>✦</div>
-            <div style={{ fontSize: 13, color: "var(--muted)", lineHeight: 1.6 }}>Sin mensajes aún.<br/>Inicia la conversación con {buyer.nombre}.</div>
+            <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 28, color: "#C8BFB0", marginBottom: 12 }}>â¦</div>
+            <div style={{ fontSize: 13, color: "var(--muted)", lineHeight: 1.6 }}>Sin mensajes aÃºn.<br/>Inicia la conversaciÃ³n con {buyer.nombre}.</div>
           </div>
         ) : (() => {
           const elements = [];
@@ -1511,7 +1511,7 @@ function WhatsAppPanel({ buyer, onClose }) {
                   {m.ts && (
                     <div style={{ fontSize: 10, color: isAgent ? "rgba(248,246,241,0.4)" : "var(--muted)", marginTop: 4, textAlign: "right", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 3 }}>
                       {m.ts}
-                      {isAgent && <span style={{ fontSize: 12, color: m.leido ? "#4FC3F7" : "rgba(248,246,241,0.4)" }}>✓✓</span>}
+                      {isAgent && <span style={{ fontSize: 12, color: m.leido ? "#4FC3F7" : "rgba(248,246,241,0.4)" }}>ââ</span>}
                     </div>
                   )}
                 </div>
@@ -1536,7 +1536,7 @@ function WhatsAppPanel({ buyer, onClose }) {
             style={{ flex: 1, padding: "11px 16px", background: modoManual ? "var(--white)" : "#F0ECE6", border: "1px solid var(--border)", color: "#1a2528", fontSize: 14, fontFamily: "Inter, sans-serif", outline: "none", cursor: modoManual ? "text" : "not-allowed", borderRadius: 0 }} />
           <button onClick={handleSend} disabled={!modoManual || !input.trim() || loading}
             style={{ width: 42, height: 42, borderRadius: "50%", background: (modoManual && input.trim() && !loading) ? BRONZE : "var(--border)", border: "none", color: (modoManual && input.trim() && !loading) ? CREAM : "var(--muted)", cursor: (modoManual && input.trim() && !loading) ? "pointer" : "default", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            ➤
+            â¤
           </button>
         </div>
       </div>
