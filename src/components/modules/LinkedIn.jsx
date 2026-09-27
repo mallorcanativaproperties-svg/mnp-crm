@@ -44,10 +44,12 @@ export default function LinkedIn() {
     <div style={{ maxWidth: 680, margin: "0 auto", padding: "clamp(20px,4vw,48px) clamp(16px,3vw,24px)", fontFamily: "Inter, sans-serif" }}>
 
       {/* Header */}
-      <div style={{ marginBottom: 36 }}>
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Publicar en LinkedIn</h1>
-            <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Publicación y gestión de contenido profesional en LinkedIn</p>
-            <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} /></div>
+      <div style={{ marginBottom: 40 }}>
+        <div style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 12, fontFamily: "Inter, sans-serif" }}>NATIVA PROPERTIES</div>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 600, margin: 0, lineHeight: 1.1, color: "#A8854A" }}>LinkedIn</h1>
+        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "10px 0 0" }}>Gestión de publicaciones y presencia en LinkedIn</p>
+        <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginTop: 28, marginBottom: 28 }} />
+      </div>
 
       {/* Aviso temporal */}
       <div style={{ background: "rgba(172,138,84,0.08)", border: "1px solid rgba(172,138,84,0.25)", padding: "12px 16px", marginBottom: 28, display: "flex", gap: 10, alignItems: "flex-start" }}>
