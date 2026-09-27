@@ -126,6 +126,15 @@ const ORDINALES_EN_PALABRA = {
   vigesimoquinto: 25, "vigésimo quinto": 25, "vigesimo quinto": 25,
   vigesimosexto: 26, vigesimoséptimo: 27, vigesimoseptimo: 27, vigesimoctavo: 28,
   vigesimonoveno: 29, trigésimo: 30, trigesimo: 30,
+
+  // Y cardinales, porque el BOE mezcla las dos formas en la MISMA ley: la Ley de
+  // Propiedad Horizontal rotula "Articulo noveno" hasta el nueve y "Articulo
+  // diecisiete" a partir del diez. No hay "Articulo decimoseptimo" en su texto.
+  diez: 10, once: 11, doce: 12, trece: 13, catorce: 14, quince: 15,
+  dieciséis: 16, dieciseis: 16, diecisiete: 17, dieciocho: 18, diecinueve: 19,
+  veinte: 20, veintiuno: 21, veintidós: 22, veintidos: 22, veintitrés: 23, veintitres: 23,
+  veinticuatro: 24, veinticinco: 25, veintiséis: 26, veintiseis: 26,
+  veintisiete: 27, veintiocho: 28, veintinueve: 29, treinta: 30,
 };
 
 function marcarEncabezadosPegados(texto) {
