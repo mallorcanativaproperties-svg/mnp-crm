@@ -455,7 +455,7 @@ function ChatPanel({ conv, onSendMessage, isAna }) {
           const isSistema = m.from === "sistema";
           if (isSistema) return (
             <div key={i} style={{ textAlign: "center", margin: "8px 0" }}>
-              <span style={{ fontSize: 10, color: "#9A968A", padding: "3px 10px", background: "#E7E1D4", borderRadius: 10 }}>{m.text}</span>
+              <span style={{ fontSize: 10, color: "#9A968A", padding: "3px 10px", background: "#E7E1D4", borderRadius: 20 }}>{m.text}</span>
             </div>
           );
           const isManual = m.from === "agente_manual";
@@ -507,7 +507,7 @@ function PromptEditor({ agente, onClose }) {
       <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, width: "100%", maxWidth: 700, padding: "28px 32px", position: "relative" }}>
         <button onClick={onClose} style={{ position: "absolute", top: 16, right: 20, background: "none", border: "none", color: "#9A968A", fontSize: 20, cursor: "pointer" }}>X</button>
         <div style={{ fontSize: 10, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 8 }}>Editar instrucciones</div>
-        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 400, color: "#22262E", margin: "0 0 20px" }}>Prompt de <em>{agente === "ana" ? "Ana" : "Claudia"}</em></h2>
+        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 600, color: "#22262E", margin: "0 0 20px" }}>Prompt de <em>{agente === "ana" ? "Ana" : "Claudia"}</em></h2>
         <textarea value={prompt} onChange={(e) => { setPrompt(e.target.value); setSaved(false); }} rows={20} style={{ width: "100%", padding: "14px 16px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 11, fontFamily: "Inter, sans-serif", boxSizing: "border-box", outline: "none", resize: "vertical", lineHeight: 1.6 }} />
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 14 }}>
           {saved && <span style={{ fontSize: 11, color: "#2C6E52", alignSelf: "center" }}>Guardado</span>}
@@ -650,7 +650,7 @@ function ScanEmailsButton() {
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => setShowModal(false)}>
           <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "28px 32px", maxWidth: 600, width: "95%" }} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-              <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 400, margin: 0 }}>Procesar email <em>Idealista</em></h3>
+              <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 600, margin: 0 }}>Procesar email <em>Idealista</em></h3>
               <button onClick={() => setShowModal(false)} style={{ background: "none", border: "none", color: "#9A968A", cursor: "pointer", fontSize: 18 }}>✕</button>
             </div>
             <p style={{ fontSize: 11, color: "#9A968A", marginBottom: 16 }}>Pega el contenido del email de Idealista. CLAUDIA extraerá los datos y enviará WhatsApp al cliente automáticamente.</p>
@@ -886,7 +886,7 @@ function OtrosPanel({ convs, selectedId, setSelectedId }) {
                 if (esSistema) {
                   return (
                     <div key={i} style={{ textAlign: "center", margin: "4px 0" }}>
-                      <span style={{ fontSize: 10, color: "#7A6B5A", padding: "3px 12px", background: "#7A6B5A15", borderRadius: 10, border: "1px solid #7A6B5A22" }}>
+                      <span style={{ fontSize: 10, color: "#7A6B5A", padding: "3px 12px", background: "#7A6B5A15", borderRadius: 20, border: "1px solid #7A6B5A22" }}>
                         🤖 CRM: {m.text}
                       </span>
                       {m.ts && <div style={{ fontSize: 9, color: "#C0BAB0", marginTop: 2 }}>{m.ts}</div>}
@@ -1174,7 +1174,7 @@ export default function AgentesIA() {
         <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
           <div>
             <div style={{ fontSize: 10, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.2em", fontWeight: 500 }}>Nativa Properties</div>
-            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 400, margin: "4px 0 0" }}>Agentes <em>IA</em></h1>
+            <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 600, margin: "4px 0 0" }}>Agentes <em>IA</em></h1>
           </div>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <ScanEmailsButton />
