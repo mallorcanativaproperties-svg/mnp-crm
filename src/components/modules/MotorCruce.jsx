@@ -365,7 +365,7 @@ export default function MotorCruce() {
       setLoading(true);
       const [bRes, pRes, vRes] = await Promise.all([
         supabase.from("compradores").select("*").neq("estado", "baja").order("created_at", { ascending: false }),
-        supabase.from("propiedades").select("*").in("estado", ["publicada","reservada"]).order("created_at", { ascending: false }),
+        supabase.from("propiedades").select("*").in("estado", ["captada","publicada","reservada"]).order("created_at", { ascending: false }),
         supabase.from("propiedades_compradores").select("*"),
       ]);
       if (vRes.data) setVinculaciones(vRes.data);
