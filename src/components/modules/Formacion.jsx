@@ -408,7 +408,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
     <div style={{ background: CREAM, minHeight: "100vh", fontFamily: "Inter, sans-serif" }}>
 
       {/* Header */}
-      <div style={{ marginBottom: 40 }}>
+      <div style={{ marginBottom: 40, padding: "40px 40px 0" }}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 4 }}>
           <div>
             <div style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 12, fontFamily: "Inter, sans-serif" }}>NATIVA PROPERTIES</div>

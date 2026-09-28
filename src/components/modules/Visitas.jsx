@@ -2218,7 +2218,7 @@ export default function Visitas({ currentUser }) {
 
       {/* ── Stats bar — scroll horizontal en mobile ── */}
       <div style={{ background: WHITE, borderBottom: `1px solid ${BORDER}`,
-        padding: "0 20px", overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+        padding: "0 32px", overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
         <div style={{ display: "flex", gap: 0, minWidth: "max-content" }}>
           {statsData.map((s, i) => (
             <div key={s.label} style={{
@@ -2242,7 +2242,7 @@ export default function Visitas({ currentUser }) {
       </div>
 
       {/* ── Buscador ── */}
-      <div style={{ padding: "14px 16px", background: WHITE, borderBottom: `1px solid ${BORDER}` }}>
+      <div style={{ padding: "14px 32px", background: WHITE, borderBottom: `1px solid ${BORDER}` }}>
         <div style={{ position: "relative" }}>
           <MagnifyingGlassIcon style={{ width: 18, height: 18, position: "absolute", left: 14, top: "50%",
             transform: "translateY(-50%)", color: MUTED }} />
