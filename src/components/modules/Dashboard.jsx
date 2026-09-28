@@ -1,7 +1,7 @@
 "use client";
 import { ChartBarIcon, BuildingOfficeIcon, UsersIcon, DocumentTextIcon, CpuChipIcon, AcademicCapIcon } from "@heroicons/react/24/outline";
 import { supabase } from "@/lib/supabase";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 
 const COLS = [
   { key: "captada", label: "Captada", accent: "#AC8A54" },
