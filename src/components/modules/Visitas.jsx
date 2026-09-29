@@ -429,6 +429,7 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
           </div>
         </Modal>
       )}
+      </div>
     </div>
   );
 }
@@ -2206,10 +2207,11 @@ export default function Visitas({ currentUser }) {
 
   return (
     <div style={{ background: CREAM, minHeight: "100vh", fontFamily: "Inter, sans-serif",
-      maxWidth: "100vw", overflowX: "hidden" }}>
+      padding: "40px 32px", overflowX: "hidden" }}>
+      <div style={{ maxWidth: 920, margin: "0 auto" }}>
 
       {/* Header */}
-      <div style={{ marginBottom: 40, padding: "40px 32px 0" }}>
+      <div style={{ marginBottom: 40 }}>
         <div style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 12, fontFamily: "Inter, sans-serif" }}>NATIVA PROPERTIES</div>
         <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 600, margin: 0, lineHeight: 1.1, color: "#A8854A" }}>Visitas</h1>
         <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "10px 0 0" }}>Planificación y seguimiento de visitas a propiedades</p>
@@ -2218,7 +2220,7 @@ export default function Visitas({ currentUser }) {
 
       {/* ── Stats bar — scroll horizontal en mobile ── */}
       <div style={{ background: WHITE, borderBottom: `1px solid ${BORDER}`,
-        padding: "0 32px", overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+        overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
         <div style={{ display: "flex", gap: 0, minWidth: "max-content" }}>
           {statsData.map((s, i) => (
             <div key={s.label} style={{
@@ -2242,7 +2244,7 @@ export default function Visitas({ currentUser }) {
       </div>
 
       {/* ── Buscador ── */}
-      <div style={{ padding: "14px 32px", background: WHITE, borderBottom: `1px solid ${BORDER}` }}>
+      <div style={{ padding: "14px 0", background: WHITE, borderBottom: `1px solid ${BORDER}` }}>
         <div style={{ position: "relative" }}>
           <MagnifyingGlassIcon style={{ width: 18, height: 18, position: "absolute", left: 14, top: "50%",
             transform: "translateY(-50%)", color: MUTED }} />
@@ -2253,7 +2255,7 @@ export default function Visitas({ currentUser }) {
       </div>
 
       {/* ── Contenido ── */}
-      <div style={{ padding: "16px 32px" }}>
+      <div style={{ padding: "16px 0" }}>
         {loading ? (
           <div style={{ textAlign: "center", padding: "60px 20px" }}>
             <div style={{ fontSize: 36, marginBottom: 12 }}>⏳</div>
