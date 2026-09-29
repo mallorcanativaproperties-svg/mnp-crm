@@ -988,7 +988,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
           {/* ââ ð Comprador ââ */}
           <div style={{ padding: "13px 20px", background: CREAM_SECTION, borderTop: `1px solid ${CREAM_SECTION_B}`, borderBottom: `1px solid ${CREAM_SECTION_B}`, borderLeft: `3px solid ${GOLD}` }}>
             <div style={{ fontSize: 10, color: TEXT_BROWN, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase",
-              marginBottom: 12, fontFamily: "Inter, sans-serif" }}><><UserIcon style={{ width: 12, height: 12, display: "inline", marginRight: 5, verticalAlign: "middle" }} /> COMPRADOR{todosCompradores.length > 1 ? "ES" : ""}</></></div>
+              marginBottom: 12, fontFamily: "Inter, sans-serif" }}><><UserIcon style={{ width: 12, height: 12, display: "inline", marginRight: 5, verticalAlign: "middle" }} /> COMPRADOR{todosCompradores.length > 1 ? "ES" : ""}</></div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {todosCompradores.map((c, i) => (
                 <div key={c.id || i} style={{ background: WHITE, borderRadius: 0, padding: "12px 14px",
