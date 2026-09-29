@@ -179,6 +179,7 @@ function VisorRecurso({ recurso, userLogin, onClose, onCompletado }) {
           )}
         </div>
       </div>
+      </div>
     </div>
   );
 }
@@ -405,10 +406,11 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
   // VISTA: GRID DE MÓDULOS
   // ──────────────────────────────────────────────────────────────
   if (vista === "modulos") return (
-    <div style={{ background: CREAM, minHeight: "100vh", fontFamily: "Inter, sans-serif" }}>
+    <div style={{ background: CREAM, minHeight: "100vh", fontFamily: "Inter, sans-serif", padding: "40px 32px" }}>
+      <div style={{ maxWidth: 920, margin: "0 auto" }}>
 
       {/* Header */}
-      <div style={{ marginBottom: 40, padding: "40px 40px 0" }}>
+      <div style={{ marginBottom: 40 }}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 4 }}>
           <div>
             <div style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 12, fontFamily: "Inter, sans-serif" }}>NATIVA PROPERTIES</div>
@@ -446,7 +448,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
       </div>
 
       {/* Grid */}
-      <div style={{ padding: "36px 40px" }}>
+      <div style={{ padding: "36px 0" }}>
         {loading ? (
           <div style={{ color: MUTED, textAlign: "center", padding: 60, fontFamily: "Inter, sans-serif" }}>Cargando...</div>
         ) : (
@@ -602,7 +604,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
         </div>
 
         {/* Barra de progreso + diploma — separada del hero */}
-        <div style={{ background:WHITE, borderBottom:`1px solid ${BORDER}`, padding:"16px 40px", display:"flex", alignItems:"center", gap:24 }}>
+        <div style={{ background:WHITE, borderBottom:`1px solid ${BORDER}`, padding:"16px 0", display:"flex", alignItems:"center", gap:24 }}>
           <div style={{ flex:1, maxWidth:320 }}>
             <div style={{ display:"flex", justifyContent:"space-between", fontSize:11, color:MUTED, marginBottom:5 }}>
               <span>{done} de {total} contenidos completados</span>
@@ -636,7 +638,7 @@ export default function Formacion({ currentUser, defaultSubseccion = "agentes" }
         </div>
 
         {/* Lista temas */}
-        <div style={{ padding:"28px 40px" }}>
+        <div style={{ padding:"28px 0" }}>
           {isAdmin && (
             <button onClick={() => setEditTema({ titulo:"", descripcion:"", orden: tList.length })}
               style={{ marginBottom:20, padding:"8px 18px", border:`1px dashed ${GOLD}`, background:"transparent", color:GOLD, fontSize:11, cursor:"pointer", fontFamily:"Inter, sans-serif", fontWeight:600, borderRadius: 0 }}>
@@ -941,7 +943,7 @@ function Seguimiento({ modulos, temas, recursos, onClose }) {
 
   return (
     <div style={{ background:CREAM, minHeight:"100vh", fontFamily:"Inter, sans-serif" }}>
-      <div style={{ background:WHITE, borderBottom:`1px solid ${BORDER}`, padding:"20px 40px", display:"flex", alignItems:"center", gap:16 }}>
+      <div style={{ background:WHITE, borderBottom:`1px solid ${BORDER}`, padding:"20px 0", display:"flex", alignItems:"center", gap:16 }}>
         <button onClick={onClose} style={{ background:"transparent", border:"none", color:MUTED, cursor:"pointer", fontSize:12, padding:0, fontFamily:"Inter, sans-serif" }}>← Volver</button>
         <h2 style={{ fontSize:20, fontWeight: 600, color:TEXT, margin:0, fontFamily: "'Playfair Display', serif" }}>Panel de seguimiento</h2>
       </div>
