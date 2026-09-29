@@ -17,7 +17,7 @@ import {
   PaperClipIcon, EyeIcon, HomeIcon, ExclamationTriangleIcon
 } from "@heroicons/react/24/outline";
 
-// ── Paleta ────────────────────────────────────────────────────────────────────
+// ââ Paleta ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const GOLD    = "var(--gold)";
 const GOLD_L  = "var(--gold-l)";
 const GOLD_XL = "var(--gold-xl)";
@@ -36,16 +36,16 @@ const ESTADO_DOC = {
   borrador:          { label: "Borrador",           color: MUTED,   bg: `${MUTED}15`    },
   enviado:           { label: "Enviado",            color: BLUE,    bg: `${BLUE}15`     },
   firmado_comprador: { label: "Firmado comprador",  color: GOLD,    bg: `${GOLD}15`     },
-  deposito_recibido: { label: "Depósito recibido",  color: "var(--amber)", bg: "var(--amber)15"   },
+  deposito_recibido: { label: "DepÃ³sito recibido",  color: "var(--amber)", bg: "var(--amber)15"   },
   firmado_vendedor:  { label: "Firmado vendedor",   color: SUCCESS, bg: `${SUCCESS}15`  },
   completado:        { label: "Completado",         color: SUCCESS, bg: `${SUCCESS}20`  },
 };
 
 const TIPO_DOC = {
-  hoja_visita:  { label: "Hoja de visita",      icon: "📋", firmVendedor: false },
-  oferta:       { label: "Propuesta / Oferta",  icon: "📄", firmVendedor: true  },
-  reserva:      { label: "Reserva exclusiva",   icon: "🔑", firmVendedor: true  },
-  contraoferta: { label: "Contraoferta",        icon: "🔄", firmVendedor: true  },
+  hoja_visita:  { label: "Hoja de visita",      icon: "ð", firmVendedor: false },
+  oferta:       { label: "Propuesta / Oferta",  icon: "ð", firmVendedor: true  },
+  reserva:      { label: "Reserva exclusiva",   icon: "ð", firmVendedor: true  },
+  contraoferta: { label: "Contraoferta",        icon: "ð", firmVendedor: true  },
 };
 
 // Pipeline de estados para documentos
@@ -67,7 +67,7 @@ const L = ({ c, req }) => (
   </div>
 );
 
-// ── Badge de estado ───────────────────────────────────────────────────────────
+// ââ Badge de estado âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function BadgeEstado({ estado, size = "md" }) {
   const e = ESTADO_DOC[estado] || { label: estado, color: MUTED, bg: `${MUTED}15` };
   const pad = size === "lg" ? "5px 14px" : "4px 10px";
@@ -81,19 +81,19 @@ function BadgeEstado({ estado, size = "md" }) {
   );
 }
 
-// ── Estrellas de interés IA ───────────────────────────────────────────────────
+// ââ Estrellas de interÃ©s IA âââââââââââââââââââââââââââââââââââââââââââââââââââ
 function EstrellaInteres({ nivel }) {
   if (!nivel) return null;
   const colors = ["", DANGER, DANGER, GOLD, GOLD, SUCCESS];
   return (
     <span style={{ fontSize: 16, letterSpacing: 1, color: colors[nivel] || GOLD }}>
-      {"★".repeat(nivel)}
-      <span style={{ color: `${MUTED}50` }}>{"★".repeat(5 - nivel)}</span>
+      {"â".repeat(nivel)}
+      <span style={{ color: `${MUTED}50` }}>{"â".repeat(5 - nivel)}</span>
     </span>
   );
 }
 
-// ── Avatar con iniciales ──────────────────────────────────────────────────────
+// ââ Avatar con iniciales ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function Avatar({ nombre, apellidos, size = 44 }) {
   const initials = [nombre?.[0], apellidos?.[0]].filter(Boolean).join("").toUpperCase() || "?";
   return (
@@ -108,7 +108,7 @@ function Avatar({ nombre, apellidos, size = 44 }) {
   );
 }
 
-// ── Modal full-screen en mobile ───────────────────────────────────────────────
+// ââ Modal full-screen en mobile âââââââââââââââââââââââââââââââââââââââââââââââ
 function Modal({ title, onClose, children, width = 560 }) {
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(26,37,40,0.75)", zIndex: 1000,
@@ -137,8 +137,8 @@ function Modal({ title, onClose, children, width = 560 }) {
   );
 }
 
-// ── Selector de comprador ─────────────────────────────────────────────────────
-function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, email o teléfono..." }) {
+// ââ Selector de comprador âââââââââââââââââââââââââââââââââââââââââââââââââââââ
+function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, email o telÃ©fono..." }) {
   const [q, setQ] = useState("");
   const [results, setResults] = useState([]);
   const [showNew, setShowNew] = useState(false);
@@ -146,7 +146,7 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
   const [nuevoTel, setNuevoTel] = useState("");
   const [nuevoEmail, setNuevoEmail] = useState("");
   const [nuevoDni, setNuevoDni] = useState("");
-  const [nuevaNac, setNuevaNac] = useState("España");
+  const [nuevaNac, setNuevaNac] = useState("EspaÃ±a");
   const [saving, setSaving] = useState(false);
   const [sugerencias, setSugerencias] = useState([]);
   const [compradorExistenteId, setCompradorExistenteId] = useState(null);
@@ -165,7 +165,7 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
   async function crearNuevo() {
     if (!nuevoNombre.trim()) return;
     if (!nuevoDni.trim()) { alert("El DNI / NIE es obligatorio."); return; }
-    if (!nuevoTel.trim()) { alert("El teléfono es obligatorio."); return; }
+    if (!nuevoTel.trim()) { alert("El telÃ©fono es obligatorio."); return; }
     setSaving(true);
 
     const partes = nuevoNombre.trim().split(" ");
@@ -195,7 +195,7 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
     setSaving(false);
     setShowNew(false);
     setCompradorExistenteId(null);
-    setNuevoNombre(""); setNuevoDni(""); setNuevoTel(""); setNuevoEmail(""); setNuevaNac("España");
+    setNuevoNombre(""); setNuevoDni(""); setNuevoTel(""); setNuevoEmail(""); setNuevaNac("EspaÃ±a");
   }
 
   if (value) return (
@@ -208,8 +208,8 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
             {value.nombre} {value.apellidos || ""}
           </div>
           <div style={{ fontSize: 12, color: MUTED, fontFamily: "Inter, sans-serif", marginTop: 2 }}>
-            {value.telefono || ""}{value.email ? ` · ${value.email}` : ""}
-            {value.dni ? ` · DNI: ${value.dni}` : ""}
+            {value.telefono || ""}{value.email ? ` Â· ${value.email}` : ""}
+            {value.dni ? ` Â· DNI: ${value.dni}` : ""}
           </div>
         </div>
       </div>
@@ -270,9 +270,9 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
                     )}
                   </div>
                   <div style={{ fontSize: 12, color: MUTED, marginTop: 2 }}>
-                    {c.telefono || <span style={{color:DANGER}}>Sin teléfono</span>}
-                    {c.email ? ` · ${c.email}` : ""}
-                    {c.dni ? ` · DNI: ${c.dni}` : <span style={{color:DANGER}}> · Sin DNI</span>}
+                    {c.telefono || <span style={{color:DANGER}}>Sin telÃ©fono</span>}
+                    {c.email ? ` Â· ${c.email}` : ""}
+                    {c.dni ? ` Â· DNI: ${c.dni}` : <span style={{color:DANGER}}> Â· Sin DNI</span>}
                   </div>
                 </div>
               </div>
@@ -290,7 +290,7 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
                 {completarDatos.nombre} {completarDatos.apellidos || ""}
               </div>
               <div style={{ fontSize: 12, color: DANGER, fontFamily: "Inter, sans-serif", marginTop: 2 }}>
-                Necesita DNI y teléfono para continuar
+                Necesita DNI y telÃ©fono para continuar
               </div>
             </div>
           </div>
@@ -301,7 +301,7 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
                 placeholder="12345678A" autoFocus />
             </div>
             <div>
-              <L c="Teléfono" req />
+              <L c="TelÃ©fono" req />
               <input style={iSt} value={completarTel} onChange={e => setCompletarTel(e.target.value)}
                 placeholder="+34 600 000 000" />
             </div>
@@ -322,7 +322,7 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
               style={{ padding: "16px", background: DARK, border: "none", color: WHITE,
                 cursor: "pointer", borderRadius: 0, fontWeight: 700, fontFamily: "Inter, sans-serif",
                 fontSize: 15, opacity: (!completarDni.trim() || !completarTel.trim()) ? 0.4 : 1 }}>
-              {completarGuardando ? "Guardando..." : "✓ Guardar y añadir"}
+              {completarGuardando ? "Guardando..." : "â Guardar y aÃ±adir"}
             </button>
             <button onClick={() => setCompletarDatos(null)} style={{ padding: "14px",
               border: `1.5px solid ${BORDER}`, background: "transparent", color: MUTED,
@@ -338,7 +338,7 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
             <div style={{ marginBottom: 16, padding: "12px 14px", background: `${GOLD}10`,
               border: `1.5px solid ${GOLD}`, borderRadius: 0, fontSize: 13,
               color: GOLD, fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
-              ✓ Ya existe en la BD — se actualizarán sus datos
+              â Ya existe en la BD â se actualizarÃ¡n sus datos
             </div>
           )}
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -376,7 +376,7 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
                         setNuevoDni(s.dni || "");
                         setNuevoTel(s.telefono || "");
                         setNuevoEmail(s.email || "");
-                        setNuevaNac(s.pais || "España");
+                        setNuevaNac(s.pais || "EspaÃ±a");
                         setCompradorExistenteId(s.id);
                         setSugerencias([]);
                       }}
@@ -390,19 +390,19 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
                           {s.nombre} {s.apellidos || ""}
                           {(!s.dni || !s.telefono) && (
                             <span style={{ fontSize: 10, color: DANGER, marginLeft: 8, fontWeight: 700 }}>
-                              {!s.dni && !s.telefono ? "· Falta DNI y tel." : !s.dni ? "· Falta DNI" : "· Falta tel."}
+                              {!s.dni && !s.telefono ? "Â· Falta DNI y tel." : !s.dni ? "Â· Falta DNI" : "Â· Falta tel."}
                             </span>
                           )}
                         </div>
                         <div style={{ fontSize: 11, color: MUTED, marginTop: 2 }}>
-                          {s.telefono || "Sin teléfono"}{s.email ? ` · ${s.email}` : ""}{s.dni ? ` · DNI: ${s.dni}` : ""}
+                          {s.telefono || "Sin telÃ©fono"}{s.email ? ` Â· ${s.email}` : ""}{s.dni ? ` Â· DNI: ${s.dni}` : ""}
                         </div>
                       </div>
                     </div>
                   ))}
                   <div style={{ padding: "8px 14px", fontSize: 11, color: MUTED, fontStyle: "italic",
                     fontFamily: "Inter, sans-serif", borderTop: `1px solid ${BORDER}` }}>
-                    Selecciona para autorellenar o continúa para crear nuevo
+                    Selecciona para autorellenar o continÃºa para crear nuevo
                   </div>
                 </div>
               )}
@@ -411,7 +411,7 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               <div><L c="DNI / NIE" req /><input style={iStSm} value={nuevoDni} onChange={e => setNuevoDni(e.target.value)} placeholder="12345678A" /></div>
               <div><L c="Nacionalidad" /><input style={iStSm} value={nuevaNac} onChange={e => setNuevaNac(e.target.value)} /></div>
-              <div><L c="Teléfono" req /><input style={iStSm} value={nuevoTel} onChange={e => setNuevoTel(e.target.value)} placeholder="+34 600 000 000" /></div>
+              <div><L c="TelÃ©fono" req /><input style={iStSm} value={nuevoTel} onChange={e => setNuevoTel(e.target.value)} placeholder="+34 600 000 000" /></div>
               <div><L c="Email" /><input style={iStSm} value={nuevoEmail} onChange={e => setNuevoEmail(e.target.value)} /></div>
             </div>
           </div>
@@ -419,7 +419,7 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
             <button onClick={crearNuevo} disabled={saving}
               style={{ padding: "16px", background: DARK, border: "none", color: WHITE,
                 cursor: "pointer", borderRadius: 0, fontWeight: 700, fontFamily: "Inter, sans-serif", fontSize: 15 }}>
-              {saving ? "Guardando..." : compradorExistenteId ? "✓ Guardar y seleccionar" : "✓ Crear y seleccionar"}
+              {saving ? "Guardando..." : compradorExistenteId ? "â Guardar y seleccionar" : "â Crear y seleccionar"}
             </button>
             <button onClick={() => { setShowNew(false); setCompradorExistenteId(null); }}
               style={{ padding: "14px", border: `1.5px solid ${BORDER}`, background: "transparent",
@@ -434,7 +434,7 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
   );
 }
 
-// ── Generador de documento ────────────────────────────────────────────────────
+// ââ Generador de documento ââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function GeneradorDoc({ visita, propiedad, agente, onGuardado, onClose }) {
   const [tipo, setTipo] = useState("hoja_visita");
   const [condicionesParticulares, setCondicionesParticulares] = useState("");
@@ -459,7 +459,7 @@ function GeneradorDoc({ visita, propiedad, agente, onGuardado, onClose }) {
     }
     const dirBase = [propObj.dir, propObj.num].filter(Boolean).join(" ");
     const dirCompleta = [dirBase, propObj.municipio].filter(Boolean).join(", ")
-      + (anexos.length > 0 ? ` — con ${anexos.join(" y ")}` : "");
+      + (anexos.length > 0 ? ` â con ${anexos.join(" y ")}` : "");
 
     const contenido = {
       agente: {
@@ -526,22 +526,22 @@ function GeneradorDoc({ visita, propiedad, agente, onGuardado, onClose }) {
       {tipo !== "hoja_visita" && (
         <>
           <div>
-            <L c="Precio ofertado (€)" />
+            <L c="Precio ofertado (â¬)" />
             <input style={iSt} type="number" value={precioOferta}
               onChange={e => setPrecioOferta(e.target.value)}
               placeholder="Ej: 450000" />
           </div>
           <div>
-            <L c="Condiciones que condicionan aceptación (voluntario)" />
+            <L c="Condiciones que condicionan aceptaciÃ³n (voluntario)" />
             <textarea rows={3} style={{ ...iSt, resize: "vertical", lineHeight: 1.6 }}
               value={condicionesParticulares}
               onChange={e => setCondicionesParticulares(e.target.value)}
-              placeholder="Ej: Condicionado a obtención de hipoteca, entrega libre en 60 días..." />
+              placeholder="Ej: Condicionado a obtenciÃ³n de hipoteca, entrega libre en 60 dÃ­as..." />
           </div>
           <div>
-            <L c="Método de pago de reserva (1.000€)" />
+            <L c="MÃ©todo de pago de reserva (1.000â¬)" />
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {[["transferencia", "🏦 Transferencia bancaria"], ["stripe", "💳 Link de pago (Stripe)"]].map(([k, v]) => (
+              {[["transferencia", "ð¦ Transferencia bancaria"], ["stripe", "ð³ Link de pago (Stripe)"]].map(([k, v]) => (
                 <button key={k} onClick={() => setDepositoTipo(k)} style={{
                   padding: "14px 16px", border: `2px solid ${depositoTipo === k ? GOLD : BORDER}`,
                   background: depositoTipo === k ? `${GOLD}10` : WHITE, color: depositoTipo === k ? GOLD : TEXT,
@@ -557,7 +557,7 @@ function GeneradorDoc({ visita, propiedad, agente, onGuardado, onClose }) {
               <div style={{ marginTop: 10, padding: "14px 16px", background: CREAM2,
                 border: `1px solid ${BORDER}`, borderRadius: 0, fontSize: 13, color: TEXT,
                 fontFamily: "Inter, sans-serif", lineHeight: 1.7 }}>
-                Banco Sabadell · Titular: <strong>MALLORCA NATIVA, S.L.</strong><br />
+                Banco Sabadell Â· Titular: <strong>MALLORCA NATIVA, S.L.</strong><br />
                 IBAN: ES30 0081 0268 2700 0248 1851<br />
                 Concepto: Nombre completo del comprador
               </div>
@@ -566,7 +566,7 @@ function GeneradorDoc({ visita, propiedad, agente, onGuardado, onClose }) {
               <div style={{ marginTop: 10, padding: "14px 16px", background: "#E6F1FB",
                 border: "1px solid #B5D4F4", borderRadius: 0, fontSize: 13, color: BLUE,
                 fontFamily: "Inter, sans-serif" }}>
-                Se generará un link de pago de 1.000€ automáticamente al enviar el documento.
+                Se generarÃ¡ un link de pago de 1.000â¬ automÃ¡ticamente al enviar el documento.
               </div>
             )}
           </div>
@@ -578,7 +578,7 @@ function GeneradorDoc({ visita, propiedad, agente, onGuardado, onClose }) {
         <button onClick={guardar} disabled={saving} style={{ padding: "16px", background: DARK,
           border: "none", color: WHITE, cursor: "pointer", borderRadius: 0, fontWeight: 700,
           fontFamily: "Inter, sans-serif", fontSize: 15 }}>
-          {saving ? "Guardando..." : "📄 Crear documento"}
+          {saving ? "Guardando..." : "ð Crear documento"}
         </button>
         <button onClick={onClose} style={{ padding: "14px", border: `1.5px solid ${BORDER}`,
           background: "transparent", color: MUTED, cursor: "pointer", borderRadius: 0,
@@ -588,7 +588,7 @@ function GeneradorDoc({ visita, propiedad, agente, onGuardado, onClose }) {
   );
 }
 
-// ── Uploader de grabación + transcripción IA ──────────────────────────────────
+// ââ Uploader de grabaciÃ³n + transcripciÃ³n IA ââââââââââââââââââââââââââââââââââ
 function UploaderGrabacion({ visitaId, onActualizado }) {
   const ref = useRef();
   const [estado, setEstado] = useState("idle");
@@ -597,7 +597,7 @@ function UploaderGrabacion({ visitaId, onActualizado }) {
   async function manejarArchivo(e) {
     const file = e.target.files?.[0];
     if (!file) return;
-    setEstado("subiendo"); setMsg("Subiendo grabación...");
+    setEstado("subiendo"); setMsg("Subiendo grabaciÃ³n...");
 
     try {
       const ext = file.name.split(".").pop();
@@ -619,9 +619,9 @@ function UploaderGrabacion({ visitaId, onActualizado }) {
         body: JSON.stringify({ visitaId, grabacionUrl }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Error en transcripción");
+      if (!res.ok) throw new Error(data.error || "Error en transcripciÃ³n");
 
-      setEstado("listo"); setMsg("✓ Transcripción y resumen IA completados");
+      setEstado("listo"); setMsg("â TranscripciÃ³n y resumen IA completados");
       onActualizado();
     } catch (err) {
       setEstado("error"); setMsg(`Error: ${err.message}`);
@@ -646,13 +646,13 @@ function UploaderGrabacion({ visitaId, onActualizado }) {
           gap: 10, width: "100%",
         }}>
         <MicrophoneIcon style={{ width: 22, height: 22 }} />
-        {isLoading ? msg : "🎙 Subir grabación de visita"}
+        {isLoading ? msg : "ð Subir grabaciÃ³n de visita"}
       </button>
       {estado === "listo" && (
         <div style={{ marginTop: 8, padding: "10px 14px", background: `${SUCCESS}10`,
           border: `1px solid ${SUCCESS}30`, borderRadius: 0, fontSize: 13, color: SUCCESS,
           fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
-          ✓ {msg}
+          â {msg}
         </div>
       )}
       {estado === "error" && (
@@ -666,7 +666,7 @@ function UploaderGrabacion({ visitaId, onActualizado }) {
   );
 }
 
-// ── Editor de informe al propietario ─────────────────────────────────────────
+// ââ Editor de informe al propietario âââââââââââââââââââââââââââââââââââââââââ
 function EditorInforme({ informe, propiedadNombre, onGuardado, onClose, propiedadId, agente, fecha }) {
   const [contenido, setContenido] = useState(informe.contenido_borrador || "");
   const [enviando, setEnviando] = useState(false);
@@ -731,8 +731,8 @@ function EditorInforme({ informe, propiedadNombre, onGuardado, onClose, propieda
     <div>
       <div style={{ fontSize: 13, color: MUTED, marginBottom: 14, fontFamily: "Inter, sans-serif",
         padding: "12px 14px", background: CREAM, borderRadius: 0 }}>
-        📊 Informe de visitas — <strong style={{ color: TEXT }}>{propiedadNombre}</strong>.
-        Revisa y edita antes de confirmar el envío al propietario.
+        ð Informe de visitas â <strong style={{ color: TEXT }}>{propiedadNombre}</strong>.
+        Revisa y edita antes de confirmar el envÃ­o al propietario.
       </div>
       <textarea rows={16} value={contenido} onChange={e => setContenido(e.target.value)}
         style={{ ...iSt, resize: "vertical", lineHeight: 1.7, fontSize: 13 }} />
@@ -742,20 +742,20 @@ function EditorInforme({ informe, propiedadNombre, onGuardado, onClose, propieda
             cursor: "pointer", borderRadius: 0, fontWeight: 700, fontFamily: "Inter, sans-serif",
             fontSize: 15, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
           <PaperAirplaneIcon style={{ width: 18, height: 18 }} />
-          {enviando ? "Enviando..." : "✉ Confirmar y enviar al propietario"}
+          {enviando ? "Enviando..." : "â Confirmar y enviar al propietario"}
         </button>
         <button onClick={guardar} disabled={guardando}
           style={{ padding: "14px", border: `2px solid ${GOLD}`, background: "transparent",
             color: GOLD, cursor: "pointer", borderRadius: 0, fontFamily: "Inter, sans-serif",
             fontWeight: 700, fontSize: 14 }}>
-          {guardando ? "Guardando..." : "💾 Guardar borrador"}
+          {guardando ? "Guardando..." : "ð¾ Guardar borrador"}
         </button>
         {propiedadId && agente && fecha && (
           <button onClick={regenerar} disabled={regenerando}
             style={{ padding: "14px", border: `1.5px solid ${MUTED}`, background: "transparent",
               color: MUTED, cursor: "pointer", borderRadius: 0, fontFamily: "Inter, sans-serif",
               fontWeight: 600, fontSize: 13, opacity: regenerando ? 0.5 : 1 }}>
-            {regenerando ? "⏳ Regenerando..." : "🔄 Regenerar con IA"}
+            {regenerando ? "â³ Regenerando..." : "ð Regenerar con IA"}
           </button>
         )}
         <button onClick={onClose} style={{ padding: "14px", border: `1.5px solid ${BORDER}`,
@@ -766,12 +766,12 @@ function EditorInforme({ informe, propiedadNombre, onGuardado, onClose, propieda
   );
 }
 
-// ── Pipeline de documento (paso a paso visual) ────────────────────────────────
+// ââ Pipeline de documento (paso a paso visual) ââââââââââââââââââââââââââââââââ
 function PipelineDoc({ estado }) {
   const pasos = ["borrador","enviado","firmado_comprador","deposito_recibido","firmado_vendedor","completado"];
   const labelCorto = {
-    borrador: "Borrador", enviado: "Enviado", firmado_comprador: "Comprador ✓",
-    deposito_recibido: "Depósito ✓", firmado_vendedor: "Vendedor ✓", completado: "Completado",
+    borrador: "Borrador", enviado: "Enviado", firmado_comprador: "Comprador â",
+    deposito_recibido: "DepÃ³sito â", firmado_vendedor: "Vendedor â", completado: "Completado",
   };
   const idxActual = pasos.indexOf(estado);
 
@@ -808,12 +808,12 @@ function PipelineDoc({ estado }) {
   );
 }
 
-// ── Tarjeta de visita ─────────────────────────────────────────────────────────
+// ââ Tarjeta de visita âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, abierta, onToggleAbierta }) {
   const [showDoc, setShowDoc] = useState(false);
   const [editandoDoc, setEditandoDoc] = useState(null);
-  const [firmasLinks, setFirmasLinks] = useState({}); // docId → [{nombre, token, firmado_at}]
-  const [firmasLinksVend, setFirmasLinksVend] = useState({}); // docId → [{nombre, token, firmado_at}]
+  const [firmasLinks, setFirmasLinks] = useState({}); // docId â [{nombre, token, firmado_at}]
+  const [firmasLinksVend, setFirmasLinksVend] = useState({}); // docId â [{nombre, token, firmado_at}]
   const [firmaAgenteDocId, setFirmaAgenteDocId] = useState(null); // docId en proceso de firma agente
   const [subiendoJustificante, setSubiendoJustificante] = useState(false); // docId en proceso de subida
   const isAdmin = ["director", "administrador"].includes(currentUser?.role?.toLowerCase());
@@ -826,7 +826,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
   const comp = todosCompradores[0];
   const docs = visita.visita_documentos || [];
 
-  // Cargar tokens de firma para todos los docs que estén enviados
+  // Cargar tokens de firma para todos los docs que estÃ©n enviados
   useEffect(() => {
     const docsEnviados = docs.filter(d => ["enviado","firmado_comprador","deposito_recibido","firmado_vendedor","completado"].includes(d.estado));
     if (docsEnviados.length === 0) return;
@@ -866,17 +866,17 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
   const [fbEdit, setFbEdit] = useState(null);
   const [guardandoFb, setGuardandoFb] = useState(false);
 
-  const OBJECIONES_OPTS = ["Precio alto","Estado / reforma necesaria","Zona o ubicación","Tamaño o distribución","Sin parking / trastero","Financiación pendiente","Comparando con otras propiedades","Sin objeciones"];
-  const SIGUIENTE_PASO_OPTS = ["Sin acción","Reenviar documentación","Segunda visita","Presentar oferta","Espera respuesta del comprador","Descartada"];
-  const VALORACION_PRECIO_OPTS = ["Precio aceptable","Precio alto, pediría rebaja","Precio muy fuera de mercado"];
-  const NIVEL_LABEL = ["","Sin interés","Interés bajo","Interés moderado","Interés alto","Muy interesado"];
+  const OBJECIONES_OPTS = ["Precio alto","Estado / reforma necesaria","Zona o ubicaciÃ³n","TamaÃ±o o distribuciÃ³n","Sin parking / trastero","FinanciaciÃ³n pendiente","Comparando con otras propiedades","Sin objeciones"];
+  const SIGUIENTE_PASO_OPTS = ["Sin acciÃ³n","Reenviar documentaciÃ³n","Segunda visita","Presentar oferta","Espera respuesta del comprador","Descartada"];
+  const VALORACION_PRECIO_OPTS = ["Precio aceptable","Precio alto, pedirÃ­a rebaja","Precio muy fuera de mercado"];
+  const NIVEL_LABEL = ["","Sin interÃ©s","InterÃ©s bajo","InterÃ©s moderado","InterÃ©s alto","Muy interesado"];
 
   async function guardarFeedback() {
     setGuardandoFb(true);
     await supabase.from("visitas").update({ feedback: fbEdit, updated_at: new Date().toISOString() }).eq("id", visita.id);
     setGuardandoFb(false);
     setEditandoFeedback(false);
-    notificarGuardado("Análisis guardado");
+    notificarGuardado("AnÃ¡lisis guardado");
     onActualizado();
   }
 
@@ -914,20 +914,20 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
   }
 
   async function eliminarVisita() {
-    if (!confirm("¿Eliminar esta visita y todos sus documentos?")) return;
+    if (!confirm("Â¿Eliminar esta visita y todos sus documentos?")) return;
     await supabase.from("visitas").update({ activo: false }).eq("id", visita.id);
     onActualizado();
   }
 
   const nombreCompradores = todosCompradores.length > 0
-    ? todosCompradores.map(c => `${c.nombre} ${c.apellidos || ""}`.trim()).join(" · ")
+    ? todosCompradores.map(c => `${c.nombre} ${c.apellidos || ""}`.trim()).join(" Â· ")
     : "Sin comprador";
 
   return (
     <div style={{ background: WHITE, border: `1.5px solid ${BORDER}`, borderRadius: 12,
       overflow: "hidden", marginBottom: 12, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
 
-      {/* Cabecera — tap para expandir */}
+      {/* Cabecera â tap para expandir */}
       <div style={{ padding: "16px", cursor: "pointer", display: "flex", gap: 14, alignItems: "flex-start" }}
         onClick={onToggleAbierta}>
 
@@ -941,10 +941,10 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
             {nombreCompradores}
           </div>
           <div style={{ fontSize: 12, color: MUTED, fontFamily: "Inter, sans-serif", marginTop: 2 }}>
-            📅 {fecha} · {hora} · {visita.agente_login}
+            ð {fecha} Â· {hora} Â· {visita.agente_login}
           </div>
 
-          {/* Chips de estado rápido */}
+          {/* Chips de estado rÃ¡pido */}
           <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap", alignItems: "center" }}>
             {nivelInteres && (
               <EstrellaInteres nivel={nivelInteres} />
@@ -952,19 +952,19 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
             {docs.length > 0 && (
               <span style={{ fontSize: 10, background: `${GOLD}18`, color: GOLD, padding: "3px 10px",
                 borderRadius: 20, fontFamily: "Inter, sans-serif", fontWeight: 700 }}>
-                📄 {docs.length} doc{docs.length > 1 ? "s" : ""}
+                ð {docs.length} doc{docs.length > 1 ? "s" : ""}
               </span>
             )}
             {visita.resumen_ia && (
               <span style={{ fontSize: 10, background: `${SUCCESS}15`, color: SUCCESS, padding: "3px 10px",
                 borderRadius: 20, fontFamily: "Inter, sans-serif", fontWeight: 700 }}>
-                🤖 IA ✓
+                ð¤ IA â
               </span>
             )}
             {todosCompradores.length > 1 && (
               <span style={{ fontSize: 10, background: `${BLUE}12`, color: BLUE, padding: "3px 10px",
                 borderRadius: 20, fontFamily: "Inter, sans-serif", fontWeight: 700 }}>
-                👥 {todosCompradores.length} personas
+                ð¥ {todosCompradores.length} personas
               </span>
             )}
           </div>
@@ -983,10 +983,10 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
       {abierta && (
         <div style={{ borderTop: `1.5px solid ${BORDER}`, background: CREAM }}>
 
-          {/* ── 📞 Comprador ── */}
+          {/* ââ ð Comprador ââ */}
           <div style={{ padding: "16px", borderBottom: `1px solid ${BORDER}` }}>
             <div style={{ fontSize: 11, color: GOLD, fontWeight: 800, letterSpacing: "0.1em",
-              marginBottom: 12, fontFamily: "Inter, sans-serif" }}>📞 COMPRADOR{todosCompradores.length > 1 ? "ES" : ""}</div>
+              marginBottom: 12, fontFamily: "Inter, sans-serif" }}>ð COMPRADOR{todosCompradores.length > 1 ? "ES" : ""}</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {todosCompradores.map((c, i) => (
                 <div key={c.id || i} style={{ background: WHITE, borderRadius: 0, padding: "12px 14px",
@@ -1001,9 +1001,9 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                       {c.nombre} {c.apellidos || ""}
                     </div>
                     <div style={{ fontSize: 12, color: MUTED, marginTop: 3, display: "flex", gap: 12, flexWrap: "wrap" }}>
-                      {c.telefono && <span>📱 {c.telefono}</span>}
-                      {c.email && <span>✉ {c.email}</span>}
-                      {c.dni && <span>🪪 {c.dni}</span>}
+                      {c.telefono && <span>ð± {c.telefono}</span>}
+                      {c.email && <span>â {c.email}</span>}
+                      {c.dni && <span>ðªª {c.dni}</span>}
                     </div>
                   </div>
                 </div>
@@ -1011,26 +1011,26 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
             </div>
           </div>
 
-          {/* ── 🤖 Análisis IA ── */}
+          {/* ââ ð¤ AnÃ¡lisis IA ââ */}
           {(fb || puedeEditar) && (
             <div style={{ padding: "16px", borderBottom: `1px solid ${BORDER}` }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
                 <div style={{ fontSize: 11, color: GOLD, fontWeight: 800, letterSpacing: "0.1em",
-                  fontFamily: "Inter, sans-serif" }}>🤖 ANÁLISIS IA</div>
+                  fontFamily: "Inter, sans-serif" }}>ð¤ ANÃLISIS IA</div>
                 {puedeEditar && !editandoFeedback && (
                   <button onClick={() => { setFbEdit(fb ? {...fb, objeciones: [...(fb.objeciones||[])]} : { nivel_interes: null, objeciones: [], valoracion_precio: null, siguiente_paso: null }); setEditandoFeedback(true); }}
                     style={{ fontSize: 11, color: GOLD, background: `${GOLD}12`, border: `1px solid ${GOLD}30`,
                       borderRadius: 20, padding: "4px 12px", cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 700 }}>
-                    ✏ Editar
+                    â Editar
                   </button>
                 )}
               </div>
 
               {editandoFeedback && fbEdit ? (
                 <div style={{ background: WHITE, borderRadius: 0, padding: "14px", border: `1.5px solid ${GOLD}` }}>
-                  {/* Nivel interés */}
+                  {/* Nivel interÃ©s */}
                   <div style={{ marginBottom: 14 }}>
-                    <div style={{ fontSize: 10, color: MUTED, fontWeight: 700, letterSpacing: "0.08em", marginBottom: 8, fontFamily: "Inter, sans-serif" }}>NIVEL DE INTERÉS</div>
+                    <div style={{ fontSize: 10, color: MUTED, fontWeight: 700, letterSpacing: "0.08em", marginBottom: 8, fontFamily: "Inter, sans-serif" }}>NIVEL DE INTERÃS</div>
                     <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                       {[1,2,3,4,5].map(n => (
                         <button key={n} onClick={() => setFbEdit(p => ({...p, nivel_interes: n}))}
@@ -1038,14 +1038,14 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                             background: fbEdit.nivel_interes === n ? `${NIVEL_COLOR[n]}18` : CREAM,
                             color: fbEdit.nivel_interes === n ? NIVEL_COLOR[n] : MUTED,
                             cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "Inter, sans-serif" }}>
-                          {"★".repeat(n)} {NIVEL_LABEL[n]}
+                          {"â".repeat(n)} {NIVEL_LABEL[n]}
                         </button>
                       ))}
                     </div>
                   </div>
-                  {/* Valoración precio */}
+                  {/* ValoraciÃ³n precio */}
                   <div style={{ marginBottom: 14 }}>
-                    <div style={{ fontSize: 10, color: MUTED, fontWeight: 700, letterSpacing: "0.08em", marginBottom: 8, fontFamily: "Inter, sans-serif" }}>VALORACIÓN PRECIO</div>
+                    <div style={{ fontSize: 10, color: MUTED, fontWeight: 700, letterSpacing: "0.08em", marginBottom: 8, fontFamily: "Inter, sans-serif" }}>VALORACIÃN PRECIO</div>
                     <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                       {VALORACION_PRECIO_OPTS.map(v => {
                         const col = v === "Precio aceptable" ? SUCCESS : v === "Precio muy fuera de mercado" ? DANGER : GOLD;
@@ -1072,7 +1072,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                             style={{ padding: "7px 12px", borderRadius: 0 , border: `2px solid ${sel ? DANGER : BORDER}`,
                               background: sel ? `${DANGER}12` : CREAM, color: sel ? DANGER : MUTED,
                               cursor: "pointer", fontSize: 11, fontWeight: sel ? 700 : 500, fontFamily: "Inter, sans-serif" }}>
-                            {sel ? "✓ " : ""}{o}
+                            {sel ? "â " : ""}{o}
                           </button>
                         );
                       })}
@@ -1083,7 +1083,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                     <div style={{ fontSize: 10, color: MUTED, fontWeight: 700, letterSpacing: "0.08em", marginBottom: 8, fontFamily: "Inter, sans-serif" }}>SIGUIENTE PASO</div>
                     <select value={fbEdit.siguiente_paso||""} onChange={e => setFbEdit(p => ({...p, siguiente_paso: e.target.value}))}
                       style={{ ...iStSm, width: "100%", appearance: "none" }}>
-                      <option value="">— Seleccionar —</option>
+                      <option value="">â Seleccionar â</option>
                       {SIGUIENTE_PASO_OPTS.map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
                   </div>
@@ -1091,7 +1091,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                     <button onClick={guardarFeedback} disabled={guardandoFb}
                       style={{ flex: 1, padding: "12px", background: SUCCESS, border: "none", color: WHITE,
                         cursor: "pointer", borderRadius: 0, fontWeight: 700, fontFamily: "Inter, sans-serif", fontSize: 14 }}>
-                      {guardandoFb ? "Guardando..." : "💾 Guardar análisis"}
+                      {guardandoFb ? "Guardando..." : "ð¾ Guardar anÃ¡lisis"}
                     </button>
                     <button onClick={() => setEditandoFeedback(false)}
                       style={{ padding: "12px 16px", border: `1.5px solid ${BORDER}`, background: "transparent",
@@ -1104,7 +1104,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                   {fb.nivel_interes && (
                     <div style={{ marginBottom: 12 }}>
                       <div style={{ fontSize: 10, color: MUTED, fontWeight: 700, letterSpacing: "0.08em",
-                        marginBottom: 6, fontFamily: "Inter, sans-serif" }}>NIVEL DE INTERÉS</div>
+                        marginBottom: 6, fontFamily: "Inter, sans-serif" }}>NIVEL DE INTERÃS</div>
                       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                         <EstrellaInteres nivel={fb.nivel_interes} />
                         <span style={{ fontSize: 13, fontWeight: 700, color: NIVEL_COLOR[fb.nivel_interes],
@@ -1124,7 +1124,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                         </span>
                       </div>
                     )}
-                    {fb.siguiente_paso && fb.siguiente_paso !== "Sin acción" && (
+                    {fb.siguiente_paso && fb.siguiente_paso !== "Sin acciÃ³n" && (
                       <div style={{ flex: 1, minWidth: 140 }}>
                         <div style={{ fontSize: 10, color: MUTED, fontWeight: 700, letterSpacing: "0.08em",
                           marginBottom: 4, fontFamily: "Inter, sans-serif" }}>SIGUIENTE PASO</div>
@@ -1137,7 +1137,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                       {fb.objeciones.map(o => (
                         <span key={o} style={{ fontSize: 11, color: DANGER, background: `${DANGER}10`,
                           padding: "4px 10px", borderRadius: 20, border: `1px solid ${DANGER}20`,
-                          fontFamily: "Inter, sans-serif" }}>⚠ {o}</span>
+                          fontFamily: "Inter, sans-serif" }}>â  {o}</span>
                       ))}
                     </div>
                   )}
@@ -1145,7 +1145,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
               ) : puedeEditar ? (
                 <div style={{ padding: "14px", background: CREAM, border: `1.5px dashed ${BORDER}`, borderRadius: 0,
                   fontSize: 13, color: MUTED, fontFamily: "Inter, sans-serif", textAlign: "center" }}>
-                  Sin análisis IA — sube una grabación o pulsa Editar para rellenarlo manualmente
+                  Sin anÃ¡lisis IA â sube una grabaciÃ³n o pulsa Editar para rellenarlo manualmente
                 </div>
               ) : null}
             </div>
@@ -1157,7 +1157,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
               <div style={{ padding: "14px", background: WHITE,
                 border: `1px solid ${BORDER}`, borderLeft: `4px solid ${SUCCESS}`, borderRadius: 0 }}>
                 <div style={{ fontSize: 10, color: SUCCESS, fontWeight: 800, letterSpacing: "0.08em",
-                  marginBottom: 8, fontFamily: "Inter, sans-serif" }}>📝 RESUMEN IA</div>
+                  marginBottom: 8, fontFamily: "Inter, sans-serif" }}>ð RESUMEN IA</div>
                 <div style={{ fontSize: 13, color: TEXT, lineHeight: 1.6, fontFamily: "Inter, sans-serif" }}>
                   {visita.resumen_ia}
                 </div>
@@ -1165,7 +1165,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
             </div>
           )}
 
-          {/* Transcripción */}
+          {/* TranscripciÃ³n */}
           {visita.transcripcion && (
             <div style={{ padding: "0 16px 16px" }}>
               <details>
@@ -1173,7 +1173,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                   fontFamily: "Inter, sans-serif", padding: "8px 14px", background: WHITE,
                   borderRadius: 0, border: `1px solid ${BORDER}`, listStyle: "none",
                   display: "flex", alignItems: "center", gap: 8 }}>
-                  🎙 Ver transcripción completa
+                  ð Ver transcripciÃ³n completa
                 </summary>
                 <div style={{ marginTop: 8, padding: "14px", background: WHITE,
                   border: `1px solid ${BORDER}`, borderRadius: 0, fontSize: 12, color: TEXT,
@@ -1184,11 +1184,11 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
             </div>
           )}
 
-          {/* ── 📝 Notas ── */}
+          {/* ââ ð Notas ââ */}
           {visita.notas && (
             <div style={{ padding: "0 16px 16px" }}>
               <div style={{ fontSize: 11, color: GOLD, fontWeight: 800, letterSpacing: "0.1em",
-                marginBottom: 8, fontFamily: "Inter, sans-serif" }}>📝 NOTAS</div>
+                marginBottom: 8, fontFamily: "Inter, sans-serif" }}>ð NOTAS</div>
               <div style={{ padding: "12px 14px", background: WHITE, border: `1px solid ${BORDER}`,
                 borderRadius: 0, fontSize: 13, color: TEXT, fontStyle: "italic",
                 fontFamily: "Inter, sans-serif", lineHeight: 1.6 }}>
@@ -1197,7 +1197,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
             </div>
           )}
 
-          {/* ── 🎙 Subir grabación ── */}
+          {/* ââ ð Subir grabaciÃ³n ââ */}
           {puedeEditar && (
             <div style={{ padding: "0 16px 16px" }}>
               <UploaderGrabacion visitaId={visita.id} onActualizado={onActualizado} />
@@ -1205,18 +1205,18 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                 <a href={visita.grabacion_url} target="_blank" rel="noopener noreferrer"
                   style={{ display: "block", marginTop: 8, fontSize: 13, color: BLUE,
                     fontFamily: "Inter, sans-serif", textAlign: "center" }}>
-                  ▶ Ver grabación existente
+                  â¶ Ver grabaciÃ³n existente
                 </a>
               )}
             </div>
           )}
 
-          {/* ── 📄 Documentos ── */}
+          {/* ââ ð Documentos ââ */}
           {(docs.length > 0 || (puedeEditar && !showDoc)) && (
             <div style={{ padding: "0 16px 16px" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
                 <div style={{ fontSize: 11, color: GOLD, fontWeight: 800, letterSpacing: "0.1em",
-                  fontFamily: "Inter, sans-serif" }}>📄 DOCUMENTOS</div>
+                  fontFamily: "Inter, sans-serif" }}>ð DOCUMENTOS</div>
                 {puedeEditar && !showDoc && (
                   <button onClick={() => setShowDoc(true)} style={{
                     padding: "10px 18px", background: DARK, border: "none", color: WHITE,
@@ -1231,7 +1231,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
               {docs.length > 0 && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {docs.map(doc => {
-                    const td = TIPO_DOC[doc.tipo] || { label: doc.tipo, icon: "📄" };
+                    const td = TIPO_DOC[doc.tipo] || { label: doc.tipo, icon: "ð" };
                     const esOfResv = ["oferta","reserva","contraoferta"].includes(doc.tipo);
 
                     async function verDocumento() {
@@ -1265,7 +1265,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                             })
                             .eq("id", docId);
                           if (dbErr) throw dbErr;
-                          notificarGuardado("Justificante de depósito adjuntado ✅");
+                          notificarGuardado("Justificante de depÃ³sito adjuntado â");
                           onActualizado();
                         } catch (err) {
                           alert("Error al subir el justificante: " + err.message);
@@ -1284,7 +1284,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                       });
                       const data = await res.json();
                       if (data.ok) {
-                        alert(`✅ Link de firma enviado por WhatsApp al ${destinatario === "vendedor" ? "propietario" : "comprador"}.`);
+                        alert(`â Link de firma enviado por WhatsApp al ${destinatario === "vendedor" ? "propietario" : "comprador"}.`);
                         onActualizado();
                       } else {
                         alert(`Error: ${data.error}`);
@@ -1304,14 +1304,14 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                               {doc.contenido?.precio_oferta && (
                                 <div style={{ fontSize: 13, color: GOLD, fontFamily: "Inter, sans-serif",
                                   fontWeight: 700, marginTop: 2 }}>
-                                  💰 {Number(doc.contenido.precio_oferta).toLocaleString("es-ES")} €
+                                  ð° {Number(doc.contenido.precio_oferta).toLocaleString("es-ES")} â¬
                                 </div>
                               )}
                             </div>
                             <BadgeEstado estado={doc.estado} size="lg" />
                           </div>
 
-                          {/* ✅ Banner COMPLETADO + descarga */}
+                          {/* â Banner COMPLETADO + descarga */}
                           {doc.estado === "completado" && (
                             <div style={{ margin: "10px 0 6px", padding: "14px 16px",
                               background: `${SUCCESS}12`, border: `1.5px solid ${SUCCESS}40`,
@@ -1320,7 +1320,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                               <div>
                                 <div style={{ fontSize: 13, fontWeight: 800, color: SUCCESS,
                                   fontFamily: "Inter, sans-serif", marginBottom: 2 }}>
-                                  ✅ Proceso completado
+                                  â Proceso completado
                                 </div>
                                 <div style={{ fontSize: 11, color: SUCCESS, fontFamily: "Inter, sans-serif",
                                   opacity: 0.8 }}>
@@ -1334,7 +1334,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                                     borderRadius: 0, fontSize: 13, fontWeight: 700,
                                     fontFamily: "Inter, sans-serif", textDecoration: "none",
                                     whiteSpace: "nowrap", flexShrink: 0 }}>
-                                  ⬇️ Descargar PDF
+                                  â¬ï¸ Descargar PDF
                                 </a>
                               )}
                             </div>
@@ -1348,7 +1348,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                             <div style={{ marginTop: 10, padding: "10px 12px", background: CREAM,
                               borderRadius: 0, fontSize: 12, color: TEXT, fontFamily: "Inter, sans-serif",
                               lineHeight: 1.6 }}>
-                              💳 <strong>ES30 0081 0268 2700 0248 1851</strong><br />
+                              ð³ <strong>ES30 0081 0268 2700 0248 1851</strong><br />
                               Concepto: {comp?.nombre} {comp?.apellidos}
                             </div>
                           )}
@@ -1358,7 +1358,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                             <div style={{ marginTop: 10, padding: "10px 12px", background: `${GOLD}08`,
                               borderRadius: 0, border: `1px solid ${GOLD}22`, fontSize: 12,
                               color: TEXT, fontFamily: "Inter, sans-serif", fontStyle: "italic" }}>
-                              📋 {doc.condiciones_particulares}
+                              ð {doc.condiciones_particulares}
                             </div>
                           )}
 
@@ -1368,17 +1368,17 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                               borderRadius: 0, border: `1px solid ${BORDER}` }}>
                               <div style={{ fontSize: 10, color: GOLD, fontWeight: 800,
                                 letterSpacing: "0.1em", marginBottom: 8, fontFamily: "Inter, sans-serif" }}>
-                                🔗 LINKS DE FIRMA
+                                ð LINKS DE FIRMA
                               </div>
                               {firmasLinks[doc.id].map(f => (
                                 <div key={f.id} style={{ marginBottom: 8 }}>
                                   <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
-                                    <span style={{ fontSize: 13 }}>{f.firmado_at ? "✅" : "⏳"}</span>
+                                    <span style={{ fontSize: 13 }}>{f.firmado_at ? "â" : "â³"}</span>
                                     <span style={{ fontSize: 12, fontWeight: 600, color: TEXT,
                                       fontFamily: "Inter, sans-serif" }}>{f.nombre_firmante}</span>
                                     {f.firmado_at && (
                                       <span style={{ fontSize: 10, color: SUCCESS, fontFamily: "Inter, sans-serif" }}>
-                                        firmó {new Date(f.firmado_at).toLocaleDateString("es-ES")}
+                                        firmÃ³ {new Date(f.firmado_at).toLocaleDateString("es-ES")}
                                       </span>
                                     )}
                                   </div>
@@ -1390,7 +1390,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                                           background: WHITE, cursor: "text" }} />
                                       <button onClick={() => {
                                         navigator.clipboard.writeText(`https://crm.mallorcanativaproperties.com/firmar-visita?token=${f.token}&tipo=comprador`);
-                                        alert("✅ Link copiado");
+                                        alert("â Link copiado");
                                       }} style={{ padding: "5px 10px", background: DARK, border: "none",
                                         color: WHITE, borderRadius: 0, fontSize: 11, cursor: "pointer",
                                         fontFamily: "Inter, sans-serif", whiteSpace: "nowrap" }}>
@@ -1409,12 +1409,12 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                               borderRadius: 0, border: `1px solid ${GOLD}40` }}>
                               <div style={{ fontSize: 10, color: GOLD, fontWeight: 800,
                                 letterSpacing: "0.1em", marginBottom: 8, fontFamily: "Inter, sans-serif" }}>
-                                🔗 LINKS FIRMA PROPIETARIO{firmasLinksVend[doc.id].length > 1 ? "S" : ""}
+                                ð LINKS FIRMA PROPIETARIO{firmasLinksVend[doc.id].length > 1 ? "S" : ""}
                               </div>
                               {firmasLinksVend[doc.id].map(f => (
                                 <div key={f.id} style={{ marginBottom: 8 }}>
                                   <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
-                                    <span style={{ fontSize: 13 }}>{f.firmado_at ? "✅" : "⏳"}</span>
+                                    <span style={{ fontSize: 13 }}>{f.firmado_at ? "â" : "â³"}</span>
                                     <span style={{ fontSize: 12, fontWeight: 600, color: f.firmado_at ? SUCCESS : TEXT,
                                       fontFamily: "Inter, sans-serif" }}>{f.nombre_firmante || "Propietario"}</span>
                                     {f.firmado_at && (
@@ -1431,7 +1431,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                                           background: WHITE, cursor: "text" }} />
                                       <button onClick={() => {
                                         navigator.clipboard.writeText(`https://crm.mallorcanativaproperties.com/firmar-visita?token=${f.token}&tipo=vendedor`);
-                                        alert("✅ Link copiado");
+                                        alert("â Link copiado");
                                       }} style={{ padding: "5px 10px", background: GOLD, border: "none",
                                         color: WHITE, borderRadius: 0, fontSize: 11, cursor: "pointer",
                                         fontFamily: "Inter, sans-serif", whiteSpace: "nowrap" }}>
@@ -1443,16 +1443,16 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                               ))}
                             </div>
                           )}
-                          {/* Fallback: link propietario legacy (token único) */}
+                          {/* Fallback: link propietario legacy (token Ãºnico) */}
                           {!firmasLinksVend[doc.id]?.length && doc.token_firma_vendedor && (
                             <div style={{ marginTop: 12, padding: "10px 12px", background: `${GOLD}10`,
                               borderRadius: 0, border: `1px solid ${GOLD}40` }}>
                               <div style={{ fontSize: 10, color: GOLD, fontWeight: 800,
                                 letterSpacing: "0.1em", marginBottom: 6, fontFamily: "Inter, sans-serif" }}>
-                                🔗 LINK FIRMA PROPIETARIO
+                                ð LINK FIRMA PROPIETARIO
                               </div>
                               <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: doc.firmado_vendedor_at ? 0 : 6 }}>
-                                <span style={{ fontSize: 13 }}>{doc.firmado_vendedor_at ? "✅" : "⏳"}</span>
+                                <span style={{ fontSize: 13 }}>{doc.firmado_vendedor_at ? "â" : "â³"}</span>
                                 <span style={{ fontSize: 12, fontWeight: 600, color: doc.firmado_vendedor_at ? SUCCESS : TEXT,
                                   fontFamily: "Inter, sans-serif" }}>Propietario</span>
                                 {doc.firmado_vendedor_at && (
@@ -1470,7 +1470,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                                       background: WHITE, cursor: "text" }} />
                                   <button onClick={() => {
                                     navigator.clipboard.writeText(`https://crm.mallorcanativaproperties.com/firmar-visita?token=${doc.token_firma_vendedor}&tipo=vendedor`);
-                                    alert("✅ Link copiado");
+                                    alert("â Link copiado");
                                   }} style={{ padding: "5px 10px", background: GOLD, border: "none",
                                     color: WHITE, borderRadius: 0, fontSize: 11, cursor: "pointer",
                                     fontFamily: "Inter, sans-serif", whiteSpace: "nowrap" }}>
@@ -1486,12 +1486,12 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                             <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 4 }}>
                               {doc.firmado_comprador_at && (
                                 <span style={{ fontSize: 12, color: SUCCESS, fontFamily: "Inter, sans-serif" }}>
-                                  ✓ Comprador firmó {new Date(doc.firmado_comprador_at).toLocaleDateString("es-ES")}
+                                  â Comprador firmÃ³ {new Date(doc.firmado_comprador_at).toLocaleDateString("es-ES")}
                                 </span>
                               )}
                               {doc.firmado_vendedor_at && (
                                 <span style={{ fontSize: 12, color: SUCCESS, fontFamily: "Inter, sans-serif" }}>
-                                  ✓ Propietario firmó {new Date(doc.firmado_vendedor_at).toLocaleDateString("es-ES")}
+                                  â Propietario firmÃ³ {new Date(doc.firmado_vendedor_at).toLocaleDateString("es-ES")}
                                 </span>
                               )}
                             </div>
@@ -1519,7 +1519,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                                 justifyContent: "center", gap: 8,
                               }}>
                                 <PaperAirplaneIcon style={{ width: 18, height: 18 }} />
-                                {doc.estado === "enviado" ? "Reenviar firma → Comprador" : "Enviar firma → Comprador"}
+                                {doc.estado === "enviado" ? "Reenviar firma â Comprador" : "Enviar firma â Comprador"}
                               </button>
                             )}
 
@@ -1529,7 +1529,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                               if (!estadoConJustificante) return null;
                               return (
                                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                                  {/* Justificante de depósito */}
+                                  {/* Justificante de depÃ³sito */}
                                   {tieneJustificante ? (
                                     <div style={{ display: "flex", alignItems: "center", gap: 8,
                                       padding: "12px 14px", background: `${SUCCESS}12`,
@@ -1564,15 +1564,15 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                                         width: "100%", boxSizing: "border-box",
                                         opacity: subiendoJustificante ? 0.6 : 1 }}>
                                       <ArrowUpTrayIcon style={{ width: 18, height: 18, flexShrink: 0 }} />
-                                      {subiendoJustificante ? "Subiendo…" : "Adjuntar justificante de depósito"}
+                                      {subiendoJustificante ? "Subiendoâ¦" : "Adjuntar justificante de depÃ³sito"}
                                     </button>
                                   )}
-                                  {/* Enviar firma al propietario — solo cuando estado es firmado_comprador y no hay firma del vendedor aún */}
+                                  {/* Enviar firma al propietario â solo cuando estado es firmado_comprador y no hay firma del vendedor aÃºn */}
                                   {doc.estado === "firmado_comprador" && !doc.firmado_vendedor_at && (
                                     <>
                                       <button onClick={() => tieneJustificante ? enviarFirma("vendedor") : null}
                                         disabled={!tieneJustificante}
-                                        title={!tieneJustificante ? "Adjunta el justificante de depósito primero" : ""}
+                                        title={!tieneJustificante ? "Adjunta el justificante de depÃ³sito primero" : ""}
                                         style={{ padding: "14px 16px",
                                           background: tieneJustificante ? SUCCESS : BORDER,
                                           border: "none", color: tieneJustificante ? WHITE : MUTED,
@@ -1582,7 +1582,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                                           alignItems: "center", justifyContent: "center", gap: 8,
                                           width: "100%", boxSizing: "border-box" }}>
                                         <PaperAirplaneIcon style={{ width: 18, height: 18, flexShrink: 0 }} />
-                                        <span style={{ flex: 1, textAlign: "center" }}>Enviar firma → Propietario</span>
+                                        <span style={{ flex: 1, textAlign: "center" }}>Enviar firma â Propietario</span>
                                         {!tieneJustificante && (
                                           <PaperClipIcon style={{ width: 15, height: 15, flexShrink: 0 }} />
                                         )}
@@ -1590,7 +1590,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                                       {!tieneJustificante && (
                                         <p style={{ margin: 0, fontSize: 11, color: MUTED,
                                           fontFamily: "Inter, sans-serif", textAlign: "center", lineHeight: 1.4 }}>
-                                          Adjunta el justificante de depósito para desbloquear el envío al propietario
+                                          Adjunta el justificante de depÃ³sito para desbloquear el envÃ­o al propietario
                                         </p>
                                       )}
                                     </>
@@ -1599,7 +1599,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                               );
                             })()}
 
-                            {/* Firma del agente — disponible cuando todos han firmado (firmado_vendedor) o firmado_comprador en hoja_visita */}
+                            {/* Firma del agente â disponible cuando todos han firmado (firmado_vendedor) o firmado_comprador en hoja_visita */}
                             {(doc.estado === "firmado_vendedor" || (!esOfResv && doc.estado === "firmado_comprador")) && !doc.firma_agente_data && (
                               <button onClick={() => setFirmaAgenteDocId(doc.id)} style={{
                                 padding: "14px 16px", background: GOLD, border: "none", color: WHITE,
@@ -1607,14 +1607,14 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                                 fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center",
                                 justifyContent: "center", gap: 8,
                               }}>
-                                ✍️ Firmar como agente
+                                âï¸ Firmar como agente
                               </button>
                             )}
                             {doc.firma_agente_data && (
                               <div style={{ padding: "10px 14px", background: `${SUCCESS}12`, border: `1px solid ${SUCCESS}40`,
                                 borderRadius: 0, fontSize: 12, color: SUCCESS, fontFamily: "Inter, sans-serif",
                                 display: "flex", alignItems: "center", gap: 8 }}>
-                                ✅ Agente firmó {doc.firma_agente_fecha ? new Date(doc.firma_agente_fecha).toLocaleDateString("es-ES") : ""}
+                                â Agente firmÃ³ {doc.firma_agente_fecha ? new Date(doc.firma_agente_fecha).toLocaleDateString("es-ES") : ""}
                               </div>
                             )}
 
@@ -1639,7 +1639,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
               {docs.length === 0 && !showDoc && (
                 <div style={{ textAlign: "center", padding: "20px", color: MUTED,
                   fontFamily: "Inter, sans-serif", fontSize: 13 }}>
-                  Sin documentos todavía
+                  Sin documentos todavÃ­a
                 </div>
               )}
             </div>
@@ -1667,7 +1667,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
             </Modal>
           )}
 
-          {/* Eliminar visita — solo admin */}
+          {/* Eliminar visita â solo admin */}
           {currentUser?.role?.toLowerCase() === "administrador" && (
             <div style={{ padding: "0 16px 16px" }}>
               <button onClick={eliminarVisita} style={{
@@ -1686,7 +1686,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
   );
 }
 
-// ── Modal firma del agente ───────────────────────────────────────────────────
+// ââ Modal firma del agente âââââââââââââââââââââââââââââââââââââââââââââââââââ
 function ModalFirmaAgente({ docId, agente, onFirmado, onClose }) {
   const canvasRef = useRef(null);
   const [dibujando, setDibujando] = useState(false);
@@ -1736,7 +1736,7 @@ function ModalFirmaAgente({ docId, agente, onFirmado, onClose }) {
     if (res.ok) {
       onFirmado();
     } else {
-      alert("Error al guardar la firma. Inténtalo de nuevo.");
+      alert("Error al guardar la firma. IntÃ©ntalo de nuevo.");
       setFirmando(false);
     }
   }
@@ -1744,7 +1744,7 @@ function ModalFirmaAgente({ docId, agente, onFirmado, onClose }) {
   return (
     <div style={{ padding: "0 4px 4px" }}>
       <div style={{ fontSize: 13, color: "var(--muted)", fontFamily: "Inter, sans-serif", marginBottom: 16 }}>
-        Firma el documento como agente inmobiliario. Tu firma quedará estampada en el PDF.
+        Firma el documento como agente inmobiliario. Tu firma quedarÃ¡ estampada en el PDF.
       </div>
       {agente?.nombre && (
         <div style={{ fontSize: 12, color: "var(--gold)", fontWeight: 700, marginBottom: 12,
@@ -1784,8 +1784,8 @@ function ModalFirmaAgente({ docId, agente, onFirmado, onClose }) {
   );
 }
 
-// ── Grupo de propiedad ────────────────────────────────────────────────────────
-// ── Agrupador de visitas por día dentro de una propiedad ─────────────────────
+// ââ Grupo de propiedad ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ââ Agrupador de visitas por dÃ­a dentro de una propiedad âââââââââââââââââââââ
 function GrupoDia({ fecha, visitas, propiedadId, propiedadNombre, currentUser, onActualizado, informesPendientes, visitasAbiertas, setVisitasAbiertas }) {
   const [informe, setInforme] = useState(null);
   const [generando, setGenerando] = useState(false);
@@ -1833,13 +1833,13 @@ function GrupoDia({ fecha, visitas, propiedadId, propiedadNombre, currentUser, o
 
   return (
     <div style={{ marginBottom: 20 }}>
-      {/* Header del día */}
+      {/* Header del dÃ­a */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
         <div style={{ flex: 1, height: 1, background: BORDER }} />
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
           <span style={{ fontSize: 12, fontWeight: 700, color: esHoy ? GOLD : MUTED,
             fontFamily: "Inter, sans-serif", letterSpacing: "0.02em", textTransform: "capitalize" }}>
-            📅 {etiquetaDia}
+            ð {etiquetaDia}
           </span>
           <span style={{ fontSize: 11, background: `${GOLD}18`, color: GOLD, padding: "3px 10px",
             borderRadius: 20, fontWeight: 700, fontFamily: "Inter, sans-serif" }}>
@@ -1847,7 +1847,7 @@ function GrupoDia({ fecha, visitas, propiedadId, propiedadNombre, currentUser, o
           </span>
         </div>
         <div style={{ flex: 1, height: 1, background: BORDER }} />
-        {/* Botón informe del día */}
+        {/* BotÃ³n informe del dÃ­a */}
         <button
           onClick={informePendiente ? async () => {
             const { data: inf } = await supabase.from("visita_informes").select("*").eq("id", informePendiente.id).single();
@@ -1860,11 +1860,11 @@ function GrupoDia({ fecha, visitas, propiedadId, propiedadNombre, currentUser, o
             fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 5,
             whiteSpace: "nowrap", opacity: generando ? 0.5 : 1 }}>
           <DocumentTextIcon style={{ width: 13, height: 13 }} />
-          {generando ? "..." : informePendiente ? "Ver informe" : "Informe del día"}
+          {generando ? "..." : informePendiente ? "Ver informe" : "Informe del dÃ­a"}
         </button>
       </div>
 
-      {/* Visitas del día */}
+      {/* Visitas del dÃ­a */}
       {visitas.map(v => (
         <TarjetaVisita key={v.id} visita={v} propiedad={{ id: propiedadId, nombre: propiedadNombre }}
           agente={agente} currentUser={currentUser} onActualizado={onActualizado}
@@ -1878,7 +1878,7 @@ function GrupoDia({ fecha, visitas, propiedadId, propiedadNombre, currentUser, o
 
       {/* Modal editor informe */}
       {informe && (
-        <Modal title={`Informe al propietario · ${etiquetaDia}`} onClose={() => setInforme(null)} width={640}>
+        <Modal title={`Informe al propietario Â· ${etiquetaDia}`} onClose={() => setInforme(null)} width={640}>
           <EditorInforme informe={informe} propiedadNombre={propiedadNombre}
             onGuardado={onActualizado} onClose={() => setInforme(null)}
             propiedadId={propiedadId} agente={currentUser?.user_login} fecha={fecha} />
@@ -1907,7 +1907,7 @@ function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, on
   const totalVisitas = visitas.length;
   const totalDocs = visitas.reduce((acc, v) => acc + (v.visita_documentos?.length || 0), 0);
 
-  // Agrupar visitas por día (YYYY-MM-DD)
+  // Agrupar visitas por dÃ­a (YYYY-MM-DD)
   const visitasPorDia = {};
   visitas.forEach(v => {
     const _d = new Date(v.fecha_visita);
@@ -1916,7 +1916,7 @@ function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, on
     if (!visitasPorDia[dia]) visitasPorDia[dia] = [];
     visitasPorDia[dia].push(v);
   });
-  // Ordenar días desc (más reciente primero)
+  // Ordenar dÃ­as desc (mÃ¡s reciente primero)
   const diasOrdenados = Object.keys(visitasPorDia).sort((a, b) => b.localeCompare(a));
 
   async function crearVisita() {
@@ -1956,10 +1956,10 @@ function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, on
         borderBottom: abierto ? `1.5px solid ${BORDER}` : "none" }}
         onClick={onToggle}>
         <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
-          {/* Ícono propiedad */}
+          {/* Ãcono propiedad */}
           <div style={{ width: 46, height: 46, borderRadius: 0, background: `${DARK}0a`,
             display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>
-            🏠
+            ð 
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 15, fontWeight: 600, color: TEXT,
@@ -1976,7 +1976,7 @@ function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, on
               {diasOrdenados.length > 1 && (
                 <span style={{ fontSize: 11, background: `${DARK}0d`, color: DARK, padding: "4px 12px",
                   borderRadius: 20, fontFamily: "Inter, sans-serif", fontWeight: 700 }}>
-                  {diasOrdenados.length} días
+                  {diasOrdenados.length} dÃ­as
                 </span>
               )}
               {totalDocs > 0 && (
@@ -1988,7 +1988,7 @@ function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, on
               {informePendiente && (
                 <span style={{ fontSize: 11, background: "var(--amber)18", color: "var(--amber)", padding: "4px 12px",
                   borderRadius: 20, fontFamily: "Inter, sans-serif", fontWeight: 700 }}>
-                  ⚠ Informe pendiente
+                  â  Informe pendiente
                 </span>
               )}
             </div>
@@ -2002,7 +2002,7 @@ function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, on
       {/* Contenido expandido */}
       {abierto && (
         <div style={{ padding: "14px 16px", background: CREAM }}>
-          {/* Botón Nueva visita */}
+          {/* BotÃ³n Nueva visita */}
           {puedeEditar && (
             <button onClick={() => setNuevaVisita(true)} style={{
               width: "100%", padding: "12px", background: `linear-gradient(135deg, ${GOLD}, ${GOLD_L})`, border: "none", color: WHITE,
@@ -2014,7 +2014,7 @@ function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, on
             </button>
           )}
 
-          {/* Visitas agrupadas por día */}
+          {/* Visitas agrupadas por dÃ­a */}
           {diasOrdenados.map(dia => (
             <GrupoDia
               key={dia}
@@ -2047,7 +2047,7 @@ function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, on
                   <L c="Notas de la visita" />
                   <textarea rows={3} value={notasNueva} onChange={e => setNotasNueva(e.target.value)}
                     style={{ ...iSt, resize: "vertical" }}
-                    placeholder="Impresión del comprador, interés mostrado, preguntas relevantes..." />
+                    placeholder="ImpresiÃ³n del comprador, interÃ©s mostrado, preguntas relevantes..." />
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10, paddingTop: 8,
                   borderTop: `1px solid ${BORDER}` }}>
@@ -2055,7 +2055,7 @@ function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, on
                     style={{ padding: "16px", background: DARK, border: "none", color: WHITE,
                       cursor: "pointer", borderRadius: 0, fontWeight: 700, fontFamily: "Inter, sans-serif",
                       fontSize: 15, opacity: !compradorNueva ? 0.4 : 1 }}>
-                    {guardando ? "Guardando..." : "✓ Registrar visita"}
+                    {guardando ? "Guardando..." : "â Registrar visita"}
                   </button>
                   <button onClick={() => setNuevaVisita(false)} style={{ padding: "14px",
                     border: `1.5px solid ${BORDER}`, background: "transparent", color: MUTED,
@@ -2072,9 +2072,9 @@ function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, on
   );
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 // COMPONENTE PRINCIPAL
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 export default function Visitas({ currentUser }) {
   const isAdmin = ["director", "administrador"].includes(currentUser?.role?.toLowerCase());
   const [visitas, setVisitas] = useState([]);
@@ -2214,11 +2214,11 @@ export default function Visitas({ currentUser }) {
       <div style={{ marginBottom: 40 }}>
         <div style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 12, fontFamily: "Inter, sans-serif" }}>NATIVA PROPERTIES</div>
         <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 600, margin: 0, lineHeight: 1.1, color: "#A8854A" }}>Visitas</h1>
-        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "10px 0 0" }}>Planificación y seguimiento de visitas a propiedades</p>
+        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "10px 0 0" }}>PlanificaciÃ³n y seguimiento de visitas a propiedades</p>
         <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginTop: 28, marginBottom: 0 }} />
       </div>
 
-      {/* ── Stats bar — scroll horizontal en mobile ── */}
+      {/* ââ Stats bar â scroll horizontal en mobile ââ */}
       <div style={{ background: WHITE, borderBottom: `1px solid ${BORDER}`,
         overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
         <div style={{ display: "flex", gap: 0, minWidth: "max-content" }}>
@@ -2243,27 +2243,27 @@ export default function Visitas({ currentUser }) {
         </div>
       </div>
 
-      {/* ── Buscador ── */}
+      {/* ââ Buscador ââ */}
       <div style={{ padding: "14px 0", background: WHITE, borderBottom: `1px solid ${BORDER}` }}>
         <div style={{ position: "relative" }}>
           <MagnifyingGlassIcon style={{ width: 18, height: 18, position: "absolute", left: 14, top: "50%",
             transform: "translateY(-50%)", color: MUTED }} />
           <input value={filtroProp} onChange={e => setFiltroProp(e.target.value)}
-            placeholder="Buscar por ref. o dirección..."
+            placeholder="Buscar por ref. o direcciÃ³n..."
             style={{ ...iSt, paddingLeft: 44, fontSize: 15 }} />
         </div>
       </div>
 
-      {/* ── Contenido ── */}
+      {/* ââ Contenido ââ */}
       <div style={{ padding: "16px 0" }}>
         {loading ? (
           <div style={{ textAlign: "center", padding: "60px 20px" }}>
-            <div style={{ fontSize: 36, marginBottom: 12 }}>⏳</div>
+            <div style={{ fontSize: 36, marginBottom: 12 }}>â³</div>
             <div style={{ color: MUTED, fontFamily: "Inter, sans-serif", fontSize: 14 }}>Cargando visitas...</div>
           </div>
         ) : gruposFiltrados.length === 0 ? (
           <div style={{ textAlign: "center", padding: "60px 20px" }}>
-            <div style={{ fontSize: 56, marginBottom: 16 }}>🏠</div>
+            <div style={{ fontSize: 56, marginBottom: 16 }}>ð </div>
             <div style={{ fontSize: 20, fontWeight: 600, color: TEXT, fontFamily: "'Playfair Display', serif", marginBottom: 8 }}>
               No hay visitas registradas
             </div>
@@ -2283,7 +2283,7 @@ export default function Visitas({ currentUser }) {
           gruposFiltrados.map(([pid, vis]) => {
             const prop = propiedades[pid];
             const nombre = prop
-              ? `${prop.ref ? `[${prop.ref}] ` : ""}${prop.dir || ""}${prop.municipio ? ` — ${prop.municipio}` : ""}`.trim()
+              ? `${prop.ref ? `[${prop.ref}] ` : ""}${prop.dir || ""}${prop.municipio ? ` â ${prop.municipio}` : ""}`.trim()
               : "Propiedad sin referencia";
             return (
               <GrupoPropiedad key={pid} propiedadId={pid} propiedadNombre={nombre}
@@ -2302,7 +2302,7 @@ export default function Visitas({ currentUser }) {
         )}
       </div>
 
-      {/* ── FAB — Nueva Visita ── */}
+      {/* ââ FAB â Nueva Visita ââ */}
       {visitas.length > 0 && (
         <button onClick={() => setModalNuevaVisita(true)} style={{
           position: "fixed", bottom: 24, right: 20, zIndex: 900,
@@ -2317,7 +2317,7 @@ export default function Visitas({ currentUser }) {
         </button>
       )}
 
-      {/* ── Modal nueva visita global ── */}
+      {/* ââ Modal nueva visita global ââ */}
       {modalNuevaVisita && (
         <Modal title="Nueva visita" onClose={() => setModalNuevaVisita(false)} width={540}>
           <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
@@ -2330,10 +2330,10 @@ export default function Visitas({ currentUser }) {
                   setNvPropiedad(p);
                 }}
                 style={{ ...iSt, cursor: "pointer" }}>
-                <option value="">— Selecciona una propiedad —</option>
+                <option value="">â Selecciona una propiedad â</option>
                 {propsAgente.map(p => (
                   <option key={p.id} value={p.id}>
-                    {p.ref ? `[${p.ref}] ` : ""}{p.dir}{p.municipio ? ` — ${p.municipio}` : ""}
+                    {p.ref ? `[${p.ref}] ` : ""}{p.dir}{p.municipio ? ` â ${p.municipio}` : ""}
                   </option>
                 ))}
               </select>
@@ -2375,7 +2375,7 @@ export default function Visitas({ currentUser }) {
               )}
               <SelectorComprador value={null}
                 onChange={c => { if (c && !nvCompradores.find(x => x.id === c.id)) setNvCompradores([...nvCompradores, c]); }}
-                placeholder={nvCompradores.length === 0 ? "Buscar o crear comprador principal..." : "Añadir otro comprador..."} />
+                placeholder={nvCompradores.length === 0 ? "Buscar o crear comprador principal..." : "AÃ±adir otro comprador..."} />
             </div>
 
             <div>
@@ -2392,7 +2392,7 @@ export default function Visitas({ currentUser }) {
                   fontSize: 15, opacity: (!nvPropiedad || nvCompradores.length === 0) ? 0.4 : 1,
                   boxShadow: `0 4px 16px ${GOLD}44`,
                 }}>
-                {nvGuardando ? "Guardando..." : `✓ Registrar visita${nvCompradores.length > 1 ? ` (${nvCompradores.length} personas)` : ""}`}
+                {nvGuardando ? "Guardando..." : `â Registrar visita${nvCompradores.length > 1 ? ` (${nvCompradores.length} personas)` : ""}`}
               </button>
               <button onClick={() => setModalNuevaVisita(false)} style={{ padding: "14px",
                 border: `1.5px solid ${BORDER}`, background: "transparent", color: MUTED,
@@ -2403,6 +2403,7 @@ export default function Visitas({ currentUser }) {
           </div>
         </Modal>
       )}
+      </div>
     </div>
   );
 }
