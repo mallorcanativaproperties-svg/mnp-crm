@@ -14,7 +14,7 @@ import {
   TrashIcon, XMarkIcon, CheckCircleIcon, ClipboardDocumentListIcon,
   PhoneIcon, EnvelopeIcon, UserIcon, DocumentDuplicateIcon,
   CameraIcon, CheckIcon, ChevronDownIcon, ChevronUpIcon,
-  PaperClipIcon, EyeIcon, HomeIcon, ExclamationTriangleIcon
+  PaperClipIcon, EyeIcon, HomeIcon, ExclamationTriangleIcon, SparklesIcon, FolderIcon
 } from "@heroicons/react/24/outline";
 
 // ââ Paleta ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
@@ -988,7 +988,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
           {/* ââ ð Comprador ââ */}
           <div style={{ padding: "13px 20px", background: CREAM_SECTION, borderTop: `1px solid ${CREAM_SECTION_B}`, borderBottom: `1px solid ${CREAM_SECTION_B}`, borderLeft: `3px solid ${GOLD}` }}>
             <div style={{ fontSize: 10, color: TEXT_BROWN, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase",
-              marginBottom: 12, fontFamily: "Inter, sans-serif" }}>ð COMPRADOR{todosCompradores.length > 1 ? "ES" : ""}</div>
+              marginBottom: 12, fontFamily: "Inter, sans-serif" }}><><UserIcon style={{ width: 12, height: 12, display: "inline", marginRight: 5, verticalAlign: "middle" }} /> COMPRADOR{todosCompradores.length > 1 ? "ES" : ""}</></></div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {todosCompradores.map((c, i) => (
                 <div key={c.id || i} style={{ background: WHITE, borderRadius: 0, padding: "12px 14px",
@@ -1018,7 +1018,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
             <div style={{ padding: "13px 20px", background: CREAM_SECTION, borderTop: `1px solid ${CREAM_SECTION_B}`, borderBottom: `1px solid ${CREAM_SECTION_B}`, borderLeft: `3px solid ${GOLD}` }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
                 <div style={{ fontSize: 10, color: TEXT_BROWN, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase",
-                  fontFamily: "Inter, sans-serif" }}>ð¤ ANÃLISIS IA</div>
+                  fontFamily: "Inter, sans-serif" }}><><SparklesIcon style={{ width: 12, height: 12, display: "inline", marginRight: 5, verticalAlign: "middle" }} />ANÁLISIS IA</></div>
                 {puedeEditar && !editandoFeedback && (
                   <button onClick={() => { setFbEdit(fb ? {...fb, objeciones: [...(fb.objeciones||[])]} : { nivel_interes: null, objeciones: [], valoracion_precio: null, siguiente_paso: null }); setEditandoFeedback(true); }}
                     style={{ fontSize: 11, color: GOLD, background: `${GOLD}12`, border: `1px solid ${GOLD}30`,
@@ -1159,7 +1159,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
               <div style={{ padding: "14px", background: CREAM_SECTION,
                 border: `1px solid ${BORDER}`, borderLeft: `4px solid ${SUCCESS}`, borderRadius: 0 }}>
                 <div style={{ fontSize: 10, color: SUCCESS, fontWeight: 800, letterSpacing: "0.08em",
-                  marginBottom: 8, fontFamily: "Inter, sans-serif" }}>ð RESUMEN IA</div>
+                  marginBottom: 8, fontFamily: "Inter, sans-serif" }}><><DocumentTextIcon style={{ width: 12, height: 12, display: "inline", marginRight: 5, verticalAlign: "middle" }} />RESUMEN IA</></div>
                 <div style={{ fontSize: 13, color: TEXT, lineHeight: 1.6, fontFamily: "Inter, sans-serif" }}>
                   {visita.resumen_ia}
                 </div>
@@ -1218,7 +1218,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
             <div style={{ padding: "0 16px 16px" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
                 <div style={{ fontSize: 10, color: TEXT_BROWN, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase",
-                  fontFamily: "Inter, sans-serif" }}>ð DOCUMENTOS</div>
+                  fontFamily: "Inter, sans-serif" }}><><FolderIcon style={{ width: 12, height: 12, display: "inline", marginRight: 5, verticalAlign: "middle" }} />DOCUMENTOS</></div>
                 {puedeEditar && !showDoc && (
                   <button onClick={() => setShowDoc(true)} style={{
                     padding: "10px 18px", background: DARK, border: "none", color: WHITE,
