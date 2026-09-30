@@ -2976,7 +2976,7 @@ REGLAS:
             {EFl({label: "Codigo postal", req: true, field: "cp", pub: true})}
             {(() => {
                   const hasErr = editMode && idealistaFieldErrors.has("provincia");
-                  const inputStyle = { width: "100%", background: "var(--white)", border: `1px solid ${hasErr ? "var(--danger)" : "var(--border)"}`, borderRadius: 6, padding: "6px 10px", fontSize: 13, outline: "none", appearance: "none", WebkitAppearance: "none", cursor: "pointer" };
+                  const inputStyle = { width: "100%", background: "var(--white)", border: `1px solid ${hasErr ? "var(--danger)" : "var(--text)"}`, borderRadius: 0, color: "var(--text)", padding: "10px 14px", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box", outline: "none", appearance: "none", WebkitAppearance: "none", cursor: "pointer" };
                   const provOpts = Object.keys(PROVINCIAS_MAP);
                   return (
                     <div style={{ marginBottom: 8 }}>
