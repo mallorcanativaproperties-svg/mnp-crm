@@ -946,17 +946,8 @@ export default function FormularioCaptacion() {
           {esResidencial && <Input label="Urbanizacion" value={urbanizacion} onChange={setUrbanizacion} placeholder="Urb. Los Pinos" />}
           <div style={g3}>
             <Input label="Codigo postal" value={cp} onChange={setCp} placeholder="07007" required />
-            <Select
-              label="Provincia"
-              value={provincia}
-              onChange={e => { setProvincia(e.target.value); setZona(""); setMunicipio(""); }}
-              style={{width:'100%'}}
-            >
-              <option value="">-- Selecciona Provincia --</option>
-              {Object.keys(PROVINCIAS_MAP).map(prov => (
-                <option key={prov} value={prov}>{prov}</option>
-              ))}
-            </Select>
+            <Select label="Provincia" value={provincia} onChange={v => { setProvincia(v); setZona(""); setMunicipio(""); }} options={Object.keys(PROVINCIAS_MAP)} />
+            
                         <Select label="Municipio" value={municipio} onChange={(v) => { setMunicipio(v); setZona(""); }} options={(provincia ? PROVINCIAS_MAP[provincia] : Object.keys(ZONAS_MAP))} required />
             <Select label="Zona" value={zona} onChange={setZona} options={municipio && ZONAS_MAP[municipio] ? ZONAS_MAP[municipio] : []} />
             <Input label="Latitud (GPS)" value={latitud} onChange={setLatitud} type="number" placeholder="39.5696" />
