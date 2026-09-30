@@ -9,7 +9,7 @@ import { reportarError } from "@/lib/reportarError";
 import PropietariosEditor, { PROPIETARIO_VACIO } from "@/components/PropietariosEditor";
 import dynamic from "next/dynamic";
 const VisitasResumen = dynamic(() => import("@/components/VisitasResumen"), { ssr: false });
-import { PlusIcon, MagnifyingGlassIcon, PencilSquareIcon, TrashIcon, PhotoIcon, GlobeAltIcon, ArrowUpTrayIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, MagnifyingGlassIcon, PencilSquareIcon, TrashIcon, PhotoIcon, GlobeAltIcon, ArrowUpTrayIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 
@@ -666,7 +666,7 @@ const ETIQUETAS_IDEALISTA = [
   { value: "PLAN",        label: "Plano" },
 ];
 
-function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) {
+function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, currentUser }) {
   const [media, setMedia] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -686,6 +686,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
   const [fotosSeleccionadas, setFotosSeleccionadas] = useState(new Set()); // ids seleccionados 3 variaciones generadas
   const [iaLoading, setIaLoading] = useState(false);
   const [iaSeleccionada, setIaSeleccionada] = useState(null); // variación elegida
+  const [descargandoMedia, setDescargandoMedia] = useState(false);
 
   useEffect(() => {
     if (propiedadId) loadMedia(false);
@@ -1071,6 +1072,51 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
     }
   }
 
+  const rolMedia = currentUser?.role?.toLowerCase() || "agente";
+
+  async function handleDescargarTodoMedia() {
+    if (rolMedia !== "administrador") return;
+    try {
+      setDescargandoMedia(true);
+      const { data: mediaFiles, error } = await supabase
+        .from("media_propiedades")
+        .select("url, nombre, tipo, mime_type")
+        .eq("propiedad_id", propiedadId)
+        .order("tipo")
+        .order("orden");
+      if (error) throw error;
+      if (!mediaFiles || mediaFiles.length === 0) {
+        alert("Esta propiedad no tiene archivos multimedia.");
+        return;
+      }
+      for (let i = 0; i < mediaFiles.length; i++) {
+        const file = mediaFiles[i];
+        try {
+          const response = await fetch(file.url);
+          const blob = await response.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          const ext = file.nombre ? file.nombre.split(".").pop() : "jpg";
+          const baseName = file.nombre || `${file.tipo}_${i + 1}.${ext}`;
+          a.download = `${propRef || propiedadId}_${file.tipo}_${baseName}`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          await new Promise(resolve => setTimeout(resolve, 300));
+        } catch (err) {
+          console.error("Error descargando:", file.nombre, err);
+        }
+      }
+    } catch (err) {
+      console.error("Error al descargar media:", err);
+      alert("Error al descargar los archivos.");
+    } finally {
+      setDescargandoMedia(false);
+    }
+  }
+
   const btnBase = { padding: "6px 14px", borderRadius: 0, border: "1px solid var(--text)", background: "transparent", color: "var(--muted)", cursor: "pointer", fontSize: 11, fontWeight: 500, letterSpacing: "0.04em", fontFamily: "Inter, sans-serif", transition: "all 0.2s", display: "flex", alignItems: "center", gap: 6 };
 
   return (
@@ -1100,8 +1146,28 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos }) 
             </button>
           );
         })}
+        {rolMedia === "administrador" && (
+          <button
+            onClick={handleDescargarTodoMedia}
+            disabled={descargandoMedia}
+            title="Descargar todos los archivos multimedia"
+            style={{
+              marginLeft: "auto",
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "6px 14px",
+              background: descargandoMedia ? "#ccc" : "#AC8A54",
+              color: "#fff", border: "none", borderRadius: 6,
+              fontSize: 11, fontWeight: 600, cursor: descargandoMedia ? "not-allowed" : "pointer",
+              letterSpacing: "0.04em", fontFamily: "Inter, sans-serif", whiteSpace: "nowrap",
+              alignSelf: "center",
+            }}
+          >
+            <ArrowDownTrayIcon style={{ width: 13, height: 13 }} />
+            {descargandoMedia ? "Descargando..." : "Descargar todo"}
+          </button>
+        )}
         {activeTab === "foto" && media.filter(m => m.tipo === "foto").length > 0 && (
-          <div style={{ marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" }}>
+          <div style={{ marginLeft: rolMedia === "administrador" ? 0 : "auto", display: "flex", gap: 8, alignItems: "center" }}>
             {/* Botón eliminar seleccionadas — solo cuando hay selección */}
             {fotosSeleccionadas.size > 0 && (
               <button
@@ -3381,6 +3447,7 @@ REGLAS:
               propRef={p.ref}
               tiposPermitidos={["foto", ...(tieneVideos ? ["video"] : []), ...(tienePlanos ? ["plano"] : [])]}
               onCountUpdate={(counts) => { if (onUpdate) onUpdate({ ...p, fotos: counts.foto, videos: counts.video, planos: counts.plano }); }}
+              currentUser={currentUser}
             />
           ) : (
             <div style={{ padding: "20px", textAlign: "center", color: "var(--muted)", fontSize: 12, background: "var(--white)", borderRadius: 0 }}>
