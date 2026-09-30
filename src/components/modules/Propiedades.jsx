@@ -3638,7 +3638,6 @@ REGLAS:
                 const [generando, setGenerando] = React.useState(false);
                 const [resultado, setResultado] = React.useState(null);
                 const [errorIA, setErrorIA] = React.useState(null);
-                const fileRefs = {};
                 const docKeys = ['dni_vendedor','dni_comprador','nota_simple','catastro','cert_energetico','cedula','cert_bancario','actas_comunidad','poder_notarial','otros'];
                 docKeys.forEach(k => { fileRefs[k] = React.useRef(null); });
                 const docTypes = [
@@ -3732,8 +3731,8 @@ DOCUMENTOS: ${docTypes.map(d => (docsState[d.key] ? '✓' : '✗') + ' ' + d.lab
                       React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 10 } },
                         docTypes.map(({ key, label, icon, required }) => {
                           const file = docsState[key];
-                          return React.createElement('div', { key, style: { border: `1px solid ${file ? 'var(--amber)' : 'var(--border)'}`, background: file ? 'rgba(156,110,27,0.04)' : 'var(--white)', padding: '12px 14px', cursor: 'pointer' }, onClick: () => fileRefs[key].current?.click() },
-                            React.createElement('input', { type: 'file', ref: fileRefs[key], style: { display: 'none' }, accept: '.pdf,.jpg,.jpeg,.png,.doc,.docx', onChange: e => { const f = e.target.files[0]; if (f) setDocsState(d => ({...d, [key]: f})); } }),
+                          return React.createElement('div', { key, style: { border: `1px solid ${file ? 'var(--amber)' : 'var(--border)'}`, background: file ? 'rgba(156,110,27,0.04)' : 'var(--white)', padding: '12px 14px', cursor: 'pointer' }, onClick: () => document.getElementById('file-arras-' + key)?.click() },
+                            React.createElement('input', { type: 'file', id: 'file-arras-' + key, style: { display: 'none' }, accept: '.pdf,.jpg,.jpeg,.png,.doc,.docx', onChange: e => { const f = e.target.files[0]; if (f) setDocsState(d => ({...d, [key]: f})); } }),
                             React.createElement('div', { style: { display: 'flex', alignItems: 'flex-start', gap: 8 } },
                               React.createElement('span', { style: { fontSize: 18 } }, icon),
                               React.createElement('div', { style: { flex: 1 } },
