@@ -205,7 +205,7 @@ const CALIDADES = [
 ];
 
 const PROVINCIAS_MAP = {
-  "Illes Balears": [
+  "Mallorca": [
     "Alaró","Alcúdia","Algaida","Andratx","Ariany","Artà","Banyalbufar","Binissalem",
     "Búger","Bunyola","Calvià","Campanet","Campos","Capdepera","Consell","Costitx",
     "Deià","Escorca","Esporles","Estellencs","Felanitx","Fornalutx","Inca","Lloret de Vistalegre",
@@ -257,7 +257,7 @@ const SAMPLE = [
     id: 1, ref: "MNP-001", tipo: "Piso", op: "Compraventa",
     titulo: "Piso reformado con terraza en Pere Garau",
     dir: "C/ de Sa Coma", num: "12", cp: "07007",
-    provincia: "Illes Balears",
+    provincia: "Mallorca",
     municipio: "Palma", zona: "Pere Garau",
     visDir: "Direccion exacta", orient: "Sur", distPlaya: "2 km",
     precioVenta: 399000, precioProp: 374861, precioAnt: 420000, precioTraspaso: 0,
