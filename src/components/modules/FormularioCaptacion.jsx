@@ -45,32 +45,66 @@ const ZONAS_MAP = {
   "Marratxi": ["Pont d'Inca","Pont d'Inca Nou","Sa Cabaneta","Portol","Es Pla de na Tesa"],
   "Inca": ["Inca Centre","Binissalem","Lloseta","Selva","Caimari"],
   "Manacor": ["Manacor Centre","Porto Cristo","S'Illot","Cala Millor","Cala Bona","Son Carrio","Sant Llorenç"],
-  "Llucmajor": ["Llucmajor Centre","SArena","Bahia Azul","Badia Gran","Regana","Son Antem","Urbanitzacions Sud"],
+  "Llucmajor": ["Llucmajor Centre","SArenal","Bahia Azul","Badia Gran","Regana","Son Antem","Urbanitzacions Sud"],
   "Andratx": ["Andratx Centre","Port d'Andratx","Camp de Mar","S'Arraco","Sant Elm"],
   "Soller": ["Soller Centre","Port de Soller","Fornalutx","Deia","Biniaraix"],
   "Felanitx": ["Felanitx Centre","Portocolom","Cala Ferrera","Cala Marcal","Cas Concos"],
+  "Sa Pobla": ["Sa Pobla Centre","Crestatx"],
   "Alcudia": ["Alcudia Centre","Port d'Alcudia","Urbanitzacions"],
   "Pollenca": ["Pollenca Centre","Port de Pollenca","Cala Sant Vicenc","La Gola"],
   "Campos": ["Campos Centre","Sa Rapita","Es Trenc","Colonia Sant Jordi"],
   "Santanyi": ["Santanyi Centre","Cala Figuera","Cala d'Or","Portopetro","Cala Mondragó"],
   "Arta": ["Arta Centre","Cala Rajada","Capdepera","Canyamel","Costa dels Pins"],
   "Capdepera": ["Capdepera Centre","Cala Rajada","Canyamel","Font de Sa Cala"],
+  "Petra": ["Petra Centre"],
+  "Porreres": ["Porreres Centre"],
+  "Muro": ["Muro Centre","Playa de Muro"],
+  "Binissalem": ["Binissalem Centre"],
+  "Consell": ["Consell Centre"],
+  "Lloseta": ["Lloseta Centre"],
+  "Bunyola": ["Bunyola Centre"],
+  "Santa Margalida": ["Santa Margalida Centre","Can Picafort","Son Serra de Marina"],
+  "Ses Salines": ["Ses Salines Centre","Colonia Sant Jordi"],
+  "Algaida": ["Algaida Centre","Pina","Randa"],
+  "Montuiri": ["Montuiri Centre"],
+  "Sant Joan": ["Sant Joan Centre"],
+  "Vilafranca": ["Vilafranca Centre"],
+  "Sineu": ["Sineu Centre"],
+  "Santa Eugenia": ["Santa Eugenia Centre"],
+  "Sencelles": ["Sencelles Centre"],
+  "Alaró": ["Alaró Centre"],
+  "Santa Maria del Cami": ["Santa Maria del Cami Centre"],
   "Mahon": ["Mahon Centre","Es Castell","Sant Lluís","Cala en Porter","Alaior"],
   "Ciutadella": ["Ciutadella Centre","Cala en Blanes","Cala Forcat","Los Delfines","Cala'n Bosch","Son Oleo"],
   "Ferreries": ["Ferreries Centre","Santa Galdana","Cala Santa Galdana"],
   "Es Mercadal": ["Es Mercadal Centre","Fornells","Arenal den Castell","Son Parc"],
+  "Sant Lluís": ["Sant Lluís Centre","Punta Prima","Binibeca"],
+  "Es Castell": ["Es Castell Centre"],
+  "Alaior": ["Alaior Centre","Cala en Porter"],
+  "Es Migjorn Gran": ["Es Migjorn Gran Centre"],
   "Valencia": ["Ciutat Vella","Eixample","Extramurs","Campanar","La Saidia","El Pla del Real","L'Olivereta","Patraix","Jesus","Quatre Carreres","Poblats Maritims","Camins al Grau","Algiros","Benimaclet","Rascanya","Benicalap","Pobles del Nord","Pobles de l'Oest","Pobles del Sud"],
   "Alicante": ["Centro","Ensanche","Carolinas","Benalua","San Gabriel","Playa de San Juan","Cabo de las Huertas","Vistahermosa","Pau Casals"],
+  "Castellon de la Plana": ["Centro","El Grao","La Plana","Rafalafena","Universitat","Nord"],
+  "Gandia": ["Gandia Centre","Playa de Gandia","Marxuquera","Beniopa"],
   "Denia": ["Denia Centre","Las Marinas","Les Rotes","Montgo","El Vergel"],
   "Javea": ["Javea Centre","El Arenal","La Granadella","Portichol","Cabo de la Nao"],
   "Calpe": ["Calpe Centre","La Manzanera","Empedrola","Puerto Blanco"],
   "Benidorm": ["Centro","Rincon de Loix","La Cala","Playa de Poniente","Playa de Levante"],
-  "Gandia": ["Gandia Centre","Playa de Gandia","Marxuquera","Beniopa"],
   "Torrevieja": ["Centro","La Mata","Punta Prima","Los Locos","Los Altos","El Chaparral"],
   "Orihuela": ["Orihuela Centro","Campoamor","Dehesa de Campoamor","La Zenia","Cabo Roig","Playa Flamenca"],
   "Orihuela Costa": ["Campoamor","Dehesa de Campoamor","La Zenia","Cabo Roig","Playa Flamenca","Punta Prima"],
   "Elche": ["El Pla","Altabix","El Raval","Els Palmerars","Carrús","Patilla"],
-  "Castellon de la Plana": ["Centro","El Grao","La Plana","Rafalafena","Universitat","Nord"]
+  "Elda": ["Centro","La Torreta","La Plana"],
+  "Villena": ["Centro","El Llano"],
+  "Alcoy": ["Centro","Zona Norte","Zona Sur"],
+  "Torrent": ["Centro","Parque Central","Zona Norte"],
+  "Manises": ["Centro","El Rincon"],
+  "Paterna": ["Centro","La Coma","Terramelar"],
+  "Burjassot": ["Centro"],
+  "Oliva": ["Oliva Centre","Playa de Oliva"],
+  "Altea": ["Altea Centre","Altea Hills","Cap Negret"],
+  "Moraira": ["Moraira Centre","El Portet","Pla del Mar"],
+  "Torrent": ["Centro","Parque Central"]
 };
 
 function fmtP(n) {
@@ -188,7 +222,7 @@ function CheckGroup({ label, options, selected, onChange }) {
               style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 16px", borderRadius: 0, border: "2px solid " + (on ? "#AC8A54" : "#9A968A"), background: on ? "#AC8A5415" : "#FFFFFF", cursor: "pointer", transition: "all 0.15s" }}
             >
               <div style={{ width: 18, height: 18, borderRadius: 0, border: "2px solid " + (on ? "#AC8A54" : "#9A968A"), background: on ? "#AC8A54" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                {on && <span style={{ color: "#FFFFFF", fontSize: 12, fontWeight: 700, lineHeight: 1 }}>â</span>}
+                {on && <span style={{ color: "#FFFFFF", fontSize: 12, fontWeight: 700, lineHeight: 1 }}>✓</span>}
               </div>
               <span style={{ fontSize: 13, fontWeight: 600, color: on ? "#AC8A54" : "#22262E", fontFamily: "Inter, sans-serif" }}>{opt}</span>
             </div>
@@ -222,11 +256,11 @@ function QualRow({ items, onChange, color, symbol }) {
             placeholder={"Punto " + (i + 1)}
             style={{ flex: 1, padding: "8px 12px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 12, fontFamily: "Inter, sans-serif", outline: "none", boxSizing: "border-box" }}
           />
-          <button onClick={() => removeRow(i)} style={{ background: "none", border: "none", color: "#C8BFB0", cursor: "pointer", fontSize: 16, lineHeight: 1, padding: "0 4px", flexShrink: 0 }}>Ã</button>
+          <button onClick={() => removeRow(i)} style={{ background: "none", border: "none", color: "#C8BFB0", cursor: "pointer", fontSize: 16, lineHeight: 1, padding: "0 4px", flexShrink: 0 }}>×</button>
         </div>
       ))}
       <button onClick={addRow} style={{ marginTop: 4, background: "none", border: `1px dashed ${color}`, color: color, fontSize: 11, fontWeight: 600, cursor: "pointer", padding: "5px 12px", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
-        + AÃ±adir punto
+        + Añadir punto
       </button>
     </div>
   );
@@ -238,12 +272,12 @@ function CatastroImportCuestionario({ setDir, setNum, setPlanta, setPuerta, setC
   const [msg, setMsg] = useState(null);
 
   const TIPO_VIA = { CL:"Calle", AV:"Avenida", PZ:"Plaza", CM:"Camino", CR:"Carretera", PS:"Paseo", RD:"Ronda", GL:"Glorieta", RB:"Rambla", TR:"Travesia", UR:"Urbanizacion" };
-  const LABELS = { dir:"DirecciÃ³n", num:"NÃºmero", planta:"Planta", puerta:"Puerta", cp:"CP", municipio:"Municipio", mConst:"mÂ² construidos", anoCon:"AÃ±o construcciÃ³n" };
+  const LABELS = { dir:"Dirección", num:"Número", planta:"Planta", puerta:"Puerta", cp:"CP", municipio:"Municipio", mConst:"m² construidos", anoCon:"Año construcción" };
   const SETTERS = { dir: setDir, num: setNum, planta: setPlanta, puerta: setPuerta, cp: setCp, municipio: setMunicipio, mConst: (v) => setMConst(String(v)), anoCon: setAnoCon };
 
   async function importar() {
     const ref = refCatInput.trim().replace(/\s/g, "").toUpperCase();
-    if (!ref || ref.length < 14) { setMsg({ type: "error", text: "Referencia catastral no vÃ¡lida (mÃ­nimo 14 caracteres)" }); return; }
+    if (!ref || ref.length < 14) { setMsg({ type: "error", text: "Referencia catastral no válida (mínimo 14 caracteres)" }); return; }
     setLoading(true); setMsg(null);
     try {
       const url = `https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/COVCCallejero.svc/json/Consulta_DNPRC?RefCat=${ref}`;
@@ -277,11 +311,11 @@ function CatastroImportCuestionario({ setDir, setNum, setPlanta, setPuerta, setC
       const aplicados = ["Ref. catastral"];
       Object.entries(campos).forEach(([k, v]) => { if (v !== undefined && v !== null && v !== "" && SETTERS[k]) { SETTERS[k](v); aplicados.push(LABELS[k] || k); } });
       const noImportados = Object.keys(LABELS).filter(k => !campos[k]).map(k => LABELS[k]);
-      if (aplicados.length === 0) setMsg({ type: "error", text: "â ï¸ Referencia encontrada pero sin datos disponibles. Completa manualmente." });
-      else if (noImportados.length > 0) setMsg({ type: "warn", text: `â Importados: ${aplicados.join(", ")}. â ï¸ Sin datos: ${noImportados.join(", ")} â completa manualmente.` });
-      else setMsg({ type: "ok", text: `â Todos los datos importados: ${aplicados.join(", ")}` });
+      if (aplicados.length === 0) setMsg({ type: "error", text: "⚠️ Referencia encontrada pero sin datos disponibles. Completa manualmente." });
+      else if (noImportados.length > 0) setMsg({ type: "warn", text: `✅ Importados: ${aplicados.join(", ")}. ⚠️ Sin datos: ${noImportados.join(", ")} — completa manualmente.` });
+      else setMsg({ type: "ok", text: `✅ Todos los datos importados: ${aplicados.join(", ")}` });
     } catch (err) {
-      setMsg({ type: "error", text: `â ï¸ ${err.message}. Comprueba la referencia e intÃ©ntalo de nuevo.` });
+      setMsg({ type: "error", text: `⚠️ ${err.message}. Comprueba la referencia e inténtalo de nuevo.` });
     }
     setLoading(false);
   }
@@ -299,7 +333,7 @@ function CatastroImportCuestionario({ setDir, setNum, setPlanta, setPuerta, setC
         </button>
       </div>
       {msg && <div style={{ fontSize: 11, marginTop: 8, padding: "6px 10px", borderRadius: 0, color: msg.type === "ok" ? "#2C6E52" : msg.type === "warn" ? "#AC8A54" : "#A23A3A", background: msg.type === "ok" ? "#6AAF8D11" : msg.type === "warn" ? "#C8A97E11" : "#F6E7E5", border: "1px solid " + (msg.type === "ok" ? "#6AAF8D44" : msg.type === "warn" ? "#C8A97E44" : "#D4545444") }}>{msg.text}</div>}
-      <div style={{ fontSize: 10, color: "#C8BFB0", marginTop: 8 }}>Autocumplimenta: direcciÃ³n, nÃºmero, planta, puerta, CP, municipio, mÂ² y aÃ±o construcciÃ³n</div>
+      <div style={{ fontSize: 10, color: "#C8BFB0", marginTop: 8 }}>Autocumplimenta: dirección, número, planta, puerta, CP, municipio, m² y año construcción</div>
     </div>
   );
 }
@@ -312,13 +346,13 @@ export default function FormularioCaptacion() {
   const [fichaId, setFichaId] = useState(null); // ID de la ficha ya creada
   const [autoSaveStatus, setAutoSaveStatus] = useState(null); // null | "saving" | "saved" | "error"
 
-  // Cargar agentes dinÃ¡micamente desde Supabase
+  // Cargar agentes dinámicamente desde Supabase
   useEffect(() => {
     supabase.from("usuarios").select("nombre,agente_codigo").eq("activo", true).not("agente_codigo", "is", null)
       .then(({ data }) => { if (data) setAgentesDB(data); });
   }, []);
 
-  // Generar referencia automÃ¡tica â 4 dÃ­gitos fijos, mÃ¡ximo real por agente
+  // Generar referencia automática — 4 dígitos fijos, máximo real por agente
   async function generarRef(agenteName) {
     const found = agentesDB.find(a => a.nombre === agenteName);
     const prefix = found?.agente_codigo;
@@ -346,7 +380,7 @@ export default function FormularioCaptacion() {
   const [cp, setCp] = useState("");
   const [municipio, setMunicipio] = useState("");
   const [provincia, setProvincia] = useState("");
-   const [zona, setZona] = useState("");
+  const [zona, setZona] = useState("");
   const [orient, setOrient] = useState("");
   const [distPlaya, setDistPlaya] = useState("");
   const [visDir, setVisDir] = useState("Solo calle");
@@ -369,7 +403,7 @@ export default function FormularioCaptacion() {
   const [honorarios, setHonorarios] = useState("5");
   const [ivaHon, setIvaHon] = useState("21");
 
-  // Motor de cÃ¡lculo â puede calcularse desde precio venta O desde precio propietario
+  // Motor de cálculo — puede calcularse desde precio venta O desde precio propietario
   // Gastos
   const [ibi, setIbi] = useState("");
   const [basuras, setBasuras] = useState("");
@@ -450,12 +484,12 @@ export default function FormularioCaptacion() {
   const [localEntradaAuxiliar, setLocalEntradaAuxiliar] = useState(false);
   const [localTieneOficina, setLocalTieneOficina] = useState(false);
 
-  // DirecciÃ³n extendida
+  // Dirección extendida
   const [bloque, setBloque] = useState("");
   const [escalera, setEscalera] = useState("");
   const [urbanizacion, setUrbanizacion] = useState("");
 
-  // CaracterÃ­sticas residenciales adicionales (Idealista v6)
+  // Características residenciales adicionales (Idealista v6)
   const [chimenea, setChimenea] = useState(false);
   const [cocinaEquipada, setCocinaEquipada] = useState(false);
   const [dobleAcristalamiento, setDobleAcristalamiento] = useState(false);
@@ -483,14 +517,14 @@ export default function FormularioCaptacion() {
 
   // Publicacion
 
-  // Propietarios (array dinÃ¡mico)
+  // Propietarios (array dinámico)
   const [propietarios, setPropietarios] = useState([{ ...PROPIETARIO_VACIO }]);
   const [notasPriv, setNotasPriv] = useState("");
 
   // Cualificacion
   const [cualPos, setCualPos] = useState(["", "", "", "", "", ""]);
 
-  // autoSaveRef + useEffect autoguardado â despuÃ©s de todos los useState
+  // autoSaveRef + useEffect autoguardado — después de todos los useState
   const autoSaveRef = useRef(null);
   useEffect(() => {
     if (!ref || !tipo || !op) return;
@@ -506,7 +540,7 @@ export default function FormularioCaptacion() {
           // Verificar si ya existe una ficha con esa ref antes de crear
           const { data: existing } = await supabase.from("propiedades").select("id").eq("ref", data.ref).maybeSingle();
           if (existing) {
-            // Ya existe â enlazar y actualizar en lugar de duplicar
+            // Ya existe — enlazar y actualizar en lugar de duplicar
             setFichaId(existing.id);
             const { error } = await supabase.from("propiedades").update(data).eq("id", existing.id);
             if (error) throw error;
@@ -568,20 +602,20 @@ export default function FormularioCaptacion() {
   honTotal = honNeto + honIva;
   netoProp = (calcDesde === "propietario" && pp > 0 && op !== "Alquiler") ? pp : precioCalc - honTotal;
 
-  // Helper condicionalidad por tipo â despuÃ©s de todos los hooks
+  // Helper condicionalidad por tipo — después de todos los hooks
   const TIPO_MAP_COND = {
-    // Piso â flat
+    // Piso → flat
     Piso:"flat", Apartamento:"flat", Estudio:"flat", Loft:"flat",
     Atico:"flat", "Atico Duplex":"flat", Duplex:"flat", "Planta baja":"flat",
-    // Casa â house
+    // Casa → house
     Casa:"house", Chalet:"house", Adosado:"house", Bungalow:"house",
     Pareado:"house", Villa:"house", "Villa de Lujo":"house", "Casa Tipo Duplex":"house",
-    // Finca â rustic
+    // Finca → rustic
     "Finca rustica":"rustic", Finca:"rustic",
-    // Local/Nave â premises_commercial
+    // Local/Nave → premises_commercial
     "Local comercial":"premises_commercial", Oficina:"office",
     "Nave industrial":"premises_commercial", Almacen:"premises_commercial", Negocio:"premises_commercial",
-    // Terreno â land
+    // Terreno → land
     Parcela:"land", Solar:"land", "Terreno urbano":"land", "Terreno urbanizable":"land",
     "Terreno rustico":"land", "Terreno rural":"land", "Terreno industrial":"land",
     // Otros
@@ -597,7 +631,7 @@ export default function FormularioCaptacion() {
   const tieneHab = ["flat","house","rustic"].includes(ft);
   const tieneCert = ["flat","house","rustic"].includes(ft);
   const tieneExtras = ["flat","house","rustic"].includes(ft);
-  // Gastos condicionados por operaciÃ³n Y tipo de propiedad
+  // Gastos condicionados por operación Y tipo de propiedad
   const esCompraventa = op === "Compraventa";
   const esAlquilerOp  = op === "Alquiler";
   const esTraspasoOp  = op === "Traspaso";
@@ -748,21 +782,21 @@ export default function FormularioCaptacion() {
     const errores = [];
     if (!ref) errores.push("Referencia");
     if (!tipo) errores.push("Tipo de propiedad");
-    if (!op) errores.push("Tipo de operaciÃ³n");
-    if (!dir) errores.push("DirecciÃ³n");
+    if (!op) errores.push("Tipo de operación");
+    if (!dir) errores.push("Dirección");
     if (!municipio) errores.push("Municipio");
-    if (!cp) errores.push("CÃ³digo postal");
+    if (!cp) errores.push("Código postal");
     if (op === "Compraventa" && (!precioVenta || Number(precioVenta) <= 0)) errores.push("Precio de venta");
     if (op === "Alquiler" && (!precioAlquiler || Number(precioAlquiler) <= 0)) errores.push("Renta mensual");
     if (op === "Traspaso" && (!precioTraspaso || Number(precioTraspaso) <= 0)) errores.push("Precio traspaso");
     if (op === "Alquiler" && esResidencial && !alqEquipamiento) errores.push("Equipamiento (cocina/mobiliario)");
     if (op === "Traspaso" && (!precioTraspaso || Number(precioTraspaso) <= 0)) errores.push("Precio de traspaso");
-    if (!esTerreno && !esGaraje && (!mConst || Number(mConst) <= 0)) errores.push("mÂ² construidos");
-    if (tieneHab && (Number(banos)||0) + (Number(aseos)||0) <= 0) errores.push("BaÃ±os");
-    if (tieneCert && !certE) errores.push("Certificado energÃ©tico");
-    if (esTerreno && (!mParcela || Number(mParcela) <= 0)) errores.push("mÂ² parcela");
+    if (!esTerreno && !esGaraje && (!mConst || Number(mConst) <= 0)) errores.push("m² construidos");
+    if (tieneHab && (Number(banos)||0) + (Number(aseos)||0) <= 0) errores.push("Baños");
+    if (tieneCert && !certE) errores.push("Certificado energético");
+    if (esTerreno && (!mParcela || Number(mParcela) <= 0)) errores.push("m² parcela");
     if (errores.length > 0) {
-      alert("â ï¸ Campos obligatorios incompletos:\n\nâ¢ " + errores.join("\nâ¢ ") + "\n\nCompleta estos campos antes de crear la ficha.");
+      alert("⚠️ Campos obligatorios incompletos:\n\n• " + errores.join("\n• ") + "\n\nCompleta estos campos antes de crear la ficha.");
       return;
     }
     setSaving(true);
@@ -771,7 +805,7 @@ export default function FormularioCaptacion() {
 
       let error;
       if (fichaId) {
-        // Ficha ya existe â actualizar
+        // Ficha ya existe — actualizar
         ({ error } = await supabase.from("propiedades").update(dbData).eq("id", fichaId));
       } else {
         // Crear nueva
@@ -784,7 +818,7 @@ export default function FormularioCaptacion() {
       }
       notificarGuardado(fichaId ? "Ficha actualizada" : "Ficha creada");
 
-      // Enviar email de notificaciÃ³n a info@mallorcanativaproperties.com
+      // Enviar email de notificación a info@mallorcanativaproperties.com
       try {
         await fetch("/api/email-captacion", {
           method: "POST",
@@ -815,7 +849,7 @@ export default function FormularioCaptacion() {
           }),
         });
       } catch (emailErr) {
-        console.error("Error enviando email captaciÃ³n:", emailErr);
+        console.error("Error enviando email captación:", emailErr);
         // No bloquear el flujo si falla el email
       }
 
@@ -855,16 +889,16 @@ export default function FormularioCaptacion() {
         {/* Header */}
       <div style={{ marginBottom: 40 }}>
         <div style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 12, fontFamily: "Inter, sans-serif" }}>NATIVA PROPERTIES</div>
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 600, margin: 0, lineHeight: 1.1, color: "#A8854A" }}>Formulario de CaptaciÃ³n</h1>
-        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "10px 0 0" }}>Formulario de captaciÃ³n de nuevas propiedades</p>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 600, margin: 0, lineHeight: 1.1, color: "#A8854A" }}>Formulario de Captación</h1>
+        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "10px 0 0" }}>Formulario de captación de nuevas propiedades</p>
         <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginTop: 28, marginBottom: 28 }} />
       </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-          {autoSaveStatus === "saving" && <span style={{ fontSize: 11, color: "#AC8A54", fontFamily: "Inter, sans-serif" }}>â³ Guardando...</span>}
-          {autoSaveStatus === "saved" && <span style={{ fontSize: 11, color: "#2C6E52", fontFamily: "Inter, sans-serif" }}>â Guardado automÃ¡ticamente</span>}
-          {autoSaveStatus === "error" && <span style={{ fontSize: 11, color: "#A23A3A", fontFamily: "Inter, sans-serif" }}>â ï¸ Error al guardar</span>}
-          {fichaId && !autoSaveStatus && <span style={{ fontSize: 10, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>ð Ficha creada</span>}
+          {autoSaveStatus === "saving" && <span style={{ fontSize: 11, color: "#AC8A54", fontFamily: "Inter, sans-serif" }}>⏳ Guardando...</span>}
+          {autoSaveStatus === "saved" && <span style={{ fontSize: 11, color: "#2C6E52", fontFamily: "Inter, sans-serif" }}>✓ Guardado automáticamente</span>}
+          {autoSaveStatus === "error" && <span style={{ fontSize: 11, color: "#A23A3A", fontFamily: "Inter, sans-serif" }}>⚠️ Error al guardar</span>}
+          {fichaId && !autoSaveStatus && <span style={{ fontSize: 10, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>📋 Ficha creada</span>}
         </div>
         <p style={{ fontSize: 12, color: "#9A968A", margin: "0 0 24px", letterSpacing: "0.04em" }}>El agente cumplimenta este formulario delante del propietario. Al enviar se crea la ficha en el CRM.</p>
 
@@ -912,8 +946,18 @@ export default function FormularioCaptacion() {
           {esResidencial && <Input label="Urbanizacion" value={urbanizacion} onChange={setUrbanizacion} placeholder="Urb. Los Pinos" />}
           <div style={g3}>
             <Input label="Codigo postal" value={cp} onChange={setCp} placeholder="07007" required />
-            <Select label="Provincia" value={provincia} onChange={(v) => { setProvincia(v); setMunicipio(""); setZona(""); }} options={Object.keys(PROVINCIAS_MAP)} />
-               <Select label="Municipio" value={municipio} onChange={(v) => { setMunicipio(v); setZona(""); }} options={provincia && PROVINCIAS_MAP[provincia] ? PROVINCIAS_MAP[provincia] : Object.keys(ZONAS_MAP)} required />
+            <Select
+              label="Provincia"
+              value={provincia}
+              onChange={e => { setProvincia(e.target.value); setZona(""); setMunicipio(""); }}
+              style={{width:'100%'}}
+            >
+              <option value="">-- Selecciona Provincia --</option>
+              {Object.keys(PROVINCIAS_MAP).map(prov => (
+                <option key={prov} value={prov}>{prov}</option>
+              ))}
+            </Select>
+                        <Select label="Municipio" value={municipio} onChange={(v) => { setMunicipio(v); setZona(""); }} options={(provincia ? PROVINCIAS_MAP[provincia] : Object.keys(ZONAS_MAP))} required />
             <Select label="Zona" value={zona} onChange={setZona} options={municipio && ZONAS_MAP[municipio] ? ZONAS_MAP[municipio] : []} />
             <Input label="Latitud (GPS)" value={latitud} onChange={setLatitud} type="number" placeholder="39.5696" />
             <Input label="Longitud (GPS)" value={longitud} onChange={setLongitud} type="number" placeholder="2.6502" />
@@ -983,12 +1027,12 @@ export default function FormularioCaptacion() {
               </div>
             </div>
             <div>
-              <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 4 }}>Total baÃ±os (Idealista)</label>
+              <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 4 }}>Total baños (Idealista)</label>
               <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                 <div style={{ width: 80, background: "#F8F6F1", border: "1px solid #E7E1D4", borderRadius: 0, color: "#AC8A54", padding: "9px 12px", fontSize: 13, fontFamily: "Inter, sans-serif", fontWeight: 700, textAlign: "center" }}>
                   {(Number(banos)||0)+(Number(aseos)||0)}
                 </div>
-                <span style={{ fontSize: 10, color: "#9A968A" }}>BaÃ±os + aseos â bathNumber</span>
+                <span style={{ fontSize: 10, color: "#9A968A" }}>Baños + aseos — bathNumber</span>
               </div>
             </div>
           </div>}
@@ -999,7 +1043,7 @@ export default function FormularioCaptacion() {
           {esTerreno && <div style={g2}>
             <Input label="m2 edificables" value={mEdificable} onChange={setMEdificable} type="number" />
             <Select label="Tipo de acceso" value={terrenoAcceso} onChange={setTerrenoAcceso}
-              options={["","Urbano","Carretera","Pista","AutovÃ­a/Autopista","Desconocido"]} />
+              options={["","Urbano","Carretera","Pista","Autovía/Autopista","Desconocido"]} />
           </div>}
           {esTerreno && <div style={{ display: "flex", flexWrap: "wrap", gap: 20 }}>
             <Toggle label="Luz" value={terrenoLuz} onChange={setTerrenoLuz} />
@@ -1034,32 +1078,32 @@ export default function FormularioCaptacion() {
 
           </div>}
 
-          {/* Local / Nave: caracterÃ­sticas especÃ­ficas */}
+          {/* Local / Nave: características específicas */}
           {esComercial && (() => {
             const LBL = { fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 };
             const INP = { width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" };
             const SEL = { ...INP, appearance: "none", WebkitAppearance: "none" };
             return (
               <div style={{ marginTop: 16 }}>
-                {/* UbicaciÃ³n + NÂº escaparates + NÂº plantas */}
+                {/* Ubicación + Nº escaparates + Nº plantas */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14, marginBottom: 14 }}>
                   <div>
-                    <label style={LBL}>UbicaciÃ³n</label>
+                    <label style={LBL}>Ubicación</label>
                     <select value={localUbicacion} onChange={e => setLocalUbicacion(e.target.value)} style={SEL}>
-                      <option value="">â Sin especificar â</option>
+                      <option value="">— Sin especificar —</option>
                       <option value="pie_calle">Pie de calle</option>
                       <option value="centro_comercial">Centro comercial</option>
                       <option value="entreplanta">Entreplanta</option>
-                      <option value="sotano">SÃ³tano</option>
+                      <option value="sotano">Sótano</option>
                       <option value="planta_superior">Planta superior</option>
                     </select>
                   </div>
                   <div>
-                    <label style={LBL}>NÂº escaparates</label>
+                    <label style={LBL}>Nº escaparates</label>
                     <input type="number" min="0" value={localNEscaparates} onChange={e => setLocalNEscaparates(e.target.value)} style={INP} />
                   </div>
                   <div>
-                    <label style={LBL}>NÂº plantas</label>
+                    <label style={LBL}>Nº plantas</label>
                     <input type="number" min="1" value={localNPlantas} onChange={e => setLocalNPlantas(e.target.value)} style={INP} />
                   </div>
                 </div>
@@ -1068,10 +1112,10 @@ export default function FormularioCaptacion() {
                 <div style={{ marginBottom: 16 }}>
                   <label style={LBL}>Actividad comercial</label>
                   {[
-                    { grupo: "HostelerÃ­a", opciones: ["Bar","Restaurante","CafeterÃ­a","Discoteca / pub / sala","Hotel / hostal","Otros hostelerÃ­a"] },
-                    { grupo: "Comercio", opciones: ["AlimentaciÃ³n","Moda y complementos","ElectrÃ³nica","Mobiliario y decoraciÃ³n","Farmacia / parafarmacia","JoyerÃ­a / relojerÃ­a","PapelerÃ­a / librerÃ­a","JugueterÃ­a","Otros comercio"] },
-                    { grupo: "Servicios", opciones: ["PeluquerÃ­a / estÃ©tica","LavanderÃ­a / tintorerÃ­a","Agencia de viajes","Inmobiliaria","Financiero / seguros","ClÃ­nica / centro mÃ©dico","Centro de formaciÃ³n","Gimnasio / deporte","Otros servicios"] },
-                    { grupo: "Otras actividades", opciones: ["Taller / reparaciÃ³n","AlmacÃ©n / logÃ­stica","Industria ligera"] },
+                    { grupo: "Hostelería", opciones: ["Bar","Restaurante","Cafetería","Discoteca / pub / sala","Hotel / hostal","Otros hostelería"] },
+                    { grupo: "Comercio", opciones: ["Alimentación","Moda y complementos","Electrónica","Mobiliario y decoración","Farmacia / parafarmacia","Joyería / relojería","Papelería / librería","Juguetería","Otros comercio"] },
+                    { grupo: "Servicios", opciones: ["Peluquería / estética","Lavandería / tintorería","Agencia de viajes","Inmobiliaria","Financiero / seguros","Clínica / centro médico","Centro de formación","Gimnasio / deporte","Otros servicios"] },
+                    { grupo: "Otras actividades", opciones: ["Taller / reparación","Almacén / logística","Industria ligera"] },
                   ].map(({ grupo, opciones }) => (
                     <div key={grupo} style={{ marginBottom: 10 }}>
                       <div style={{ fontSize: 9, fontWeight: 700, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>{grupo}</div>
@@ -1104,14 +1148,14 @@ export default function FormularioCaptacion() {
                   <label style={LBL}>Equipamiento</label>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 24px" }}>
                     {[
-                      [localCalefaccion, setLocalCalefaccion, "CalefacciÃ³n"],
+                      [localCalefaccion, setLocalCalefaccion, "Calefacción"],
                       [localAC, setLocalAC, "Aire acondicionado"],
                       [localSalidaHumos, setLocalSalidaHumos, "Salida de humos"],
                       [localCocinaEquipada, setLocalCocinaEquipada, "Cocina equipada"],
                       [localPuertaSeguridad, setLocalPuertaSeguridad, "Puerta de seguridad"],
                       [localAlarma, setLocalAlarma, "Alarma"],
                       [localCCTV, setLocalCCTV, "CCTV"],
-                      [localAlmacen, setLocalAlmacen, "AlmacÃ©n en edificio"],
+                      [localAlmacen, setLocalAlmacen, "Almacén en edificio"],
                       [localHaceEsquina, setLocalHaceEsquina, "Hace esquina"],
                       [localEntradaAuxiliar, setLocalEntradaAuxiliar, "Entrada auxiliar"],
                       [localTieneOficina, setLocalTieneOficina, "Oficina en local"],
@@ -1152,16 +1196,16 @@ export default function FormularioCaptacion() {
           {esResidencial && <div style={g3}>
             <Input label="Plantas del edificio" value={plantasEdificio} onChange={setPlantasEdificio} type="number" placeholder="5" />
             <Select label="Ocupacion actual" value={ocupacionActual} onChange={setOcupacionActual}
-              options={["VacÃ­a","Alquilada","Ocupada"]} />
+              options={["Vacía","Alquilada","Ocupada"]} />
           </div>}
           {esGaraje && <div style={g3}>
             <Select label="Tipo de garaje (capacidad)" value={tipoGaraje} onChange={setTipoGaraje}
-              options={["Coche compacto","Coche sedÃ¡n","Moto","Coche y moto","Dos coches o mÃ¡s","Desconocido"]} />
-            <Select label="TipologÃ­a plaza" value={garajeTipo} onChange={setGarajeTipo}
-              options={["","Plaza aparcamiento","Trastero/DepÃ³sito","Desconocido"]} />
+              options={["Coche compacto","Coche sedán","Moto","Coche y moto","Dos coches o más","Desconocido"]} />
+            <Select label="Tipología plaza" value={garajeTipo} onChange={setGarajeTipo}
+              options={["","Plaza aparcamiento","Trastero/Depósito","Desconocido"]} />
           </div>}
           {esGaraje && <div style={{ display: "flex", gap: 30 }}>
-            <Toggle label="Puerta automÃ¡tica" value={garajePuertaAuto} onChange={setGarajePuertaAuto} />
+            <Toggle label="Puerta automática" value={garajePuertaAuto} onChange={setGarajePuertaAuto} />
             <Toggle label="Plaza cubierta" value={garajePlazaCubierta} onChange={setGarajePlazaCubierta} />
           </div>}
           {esTrastero && <div style={g2}>
@@ -1176,7 +1220,7 @@ export default function FormularioCaptacion() {
             <Select label="Parking" value={parking} onChange={setParking} options={["Si","No","Comunitario","Opcional"]} />
             <Input label="N plazas" value={nPlazas} onChange={setNPlazas} type="number" />
             {(parking === "Si" || parking === "Opcional") &&
-              <Input label="Precio garaje (si va aparte)" value={precioParking} onChange={setPrecioParking} type="number" placeholder="Dejar vacÃ­o si incluido" />
+              <Input label="Precio garaje (si va aparte)" value={precioParking} onChange={setPrecioParking} type="number" placeholder="Dejar vacío si incluido" />
             }
           </div>}
         </Sec>}
@@ -1201,7 +1245,7 @@ export default function FormularioCaptacion() {
                 : <div>
                     <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Precio de venta (calculado)</div>
                     <div style={{ padding: "9px 12px", background: "#F8F6F1", border: "1px solid #E7E1D4", fontSize: 13, color: "#16294A", fontWeight: 700 }}>
-                      {precioCalc > 0 ? fmtP(Math.round(precioCalc)) : "â"}
+                      {precioCalc > 0 ? fmtP(Math.round(precioCalc)) : "—"}
                     </div>
                   </div>
             )}
@@ -1211,7 +1255,7 @@ export default function FormularioCaptacion() {
                 : <div>
                     <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Precio propietario (calculado)</div>
                     <div style={{ padding: "9px 12px", background: "#F8F6F1", border: "1px solid #E7E1D4", fontSize: 13, color: "#2C6E52", fontWeight: 700 }}>
-                      {netoProp > 0 ? fmtP(Math.round(netoProp)) : "â"}
+                      {netoProp > 0 ? fmtP(Math.round(netoProp)) : "—"}
                     </div>
                   </div>
             )}
@@ -1234,7 +1278,7 @@ export default function FormularioCaptacion() {
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
                   <div>
-                    <label style={LBL}>Alquiler / mes (â¬)</label>
+                    <label style={LBL}>Alquiler / mes (€)</label>
                     <input type="number" value={localAlquilerMes} onChange={e => setLocalAlquilerMes(e.target.value)} style={INP} placeholder="0" />
                   </div>
                   <div>
@@ -1250,29 +1294,29 @@ export default function FormularioCaptacion() {
             );
           })()}
 
-          {/* ALQUILER: campos especÃ­ficos Idealista */}
+          {/* ALQUILER: campos específicos Idealista */}
           {op === "Alquiler" && (
             <>
               <div style={g3}>
                 <Input label="Fianza (meses)" value={fianzaMeses} onChange={setFianzaMeses} type="number" placeholder="1" />
-                <Input label="DuraciÃ³n mÃ­nima (meses)" value={duracionMinMeses} onChange={setDuracionMinMeses} type="number" placeholder="11" />
-                <Input label="NÂº mÃ¡x. inquilinos" value={alqMaxInquilinos} onChange={setAlqMaxInquilinos} type="number" placeholder="2" />
+                <Input label="Duración mínima (meses)" value={duracionMinMeses} onChange={setDuracionMinMeses} type="number" placeholder="11" />
+                <Input label="Nº máx. inquilinos" value={alqMaxInquilinos} onChange={setAlqMaxInquilinos} type="number" placeholder="2" />
               </div>
               <div style={g3}>
                 <Select label="Tipo de alquiler" value={alqTipoOperacion} onChange={setAlqTipoOperacion}
                   options={["residencia", "temporada"]} />
                 <Toggle label="Mascotas permitidas" value={mascotas} onChange={setMascotas} />
-                <Select label="Apto para niÃ±os" value={alqAptoNinos === true ? "si" : alqAptoNinos === false ? "no" : ""}
+                <Select label="Apto para niños" value={alqAptoNinos === true ? "si" : alqAptoNinos === false ? "no" : ""}
                   onChange={v => setAlqAptoNinos(v === "si" ? true : v === "no" ? false : null)}
                   options={["si","no"]} />
               </div>
               {esResidencial && (
                 <Select label="Equipamiento *" value={alqEquipamiento} onChange={setAlqEquipamiento}
                   options={[
-                    "Cocina con electrodomÃ©sticos y casa amueblada",
-                    "Cocina con electrodomÃ©sticos y casa sin amueblar",
-                    "Cocina vacÃ­a y casa sin amueblar",
-                    "No lo sÃ©",
+                    "Cocina con electrodomésticos y casa amueblada",
+                    "Cocina con electrodomésticos y casa sin amueblar",
+                    "Cocina vacía y casa sin amueblar",
+                    "No lo sé",
                   ]} />
               )}
             </>
@@ -1281,20 +1325,20 @@ export default function FormularioCaptacion() {
             <Select label="Tipo honorarios" value={honorariosTipo} onChange={setHonorariosTipo} options={["porcentaje", "fijo"]} />
             {honorariosTipo === "porcentaje"
               ? <Input label="Honorarios (%)" value={honorarios} onChange={setHonorarios} type="number" placeholder="5" />
-              : <Input label="Hon. neto â base imponible (â¬)" value={honNetoManual} onChange={setHonNetoManual} type="number" placeholder="15000" />
+              : <Input label="Hon. neto — base imponible (€)" value={honNetoManual} onChange={setHonNetoManual} type="number" placeholder="15000" />
             }
             <Input label="IVA honorarios (%)" value={ivaHon} onChange={setIvaHon} type="number" placeholder="21" />
           </div>
           {honorariosTipo === "porcentaje" && (
             <div style={{ marginBottom: 8 }}>
               <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Hon. neto (calculado)</div>
-              <div style={{ padding: "9px 12px", background: "#F8F6F1", border: "1px solid #E7E1D4", fontSize: 13, color: "#16294A", fontWeight: 600 }}>{(pv > 0 || pp > 0) ? fmtP(Math.round(honNeto)) : "â"}</div>
+              <div style={{ padding: "9px 12px", background: "#F8F6F1", border: "1px solid #E7E1D4", fontSize: 13, color: "#16294A", fontWeight: 600 }}>{(pv > 0 || pp > 0) ? fmtP(Math.round(honNeto)) : "—"}</div>
             </div>
           )}
-          {/* Panel cÃ¡lculo automÃ¡tico â siempre visible */}
+          {/* Panel cálculo automático — siempre visible */}
           <div style={{ padding: "16px 18px", background: "#F4EEE0", border: "1px solid #E7D9C0", marginTop: 8, marginBottom: 4 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
-              <div style={{ fontSize: 10, color: "#8C6E3F", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>CÃ¡lculo AutomÃ¡tico</div>
+              <div style={{ fontSize: 10, color: "#8C6E3F", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>Cálculo Automático</div>
               {op !== "Alquiler" && (
                 <div style={{ display: "flex", gap: 6 }}>
                   <button onClick={() => setCalcDesde("venta")} style={{ fontSize: 10, padding: "5px 12px", border: "1px solid #AC8A54", borderRadius: 0, background: calcDesde === "venta" ? "#AC8A54" : "transparent", color: calcDesde === "venta" ? "#fff" : "#AC8A54", cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600, letterSpacing: "0.04em" }}>Desde precio venta</button>
@@ -1305,23 +1349,23 @@ export default function FormularioCaptacion() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "12px 20px" }}>
               <div>
                 <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 4 }}>{op === "Alquiler" ? "Renta mensual" : "Precio de venta"}</div>
-                <div style={{ fontSize: 15, fontWeight: 700, color: "#16294A" }}>{pv > 0 || precioCalc > 0 ? fmtP(Math.round(calcDesde === "propietario" && precioCalc > 0 ? precioCalc : pv)) : "â"}</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "#16294A" }}>{pv > 0 || precioCalc > 0 ? fmtP(Math.round(calcDesde === "propietario" && precioCalc > 0 ? precioCalc : pv)) : "—"}</div>
               </div>
               <div>
                 <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 4 }}>Hon. neto</div>
-                <div style={{ fontSize: 15, fontWeight: 700, color: "#16294A" }}>{honNeto > 0 ? fmtP(Math.round(honNeto)) : "â"}</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "#16294A" }}>{honNeto > 0 ? fmtP(Math.round(honNeto)) : "—"}</div>
               </div>
               <div>
                 <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 4 }}>IVA ({Number(ivaHon)||21}%)</div>
-                <div style={{ fontSize: 15, fontWeight: 700, color: "#16294A" }}>{honIva > 0 ? fmtP(Math.round(honIva)) : "â"}</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "#16294A" }}>{honIva > 0 ? fmtP(Math.round(honIva)) : "—"}</div>
               </div>
               <div>
                 <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 4 }}>Hon. total (neto+IVA)</div>
-                <div style={{ fontSize: 15, fontWeight: 700, color: "#AC8A54" }}>{honTotal > 0 ? fmtP(Math.round(honTotal)) : "â"}</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "#AC8A54" }}>{honTotal > 0 ? fmtP(Math.round(honTotal)) : "—"}</div>
               </div>
               <div style={{ gridColumn: "span 2" }}>
                 <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 4 }}>Neto propietario</div>
-                <div style={{ fontSize: 17, fontWeight: 700, color: "#2C6E52" }}>{netoProp > 0 ? fmtP(Math.round(netoProp)) : "â"}</div>
+                <div style={{ fontSize: 17, fontWeight: 700, color: "#2C6E52" }}>{netoProp > 0 ? fmtP(Math.round(netoProp)) : "—"}</div>
               </div>
             </div>
           </div>
@@ -1371,7 +1415,7 @@ export default function FormularioCaptacion() {
               fontFamily: "Inter, sans-serif", transition: "all 0.3s",
             }}
           >
-            {saving ? "Guardando..." : fichaId ? "Ficha guardada â" : "Crear ficha de propiedad"}
+            {saving ? "Guardando..." : fichaId ? "Ficha guardada ✓" : "Crear ficha de propiedad"}
           </button>
         </div>
 
