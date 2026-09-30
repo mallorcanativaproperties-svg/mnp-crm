@@ -1,5 +1,5 @@
 "use client";
-// Función local para no depender de imports en chunks separados
+// FunciÃ³n local para no depender de imports en chunks separados
 function notificarGuardado(msg) {
   if (typeof window !== "undefined") {
     try { window.dispatchEvent(new CustomEvent("mnp:guardado", { detail: { msg: msg || "Guardado correctamente" } })); } catch {}
@@ -186,9 +186,9 @@ const ESTADOS = [
   { key: "publicada", label: "Publicada", accent: "var(--success)" },
   { key: "reservada", label: "Reservada", accent: "var(--amber)" },
   { key: "arras",     label: "Arras",     accent: "#B05D00" },
-  { key: "notaria",   label: "Notaría",   accent: "var(--blue)" },
+  { key: "notaria",   label: "NotarÃ­a",   accent: "var(--blue)" },
   { key: "vendida",   label: "Vendida",   accent: "var(--success)" },
-  { key: "caida",     label: "Caída",     accent: "var(--danger)" },
+  { key: "caida",     label: "CaÃ­da",     accent: "var(--danger)" },
   { key: "retirada",  label: "Retirada",  accent: "var(--muted)" },
 ];
 
@@ -206,23 +206,23 @@ const CALIDADES = [
 
 const PROVINCIAS_MAP = {
   "Mallorca": [
-    "Alaró","Alcúdia","Algaida","Andratx","Ariany","Artà","Banyalbufar","Binissalem",
-    "Búger","Bunyola","Calvià","Campanet","Campos","Capdepera","Consell","Costitx",
-    "Deià","Escorca","Esporles","Estellencs","Felanitx","Fornalutx","Inca","Lloret de Vistalegre",
-    "Lloseta","Llubí","Llucmajor","Manacor","Mancor de la Vall","Maria de la Salut","Marratxí",
-    "Montuïri","Muro","Palma","Petra","Pollença","Porreres","Puigpunyent","Sa Pobla",
-    "Sant Joan","Sant Llorenç des Cardassar","Santa Eugènia","Santa Margalida","Santa Maria del Camí",
-    "Santanyí","Selva","Sencelles","Ses Salines","Sineu","Sóller","Son Servera","Valldemossa","Vilafranca de Bonany"
+    "AlarÃ³","AlcÃºdia","Algaida","Andratx","Ariany","ArtÃ ","Banyalbufar","Binissalem",
+    "BÃºger","Bunyola","CalviÃ ","Campanet","Campos","Capdepera","Consell","Costitx",
+    "DeiÃ ","Escorca","Esporles","Estellencs","Felanitx","Fornalutx","Inca","Lloret de Vistalegre",
+    "Lloseta","LlubÃ­","Llucmajor","Manacor","Mancor de la Vall","Maria de la Salut","MarratxÃ­",
+    "MontuÃ¯ri","Muro","Palma","Petra","PollenÃ§a","Porreres","Puigpunyent","Sa Pobla",
+    "Sant Joan","Sant LlorenÃ§ des Cardassar","Santa EugÃ¨nia","Santa Margalida","Santa Maria del CamÃ­",
+    "SantanyÃ­","Selva","Sencelles","Ses Salines","Sineu","SÃ³ller","Son Servera","Valldemossa","Vilafranca de Bonany"
   ],
   "Menorca": [
-    "Alaior","Ciutadella de Menorca","Es Castell","Es Mercadal","Es Migjorn Gran","Ferreries","Maó","Sant Lluís"
+    "Alaior","Ciutadella de Menorca","Es Castell","Es Mercadal","Es Migjorn Gran","Ferreries","MaÃ³","Sant LluÃ­s"
   ],
   "Comunitat Valenciana": [
-    "Alacant","Alcoi","Altea","Benidorm","Calp","Dénia","Elx","Gandia","Guardamar del Segura",
-    "La Vila Joiosa","Novelda","Orihuela","Pego","Santa Pola","Torrevieja","Xàbia",
+    "Alacant","Alcoi","Altea","Benidorm","Calp","DÃ©nia","Elx","Gandia","Guardamar del Segura",
+    "La Vila Joiosa","Novelda","Orihuela","Pego","Santa Pola","Torrevieja","XÃ bia",
     "Alzira","Burjassot","Cullera","Mislata","Ontinyent","Paterna","Requena","Sueca",
-    "Torrent","Utiel","Valencia","Xàtiva","Castelló de la Plana","Benicarló","Morella",
-    "Nules","Peníscola","Segorbe","Vinaròs"
+    "Torrent","Utiel","Valencia","XÃ tiva","CastellÃ³ de la Plana","BenicarlÃ³","Morella",
+    "Nules","PenÃ­scola","Segorbe","VinarÃ²s"
   ]
 };
 const ZONAS_MAP = {
@@ -380,7 +380,7 @@ function Sec({ title, children, startOpen, forceOpen }) {
     <div style={{ marginBottom: 0 }}>
       <div onClick={() => { if (forceOpen === undefined) setOpenLocal(o => !o); else setOpenLocal(o => !o); }}
         style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", padding: "10px 0", borderBottom: open ? "none" : "1px solid var(--border)", marginBottom: open ? 12 : 0 }}>
-        <span style={{ fontSize: 9, color: "var(--gold)", transform: open ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s", display: "inline-block" }}>▶</span>
+        <span style={{ fontSize: 9, color: "var(--gold)", transform: open ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s", display: "inline-block" }}>â¶</span>
         <span style={{ fontSize: 10.5, fontWeight: 600, color: "var(--gold-dark)", textTransform: "uppercase", letterSpacing: "0.12em" }}>{title}</span>
       </div>
       {open && <div style={{ paddingBottom: 16, borderBottom: "1px solid var(--border)", marginBottom: 4 }}>{children}</div>}
@@ -390,10 +390,10 @@ function Sec({ title, children, startOpen, forceOpen }) {
 
 
 
-// ── Panel de datos de venta ─────────────────────────────────────────────────
-// Componente separado para evitar IIFEs y re-renders problemáticos dentro del JSX
+// ââ Panel de datos de venta âââââââââââââââââââââââââââââââââââââââââââââââââ
+// Componente separado para evitar IIFEs y re-renders problemÃ¡ticos dentro del JSX
 function DatosVentaPanel({ d, editMode, calcDesde, setCalcDesde, EFl, upd, draft, autoSave }) {
-  // Todos los cálculos aquí, fuera del JSX
+  // Todos los cÃ¡lculos aquÃ­, fuera del JSX
   const pv  = d.op === "Alquiler" ? (Number(d.precioAlquiler)||0)
              : d.op === "Traspaso" ? (Number(d.precioTraspaso)||0)
              : (Number(d.precioVenta)||0);
@@ -432,7 +432,7 @@ function DatosVentaPanel({ d, editMode, calcDesde, setCalcDesde, EFl, upd, draft
           {label}
         </div>
         <div style={{ padding: "10px 14px", background: "var(--cream)", border: "1px solid var(--border)", fontSize: 14, color, fontWeight: 700, minHeight: 40, display: "flex", alignItems: "center" }}>
-          {value || "—"}
+          {value || "â"}
         </div>
       </div>
     );
@@ -440,7 +440,7 @@ function DatosVentaPanel({ d, editMode, calcDesde, setCalcDesde, EFl, upd, draft
 
   return (
     <>
-      {/* Fila 1: precios según operación */}
+      {/* Fila 1: precios segÃºn operaciÃ³n */}
       <div style={g2}>
         {/* Compraventa: precio venta + neto propietario */}
         {d.op === "Compraventa" && (
@@ -458,7 +458,7 @@ function DatosVentaPanel({ d, editMode, calcDesde, setCalcDesde, EFl, upd, draft
         {d.op === "Alquiler" && EFl({label: "Renta mensual", req: true, field: "precioAlquiler", pub: true, gold: true, type: "number"})}
         {d.op === "Alquiler" && EFl({label: "Renta neta propietario", field: "precioProp", pub: false, type: "number"})}
 
-        {/* Traspaso: precio traspaso (no hay neto propietario estándar) */}
+        {/* Traspaso: precio traspaso (no hay neto propietario estÃ¡ndar) */}
         {d.op === "Traspaso" && EFl({label: "Precio traspaso", req: true, field: "precioTraspaso", pub: true, gold: true, type: "number"})}
         {d.op === "Traspaso" && EFl({label: "Precio propietario", field: "precioProp", pub: false, type: "number"})}
       </div>
@@ -474,7 +474,7 @@ function DatosVentaPanel({ d, editMode, calcDesde, setCalcDesde, EFl, upd, draft
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
               <div>
-                <label style={LBL}>Alquiler / mes (€)</label>
+                <label style={LBL}>Alquiler / mes (â¬)</label>
                 <input type="number" value={d.localAlquilerMes || ""} onChange={e => upd("localAlquilerMes", e.target.value)} style={INP} placeholder="0" />
               </div>
               <div>
@@ -490,27 +490,27 @@ function DatosVentaPanel({ d, editMode, calcDesde, setCalcDesde, EFl, upd, draft
         );
       })()}
 
-      {/* Alquiler: campos específicos */}
+      {/* Alquiler: campos especÃ­ficos */}
       {esAlq && (
         <>
           <div style={{ ...g3, marginBottom: 14 }}>
             {EFl({label: "Fianza (meses)",          field: "fianzaMeses",      pub: true, type: "number"})}
             {EFl({label: "Duracion minima (meses)", field: "duracionMinMeses", pub: true, type: "number"})}
-            {EFl({label: "Nº máx. inquilinos",      field: "alqMaxInquilinos", pub: true, type: "number"})}
+            {EFl({label: "NÂº mÃ¡x. inquilinos",      field: "alqMaxInquilinos", pub: true, type: "number"})}
           </div>
           <div style={{ ...g3, marginBottom: 14 }}>
             {EFl({label: "Tipo de alquiler",        field: "alqTipoOperacion", pub: true, type: "select",
               options: ["residencia", "temporada"]})}
             {EFl({label: "Mascotas permitidas",     field: "mascotas",         pub: true, type: "bool"})}
-            {EFl({label: "Apto para niños",         field: "alqAptoNinos",     pub: true, type: "bool"})}
+            {EFl({label: "Apto para niÃ±os",         field: "alqAptoNinos",     pub: true, type: "bool"})}
           </div>
           <div style={{ marginBottom: 14 }}>
             {EFl({label: "Equipamiento *", field: "alqEquipamiento", pub: true, type: "select",
               options: [
-                "Cocina con electrodomésticos y casa amueblada",
-                "Cocina con electrodomésticos y casa sin amueblar",
-                "Cocina vacía y casa sin amueblar",
-                "No lo sé",
+                "Cocina con electrodomÃ©sticos y casa amueblada",
+                "Cocina con electrodomÃ©sticos y casa sin amueblar",
+                "Cocina vacÃ­a y casa sin amueblar",
+                "No lo sÃ©",
               ]})}
           </div>
         </>
@@ -521,15 +521,15 @@ function DatosVentaPanel({ d, editMode, calcDesde, setCalcDesde, EFl, upd, draft
         {EFl({label: "Tipo honorarios", field: "honorariosTipo", pub: false, type: "select", options: ["porcentaje","fijo"]})}
         {d.honorariosTipo === "porcentaje"
           ? EFl({label: "Honorarios (%)", field: "honorarios", pub: false, type: "number"})
-          : EFl({label: "Hon. neto — base imponible (€)", field: "honNetoManual", pub: false, type: "number"})
+          : EFl({label: "Hon. neto â base imponible (â¬)", field: "honNetoManual", pub: false, type: "number"})
         }
         {EFl({label: "IVA honorarios (%)", field: "ivaHon", pub: false, type: "number"})}
       </div>
 
-      {/* Panel resumen de cálculo */}
+      {/* Panel resumen de cÃ¡lculo */}
       <div style={{ padding: "14px 18px", background: "#F4EEE0", border: "1px solid #E7D9C0", marginBottom: 8 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
-          <div style={{ fontSize: 10, color: "var(--gold-dark)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>Cálculo automático</div>
+          <div style={{ fontSize: 10, color: "var(--gold-dark)", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>CÃ¡lculo automÃ¡tico</div>
           {!esAlq && d.op !== "Traspaso" && (
             <div style={{ display: "flex", gap: 6 }}>
               <button onClick={() => setCalcDesde("venta")}
@@ -552,12 +552,12 @@ function DatosVentaPanel({ d, editMode, calcDesde, setCalcDesde, EFl, upd, draft
           ].map(({ label, value, color }) => (
             <div key={label}>
               <div style={{ fontSize: 10, color: "var(--muted)", marginBottom: 4 }}>{label}</div>
-              <div style={{ fontSize: 14, fontWeight: 700, color }}>{value > 0 ? fmtP(Math.round(value)) : "—"}</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color }}>{value > 0 ? fmtP(Math.round(value)) : "â"}</div>
             </div>
           ))}
           <div style={{ gridColumn: "span 2" }}>
             <div style={{ fontSize: 10, color: "var(--muted)", marginBottom: 4 }}>Neto propietario</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: "var(--success)" }}>{netoVend > 0 ? fmtP(Math.round(netoVend)) : "—"}</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "var(--success)" }}>{netoVend > 0 ? fmtP(Math.round(netoVend)) : "â"}</div>
           </div>
         </div>
         {editMode && (
@@ -571,7 +571,7 @@ function DatosVentaPanel({ d, editMode, calcDesde, setCalcDesde, EFl, upd, draft
             Object.entries(updates).forEach(([k, v]) => upd(k, v));
             setTimeout(() => autoSave({ ...draft, ...updates }), 100);
           }} style={{ marginTop: 14, padding: "8px 16px", background: "var(--gold)", border: "none", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.06em" }}>
-            ↓ Aplicar valores a la ficha
+            â Aplicar valores a la ficha
           </button>
         )}
       </div>
@@ -579,14 +579,14 @@ function DatosVentaPanel({ d, editMode, calcDesde, setCalcDesde, EFl, upd, draft
   );
 }
 
-// ── Sección grande (contenedor de nivel 1) ────────────────────────────────────
+// ââ SecciÃ³n grande (contenedor de nivel 1) ââââââââââââââââââââââââââââââââââââ
 // Las secciones grandes agrupan las subsecciones Sec.
 // defaultOpen: estado inicial; el usuario siempre puede abrirla/cerrarla manualmente.
 function SeccionGrande({ title, badge, badgeColor, children, defaultOpen = true, accentColor = "var(--gold)" }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div style={{ marginBottom: 2 }}>
-      {/* Cabecera de sección grande */}
+      {/* Cabecera de secciÃ³n grande */}
       <div
         onClick={() => setOpen(o => !o)}
         style={{
@@ -604,7 +604,7 @@ function SeccionGrande({ title, badge, badgeColor, children, defaultOpen = true,
             fontSize: 9, color: accentColor,
             transform: open ? "rotate(90deg)" : "rotate(0deg)",
             transition: "transform 0.2s", display: "inline-block",
-          }}>▶</span>
+          }}>â¶</span>
           <span style={{
             fontSize: 10, fontWeight: 700, color: "#5C4A2A",
             textTransform: "uppercase", letterSpacing: "0.18em",
@@ -622,7 +622,7 @@ function SeccionGrande({ title, badge, badgeColor, children, defaultOpen = true,
           )}
         </div>
         <span style={{ fontSize: 14, color: accentColor, opacity: 0.6, lineHeight: 1 }}>
-          {open ? "−" : "+"}
+          {open ? "â" : "+"}
         </span>
       </div>
       {/* Contenido */}
@@ -639,7 +639,7 @@ function SeccionGrande({ title, badge, badgeColor, children, defaultOpen = true,
   );
 }
 
-// Devuelve qué secciones grandes van abiertas por defecto según el estado
+// Devuelve quÃ© secciones grandes van abiertas por defecto segÃºn el estado
 function seccionesPorEstado(estado) {
   const e = estado || "captada";
   return {
@@ -671,16 +671,16 @@ const MEDIA_TIPOS = [
 ];
 
 
-// Etiquetas de estancia para Idealista — valores que acepta imageLabel en el feed
+// Etiquetas de estancia para Idealista â valores que acepta imageLabel en el feed
 const ETIQUETAS_IDEALISTA = [
   { value: "",             label: "Sin etiqueta" },
-  { value: "LIVING_ROOM", label: "Salón / Comedor" },
-  { value: "BEDROOM",     label: "Habitación" },
-  { value: "BATHROOM",    label: "Baño" },
+  { value: "LIVING_ROOM", label: "SalÃ³n / Comedor" },
+  { value: "BEDROOM",     label: "HabitaciÃ³n" },
+  { value: "BATHROOM",    label: "BaÃ±o" },
   { value: "KITCHEN",     label: "Cocina" },
   { value: "TERRACE",     label: "Terraza" },
-  { value: "BALCONY",     label: "Balcón" },
-  { value: "GARDEN",      label: "Jardín / Patio" },
+  { value: "BALCONY",     label: "BalcÃ³n" },
+  { value: "GARDEN",      label: "JardÃ­n / Patio" },
   { value: "SWIMMING_POOL", label: "Piscina" },
   { value: "FACADE",      label: "Fachada" },
   { value: "VIEWS",       label: "Vistas" },
@@ -700,8 +700,8 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
   const [uploadProgress, setUploadProgress] = useState("");
   const [dragItem, setDragItem] = useState(null);
   const [dragOverItem, setDragOverItem] = useState(null);
-  const [iaModal, setIaModal] = useState(null); // { item, tipo } — foto seleccionada para IA
-  const [iaEstilo, setIaEstilo] = useState("nórdico");
+  const [iaModal, setIaModal] = useState(null); // { item, tipo } â foto seleccionada para IA
+  const [iaEstilo, setIaEstilo] = useState("nÃ³rdico");
   const [iaVariaciones, setIaVariaciones] = useState([]); // hasta
   const [mejorandoTodas, setMejorandoTodas] = useState(false);
   const [mejoraBatchProgreso, setMejoraBatchProgreso] = useState(null); // { actual, total }
@@ -709,7 +709,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
   const [showModalMejora, setShowModalMejora] = useState(false);
   const [fotosSeleccionadas, setFotosSeleccionadas] = useState(new Set()); // ids seleccionados 3 variaciones generadas
   const [iaLoading, setIaLoading] = useState(false);
-  const [iaSeleccionada, setIaSeleccionada] = useState(null); // variación elegida
+  const [iaSeleccionada, setIaSeleccionada] = useState(null); // variaciÃ³n elegida
   const [descargandoMedia, setDescargandoMedia] = useState(false);
 
   useEffect(() => {
@@ -743,7 +743,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
     if (onCountUpdate) onCountUpdate(counts);
   }
 
-  // Comprime vídeo en el navegador usando MediaRecorder si supera el límite de Supabase (50MB)
+  // Comprime vÃ­deo en el navegador usando MediaRecorder si supera el lÃ­mite de Supabase (50MB)
   async function compressVideo(file) {
     return new Promise((resolve) => {
       const MAX_MB = 45;
@@ -756,21 +756,21 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
 
       video.onloadedmetadata = () => {
         const canvas = document.createElement("canvas");
-        // Escalar resolución para reducir tamaño — máx 1280px de ancho
+        // Escalar resoluciÃ³n para reducir tamaÃ±o â mÃ¡x 1280px de ancho
         const scale = Math.min(1, 1280 / video.videoWidth);
         canvas.width = Math.round(video.videoWidth * scale);
         canvas.height = Math.round(video.videoHeight * scale);
         const ctx = canvas.getContext("2d");
 
         const stream = canvas.captureStream(25);
-        // Añadir pista de audio si el vídeo tiene audio
+        // AÃ±adir pista de audio si el vÃ­deo tiene audio
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const src = audioCtx.createMediaElementSource(video);
         const dest = audioCtx.createMediaStreamDestination();
         src.connect(dest);
         dest.stream.getAudioTracks().forEach(t => stream.addTrack(t));
 
-        // MP4 es el formato aceptado por Idealista (webm no está en su lista)
+        // MP4 es el formato aceptado por Idealista (webm no estÃ¡ en su lista)
         const mimeType = MediaRecorder.isTypeSupported("video/mp4")
           ? "video/mp4"
           : MediaRecorder.isTypeSupported("video/webm;codecs=vp9,opus")
@@ -805,24 +805,24 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
     setUploading(true);
     const total = files.length;
     let uploaded = 0;
-    const MAX_SIZE = 50 * 1024 * 1024; // 50MB límite Supabase free tier
+    const MAX_SIZE = 50 * 1024 * 1024; // 50MB lÃ­mite Supabase free tier
 
     for (let file of files) {
-      // Vídeos grandes: comprimir antes de subir
+      // VÃ­deos grandes: comprimir antes de subir
       if (tipo === "video" && file.size > MAX_SIZE) {
-        setUploadProgress(`Comprimiendo vídeo ${uploaded + 1} de ${total}... (${(file.size / 1024 / 1024).toFixed(0)}MB → puede tardar unos segundos)`);
+        setUploadProgress(`Comprimiendo vÃ­deo ${uploaded + 1} de ${total}... (${(file.size / 1024 / 1024).toFixed(0)}MB â puede tardar unos segundos)`);
         file = await compressVideo(file);
         if (file.size > MAX_SIZE) {
-          alert(`El vídeo "${file.name}" sigue siendo demasiado grande tras comprimir (${(file.size/1024/1024).toFixed(0)}MB). Comprime el vídeo manualmente antes de subirlo.`);
+          alert(`El vÃ­deo "${file.name}" sigue siendo demasiado grande tras comprimir (${(file.size/1024/1024).toFixed(0)}MB). Comprime el vÃ­deo manualmente antes de subirlo.`);
           uploaded++;
           continue;
         }
       } else if (tipo === "foto" && file.size > 8 * 1024 * 1024) {
-        alert(`La foto "${file.name}" supera el límite de 8MB de Idealista (${(file.size/1024/1024).toFixed(1)}MB). Comprime la imagen antes de subirla.`);
+        alert(`La foto "${file.name}" supera el lÃ­mite de 8MB de Idealista (${(file.size/1024/1024).toFixed(1)}MB). Comprime la imagen antes de subirla.`);
         uploaded++;
         continue;
       } else if (file.size > MAX_SIZE) {
-        alert(`El archivo "${file.name}" supera el límite de 50MB (${(file.size/1024/1024).toFixed(0)}MB).`);
+        alert(`El archivo "${file.name}" supera el lÃ­mite de 50MB (${(file.size/1024/1024).toFixed(0)}MB).`);
         uploaded++;
         continue;
       }
@@ -877,7 +877,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
   async function handleDeleteSeleccionadas() {
     const fotos = media.filter(m => fotosSeleccionadas.has(m.id));
     if (!fotos.length) return;
-    if (!confirm(`¿Eliminar ${fotos.length} foto${fotos.length !== 1 ? "s" : ""} seleccionada${fotos.length !== 1 ? "s" : ""}? Esta acción no se puede deshacer.`)) return;
+    if (!confirm(`Â¿Eliminar ${fotos.length} foto${fotos.length !== 1 ? "s" : ""} seleccionada${fotos.length !== 1 ? "s" : ""}? Esta acciÃ³n no se puede deshacer.`)) return;
     // Borrar archivos del storage
     const paths = fotos.map(f => f.url.split("/propiedades-media/")[1]).filter(Boolean).map(p => decodeURIComponent(p));
     if (paths.length) await supabase.storage.from("propiedades-media").remove(paths);
@@ -988,7 +988,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
       clearTimeout(t1);
       const data = await res.json();
       if (!data.ok) throw new Error(data.error);
-      // Reemplaza la original — recargar y cerrar
+      // Reemplaza la original â recargar y cerrar
       await loadMedia(true);
       setIaModal(null);
       setIaVariaciones([]);
@@ -1000,14 +1000,14 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
     }
   }
 
-  // Abre el modal de selección de fotos a mejorar
+  // Abre el modal de selecciÃ³n de fotos a mejorar
   function abrirModalMejora() {
     const fotos = media.filter(m => m.tipo === "foto");
     setFotosSeleccionadas(new Set(fotos.map(f => f.id)));
     setShowModalMejora(true);
   }
 
-  // Inserta las fotos en la cola de mejora — el cron las procesa sin límite de tiempo
+  // Inserta las fotos en la cola de mejora â el cron las procesa sin lÃ­mite de tiempo
   async function mejorarTodasFotos() {
     const fotos = media.filter(m => m.tipo === "foto" && fotosSeleccionadas.has(m.id));
     if (!fotos.length) return;
@@ -1021,7 +1021,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
     // Procesar foto a foto directamente desde el cliente (sin cola ni cron)
     let procesadas = 0;
     for (const foto of fotos) {
-      // Mostrar cuál se está procesando ANTES de la llamada
+      // Mostrar cuÃ¡l se estÃ¡ procesando ANTES de la llamada
       setMejoraBatchProgreso({ actual: procesadas, total, procesando: procesadas + 1 });
       try {
         const res = await fetch("/api/foto-ia", {
@@ -1041,11 +1041,11 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
     setMejorandoTodas(false);
     setMejoraBatchProgreso(null);
 
-    // Recargar la galería para mostrar las fotos mejoradas
+    // Recargar la galerÃ­a para mostrar las fotos mejoradas
     await loadMedia(true);
   }
 
-  // Home Staging: genera variación sin reemplazar la original (previewOnly)
+  // Home Staging: genera variaciÃ³n sin reemplazar la original (previewOnly)
   async function generarVariacionIA(item, estilo) {
     setIaLoading(true);
     try {
@@ -1069,7 +1069,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
     }
   }
 
-  // Aplicar variación elegida: reemplaza la original con la variación seleccionada
+  // Aplicar variaciÃ³n elegida: reemplaza la original con la variaciÃ³n seleccionada
   async function aplicarVariacionIA(variacion) {
     if (!iaModal || !variacion) return;
     setIaLoading(true);
@@ -1192,7 +1192,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
         )}
         {activeTab === "foto" && media.filter(m => m.tipo === "foto").length > 0 && (
           <div style={{ marginLeft: rolMedia === "administrador" ? 0 : "auto", display: "flex", gap: 8, alignItems: "center" }}>
-            {/* Botón eliminar seleccionadas — solo cuando hay selección */}
+            {/* BotÃ³n eliminar seleccionadas â solo cuando hay selecciÃ³n */}
             {fotosSeleccionadas.size > 0 && (
               <button
                 onClick={handleDeleteSeleccionadas}
@@ -1203,10 +1203,10 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
                   letterSpacing: "0.1em", textTransform: "uppercase",
                   fontFamily: "Inter, sans-serif", borderRadius: 0, whiteSpace: "nowrap",
                 }}>
-                × Eliminar {fotosSeleccionadas.size} foto{fotosSeleccionadas.size !== 1 ? "s" : ""}
+                Ã Eliminar {fotosSeleccionadas.size} foto{fotosSeleccionadas.size !== 1 ? "s" : ""}
               </button>
             )}
-            {/* Botón mejorar */}
+            {/* BotÃ³n mejorar */}
             <button
               onClick={abrirModalMejora}
               disabled={mejorandoTodas || iaLoading}
@@ -1221,7 +1221,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
               }}>
               {mejorandoTodas
                 ? `Mejorando ${mejoraBatchProgreso?.procesando || 1}/${mejoraBatchProgreso?.total || 0}...`
-                : "Mejorar fotografías"}
+                : "Mejorar fotografÃ­as"}
             </button>
           </div>
         )}
@@ -1237,7 +1237,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
           <span style={{ fontSize: 13, color: "var(--gold)" }}></span>
           <span style={{ fontSize: 12, color: "#5C5347", fontFamily: "Inter, sans-serif", fontWeight: 500 }}>
             {mejoraBatchProgreso.procesando <= mejoraBatchProgreso.total
-              ? `Mejorando fotografía ${mejoraBatchProgreso.procesando} de ${mejoraBatchProgreso.total}...`
+              ? `Mejorando fotografÃ­a ${mejoraBatchProgreso.procesando} de ${mejoraBatchProgreso.total}...`
               : `${mejoraBatchProgreso.actual} de ${mejoraBatchProgreso.total} completadas`}
           </span>
           <div style={{ flex: 1, height: 3, background: "var(--border)", borderRadius: 2 }}>
@@ -1248,7 +1248,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
             }} />
           </div>
           <span style={{ fontSize: 11, color: "var(--muted)", fontFamily: "Inter, sans-serif", whiteSpace: "nowrap" }}>
-            Recibirás un WhatsApp al terminar
+            RecibirÃ¡s un WhatsApp al terminar
           </span>
         </div>
       )}
@@ -1286,10 +1286,10 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
           {uploading ? uploadProgress : `Arrastra ${currentTipo.label.toLowerCase()} aqui o haz clic para subir`}
         </div>
         <div style={{ fontSize: 10, color: "#C8BFB0", marginTop: 6 }}>
-          {activeTab === "foto" && "JPG, PNG, WebP — max 10MB por archivo"}
-          {activeTab === "video" && "MP4, MOV — max 100MB por archivo"}
-          {activeTab === "plano" && "JPG, PNG, PDF — max 10MB por archivo"}
-          {activeTab === "tour360" && "JPG, PNG (equirectangular) — max 20MB"}
+          {activeTab === "foto" && "JPG, PNG, WebP â max 10MB por archivo"}
+          {activeTab === "video" && "MP4, MOV â max 100MB por archivo"}
+          {activeTab === "plano" && "JPG, PNG, PDF â max 10MB por archivo"}
+          {activeTab === "tour360" && "JPG, PNG (equirectangular) â max 20MB"}
         </div>
         {uploading && (
           <div style={{ marginTop: 12, height: 3, background: "var(--border)", borderRadius: 0, overflow: "hidden" }}>
@@ -1383,7 +1383,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
                     style={{ width: "100%", height: 140, objectFit: "cover", display: "block" }}
                     loading="lazy"
                   />
-                  {/* Checkbox selección — solo en tab fotos, esquina inferior izquierda */}
+                  {/* Checkbox selecciÃ³n â solo en tab fotos, esquina inferior izquierda */}
                   {activeTab === "foto" && (
                     <div
                       onClick={e => { e.stopPropagation(); const next = new Set(fotosSeleccionadas); fotosSeleccionadas.has(item.id) ? next.delete(item.id) : next.add(item.id); setFotosSeleccionadas(next); }}
@@ -1397,13 +1397,13 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
                         boxShadow: "0 1px 4px rgba(0,0,0,0.4)",
                       }}
                     >
-                      {fotosSeleccionadas.has(item.id) && <span style={{ color: "#fff", fontSize: 13, lineHeight: 1, fontWeight: 700 }}>✓</span>}
+                      {fotosSeleccionadas.has(item.id) && <span style={{ color: "#fff", fontSize: 13, lineHeight: 1, fontWeight: 700 }}>â</span>}
                     </div>
                   )}
                 </div>
               )}
 
-              {/* Etiqueta de estancia — solo fotos */}
+              {/* Etiqueta de estancia â solo fotos */}
               {activeTab === "foto" && (
                 <div style={{ padding: "0 8px 4px" }}>
                   <select
@@ -1430,12 +1430,12 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
                   {activeTab === "foto" && !item.es_portada && (
                     <button onClick={(e) => { e.stopPropagation(); handleSetPortada(item); }} style={{ ...btnBase, padding: "2px 5px", fontSize: 10, color: "var(--gold)", borderColor: "var(--gold-l)33" }} title="Hacer portada"></button>
                   )}
-                  {/* Editar con IA — solo fotos */}
+                  {/* Editar con IA â solo fotos */}
                   {activeTab === "foto" && (
                     <button onClick={(e) => { e.stopPropagation(); setIaModal({ item }); setIaVariaciones([]); setIaSeleccionada(null); }} style={{ ...btnBase, padding: "2px 5px", fontSize: 10, color: "#405c6b", borderColor: "#405c6b44" }} title="Editar con IA"></button>
                   )}
                   {/* Delete */}
-                  <button onClick={(e) => { e.stopPropagation(); if (confirm("Eliminar este archivo?")) handleDelete(item); }} style={{ ...btnBase, padding: "2px 5px", fontSize: 10, color: "var(--danger)", borderColor: "var(--danger)44" }} title="Eliminar">×</button>
+                  <button onClick={(e) => { e.stopPropagation(); if (confirm("Eliminar este archivo?")) handleDelete(item); }} style={{ ...btnBase, padding: "2px 5px", fontSize: 10, color: "var(--danger)", borderColor: "var(--danger)44" }} title="Eliminar">Ã</button>
                 </div>
               </div>
             </div>
@@ -1443,7 +1443,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
         </div>
       )}
 
-      {/* Modal IA — Mejora de foto y Home Staging */}
+      {/* Modal IA â Mejora de foto y Home Staging */}
       {iaModal && (
         <div onClick={() => { if (!iaLoading) { setIaModal(null); setIaVariaciones([]); setIaSeleccionada(null); } }}
           style={{ position: "fixed", inset: 0, background: "rgba(10,14,15,0.94)", backdropFilter: "blur(20px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2100 }}>
@@ -1455,7 +1455,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
             <div style={{ padding: "24px 32px 0", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
               <div>
                 <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 400, color: "#1a2528", lineHeight: 1.2 }}>
-                  Edición con Inteligencia Artificial
+                  EdiciÃ³n con Inteligencia Artificial
                 </div>
                 <div style={{ fontFamily: "Inter, sans-serif", fontSize: 12, color: "var(--gold)", marginTop: 4, letterSpacing: "0.06em" }}>
                   {iaModal.item.nombre}
@@ -1463,7 +1463,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
               </div>
               {!iaLoading && (
                 <button onClick={() => { setIaModal(null); setIaVariaciones([]); setIaSeleccionada(null); }}
-                  style={{ background: "none", border: "none", color: "var(--muted)", fontSize: 22, cursor: "pointer", lineHeight: 1, padding: "4px 0 0 16px" }}>×</button>
+                  style={{ background: "none", border: "none", color: "var(--muted)", fontSize: 22, cursor: "pointer", lineHeight: 1, padding: "4px 0 0 16px" }}>Ã</button>
               )}
             </div>
 
@@ -1473,7 +1473,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
             {iaVariaciones.length > 0 ? (
               <div style={{ padding: "0 32px 28px" }}>
                 <div style={{ fontFamily: "Inter, sans-serif", fontSize: 10, color: "var(--muted)", letterSpacing: "0.12em", marginBottom: 16 }}>
-                  VARIACIONES HOME STAGING — {iaVariaciones.length}/3 · Selecciona la que más te guste
+                  VARIACIONES HOME STAGING â {iaVariaciones.length}/3 Â· Selecciona la que mÃ¡s te guste
                 </div>
 
                 {/* Comparativa: original + variaciones a pantalla completa */}
@@ -1487,12 +1487,12 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
                   {iaVariaciones.map((v, i) => (
                     <div key={i} onClick={() => setIaSeleccionada(i)} style={{ cursor: "pointer" }}>
                       <div style={{ fontFamily: "Inter, sans-serif", fontSize: 10, color: iaSeleccionada === i ? "var(--gold)" : "var(--muted)", letterSpacing: "0.1em", marginBottom: 8, fontWeight: iaSeleccionada === i ? 700 : 400 }}>
-                        {iaSeleccionada === i ? "✓ " : ""}{v.label.toUpperCase()}
+                        {iaSeleccionada === i ? "â " : ""}{v.label.toUpperCase()}
                       </div>
                       <div style={{ position: "relative" }}>
                         <img src={v.url} alt={v.label} style={{ width: "100%", height: 340, objectFit: "cover", border: `2px solid ${iaSeleccionada === i ? "var(--gold)" : "var(--border)"}`, display: "block", transition: "border-color 0.2s" }} />
                         {iaSeleccionada === i && (
-                          <div style={{ position: "absolute", top: 10, right: 10, background: "var(--gold)", color: "#fff", width: 26, height: 26, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700 }}>✓</div>
+                          <div style={{ position: "absolute", top: 10, right: 10, background: "var(--gold)", color: "#fff", width: 26, height: 26, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 700 }}>â</div>
                         )}
                       </div>
                     </div>
@@ -1503,20 +1503,20 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
                 {iaLoading && (
                   <div style={{ textAlign: "center", padding: "20px 0", borderTop: "1px solid var(--border)", marginBottom: 16 }}>
                     <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, color: "var(--gold)", marginBottom: 8 }}></div>
-                    <div style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#1a2528" }}>Generando variación...</div>
-                    <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>20 — 40 segundos</div>
+                    <div style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#1a2528" }}>Generando variaciÃ³n...</div>
+                    <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>20 â 40 segundos</div>
                   </div>
                 )}
 
                 {/* Acciones */}
                 <div style={{ display: "flex", gap: 12, alignItems: "center", justifyContent: "space-between" }}>
                   <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                    {/* Generar otra variación */}
+                    {/* Generar otra variaciÃ³n */}
                     {iaVariaciones.length < 3 && !iaLoading && (
                       <div style={{ display: "flex", gap: 0 }}>
                         <select value={iaEstilo} onChange={e => setIaEstilo(e.target.value)}
                           style={{ padding: "10px 14px", background: "#fff", border: "1px solid var(--border)", borderRight: "none", color: "#1a2528", fontFamily: "Inter, sans-serif", fontSize: 12, outline: "none", cursor: "pointer", appearance: "none", WebkitAppearance: "none" }}>
-                          {["Nórdico","Industrial","Ecléctico","Minimalista","Bohemio","Art Deco"].map(e => (
+                          {["NÃ³rdico","Industrial","EclÃ©ctico","Minimalista","Bohemio","Art Deco"].map(e => (
                             <option key={e} value={e.toLowerCase()}>{e}</option>
                           ))}
                         </select>
@@ -1531,7 +1531,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
                       </div>
                     )}
                     {iaVariaciones.length >= 3 && !iaLoading && (
-                      <div style={{ fontFamily: "Inter, sans-serif", fontSize: 11, color: "var(--muted)" }}>Máximo 3 variaciones alcanzado</div>
+                      <div style={{ fontFamily: "Inter, sans-serif", fontSize: 11, color: "var(--muted)" }}>MÃ¡ximo 3 variaciones alcanzado</div>
                     )}
                   </div>
                   <div style={{ display: "flex", gap: 10 }}>
@@ -1562,15 +1562,15 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
                 {/* Panel de controles */}
                 <div style={{ borderLeft: "1px solid var(--border)", paddingLeft: 28, display: "flex", flexDirection: "column" }}>
 
-                  {/* Mejora automática */}
+                  {/* Mejora automÃ¡tica */}
                   <div style={{ marginBottom: 28 }}>
-                    <div style={{ fontFamily: "Inter, sans-serif", fontSize: 10, color: "var(--muted)", letterSpacing: "0.12em", marginBottom: 10 }}>MEJORA AUTOMÁTICA</div>
+                    <div style={{ fontFamily: "Inter, sans-serif", fontSize: 10, color: "var(--muted)", letterSpacing: "0.12em", marginBottom: 10 }}>MEJORA AUTOMÃTICA</div>
                     <p style={{ fontFamily: "Inter, sans-serif", fontSize: 12, color: "#6B7280", lineHeight: 1.6, marginBottom: 14 }}>
-                      Optimiza iluminación, ángulo y encuadre. Retira desorden. Alta definición 16:9. Reemplaza la foto original directamente.
+                      Optimiza iluminaciÃ³n, Ã¡ngulo y encuadre. Retira desorden. Alta definiciÃ³n 16:9. Reemplaza la foto original directamente.
                     </p>
                     <button onClick={() => mejorarFoto(iaModal.item)} disabled={iaLoading}
                       style={{ width: "100%", padding: "13px 0", background: iaLoading ? "var(--border)" : "#1a2528", border: "none", color: iaLoading ? "var(--muted)" : "var(--cream)", fontFamily: "Inter, sans-serif", fontSize: 12, fontWeight: 600, letterSpacing: "0.08em", cursor: iaLoading ? "not-allowed" : "pointer" }}>
-                      Mejorar fotografía
+                      Mejorar fotografÃ­a
                     </button>
                   </div>
 
@@ -1580,11 +1580,11 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
                   <div style={{ marginBottom: 28 }}>
                     <div style={{ fontFamily: "Inter, sans-serif", fontSize: 10, color: "var(--muted)", letterSpacing: "0.12em", marginBottom: 10 }}>HOME STAGING VIRTUAL</div>
                     <p style={{ fontFamily: "Inter, sans-serif", fontSize: 12, color: "#6B7280", lineHeight: 1.6, marginBottom: 14 }}>
-                      Rediseño visual del espacio manteniendo la estructura. Genera hasta 3 variaciones para comparar antes de elegir.
+                      RediseÃ±o visual del espacio manteniendo la estructura. Genera hasta 3 variaciones para comparar antes de elegir.
                     </p>
                     <select value={iaEstilo} onChange={e => setIaEstilo(e.target.value)}
                       style={{ width: "100%", padding: "11px 14px", marginBottom: 10, background: "#fff", border: "1px solid var(--border)", color: "#1a2528", fontFamily: "Inter, sans-serif", fontSize: 13, outline: "none", cursor: "pointer", appearance: "none", WebkitAppearance: "none" }}>
-                      {["Nórdico","Industrial","Ecléctico","Minimalista","Bohemio","Art Deco"].map(e => (
+                      {["NÃ³rdico","Industrial","EclÃ©ctico","Minimalista","Bohemio","Art Deco"].map(e => (
                         <option key={e} value={e.toLowerCase()}>{e}</option>
                       ))}
                     </select>
@@ -1604,7 +1604,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
                     <div style={{ textAlign: "center", padding: "20px 0", borderTop: "1px solid var(--border)" }}>
                       <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, color: "var(--gold)", marginBottom: 10, lineHeight: 1 }}></div>
                       <div style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#1a2528", fontWeight: 500 }}>Generando imagen...</div>
-                      <div style={{ fontFamily: "Inter, sans-serif", fontSize: 11, color: "var(--muted)", marginTop: 6 }}>20 — 40 segundos</div>
+                      <div style={{ fontFamily: "Inter, sans-serif", fontSize: 11, color: "var(--muted)", marginTop: 6 }}>20 â 40 segundos</div>
                     </div>
                   )}
 
@@ -1657,7 +1657,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
                   backdropFilter: "blur(4px)", transition: "background 0.2s", zIndex: 2001 }}
                 onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.25)"}
                 onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.12)"}>
-                ‹
+                â¹
               </button>
             )}
 
@@ -1665,7 +1665,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
               {/* Cerrar */}
               <button onClick={() => setLightbox(null)}
                 style={{ position: "absolute", top: -36, right: 0, background: "none", border: "none",
-                  color: "#fff", fontSize: 20, cursor: "pointer", opacity: 0.7, padding: "4px 8px" }}>×</button>
+                  color: "#fff", fontSize: 20, cursor: "pointer", opacity: 0.7, padding: "4px 8px" }}>Ã</button>
 
               {/* Contador */}
               {itemsNav.length > 1 && (
@@ -1703,14 +1703,14 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
                   backdropFilter: "blur(4px)", transition: "background 0.2s", zIndex: 2001 }}
                 onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.25)"}
                 onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.12)"}>
-                ›
+                âº
               </button>
             )}
           </div>
         );
       })()}
 
-      {/* Modal selección fotos a mejorar */}
+      {/* Modal selecciÃ³n fotos a mejorar */}
     {showModalMejora && (() => {
       const fotosDisp = media.filter(m => m.tipo === "foto");
       return (
@@ -1721,13 +1721,13 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
             <div style={{ padding: "20px 24px 16px", borderBottom: "1px solid var(--border)" }}>
               <div style={{ fontSize: 10, color: "var(--gold)", letterSpacing: "0.2em",
                 textTransform: "uppercase", fontFamily: "Inter, sans-serif", marginBottom: 4 }}>
-                Nativa Properties · IA
+                Nativa Properties Â· IA
               </div>
               <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 600 }}>
-                Mejorar <em>fotografías</em>
+                Mejorar <em>fotografÃ­as</em>
               </div>
               <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 6, fontFamily: "Inter, sans-serif" }}>
-                Selecciona las fotografías que quieres mejorar. Se procesarán en secuencia.
+                Selecciona las fotografÃ­as que quieres mejorar. Se procesarÃ¡n en secuencia.
               </div>
             </div>
             <div style={{ padding: "10px 24px", borderBottom: "1px solid var(--border)",
@@ -1771,7 +1771,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
                         borderRadius: "50%", background: sel ? "var(--gold-l)" : "rgba(255,255,255,0.85)",
                         border: sel ? "none" : "2px solid #ccc",
                         display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        {sel && <span style={{ color: "#fff", fontSize: 12, fontWeight: 700, lineHeight: 1 }}>✓</span>}
+                        {sel && <span style={{ color: "#fff", fontSize: 12, fontWeight: 700, lineHeight: 1 }}>â</span>}
                       </div>
                     </div>
                   );
@@ -1806,7 +1806,7 @@ function MediaSection({ propiedadId, propRef, onCountUpdate, tiposPermitidos, cu
 
 const DOC_TIPOS = [
   { key: "nota_simple", label: "Nota Simple", iconKey: "clipboard" },
-  { key: "descripcion_catastral", label: "Descripción Catastral", iconKey: "map" },
+  { key: "descripcion_catastral", label: "DescripciÃ³n Catastral", iconKey: "map" },
   { key: "hoja_encargo", label: "Hoja de Encargo", iconKey: "pencil" },
   { key: "escritura", label: "Escritura", iconKey: "scroll" },
   { key: "ibi_recibo", label: "Recibo IBI", iconKey: "bank" },
@@ -1857,7 +1857,7 @@ function DocsSection({ propiedadId, propRef }) {
 
         if (uploadError) {
           console.error("Upload storage error:", uploadError);
-          await reportarError({ modulo: "Propiedades – Documentos", accion: "Subir documento", mensaje: uploadError.message });
+          await reportarError({ modulo: "Propiedades â Documentos", accion: "Subir documento", mensaje: uploadError.message });
           errores++;
           continue;
         }
@@ -1876,12 +1876,12 @@ function DocsSection({ propiedadId, propRef }) {
           });
           if (dbError) {
             console.error("DB insert error:", dbError);
-            await reportarError({ modulo: "Propiedades – Documentos", accion: "Guardar documento en BD", mensaje: dbError.message });
+            await reportarError({ modulo: "Propiedades â Documentos", accion: "Guardar documento en BD", mensaje: dbError.message });
             errores++;
           }
         }
       } catch (e) {
-        await reportarError({ modulo: "Propiedades – Documentos", accion: "Subir documento", error: e });
+        await reportarError({ modulo: "Propiedades â Documentos", accion: "Subir documento", error: e });
         errores++;
       }
     }
@@ -1967,7 +1967,7 @@ function DocsSection({ propiedadId, propRef }) {
             />
           </label>
         </div>
-        <div style={{ fontSize: 10, color: "#C8BFB0", marginTop: 8 }}>PDF, Word, Excel, imagenes — max 10MB por archivo</div>
+        <div style={{ fontSize: 10, color: "#C8BFB0", marginTop: 8 }}>PDF, Word, Excel, imagenes â max 10MB por archivo</div>
       </div>
 
       {/* Documents list grouped by tipo */}
@@ -1995,14 +1995,14 @@ function DocsSection({ propiedadId, propRef }) {
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: 12, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{doc.nombre}</div>
                       <div style={{ fontSize: 10, color: "#C8BFB0", marginTop: 2 }}>
-                        {formatSize(doc.tamano)} — {new Date(doc.created_at).toLocaleDateString("es-ES")}
+                        {formatSize(doc.tamano)} â {new Date(doc.created_at).toLocaleDateString("es-ES")}
                       </div>
                     </div>
                     <a href={doc.url} target="_blank" rel="noopener noreferrer"
                       style={{ fontSize: 10, color: "var(--success)", textDecoration: "none", padding: "4px 10px", border: "1px solid #8FA88A33", borderRadius: 0 }}>
                       Abrir
                     </a>
-                    <button onClick={() => { if (confirm("Eliminar " + doc.nombre + "?")) handleDelete(doc); }} style={btnDel}>×</button>
+                    <button onClick={() => { if (confirm("Eliminar " + doc.nombre + "?")) handleDelete(doc); }} style={btnDel}>Ã</button>
                   </div>
                 ))}
               </div>
@@ -2064,11 +2064,11 @@ function QualRow({ items, onChange, color, symbol }) {
             placeholder={"Punto " + (i + 1)}
             style={{ flex: 1, padding: "8px 12px", background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, color: "var(--text)", fontSize: 12, fontFamily: "Inter, sans-serif", outline: "none", boxSizing: "border-box" }}
           />
-          <button onClick={() => removeRow(i)} style={{ background: "none", border: "none", color: "#C8BFB0", cursor: "pointer", fontSize: 16, lineHeight: 1, padding: "0 4px", flexShrink: 0 }}>×</button>
+          <button onClick={() => removeRow(i)} style={{ background: "none", border: "none", color: "#C8BFB0", cursor: "pointer", fontSize: 16, lineHeight: 1, padding: "0 4px", flexShrink: 0 }}>Ã</button>
         </div>
       ))}
       <button onClick={addRow} style={{ marginTop: 4, background: "none", border: `1px dashed ${color}`, color: color, fontSize: 11, fontWeight: 600, cursor: "pointer", padding: "5px 12px", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
-        + Añadir punto
+        + AÃ±adir punto
       </button>
     </div>
   );
@@ -2104,7 +2104,7 @@ function PropCard({ p, onClick }) {
             <Tag color={est.accent}>{est.label}</Tag>
             <Tag>{p.op}</Tag>
           </div>
-          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 600, color: "var(--text)", lineHeight: 1.3 }}>{p.ref} – {p.titulo}</div>
+          <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, fontWeight: 600, color: "var(--text)", lineHeight: 1.3 }}>{p.ref} â {p.titulo}</div>
           <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 4 }}>{p.zona}, {p.municipio} - {p.tipo}</div>
         </div>
         <div style={{ textAlign: "right", flexShrink: 0 }}>
@@ -2129,14 +2129,14 @@ function PropCard({ p, onClick }) {
             color: p.idealista_estado === "publicada" ? "var(--success)" : p.idealista_estado === "no_publicada" ? "var(--danger)" : "var(--gold)",
             border: "1px solid " + (p.idealista_estado === "publicada" ? "var(--success)44" : p.idealista_estado === "no_publicada" ? "var(--danger)44" : "var(--gold)44")
           }}>
-            {p.idealista_estado === "publicada" ? "✓ Idealista" : p.idealista_estado === "no_publicada" ? "✗ No en Idealista" : "↻ Idealista"}
+            {p.idealista_estado === "publicada" ? "â Idealista" : p.idealista_estado === "no_publicada" ? "â No en Idealista" : "â» Idealista"}
           </span>
         )}
         {p.ref && (() => {
           const webUrl = `https://mallorcanativaproperties.com/propiedades/${p.ref.toLowerCase()}/`;
           return (
             <button
-              onClick={e => { e.stopPropagation(); navigator.clipboard.writeText(webUrl); e.currentTarget.textContent = "✓ Copiado"; setTimeout(() => { if(e.currentTarget) e.currentTarget.textContent = "Copiar link web"; }, 2000); }}
+              onClick={e => { e.stopPropagation(); navigator.clipboard.writeText(webUrl); e.currentTarget.textContent = "â Copiado"; setTimeout(() => { if(e.currentTarget) e.currentTarget.textContent = "Copiar link web"; }, 2000); }}
               style={{ marginLeft: "auto", fontSize: 11, color: "var(--gold)", background: "none", border: "1px solid var(--gold-l)33", padding: "2px 10px", cursor: "pointer", letterSpacing: "0.04em", flexShrink: 0, fontFamily: "Inter, sans-serif" }}>
               Copiar link web
             </button>
@@ -2168,7 +2168,7 @@ function PropCard({ p, onClick }) {
 }
 
 function PropDetail({ p, currentUser, onClose, onUpdate, onDelete, onDuplicate }) {
-  // ─── SISTEMA DE PERMISOS ─────────────────────────────────────
+  // âââ SISTEMA DE PERMISOS âââââââââââââââââââââââââââââââââââââ
   const rol = currentUser?.role?.toLowerCase() || "agente";
   const isAdmin  = rol === "director" || rol === "administrador"; // director o administrador
   const isAgente = rol === "agente";
@@ -2184,8 +2184,8 @@ function PropDetail({ p, currentUser, onClose, onUpdate, onDelete, onDuplicate }
   const puedeEditarPrecio = isAdmin || esAgentePropietario;
   // Publicar en Idealista: admin siempre, agente solo si es su propiedad
   const puedePublicar = isAdmin || esAgentePropietario;
-  // ─────────────────────────────────────────────────────────────
-  const isDirector = isAdmin; // alias para compatibilidad con código existente
+  // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+  const isDirector = isAdmin; // alias para compatibilidad con cÃ³digo existente
   const est = ESTADOS.find((e) => e.key === p.estado) || ESTADOS[0];
   const hon = calcHon(p);
   const [aiDesc, setAiDesc] = useState("");
@@ -2198,7 +2198,7 @@ function PropDetail({ p, currentUser, onClose, onUpdate, onDelete, onDuplicate }
   const [calcDesde, setCalcDesde] = useState("venta"); // null | "saving" | "saved" | "error"
   const [semaforoStats, setSemaforoStats] = useState({ totalVisitas: 0, tieneOferta: false });
 
-  // Cargar stats para semáforo de precio
+  // Cargar stats para semÃ¡foro de precio
   useEffect(() => {
     if (p.estado !== "publicada") return;
     (async () => {
@@ -2238,7 +2238,7 @@ function PropDetail({ p, currentUser, onClose, onUpdate, onDelete, onDuplicate }
   const d = draft;
   const upd = (key, val) => setDraft(prev => ({ ...prev, [key]: val }));
 
-  // Autoguardado al salir de cualquier campo (onBlur) — solo propiedades existentes
+  // Autoguardado al salir de cualquier campo (onBlur) â solo propiedades existentes
   async function autoSave(currentDraft) {
     if (!currentDraft.id || !editMode) return;
     setAutoSaveStatus("saving");
@@ -2258,7 +2258,7 @@ function PropDetail({ p, currentUser, onClose, onUpdate, onDelete, onDuplicate }
     }
   }
 
-  // Calcula en tiempo real qué campos de Idealista faltan en el draft actual
+  // Calcula en tiempo real quÃ© campos de Idealista faltan en el draft actual
   const idealistaFieldErrors = useMemo(() => {
     const errs = new Set();
     const src = draft;
@@ -2290,17 +2290,17 @@ function PropDetail({ p, currentUser, onClose, onUpdate, onDelete, onDuplicate }
       else if (src.op === "Traspaso") errs.add("precioTraspaso");
       else errs.add("precioVenta");
     }
-    // m² construidos obligatorio excepto terrenos (que requieren m² parcela)
+    // mÂ² construidos obligatorio excepto terrenos (que requieren mÂ² parcela)
     const needsMConst = !["land","garage","storage"].includes(featuresType);
     if (needsMConst && (!Number(src.mConst) || Number(src.mConst) <= 0)) errs.add("mConst");
     if (featuresType === "land" && (!Number(src.mParcela) || Number(src.mParcela) <= 0)) errs.add("mParcela");
     if (!src.desc || !src.desc.trim()) errs.add("desc");
     if (needsBaths && (Number(src.banos)||0) + (Number(src.aseos)||0) <= 0) errs.add("banos");
-    // Alquiler — campos específicos Idealista
+    // Alquiler â campos especÃ­ficos Idealista
     if (src.op === "Alquiler") {
       if (!Number(src.fianzaMeses) || Number(src.fianzaMeses) <= 0) errs.add("fianzaMeses");
       if (!Number(src.duracionMinMeses) || Number(src.duracionMinMeses) <= 0) errs.add("duracionMinMeses");
-      // Solo para residencial — equipamiento obligatorio con asterisco en Idealista
+      // Solo para residencial â equipamiento obligatorio con asterisco en Idealista
       const ftAlq = TIPO_MAP_LOCAL[src.tipo] || "flat";
       if (["flat","house","rustic"].includes(ftAlq) && !src.alqEquipamiento) errs.add("alqEquipamiento");
     }
@@ -2489,7 +2489,7 @@ REGLAS:
   const [translatingEn, setTranslatingEn] = useState(false);
   const [translatingDe, setTranslatingDe] = useState(false);
 
-  // Comprime el texto español a máx chars manteniendo párrafos completos
+  // Comprime el texto espaÃ±ol a mÃ¡x chars manteniendo pÃ¡rrafos completos
   function comprimirTexto(texto, maxChars) {
     if (texto.length <= maxChars) return texto;
     const sep = "\n\n";
@@ -2509,7 +2509,7 @@ REGLAS:
 
   async function traducirAIngles() {
     const textoEs = draft.desc || "";
-    if (!textoEs.trim()) { setTranslateError("Escribe primero la descripción en español."); return; }
+    if (!textoEs.trim()) { setTranslateError("Escribe primero la descripciÃ³n en espaÃ±ol."); return; }
     setTranslatingEn(true);
     setTranslateError("");
     try {
@@ -2520,8 +2520,8 @@ REGLAS:
         body: JSON.stringify({
           model: "claude-haiku-4-5-20251001",
           max_tokens: 4096,
-          system: "Eres un traductor profesional especializado en textos inmobiliarios de lujo en Mallorca. Traduce al inglés manteniendo exactamente el mismo tono, estilo narrativo y estructura. El resultado debe caber en 3500 caracteres. Responde SOLO con la traducción, sin explicaciones.",
-          messages: [{ role: "user", content: "Traduce al inglés este texto inmobiliario:\n\n" + texto }],
+          system: "Eres un traductor profesional especializado en textos inmobiliarios de lujo en Mallorca. Traduce al inglÃ©s manteniendo exactamente el mismo tono, estilo narrativo y estructura. El resultado debe caber en 3500 caracteres. Responde SOLO con la traducciÃ³n, sin explicaciones.",
+          messages: [{ role: "user", content: "Traduce al inglÃ©s este texto inmobiliario:\n\n" + texto }],
         }),
       });
       const raw = await res.text();
@@ -2531,7 +2531,7 @@ REGLAS:
       const descEn = (data.text || "").trim().slice(0, 3500);
       if (descEn) { upd("descEn", descEn); draft.descEn = descEn; await autoSave({...draft, descEn}); }
     } catch(e) {
-      setTranslateError("Error al traducir al inglés: " + e.message);
+      setTranslateError("Error al traducir al inglÃ©s: " + e.message);
     } finally {
       setTranslatingEn(false);
     }
@@ -2539,7 +2539,7 @@ REGLAS:
 
   async function traducirAAleman() {
     const textoEs = draft.desc || "";
-    if (!textoEs.trim()) { setTranslateError("Escribe primero la descripción en español."); return; }
+    if (!textoEs.trim()) { setTranslateError("Escribe primero la descripciÃ³n en espaÃ±ol."); return; }
     setTranslatingDe(true);
     setTranslateError("");
     try {
@@ -2550,8 +2550,8 @@ REGLAS:
         body: JSON.stringify({
           model: "claude-haiku-4-5-20251001",
           max_tokens: 4096,
-          system: "Eres un traductor profesional especializado en textos inmobiliarios de lujo en Mallorca. Traduce al alemán manteniendo exactamente el mismo tono, estilo narrativo y estructura. El resultado debe caber en 3500 caracteres. Responde SOLO con la traducción, sin explicaciones.",
-          messages: [{ role: "user", content: "Traduce al alemán este texto inmobiliario:\n\n" + texto }],
+          system: "Eres un traductor profesional especializado en textos inmobiliarios de lujo en Mallorca. Traduce al alemÃ¡n manteniendo exactamente el mismo tono, estilo narrativo y estructura. El resultado debe caber en 3500 caracteres. Responde SOLO con la traducciÃ³n, sin explicaciones.",
+          messages: [{ role: "user", content: "Traduce al alemÃ¡n este texto inmobiliario:\n\n" + texto }],
         }),
       });
       const raw = await res.text();
@@ -2561,27 +2561,27 @@ REGLAS:
       const descDe = (data.text || "").trim().slice(0, 3500);
       if (descDe) { upd("descDe", descDe); draft.descDe = descDe; await autoSave({...draft, descDe}); }
     } catch(e) {
-      setTranslateError("Error al traducir al alemán: " + e.message);
+      setTranslateError("Error al traducir al alemÃ¡n: " + e.message);
     } finally {
       setTranslatingDe(false);
     }
   }
 
-  // Helper condicionalidad por tipo — debe ir después de todos los hooks
+  // Helper condicionalidad por tipo â debe ir despuÃ©s de todos los hooks
   const tipoActual = draft.tipo || p.tipo || "";
   const TIPO_MAP_COND = {
-    // Piso → flat
+    // Piso â flat
     Piso:"flat", Apartamento:"flat", Estudio:"flat", Loft:"flat",
     Atico:"flat", "Atico Duplex":"flat", Duplex:"flat", "Planta baja":"flat",
-    // Casa → house
+    // Casa â house
     Casa:"house", Chalet:"house", Adosado:"house", Bungalow:"house",
     Pareado:"house", Villa:"house", "Villa de Lujo":"house", "Casa Tipo Duplex":"house",
-    // Finca → rustic
+    // Finca â rustic
     "Finca rustica":"rustic", Finca:"rustic",
-    // Local/Nave → premises_commercial
+    // Local/Nave â premises_commercial
     "Local comercial":"premises_commercial", Oficina:"office",
     "Nave industrial":"premises_industrial", Almacen:"premises_industrial", Negocio:"premises_commercial",
-    // Terreno → land
+    // Terreno â land
     Parcela:"land", Solar:"land", "Terreno urbano":"land", "Terreno urbanizable":"land",
     "Terreno rustico":"land", "Terreno rural":"land", "Terreno industrial":"land",
     // Otros
@@ -2596,20 +2596,20 @@ REGLAS:
   const esTerreno = ft === "land";
   const tieneHab = ["flat","house","rustic"].includes(ft);
   const tieneCert = ["flat","house","rustic"].includes(ft);
-  // Gastos asociados — condicionados por tipo de operación Y tipo de propiedad
+  // Gastos asociados â condicionados por tipo de operaciÃ³n Y tipo de propiedad
   const opActual = d.op || "Compraventa";
   const esCompraventa = opActual === "Compraventa";
   const esAlquiler    = opActual === "Alquiler";
   const esTraspaso    = opActual === "Traspaso";
 
-  // IBI: solo compraventa y traspaso (el comprador/nuevo titular lo asumirá)
+  // IBI: solo compraventa y traspaso (el comprador/nuevo titular lo asumirÃ¡)
   const tieneIBI = esCompraventa || esTraspaso;
 
   // Comunidad: compraventa+traspaso para tipos que la tienen; alquiler solo en residencial (puede ir incluida)
   const tienesComunidadTipo = ["flat","house","premises_commercial","office","garage","storage"].includes(ft);
   const tieneComunidad = tienesComunidadTipo && (esCompraventa || esTraspaso || (esAlquiler && esResidencial));
 
-  // Basuras: compraventa y traspaso únicamente
+  // Basuras: compraventa y traspaso Ãºnicamente
   const tieneBasuras = esCompraventa || esTraspaso;
 
   // Derramas: solo compraventa, solo piso/casa
@@ -2634,14 +2634,14 @@ REGLAS:
   async function autoGenerateRef(agenteName) {
     const prefix = AGENTE_PREFIX[agenteName];
     if (!prefix) return "";
-    // Buscar todas las refs de este agente y encontrar el máximo número
+    // Buscar todas las refs de este agente y encontrar el mÃ¡ximo nÃºmero
     const { data: existing } = await supabase
       .from("propiedades")
       .select("ref")
       .like("ref", `${prefix}%`);
     let maxNum = 0;
     (existing || []).forEach(row => {
-      // Solo refs que empiecen exactamente con el prefijo (5 chars) seguido de dígitos
+      // Solo refs que empiecen exactamente con el prefijo (5 chars) seguido de dÃ­gitos
       const numStr = row.ref?.slice(prefix.length);
       if (numStr && /^\d+$/.test(numStr)) {
         maxNum = Math.max(maxNum, parseInt(numStr));
@@ -2671,39 +2671,39 @@ REGLAS:
             cualNeg: (draft.cualNegText || "").split("\n").filter(Boolean),
             destinos: draft.destinos || [],
           };
-          // Validar campos obligatorios — comportamiento según estado
+          // Validar campos obligatorios â comportamiento segÃºn estado
           if (idealistaFieldErrors.size > 0) {
-            const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","precioAlquiler":"Renta mensual","precioTraspaso":"Precio traspaso","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético","refCatastral":"Referencia catastral","fianzaMeses":"Fianza (meses)","duracionMinMeses":"Duración mínima (meses)","alqEquipamiento":"Equipamiento (cocina/mobiliario)"};
-            const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join("\n• ");
+            const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operaciÃ³n","dir":"DirecciÃ³n","municipio":"Municipio","cp":"CÃ³digo postal","precioVenta":"Precio de venta","precioAlquiler":"Renta mensual","precioTraspaso":"Precio traspaso","mConst":"mÂ² construidos","desc":"DescripciÃ³n","banos":"BaÃ±os","certEnerg":"Certificado energÃ©tico","refCatastral":"Referencia catastral","fianzaMeses":"Fianza (meses)","duracionMinMeses":"DuraciÃ³n mÃ­nima (meses)","alqEquipamiento":"Equipamiento (cocina/mobiliario)"};
+            const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join("\nâ¢ ");
             const esPublicada = (draft.estado || p.estado) === "publicada";
             if (esPublicada) {
               // Publicada: NO deja guardar
-              alert(" Esta propiedad está PUBLICADA.\n\nNo se puede guardar sin completar los campos obligatorios (*):\n\n• " + faltantes + "\n\nCompleta estos campos o cambia el estado a \'Captada\'.");
+              alert(" Esta propiedad estÃ¡ PUBLICADA.\n\nNo se puede guardar sin completar los campos obligatorios (*):\n\nâ¢ " + faltantes + "\n\nCompleta estos campos o cambia el estado a \'Captada\'.");
               return;
             } else {
               // Captada: avisa pero deja guardar
-              if (!confirm("⚠ Hay campos obligatorios (*) sin completar:\n\n• " + faltantes + "\n\nSi guardas así, la propiedad NO podrá publicarse en Idealista.\n\n¿Guardar igualmente?")) return;
+              if (!confirm("â  Hay campos obligatorios (*) sin completar:\n\nâ¢ " + faltantes + "\n\nSi guardas asÃ­, la propiedad NO podrÃ¡ publicarse en Idealista.\n\nÂ¿Guardar igualmente?")) return;
             }
           }
           if (onUpdate) onUpdate(toSave);
         }}
           style={{ display: "none" }}>Guardar</button>}
 
-        {/* Header pantalla completa — estilo cuestionario */}
+        {/* Header pantalla completa â estilo cuestionario */}
         <div style={{ marginBottom: 36, borderBottom: "1px solid var(--border)", paddingBottom: 28, display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
           <div>
             <div style={{ fontSize: 10, color: "var(--gold)", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 10, fontWeight: 500 }}>Nativa Properties</div>
             <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Cartera de Propiedades</h1>
-        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Ficha completa de la propiedad con documentación, medios y actividad</p>
+        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Ficha completa de la propiedad con documentaciÃ³n, medios y actividad</p>
         <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />
           </div>
-          {/* Botones de acción en header */}
+          {/* Botones de acciÃ³n en header */}
           <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
             {p.ref && (
               <button onClick={e => {
                 const url = `https://mallorcanativaproperties.com/propiedades/${p.ref.toLowerCase()}/`;
                 navigator.clipboard.writeText(url);
-                e.currentTarget.textContent = "✓ Copiado";
+                e.currentTarget.textContent = "â Copiado";
                 setTimeout(() => { if(e.currentTarget) e.currentTarget.textContent = "Copiar link web"; }, 2000);
               }} style={{ padding: "8px 16px", borderRadius: 0, border: "1px solid var(--gold)44", background: "transparent", color: "var(--gold)", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
                 Copiar link web
@@ -2711,13 +2711,13 @@ REGLAS:
             )}
             <button onClick={() => {
               if (idealistaFieldErrors.size > 0) {
-                const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","precioAlquiler":"Renta mensual","precioTraspaso":"Precio traspaso","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético","refCatastral":"Referencia catastral","fianzaMeses":"Fianza (meses)","duracionMinMeses":"Duración mínima (meses)","alqEquipamiento":"Equipamiento (cocina/mobiliario)"};
-                const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join("\n• ");
-                if (!confirm("⚠ Campos con * sin completar:\n\n• " + faltantes + "\n\n¿Volver sin guardar igualmente?")) return;
+                const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operaciÃ³n","dir":"DirecciÃ³n","municipio":"Municipio","cp":"CÃ³digo postal","precioVenta":"Precio de venta","precioAlquiler":"Renta mensual","precioTraspaso":"Precio traspaso","mConst":"mÂ² construidos","desc":"DescripciÃ³n","banos":"BaÃ±os","certEnerg":"Certificado energÃ©tico","refCatastral":"Referencia catastral","fianzaMeses":"Fianza (meses)","duracionMinMeses":"DuraciÃ³n mÃ­nima (meses)","alqEquipamiento":"Equipamiento (cocina/mobiliario)"};
+                const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join("\nâ¢ ");
+                if (!confirm("â  Campos con * sin completar:\n\nâ¢ " + faltantes + "\n\nÂ¿Volver sin guardar igualmente?")) return;
               }
               onClose();
             }} style={{ padding: "8px 20px", borderRadius: 0, border: "1px solid var(--border)", background: "transparent", color: "var(--muted)", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
-              ← Volver
+              â Volver
             </button>
             {puedeEditar && <button onClick={() => { if (onDuplicate) onDuplicate(p); }} style={{ padding: "8px 20px", borderRadius: 0, border: "1px solid var(--gold)44", background: "transparent", color: "var(--gold)", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
               Duplicar
@@ -2733,14 +2733,14 @@ REGLAS:
                 destinos: draft.destinos || [],
               };
               if (idealistaFieldErrors.size > 0) {
-                const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","precioAlquiler":"Renta mensual","precioTraspaso":"Precio traspaso","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético","refCatastral":"Referencia catastral","fianzaMeses":"Fianza (meses)","duracionMinMeses":"Duración mínima (meses)","alqEquipamiento":"Equipamiento (cocina/mobiliario)"};
-                const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join("\n• ");
+                const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operaciÃ³n","dir":"DirecciÃ³n","municipio":"Municipio","cp":"CÃ³digo postal","precioVenta":"Precio de venta","precioAlquiler":"Renta mensual","precioTraspaso":"Precio traspaso","mConst":"mÂ² construidos","desc":"DescripciÃ³n","banos":"BaÃ±os","certEnerg":"Certificado energÃ©tico","refCatastral":"Referencia catastral","fianzaMeses":"Fianza (meses)","duracionMinMeses":"DuraciÃ³n mÃ­nima (meses)","alqEquipamiento":"Equipamiento (cocina/mobiliario)"};
+                const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join("\nâ¢ ");
                 const esPublicada = (draft.estado || p.estado) === "publicada";
                 if (esPublicada) {
-                  alert(" Esta propiedad está PUBLICADA.\n\nNo se puede guardar sin completar los campos obligatorios (*):\n\n• " + faltantes + "\n\nCompleta estos campos o cambia el estado a 'Captada'.");
+                  alert(" Esta propiedad estÃ¡ PUBLICADA.\n\nNo se puede guardar sin completar los campos obligatorios (*):\n\nâ¢ " + faltantes + "\n\nCompleta estos campos o cambia el estado a 'Captada'.");
                   return;
                 } else {
-                  if (!confirm("⚠ Hay campos obligatorios (*) sin completar:\n\n• " + faltantes + "\n\nSi guardas así, la propiedad NO podrá publicarse en Idealista.\n\n¿Guardar igualmente?")) return;
+                  if (!confirm("â  Hay campos obligatorios (*) sin completar:\n\nâ¢ " + faltantes + "\n\nSi guardas asÃ­, la propiedad NO podrÃ¡ publicarse en Idealista.\n\nÂ¿Guardar igualmente?")) return;
                 }
               }
               if (onUpdate) onUpdate(toSave);
@@ -2752,19 +2752,19 @@ REGLAS:
         {/* Indicador autoguardado */}
         {editMode && autoSaveStatus && (
           <div style={{ position: "absolute", top: 22, left: 220, fontSize: 10, color: autoSaveStatus === "saved" ? "var(--success)" : autoSaveStatus === "error" ? "var(--danger)" : "var(--muted)", display: "flex", alignItems: "center", gap: 4 }}>
-            {autoSaveStatus === "saving" && <span>⏳ Guardando...</span>}
-            {autoSaveStatus === "saved" && <span>✓ Guardado</span>}
-            {autoSaveStatus === "error" && <span>✗ Error al guardar</span>}
+            {autoSaveStatus === "saving" && <span>â³ Guardando...</span>}
+            {autoSaveStatus === "saved" && <span>â Guardado</span>}
+            {autoSaveStatus === "error" && <span>â Error al guardar</span>}
           </div>
         )}
-        {/* Banner estado Idealista — solo visible en modo edición */}
+        {/* Banner estado Idealista â solo visible en modo ediciÃ³n */}
         {/* Aviso Idealista */}
         {editMode && (
           <div style={{ marginBottom: 24, padding: "12px 18px", background: idealistaReady ? "var(--success)10" : "var(--danger)08", border: "1px solid " + (idealistaReady ? "var(--success)30" : "var(--danger)25"), display: "flex", alignItems: "center", gap: 12 }}>
-            <span style={{ fontSize: 18 }}>{idealistaReady ? "✓" : "⚠"}</span>
+            <span style={{ fontSize: 18 }}>{idealistaReady ? "â" : "â "}</span>
             <span style={{ fontSize: 12, color: idealistaReady ? "var(--success)" : "var(--danger)", fontWeight: 600, fontFamily: "Inter, sans-serif", letterSpacing: "0.02em" }}>
               {idealistaReady
-                ? "Propiedad lista para Idealista — todos los campos requeridos están completos"
+                ? "Propiedad lista para Idealista â todos los campos requeridos estÃ¡n completos"
                 : idealistaFieldErrors.size + " campo(s) requerido(s) para Idealista sin completar"}
             </span>
           </div>
@@ -2774,12 +2774,12 @@ REGLAS:
         <div style={{ marginBottom: 24 }}>
           {editMode ? (
             <>
-              {/* Fila: REF + Operación + Tipo */}
-              {/* Título — primero, igual que en el formulario */}
-              <input type="text" value={d.titulo || ""} onChange={e => upd("titulo", e.target.value)} onBlur={() => autoSave(draft)} placeholder="Título de la propiedad"
+              {/* Fila: REF + OperaciÃ³n + Tipo */}
+              {/* TÃ­tulo â primero, igual que en el formulario */}
+              <input type="text" value={d.titulo || ""} onChange={e => upd("titulo", e.target.value)} onBlur={() => autoSave(draft)} placeholder="TÃ­tulo de la propiedad"
                 style={{ width: "100%", background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, color: "var(--text)", padding: "10px 14px", fontSize: 20, fontFamily: "'Playfair Display', serif", marginBottom: 16, boxSizing: "border-box" }} />
 
-              {/* Agente, Referencia, Tipo operación — misma estética que formulario */}
+              {/* Agente, Referencia, Tipo operaciÃ³n â misma estÃ©tica que formulario */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "0 16px" }}>
                 <div style={{ marginBottom: 14 }}>
                   <label style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
@@ -2816,7 +2816,7 @@ REGLAS:
                 </div>
               </div>
 
-              {/* Tipo de propiedad — ancho completo con groups, igual que formulario */}
+              {/* Tipo de propiedad â ancho completo con groups, igual que formulario */}
               <div style={{ marginBottom: 14 }}>
                 <label style={{ fontSize: 10, fontWeight: 600, color: idealistaFieldErrors.has("tipo") ? "var(--danger)" : "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
                   Tipo de propiedad<span style={{ color: "var(--amber)", marginLeft: 3 }}>*</span>
@@ -2841,15 +2841,15 @@ REGLAS:
                 <Tag>{p.tipo}</Tag>
               </div>
               <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 400, color: "var(--text)", margin: 0, lineHeight: 1.2 }}>{p.titulo}</h2>
-              <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 8 }}>Captada {p.fechaCap} · Agente: <strong style={{ color: "var(--text)" }}>{p.agente}</strong></div>
+              <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 8 }}>Captada {p.fechaCap} Â· Agente: <strong style={{ color: "var(--text)" }}>{p.agente}</strong></div>
               {p.destinos?.includes("Idealista") && <div style={{ marginTop: 6 }}>
                 <span style={{ fontSize: 10, padding: "3px 10px", letterSpacing: "0.06em",
                   background: p.idealistaEstado === "publicada" ? "var(--success)18" : p.idealistaEstado === "no_publicada" ? "var(--danger)18" : "var(--gold)18",
                   color: p.idealistaEstado === "publicada" ? "var(--success)" : p.idealistaEstado === "no_publicada" ? "var(--danger)" : "var(--gold)",
                   border: "1px solid " + (p.idealistaEstado === "publicada" ? "var(--success)44" : p.idealistaEstado === "no_publicada" ? "var(--danger)44" : "var(--gold)44")
                 }}>
-                  {p.idealistaEstado === "publicada" ? "✓ Confirmado en Idealista" : p.idealistaEstado === "no_publicada" ? "⚠ No encontrado en Idealista — revisar" : "↻ Pendiente verificación"}
-                  {p.idealistaCheck && <span style={{ color: "var(--muted)", marginLeft: 6 }}>· {new Date(p.idealistaCheck).toLocaleDateString("es-ES")}</span>}
+                  {p.idealistaEstado === "publicada" ? "â Confirmado en Idealista" : p.idealistaEstado === "no_publicada" ? "â  No encontrado en Idealista â revisar" : "â» Pendiente verificaciÃ³n"}
+                  {p.idealistaCheck && <span style={{ color: "var(--muted)", marginLeft: 6 }}>Â· {new Date(p.idealistaCheck).toLocaleDateString("es-ES")}</span>}
                 </span>
               </div>}
             </>
@@ -2863,14 +2863,14 @@ REGLAS:
 
         <div style={sep} />
 
-        {/* ══ SECCIONES GRANDES ══ */}
+        {/* ââ SECCIONES GRANDES ââ */}
         {(() => {
           const secs = seccionesPorEstado(editMode ? draft.estado : p.estado);
           return (
             <>
-            {/* ── INFORMACIÓN DE LA PROPIEDAD ── */}
+            {/* ââ INFORMACIÃN DE LA PROPIEDAD ââ */}
             <SeccionGrande
-              title="Información de la propiedad"
+              title="InformaciÃ³n de la propiedad"
               defaultOpen={secs.informacion}
               accentColor="var(--gold)"
             >
@@ -2887,7 +2887,7 @@ REGLAS:
               <span style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Estado de la propiedad</span>
             </div>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {/* ── Semáforo de precio — solo cuando está publicada ── */}
+              {/* ââ SemÃ¡foro de precio â solo cuando estÃ¡ publicada ââ */}
               {(editMode ? draft.estado : p.estado) === "publicada" && (() => {
                 const diasMercado = p.fechaPublicacion
                   ? Math.floor((Date.now() - new Date(p.fechaPublicacion)) / 86400000)
@@ -2896,10 +2896,10 @@ REGLAS:
                 const esRojo = diasMercado >= 45 || totalVisitas >= 10;
                 const esAmbar = !esRojo && (diasMercado >= 30 || (totalVisitas >= 5 && !tieneOferta));
                 const semaforo = esRojo
-                  ? { color: "var(--danger)", iconKey: "dot-red", label: `${diasMercado} días en mercado · ${totalVisitas} visita${totalVisitas !== 1 ? "s" : ""} — Revisar precio`, msg: "Solicita una valoración actualizada a tu Agente de Referencia." }
+                  ? { color: "var(--danger)", iconKey: "dot-red", label: `${diasMercado} dÃ­as en mercado Â· ${totalVisitas} visita${totalVisitas !== 1 ? "s" : ""} â Revisar precio`, msg: "Solicita una valoraciÃ³n actualizada a tu Agente de Referencia." }
                   : esAmbar
-                  ? { color: "#C8820A", iconKey: "dot-yellow", label: `${diasMercado} días en mercado · ${totalVisitas} visita${totalVisitas !== 1 ? "s" : ""} — Atención`, msg: totalVisitas >= 5 ? "Hay visitas pero sin oferta. Considera revisar el precio." : "La propiedad lleva más de 30 días publicada. Considera revisar la estrategia de precio." }
-                  : { color: "var(--success)", iconKey: "dot-green", label: `${diasMercado} días en mercado · ${totalVisitas} visita${totalVisitas !== 1 ? "s" : ""}`, msg: null };
+                  ? { color: "#C8820A", iconKey: "dot-yellow", label: `${diasMercado} dÃ­as en mercado Â· ${totalVisitas} visita${totalVisitas !== 1 ? "s" : ""} â AtenciÃ³n`, msg: totalVisitas >= 5 ? "Hay visitas pero sin oferta. Considera revisar el precio." : "La propiedad lleva mÃ¡s de 30 dÃ­as publicada. Considera revisar la estrategia de precio." }
+                  : { color: "var(--success)", iconKey: "dot-green", label: `${diasMercado} dÃ­as en mercado Â· ${totalVisitas} visita${totalVisitas !== 1 ? "s" : ""}`, msg: null };
                 return (
                   <div style={{
                     gridColumn: "1/-1", padding: "10px 14px", marginBottom: 8,
@@ -2941,7 +2941,7 @@ REGLAS:
                           ...prev,
                           estado: e.key,
                           destinos: [],
-                          // Al pasar a arras, retirar de portales automáticamente
+                          // Al pasar a arras, retirar de portales automÃ¡ticamente
                           ...(e.key === "arras" ? { destinos: [] } : {}),
                         }));
                       }
@@ -3011,7 +3011,7 @@ REGLAS:
                 </div>
               );
             })()}
-            {/* Zona — dependiente del municipio seleccionado */}
+            {/* Zona â dependiente del municipio seleccionado */}
             {(() => {
               const zonaOpts = d.municipio && ZONAS_MAP[d.municipio] ? ZONAS_MAP[d.municipio] : [];
               const inputStyle = { width: "100%", background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, color: "var(--text)", padding: "10px 14px", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" };
@@ -3094,16 +3094,16 @@ REGLAS:
                   <div style={{ width: 80, background: "var(--cream)", border: "1px solid var(--border)", borderRadius: 0, color: "var(--gold)", padding: "6px 8px", fontSize: 13, fontFamily: "Inter, sans-serif", fontWeight: 700, textAlign: "center" }}>
                     {(Number(d.habDobles)||0)+(Number(d.habSimples)||0)}
                   </div>
-                  <span style={{ fontSize: 10, color: "var(--muted)" }}>Calculado automáticamente — se envía a Idealista</span>
+                  <span style={{ fontSize: 10, color: "var(--muted)" }}>Calculado automÃ¡ticamente â se envÃ­a a Idealista</span>
                 </div>
               </div>
               <div style={{ marginBottom: 10 }}>
-                <div style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Total baños (Idealista) *</div>
+                <div style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Total baÃ±os (Idealista) *</div>
                 <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                   <div style={{ width: 80, background: "var(--cream)", border: "1px solid var(--border)", borderRadius: 0, color: "var(--gold)", padding: "6px 8px", fontSize: 13, fontFamily: "Inter, sans-serif", fontWeight: 700, textAlign: "center" }}>
                     {(Number(d.banos)||0)+(Number(d.aseos)||0)}
                   </div>
-                  <span style={{ fontSize: 10, color: "var(--muted)" }}>Baños + aseos — se envía a Idealista como bathNumber</span>
+                  <span style={{ fontSize: 10, color: "var(--muted)" }}>BaÃ±os + aseos â se envÃ­a a Idealista como bathNumber</span>
                 </div>
               </div>
             </div>
@@ -3117,7 +3117,7 @@ REGLAS:
           )}
           {esTerreno && <div style={{ ...g2, marginTop: 8 }}>
             {EFl({label: "m2 edificables", field: "mEdificable", pub: true, type: "number"})}
-            {EFl({label: "Tipo de acceso", field: "terrenoAcceso", pub: true, options: ["","Urbano","Carretera","Pista","Autovía/Autopista","Desconocido"], type: "select"})}
+            {EFl({label: "Tipo de acceso", field: "terrenoAcceso", pub: true, options: ["","Urbano","Carretera","Pista","AutovÃ­a/Autopista","Desconocido"], type: "select"})}
           </div>}
           {esTerreno && <div style={{ ...g4, marginTop: 8 }}>
             {EFl({label: "Luz", field: "terrenoLuz", pub: true, type: "toggle"})}
@@ -3169,33 +3169,33 @@ REGLAS:
             {EFl({label: "Incluye mobiliario", field: "ventaMobiliario", pub: true, type: "bool"})}
           </div>}
 
-          {/* Local / Nave: características específicas */}
+          {/* Local / Nave: caracterÃ­sticas especÃ­ficas */}
           {esComercial && (() => {
             const LBL = { fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 };
             const INP = { width: "100%", padding: "10px 14px", background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, color: "var(--text)", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" };
             const SEL = { ...INP, appearance: "none", WebkitAppearance: "none" };
             return (
               <div style={{ marginTop: 16 }}>
-                {/* Ubicación + Nº escaparates + Nº plantas */}
+                {/* UbicaciÃ³n + NÂº escaparates + NÂº plantas */}
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14, marginBottom: 14 }}>
                   <div>
-                    <label style={LBL}>Ubicación</label>
+                    <label style={LBL}>UbicaciÃ³n</label>
                     <select value={d.localUbicacion || ""} onChange={e => upd("localUbicacion", e.target.value)} style={SEL}>
-                      <option value="">— Sin especificar —</option>
+                      <option value="">â Sin especificar â</option>
                       <option value="pie_calle">Pie de calle</option>
                       <option value="centro_comercial">Centro comercial</option>
                       <option value="entreplanta">Entreplanta</option>
-                      <option value="sotano">Sótano</option>
+                      <option value="sotano">SÃ³tano</option>
                       <option value="planta_superior">Planta superior</option>
                       <option value="otros">Otros</option>
                     </select>
                   </div>
                   <div>
-                    <label style={LBL}>Nº escaparates</label>
+                    <label style={LBL}>NÂº escaparates</label>
                     <input type="number" min="0" value={d.localNEscaparates || ""} onChange={e => upd("localNEscaparates", e.target.value)} style={INP} />
                   </div>
                   <div>
-                    <label style={LBL}>Nº plantas</label>
+                    <label style={LBL}>NÂº plantas</label>
                     <input type="number" min="1" value={d.localNPlantas || ""} onChange={e => upd("localNPlantas", e.target.value)} style={INP} />
                   </div>
                 </div>
@@ -3204,10 +3204,10 @@ REGLAS:
                 <div style={{ marginBottom: 16 }}>
                   <label style={LBL}>Actividad comercial</label>
                   {[
-                    { grupo: "Hostelería", opciones: ["Bar","Restaurante","Cafetería","Discoteca / pub / sala","Hotel / hostal","Otros hostelería"] },
-                    { grupo: "Comercio", opciones: ["Alimentación","Moda y complementos","Electrónica","Mobiliario y decoración","Farmacia / parafarmacia","Joyería / relojería","Papelería / librería","Juguetería","Otros comercio"] },
-                    { grupo: "Servicios", opciones: ["Peluquería / estética","Lavandería / tintorería","Agencia de viajes","Inmobiliaria","Financiero / seguros","Clínica / centro médico","Centro de formación","Gimnasio / deporte","Otros servicios"] },
-                    { grupo: "Otras actividades", opciones: ["Taller / reparación","Almacén / logística","Industria ligera"] },
+                    { grupo: "HostelerÃ­a", opciones: ["Bar","Restaurante","CafeterÃ­a","Discoteca / pub / sala","Hotel / hostal","Otros hostelerÃ­a"] },
+                    { grupo: "Comercio", opciones: ["AlimentaciÃ³n","Moda y complementos","ElectrÃ³nica","Mobiliario y decoraciÃ³n","Farmacia / parafarmacia","JoyerÃ­a / relojerÃ­a","PapelerÃ­a / librerÃ­a","JugueterÃ­a","Otros comercio"] },
+                    { grupo: "Servicios", opciones: ["PeluquerÃ­a / estÃ©tica","LavanderÃ­a / tintorerÃ­a","Agencia de viajes","Inmobiliaria","Financiero / seguros","ClÃ­nica / centro mÃ©dico","Centro de formaciÃ³n","Gimnasio / deporte","Otros servicios"] },
+                    { grupo: "Otras actividades", opciones: ["Taller / reparaciÃ³n","AlmacÃ©n / logÃ­stica","Industria ligera"] },
                   ].map(({ grupo, opciones }) => (
                     <div key={grupo} style={{ marginBottom: 10 }}>
                       <div style={{ fontSize: 9, fontWeight: 700, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>{grupo}</div>
@@ -3243,10 +3243,10 @@ REGLAS:
                   <label style={LBL}>Equipamiento</label>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 24px" }}>
                     {[
-                      ["localCalefaccion","Calefacción"],["localAC","Aire acondicionado"],
+                      ["localCalefaccion","CalefacciÃ³n"],["localAC","Aire acondicionado"],
                       ["localSalidaHumos","Salida de humos"],["localCocinaEquipada","Cocina equipada"],
                       ["localPuertaSeguridad","Puerta de seguridad"],["localAlarma","Alarma"],
-                      ["localCCTV","CCTV"],["localAlmacen","Almacén en edificio"],
+                      ["localCCTV","CCTV"],["localAlmacen","AlmacÃ©n en edificio"],
                       ["localHaceEsquina","Hace esquina"],["localEntradaAuxiliar","Entrada auxiliar"],
                       ["localTieneOficina","Oficina en local"],
                     ].map(([key, lbl]) => (
@@ -3264,7 +3264,7 @@ REGLAS:
         </Sec>}
         <div style={sep} />
 
-        {/* Extras y dotaciones — separado de características, igual que cuestionario */}
+        {/* Extras y dotaciones â separado de caracterÃ­sticas, igual que cuestionario */}
         {(esResidencial || esComercial || esGaraje || esTrastero) && <Sec title="Extras y dotaciones">
           {tieneExtras && <div style={{ ...g4, marginTop: 4 }}>
             {EFl({label: "Terraza", field: "terraza", pub: true, type: "bool"})}
@@ -3293,7 +3293,7 @@ REGLAS:
                     }} style={{ width: 36, height: 20, borderRadius: 0, border: "none", background: aireVal ? "var(--success)" : "var(--border)", cursor: "pointer", position: "relative", transition: "background 0.2s", flexShrink: 0 }}>
                       <span style={{ position: "absolute", top: 2, left: aireVal ? 18 : 2, width: 16, height: 16, borderRadius: "50%", background: "#fff", transition: "left 0.2s", display: "block" }} />
                     </button>
-                    <span style={{ fontSize: 12 }}>{aireVal ? "Sí" : "No"}</span>
+                    <span style={{ fontSize: 12 }}>{aireVal ? "SÃ­" : "No"}</span>
                   </div>
                 </div>
                 {aireVal && (
@@ -3315,15 +3315,15 @@ REGLAS:
           {esResidencial && <div style={{ ...g4, marginTop: 8 }}>
             {EFl({label: "Alarma seguridad", field: "alarmaSeguridad", pub: true, type: "bool"})}
             {EFl({label: "Plantas edificio", field: "plantasEdificio", pub: true, type: "number"})}
-            {EFl({label: "Ocupacion actual", field: "ocupacionActual", pub: true, options: ["","Vacía","Alquilada","Ocupada"], type: "select"})}
+            {EFl({label: "Ocupacion actual", field: "ocupacionActual", pub: true, options: ["","VacÃ­a","Alquilada","Ocupada"], type: "select"})}
             <div />
           </div>}
           {esGaraje && <div style={{ ...g2, marginTop: 8 }}>
-            {EFl({label: "Tipo de garaje (capacidad)", field: "tipoGaraje", pub: true, options: ["","Coche compacto","Coche sedán","Moto","Coche y moto","Dos coches o más","Desconocido"], type: "select"})}
-            {EFl({label: "Tipología plaza", field: "garajeTipo", pub: true, options: ["","Plaza aparcamiento","Trastero/Depósito","Desconocido"], type: "select"})}
+            {EFl({label: "Tipo de garaje (capacidad)", field: "tipoGaraje", pub: true, options: ["","Coche compacto","Coche sedÃ¡n","Moto","Coche y moto","Dos coches o mÃ¡s","Desconocido"], type: "select"})}
+            {EFl({label: "TipologÃ­a plaza", field: "garajeTipo", pub: true, options: ["","Plaza aparcamiento","Trastero/DepÃ³sito","Desconocido"], type: "select"})}
           </div>}
           {esGaraje && <div style={{ ...g2, marginTop: 8 }}>
-            {EFl({label: "Puerta automática", field: "garajePuertaAuto", pub: true, type: "toggle"})}
+            {EFl({label: "Puerta automÃ¡tica", field: "garajePuertaAuto", pub: true, type: "toggle"})}
             {EFl({label: "Plaza cubierta", field: "garajePlazaCubierta", pub: true, type: "toggle"})}
           </div>}
           {!esGaraje && <div style={{ ...g2, marginTop: 8 }}>
@@ -3331,8 +3331,8 @@ REGLAS:
             {EFl({label: "N plazas", field: "nPlazas", pub: true, type: "number"})}
           </div>}
           {!esGaraje && (draft?.parking === "Si" || draft?.parking === "Opcional") && <div style={{ ...g2, marginTop: 8 }}>
-            {EFl({label: "Precio garaje aparte (€)", field: "precioParking", pub: true, type: "number"})}
-            <div><div style={{ fontSize: 10, color: "var(--muted)", marginTop: 4 }}>Dejar vacío si el garaje va incluido en el precio</div></div>
+            {EFl({label: "Precio garaje aparte (â¬)", field: "precioParking", pub: true, type: "number"})}
+            <div><div style={{ fontSize: 10, color: "var(--muted)", marginTop: 4 }}>Dejar vacÃ­o si el garaje va incluido en el precio</div></div>
           </div>}
         </Sec>}
         <div style={sep} />
@@ -3352,9 +3352,9 @@ REGLAS:
 
         
 
-        {/* Publicacion — solo visible si puede ver precios */}
+        {/* Publicacion â solo visible si puede ver precios */}
         {puedeVerPrecios && <Sec title="Datos de venta">
-          {/* Precios — editable/calculado según calcDesde */}
+          {/* Precios â editable/calculado segÃºn calcDesde */}
           <DatosVentaPanel
             d={d}
             editMode={editMode}
@@ -3404,7 +3404,7 @@ REGLAS:
             </div>
           )}
 
-          {/* Descripción ES — obligatoria */}
+          {/* DescripciÃ³n ES â obligatoria */}
           <div style={{ marginTop: 16 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 3 }}>
               <span style={{ fontSize: 10, fontWeight: 600, color: idealistaFieldErrors.has("desc") ? "var(--danger)" : "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
@@ -3425,23 +3425,23 @@ REGLAS:
             {idealistaFieldErrors.has("desc") && <div style={{ fontSize: 10, color: "var(--danger)", marginTop: 3 }}>Requerido para Idealista</div>}
           </div>
 
-          {/* Botones de traducción */}
+          {/* Botones de traducciÃ³n */}
           <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
             <button onClick={traducirAIngles} disabled={translatingEn || translatingDe}
               style={{ padding: "9px 18px", borderRadius: 0, border: "1px solid #405c6b", background: translatingEn ? "var(--border)" : "transparent", color: translatingEn ? "var(--muted)" : "#405c6b", cursor: (translatingEn || translatingDe) ? "default" : "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 8 }}>
-              {translatingEn ? (<><span style={{ display: "inline-block", width: 12, height: 12, border: "2px solid var(--muted)", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />Traduciendo...</>) : " Traducir al inglés"}
+              {translatingEn ? (<><span style={{ display: "inline-block", width: 12, height: 12, border: "2px solid var(--muted)", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />Traduciendo...</>) : " Traducir al inglÃ©s"}
             </button>
             <button onClick={traducirAAleman} disabled={translatingEn || translatingDe}
               style={{ padding: "9px 18px", borderRadius: 0, border: "1px solid #405c6b", background: translatingDe ? "var(--border)" : "transparent", color: translatingDe ? "var(--muted)" : "#405c6b", cursor: (translatingEn || translatingDe) ? "default" : "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 8 }}>
-              {translatingDe ? (<><span style={{ display: "inline-block", width: 12, height: 12, border: "2px solid var(--muted)", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />Traduciendo...</>) : " Traducir al alemán"}
+              {translatingDe ? (<><span style={{ display: "inline-block", width: 12, height: 12, border: "2px solid var(--muted)", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />Traduciendo...</>) : " Traducir al alemÃ¡n"}
             </button>
             {translateError && <span style={{ fontSize: 11, color: "var(--danger)" }}>{translateError}</span>}
           </div>
 
-          {/* Descripción EN — opcional */}
+          {/* DescripciÃ³n EN â opcional */}
           <div style={{ marginTop: 16 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 3 }}>
-              <span style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Descripcion EN <span style={{ fontSize: 9, color: "var(--muted)", fontWeight: 400 }}>(opcional — Idealista usuarios inglés)</span></span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Descripcion EN <span style={{ fontSize: 9, color: "var(--muted)", fontWeight: 400 }}>(opcional â Idealista usuarios inglÃ©s)</span></span>
               <span id="desc-en-counter" style={{ fontSize: 10, color: "var(--muted)" }}>{(d.descEn || "").length} / 4.000</span>
             </div>
             <textarea
@@ -3456,10 +3456,10 @@ REGLAS:
               style={{ width: "100%", background: "var(--white)", border: "1px solid var(--border)", borderRadius: 0, color: "var(--text)", padding: "14px 18px", fontSize: 13, fontFamily: "Inter, sans-serif", minHeight: 140, resize: "vertical", lineHeight: 1.6 }} />
           </div>
 
-          {/* Descripción DE — opcional */}
+          {/* DescripciÃ³n DE â opcional */}
           <div style={{ marginTop: 16 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 3 }}>
-              <span style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Descripcion DE <span style={{ fontSize: 9, color: "var(--muted)", fontWeight: 400 }}>(opcional — Idealista usuarios alemán)</span></span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Descripcion DE <span style={{ fontSize: 9, color: "var(--muted)", fontWeight: 400 }}>(opcional â Idealista usuarios alemÃ¡n)</span></span>
               <span id="desc-de-counter" style={{ fontSize: 10, color: "var(--muted)" }}>{(d.descDe || "").length} / 4.000</span>
             </div>
             <textarea
@@ -3536,7 +3536,7 @@ REGLAS:
                   }}
                   style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", borderRadius: 0, border: "2px solid " + (on ? "var(--success)" : "var(--muted)"), background: on ? "var(--success)15" : "var(--white)", cursor: canEdit ? "pointer" : "default", opacity: editMode && !canEdit ? 0.6 : 1, transition: "all 0.15s" }}>
                   <div style={{ width: 18, height: 18, borderRadius: 0, border: "2px solid " + (on ? "var(--success)" : "var(--muted)"), background: on ? "var(--success)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    {on && <span style={{ color: "var(--white)", fontSize: 12, fontWeight: 700, lineHeight: 1 }}>✓</span>}
+                    {on && <span style={{ color: "var(--white)", fontSize: 12, fontWeight: 700, lineHeight: 1 }}>â</span>}
                   </div>
                   <span style={{ fontSize: 13, fontWeight: 600, color: on ? "var(--success)" : "var(--text)", fontFamily: "Inter, sans-serif" }}>{dest}</span>
                 </div>
@@ -3588,9 +3588,9 @@ REGLAS:
           </div>
         </Sec>
 
-            </SeccionGrande>{/* fin INFORMACIÓN DE LA PROPIEDAD */}
+            </SeccionGrande>{/* fin INFORMACIÃN DE LA PROPIEDAD */}
 
-            {/* ── VISITAS Y DOCUMENTOS ── */}
+            {/* ââ VISITAS Y DOCUMENTOS ââ */}
             <SeccionGrande
               title="Visitas y documentos"
               defaultOpen={secs.visitas}
@@ -3601,29 +3601,375 @@ REGLAS:
               </div>
             </SeccionGrande>
 
-            {/* ── RESERVA A ARRAS ── */}
+            {/* ââ RESERVA A ARRAS ââ */}
+                        {/* ── RESERVA A ARRAS ── */}
             <SeccionGrande
               title="Reserva a arras"
               defaultOpen={secs.arras}
               accentColor="var(--amber)"
-              badge="Próximamente"
-              badgeColor="#C8820A"
             >
-              <div style={{ padding: "32px 0", textAlign: "center", color: "var(--muted)", fontSize: 13, fontFamily: "Inter, sans-serif" }}>
-                Esta sección se habilitará cuando la reserva esté completada (firmada por comprador, vendedor y pago confirmado).
-              </div>
+              {(() => {
+                const [arrasTab, setArrasTab] = React.useState('docs');
+                const [docsState, setDocsState] = React.useState({
+                  dni_vendedor: null, dni_comprador: null,
+                  nota_simple: null, catastro: null,
+                  cert_energetico: null, cedula: null,
+                  actas_comunidad: null, poder_notarial: null,
+                  cert_bancario: null, otros: null,
+                });
+                const [form, setForm] = React.useState({
+                  vendedor_nombre: '', vendedor_dni: '', vendedor_domicilio: '',
+                  vendedor_estado_civil: '', vendedor_regimen: '',
+                  vendedor_iban: '', vendedor_vivienda_habitual: 'no',
+                  comprador_nombre: '', comprador_dni: '', comprador_domicilio: '',
+                  comprador_estado_civil: '', comprador_regimen: '',
+                  comprador_hipoteca: 'no',
+                  ref_catastral: '', direccion_inmueble: '', garaje_trastero: 'no',
+                  libre_arrendatarios: 'si', inquilino_detalle: '',
+                  iee_aplica: 'no', derramas: 'no', derramas_detalle: '',
+                  actas_relevantes: '',
+                  precio_total: '', incluye_muebles: 'no', muebles_detalle: '',
+                  importe_arras: '', forma_pago_arras: '',
+                  plazo_escritura: '', plazo_tipo: 'naturales',
+                  honorarios: '', honorarios_iva: 'si', honorarios_pago: '50_50',
+                  fecha_firma_arras: '', condiciones_suspensivas: '',
+                  acuerdos_verbales: '', docs_adicionales: '',
+                });
+                const [generando, setGenerando] = React.useState(false);
+                const [resultado, setResultado] = React.useState(null);
+                const [errorIA, setErrorIA] = React.useState(null);
+                const fileRefs = {};
+                const docKeys = ['dni_vendedor','dni_comprador','nota_simple','catastro','cert_energetico','cedula','cert_bancario','actas_comunidad','poder_notarial','otros'];
+                docKeys.forEach(k => { fileRefs[k] = React.useRef(null); });
+                const docTypes = [
+                  { key: 'dni_vendedor', label: 'DNI / NIE / Pasaporte — Vendedor', icon: '🚪', required: true },
+                  { key: 'dni_comprador', label: 'DNI / NIE / Pasaporte — Comprador', icon: '🚪', required: true },
+                  { key: 'nota_simple', label: 'Nota Simple (Registro de la Propiedad)', icon: '📋', required: true },
+                  { key: 'catastro', label: 'Consulta descriptiva y gráfica — Catastro', icon: '🗺️', required: true },
+                  { key: 'cert_energetico', label: 'Certificado de Eficiencia Energética', icon: '⚡', required: true },
+                  { key: 'cedula', label: 'Cédula de Habitabilidad / Licencia 1ª Ocupación', icon: '🏠', required: true },
+                  { key: 'cert_bancario', label: 'Cert. Titularidad Bancaria (IBAN Vendedor)', icon: '🏦', required: false },
+                  { key: 'actas_comunidad', label: 'Actas de Comunidad / IEE', icon: '📄', required: false },
+                  { key: 'poder_notarial', label: 'Escritura de Poder Notarial (si aplica)', icon: '📜', required: false },
+                  { key: 'otros', label: 'Otros documentos adicionales', icon: '📎', required: false },
+                ];
+                const docsSubidos = Object.values(docsState).filter(Boolean).length;
+                const docsReq = docTypes.filter(d => d.required).length;
+                const docsReqOk = docTypes.filter(d => d.required && docsState[d.key]).length;
+                const setF = (k, v) => setForm(f => ({ ...f, [k]: v }));
+                const lblStyle = { fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 6, display: 'block' };
+                const inpStyle = { width: '100%', background: 'var(--white)', border: '1px solid var(--text)', borderRadius: 0, color: 'var(--text)', padding: '10px 14px', fontSize: 13, fontFamily: 'Inter, sans-serif', boxSizing: 'border-box', outline: 'none' };
+                const selStyle = { ...inpStyle, appearance: 'none', WebkitAppearance: 'none', cursor: 'pointer' };
+                const fGrp = { marginBottom: 20 };
+                const tabPill = (a) => ({ padding: '8px 18px', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'Inter, sans-serif', background: a ? 'var(--amber)' : 'transparent', color: a ? 'var(--white)' : 'var(--muted)', border: a ? '1px solid var(--amber)' : '1px solid var(--border)', borderRadius: 0, cursor: 'pointer' });
+                const secHdr = (txt) => React.createElement('div', { style: { fontSize: 11, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--amber)', borderBottom: '1px solid var(--border)', paddingBottom: 8, marginBottom: 16 } }, txt);
+                const generarArras = async () => {
+                  setGenerando(true); setErrorIA(null); setResultado(null);
+                  try {
+                    const resumen = [`CONTRATO ARRAS: ${p?.titulo || 'Propiedad'} (Ref: ${p?.refInterna || ''})`,
+                      `
+VENDEDOR: ${form.vendedor_nombre} | ${form.vendedor_dni} | ${form.vendedor_domicilio}`,
+                      `Estado civil: ${form.vendedor_estado_civil} | Régimen: ${form.vendedor_regimen} | IBAN: ${form.vendedor_iban}`,
+                      `Vivienda habitual conyugal: ${form.vendedor_vivienda_habitual}`,
+                      `
+COMPRADOR: ${form.comprador_nombre} | ${form.comprador_dni} | ${form.comprador_domicilio}`,
+                      `Estado civil: ${form.comprador_estado_civil} | Régimen: ${form.comprador_regimen}`,
+                      `Financiación hipotecaria: ${form.comprador_hipoteca}`,
+                      `
+INMUEBLE: ${form.direccion_inmueble} | Catastro: ${form.ref_catastral}`,
+                      `Garaje/trastero: ${form.garaje_trastero} | Libre arrendatarios: ${form.libre_arrendatarios} ${form.inquilino_detalle}`,
+                      `
+COMUNIDAD: IEE: ${form.iee_aplica} | Derramas: ${form.derramas} ${form.derramas_detalle}`,
+                      `Actas: ${form.actas_relevantes}`,
+                      `
+ECONÓMICO: Precio: ${form.precio_total}€ | Arras: ${form.importe_arras}€ (${form.forma_pago_arras})`,
+                      `Muebles: ${form.incluye_muebles} ${form.muebles_detalle} | Plazo escritura: ${form.plazo_escritura} días ${form.plazo_tipo}`,
+                      `Fecha prevista firma arras: ${form.fecha_firma_arras || 'Por determinar'}`,
+                      `
+HONORARIOS: ${form.honorarios}€ ${form.honorarios_iva === 'si' ? '+ IVA' : 'IVA incl.'} | Pago: ${form.honorarios_pago}`,
+                      `
+OTROS: Condiciones suspensivas: ${form.condiciones_suspensivas || 'Ninguna'}`,
+                      `Acuerdos verbales: ${form.acuerdos_verbales || 'Ninguno'}`,
+                      `Docs adicionales: ${form.docs_adicionales || 'Ninguno'}`,
+                      `
+DOCUMENTOS: ${docTypes.map(d => (docsState[d.key] ? '✓' : '✗') + ' ' + d.label).join(' | ')}`
+                    ].join('\n');
+                    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.NEXT_PUBLIC_ANTHROPIC_KEY || '', 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+                      body: JSON.stringify({ model: 'claude-opus-4-5', max_tokens: 4096, messages: [{ role: 'user', content: `Eres el asistente jurídico de Mallorca Nativa Properties. Redacta un contrato de arras penitenciales completo en español, conforme al Código Civil (arts. 1.454-1.455) y normativa balear. Datos:\n\n${resumen}\n\nInstrucciones: contrato completo con comparecientes, antecedentes, objeto, precio y arras, plazo escritura, condiciones, honorarios, declaraciones y cierre. Lenguaje jurídico formal. Campos vacíos o por determinar en [CORCHETES]. Al final, lista DOCUMENTOS ANEXOS (subidos vs pendientes). Solo el contrato, sin comentarios.` }] })
+                    });
+                    if (!resp.ok) { const e = await resp.json(); throw new Error(e.error?.message || 'Error ' + resp.status); }
+                    const d = await resp.json();
+                    setResultado(d.content[0].text);
+                  } catch(e) { setErrorIA(e.message); }
+                  finally { setGenerando(false); }
+                };
+                const downloadTxt = () => {
+                  if (!resultado) return;
+                  const b = new Blob([resultado], { type: 'text/plain;charset=utf-8' });
+                  const u = URL.createObjectURL(b);
+                  const a = document.createElement('a');
+                  a.href = u; a.download = `Arras_${(p?.refInterna||'prop').replace(/\s/g,'_')}_${new Date().toISOString().slice(0,10)}.txt`;
+                  a.click(); URL.revokeObjectURL(u);
+                };
+                return (
+                  React.createElement('div', { style: { padding: '8px 0 0' } },
+                    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24, padding: '12px 16px', background: 'var(--cream-2)', borderLeft: '3px solid var(--amber)' } },
+                      React.createElement('span', { style: { fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--amber)', whiteSpace: 'nowrap' } }, 'Progreso'),
+                      React.createElement('div', { style: { flex: 1, height: 4, background: 'var(--border)', borderRadius: 2 } },
+                        React.createElement('div', { style: { height: '100%', width: Math.min(100, Math.round((docsReqOk / docsReq) * 50 + (Object.values(form).filter(v => v && !['no','si','naturales','50_50'].includes(v)).length / 20) * 50)) + '%', background: 'var(--amber)', borderRadius: 2, transition: 'width 0.3s' } })
+                      ),
+                      React.createElement('span', { style: { fontSize: 11, color: 'var(--muted)', whiteSpace: 'nowrap' } }, docsReqOk + '/' + docsReq + ' docs')
+                    ),
+                    React.createElement('div', { style: { display: 'flex', gap: 0, marginBottom: 28, borderBottom: '2px solid var(--amber)' } },
+                      [['docs','📁 Documentos'],['preguntas','📝 Datos'],['ia','✨ Generar con IA']].map(([k,l]) =>
+                        React.createElement('button', { key: k, style: tabPill(arrasTab===k), onClick: () => setArrasTab(k) }, l)
+                      )
+                    ),
+                    arrasTab === 'docs' && React.createElement('div', null,
+                      React.createElement('p', { style: { fontSize: 13, color: 'var(--muted)', marginBottom: 20, fontFamily: 'Inter, sans-serif' } }, 'Adjunta los documentos necesarios. Los marcados con * son obligatorios.'),
+                      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 10 } },
+                        docTypes.map(({ key, label, icon, required }) => {
+                          const file = docsState[key];
+                          return React.createElement('div', { key, style: { border: `1px solid ${file ? 'var(--amber)' : 'var(--border)'}`, background: file ? 'rgba(156,110,27,0.04)' : 'var(--white)', padding: '12px 14px', cursor: 'pointer' }, onClick: () => fileRefs[key].current?.click() },
+                            React.createElement('input', { type: 'file', ref: fileRefs[key], style: { display: 'none' }, accept: '.pdf,.jpg,.jpeg,.png,.doc,.docx', onChange: e => { const f = e.target.files[0]; if (f) setDocsState(d => ({...d, [key]: f})); } }),
+                            React.createElement('div', { style: { display: 'flex', alignItems: 'flex-start', gap: 8 } },
+                              React.createElement('span', { style: { fontSize: 18 } }, icon),
+                              React.createElement('div', { style: { flex: 1 } },
+                                React.createElement('div', { style: { fontSize: 11, fontWeight: 600, color: 'var(--text)', fontFamily: 'Inter, sans-serif', lineHeight: 1.3 } },
+                                  label, required && React.createElement('span', { style: { color: 'var(--danger)', marginLeft: 3 } }, '*')
+                                ),
+                                file ? React.createElement('div', { style: { marginTop: 3, fontSize: 11, color: 'var(--amber)', fontWeight: 600 } }, '✓ ' + file.name)
+                               : React.createElement('div', { style: { marginTop: 3, fontSize: 11, color: 'var(--muted)' } }, 'Clic para adjuntar')
+                              ),
+                              file && React.createElement('button', { style: { background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: 14 }, onClick: e => { e.stopPropagation(); setDocsState(d => ({...d, [key]: null})); } }, '×')
+                            )
+                          );
+                        })
+                      ),
+                      React.createElement('div', { style: { marginTop: 16, padding: '8px 14px', background: 'var(--cream-2)', fontSize: 12, color: 'var(--muted)', fontFamily: 'Inter, sans-serif' } }, docsSubidos + ' adjunto(s) · ' + docsReqOk + '/' + docsReq + ' obligatorios'),
+                      React.createElement('button', { style: { marginTop: 14, ...tabPill(true) }, onClick: () => setArrasTab('preguntas') }, 'Siguiente: Datos del contrato →')
+                    ),
+                    arrasTab === 'preguntas' && React.createElement('div', null,
+                      secHdr('Vendedor'),
+                      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 24 } },
+                        [['vendedor_nombre','Nombre completo / Razón social'],['vendedor_dni','DNI / NIE / CIF'],['vendedor_domicilio','Domicilio a efectos de notificaciones'],['vendedor_estado_civil','Estado civil'],['vendedor_regimen','Régimen económico matrimonial'],['vendedor_iban','IBAN cuenta bancaria']].map(([k,l]) =>
+                          React.createElement('div', { key: k, style: fGrp },
+                            React.createElement('label', { style: lblStyle }, l),
+                            React.createElement('input', { value: form[k], onChange: e => setF(k, e.target.value), style: inpStyle, placeholder: l })
+                          )
+                        ),
+                        React.createElement('div', { style: fGrp },
+                          React.createElement('label', { style: lblStyle }, '¿Vivienda habitual conyugal?'),
+                          React.createElement('select', { value: form.vendedor_vivienda_habitual, onChange: e => setF('vendedor_vivienda_habitual', e.target.value), style: selStyle },
+                            React.createElement('option', { value: 'no' }, 'No'),
+                            React.createElement('option', { value: 'si' }, 'Sí — requiere consentimiento cónyuge (art. 1320 CC)')
+                          )
+                        )
+                      ),
+                      secHdr('Comprador'),
+                      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 24 } },
+                        [['comprador_nombre','Nombre completo / Razón social'],['comprador_dni','DNI / NIE / CIF'],['comprador_domicilio','Domicilio a efectos de notificaciones'],['comprador_estado_civil','Estado civil'],['comprador_regimen','Régimen económico matrimonial']].map(([k,l]) =>
+                          React.createElement('div', { key: k, style: fGrp },
+                            React.createElement('label', { style: lblStyle }, l),
+                            React.createElement('input', { value: form[k], onChange: e => setF(k, e.target.value), style: inpStyle, placeholder: l })
+                          )
+                        ),
+                        React.createElement('div', { style: fGrp },
+                          React.createElement('label', { style: lblStyle }, '¿Financiación hipotecaria?'),
+                          React.createElement('select', { value: form.comprador_hipoteca, onChange: e => setF('comprador_hipoteca', e.target.value), style: selStyle },
+                            React.createElement('option', { value: 'no' }, 'No — compra al contado'),
+                            React.createElement('option', { value: 'si' }, 'Sí — valorar condición suspensiva')
+                          )
+                        )
+                      ),
+                      secHdr('Inmueble'),
+                      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 24 } },
+                        [['ref_catastral','Referencia catastral'],['direccion_inmueble','Dirección completa del inmueble']].map(([k,l]) =>
+                          React.createElement('div', { key: k, style: fGrp },
+                            React.createElement('label', { style: lblStyle }, l),
+                            React.createElement('input', { value: form[k], onChange: e => setF(k, e.target.value), style: inpStyle, placeholder: l })
+                          )
+                        ),
+                        React.createElement('div', { style: fGrp },
+                          React.createElement('label', { style: lblStyle }, '¿Garaje / trastero vinculado?'),
+                          React.createElement('select', { value: form.garaje_trastero, onChange: e => setF('garaje_trastero', e.target.value), style: selStyle },
+                            React.createElement('option', { value: 'no' }, 'No'),
+                            React.createElement('option', { value: 'vinculado' }, 'Sí — vinculado a finca principal'),
+                            React.createElement('option', { value: 'independiente' }, 'Sí — finca registral independiente')
+                          )
+                        ),
+                        React.createElement('div', { style: fGrp },
+                          React.createElement('label', { style: lblStyle }, '¿Libre de arrendatarios?'),
+                          React.createElement('select', { value: form.libre_arrendatarios, onChange: e => setF('libre_arrendatarios', e.target.value), style: selStyle },
+                            React.createElement('option', { value: 'si' }, 'Sí — libre de cargas de uso'),
+                            React.createElement('option', { value: 'no' }, 'No — con contrato de alquiler en vigor')
+                          )
+                        ),
+                        form.libre_arrendatarios === 'no' && React.createElement('div', { style: { ...fGrp, gridColumn: '1 / -1' } },
+                          React.createElement('label', { style: lblStyle }, 'Detalle del arrendamiento'),
+                          React.createElement('input', { value: form.inquilino_detalle, onChange: e => setF('inquilino_detalle', e.target.value), style: inpStyle, placeholder: 'Venta con o sin contrato, fecha fin, etc.' })
+                        )
+                      ),
+                      secHdr('Comunidad de Propietarios'),
+                      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 24 } },
+                        React.createElement('div', { style: fGrp },
+                          React.createElement('label', { style: lblStyle }, 'Informe de Evaluación del Edificio (IEE)'),
+                          React.createElement('select', { value: form.iee_aplica, onChange: e => setF('iee_aplica', e.target.value), style: selStyle },
+                            React.createElement('option', { value: 'no' }, 'No aplica (edificio <50 años)'),
+                            React.createElement('option', { value: 'favorable' }, 'Sí — IEE Favorable'),
+                            React.createElement('option', { value: 'desfavorable' }, 'Sí — IEE Desfavorable'),
+                            React.createElement('option', { value: 'pendiente' }, 'Sí — IEE pendiente')
+                          )
+                        ),
+                        React.createElement('div', { style: fGrp },
+                          React.createElement('label', { style: lblStyle }, '¿Derramas extraordinarias aprobadas?'),
+                          React.createElement('select', { value: form.derramas, onChange: e => setF('derramas', e.target.value), style: selStyle },
+                            React.createElement('option', { value: 'no' }, 'No'),
+                            React.createElement('option', { value: 'si' }, 'Sí')
+                          )
+                        ),
+                        form.derramas === 'si' && React.createElement('div', { style: { ...fGrp, gridColumn: '1 / -1' } },
+                          React.createElement('label', { style: lblStyle }, 'Detalle derramas (importe, calendario, a cargo de quién)'),
+                          React.createElement('input', { value: form.derramas_detalle, onChange: e => setF('derramas_detalle', e.target.value), style: inpStyle, placeholder: 'Importe total, cuotas, quién asume...' })
+                        ),
+                        React.createElement('div', { style: { ...fGrp, gridColumn: '1 / -1' } },
+                          React.createElement('label', { style: lblStyle }, 'Actas de junta relevantes (obras, limitaciones, cambios estatutos)'),
+                          React.createElement('input', { value: form.actas_relevantes, onChange: e => setF('actas_relevantes', e.target.value), style: inpStyle, placeholder: 'Descripción breve o Ninguna' })
+                        )
+                      ),
+                      secHdr('Condiciones Económicas'),
+                      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 24 } },
+                        React.createElement('div', { style: fGrp },
+                          React.createElement('label', { style: lblStyle }, 'Precio total compraventa (€)'),
+                          React.createElement('input', { type: 'number', value: form.precio_total, onChange: e => setF('precio_total', e.target.value), style: inpStyle, placeholder: '0' })
+                        ),
+                        React.createElement('div', { style: fGrp },
+                          React.createElement('label', { style: lblStyle }, 'Importe de las arras (€)'),
+                          React.createElement('input', { type: 'number', value: form.importe_arras, onChange: e => setF('importe_arras', e.target.value), style: inpStyle, placeholder: '0' })
+                        ),
+                        React.createElement('div', { style: fGrp },
+                          React.createElement('label', { style: lblStyle }, 'Forma de pago de las arras'),
+                          React.createElement('input', { value: form.forma_pago_arras, onChange: e => setF('forma_pago_arras', e.target.value), style: inpStyle, placeholder: 'Transferencia a IBAN...' })
+                        ),
+                        React.createElement('div', { style: fGrp },
+                          React.createElement('label', { style: lblStyle }, '¿Incluye mobiliario?'),
+                          React.createElement('select', { value: form.incluye_muebles, onChange: e => setF('incluye_muebles', e.target.value), style: selStyle },
+                            React.createElement('option', { value: 'no' }, 'No — solo inmueble'),
+                            React.createElement('option', { value: 'si' }, 'Sí — con inventario')
+                          )
+                        ),
+                        form.incluye_muebles === 'si' && React.createElement('div', { style: { ...fGrp, gridColumn: '1 / -1' } },
+                          React.createElement('label', { style: lblStyle }, 'Detalle mobiliario incluido'),
+                          React.createElement('input', { value: form.muebles_detalle, onChange: e => setF('muebles_detalle', e.target.value), style: inpStyle, placeholder: 'Descripción o referencia a inventario anexo' })
+                        ),
+                        React.createElement('div', { style: fGrp },
+                          React.createElement('label', { style: lblStyle }, 'Plazo para escritura pública (número)'),
+                          React.createElement('input', { type: 'number', value: form.plazo_escritura, onChange: e => setF('plazo_escritura', e.target.value), style: inpStyle, placeholder: '90' })
+                        ),
+                        React.createElement('div', { style: fGrp },
+                          React.createElement('label', { style: lblStyle }, 'Tipo de días'),
+                          React.createElement('select', { value: form.plazo_tipo, onChange: e => setF('plazo_tipo', e.target.value), style: selStyle },
+                            React.createElement('option', { value: 'naturales' }, 'Días naturales'),
+                            React.createElement('option', { value: 'habiles' }, 'Días hábiles')
+                          )
+                        ),
+                        React.createElement('div', { style: fGrp },
+                          React.createElement('label', { style: lblStyle }, 'Fecha prevista firma arras'),
+                          React.createElement('input', { type: 'date', value: form.fecha_firma_arras, onChange: e => setF('fecha_firma_arras', e.target.value), style: inpStyle })
+                        )
+                      ),
+                      secHdr('Honorarios de Intermediación'),
+                      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 24 } },
+                        React.createElement('div', { style: fGrp },
+                          React.createElement('label', { style: lblStyle }, 'Importe honorarios (€)'),
+                          React.createElement('input', { type: 'number', value: form.honorarios, onChange: e => setF('honorarios', e.target.value), style: inpStyle, placeholder: '0' })
+                        ),
+                        React.createElement('div', { style: fGrp },
+                          React.createElement('label', { style: lblStyle }, 'IVA'),
+                          React.createElement('select', { value: form.honorarios_iva, onChange: e => setF('honorarios_iva', e.target.value), style: selStyle },
+                            React.createElement('option', { value: 'si' }, '+ IVA (21%)'),
+                            React.createElement('option', { value: 'no' }, 'IVA incluido')
+                          )
+                        ),
+                        React.createElement('div', { style: { ...fGrp, gridColumn: '1 / -1' } },
+                          React.createElement('label', { style: lblStyle }, 'Forma de pago honorarios'),
+                          React.createElement('select', { value: form.honorarios_pago, onChange: e => setF('honorarios_pago', e.target.value), style: selStyle },
+                            React.createElement('option', { value: '50_50' }, '50% firma arras / 50% notaría'),
+                            React.createElement('option', { value: '100_arras' }, '100% en firma de arras'),
+                            React.createElement('option', { value: '100_notaria' }, '100% en notaría'),
+                            React.createElement('option', { value: 'otro' }, 'Otro (especificar en observaciones)')
+                          )
+                        )
+                      ),
+                      secHdr('Otros Pactos y Circunstancias'),
+                      [['condiciones_suspensivas','Condiciones suspensivas o resolutorias (financiación, licencias...)'],['acuerdos_verbales','Acuerdos verbales a reflejar por escrito'],['docs_adicionales','Documentación adicional relevante (informes, seguros, litigios...)']].map(([k,l]) =>
+                        React.createElement('div', { key: k, style: fGrp },
+                          React.createElement('label', { style: lblStyle }, l),
+                          React.createElement('input', { value: form[k], onChange: e => setF(k, e.target.value), style: inpStyle, placeholder: 'Ninguno / descripción breve' })
+                        )
+                      ),
+                      React.createElement('button', { style: { marginTop: 8, ...tabPill(true) }, onClick: () => setArrasTab('ia') }, 'Siguiente: Generar con IA →')
+                    ),
+                    arrasTab === 'ia' && React.createElement('div', null,
+                      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 } },
+                        React.createElement('div', { style: { padding: '14px 16px', background: docsReqOk === docsReq ? 'rgba(44,110,82,0.06)' : 'var(--cream-2)', border: `1px solid ${docsReqOk === docsReq ? 'var(--success)' : 'var(--border)'}` } },
+                          React.createElement('div', { style: { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: docsReqOk === docsReq ? 'var(--success)' : 'var(--muted)', marginBottom: 4 } }, 'Documentos'),
+                          React.createElement('div', { style: { fontSize: 22, fontWeight: 700, color: docsReqOk === docsReq ? 'var(--success)' : 'var(--text)' } }, docsReqOk + '/' + docsReq, React.createElement('span', { style: { fontSize: 12, fontWeight: 400, color: 'var(--muted)', marginLeft: 4 } }, 'obligatorios'))
+                        ),
+                        React.createElement('div', { style: { padding: '14px 16px', background: 'var(--cream-2)', border: '1px solid var(--border)' } },
+                          React.createElement('div', { style: { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--muted)', marginBottom: 4 } }, 'Campos completados'),
+                          React.createElement('div', { style: { fontSize: 22, fontWeight: 700, color: 'var(--text)' } },
+                            Object.values(form).filter(v => v && !['no','si','naturales','50_50'].includes(v)).length,
+                            React.createElement('span', { style: { fontSize: 12, fontWeight: 400, color: 'var(--muted)', marginLeft: 4 } }, 'de ' + Object.keys(form).length)
+                          )
+                        )
+                      ),
+                      docsReqOk < docsReq && React.createElement('div', { style: { padding: '12px 16px', background: 'rgba(162,58,58,0.06)', border: '1px solid rgba(162,58,58,0.2)', marginBottom: 14, fontSize: 12, color: 'var(--danger)', fontFamily: 'Inter, sans-serif' } },
+                        '⚠️ Faltan ' + (docsReq - docsReqOk) + ' documento(s) obligatorio(s). La IA generará el contrato marcando los campos pendientes en [CORCHETES].'
+                      ),
+                      React.createElement('div', { style: { padding: '14px 16px', background: 'var(--cream-2)', border: '1px solid var(--border)', marginBottom: 20, fontSize: 13, color: 'var(--text)', fontFamily: 'Inter, sans-serif', lineHeight: 1.6 } },
+                        React.createElement('strong', { style: { color: 'var(--amber)' } }, '¿Cómo funciona?'), React.createElement('br'),
+                        'La IA analizará todos los datos y generará un contrato de arras penitenciales completo, conforme al Código Civil y normativa balear. Los campos pendientes aparecerán en ',
+                        React.createElement('span', { style: { color: 'var(--danger)', fontWeight: 600 } }, '[CORCHETES]'),
+                        ' para completar antes de imprimir.'
+                      ),
+                      !resultado && !generando && React.createElement('button', {
+                        onClick: generarArras,
+                        style: { padding: '14px 32px', background: 'linear-gradient(135deg, var(--amber), #C8820A)', color: 'var(--white)', border: 'none', borderRadius: 0, fontSize: 13, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'Inter, sans-serif', cursor: 'pointer' }
+                      }, '✨ Generar contrato de arras con IA'),
+                      generando && React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 12, padding: '20px 0', color: 'var(--amber)', fontSize: 13, fontFamily: 'Inter, sans-serif' } },
+                        React.createElement('div', { style: { width: 18, height: 18, border: '2px solid var(--amber)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' } }),
+                        'Generando contrato… Esto puede tomar unos segundos.'
+                      ),
+                      errorIA && React.createElement('div', { style: { padding: '12px 16px', background: 'rgba(162,58,58,0.06)', border: '1px solid rgba(162,58,58,0.3)', color: 'var(--danger)', fontSize: 13, fontFamily: 'Inter, sans-serif', marginTop: 14 } }, '❌ Error: ' + errorIA),
+                      resultado && React.createElement('div', { style: { marginTop: 14 } },
+                        React.createElement('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 } },
+                          React.createElement('span', { style: { fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--success)' } }, '✓ Contrato generado'),
+                          React.createElement('div', { style: { display: 'flex', gap: 8 } },
+                            React.createElement('button', { onClick: downloadTxt, style: { ...tabPill(true), fontSize: 11 } }, '⬇ Descargar .txt'),
+                            React.createElement('button', { onClick: generarArras, style: { ...tabPill(false), fontSize: 11 } }, '↺ Regenerar')
+                          )
+                        ),
+                        React.createElement('pre', { style: { background: 'var(--white)', border: '1px solid var(--border)', padding: '18px 22px', fontSize: 12, fontFamily: 'Courier New, monospace', lineHeight: 1.7, whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxHeight: 500, overflowY: 'auto', color: 'var(--text)' } }, resultado)
+                      )
+                    )
+                  )
+                );
+              })()}
             </SeccionGrande>
 
-            {/* ── ARRAS A NOTARÍA ── */}
+            {/* ââ ARRAS A NOTARÃA ââ */}
             <SeccionGrande
-              title="Arras a notaría"
+              title="Arras a notarÃ­a"
               defaultOpen={secs.notaria}
               accentColor="var(--blue)"
-              badge="Próximamente"
+              badge="PrÃ³ximamente"
               badgeColor="var(--blue)"
             >
               <div style={{ padding: "32px 0", textAlign: "center", color: "var(--muted)", fontSize: 13, fontFamily: "Inter, sans-serif" }}>
-                Esta sección se habilitará cuando las arras estén firmadas por todas las partes.
+                Esta secciÃ³n se habilitarÃ¡ cuando las arras estÃ©n firmadas por todas las partes.
               </div>
             </SeccionGrande>
 
@@ -3634,7 +3980,7 @@ REGLAS:
         {/* Barra de acciones inferior */}
         <div style={{ borderTop: "1px solid var(--border)", paddingTop: 28, marginTop: 12, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
           <button onClick={() => onClose()} style={{ padding: "12px 24px", borderRadius: 0, border: "1px solid var(--border)", background: "transparent", color: "var(--muted)", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
-            ← Volver a propiedades
+            â Volver a propiedades
           </button>
           <div style={{ display: "flex", gap: 8 }}>
             {puedeEditar && <button onClick={() => { if (onDuplicate) onDuplicate(p); }} style={{ padding: "12px 20px", borderRadius: 0, border: "1px solid var(--gold)44", background: "transparent", color: "var(--gold)", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>Duplicar</button>}
@@ -3647,11 +3993,11 @@ REGLAS:
                 destinos: draft.destinos || [],
               };
               if (idealistaFieldErrors.size > 0) {
-                const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","precioAlquiler":"Renta mensual","precioTraspaso":"Precio traspaso","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético","refCatastral":"Referencia catastral","fianzaMeses":"Fianza (meses)","duracionMinMeses":"Duración mínima (meses)","alqEquipamiento":"Equipamiento (cocina/mobiliario)"};
-                const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join("\n• ");
+                const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operaciÃ³n","dir":"DirecciÃ³n","municipio":"Municipio","cp":"CÃ³digo postal","precioVenta":"Precio de venta","precioAlquiler":"Renta mensual","precioTraspaso":"Precio traspaso","mConst":"mÂ² construidos","desc":"DescripciÃ³n","banos":"BaÃ±os","certEnerg":"Certificado energÃ©tico","refCatastral":"Referencia catastral","fianzaMeses":"Fianza (meses)","duracionMinMeses":"DuraciÃ³n mÃ­nima (meses)","alqEquipamiento":"Equipamiento (cocina/mobiliario)"};
+                const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join("\nâ¢ ");
                 const esPublicada = (draft.estado || p.estado) === "publicada";
                 if (esPublicada) { alert(" Propiedad PUBLICADA. Completa los campos * antes de guardar."); return; }
-                else { if (!confirm("⚠ Campos * sin completar:\n\n• " + faltantes + "\n\n¿Guardar igualmente?")) return; }
+                else { if (!confirm("â  Campos * sin completar:\n\nâ¢ " + faltantes + "\n\nÂ¿Guardar igualmente?")) return; }
               }
               if (onUpdate) onUpdate(toSave);
             }} style={{ padding: "12px 28px", borderRadius: 0, border: "none", background: "linear-gradient(135deg, var(--gold-l), #D4B896)", color: "var(--cream)", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
@@ -3660,7 +4006,7 @@ REGLAS:
           </div>
         </div>
 
-        {/* ── Tab Visitas — solo lectura ────────────────────────────── */}
+        {/* ââ Tab Visitas â solo lectura ââââââââââââââââââââââââââââââ */}
         {p.id && <TabVisitasReadOnly propiedadId={p.id} />}
 
       </div>
@@ -3668,7 +4014,7 @@ REGLAS:
   );
 }
 
-// ─── Tab Visitas solo lectura en ficha de propiedad ───────────────────────────
+// âââ Tab Visitas solo lectura en ficha de propiedad âââââââââââââââââââââââââââ
 function TabVisitasReadOnly({ propiedadId }) {
   const [visitas, setVisitas] = useState([]);
   const [informes, setInformes] = useState([]);
@@ -3682,7 +4028,7 @@ function TabVisitasReadOnly({ propiedadId }) {
     borrador:           { label: "Borrador",            color: MUTED    },
     enviado:            { label: "Enviado",             color: "var(--blue)" },
     firmado_comprador:  { label: "Firmado comprador",   color: GOLD     },
-    deposito_recibido:  { label: "Depósito recibido",   color: "var(--amber)" },
+    deposito_recibido:  { label: "DepÃ³sito recibido",   color: "var(--amber)" },
     firmado_vendedor:   { label: "Firmado vendedor",    color: "var(--success)" },
     completado:         { label: "Completado",          color: "var(--success)" },
   };
@@ -3726,11 +4072,11 @@ function TabVisitasReadOnly({ propiedadId }) {
           </span>
           {totalVisitas > 0 && (
             <span style={{ fontSize: 10, background: `${GOLD}18`, color: GOLD, padding: "2px 8px", borderRadius: 0, fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
-              {totalVisitas} visita{totalVisitas !== 1 ? "s" : ""} · {totalDocs} doc{totalDocs !== 1 ? "s" : ""}
+              {totalVisitas} visita{totalVisitas !== 1 ? "s" : ""} Â· {totalDocs} doc{totalDocs !== 1 ? "s" : ""}
             </span>
           )}
         </div>
-        <span style={{ color: MUTED, fontSize: 12 }}>{open ? "▲" : "▼"}</span>
+        <span style={{ color: MUTED, fontSize: 12 }}>{open ? "â²" : "â¼"}</span>
       </button>
 
       {open && (
@@ -3739,7 +4085,7 @@ function TabVisitasReadOnly({ propiedadId }) {
             <div style={{ color: MUTED, fontSize: 12, padding: "12px 0", fontFamily: "Inter, sans-serif" }}>Cargando visitas...</div>
           ) : visitas.length === 0 ? (
             <div style={{ color: MUTED, fontSize: 12, padding: "12px 0", fontFamily: "Inter, sans-serif" }}>
-              No hay visitas registradas. Las visitas se gestionan desde la sección <strong>Visitas</strong>.
+              No hay visitas registradas. Las visitas se gestionan desde la secciÃ³n <strong>Visitas</strong>.
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -3755,12 +4101,12 @@ function TabVisitasReadOnly({ propiedadId }) {
                           {comprador ? `${comprador.nombre} ${comprador.apellidos || ""}`.trim() : "Comprador sin nombre"}
                         </div>
                         <div style={{ fontSize: 11, color: MUTED, marginTop: 2, fontFamily: "Inter, sans-serif" }}>
-                          {fecha} · Agente: {v.agente_login}
+                          {fecha} Â· Agente: {v.agente_login}
                         </div>
                         {v.notas && <div style={{ fontSize: 11, color: TEXT, marginTop: 4, fontStyle: "italic" }}>{v.notas}</div>}
                       </div>
                       {v.resumen_ia && (
-                        <span style={{ fontSize: 10, background: "var(--success)18", color: "var(--success)", padding: "2px 8px", borderRadius: 0, whiteSpace: "nowrap", flexShrink: 0 }}>✓ Resumen IA</span>
+                        <span style={{ fontSize: 10, background: "var(--success)18", color: "var(--success)", padding: "2px 8px", borderRadius: 0, whiteSpace: "nowrap", flexShrink: 0 }}>â Resumen IA</span>
                       )}
                     </div>
                     {docs.length > 0 && (
@@ -3769,7 +4115,7 @@ function TabVisitasReadOnly({ propiedadId }) {
                           const est = ESTADO_DOC[doc.estado] || { label: doc.estado, color: MUTED };
                           return (
                             <div key={doc.id} style={{ fontSize: 10, border: `1px solid ${est.color}44`, color: est.color, padding: "3px 10px", borderRadius: 0, fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
-                              {TIPO_DOC[doc.tipo] || doc.tipo} · {est.label}
+                              {TIPO_DOC[doc.tipo] || doc.tipo} Â· {est.label}
                             </div>
                           );
                         })}
@@ -3794,7 +4140,7 @@ function TabVisitasReadOnly({ propiedadId }) {
                       Informe del {new Date(inf.fecha_informe).toLocaleDateString("es-ES", { day: "2-digit", month: "long", year: "numeric" })}
                     </div>
                     <span style={{ fontSize: 10, fontWeight: 600, color: inf.estado === "enviado" ? "var(--success)" : inf.estado === "confirmado" ? GOLD : MUTED, fontFamily: "Inter, sans-serif" }}>
-                      {inf.estado === "enviado" ? "✓ Enviado" : inf.estado === "confirmado" ? "Confirmado" : "Borrador"}
+                      {inf.estado === "enviado" ? "â Enviado" : inf.estado === "confirmado" ? "Confirmado" : "Borrador"}
                     </span>
                   </div>
                 ))}
@@ -3807,7 +4153,7 @@ function TabVisitasReadOnly({ propiedadId }) {
   );
 }
 
-// ─── Componente: Botón descarga JSON Idealista ────────────────────────────────
+// âââ Componente: BotÃ³n descarga JSON Idealista ââââââââââââââââââââââââââââââââ
 function IdealistaJsonButton({ supabase }) {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(null);
@@ -3826,11 +4172,11 @@ function IdealistaJsonButton({ supabase }) {
     "Terreno rustico":"land", "Terreno rural":"land", "Terreno industrial":"land",
     Garaje:"garage", Parking:"garage", Trastero:"storage", Edificio:"building",
   };
-  // Valores exactos del schema Idealista v6 — deben mantenerse sincronizados con route.js
+  // Valores exactos del schema Idealista v6 â deben mantenerse sincronizados con route.js
   const CONSERV_MAP = { "Buen estado":"good","Reformado":"fully_reformed","A reformar":"toRestore","Obra nueva":"new","En construccion":"new_development_in_construction" };
   const HEAT_MAP = { "Gas central":"centralGas","Gas individual":"individualGas","Electrica central":"centralOther","Electrica individual":"individualElectric","Bomba de calor":"individualAirConditioningHeatPump","Aerotermia":"individualAirConditioningHeatPump","Suelo radiante":"centralOther","Sin calefaccion":"noHeating" };
   const IMAGE_TAG_MAP = { LIVING_ROOM:"living",BEDROOM:"bedroom",BATHROOM:"bathroom",KITCHEN:"kitchen",TERRACE:"terrace",SWIMMING_POOL:"pool",GARDEN:"garden",CORRIDOR:"corridor",PLAN:"plan",VIEWS:"views",FACADE:"facade",GARAGE:"garage",STORAGE:"storage_space",BALCONY:"balcony",DINING:"dining_room",HALL:"hall",PATIO:"patio",PORCH:"porch" };
-  const FLOOR_MAP = { "Bajo":"bj","Baja":"bj","Planta baja":"bj","PB":"bj","0":"bj","Entreplanta":"en","Entresuelo":"en","Semisotano":"ss","Semisótano":"ss","SS":"ss","Sotano":"st","Sótano":"st","-1":"-1","-2":"-2" };
+  const FLOOR_MAP = { "Bajo":"bj","Baja":"bj","Planta baja":"bj","PB":"bj","0":"bj","Entreplanta":"en","Entresuelo":"en","Semisotano":"ss","SemisÃ³tano":"ss","SS":"ss","Sotano":"st","SÃ³tano":"st","-1":"-1","-2":"-2" };
   const VALID_CERT = ["A","B","C","D","E","F","G","Exento"];
 
   function isValid(row) {
@@ -3841,14 +4187,14 @@ function IdealistaJsonButton({ supabase }) {
     if(!precioOp||precioOp<=0) return false;
     if(!row.desc_texto?.trim()) return false;
     const tipo=TIPO_MAP[row.tipo]; if(!tipo) return false;
-    // m_const obligatorio excepto terrenos y garage; storage también lo requiere (storage.json: required featuresAreaConstructed)
+    // m_const obligatorio excepto terrenos y garage; storage tambiÃ©n lo requiere (storage.json: required featuresAreaConstructed)
     const needsMConst=!["land","garage"].includes(tipo);
     if(needsMConst&&(!Number(row.m_const)||Number(row.m_const)<=0)) return false;
     if(tipo==="land"&&(!Number(row.m_parcela)||Number(row.m_parcela)<=0)) return false;
-    // Baños: obligatorio para residencial y comercial (incluyendo premises_industrial)
+    // BaÃ±os: obligatorio para residencial y comercial (incluyendo premises_industrial)
     const needsBaths=["flat","house","rustic","premises_commercial","premises_industrial","office"].includes(tipo);
     if(needsBaths&&(Number(row.banos)||0)+(Number(row.aseos)||0)<=0) return false;
-    // Cert energético: solo residencial
+    // Cert energÃ©tico: solo residencial
     const residencial=["flat","house","rustic"].includes(tipo);
     if(residencial&&(!row.cert_energ||!VALID_CERT.includes(row.cert_energ))) return false;
     if(!Array.isArray(row.destinos)||!row.destinos.includes("Idealista")) return false;
@@ -3871,7 +4217,7 @@ function IdealistaJsonButton({ supabase }) {
     const isAlquiler=row.op==="Alquiler";
     const isTraspaso=row.op==="Traspaso";
     const property={propertyCode:row.ref,propertyReference:row.ref,propertyVisibility:"idealista"};
-    // Operación
+    // OperaciÃ³n
     const opType=isAlquiler?"rent":"sale";
     const price=isAlquiler?(Number(row.precio_alquiler)||0):isTraspaso?(Number(row.precio_traspaso)||0):(Number(row.precio_venta)||0);
     const op={operationType:opType};
@@ -3883,7 +4229,7 @@ function IdealistaJsonButton({ supabase }) {
     if(isTraspaso&&Number(row.precio_traspaso)>0) op.operationPriceTransfer=Math.round(Number(row.precio_traspaso));
     property.propertyOperation=op;
     property.propertyContact={contactName:"Mallorca Nativa Properties",contactEmail:"mallorcanativaproperties@gmail.com",contactPrimaryPhonePrefix:"34",contactPrimaryPhoneNumber:"655882682"};
-    // Dirección con truncados según schema
+    // DirecciÃ³n con truncados segÃºn schema
     const addr={addressCountry:"Spain"};
     if(row.vis_dir==="Direccion exacta") addr.addressVisibility="full";
     else if(row.vis_dir==="Solo calle") addr.addressVisibility="street";
@@ -3899,28 +4245,28 @@ function IdealistaJsonButton({ supabase }) {
     if(row.municipio) addr.addressTown=String(row.municipio).slice(0,50);
     if(row.latitud&&row.longitud){addr.addressCoordinatesPrecision="exact";addr.addressCoordinatesLatitude=Number(row.latitud);addr.addressCoordinatesLongitude=Number(row.longitud);}
     property.propertyAddress=addr;
-    // Features — bloque base (campos comunes a todos los tipos)
+    // Features â bloque base (campos comunes a todos los tipos)
     const feat={featuresType:tipo};
     const mConst=Number(row.m_const)||0; if(mConst>0&&!isLand) feat.featuresAreaConstructed=mConst;
     const mUtil=Number(row.m_util)||0; if(mUtil>0&&!isLand&&!isGarage&&!isStorage) feat.featuresAreaUsable=mUtil;
     const mParcela=Number(row.m_parcela)||0;
     if((isHomeType||isLand)&&mParcela>0) feat.featuresAreaPlot=mParcela;
     if(isLand&&Number(row.m_edificable)>0) feat.featuresAreaBuildable=Number(row.m_edificable);
-    // featuresAreaHeight se asigna en el bloque isStorage más abajo
+    // featuresAreaHeight se asigna en el bloque isStorage mÃ¡s abajo
     const banos=(Number(row.banos)||0)+(Number(row.aseos)||0);
     if(banos>0&&!isLand&&!isGarage&&!isStorage&&!isBuilding) feat.featuresBathroomNumber=banos;
     const bedrooms=Number(row.total_hab)||((Number(row.hab_dobles)||0)+(Number(row.hab_simples)||0));
-    // featuresBedroomNumber: integer1to99 minimum:1 — NO emitir 0
+    // featuresBedroomNumber: integer1to99 minimum:1 â NO emitir 0
     // Si no hay dormitorios (estudio), emitimos featuresRooms:1 para satisfacer el anyOf
     if(isHomeType){
       if(bedrooms>0){feat.featuresBedroomNumber=bedrooms;}
       else{feat.featuresRooms=feat.featuresRooms||1;}
     }
-    // featuresBuiltYear: NO garage, storage, land (additionalProperties:false) — building.json SÍ lo tiene
+    // featuresBuiltYear: NO garage, storage, land (additionalProperties:false) â building.json SÃ lo tiene
     if(row.ano_construc&&!isGarage&&!isStorage&&!isLand){const y=parseInt(row.ano_construc);if(y>1800&&y<=new Date().getFullYear()) feat.featuresBuiltYear=y;}
     if(!isLand&&!isGarage&&!isStorage){const conserv=CONSERV_MAP[row.conserv];if(conserv) feat.featuresConservation=conserv;}
     if(row.ref_cat) feat.featuresCadastralReference=row.ref_cat;
-    // Features — bloque HOMES (flat/house/rustic): campos exclusivos de homes.json
+    // Features â bloque HOMES (flat/house/rustic): campos exclusivos de homes.json
     if(isHomeType){
       if(row.jardin===true) feat.featuresGarden=true;
       if(row.ascensor===true) feat.featuresLiftAvailable=true;
@@ -3932,23 +4278,23 @@ function IdealistaJsonButton({ supabase }) {
       if(row.chimenea===true) feat.featuresChimney=true;
       if(row.vent_ext===true) feat.featuresWindowsLocation="exterior";
       if(row.parking==="Si"||row.parking==="Opcional") feat.featuresParkingAvailable=true;
-      // Tipología chalet
+      // TipologÃ­a chalet
       if((tipo==="house"||tipo==="rustic")&&row.tipologia_chalet){const HT_MAP={"Independiente":"house_independent","Pareado":"house_semidetached","Adosado":"house_terraced","En hilera":"house_terraced"};if(tipo==="house"&&HT_MAP[row.tipologia_chalet]) feat.featuresType=HT_MAP[row.tipologia_chalet];if(Number(row.plantas_chalet)>0) feat.featuresFloorsBuilding=Number(row.plantas_chalet);}
       if(isStudio||row.tipo==="Loft") feat.featuresStudio=true;
       if(isPenthouse) feat.featuresPenthouse=true;
       if(isDuplex) feat.featuresDuplex=true;
       if(row.cocina_equipada===true) feat.featuresEquippedKitchen=true;
       if(row.calefaccion&&HEAT_MAP[row.calefaccion]) feat.featuresHeatingType=HEAT_MAP[row.calefaccion];
-      // aire acond — featuresConditionedAirType NO existe en homes.json
+      // aire acond â featuresConditionedAirType NO existe en homes.json
       if(row.aire_acond_tipo&&row.aire_acond_tipo!=="No disponible") feat.featuresConditionedAir=true;
-      // Ocupación — solo homes y offices
-      const OCC_MAP={"Vacía":"free","Alquilada":"tenanted","Ocupada":"illegally_occupied"};
+      // OcupaciÃ³n â solo homes y offices
+      const OCC_MAP={"VacÃ­a":"free","Alquilada":"tenanted","Ocupada":"illegally_occupied"};
       if(row.ocupacion_actual&&OCC_MAP[row.ocupacion_actual]) feat.featuresCurrentOccupation=OCC_MAP[row.ocupacion_actual];
-      // Certificado energético — solo homes
+      // Certificado energÃ©tico â solo homes
       if(row.cert_energ){if(row.cert_energ==="Exento") feat.featuresEnergyCertificateRating="exempt";else if(/^[A-G]$/.test(row.cert_energ)) feat.featuresEnergyCertificateRating=row.cert_energ;}
       if(row.emisiones_energ&&/^[A-G]$/.test(row.emisiones_energ)) feat.featuresEnergyCertificateEmissionsRating=row.emisiones_energ;
       if(row.orient){const ORIENT_MAP={"Norte":["North"],"Sur":["South"],"Este":["East"],"Oeste":["West"],"Noreste":["North","East"],"Noroeste":["North","West"],"Sureste":["South","East"],"Suroeste":["South","West"]};const dirs=ORIENT_MAP[row.orient]||[];if(dirs.includes("North")) feat.featuresOrientationNorth=true;if(dirs.includes("South")) feat.featuresOrientationSouth=true;if(dirs.includes("East")) feat.featuresOrientationEast=true;if(dirs.includes("West")) feat.featuresOrientationWest=true;}
-      // Alquiler — solo UNO de los tres puede ser true (featuresSeasonalRental, featuresShortTerm, featuresResidential)
+      // Alquiler â solo UNO de los tres puede ser true (featuresSeasonalRental, featuresShortTerm, featuresResidential)
       if(isAlquiler){
         if(row.alq_tipo_operacion==="temporada"){feat.featuresSeasonalRental=true;}
         else if(row.alq_tipo_operacion==="corta"){feat.featuresShortTerm=true;if(row.alq_licencia_turistica) feat.featuresShortTermLicense=String(row.alq_licencia_turistica);}
@@ -3959,13 +4305,13 @@ function IdealistaJsonButton({ supabase }) {
         if(row.alq_apto_ninos===true) feat.featuresRecommendedForChildren=true;
         else if(row.alq_apto_ninos===false) feat.featuresRecommendedForChildren=false;
         // featuresEquippedWithFurniture solo disponible para alquiler
-        if(row.alq_equipamiento==="Cocina con electrodomésticos y casa amueblada"){feat.featuresEquippedKitchen=true;feat.featuresEquippedWithFurniture=true;}
-        else if(row.alq_equipamiento==="Cocina con electrodomésticos y casa sin amueblar"){feat.featuresEquippedKitchen=true;}
+        if(row.alq_equipamiento==="Cocina con electrodomÃ©sticos y casa amueblada"){feat.featuresEquippedKitchen=true;feat.featuresEquippedWithFurniture=true;}
+        else if(row.alq_equipamiento==="Cocina con electrodomÃ©sticos y casa sin amueblar"){feat.featuresEquippedKitchen=true;}
       }
     }
-    // Features — bloque OFFICES
+    // Features â bloque OFFICES
     // offices.json: featuresLiftNumber (NO featuresLiftAvailable), featuresHeating (NO featuresHeatingType),
-    // featuresWindowsDouble SÍ existe en offices.json (confirmado en schema v6)
+    // featuresWindowsDouble SÃ existe en offices.json (confirmado en schema v6)
     if(isOffice){
       if(row.ascensor===true) feat.featuresLiftNumber=1;
       if(row.calefaccion&&row.calefaccion!=="Sin calefaccion") feat.featuresHeating=true;
@@ -3973,16 +4319,16 @@ function IdealistaJsonButton({ supabase }) {
       const AIRE_MAP_OFF={"No disponible":"notAvailable","Solo frio":"cold","Frio/Calor":"cold/heat","Preinstalacion":"preInstallation"};
       if(row.aire_acond_tipo&&AIRE_MAP_OFF[row.aire_acond_tipo]){feat.featuresConditionedAirType=AIRE_MAP_OFF[row.aire_acond_tipo];if(row.aire_acond_tipo!=="No disponible") feat.featuresConditionedAir=true;}
       if(row.agua_cal) feat.featuresHotWater=row.agua_cal!=="Sin agua caliente";
-      if(row.doble_acristalamiento===true) feat.featuresWindowsDouble=true; // offices.json sí lo tiene
+      if(row.doble_acristalamiento===true) feat.featuresWindowsDouble=true; // offices.json sÃ­ lo tiene
       if(row.puerta_blindada===true) feat.featuresSecurityDoor=true;
       if(row.alarma_seguridad===true) feat.featuresSecurityAlarm=true;
       if(Number(row.n_plazas)>0) feat.featuresParkingSpacesNumber=Number(row.n_plazas);
       if(row.trastero===true) feat.featuresStorage=true;
       if(Number(row.plantas_edificio)>0) feat.featuresFloorsBuilding=Number(row.plantas_edificio);
-      const OCC_MAP={"Vacía":"free","Alquilada":"tenanted","Ocupada":"illegally_occupied"};
+      const OCC_MAP={"VacÃ­a":"free","Alquilada":"tenanted","Ocupada":"illegally_occupied"};
       if(row.ocupacion_actual&&OCC_MAP[row.ocupacion_actual]) feat.featuresCurrentOccupation=OCC_MAP[row.ocupacion_actual];
     }
-    // Features — bloque PREMISES (premises_commercial / premises_industrial)
+    // Features â bloque PREMISES (premises_commercial / premises_industrial)
     if(isPremisesType){
       // premises.json: featuresHeating (boolean), NO featuresHeatingType, NO featuresHotWater, NO featuresWindowsDouble
       if(row.calefaccion&&row.calefaccion!=="Sin calefaccion") feat.featuresHeating=true;
@@ -4000,24 +4346,24 @@ function IdealistaJsonButton({ supabase }) {
       if(row.local_ubicacion&&locUbicMap[row.local_ubicacion]) feat.featuresUbication=locUbicMap[row.local_ubicacion];
       if(row.local_n_escaparates) feat.featuresWindowsNumber=Number(row.local_n_escaparates);
       // featuresFloorsProperty ya establecido arriba con local_n_plantas
-      const ACTIVIDAD_MAP={"Bar":"bar","Restaurante":"restaurant","Cafetería":"coffee_shop","Discoteca / pub / sala":"nightclub","Hotel / hostal":"hotel","Otros hostelería":"other_types_of_caterings","Alimentación":"supermarket","Moda y complementos":"clothing_store","Electrónica":"electronics_and_computer_store","Mobiliario y decoración":"housewares_store","Farmacia / parafarmacia":"pharmacy","Joyería / relojería":"jewelry_shop","Papelería / librería":"bookstore","Juguetería":"other_commercial_activities","Otros comercio":"other_commercial_activities","Peluquería / estética":"hair_salon","Lavandería / tintorería":"laundry","Agencia de viajes":"other_types_of_services","Inmobiliaria":"real_estate_agency","Financiero / seguros":"other_commercial_activities","Clínica / centro médico":"clinic","Centro de formación":"educational_center","Gimnasio / deporte":"gym","Otros servicios":"other_types_of_services","Taller / reparación":"repair_shop","Almacén / logística":"storehouse","Industria ligera":"other_commercial_activities"};
+      const ACTIVIDAD_MAP={"Bar":"bar","Restaurante":"restaurant","CafeterÃ­a":"coffee_shop","Discoteca / pub / sala":"nightclub","Hotel / hostal":"hotel","Otros hostelerÃ­a":"other_types_of_caterings","AlimentaciÃ³n":"supermarket","Moda y complementos":"clothing_store","ElectrÃ³nica":"electronics_and_computer_store","Mobiliario y decoraciÃ³n":"housewares_store","Farmacia / parafarmacia":"pharmacy","JoyerÃ­a / relojerÃ­a":"jewelry_shop","PapelerÃ­a / librerÃ­a":"bookstore","JugueterÃ­a":"other_commercial_activities","Otros comercio":"other_commercial_activities","PeluquerÃ­a / estÃ©tica":"hair_salon","LavanderÃ­a / tintorerÃ­a":"laundry","Agencia de viajes":"other_types_of_services","Inmobiliaria":"real_estate_agency","Financiero / seguros":"other_commercial_activities","ClÃ­nica / centro mÃ©dico":"clinic","Centro de formaciÃ³n":"educational_center","Gimnasio / deporte":"gym","Otros servicios":"other_types_of_services","Taller / reparaciÃ³n":"repair_shop","AlmacÃ©n / logÃ­stica":"storehouse","Industria ligera":"other_commercial_activities"};
       const actividades=row.local_actividad||[];
       for(const act of actividades){if(ACTIVIDAD_MAP[act]){feat.featuresCommercialMainActivity=ACTIVIDAD_MAP[act];break;}}
-      // featuresAreaHeight NO existe en premises.json (additionalProperties:false) — omitido
+      // featuresAreaHeight NO existe en premises.json (additionalProperties:false) â omitido
       if(row.local_muelle_carga===true) feat.featuresLoadingDock=true;
-      // featuresAccess24h NO existe en premises.json — omitido
+      // featuresAccess24h NO existe en premises.json â omitido
       // Traspaso
       if(isTraspaso){
         feat.featuresIsATransfer=true;
         if(row.local_fin_contrato){const m=String(row.local_fin_contrato).match(/^(\d{4})-(0[1-9]|1[0-2])/);if(m) feat.featuresTransferEndContract=`${m[1]}-${m[2]}`;}
       }
     }
-    // Features — bloque LAND
+    // Features â bloque LAND
     if(isLand){
       const mParcela=Number(row.m_parcela)||0; if(mParcela>0) feat.featuresAreaPlot=mParcela;
       if(row.tipo){const LAND_SUBTYPE_MAP={"Parcela":"land_urban","Solar":"land_urban","Terreno urbano":"land_urban","Terreno urbanizable":"land_countrybuildable","Terreno rustico":"land_countrynonbuildable","Terreno rural":"land_countrynonbuildable","Terreno industrial":"land_urban"};if(LAND_SUBTYPE_MAP[row.tipo]) feat.featuresType=LAND_SUBTYPE_MAP[row.tipo];}
       if(Number(row.m_edificable)>0) feat.featuresAreaBuildable=Number(row.m_edificable);
-      if(row.terreno_acceso){const M={"Urbano":"urban","Carretera":"road","Pista":"track","Autovía/Autopista":"highway","Desconocido":"unknown"};if(M[row.terreno_acceso]) feat.featuresAccessType=M[row.terreno_acceso];}
+      if(row.terreno_acceso){const M={"Urbano":"urban","Carretera":"road","Pista":"track","AutovÃ­a/Autopista":"highway","Desconocido":"unknown"};if(M[row.terreno_acceso]) feat.featuresAccessType=M[row.terreno_acceso];}
       if(row.terreno_luz===true) feat.featuresUtilitiesElectricity=true;
       if(row.terreno_agua===true) feat.featuresUtilitiesWater=true;
       if(row.terreno_gas===true) feat.featuresUtilitiesNaturalGas=true;
@@ -4026,21 +4372,21 @@ function IdealistaJsonButton({ supabase }) {
       if(row.terreno_alumbrado===true) feat.featuresUtilitiesStreetLighting=true;
       if(row.terreno_carretera===true) feat.featuresUtilitiesRoadAccess=true;
     }
-    // Features — bloque GARAGE (featuresGarageCapacityType es REQUIRED)
+    // Features â bloque GARAGE (featuresGarageCapacityType es REQUIRED)
     if(isGarage){
-      const GARAGE_CAPACITY_MAP={"Coche compacto":"car_compact","Coche sedán":"car_sedan","Moto":"motorcycle","Coche y moto":"car_and_motorcycle","Dos coches o más":"two_cars_and_more","Desconocido":"unknown"};
+      const GARAGE_CAPACITY_MAP={"Coche compacto":"car_compact","Coche sedÃ¡n":"car_sedan","Moto":"motorcycle","Coche y moto":"car_and_motorcycle","Dos coches o mÃ¡s":"two_cars_and_more","Desconocido":"unknown"};
       feat.featuresGarageCapacityType=GARAGE_CAPACITY_MAP[row.tipo_garaje]||"unknown";
       if(row.garaje_puerta_auto===true) feat.featuresParkingAutomaticDoor=true;
       if(row.garaje_plaza_cubierta===true) feat.featuresParkingPlaceCovered=true;
     }
-    // Features — bloque STORAGE
+    // Features â bloque STORAGE
     if(isStorage){
       if(row.trastero_acceso_24h===true) feat.featuresAccess24h=true;
       if(Number(row.trastero_altura)>0) feat.featuresAreaHeight=Math.min(Number(row.trastero_altura),9); // schema max 9
       if(row.trastero_seguridad_24h===true) feat.featuresSecurity24h=true;
       if(row.trastero_muelle_carga===true) feat.featuresLoadingDock=true;
     }
-    // Features — bloque BUILDING
+    // Features â bloque BUILDING
     // building.json: featuresLiftNumber (NO featuresLiftAvailable), NO featuresBathroomNumber, NO featuresBedroomNumber, NO featuresStorage
     if(isBuilding){
       if(row.ascensor===true) feat.featuresLiftNumber=1;
@@ -4076,17 +4422,17 @@ function IdealistaJsonButton({ supabase }) {
         } else if(item.etiqueta&&IMAGE_TAG_MAP[item.etiqueta]){
           img.imageLabel=IMAGE_TAG_MAP[item.etiqueta];
         }
-        // Sin etiqueta válida: no se envía imageLabel
+        // Sin etiqueta vÃ¡lida: no se envÃ­a imageLabel
         img.imageAiGenerated=item.ia_generada===true;
         return img;
       });
     }
-    // Vídeos — URL absoluta requerida por el schema v6, máximo 6
+    // VÃ­deos â URL absoluta requerida por el schema v6, mÃ¡ximo 6
     const videos=(media||[]).filter(m=>m.tipo==="video"&&m.url?.startsWith("http")).sort((a,b)=>(a.orden||0)-(b.orden||0)).slice(0,6);
     if(videos.length>0){
       property.propertyVideos=videos.map((v,i)=>({videoOrder:i+1,videoUrl:v.url}));
     }
-    // Tour virtual — virtualTourUrl (NO virtualTour3DUrl) según virtualTour3D.json schema v6
+    // Tour virtual â virtualTourUrl (NO virtualTour3DUrl) segÃºn virtualTour3D.json schema v6
     if(row.tour360?.startsWith("http")) property.propertyVirtualTours={virtualTour3D:{virtualTourUrl:row.tour360}};
     return property;
   }
@@ -4118,7 +4464,7 @@ function IdealistaJsonButton({ supabase }) {
       const url=URL.createObjectURL(blob);
       const a=document.createElement("a");a.href=url;a.download=`${CUSTOMER_CODE}.json`;a.click();
       URL.revokeObjectURL(url);
-      setStatus("ok");setMsg(`✓ JSON generado con ${validas.length} propiedad(es) — descarga iniciada.`);
+      setStatus("ok");setMsg(`â JSON generado con ${validas.length} propiedad(es) â descarga iniciada.`);
     } catch(err){setStatus("error");setMsg("Error: "+err.message);}
     setLoading(false);
   }
@@ -4129,14 +4475,14 @@ function IdealistaJsonButton({ supabase }) {
         style={{background:loading?"var(--border)":"transparent",border:"1px solid "+(loading?"#3A3A38":"var(--success)"),borderRadius:0,color:loading?"var(--muted)":"var(--success)",fontSize:11,fontWeight:600,cursor:loading?"not-allowed":"pointer",padding:"12px 20px",fontFamily:"Inter, sans-serif",letterSpacing:"0.1em",whiteSpace:"nowrap",textTransform:"uppercase",transition:"all 0.3s"}}
         onMouseEnter={e=>{if(!loading){e.currentTarget.style.background="var(--success)";e.currentTarget.style.color="var(--cream)";}}}
         onMouseLeave={e=>{if(!loading){e.currentTarget.style.background="transparent";e.currentTarget.style.color="var(--success)";}}}>
-        {loading?"Generando...":"⬇ JSON Idealista"}
+        {loading?"Generando...":"â¬ JSON Idealista"}
       </button>
       {(status||loading)&&<div style={{fontSize:10,color:status==="ok"?"var(--success)":status==="error"?"var(--danger)":"var(--muted)",textAlign:"right"}}>{msg}</div>}
     </div>
   );
 }
 
-// ─── Componente: Importar datos del Catastro ──────────────────────────────────
+// âââ Componente: Importar datos del Catastro ââââââââââââââââââââââââââââââââââ
 function CatastroImport({ draft, upd, editMode }) {
   const [refCat, setRefCat] = useState("");
   const [loading, setLoading] = useState(false);
@@ -4147,7 +4493,7 @@ function CatastroImport({ draft, upd, editMode }) {
   async function importarCatastro() {
     const ref = refCat.trim().replace(/\s/g, "").toUpperCase();
     if (!ref || ref.length < 14) {
-      setMsg({ type: "error", text: "Introduce una referencia catastral válida (14-20 caracteres)" });
+      setMsg({ type: "error", text: "Introduce una referencia catastral vÃ¡lida (14-20 caracteres)" });
       return;
     }
     setLoading(true);
@@ -4169,7 +4515,7 @@ function CatastroImport({ draft, upd, editMode }) {
       const dt = inmueble.dt;
       const ds = inmueble.ds;
 
-      // Localización — puede estar en lourb (urbano) o louot (rústico)
+      // LocalizaciÃ³n â puede estar en lourb (urbano) o louot (rÃºstico)
       const lourb = dt?.locs?.lous?.lourb;
       const loint = lourb?.loint; // interior del inmueble (planta, puerta)
 
@@ -4178,14 +4524,14 @@ function CatastroImport({ draft, upd, editMode }) {
       campos.refCatastral = ref;
       const TIPO_VIA = { CL:"Calle", AV:"Avenida", PZ:"Plaza", CM:"Camino", CR:"Carretera", PS:"Paseo", RD:"Ronda", GL:"Glorieta", RB:"Rambla", TR:"Travesia", UR:"Urbanizacion" };
 
-      // Dirección
+      // DirecciÃ³n
       if (lourb?.dir?.tv && lourb?.dir?.nv) {
         const tv = TIPO_VIA[lourb.dir.tv] || lourb.dir.tv;
         campos.dir = `${tv} ${lourb.dir.nv}`.trim();
       }
       if (lourb?.dir?.pnp) campos.num = String(lourb.dir.pnp);
 
-      // Planta y puerta — pueden estar en loint o directamente
+      // Planta y puerta â pueden estar en loint o directamente
       const planta = loint?.pt || lourb?.loint?.pt;
       const puerta = loint?.pu || lourb?.loint?.pu;
       if (planta) campos.planta = String(planta);
@@ -4193,11 +4539,11 @@ function CatastroImport({ draft, upd, editMode }) {
 
       // CP y municipio
       if (lourb?.dp) campos.cp = String(lourb.dp).padStart(5, "0");
-      // Municipio — puede estar en nm, mc+nm, o en locs.lous.lourb.nm
+      // Municipio â puede estar en nm, mc+nm, o en locs.lous.lourb.nm
       const municipioNombre = lourb?.nm || lourb?.npa || dt?.locs?.lous?.lourb?.nm || rc?.bico?.bi?.dt?.locs?.lous?.lourb?.nm;
       if (municipioNombre) campos.municipio = municipioNombre;
 
-      // m² construidos — puede estar en sfc, debi.sfc, o superficie construida
+      // mÂ² construidos â puede estar en sfc, debi.sfc, o superficie construida
       if (ds?.sfc) {
         const m2 = parseFloat(String(ds.sfc).replace(",", "."));
         if (m2 > 0) campos.mConst = m2;
@@ -4211,7 +4557,7 @@ function CatastroImport({ draft, upd, editMode }) {
         if (m2 > 0) campos.mConst = m2;
       }
 
-      // Año construcción — puede estar en ds.ant, debi.ant, o en el edificio
+      // AÃ±o construcciÃ³n â puede estar en ds.ant, debi.ant, o en el edificio
       const antRaw = ds?.ant || inmueble?.debi?.ant || dt?.crop?.ant || rc?.bico?.bi?.ds?.ant;
       if (antRaw) {
         const ano = parseInt(String(antRaw).trim());
@@ -4220,7 +4566,7 @@ function CatastroImport({ draft, upd, editMode }) {
 
       // Aplicar campos
       const aplicados = [];
-      const LABELS = { refCatastral:"Ref. catastral", dir:"Dirección", num:"Número", planta:"Planta", puerta:"Puerta", cp:"CP", municipio:"Municipio", mConst:"m² construidos", anoConstruc:"Año construcción" };
+      const LABELS = { refCatastral:"Ref. catastral", dir:"DirecciÃ³n", num:"NÃºmero", planta:"Planta", puerta:"Puerta", cp:"CP", municipio:"Municipio", mConst:"mÂ² construidos", anoConstruc:"AÃ±o construcciÃ³n" };
       Object.entries(campos).forEach(([k, v]) => {
         if (v !== undefined && v !== null && v !== "") {
           upd(k, v);
@@ -4231,14 +4577,14 @@ function CatastroImport({ draft, upd, editMode }) {
       const noImportados = Object.keys(LABELS).filter(k => !campos[k]).map(k => LABELS[k]);
 
       if (aplicados.length === 0) {
-        setMsg({ type: "error", text: "⚠ Referencia encontrada pero el Catastro no devuelve datos de dirección para este inmueble. Completa los campos manualmente." });
+        setMsg({ type: "error", text: "â  Referencia encontrada pero el Catastro no devuelve datos de direcciÃ³n para este inmueble. Completa los campos manualmente." });
       } else if (noImportados.length > 0) {
-        setMsg({ type: "warn", text: `✓ Importados: ${aplicados.join(", ")}. ⚠ Sin datos: ${noImportados.join(", ")} — completa manualmente.` });
+        setMsg({ type: "warn", text: `â Importados: ${aplicados.join(", ")}. â  Sin datos: ${noImportados.join(", ")} â completa manualmente.` });
       } else {
-        setMsg({ type: "ok", text: `✓ Todos los datos importados: ${aplicados.join(", ")}` });
+        setMsg({ type: "ok", text: `â Todos los datos importados: ${aplicados.join(", ")}` });
       }
     } catch (err) {
-      setMsg({ type: "error", text: `⚠ ${err.message || "Error al consultar el Catastro"}. Comprueba la referencia e inténtalo de nuevo.` });
+      setMsg({ type: "error", text: `â  ${err.message || "Error al consultar el Catastro"}. Comprueba la referencia e intÃ©ntalo de nuevo.` });
     }
     setLoading(false);
   }
@@ -4273,13 +4619,13 @@ function CatastroImport({ draft, upd, editMode }) {
         </div>
       )}
       <div style={{ fontSize: 10, color: "#C8BFB0", marginTop: 8 }}>
-        Rellena dirección, número, piso, puerta, CP, municipio, m² y año de construcción automáticamente
+        Rellena direcciÃ³n, nÃºmero, piso, puerta, CP, municipio, mÂ² y aÃ±o de construcciÃ³n automÃ¡ticamente
       </div>
     </div>
   );
 }
 
-// ─── Componente: Importar propiedades desde XML de Idealista ──────────────────
+// âââ Componente: Importar propiedades desde XML de Idealista ââââââââââââââââââ
 function IdealistaImportButton() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
@@ -4308,12 +4654,12 @@ function IdealistaImportButton() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
       <label style={{ background: 'transparent', border: '1px solid #A89BC4', borderRadius: 0, color: '#A89BC4', fontSize: 11, fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer', padding: '12px 20px', fontFamily: "Inter, sans-serif", letterSpacing: '0.1em', textTransform: 'uppercase', opacity: loading ? 0.5 : 1 }}>
-        {loading ? 'Importando...' : '⬆ XML Idealista'}
+        {loading ? 'Importando...' : 'â¬ XML Idealista'}
         <input type="file" accept=".xml" onChange={handleFile} style={{ display: 'none' }} disabled={loading} />
       </label>
       {result && (
         <div style={{ fontSize: 10, textAlign: 'right', color: result.error ? '#D45454' : 'var(--success-l)' }}>
-          {result.error ? `Error: ${result.error}` : `✓ ${result.imported} importadas · ${result.skipped} ya existían · ${result.errors} errores`}
+          {result.error ? `Error: ${result.error}` : `â ${result.imported} importadas Â· ${result.skipped} ya existÃ­an Â· ${result.errors} errores`}
         </div>
       )}
     </div>
@@ -4388,15 +4734,15 @@ export default function CRMPropiedades({ currentUser }) {
     setLoading(false);
   }
 
-  // Validación de reglas Idealista (instrucciones de António Lopes)
+  // ValidaciÃ³n de reglas Idealista (instrucciones de AntÃ³nio Lopes)
   // Solo aplica si la propiedad tiene "Idealista" en destinos y estado = publicada
   async function saveProperty(prop) {
-    // IEE warning for buildings >= 49 years old — aviso informativo, no bloquea
+    // IEE warning for buildings >= 49 years old â aviso informativo, no bloquea
     if (prop.anoConstruc) {
       const age = new Date().getFullYear() - parseInt(prop.anoConstruc);
       if (age >= 49) {
         // Mostrar aviso no bloqueante y continuar guardando
-        setIeeWarning(`AVISO: Este inmueble tiene ${age} años. Es obligatorio solicitar el Informe de Evaluación del Edificio (IEE).`);
+        setIeeWarning(`AVISO: Este inmueble tiene ${age} aÃ±os. Es obligatorio solicitar el Informe de EvaluaciÃ³n del Edificio (IEE).`);
       }
     }
     
@@ -4429,7 +4775,7 @@ export default function CRMPropiedades({ currentUser }) {
             if (cambios.length > 0)
               await supabase.from("propiedades_historial").insert(cambios);
           }
-        } catch(e) { /* historial no crítico — no bloquea el guardado */ }
+        } catch(e) { /* historial no crÃ­tico â no bloquea el guardado */ }
         const { error } = await supabase.from("propiedades").update(dbData).eq("id", prop.id);
         if (error) {
           alert("Error al guardar:\n\n" + error.message + (error.details ? "\n" + error.details : ""));
@@ -4437,14 +4783,14 @@ export default function CRMPropiedades({ currentUser }) {
         }
         notificarGuardado("Ficha guardada");
       } else {
-        // Detección de duplicados antes de crear
+        // DetecciÃ³n de duplicados antes de crear
         if (dbData.dir && dbData.municipio) {
           const { data: dups } = await supabase.from("propiedades")
             .select("id, ref, dir, municipio")
             .eq("dir", dbData.dir).eq("municipio", dbData.municipio).limit(3);
           if (dups && dups.length > 0) {
-            const lista = dups.map(d => `${d.ref} — ${d.dir}, ${d.municipio}`).join("\n");
-            const ok = confirm(`⚠ Ya existe una propiedad con la misma dirección:\n\n${lista}\n\n¿Continuar igualmente?`);
+            const lista = dups.map(d => `${d.ref} â ${d.dir}, ${d.municipio}`).join("\n");
+            const ok = confirm(`â  Ya existe una propiedad con la misma direcciÃ³n:\n\n${lista}\n\nÂ¿Continuar igualmente?`);
             if (!ok) return;
           }
         }
@@ -4475,7 +4821,7 @@ export default function CRMPropiedades({ currentUser }) {
 
   async function duplicateProperty(prop) {
     if (!prop.id) return;
-    // Sufijo según operación del original
+    // Sufijo segÃºn operaciÃ³n del original
     const SUFIJO = { "Compraventa": "-VTA", "Alquiler": "-ALQ", "Traspaso": "-TRS" };
     const sufijo = SUFIJO[prop.op] || "-DUP";
     const newRef = (prop.ref || "") + sufijo;
@@ -4503,7 +4849,7 @@ export default function CRMPropiedades({ currentUser }) {
       return;
     }
 
-    // Duplicar fotos — copiar registros de media_propiedades
+    // Duplicar fotos â copiar registros de media_propiedades
     const { data: mediaOrig } = await supabase
       .from("media_propiedades")
       .select("*")
@@ -4523,10 +4869,10 @@ export default function CRMPropiedades({ currentUser }) {
     }
 
     await loadProps();
-    // Abrir la nueva ficha en edición
+    // Abrir la nueva ficha en ediciÃ³n
     const newPropData = mapDbToJs(inserted);
     setSel(newPropData);
-    alert(`✓ Ficha duplicada como ${newRef} — cambia la operación y el precio antes de publicar.`);
+    alert(`â Ficha duplicada como ${newRef} â cambia la operaciÃ³n y el precio antes de publicar.`);
   }
 
   async function deleteProperty(prop) {
@@ -4571,18 +4917,18 @@ export default function CRMPropiedades({ currentUser }) {
 
   // Si hay ficha seleccionada, mostrar en pantalla completa
   if (sel) {
-    return <PropDetail p={sel} currentUser={currentUser} onClose={() => setSel(null)} onUpdate={(updated) => { saveProperty(updated); }} onDelete={(prop) => { if (confirm("¿Eliminar esta propiedad y todos sus archivos? Esta accion no se puede deshacer.")) deleteProperty(prop); }} onDuplicate={(prop) => duplicateProperty(prop)} />;
+    return <PropDetail p={sel} currentUser={currentUser} onClose={() => setSel(null)} onUpdate={(updated) => { saveProperty(updated); }} onDelete={(prop) => { if (confirm("Â¿Eliminar esta propiedad y todos sus archivos? Esta accion no se puede deshacer.")) deleteProperty(prop); }} onDuplicate={(prop) => duplicateProperty(prop)} />;
   }
 
   return (
     <div style={{ fontFamily: "Inter, sans-serif", background: "var(--cream)", minHeight: "100vh", color: "var(--text)", padding: "clamp(16px, 4vw, 40px) clamp(12px, 3vw, 24px)" }}>
       <div style={{ maxWidth: 920, margin: "0 auto" }}>
 
-        {/* Banner aviso IEE — no bloqueante */}
+        {/* Banner aviso IEE â no bloqueante */}
         {ieeWarning && (
           <div style={{ background: "#FFF8E7", border: "1px solid #F0C040", padding: "12px 16px", marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-            <span style={{ fontSize: 13, color: "#7A5C00" }}>⚠ {ieeWarning}</span>
-            <button onClick={() => setIeeWarning(null)} style={{ background: "none", border: "none", color: "#7A5C00", cursor: "pointer", fontSize: 16, padding: 0, flexShrink: 0 }}>×</button>
+            <span style={{ fontSize: 13, color: "#7A5C00" }}>â  {ieeWarning}</span>
+            <button onClick={() => setIeeWarning(null)} style={{ background: "none", border: "none", color: "#7A5C00", cursor: "pointer", fontSize: 16, padding: 0, flexShrink: 0 }}>Ã</button>
           </div>
         )}
 
