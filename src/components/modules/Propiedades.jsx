@@ -17,7 +17,8 @@ function mapDbToJs(row) {
   return {
     id: row.id, ref: row.ref || "", tipo: row.tipo || "", op: row.op || "Compraventa",
     titulo: row.titulo || "", dir: row.dir || "", num: row.num || "", cp: row.cp || "",
-    provincia: row.provincia || "", municipio: row.municipio || "", zona: row.zona || "",
+    provincia: row.provincia || "",
+    municipio: row.municipio || "", zona: row.zona || "",
     visDir: row.vis_dir || "Solo calle", orient: row.orient || "", distPlaya: row.dist_playa || "",
     precioVenta: Number(row.precio_venta) || 0, precioProp: Number(row.precio_prop) || 0, precioTraspaso: Number(row.precio_traspaso) || 0, precioAlquiler: Number(row.precio_alquiler) || 0, fianzaMeses: Number(row.fianza_meses) || 1, duracionMinMeses: Number(row.duracion_min_meses) || 11, mascotas: row.mascotas || false,
     alqEquipamiento: row.alq_equipamiento || "", alqTipoOperacion: row.alq_tipo_operacion || "", alqMaxInquilinos: Number(row.alq_max_inquilinos) || 0, alqAptoNinos: row.alq_apto_ninos ?? null,
@@ -94,7 +95,8 @@ function mapDbToJs(row) {
 function mapJsToDb(p) {
   return {
     ref: p.ref, tipo: p.tipo, op: p.op, titulo: p.titulo, dir: p.dir, num: p.num, cp: p.cp,
-    provincia: p.provincia, municipio: p.municipio, zona: p.zona, vis_dir: p.visDir, orient: p.orient, dist_playa: p.distPlaya,
+    provincia: p.provincia,
+    municipio: p.municipio, zona: p.zona, vis_dir: p.visDir, orient: p.orient, dist_playa: p.distPlaya,
     precio_venta: Number(p.precioVenta) || 0, precio_prop: Number(p.precioProp) || 0, precio_traspaso: Number(p.precioTraspaso) || 0, precio_alquiler: Number(p.precioAlquiler) || 0, fianza_meses: Number(p.fianzaMeses) || 1, duracion_min_meses: Number(p.duracionMinMeses) || 11, mascotas: p.mascotas || false,
     alq_equipamiento: p.alqEquipamiento || null, alq_tipo_operacion: p.alqTipoOperacion || null, alq_max_inquilinos: Number(p.alqMaxInquilinos) || null, alq_apto_ninos: p.alqAptoNinos ?? null,
     honorarios_tipo: p.honorariosTipo, honorarios: Number(p.honorarios) || 0, iva_hon: Number(p.ivaHon) || 21, hon_neto_manual: Number(p.honNetoManual) || 0,
@@ -212,15 +214,17 @@ const PROVINCIAS_MAP = {
     "Sant Joan","Sant Llorenç des Cardassar","Santa Eugènia","Santa Margalida","Santa Maria del Camí",
     "Santanyí","Selva","Sencelles","Ses Salines","Sineu","Sóller","Son Servera","Valldemossa","Vilafranca de Bonany"
   ],
+  "Menorca": [
+    "Alaior","Ciutadella de Menorca","Es Castell","Es Mercadal","Es Migjorn Gran","Ferreries","Maó","Sant Lluís"
+  ],
   "Comunitat Valenciana": [
     "Alacant","Alcoi","Altea","Benidorm","Calp","Dénia","Elx","Gandia","Guardamar del Segura",
     "La Vila Joiosa","Novelda","Orihuela","Pego","Santa Pola","Torrevieja","Xàbia",
     "Alzira","Burjassot","Cullera","Mislata","Ontinyent","Paterna","Requena","Sueca",
     "Torrent","Utiel","Valencia","Xàtiva","Castelló de la Plana","Benicarló","Morella",
-    "Nules","Peníscola","Segorbe","Vinaròs","Vinaròs"
+    "Nules","Peníscola","Segorbe","Vinaròs"
   ]
 };
-
 const ZONAS_MAP = {
   "Palma": ["Casco Antiguo","Santa Catalina","El Terreno","Son Espanyolet","Son Cotoner","Son Dameto","La Bonanova","Genova","Cala Major","Son Rapinya","La Vileta","Pere Garau","Foners","Plaza de Toros","Son Gotleu","La Soledad","Vivero","Son Oliva","Rafal","Son Cladera","Son Ferriol","Sant Jordi","Can Pastilla","Coll den Rabassa","Nou Llevant","SIndioteria","SAranjassa","Es Pilari","Amanecer","Son Sardina","Establiments","Secar de la Real"],
   "Calvia": ["Palmanova","Magaluf","Santa Ponsa","Peguera","Illetes","Portals Nous","Bendinat","Calvia Vila","Costa de la Calma","Son Ferrer","El Toro"],
@@ -253,7 +257,8 @@ const SAMPLE = [
     id: 1, ref: "MNP-001", tipo: "Piso", op: "Compraventa",
     titulo: "Piso reformado con terraza en Pere Garau",
     dir: "C/ de Sa Coma", num: "12", cp: "07007",
-    provincia: "Illes Balears", municipio: "Palma", zona: "Pere Garau",
+    provincia: "Illes Balears",
+    municipio: "Palma", zona: "Pere Garau",
     visDir: "Direccion exacta", orient: "Sur", distPlaya: "2 km",
     precioVenta: 399000, precioProp: 374861, precioAnt: 420000, precioTraspaso: 0,
     honorariosTipo: "porcentaje", honorarios: 5, ivaHon: 21, honNetoManual: 0,
@@ -285,7 +290,7 @@ const SAMPLE = [
     id: 2, ref: "MNP-002", tipo: "Atico", op: "Compraventa",
     titulo: "Atico panoramico con terraza de 35m2",
     dir: "C/ Arxiduc Lluis Salvador", num: "45", cp: "07004",
-    provincia: "Illes Balears", municipio: "Palma", zona: "Plaza de Toros",
+    municipio: "Palma", zona: "Plaza de Toros",
     visDir: "Solo calle", orient: "Sureste", distPlaya: "3 km",
     precioVenta: 485000, precioProp: 466850, precioAnt: 0, precioTraspaso: 0,
     honorariosTipo: "fijo", honorarios: 15000, ivaHon: 21,
@@ -317,7 +322,7 @@ const SAMPLE = [
     id: 3, ref: "MNP-003", tipo: "Casa", op: "Compraventa",
     titulo: "Casa con jardin y piscina privada en Sa Cabaneta",
     dir: "C/ des Pont", num: "8", cp: "07141",
-    provincia: "Illes Balears", municipio: "Marratxi", zona: "Sa Cabaneta",
+    municipio: "Marratxi", zona: "Sa Cabaneta",
     visDir: "Direccion exacta", orient: "Oeste", distPlaya: "15 km",
     precioVenta: 520000, precioProp: 494848, precioAnt: 550000, precioTraspaso: 0,
     honorariosTipo: "porcentaje", honorarios: 4, ivaHon: 21,
@@ -2969,24 +2974,26 @@ REGLAS:
             {EFl({label: "Direccion", req: true, field: "dir", pub: true})}
             {EFl({label: "Numero", field: "num", pub: true})}
             {EFl({label: "Codigo postal", req: true, field: "cp", pub: true})}
-                        {/* Provincia */}
             {(() => {
-              const hasErr = editMode && idealistaFieldErrors.has("provincia");
-              const inputStyle = { width: "100%", background: "var(--white)", border: `1px solid ${hasErr ? "var(--danger)" : "var(--text)"}`, borderRadius: 0, color: "var(--text)", padding: "10px 14px", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" };
-              return (
-                <div style={{ marginBottom: 14 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 5 }}>
-                    <span style={{ fontSize: 10, fontWeight: 600, color: hasErr ? "var(--danger)" : "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Provincia</span>
-                    <span style={{ color: "var(--danger)", fontSize: 14, fontWeight: 700 }}>*</span>
-                  </div>
-                  <select value={d.provincia || ""} onChange={e => { upd("provincia", e.target.value); upd("municipio", ""); upd("zona", ""); }} onBlur={() => autoSave({ ...draft, municipio: d.municipio, zona: "" })} style={inputStyle}>
-                    <option value="">-</option>
-                    {{Object.keys(PROVINCIAS_MAP).map(m => <option key={m} value={m}>{m}</option>)}                  </select>
-                  {hasErr && <div style={{ fontSize: 10, color: "var(--danger)", marginTop: 3 }}>Requerido para Idealista</div>}
-                </div>
-              );
-            })()}
-            {/* Municipio — filtrado por Provincia */}
+                  const hasErr = editMode && idealistaFieldErrors.has("provincia");
+                  const inputStyle = { width: "100%", background: "var(--white)", border: `1px solid ${hasErr ? "var(--danger)" : "var(--border)"}`, borderRadius: 6, padding: "6px 10px", fontSize: 13, outline: "none", appearance: "none", WebkitAppearance: "none", cursor: "pointer" };
+                  const provOpts = Object.keys(PROVINCIAS_MAP);
+                  return (
+                    <div style={{ marginBottom: 8 }}>
+                      {editMode && <label style={{ fontSize: 11, color: "var(--muted)", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" }}>Provincia</label>}
+                      {editMode ? (
+                        <select value={d.provincia || ""} onChange={e => { upd("provincia", e.target.value); upd("municipio", ""); upd("zona", ""); }} onBlur={() => autoSave({ ...draft, provincia: d.provincia, municipio: "", zona: "" })} style={inputStyle}>
+                          <option value="">-</option>
+                          {provOpts.map(p => <option key={p} value={p}>{p}</option>)}
+                        </select>
+                      ) : d.provincia ? (
+                        <div style={{ fontSize: 13 }}>{d.provincia}</div>
+                      ) : null}
+                      {hasErr && <div style={{ fontSize: 10, color: "var(--danger)", marginTop: 3 }}>Requerido para Idealista</div>}
+                    </div>
+                  );
+                })()}
+                
             {(() => {
               const hasErr = editMode && idealistaFieldErrors.has("municipio");
               const inputStyle = { width: "100%", background: "var(--white)", border: `1px solid ${hasErr ? "var(--danger)" : "var(--text)"}`, borderRadius: 0, color: "var(--text)", padding: "10px 14px", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" };
@@ -2998,7 +3005,8 @@ REGLAS:
                   </div>
                   <select value={d.municipio || ""} onChange={e => { upd("municipio", e.target.value); upd("zona", ""); }} onBlur={() => autoSave({ ...draft, municipio: d.municipio, zona: "" })} style={inputStyle}>
                     <option value="">-</option>
-                    {{(d.provincia && PROVINCIAS_MAP[d.provincia] ? PROVINCIAS_MAP[d.provincia] : Object.keys(ZONAS_MAP)).map(m => <option key={m} value={m}>{m}</option>)}                  </select>
+                    {(d.provincia ? PROVINCIAS_MAP[d.provincia] || [] : Object.keys(ZONAS_MAP)).map(m => <option key={m} value={m}>{m}</option>)}
+                  </select>
                   {hasErr && <div style={{ fontSize: 10, color: "var(--danger)", marginTop: 3 }}>Requerido para Idealista</div>}
                 </div>
               );
