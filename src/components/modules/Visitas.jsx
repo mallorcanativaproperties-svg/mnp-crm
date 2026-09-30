@@ -90,8 +90,8 @@ function EstrellaInteres({ nivel }) {
   const colors = ["", DANGER, DANGER, GOLD, GOLD, SUCCESS];
   return (
     <span style={{ fontSize: 16, letterSpacing: 1, color: colors[nivel] || GOLD }}>
-      {"â".repeat(nivel)}
-      <span style={{ color: "#9a968a50" }}>{"â".repeat(5 - nivel)}</span>
+      {"\u2605".repeat(nivel)}
+      <span style={{ color: "#9a968a50" }}>{"\u2605".repeat(5 - nivel)}</span>
     </span>
   );
 }
@@ -1040,7 +1040,7 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                             background: fbEdit.nivel_interes === n ? `${NIVEL_COLOR[n]}18` : CREAM,
                             color: fbEdit.nivel_interes === n ? NIVEL_COLOR[n] : MUTED,
                             cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "Inter, sans-serif" }}>
-                          {"â".repeat(n)} {NIVEL_LABEL[n]}
+                          {"\u2605".repeat(n)} {NIVEL_LABEL[n]}
                         </button>
                       ))}
                     </div>
