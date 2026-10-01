@@ -2999,7 +2999,8 @@ REGLAS:
                   </div>
                   <select value={d.municipio || ""} onChange={e => { upd("municipio", e.target.value); upd("zona", ""); }} onBlur={() => autoSave({ ...draft, municipio: d.municipio, zona: "" })} style={inputStyle}>
                     <option value="">-</option>
-                    {{(d.provincia && PROVINCIAS_MAP[d.provincia] ? PROVINCIAS_MAP[d.provincia] : Object.keys(ZONAS_MAP)).map(m => <option key={m} value={m}>{m}</option>)}                  </select>
+                    {(d.provincia && PROVINCIAS_MAP[d.provincia] ? PROVINCIAS_MAP[d.provincia] : Object.keys(ZONAS_MAP)).map(m => <option key={m} value={m}>{m}</option>)}
+                  </select>
                   {hasErr && <div style={{ fontSize: 10, color: "var(--danger)", marginTop: 3 }}>Requerido para Idealista</div>}
                 </div>
               );
