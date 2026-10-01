@@ -182,17 +182,34 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
         ...(nuevoEmail.trim() ? { email: nuevoEmail.trim() } : {}),
         updated_at: new Date().toISOString(),
       }).eq("id", compradorExistenteId);
-      const { data: existing } = await supabase.from("compradores")
-        .select("*").eq("id", compradorExistenteId).single();
-      if (existing) onChange(existing);
+      // Construir objeto con datos actualizados directamente (evita RLS en SELECT)
+      const compradorActualizado = {
+        id: compradorExistenteId,
+        nombre: nombreParte,
+        apellidos: apellidosParte || null,
+        telefono: nuevoTel.trim(),
+        email: nuevoEmail.trim() || null,
+        dni: nuevoDni.trim(),
+        pais: nuevaNac,
+      };
+      onChange(compradorActualizado);
     } else {
-      const { data } = await supabase.from("compradores").insert({
+      const { error: errIns } = await supabase.from("compradores").insert({
         nombre: nombreParte, apellidos: apellidosParte || null,
         telefono: nuevoTel.trim(), email: nuevoEmail.trim() || null,
         dni: nuevoDni.trim(), pais: nuevaNac, activo: true,
         created_at: new Date().toISOString(),
-      }).select().single();
-      if (data) onChange(data);
+      });
+      if (!errIns) {
+        // Recuperar el comprador recién creado por DNI (único)
+        const { data: comp } = await supabase.from("compradores")
+          .select("*")
+          .eq("dni", nuevoDni.trim())
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .single();
+        if (comp) onChange(comp);
+      }
     }
 
     setSaving(false);
@@ -2105,13 +2122,17 @@ export default function Visitas({ currentUser }) {
   async function crearVisitaGlobal() {
     if (!nvPropiedad || nvCompradores.length === 0) return;
     setNvGuardando(true);
-    const { data: visitaArr, error: errVisita } = await supabase.from("visitas").insert({
+    const fechaISO = new Date(nvHora).toISOString();
+    const insertData = {
       propiedad_id: nvPropiedad.id,
       agente_login: currentUser.user_login,
       comprador_id: nvCompradores[0].id,
-      fecha_visita: new Date(nvHora).toISOString(),
+      fecha_visita: fechaISO,
       activo: true,
-    }).select("id");
+    };
+    console.log("[VISITA INSERT]", insertData);
+    const { error: errVisita } = await supabase.from("visitas").insert(insertData);
+    console.log("[VISITA RESULT]", errVisita ? "ERROR: " + errVisita.message : "OK");
 
     if (errVisita) {
       setNvGuardando(false);
@@ -2119,12 +2140,20 @@ export default function Visitas({ currentUser }) {
       return;
     }
 
-    const visitaId = visitaArr && visitaArr[0] ? visitaArr[0].id : null;
-    if (visitaId) {
-      const { error: errCompr } = await supabase.from("visita_compradores").insert(
-        nvCompradores.map((c, i) => ({ visita_id: visitaId, comprador_id: c.id, orden: i + 1 }))
+    // Recuperar la visita recién creada para vincular compradores
+    const { data: visitaReciente } = await supabase.from("visitas")
+      .select("id")
+      .eq("propiedad_id", nvPropiedad.id)
+      .eq("agente_login", currentUser.user_login)
+      .eq("fecha_visita", fechaISO)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (visitaReciente?.id) {
+      await supabase.from("visita_compradores").insert(
+        nvCompradores.map((c, i) => ({ visita_id: visitaReciente.id, comprador_id: c.id, orden: i + 1 }))
       );
-      if (errCompr) console.warn("Error vinculando compradores:", errCompr.message);
     }
 
     for (const c of nvCompradores) {
