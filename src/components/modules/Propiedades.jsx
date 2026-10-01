@@ -3658,8 +3658,8 @@ REGLAS:
                     .then(({ data }) => {
                       if (!data) return;
                       const candidatas = data.filter(v => {
-                        const docs = v.visita_documentos || [];
-                        return docs.some(d => ['oferta','reserva','contraoferta'].includes(d.tipo));
+                        const tieneComprador = (v.visita_compradores && v.visita_compradores.length > 0) || v.compradores;
+                        return tieneComprador;
                       });
                       setVisitasCandidatas(candidatas);
                     });
@@ -3811,8 +3811,8 @@ REGLAS:
                     React.createElement('div', { style: { marginTop: 24 } }),
                     secHdr('Documentos - Comprador' + (compradores.length > 1 ? 'es' : '')),
                     compradores.map(function(c, idx) { return React.createElement('div', { key: idx, style: { marginBottom: 16 } },
-                      compradores.length > 1 && React.createElement('div', { style: { fontSize: 11, fontWeight: 700, color: 'var(--muted)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 8 } },
-                        'Comprador ' + (idx+1) + (c.nombre ? ' - ' + c.nombre : '')
+                      React.createElement('div', { style: { fontSize: 11, fontWeight: 700, color: 'var(--muted)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 8 } },
+                        compradores.length > 1 ? ('Comprador ' + (idx+1) + (c.nombre ? ' - ' + c.nombre : '')) : (c.nombre || 'Comprador')
                       ),
                       DocSlot({ label: 'DNI / NIE / Pasaporte', icon: '🪧', file: docsCompradores[idx] && docsCompradores[idx].dni, onSet: function(f) { setDocsCompradores(function(prev) { var n=[...prev]; n[idx]={...n[idx],dni:f}; return n; }); }, required: true })
                     ); }),
