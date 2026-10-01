@@ -3602,355 +3602,540 @@ REGLAS:
               accentColor="var(--amber)"
             >
               {(() => {
+                /* ─── Estado principal ─── */
                 const [arrasTab, setArrasTab] = React.useState('docs');
-                const [docsState, setDocsState] = React.useState({
-                  dni_vendedor: null, dni_comprador: null,
-                  nota_simple: null, catastro: null,
-                  cert_energetico: null, cedula: null,
-                  actas_comunidad: null, poder_notarial: null,
-                  cert_bancario: null, otros: null,
+
+                /* Vendedores: array de personas */
+                const VENDEDOR_VACIO = { nombre: '', dni: '', domicilio: '', estado_civil: '', regimen: '', iban: '', vivienda_habitual: 'no' };
+                const [vendedores, setVendedores] = React.useState(() => {
+                  if (p && p.propietarios && p.propietarios.length > 0) {
+                    return p.propietarios.map(pr => ({ nombre: pr.nombre || '', dni: pr.dni || '', domicilio: pr.direccion_notificaciones || pr.direccion || '', estado_civil: '', regimen: '', iban: '', vivienda_habitual: 'no' }));
+                  }
+                  return [{ ...VENDEDOR_VACIO }];
                 });
+                const [ibanCompartidoVendedor, setIbanCompartidoVendedor] = React.useState(false);
+                const [ibanVendedorComun, setIbanVendedorComun] = React.useState('');
+
+                /* Compradores: array de personas */
+                const COMPRADOR_VACIO = { nombre: '', dni: '', domicilio: '', estado_civil: '', regimen: '', iban: '', hipoteca: 'no' };
+                const [compradores, setCompradores] = React.useState([{ ...COMPRADOR_VACIO }]);
+                const [ibanCompartidoComprador, setIbanCompartidoComprador] = React.useState(false);
+                const [ibanCompradorComun, setIbanCompradorComun] = React.useState('');
+
+                /* Inmuebles: array de fincas registrales */
+                const INMUEBLE_VACIO = { tipo: 'vivienda', direccion: '', ref_catastral: '', ref_registral: '', libre_arrendatarios: 'si', inquilino_detalle: '', precio: '' };
+                const [inmuebles, setInmuebles] = React.useState(() => {
+                  if (p) {
+                    return [{ tipo: 'vivienda', direccion: p.dir || '', ref_catastral: p.refCatastral || '', ref_registral: '', libre_arrendatarios: 'si', inquilino_detalle: '', precio: '' }];
+                  }
+                  return [{ ...INMUEBLE_VACIO }];
+                });
+
+                /* Precio global vs desglosado */
+                const [precioMode, setPrecioMode] = React.useState('global');
+                const [precioGlobal, setPrecioGlobal] = React.useState(p && p.precio ? String(p.precio) : '');
+
+                /* Condiciones generales */
                 const [form, setForm] = React.useState({
-                  vendedor_nombre: '', vendedor_dni: '', vendedor_domicilio: '',
-                  vendedor_estado_civil: '', vendedor_regimen: '',
-                  vendedor_iban: '', vendedor_vivienda_habitual: 'no',
-                  comprador_nombre: '', comprador_dni: '', comprador_domicilio: '',
-                  comprador_estado_civil: '', comprador_regimen: '',
-                  comprador_hipoteca: 'no',
-                  ref_catastral: '', direccion_inmueble: '', garaje_trastero: 'no',
-                  libre_arrendatarios: 'si', inquilino_detalle: '',
                   iee_aplica: 'no', derramas: 'no', derramas_detalle: '',
                   actas_relevantes: '',
-                  precio_total: '', incluye_muebles: 'no', muebles_detalle: '',
+                  incluye_muebles: 'no', muebles_detalle: '',
                   importe_arras: '', forma_pago_arras: '',
                   plazo_escritura: '', plazo_tipo: 'naturales',
-                  honorarios: '', honorarios_iva: 'si', honorarios_pago: '50_50',
-                  fecha_firma_arras: '', condiciones_suspensivas: '',
-                  acuerdos_verbales: '', docs_adicionales: '',
+                  honorarios: p && p.honorarios ? String(p.honorarios) : '', honorarios_iva: 'si', honorarios_pago: '50_50',
+                  fecha_firma_arras: '', condiciones_suspensivas: '', acuerdos_verbales: '', docs_adicionales: '',
                 });
+                const setF = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+                /* Documentos — estructurado por parte y por inmueble */
+                const [docsVendedores, setDocsVendedores] = React.useState([{ dni: null, escritura: null, poder_notarial: null }]);
+                const [docsCompradores, setDocsCompradores] = React.useState([{ dni: null }]);
+                const [docsInmuebles, setDocsInmuebles] = React.useState([{ nota_simple: null, catastro: null, cert_energetico: null, cedula: null, cert_bancario: null, actas_comunidad: null, cert_titularidad: null, otros: null }]);
+                const [docsExtra, setDocsExtra] = React.useState({ ibi_recibo: null, planos: null, otros_general: null });
+
+                /* Sincronizacion con seccion Documentos de la propiedad */
+                const docsPropiedad = p && p.docs ? p.docs : {};
+
+                /* Helpers de estado arrays */
+                const updateVendedor = (idx, k, v) => setVendedores(prev => { const n = [...prev]; n[idx] = { ...n[idx], [k]: v }; return n; });
+                const addVendedor = () => { setVendedores(v => [...v, { ...VENDEDOR_VACIO }]); setDocsVendedores(d => [...d, { dni: null, escritura: null, poder_notarial: null }]); };
+                const removeVendedor = (idx) => { if (vendedores.length === 1) return; setVendedores(v => v.filter((_, i) => i !== idx)); setDocsVendedores(d => d.filter((_, i) => i !== idx)); };
+                const updateComprador = (idx, k, v) => setCompradores(prev => { const n = [...prev]; n[idx] = { ...n[idx], [k]: v }; return n; });
+                const addComprador = () => { setCompradores(c => [...c, { ...COMPRADOR_VACIO }]); setDocsCompradores(d => [...d, { dni: null }]); };
+                const removeComprador = (idx) => { if (compradores.length === 1) return; setCompradores(c => c.filter((_, i) => i !== idx)); setDocsCompradores(d => d.filter((_, i) => i !== idx)); };
+                const updateInmueble = (idx, k, v) => setInmuebles(prev => { const n = [...prev]; n[idx] = { ...n[idx], [k]: v }; return n; });
+                const addInmueble = () => { setInmuebles(i => [...i, { ...INMUEBLE_VACIO }]); setDocsInmuebles(d => [...d, { nota_simple: null, catastro: null, cert_energetico: null, cedula: null, cert_bancario: null, actas_comunidad: null, cert_titularidad: null, otros: null }]); };
+                const removeInmueble = (idx) => { if (inmuebles.length === 1) return; setInmuebles(i => i.filter((_, i2) => i2 !== idx)); setDocsInmuebles(d => d.filter((_, i2) => i2 !== idx)); };
+
+                /* IA */
                 const [generando, setGenerando] = React.useState(false);
                 const [resultado, setResultado] = React.useState(null);
                 const [errorIA, setErrorIA] = React.useState(null);
-                const docKeys = ['dni_vendedor','dni_comprador','nota_simple','catastro','cert_energetico','cedula','cert_bancario','actas_comunidad','poder_notarial','otros'];
-                const docTypes = [
-                  { key: 'dni_vendedor', label: 'DNI / NIE / Pasaporte — Vendedor', icon: '🚪', required: true },
-                  { key: 'dni_comprador', label: 'DNI / NIE / Pasaporte — Comprador', icon: '🚪', required: true },
-                  { key: 'nota_simple', label: 'Nota Simple (Registro de la Propiedad)', icon: '📋', required: true },
-                  { key: 'catastro', label: 'Consulta descriptiva y gráfica — Catastro', icon: '🗺️', required: true },
-                  { key: 'cert_energetico', label: 'Certificado de Eficiencia Energética', icon: '⚡', required: true },
-                  { key: 'cedula', label: 'Cédula de Habitabilidad / Licencia 1ª Ocupación', icon: '🏠', required: true },
-                  { key: 'cert_bancario', label: 'Cert. Titularidad Bancaria (IBAN Vendedor)', icon: '🏦', required: false },
-                  { key: 'actas_comunidad', label: 'Actas de Comunidad / IEE', icon: '📄', required: false },
-                  { key: 'poder_notarial', label: 'Escritura de Poder Notarial (si aplica)', icon: '📜', required: false },
-                  { key: 'otros', label: 'Otros documentos adicionales', icon: '📎', required: false },
-                ];
-                const docsSubidos = Object.values(docsState).filter(Boolean).length;
-                const docsReq = docTypes.filter(d => d.required).length;
-                const docsReqOk = docTypes.filter(d => d.required && docsState[d.key]).length;
-                const setF = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+                /* Estilos */
                 const lblStyle = { fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 6, display: 'block' };
                 const inpStyle = { width: '100%', background: 'var(--white)', border: '1px solid var(--text)', borderRadius: 0, color: 'var(--text)', padding: '10px 14px', fontSize: 13, fontFamily: 'Inter, sans-serif', boxSizing: 'border-box', outline: 'none' };
                 const selStyle = { ...inpStyle, appearance: 'none', WebkitAppearance: 'none', cursor: 'pointer' };
                 const fGrp = { marginBottom: 20 };
                 const tabPill = (a) => ({ padding: '8px 18px', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'Inter, sans-serif', background: a ? 'var(--amber)' : 'transparent', color: a ? 'var(--white)' : 'var(--muted)', border: a ? '1px solid var(--amber)' : '1px solid var(--border)', borderRadius: 0, cursor: 'pointer' });
                 const secHdr = (txt) => React.createElement('div', { style: { fontSize: 11, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--amber)', borderBottom: '1px solid var(--border)', paddingBottom: 8, marginBottom: 16 } }, txt);
+                const parteBox = (colorVar) => ({ border: `1px solid ${colorVar || 'var(--border)'}`, padding: '16px 20px', marginBottom: 16, position: 'relative', background: 'var(--white)' });
+                const btnAdd = (label, onClick) => React.createElement('button', { onClick, style: { background: 'transparent', border: '1px dashed var(--border)', color: 'var(--muted)', padding: '8px 16px', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', fontFamily: 'Inter, sans-serif', width: '100%', marginTop: 4 } }, '+ ' + label);
+                const btnRemove = (onClick) => React.createElement('button', { onClick, style: { position: 'absolute', top: 8, right: 8, background: 'transparent', border: 'none', color: '#c00', fontSize: 18, cursor: 'pointer', lineHeight: 1 } }, '\xd7');
+
+                /* Conteo docs para badge */
+                const totalDocsSubidos = (docsVendedores.reduce((s, d) => s + Object.values(d).filter(Boolean).length, 0) +
+                  docsCompradores.reduce((s, d) => s + Object.values(d).filter(Boolean).length, 0) +
+                  docsInmuebles.reduce((s, d) => s + Object.values(d).filter(Boolean).length, 0) +
+                  Object.values(docsExtra).filter(Boolean).length);
+
+                /* Generar con IA */
                 const generarArras = async () => {
                   setGenerando(true); setErrorIA(null); setResultado(null);
                   try {
-                    const resumen = [`CONTRATO ARRAS: ${p?.titulo || 'Propiedad'} (Ref: ${p?.refInterna || ''})`,
-                      `
-VENDEDOR: ${form.vendedor_nombre} | ${form.vendedor_dni} | ${form.vendedor_domicilio}`,
-                      `Estado civil: ${form.vendedor_estado_civil} | Régimen: ${form.vendedor_regimen} | IBAN: ${form.vendedor_iban}`,
-                      `Vivienda habitual conyugal: ${form.vendedor_vivienda_habitual}`,
-                      `
-COMPRADOR: ${form.comprador_nombre} | ${form.comprador_dni} | ${form.comprador_domicilio}`,
-                      `Estado civil: ${form.comprador_estado_civil} | Régimen: ${form.comprador_regimen}`,
-                      `Financiación hipotecaria: ${form.comprador_hipoteca}`,
-                      `
-INMUEBLE: ${form.direccion_inmueble} | Catastro: ${form.ref_catastral}`,
-                      `Garaje/trastero: ${form.garaje_trastero} | Libre arrendatarios: ${form.libre_arrendatarios} ${form.inquilino_detalle}`,
-                      `
-COMUNIDAD: IEE: ${form.iee_aplica} | Derramas: ${form.derramas} ${form.derramas_detalle}`,
-                      `Actas: ${form.actas_relevantes}`,
-                      `
-ECONÓMICO: Precio: ${form.precio_total}€ | Arras: ${form.importe_arras}€ (${form.forma_pago_arras})`,
-                      `Muebles: ${form.incluye_muebles} ${form.muebles_detalle} | Plazo escritura: ${form.plazo_escritura} días ${form.plazo_tipo}`,
-                      `Fecha prevista firma arras: ${form.fecha_firma_arras || 'Por determinar'}`,
-                      `
-HONORARIOS: ${form.honorarios}€ ${form.honorarios_iva === 'si' ? '+ IVA' : 'IVA incl.'} | Pago: ${form.honorarios_pago}`,
-                      `
-OTROS: Condiciones suspensivas: ${form.condiciones_suspensivas || 'Ninguna'}`,
-                      `Acuerdos verbales: ${form.acuerdos_verbales || 'Ninguno'}`,
-                      `Docs adicionales: ${form.docs_adicionales || 'Ninguno'}`,
-                      `
-DOCUMENTOS: ${docTypes.map(d => (docsState[d.key] ? '✓' : '✗') + ' ' + d.label).join(' | ')}`
+                    const vStr = vendedores.map((v, i) => `  Vendedor ${i+1}: ${v.nombre} | DNI: ${v.dni} | Dom: ${v.domicilio} | E.Civil: ${v.estado_civil} | Regimen: ${v.regimen} | IBAN: ${ibanCompartidoVendedor ? ibanVendedorComun + ' (compartido)' : v.iban} | Viv.habitual: ${v.vivienda_habitual}`).join('\n');
+                    const cStr = compradores.map((c, i) => `  Comprador ${i+1}: ${c.nombre} | DNI: ${c.dni} | Dom: ${c.domicilio} | E.Civil: ${c.estado_civil} | Regimen: ${c.regimen} | IBAN: ${ibanCompartidoComprador ? ibanCompradorComun + ' (compartido)' : c.iban} | Hipoteca: ${c.hipoteca}`).join('\n');
+                    const iStr = inmuebles.map((m, i) => `  Inmueble ${i+1} (${m.tipo}): ${m.direccion} | Catastro: ${m.ref_catastral} | Registro: ${m.ref_registral} | Libre arrendatarios: ${m.libre_arrendatarios}${m.inquilino_detalle ? ' (' + m.inquilino_detalle + ')' : ''} | Precio: ${precioMode === 'desglosado' ? m.precio + '€' : 'ver precio global'}`).join('\n');
+                    const resumen = [
+                      `CONTRATO ARRAS PENITENCIALES - ${p && p.titulo ? p.titulo : 'Propiedad'} (Ref: ${p && p.refInterna ? p.refInterna : (p && p.ref ? p.ref : '')})`,
+                      `\nVENDEDORES (${vendedores.length}):\n${vStr}`,
+                      `\nCOMPRADORES (${compradores.length}):\n${cStr}`,
+                      `\nINMUEBLES (${inmuebles.length}):\n${iStr}`,
+                      `\nPRECIO: ${precioMode === 'global' ? precioGlobal + '€ (total)' : 'Desglosado por inmueble (ver arriba)'}`,
+                      `ARRAS: ${form.importe_arras}€ | Forma de pago: ${form.forma_pago_arras}`,
+                      `Muebles: ${form.incluye_muebles === 'si' ? 'Si - ' + form.muebles_detalle : 'No'}`,
+                      `\nCOMUNIDAD: IEE aplica: ${form.iee_aplica} | Derramas: ${form.derramas}${form.derramas_detalle ? ' - ' + form.derramas_detalle : ''} | Actas: ${form.actas_relevantes || 'Sin incidencias'}`,
+                      `\nPLAZO ESCRITURA: ${form.plazo_escritura} dias ${form.plazo_tipo} | Fecha prevista firma arras: ${form.fecha_firma_arras || 'Por determinar'}`,
+                      `CONDICIONES SUSPENSIVAS: ${form.condiciones_suspensivas || 'Ninguna'}`,
+                      `\nHONORARIOS: ${form.honorarios}€ ${form.honorarios_iva === 'si' ? '+ IVA' : 'IVA incluido'} | Reparto: ${form.honorarios_pago}`,
+                      `ACUERDOS VERBALES: ${form.acuerdos_verbales || 'Ninguno'}`,
+                      `\nDOCUMENTOS APORTADOS: ${totalDocsSubidos} documentos`,
                     ].join('\n');
                     const resp = await fetch('https://api.anthropic.com/v1/messages', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.NEXT_PUBLIC_ANTHROPIC_KEY || '', 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-                      body: JSON.stringify({ model: 'claude-opus-4-5', max_tokens: 4096, messages: [{ role: 'user', content: `Eres el asistente jurídico de Mallorca Nativa Properties. Redacta un contrato de arras penitenciales completo en español, conforme al Código Civil (arts. 1.454-1.455) y normativa balear. Datos:\n\n${resumen}\n\nInstrucciones: contrato completo con comparecientes, antecedentes, objeto, precio y arras, plazo escritura, condiciones, honorarios, declaraciones y cierre. Lenguaje jurídico formal. Campos vacíos o por determinar en [CORCHETES]. Al final, lista DOCUMENTOS ANEXOS (subidos vs pendientes). Solo el contrato, sin comentarios.` }] })
+                      body: JSON.stringify({ model: 'claude-opus-4-5', max_tokens: 4096, messages: [{ role: 'user', content: 'Eres el asistente juridico de Mallorca Nativa Properties. Redacta un contrato de arras penitenciales completo en espanol, conforme al Codigo Civil (arts. 1.454-1.455) y normativa balear. Permite multiples vendedores, compradores e inmuebles (fincas registrales distintas).\n\nDatos:\n' + resumen + '\n\nInstrucciones: contrato completo con comparecientes (todos los vendedores y compradores), antecedentes (todos los inmuebles), objeto, precio ' + (precioMode === 'desglosado' ? 'desglosado por inmueble' : 'global') + ', arras, plazo escritura, condiciones suspensivas, honorarios, declaraciones y cierre. Lenguaje juridico formal. Campos vacios en [CORCHETES]. Al final, incluye seccion DOCUMENTOS APORTADOS / PENDIENTES. Solo el contrato, sin comentarios previos.' }] })
                     });
-                    if (!resp.ok) { const e = await resp.json(); throw new Error(e.error?.message || 'Error ' + resp.status); }
+                    if (!resp.ok) { const e = await resp.json(); throw new Error(e.error && e.error.message ? e.error.message : 'Error ' + resp.status); }
                     const d = await resp.json();
                     setResultado(d.content[0].text);
                   } catch(e) { setErrorIA(e.message); }
                   finally { setGenerando(false); }
                 };
-                const downloadTxt = () => {
-                  if (!resultado) return;
-                  const b = new Blob([resultado], { type: 'text/plain;charset=utf-8' });
-                  const u = URL.createObjectURL(b);
-                  const a = document.createElement('a');
-                  a.href = u; a.download = `Arras_${(p?.refInterna||'prop').replace(/\s/g,'_')}_${new Date().toISOString().slice(0,10)}.txt`;
-                  a.click(); URL.revokeObjectURL(u);
+
+                /* Renderizado de un campo de documento */
+                const DocSlot = ({ label, icon, file, onSet, syncKey, required }) => {
+                  const propFile = syncKey && docsPropiedad[syncKey];
+                  return React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid var(--border)' } },
+                    React.createElement('span', { style: { fontSize: 20, width: 28, textAlign: 'center' } }, icon || '📄'),
+                    React.createElement('div', { style: { flex: 1, minWidth: 0 } },
+                      React.createElement('div', { style: { fontSize: 12, fontWeight: 600, color: 'var(--text)' } },
+                        label,
+                        required && React.createElement('span', { style: { color: 'var(--amber)', marginLeft: 4 } }, '*')
+                      ),
+                      file ? React.createElement('div', { style: { fontSize: 11, color: '#2d7a2d' } }, '✓ Subido') :
+                        propFile ? React.createElement('div', { style: { fontSize: 11, color: 'var(--blue)' } }, 'Disponible en ficha') :
+                        React.createElement('div', { style: { fontSize: 11, color: 'var(--muted)' } }, 'Pendiente')
+                    ),
+                    React.createElement('div', { style: { display: 'flex', gap: 6 } },
+                      propFile && !file && React.createElement('button', { onClick: () => onSet(propFile), style: { background: 'var(--blue)', color: 'var(--white)', border: 'none', padding: '4px 8px', fontSize: 10, fontWeight: 700, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.08em' } }, 'Usar de ficha'),
+                      React.createElement('label', { style: { background: file ? '#2d7a2d' : 'var(--amber)', color: 'var(--white)', padding: '4px 10px', fontSize: 10, fontWeight: 700, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'inline-block' } },
+                        file ? '↑ Cambiar' : '↑ Subir',
+                        React.createElement('input', { type: 'file', style: { display: 'none' }, onChange: e => { if (e.target.files[0]) onSet(e.target.files[0]); } })
+                      )
+                    )
+                  );
                 };
-                return (
-                  React.createElement('div', { style: { padding: '8px 0 0' } },
-                    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24, padding: '12px 16px', background: 'var(--cream-2)', borderLeft: '3px solid var(--amber)' } },
-                      React.createElement('span', { style: { fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--amber)', whiteSpace: 'nowrap' } }, 'Progreso'),
-                      React.createElement('div', { style: { flex: 1, height: 4, background: 'var(--border)', borderRadius: 2 } },
-                        React.createElement('div', { style: { height: '100%', width: Math.min(100, Math.round((docsReqOk / docsReq) * 50 + (Object.values(form).filter(v => v && !['no','si','naturales','50_50'].includes(v)).length / 20) * 50)) + '%', background: 'var(--amber)', borderRadius: 2, transition: 'width 0.3s' } })
+
+                /* Render principal */
+                return React.createElement('div', null,
+
+                  /* Tabs */
+                  React.createElement('div', { style: { display: 'flex', gap: 4, marginBottom: 24, flexWrap: 'wrap' } },
+                    React.createElement('button', { onClick: () => setArrasTab('docs'), style: tabPill(arrasTab === 'docs') }, 'Documentos (' + totalDocsSubidos + ')'),
+                    React.createElement('button', { onClick: () => setArrasTab('datos'), style: tabPill(arrasTab === 'datos') }, 'Datos del contrato'),
+                    React.createElement('button', { onClick: () => setArrasTab('ia'), style: tabPill(arrasTab === 'ia') }, 'Generar con IA')
+                  ),
+
+                  /* TAB DOCUMENTOS */
+                  arrasTab === 'docs' && React.createElement('div', null,
+                    secHdr('Documentos - Vendedor' + (vendedores.length > 1 ? 'es' : '')),
+                    vendedores.map(function(v, idx) { return React.createElement('div', { key: idx, style: { marginBottom: 16 } },
+                      React.createElement('div', { style: { fontSize: 11, fontWeight: 700, color: 'var(--muted)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 8 } },
+                        vendedores.length > 1 ? ('Vendedor ' + (idx+1) + (v.nombre ? ' - ' + v.nombre : '')) : (v.nombre || 'Vendedor')
                       ),
-                      React.createElement('span', { style: { fontSize: 11, color: 'var(--muted)', whiteSpace: 'nowrap' } }, docsReqOk + '/' + docsReq + ' docs')
+                      DocSlot({ label: 'DNI / NIE / Pasaporte', icon: '🪧', file: docsVendedores[idx] && docsVendedores[idx].dni, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],dni:f}; return n; }); }, syncKey: idx === 0 ? 'dni_propietario' : null, required: true }),
+                      DocSlot({ label: 'Escritura de propiedad / Titulo', icon: '📜', file: docsVendedores[idx] && docsVendedores[idx].escritura, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],escritura:f}; return n; }); }, syncKey: 'escritura', required: false }),
+                      DocSlot({ label: 'Poder notarial (si aplica)', icon: '✍️', file: docsVendedores[idx] && docsVendedores[idx].poder_notarial, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],poder_notarial:f}; return n; }); }, required: false })
+                    ); }),
+
+                    React.createElement('div', { style: { marginTop: 24 } }),
+                    secHdr('Documentos - Comprador' + (compradores.length > 1 ? 'es' : '')),
+                    compradores.map(function(c, idx) { return React.createElement('div', { key: idx, style: { marginBottom: 16 } },
+                      compradores.length > 1 && React.createElement('div', { style: { fontSize: 11, fontWeight: 700, color: 'var(--muted)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 8 } },
+                        'Comprador ' + (idx+1) + (c.nombre ? ' - ' + c.nombre : '')
+                      ),
+                      DocSlot({ label: 'DNI / NIE / Pasaporte', icon: '🪧', file: docsCompradores[idx] && docsCompradores[idx].dni, onSet: function(f) { setDocsCompradores(function(prev) { var n=[...prev]; n[idx]={...n[idx],dni:f}; return n; }); }, required: true })
+                    ); }),
+
+                    React.createElement('div', { style: { marginTop: 24 } }),
+                    secHdr('Documentos - Inmueble' + (inmuebles.length > 1 ? 's' : '')),
+                    inmuebles.map(function(m, idx) { return React.createElement('div', { key: idx, style: { marginBottom: 24, paddingBottom: 16, borderBottom: idx < inmuebles.length - 1 ? '1px dashed var(--border)' : 'none' } },
+                      inmuebles.length > 1 && React.createElement('div', { style: { fontSize: 11, fontWeight: 700, color: 'var(--muted)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 8 } },
+                        (m.tipo.charAt(0).toUpperCase() + m.tipo.slice(1)) + ' ' + (idx+1) + (m.direccion ? ' - ' + m.direccion : '')
+                      ),
+                      DocSlot({ label: 'Nota Simple (Registro de la Propiedad)', icon: '📋', file: docsInmuebles[idx] && docsInmuebles[idx].nota_simple, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],nota_simple:f}; return n; }); }, syncKey: 'nota_simple', required: true }),
+                      DocSlot({ label: 'Certificado de Titularidad', icon: '🏙️', file: docsInmuebles[idx] && docsInmuebles[idx].cert_titularidad, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],cert_titularidad:f}; return n; }); }, syncKey: 'cert_titularidad', required: true }),
+                      DocSlot({ label: 'Consulta descriptiva y grafica - Catastro', icon: '🗺️', file: docsInmuebles[idx] && docsInmuebles[idx].catastro, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],catastro:f}; return n; }); }, syncKey: 'descripcion_catastral', required: true }),
+                      DocSlot({ label: 'Certificado de Eficiencia Energetica', icon: '⚡', file: docsInmuebles[idx] && docsInmuebles[idx].cert_energetico, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],cert_energetico:f}; return n; }); }, syncKey: 'certificado_energetico', required: m.tipo === 'vivienda' }),
+                      DocSlot({ label: 'Cedula de Habitabilidad / Licencia 1a Ocupacion', icon: '🏠', file: docsInmuebles[idx] && docsInmuebles[idx].cedula, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],cedula:f}; return n; }); }, syncKey: 'cedula_habitabilidad', required: m.tipo === 'vivienda' }),
+                      DocSlot({ label: 'Cert. Titularidad Bancaria (IBAN vendedor)', icon: '🏦', file: docsInmuebles[idx] && docsInmuebles[idx].cert_bancario, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],cert_bancario:f}; return n; }); }, required: false }),
+                      DocSlot({ label: 'Actas Comunidad / IEE', icon: '📄', file: docsInmuebles[idx] && docsInmuebles[idx].actas_comunidad, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],actas_comunidad:f}; return n; }); }, syncKey: 'comunidad', required: false }),
+                      DocSlot({ label: 'Otros documentos del inmueble', icon: '📎', file: docsInmuebles[idx] && docsInmuebles[idx].otros, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],otros:f}; return n; }); }, required: false })
+                    ); }),
+
+                    React.createElement('div', { style: { marginTop: 24 } }),
+                    secHdr('Documentos generales'),
+                    DocSlot({ label: 'Recibo IBI (ultimo ejercicio)', icon: '🏦', file: docsExtra.ibi_recibo, onSet: function(f) { setDocsExtra(function(d) { return {...d, ibi_recibo: f}; }); }, syncKey: 'ibi_recibo', required: false }),
+                    DocSlot({ label: 'Planos / Catastro', icon: '📐', file: docsExtra.planos, onSet: function(f) { setDocsExtra(function(d) { return {...d, planos: f}; }); }, syncKey: 'planos', required: false }),
+                    DocSlot({ label: 'Otros (general)', icon: '📎', file: docsExtra.otros_general, onSet: function(f) { setDocsExtra(function(d) { return {...d, otros_general: f}; }); }, required: false })
+                  ),
+
+                  /* TAB DATOS */
+                  arrasTab === 'datos' && React.createElement('div', null,
+
+                    secHdr('Vendedores'),
+                    vendedores.map(function(v, idx) { return React.createElement('div', { key: idx, style: parteBox('var(--amber)') },
+                      vendedores.length > 1 && btnRemove(function() { removeVendedor(idx); }),
+                      React.createElement('div', { style: { fontSize: 11, fontWeight: 700, color: 'var(--amber)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 12 } }, 'Vendedor ' + (idx+1)),
+                      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 } },
+                        React.createElement('div', { style: fGrp },
+                          React.createElement('label', { style: lblStyle }, 'Nombre completo'),
+                          React.createElement('input', { style: inpStyle, value: v.nombre, onChange: function(e) { updateVendedor(idx, 'nombre', e.target.value); }, placeholder: 'Nombre y apellidos' })
+                        ),
+                        React.createElement('div', { style: fGrp },
+                          React.createElement('label', { style: lblStyle }, 'DNI / NIE / Pasaporte'),
+                          React.createElement('input', { style: inpStyle, value: v.dni, onChange: function(e) { updateVendedor(idx, 'dni', e.target.value); }, placeholder: '12345678A' })
+                        )
+                      ),
+                      React.createElement('div', { style: fGrp },
+                        React.createElement('label', { style: lblStyle }, 'Domicilio a efectos de notificaciones'),
+                        React.createElement('input', { style: inpStyle, value: v.domicilio, onChange: function(e) { updateVendedor(idx, 'domicilio', e.target.value); }, placeholder: 'Calle, numero, piso, municipio, CP' })
+                      ),
+                      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 16 } },
+                        React.createElement('div', { style: fGrp },
+                          React.createElement('label', { style: lblStyle }, 'Estado civil'),
+                          React.createElement('select', { style: selStyle, value: v.estado_civil, onChange: function(e) { updateVendedor(idx, 'estado_civil', e.target.value); } },
+                            React.createElement('option', { value: '' }, '- Seleccionar -'),
+                            React.createElement('option', { value: 'soltero' }, 'Soltero/a'),
+                            React.createElement('option', { value: 'casado' }, 'Casado/a'),
+                            React.createElement('option', { value: 'divorciado' }, 'Divorciado/a'),
+                            React.createElement('option', { value: 'viudo' }, 'Viudo/a'),
+                            React.createElement('option', { value: 'pareja_hecho' }, 'Pareja de hecho')
+                          )
+                        ),
+                        React.createElement('div', { style: fGrp },
+                          React.createElement('label', { style: lblStyle }, 'Regimen matrimonial'),
+                          React.createElement('select', { style: selStyle, value: v.regimen, onChange: function(e) { updateVendedor(idx, 'regimen', e.target.value); } },
+                            React.createElement('option', { value: '' }, '- Si aplica -'),
+                            React.createElement('option', { value: 'gananciales' }, 'Sociedad de gananciales'),
+                            React.createElement('option', { value: 'separacion' }, 'Separacion de bienes'),
+                            React.createElement('option', { value: 'participacion' }, 'Participacion'),
+                            React.createElement('option', { value: 'na' }, 'No aplica')
+                          )
+                        ),
+                        React.createElement('div', { style: fGrp },
+                          React.createElement('label', { style: lblStyle }, 'Vivienda habitual conyugal?'),
+                          React.createElement('select', { style: selStyle, value: v.vivienda_habitual, onChange: function(e) { updateVendedor(idx, 'vivienda_habitual', e.target.value); } },
+                            React.createElement('option', { value: 'no' }, 'No'),
+                            React.createElement('option', { value: 'si' }, 'Si')
+                          )
+                        )
+                      ),
+                      !ibanCompartidoVendedor && React.createElement('div', { style: fGrp },
+                        React.createElement('label', { style: lblStyle }, 'IBAN (cuenta de cobro)'),
+                        React.createElement('input', { style: inpStyle, value: v.iban, onChange: function(e) { updateVendedor(idx, 'iban', e.target.value); }, placeholder: 'ES00 0000 0000 0000 0000 0000' })
+                      )
+                    ); }),
+                    btnAdd('Anadir vendedor', addVendedor),
+
+                    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 10, marginTop: 16, marginBottom: 24, padding: '12px 16px', background: 'var(--bg)', border: '1px solid var(--border)', flexWrap: 'wrap' } },
+                      React.createElement('input', { type: 'checkbox', id: 'iban_vendedor_comun', checked: ibanCompartidoVendedor, onChange: function(e) { setIbanCompartidoVendedor(e.target.checked); }, style: { cursor: 'pointer' } }),
+                      React.createElement('label', { htmlFor: 'iban_vendedor_comun', style: { fontSize: 12, fontWeight: 600, cursor: 'pointer', color: 'var(--text)' } }, 'Cuenta bancaria compartida entre todos los vendedores'),
+                      ibanCompartidoVendedor && React.createElement('input', { style: { ...inpStyle, flex: 1, minWidth: 200 }, value: ibanVendedorComun, onChange: function(e) { setIbanVendedorComun(e.target.value); }, placeholder: 'ES00 0000 0000 0000 0000 0000' })
                     ),
-                    React.createElement('div', { style: { display: 'flex', gap: 0, marginBottom: 28, borderBottom: '2px solid var(--amber)' } },
-                      [['docs','📁 Documentos'],['preguntas','📝 Datos'],['ia','✨ Generar con IA']].map(([k,l]) =>
-                        React.createElement('button', { key: k, style: tabPill(arrasTab===k), onClick: () => setArrasTab(k) }, l)
+
+                    secHdr('Compradores'),
+                    compradores.map(function(c, idx) { return React.createElement('div', { key: idx, style: parteBox('var(--blue)') },
+                      compradores.length > 1 && btnRemove(function() { removeComprador(idx); }),
+                      React.createElement('div', { style: { fontSize: 11, fontWeight: 700, color: 'var(--blue)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 12 } }, 'Comprador ' + (idx+1)),
+                      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 } },
+                        React.createElement('div', { style: fGrp },
+                          React.createElement('label', { style: lblStyle }, 'Nombre completo'),
+                          React.createElement('input', { style: inpStyle, value: c.nombre, onChange: function(e) { updateComprador(idx, 'nombre', e.target.value); }, placeholder: 'Nombre y apellidos' })
+                        ),
+                        React.createElement('div', { style: fGrp },
+                          React.createElement('label', { style: lblStyle }, 'DNI / NIE / Pasaporte'),
+                          React.createElement('input', { style: inpStyle, value: c.dni, onChange: function(e) { updateComprador(idx, 'dni', e.target.value); }, placeholder: '12345678A' })
+                        )
+                      ),
+                      React.createElement('div', { style: fGrp },
+                        React.createElement('label', { style: lblStyle }, 'Domicilio a efectos de notificaciones'),
+                        React.createElement('input', { style: inpStyle, value: c.domicilio, onChange: function(e) { updateComprador(idx, 'domicilio', e.target.value); }, placeholder: 'Calle, numero, piso, municipio, CP' })
+                      ),
+                      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 16 } },
+                        React.createElement('div', { style: fGrp },
+                          React.createElement('label', { style: lblStyle }, 'Estado civil'),
+                          React.createElement('select', { style: selStyle, value: c.estado_civil, onChange: function(e) { updateComprador(idx, 'estado_civil', e.target.value); } },
+                            React.createElement('option', { value: '' }, '- Seleccionar -'),
+                            React.createElement('option', { value: 'soltero' }, 'Soltero/a'),
+                            React.createElement('option', { value: 'casado' }, 'Casado/a'),
+                            React.createElement('option', { value: 'divorciado' }, 'Divorciado/a'),
+                            React.createElement('option', { value: 'viudo' }, 'Viudo/a'),
+                            React.createElement('option', { value: 'pareja_hecho' }, 'Pareja de hecho')
+                          )
+                        ),
+                        React.createElement('div', { style: fGrp },
+                          React.createElement('label', { style: lblStyle }, 'Regimen matrimonial'),
+                          React.createElement('select', { style: selStyle, value: c.regimen, onChange: function(e) { updateComprador(idx, 'regimen', e.target.value); } },
+                            React.createElement('option', { value: '' }, '- Si aplica -'),
+                            React.createElement('option', { value: 'gananciales' }, 'Sociedad de gananciales'),
+                            React.createElement('option', { value: 'separacion' }, 'Separacion de bienes'),
+                            React.createElement('option', { value: 'participacion' }, 'Participacion'),
+                            React.createElement('option', { value: 'na' }, 'No aplica')
+                          )
+                        ),
+                        React.createElement('div', { style: fGrp },
+                          React.createElement('label', { style: lblStyle }, 'Financiacion hipotecaria?'),
+                          React.createElement('select', { style: selStyle, value: c.hipoteca, onChange: function(e) { updateComprador(idx, 'hipoteca', e.target.value); } },
+                            React.createElement('option', { value: 'no' }, 'No'),
+                            React.createElement('option', { value: 'si' }, 'Si - con condicion suspensiva'),
+                            React.createElement('option', { value: 'tramite' }, 'En tramite')
+                          )
+                        )
+                      ),
+                      !ibanCompartidoComprador && React.createElement('div', { style: fGrp },
+                        React.createElement('label', { style: lblStyle }, 'IBAN (cuenta de pago)'),
+                        React.createElement('input', { style: inpStyle, value: c.iban, onChange: function(e) { updateComprador(idx, 'iban', e.target.value); }, placeholder: 'ES00 0000 0000 0000 0000 0000' })
+                      )
+                    ); }),
+                    btnAdd('Anadir comprador', addComprador),
+
+                    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 10, marginTop: 16, marginBottom: 24, padding: '12px 16px', background: 'var(--bg)', border: '1px solid var(--border)', flexWrap: 'wrap' } },
+                      React.createElement('input', { type: 'checkbox', id: 'iban_comprador_comun', checked: ibanCompartidoComprador, onChange: function(e) { setIbanCompartidoComprador(e.target.checked); }, style: { cursor: 'pointer' } }),
+                      React.createElement('label', { htmlFor: 'iban_comprador_comun', style: { fontSize: 12, fontWeight: 600, cursor: 'pointer', color: 'var(--text)' } }, 'Cuenta bancaria compartida entre todos los compradores'),
+                      ibanCompartidoComprador && React.createElement('input', { style: { ...inpStyle, flex: 1, minWidth: 200 }, value: ibanCompradorComun, onChange: function(e) { setIbanCompradorComun(e.target.value); }, placeholder: 'ES00 0000 0000 0000 0000 0000' })
+                    ),
+
+                    secHdr('Inmuebles (fincas registrales)'),
+                    inmuebles.map(function(m, idx) { return React.createElement('div', { key: idx, style: parteBox('#2d7a2d') },
+                      inmuebles.length > 1 && btnRemove(function() { removeInmueble(idx); }),
+                      React.createElement('div', { style: { fontSize: 11, fontWeight: 700, color: '#2d7a2d', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 12 } }, 'Finca ' + (idx+1)),
+                      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 } },
+                        React.createElement('div', { style: fGrp },
+                          React.createElement('label', { style: lblStyle }, 'Tipo de inmueble'),
+                          React.createElement('select', { style: selStyle, value: m.tipo, onChange: function(e) { updateInmueble(idx, 'tipo', e.target.value); } },
+                            React.createElement('option', { value: 'vivienda' }, 'Vivienda'),
+                            React.createElement('option', { value: 'parking' }, 'Plaza de garaje'),
+                            React.createElement('option', { value: 'trastero' }, 'Trastero'),
+                            React.createElement('option', { value: 'local' }, 'Local comercial'),
+                            React.createElement('option', { value: 'finca' }, 'Finca / Solar'),
+                            React.createElement('option', { value: 'otro' }, 'Otro')
+                          )
+                        ),
+                        React.createElement('div', { style: fGrp },
+                          React.createElement('label', { style: lblStyle }, 'Referencia catastral'),
+                          React.createElement('input', { style: inpStyle, value: m.ref_catastral, onChange: function(e) { updateInmueble(idx, 'ref_catastral', e.target.value); }, placeholder: '0000000AA0000A0000AA' })
+                        )
+                      ),
+                      React.createElement('div', { style: fGrp },
+                        React.createElement('label', { style: lblStyle }, 'Direccion completa'),
+                        React.createElement('input', { style: inpStyle, value: m.direccion, onChange: function(e) { updateInmueble(idx, 'direccion', e.target.value); }, placeholder: 'Calle, numero, piso/puerta, municipio, CP' })
+                      ),
+                      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 } },
+                        React.createElement('div', { style: fGrp },
+                          React.createElement('label', { style: lblStyle }, 'Referencia registral'),
+                          React.createElement('input', { style: inpStyle, value: m.ref_registral, onChange: function(e) { updateInmueble(idx, 'ref_registral', e.target.value); }, placeholder: 'Finca No / Tomo / Folio' })
+                        ),
+                        React.createElement('div', { style: fGrp },
+                          React.createElement('label', { style: lblStyle }, 'Libre de arrendatarios'),
+                          React.createElement('select', { style: selStyle, value: m.libre_arrendatarios, onChange: function(e) { updateInmueble(idx, 'libre_arrendatarios', e.target.value); } },
+                            React.createElement('option', { value: 'si' }, 'Si - libre en la entrega'),
+                            React.createElement('option', { value: 'no' }, 'No - hay inquilino'),
+                            React.createElement('option', { value: 'parcial' }, 'Parcialmente ocupado')
+                          )
+                        )
+                      ),
+                      m.libre_arrendatarios !== 'si' && React.createElement('div', { style: fGrp },
+                        React.createElement('label', { style: lblStyle }, 'Detalle del arrendamiento'),
+                        React.createElement('input', { style: inpStyle, value: m.inquilino_detalle, onChange: function(e) { updateInmueble(idx, 'inquilino_detalle', e.target.value); }, placeholder: 'Vencimiento del contrato, condiciones...' })
+                      ),
+                      precioMode === 'desglosado' && React.createElement('div', { style: fGrp },
+                        React.createElement('label', { style: lblStyle }, 'Precio de este inmueble (€)'),
+                        React.createElement('input', { style: inpStyle, value: m.precio, onChange: function(e) { updateInmueble(idx, 'precio', e.target.value); }, placeholder: '0,00' })
+                      )
+                    ); }),
+                    btnAdd('Anadir inmueble (finca registral)', addInmueble),
+
+                    React.createElement('div', { style: { marginTop: 24 } }),
+                    secHdr('Precio y condiciones economicas'),
+                    React.createElement('div', { style: { display: 'flex', gap: 8, marginBottom: 16 } },
+                      React.createElement('button', { onClick: function() { setPrecioMode('global'); }, style: tabPill(precioMode === 'global') }, 'Precio global'),
+                      React.createElement('button', { onClick: function() { setPrecioMode('desglosado'); }, style: tabPill(precioMode === 'desglosado') }, 'Precio por inmueble')
+                    ),
+                    precioMode === 'global' && React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 } },
+                      React.createElement('div', { style: fGrp },
+                        React.createElement('label', { style: lblStyle }, 'Precio de venta total (€)'),
+                        React.createElement('input', { style: inpStyle, value: precioGlobal, onChange: function(e) { setPrecioGlobal(e.target.value); }, placeholder: '0,00' })
                       )
                     ),
-                    arrasTab === 'docs' && React.createElement('div', null,
-                      React.createElement('p', { style: { fontSize: 13, color: 'var(--muted)', marginBottom: 20, fontFamily: 'Inter, sans-serif' } }, 'Adjunta los documentos necesarios. Los marcados con * son obligatorios.'),
-                      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 10 } },
-                        docTypes.map(({ key, label, icon, required }) => {
-                          const file = docsState[key];
-                          return React.createElement('div', { key, style: { border: `1px solid ${file ? 'var(--amber)' : 'var(--border)'}`, background: file ? 'rgba(156,110,27,0.04)' : 'var(--white)', padding: '12px 14px', cursor: 'pointer' }, onClick: () => document.getElementById('file-arras-' + key)?.click() },
-                            React.createElement('input', { type: 'file', id: 'file-arras-' + key, style: { display: 'none' }, accept: '.pdf,.jpg,.jpeg,.png,.doc,.docx', onChange: e => { const f = e.target.files[0]; if (f) setDocsState(d => ({...d, [key]: f})); } }),
-                            React.createElement('div', { style: { display: 'flex', alignItems: 'flex-start', gap: 8 } },
-                              React.createElement('span', { style: { fontSize: 18 } }, icon),
-                              React.createElement('div', { style: { flex: 1 } },
-                                React.createElement('div', { style: { fontSize: 11, fontWeight: 600, color: 'var(--text)', fontFamily: 'Inter, sans-serif', lineHeight: 1.3 } },
-                                  label, required && React.createElement('span', { style: { color: 'var(--danger)', marginLeft: 3 } }, '*')
-                                ),
-                                file ? React.createElement('div', { style: { marginTop: 3, fontSize: 11, color: 'var(--amber)', fontWeight: 600 } }, '✓ ' + file.name)
-                               : React.createElement('div', { style: { marginTop: 3, fontSize: 11, color: 'var(--muted)' } }, 'Clic para adjuntar')
-                              ),
-                              file && React.createElement('button', { style: { background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: 14 }, onClick: e => { e.stopPropagation(); setDocsState(d => ({...d, [key]: null})); } }, '×')
-                            )
-                          );
-                        })
-                      ),
-                      React.createElement('div', { style: { marginTop: 16, padding: '8px 14px', background: 'var(--cream-2)', fontSize: 12, color: 'var(--muted)', fontFamily: 'Inter, sans-serif' } }, docsSubidos + ' adjunto(s) · ' + docsReqOk + '/' + docsReq + ' obligatorios'),
-                      React.createElement('button', { style: { marginTop: 14, ...tabPill(true) }, onClick: () => setArrasTab('preguntas') }, 'Siguiente: Datos del contrato →')
+                    precioMode === 'desglosado' && React.createElement('div', { style: { padding: '8px 12px', background: 'var(--bg)', border: '1px solid var(--border)', fontSize: 12, color: 'var(--muted)', marginBottom: 16 } },
+                      'Los precios se introducen en cada inmueble. Precio total: ',
+                      React.createElement('strong', null, inmuebles.reduce(function(s, m) { return s + (parseFloat((m.precio || '0').replace(/\./g,'').replace(',','.')) || 0); }, 0).toLocaleString('es-ES', { minimumFractionDigits: 2 }) + ' €')
                     ),
-                    arrasTab === 'preguntas' && React.createElement('div', null,
-                      secHdr('Vendedor'),
-                      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 24 } },
-                        [['vendedor_nombre','Nombre completo / Razón social'],['vendedor_dni','DNI / NIE / CIF'],['vendedor_domicilio','Domicilio a efectos de notificaciones'],['vendedor_estado_civil','Estado civil'],['vendedor_regimen','Régimen económico matrimonial'],['vendedor_iban','IBAN cuenta bancaria']].map(([k,l]) =>
-                          React.createElement('div', { key: k, style: fGrp },
-                            React.createElement('label', { style: lblStyle }, l),
-                            React.createElement('input', { value: form[k], onChange: e => setF(k, e.target.value), style: inpStyle, placeholder: l })
-                          )
-                        ),
-                        React.createElement('div', { style: fGrp },
-                          React.createElement('label', { style: lblStyle }, '¿Vivienda habitual conyugal?'),
-                          React.createElement('select', { value: form.vendedor_vivienda_habitual, onChange: e => setF('vendedor_vivienda_habitual', e.target.value), style: selStyle },
-                            React.createElement('option', { value: 'no' }, 'No'),
-                            React.createElement('option', { value: 'si' }, 'Sí — requiere consentimiento cónyuge (art. 1320 CC)')
-                          )
-                        )
+                    React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 } },
+                      React.createElement('div', { style: fGrp },
+                        React.createElement('label', { style: lblStyle }, 'Importe de las arras (€)'),
+                        React.createElement('input', { style: inpStyle, value: form.importe_arras, onChange: function(e) { setF('importe_arras', e.target.value); }, placeholder: '0,00' })
                       ),
-                      secHdr('Comprador'),
-                      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 24 } },
-                        [['comprador_nombre','Nombre completo / Razón social'],['comprador_dni','DNI / NIE / CIF'],['comprador_domicilio','Domicilio a efectos de notificaciones'],['comprador_estado_civil','Estado civil'],['comprador_regimen','Régimen económico matrimonial']].map(([k,l]) =>
-                          React.createElement('div', { key: k, style: fGrp },
-                            React.createElement('label', { style: lblStyle }, l),
-                            React.createElement('input', { value: form[k], onChange: e => setF(k, e.target.value), style: inpStyle, placeholder: l })
-                          )
-                        ),
-                        React.createElement('div', { style: fGrp },
-                          React.createElement('label', { style: lblStyle }, '¿Financiación hipotecaria?'),
-                          React.createElement('select', { value: form.comprador_hipoteca, onChange: e => setF('comprador_hipoteca', e.target.value), style: selStyle },
-                            React.createElement('option', { value: 'no' }, 'No — compra al contado'),
-                            React.createElement('option', { value: 'si' }, 'Sí — valorar condición suspensiva')
-                          )
-                        )
-                      ),
-                      secHdr('Inmueble'),
-                      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 24 } },
-                        [['ref_catastral','Referencia catastral'],['direccion_inmueble','Dirección completa del inmueble']].map(([k,l]) =>
-                          React.createElement('div', { key: k, style: fGrp },
-                            React.createElement('label', { style: lblStyle }, l),
-                            React.createElement('input', { value: form[k], onChange: e => setF(k, e.target.value), style: inpStyle, placeholder: l })
-                          )
-                        ),
-                        React.createElement('div', { style: fGrp },
-                          React.createElement('label', { style: lblStyle }, '¿Garaje / trastero vinculado?'),
-                          React.createElement('select', { value: form.garaje_trastero, onChange: e => setF('garaje_trastero', e.target.value), style: selStyle },
-                            React.createElement('option', { value: 'no' }, 'No'),
-                            React.createElement('option', { value: 'vinculado' }, 'Sí — vinculado a finca principal'),
-                            React.createElement('option', { value: 'independiente' }, 'Sí — finca registral independiente')
-                          )
-                        ),
-                        React.createElement('div', { style: fGrp },
-                          React.createElement('label', { style: lblStyle }, '¿Libre de arrendatarios?'),
-                          React.createElement('select', { value: form.libre_arrendatarios, onChange: e => setF('libre_arrendatarios', e.target.value), style: selStyle },
-                            React.createElement('option', { value: 'si' }, 'Sí — libre de cargas de uso'),
-                            React.createElement('option', { value: 'no' }, 'No — con contrato de alquiler en vigor')
-                          )
-                        ),
-                        form.libre_arrendatarios === 'no' && React.createElement('div', { style: { ...fGrp, gridColumn: '1 / -1' } },
-                          React.createElement('label', { style: lblStyle }, 'Detalle del arrendamiento'),
-                          React.createElement('input', { value: form.inquilino_detalle, onChange: e => setF('inquilino_detalle', e.target.value), style: inpStyle, placeholder: 'Venta con o sin contrato, fecha fin, etc.' })
-                        )
-                      ),
-                      secHdr('Comunidad de Propietarios'),
-                      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 24 } },
-                        React.createElement('div', { style: fGrp },
-                          React.createElement('label', { style: lblStyle }, 'Informe de Evaluación del Edificio (IEE)'),
-                          React.createElement('select', { value: form.iee_aplica, onChange: e => setF('iee_aplica', e.target.value), style: selStyle },
-                            React.createElement('option', { value: 'no' }, 'No aplica (edificio <50 años)'),
-                            React.createElement('option', { value: 'favorable' }, 'Sí — IEE Favorable'),
-                            React.createElement('option', { value: 'desfavorable' }, 'Sí — IEE Desfavorable'),
-                            React.createElement('option', { value: 'pendiente' }, 'Sí — IEE pendiente')
-                          )
-                        ),
-                        React.createElement('div', { style: fGrp },
-                          React.createElement('label', { style: lblStyle }, '¿Derramas extraordinarias aprobadas?'),
-                          React.createElement('select', { value: form.derramas, onChange: e => setF('derramas', e.target.value), style: selStyle },
-                            React.createElement('option', { value: 'no' }, 'No'),
-                            React.createElement('option', { value: 'si' }, 'Sí')
-                          )
-                        ),
-                        form.derramas === 'si' && React.createElement('div', { style: { ...fGrp, gridColumn: '1 / -1' } },
-                          React.createElement('label', { style: lblStyle }, 'Detalle derramas (importe, calendario, a cargo de quién)'),
-                          React.createElement('input', { value: form.derramas_detalle, onChange: e => setF('derramas_detalle', e.target.value), style: inpStyle, placeholder: 'Importe total, cuotas, quién asume...' })
-                        ),
-                        React.createElement('div', { style: { ...fGrp, gridColumn: '1 / -1' } },
-                          React.createElement('label', { style: lblStyle }, 'Actas de junta relevantes (obras, limitaciones, cambios estatutos)'),
-                          React.createElement('input', { value: form.actas_relevantes, onChange: e => setF('actas_relevantes', e.target.value), style: inpStyle, placeholder: 'Descripción breve o Ninguna' })
-                        )
-                      ),
-                      secHdr('Condiciones Económicas'),
-                      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 24 } },
-                        React.createElement('div', { style: fGrp },
-                          React.createElement('label', { style: lblStyle }, 'Precio total compraventa (€)'),
-                          React.createElement('input', { type: 'number', value: form.precio_total, onChange: e => setF('precio_total', e.target.value), style: inpStyle, placeholder: '0' })
-                        ),
-                        React.createElement('div', { style: fGrp },
-                          React.createElement('label', { style: lblStyle }, 'Importe de las arras (€)'),
-                          React.createElement('input', { type: 'number', value: form.importe_arras, onChange: e => setF('importe_arras', e.target.value), style: inpStyle, placeholder: '0' })
-                        ),
-                        React.createElement('div', { style: fGrp },
-                          React.createElement('label', { style: lblStyle }, 'Forma de pago de las arras'),
-                          React.createElement('input', { value: form.forma_pago_arras, onChange: e => setF('forma_pago_arras', e.target.value), style: inpStyle, placeholder: 'Transferencia a IBAN...' })
-                        ),
-                        React.createElement('div', { style: fGrp },
-                          React.createElement('label', { style: lblStyle }, '¿Incluye mobiliario?'),
-                          React.createElement('select', { value: form.incluye_muebles, onChange: e => setF('incluye_muebles', e.target.value), style: selStyle },
-                            React.createElement('option', { value: 'no' }, 'No — solo inmueble'),
-                            React.createElement('option', { value: 'si' }, 'Sí — con inventario')
-                          )
-                        ),
-                        form.incluye_muebles === 'si' && React.createElement('div', { style: { ...fGrp, gridColumn: '1 / -1' } },
-                          React.createElement('label', { style: lblStyle }, 'Detalle mobiliario incluido'),
-                          React.createElement('input', { value: form.muebles_detalle, onChange: e => setF('muebles_detalle', e.target.value), style: inpStyle, placeholder: 'Descripción o referencia a inventario anexo' })
-                        ),
-                        React.createElement('div', { style: fGrp },
-                          React.createElement('label', { style: lblStyle }, 'Plazo para escritura pública (número)'),
-                          React.createElement('input', { type: 'number', value: form.plazo_escritura, onChange: e => setF('plazo_escritura', e.target.value), style: inpStyle, placeholder: '90' })
-                        ),
-                        React.createElement('div', { style: fGrp },
-                          React.createElement('label', { style: lblStyle }, 'Tipo de días'),
-                          React.createElement('select', { value: form.plazo_tipo, onChange: e => setF('plazo_tipo', e.target.value), style: selStyle },
-                            React.createElement('option', { value: 'naturales' }, 'Días naturales'),
-                            React.createElement('option', { value: 'habiles' }, 'Días hábiles')
-                          )
-                        ),
-                        React.createElement('div', { style: fGrp },
-                          React.createElement('label', { style: lblStyle }, 'Fecha prevista firma arras'),
-                          React.createElement('input', { type: 'date', value: form.fecha_firma_arras, onChange: e => setF('fecha_firma_arras', e.target.value), style: inpStyle })
-                        )
-                      ),
-                      secHdr('Honorarios de Intermediación'),
-                      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 24 } },
-                        React.createElement('div', { style: fGrp },
-                          React.createElement('label', { style: lblStyle }, 'Importe honorarios (€)'),
-                          React.createElement('input', { type: 'number', value: form.honorarios, onChange: e => setF('honorarios', e.target.value), style: inpStyle, placeholder: '0' })
-                        ),
-                        React.createElement('div', { style: fGrp },
-                          React.createElement('label', { style: lblStyle }, 'IVA'),
-                          React.createElement('select', { value: form.honorarios_iva, onChange: e => setF('honorarios_iva', e.target.value), style: selStyle },
-                            React.createElement('option', { value: 'si' }, '+ IVA (21%)'),
-                            React.createElement('option', { value: 'no' }, 'IVA incluido')
-                          )
-                        ),
-                        React.createElement('div', { style: { ...fGrp, gridColumn: '1 / -1' } },
-                          React.createElement('label', { style: lblStyle }, 'Forma de pago honorarios'),
-                          React.createElement('select', { value: form.honorarios_pago, onChange: e => setF('honorarios_pago', e.target.value), style: selStyle },
-                            React.createElement('option', { value: '50_50' }, '50% firma arras / 50% notaría'),
-                            React.createElement('option', { value: '100_arras' }, '100% en firma de arras'),
-                            React.createElement('option', { value: '100_notaria' }, '100% en notaría'),
-                            React.createElement('option', { value: 'otro' }, 'Otro (especificar en observaciones)')
-                          )
-                        )
-                      ),
-                      secHdr('Otros Pactos y Circunstancias'),
-                      [['condiciones_suspensivas','Condiciones suspensivas o resolutorias (financiación, licencias...)'],['acuerdos_verbales','Acuerdos verbales a reflejar por escrito'],['docs_adicionales','Documentación adicional relevante (informes, seguros, litigios...)']].map(([k,l]) =>
-                        React.createElement('div', { key: k, style: fGrp },
-                          React.createElement('label', { style: lblStyle }, l),
-                          React.createElement('input', { value: form[k], onChange: e => setF(k, e.target.value), style: inpStyle, placeholder: 'Ninguno / descripción breve' })
-                        )
-                      ),
-                      React.createElement('button', { style: { marginTop: 8, ...tabPill(true) }, onClick: () => setArrasTab('ia') }, 'Siguiente: Generar con IA →')
-                    ),
-                    arrasTab === 'ia' && React.createElement('div', null,
-                      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 } },
-                        React.createElement('div', { style: { padding: '14px 16px', background: docsReqOk === docsReq ? 'rgba(44,110,82,0.06)' : 'var(--cream-2)', border: `1px solid ${docsReqOk === docsReq ? 'var(--success)' : 'var(--border)'}` } },
-                          React.createElement('div', { style: { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: docsReqOk === docsReq ? 'var(--success)' : 'var(--muted)', marginBottom: 4 } }, 'Documentos'),
-                          React.createElement('div', { style: { fontSize: 22, fontWeight: 700, color: docsReqOk === docsReq ? 'var(--success)' : 'var(--text)' } }, docsReqOk + '/' + docsReq, React.createElement('span', { style: { fontSize: 12, fontWeight: 400, color: 'var(--muted)', marginLeft: 4 } }, 'obligatorios'))
-                        ),
-                        React.createElement('div', { style: { padding: '14px 16px', background: 'var(--cream-2)', border: '1px solid var(--border)' } },
-                          React.createElement('div', { style: { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--muted)', marginBottom: 4 } }, 'Campos completados'),
-                          React.createElement('div', { style: { fontSize: 22, fontWeight: 700, color: 'var(--text)' } },
-                            Object.values(form).filter(v => v && !['no','si','naturales','50_50'].includes(v)).length,
-                            React.createElement('span', { style: { fontSize: 12, fontWeight: 400, color: 'var(--muted)', marginLeft: 4 } }, 'de ' + Object.keys(form).length)
-                          )
-                        )
-                      ),
-                      docsReqOk < docsReq && React.createElement('div', { style: { padding: '12px 16px', background: 'rgba(162,58,58,0.06)', border: '1px solid rgba(162,58,58,0.2)', marginBottom: 14, fontSize: 12, color: 'var(--danger)', fontFamily: 'Inter, sans-serif' } },
-                        '⚠️ Faltan ' + (docsReq - docsReqOk) + ' documento(s) obligatorio(s). La IA generará el contrato marcando los campos pendientes en [CORCHETES].'
-                      ),
-                      React.createElement('div', { style: { padding: '14px 16px', background: 'var(--cream-2)', border: '1px solid var(--border)', marginBottom: 20, fontSize: 13, color: 'var(--text)', fontFamily: 'Inter, sans-serif', lineHeight: 1.6 } },
-                        React.createElement('strong', { style: { color: 'var(--amber)' } }, '¿Cómo funciona?'), React.createElement('br'),
-                        'La IA analizará todos los datos y generará un contrato de arras penitenciales completo, conforme al Código Civil y normativa balear. Los campos pendientes aparecerán en ',
-                        React.createElement('span', { style: { color: 'var(--danger)', fontWeight: 600 } }, '[CORCHETES]'),
-                        ' para completar antes de imprimir.'
-                      ),
-                      !resultado && !generando && React.createElement('button', {
-                        onClick: generarArras,
-                        style: { padding: '14px 32px', background: 'linear-gradient(135deg, var(--amber), #C8820A)', color: 'var(--white)', border: 'none', borderRadius: 0, fontSize: 13, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'Inter, sans-serif', cursor: 'pointer' }
-                      }, '✨ Generar contrato de arras con IA'),
-                      generando && React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 12, padding: '20px 0', color: 'var(--amber)', fontSize: 13, fontFamily: 'Inter, sans-serif' } },
-                        React.createElement('div', { style: { width: 18, height: 18, border: '2px solid var(--amber)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' } }),
-                        'Generando contrato… Esto puede tomar unos segundos.'
-                      ),
-                      errorIA && React.createElement('div', { style: { padding: '12px 16px', background: 'rgba(162,58,58,0.06)', border: '1px solid rgba(162,58,58,0.3)', color: 'var(--danger)', fontSize: 13, fontFamily: 'Inter, sans-serif', marginTop: 14 } }, '❌ Error: ' + errorIA),
-                      resultado && React.createElement('div', { style: { marginTop: 14 } },
-                        React.createElement('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 } },
-                          React.createElement('span', { style: { fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--success)' } }, '✓ Contrato generado'),
-                          React.createElement('div', { style: { display: 'flex', gap: 8 } },
-                            React.createElement('button', { onClick: downloadTxt, style: { ...tabPill(true), fontSize: 11 } }, '⬇ Descargar .txt'),
-                            React.createElement('button', { onClick: generarArras, style: { ...tabPill(false), fontSize: 11 } }, '↺ Regenerar')
-                          )
-                        ),
-                        React.createElement('pre', { style: { background: 'var(--white)', border: '1px solid var(--border)', padding: '18px 22px', fontSize: 12, fontFamily: 'Courier New, monospace', lineHeight: 1.7, whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxHeight: 500, overflowY: 'auto', color: 'var(--text)' } }, resultado)
+                      React.createElement('div', { style: fGrp },
+                        React.createElement('label', { style: lblStyle }, 'Forma de pago de las arras'),
+                        React.createElement('input', { style: inpStyle, value: form.forma_pago_arras, onChange: function(e) { setF('forma_pago_arras', e.target.value); }, placeholder: 'Transferencia bancaria / Cheque nominativo...' })
                       )
+                    ),
+                    React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 } },
+                      React.createElement('div', { style: fGrp },
+                        React.createElement('label', { style: lblStyle }, 'Incluye muebles?'),
+                        React.createElement('select', { style: selStyle, value: form.incluye_muebles, onChange: function(e) { setF('incluye_muebles', e.target.value); } },
+                          React.createElement('option', { value: 'no' }, 'No'),
+                          React.createElement('option', { value: 'si' }, 'Si')
+                        )
+                      ),
+                      form.incluye_muebles === 'si' && React.createElement('div', { style: fGrp },
+                        React.createElement('label', { style: lblStyle }, 'Detalle del mobiliario'),
+                        React.createElement('input', { style: inpStyle, value: form.muebles_detalle, onChange: function(e) { setF('muebles_detalle', e.target.value); }, placeholder: 'Descripcion o referencia al inventario' })
+                      )
+                    )
+                  ),
+
+
+                    ),
+
+                    React.createElement('div', { style: { marginTop: 8 } }),
+                    secHdr('Comunidad de propietarios'),
+                    React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 } },
+                      React.createElement('div', { style: fGrp },
+                        React.createElement('label', { style: lblStyle }, 'IEE / ITE aplica'),
+                        React.createElement('select', { style: selStyle, value: form.iee_aplica, onChange: function(e) { setF('iee_aplica', e.target.value); } },
+                          React.createElement('option', { value: 'no' }, 'No'),
+                          React.createElement('option', { value: 'si' }, 'Si')
+                        )
+                      ),
+                      React.createElement('div', { style: fGrp },
+                        React.createElement('label', { style: lblStyle }, 'Derramas aprobadas'),
+                        React.createElement('select', { style: selStyle, value: form.derramas, onChange: function(e) { setF('derramas', e.target.value); } },
+                          React.createElement('option', { value: 'no' }, 'No'),
+                          React.createElement('option', { value: 'si' }, 'Si')
+                        )
+                      )
+                    ),
+                    form.derramas === 'si' && React.createElement('div', { style: fGrp },
+                      React.createElement('label', { style: lblStyle }, 'Detalle de derramas'),
+                      React.createElement('input', { style: inpStyle, value: form.derramas_detalle, onChange: function(e) { setF('derramas_detalle', e.target.value); }, placeholder: 'Importe, motivo, fecha aprobacion...' })
+                    ),
+                    React.createElement('div', { style: fGrp },
+                      React.createElement('label', { style: lblStyle }, 'Actas con relevancia para el comprador'),
+                      React.createElement('textarea', { style: { ...inpStyle, minHeight: 60, resize: 'vertical' }, value: form.actas_relevantes, onChange: function(e) { setF('actas_relevantes', e.target.value); }, placeholder: 'Obras pendientes, litigios, acuerdos relevantes...' })
+                    ),
+
+                    React.createElement('div', { style: { marginTop: 8 } }),
+                    secHdr('Plazos y condiciones'),
+                    React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 16 } },
+                      React.createElement('div', { style: fGrp },
+                        React.createElement('label', { style: lblStyle }, 'Plazo para escritura (dias)'),
+                        React.createElement('input', { style: inpStyle, type: 'number', value: form.plazo_escritura, onChange: function(e) { setF('plazo_escritura', e.target.value); }, placeholder: '90' })
+                      ),
+                      React.createElement('div', { style: fGrp },
+                        React.createElement('label', { style: lblStyle }, 'Tipo de dias'),
+                        React.createElement('select', { style: selStyle, value: form.plazo_tipo, onChange: function(e) { setF('plazo_tipo', e.target.value); } },
+                          React.createElement('option', { value: 'naturales' }, 'Naturales'),
+                          React.createElement('option', { value: 'habiles' }, 'Habiles')
+                        )
+                      ),
+                      React.createElement('div', { style: fGrp },
+                        React.createElement('label', { style: lblStyle }, 'Fecha prevista firma arras'),
+                        React.createElement('input', { style: inpStyle, type: 'date', value: form.fecha_firma_arras, onChange: function(e) { setF('fecha_firma_arras', e.target.value); } })
+                      )
+                    ),
+                    React.createElement('div', { style: fGrp },
+                      React.createElement('label', { style: lblStyle }, 'Condiciones suspensivas'),
+                      React.createElement('textarea', { style: { ...inpStyle, minHeight: 60, resize: 'vertical' }, value: form.condiciones_suspensivas, onChange: function(e) { setF('condiciones_suspensivas', e.target.value); }, placeholder: 'Condicion hipotecaria, licencias, otros...' })
+                    ),
+                    React.createElement('div', { style: fGrp },
+                      React.createElement('label', { style: lblStyle }, 'Acuerdos verbales a incluir'),
+                      React.createElement('textarea', { style: { ...inpStyle, minHeight: 60, resize: 'vertical' }, value: form.acuerdos_verbales, onChange: function(e) { setF('acuerdos_verbales', e.target.value); }, placeholder: 'Acuerdos alcanzados verbalmente que se quieren hacer constar...' })
+                    ),
+
+                    React.createElement('div', { style: { marginTop: 8 } }),
+                    secHdr('Honorarios Mallorca Nativa Properties'),
+                    React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 16 } },
+                      React.createElement('div', { style: fGrp },
+                        React.createElement('label', { style: lblStyle }, 'Importe honorarios (\u20ac)'),
+                        React.createElement('input', { style: inpStyle, value: form.honorarios, onChange: function(e) { setF('honorarios', e.target.value); }, placeholder: '0,00' })
+                      ),
+                      React.createElement('div', { style: fGrp },
+                        React.createElement('label', { style: lblStyle }, 'IVA'),
+                        React.createElement('select', { style: selStyle, value: form.honorarios_iva, onChange: function(e) { setF('honorarios_iva', e.target.value); } },
+                          React.createElement('option', { value: 'si' }, 'A anadir (+21% IVA)'),
+                          React.createElement('option', { value: 'no' }, 'IVA incluido')
+                        )
+                      ),
+                      React.createElement('div', { style: fGrp },
+                        React.createElement('label', { style: lblStyle }, 'Reparto entre partes'),
+                        React.createElement('select', { style: selStyle, value: form.honorarios_pago, onChange: function(e) { setF('honorarios_pago', e.target.value); } },
+                          React.createElement('option', { value: '50_50' }, '50% vendedor / 50% comprador'),
+                          React.createElement('option', { value: 'vendedor' }, '100% a cargo del vendedor'),
+                          React.createElement('option', { value: 'comprador' }, '100% a cargo del comprador'),
+                          React.createElement('option', { value: 'otro' }, 'Otro acuerdo')
+                        )
+                      )
+                    )
+                  ),
+                  /* TAB IA */
+                  arrasTab === 'ia' && React.createElement('div', null,
+                    React.createElement('div', { style: { padding: '16px 20px', background: 'var(--bg)', border: '1px solid var(--amber)', marginBottom: 24 } },
+                      React.createElement('div', { style: { fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: 8 } }, 'Resumen del contrato a generar'),
+                      React.createElement('div', { style: { fontSize: 12, color: 'var(--muted)', lineHeight: 1.8 } },
+                        React.createElement('strong', null, 'Vendedores: '), vendedores.map(function(v) { return v.nombre || '-'; }).join(', '),
+                        React.createElement('br', null),
+                        React.createElement('strong', null, 'Compradores: '), compradores.map(function(c) { return c.nombre || '-'; }).join(', '),
+                        React.createElement('br', null),
+                        React.createElement('strong', null, 'Inmuebles: '), inmuebles.map(function(m) { return (m.tipo === 'vivienda' ? '🏠' : m.tipo === 'parking' ? '🚗' : m.tipo === 'trastero' ? '📦' : '🏗️') + ' ' + (m.direccion || m.tipo); }).join(' \xb7 '),
+                        React.createElement('br', null),
+                        React.createElement('strong', null, 'Precio: '), precioMode === 'global' ? (precioGlobal || '-') + ' €' : 'Desglosado por inmueble',
+                        React.createElement('br', null),
+                        React.createElement('strong', null, 'Arras: '), (form.importe_arras || '-') + ' €',
+                        React.createElement('br', null),
+                        React.createElement('strong', null, 'Documentos aportados: '), totalDocsSubidos
+                      )
+                    ),
+                    React.createElement('button', {
+                      onClick: generarArras,
+                      disabled: generando,
+                      style: { background: generando ? 'var(--muted)' : 'var(--amber)', color: 'var(--white)', border: 'none', padding: '14px 32px', fontSize: 12, fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', cursor: generando ? 'not-allowed' : 'pointer', fontFamily: 'Inter, sans-serif', width: '100%', marginBottom: 20 }
+                    }, generando ? '⧗ Generando contrato...' : '✶ Generar borrador de contrato de arras con IA'),
+                    errorIA && React.createElement('div', { style: { padding: 16, background: '#fff0f0', border: '1px solid #c00', color: '#c00', fontSize: 12, marginBottom: 16 } }, '⚠️ ', errorIA),
+                    resultado && React.createElement('div', null,
+                      React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 } },
+                        React.createElement('span', { style: { fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--amber)' } }, 'Borrador generado'),
+                        React.createElement('button', { onClick: function() { if (navigator.clipboard) navigator.clipboard.writeText(resultado); }, style: { background: 'transparent', border: '1px solid var(--border)', color: 'var(--muted)', padding: '4px 12px', fontSize: 11, cursor: 'pointer', fontFamily: 'Inter, sans-serif' } }, 'Copiar')
+                      ),
+                      React.createElement('pre', { style: { background: 'var(--bg)', border: '1px solid var(--border)', padding: '20px 24px', fontSize: 11, lineHeight: 1.9, whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'monospace', maxHeight: 600, overflowY: 'auto' } }, resultado)
                     )
                   )
                 );
               })()}
             </SeccionGrande>
-
             {/* ── ARRAS A NOTARÍA ── */}
             <SeccionGrande
               title="Arras a notaría"
