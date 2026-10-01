@@ -1924,17 +1924,17 @@ function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, on
   async function crearVisita() {
     if (!compradorNueva) return;
     setGuardando(true);
-    const { data: visitaCreada, error: errV } = await supabase.from("visitas").insert({
+    const { error: errV } = await supabase.from("visitas").insert({
       propiedad_id: propiedadId,
       agente_login: currentUser.user_login,
       comprador_id: compradorNueva.id,
       fecha_visita: new Date(horaVisita).toISOString(),
       notas: notasNueva || null,
       activo: true,
-    }).select().single();
+    });
     setGuardando(false);
-    if (errV || !visitaCreada) {
-      alert("Error al guardar la visita: " + (errV?.message || "Sin respuesta de la base de datos"));
+    if (errV) {
+      alert("Error al guardar la visita: " + errV.message);
       return;
     }
     setNuevaVisita(false);
@@ -2105,24 +2105,27 @@ export default function Visitas({ currentUser }) {
   async function crearVisitaGlobal() {
     if (!nvPropiedad || nvCompradores.length === 0) return;
     setNvGuardando(true);
-    const { data: visita, error: errVisita } = await supabase.from("visitas").insert({
+    const { data: visitaArr, error: errVisita } = await supabase.from("visitas").insert({
       propiedad_id: nvPropiedad.id,
       agente_login: currentUser.user_login,
       comprador_id: nvCompradores[0].id,
       fecha_visita: new Date(nvHora).toISOString(),
       activo: true,
-    }).select().single();
+    }).select("id");
 
-    if (errVisita || !visita) {
+    if (errVisita) {
       setNvGuardando(false);
-      alert("Error al guardar la visita: " + (errVisita?.message || "Sin respuesta de la base de datos"));
+      alert("Error al guardar la visita: " + errVisita.message);
       return;
     }
 
-    const { error: errCompr } = await supabase.from("visita_compradores").insert(
-      nvCompradores.map((c, i) => ({ visita_id: visita.id, comprador_id: c.id, orden: i + 1 }))
-    );
-    if (errCompr) console.warn("Error vinculando compradores:", errCompr.message);
+    const visitaId = visitaArr && visitaArr[0] ? visitaArr[0].id : null;
+    if (visitaId) {
+      const { error: errCompr } = await supabase.from("visita_compradores").insert(
+        nvCompradores.map((c, i) => ({ visita_id: visitaId, comprador_id: c.id, orden: i + 1 }))
+      );
+      if (errCompr) console.warn("Error vinculando compradores:", errCompr.message);
+    }
 
     for (const c of nvCompradores) {
       await fetch("/api/visitas/programar-cualificacion", {
