@@ -197,18 +197,19 @@ function SelectorComprador({ value, onChange, placeholder = "Buscar por nombre, 
       const { error: errIns } = await supabase.from("compradores").insert({
         nombre: nombreParte, apellidos: apellidosParte || null,
         telefono: nuevoTel.trim(), email: nuevoEmail.trim() || null,
-        dni: nuevoDni.trim(), pais: nuevaNac, activo: true,
+        dni: nuevoDni.trim() || null, pais: nuevaNac,
         created_at: new Date().toISOString(),
       });
       if (!errIns) {
-        // Recuperar el comprador recién creado por DNI (único)
-        const { data: comp } = await supabase.from("compradores")
-          .select("*")
-          .eq("dni", nuevoDni.trim())
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .single();
+        // Recuperar el comprador recién creado por teléfono+nombre (más fiable que DNI que puede ser null)
+        const refetch = nuevoDni.trim()
+          ? supabase.from("compradores").select("*").eq("dni", nuevoDni.trim()).order("created_at", { ascending: false }).limit(1).single()
+          : supabase.from("compradores").select("*").eq("telefono", nuevoTel.trim()).ilike("nombre", `%${nombreParte}%`).order("created_at", { ascending: false }).limit(1).single();
+        const { data: comp } = await refetch;
         if (comp) onChange(comp);
+      } else {
+        console.error("[COMPRADOR INSERT ERROR]", errIns.message);
+        alert("Error al crear comprador: " + errIns.message);
       }
     }
 
