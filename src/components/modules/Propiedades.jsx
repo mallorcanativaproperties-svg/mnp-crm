@@ -2981,7 +2981,8 @@ REGLAS:
                   </div>
                   <select value={d.provincia || ""} onChange={e => { upd("provincia", e.target.value); upd("municipio", ""); upd("zona", ""); }} onBlur={() => autoSave({ ...draft, municipio: d.municipio, zona: "" })} style={inputStyle}>
                     <option value="">-</option>
-                    {{Object.keys(PROVINCIAS_MAP).map(m => <option key={m} value={m}>{m}</option>)}                  </select>
+                    {Object.keys(PROVINCIAS_MAP).map(m => <option key={m} value={m}>{m}</option>)}
+                  </select>
                   {hasErr && <div style={{ fontSize: 10, color: "var(--danger)", marginTop: 3 }}>Requerido para Idealista</div>}
                 </div>
               );
