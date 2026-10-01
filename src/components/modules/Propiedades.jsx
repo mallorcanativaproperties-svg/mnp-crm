@@ -3647,6 +3647,45 @@ REGLAS:
                 });
                 const setF = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
+                /* Visitas candidatas a importar compradores */
+                const [visitasCandidatas, setVisitasCandidatas] = React.useState([]);
+                const [visitaSeleccionada, setVisitaSeleccionada] = React.useState('');
+                React.useEffect(() => {
+                  if (!p || !p.id) return;
+                  supabase.from('visitas')
+                    .select('id, fecha_visita, compradores(id,nombre,apellidos,dni,telefono,email,pais), visita_compradores(orden, compradores(id,nombre,apellidos,dni,telefono,email,pais)), visita_documentos(tipo,estado,precio_oferta)')
+                    .eq('propiedad_id', p.id).eq('activo', true)
+                    .then(({ data }) => {
+                      if (!data) return;
+                      const candidatas = data.filter(v => {
+                        const docs = v.visita_documentos || [];
+                        return docs.some(d => ['oferta','reserva','contraoferta'].includes(d.tipo) && ['borrador','enviado','firmado_comprador','deposito_recibido','firmado_vendedor','completado'].includes(d.estado));
+                      });
+                      setVisitasCandidatas(candidatas);
+                    });
+                }, [p && p.id]);
+
+                const importarCompradoresDeVisita = (visitaId) => {
+                  const v = visitasCandidatas.find(x => String(x.id) === String(visitaId));
+                  if (!v) return;
+                  const comps = v.visita_compradores && v.visita_compradores.length > 0
+                    ? v.visita_compradores.sort((a,b) => a.orden - b.orden).map(vc => vc.compradores).filter(Boolean)
+                    : v.compradores ? [v.compradores] : [];
+                  if (comps.length === 0) return;
+                  const nuevos = comps.map(c => ({
+                    nombre: [c.nombre, c.apellidos].filter(Boolean).join(' '),
+                    dni: c.dni || '',
+                    domicilio: '',
+                    estado_civil: '',
+                    regimen: '',
+                    iban: '',
+                    hipoteca: 'no',
+                  }));
+                  setCompradores(nuevos);
+                  setDocsCompradores(nuevos.map(() => ({ dni: null })));
+                  setVisitaSeleccionada(visitaId);
+                };
+
                 /* Documentos — estructurado por parte y por inmueble */
                 const [docsVendedores, setDocsVendedores] = React.useState([{ dni: null, escritura: null, poder_notarial: null }]);
                 const [docsCompradores, setDocsCompradores] = React.useState([{ dni: null }]);
@@ -3866,6 +3905,33 @@ REGLAS:
                     ),
 
                     secHdr('Compradores'),
+                    visitasCandidatas.length > 0 && React.createElement('div', { style: { background: 'var(--bg)', border: '1px solid var(--amber)', padding: '14px 18px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' } },
+                      React.createElement('span', { style: { fontSize: 11, fontWeight: 700, color: 'var(--amber)', letterSpacing: '0.1em', textTransform: 'uppercase' } }, '↓ Importar comprador/es'),
+                      React.createElement('select', {
+                        style: { ...selStyle, flex: 1, minWidth: 220, border: '1px solid var(--amber)' },
+                        value: visitaSeleccionada,
+                        onChange: function(e) { setVisitaSeleccionada(e.target.value); }
+                      },
+                        React.createElement('option', { value: '' }, '— Seleccionar visita/oferta —'),
+                        visitasCandidatas.map(function(v) {
+                          const comps = v.visita_compradores && v.visita_compradores.length > 0
+                            ? v.visita_compradores.sort(function(a,b){ return a.orden - b.orden; }).map(function(vc){ return vc.compradores; }).filter(Boolean)
+                            : v.compradores ? [v.compradores] : [];
+                          const nombres = comps.map(function(c){ return [c.nombre,c.apellidos].filter(Boolean).join(' '); }).join(', ');
+                          const docs = v.visita_documentos || [];
+                          const mejorDoc = docs.find(function(d){ return ['deposito_recibido','firmado_comprador','firmado_vendedor','completado'].includes(d.estado); })
+                            || docs.find(function(d){ return ['oferta','reserva','contraoferta'].includes(d.tipo); });
+                          const etiqueta = mejorDoc ? (mejorDoc.tipo === 'oferta' ? 'Oferta' : mejorDoc.tipo === 'reserva' ? 'Reserva' : 'Contraoferta') + ' · ' + (mejorDoc.estado === 'deposito_recibido' ? 'Depósito ✓' : mejorDoc.estado === 'firmado_comprador' ? 'Firmado' : mejorDoc.estado) : 'Doc';
+                          const fecha = new Date(v.fecha_visita).toLocaleDateString('es-ES', { day:'2-digit', month:'short', year:'numeric' });
+                          return React.createElement('option', { key: v.id, value: v.id }, fecha + ' · ' + nombres + ' (' + etiqueta + ')');
+                        })
+                      ),
+                      React.createElement('button', {
+                        onClick: function() { if (visitaSeleccionada) importarCompradoresDeVisita(visitaSeleccionada); },
+                        disabled: !visitaSeleccionada,
+                        style: { padding: '9px 18px', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'Inter, sans-serif', background: visitaSeleccionada ? 'var(--amber)' : 'var(--border)', color: visitaSeleccionada ? 'var(--white)' : 'var(--muted)', border: 'none', cursor: visitaSeleccionada ? 'pointer' : 'default' }
+                      }, 'Importar')
+                    ),
                     compradores.map(function(c, idx) { return React.createElement('div', { key: idx, style: parteBox('var(--blue)') },
                       compradores.length > 1 && btnRemove(function() { removeComprador(idx); }),
                       React.createElement('div', { style: { fontSize: 11, fontWeight: 700, color: 'var(--blue)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 12 } }, 'Comprador ' + (idx+1)),
