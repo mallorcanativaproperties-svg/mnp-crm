@@ -4015,7 +4015,7 @@ REGLAS:
                         React.createElement('label', { style: lblStyle }, 'Detalle del mobiliario'),
                         React.createElement('input', { style: inpStyle, value: form.muebles_detalle, onChange: function(e) { setF('muebles_detalle', e.target.value); }, placeholder: 'Descripcion o referencia al inventario' })
                       )
-                    )
+                    ),
 
 
                     React.createElement('div', { style: { marginTop: 8 } }),
