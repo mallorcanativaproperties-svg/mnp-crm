@@ -3659,11 +3659,11 @@ REGLAS:
                       if (!data) return;
                       const candidatas = data.filter(v => {
                         const docs = v.visita_documentos || [];
-                        return docs.some(d => ['oferta','reserva','contraoferta'].includes(d.tipo) && ['borrador','enviado','firmado_comprador','deposito_recibido','firmado_vendedor','completado'].includes(d.estado));
+                        return docs.some(d => ['oferta','reserva','contraoferta'].includes(d.tipo));
                       });
                       setVisitasCandidatas(candidatas);
                     });
-                }, [p && p.id]);
+                }, []);
 
                 const importarCompradoresDeVisita = (visitaId) => {
                   const v = visitasCandidatas.find(x => String(x.id) === String(visitaId));
