@@ -1924,15 +1924,19 @@ function GrupoPropiedad({ propiedadId, propiedadNombre, visitas, currentUser, on
   async function crearVisita() {
     if (!compradorNueva) return;
     setGuardando(true);
-    await supabase.from("visitas").insert({
+    const { data: visitaCreada, error: errV } = await supabase.from("visitas").insert({
       propiedad_id: propiedadId,
       agente_login: currentUser.user_login,
       comprador_id: compradorNueva.id,
       fecha_visita: new Date(horaVisita).toISOString(),
       notas: notasNueva || null,
       activo: true,
-    });
+    }).select().single();
     setGuardando(false);
+    if (errV || !visitaCreada) {
+      alert("Error al guardar la visita: " + (errV?.message || "Sin respuesta de la base de datos"));
+      return;
+    }
     setNuevaVisita(false);
     setCompradorNueva(null);
     setNotasNueva("");
@@ -2101,7 +2105,7 @@ export default function Visitas({ currentUser }) {
   async function crearVisitaGlobal() {
     if (!nvPropiedad || nvCompradores.length === 0) return;
     setNvGuardando(true);
-    const { data: visita } = await supabase.from("visitas").insert({
+    const { data: visita, error: errVisita } = await supabase.from("visitas").insert({
       propiedad_id: nvPropiedad.id,
       agente_login: currentUser.user_login,
       comprador_id: nvCompradores[0].id,
@@ -2109,21 +2113,28 @@ export default function Visitas({ currentUser }) {
       activo: true,
     }).select().single();
 
-    if (visita) {
-      await supabase.from("visita_compradores").insert(
-        nvCompradores.map((c, i) => ({ visita_id: visita.id, comprador_id: c.id, orden: i + 1 }))
-      );
-      for (const c of nvCompradores) {
-        await fetch("/api/visitas/programar-cualificacion", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            compradorId: c.id, compradorTel: c.telefono,
-            propiedadId: nvPropiedad.id, fecha: new Date(nvHora).toISOString(),
-          }),
-        });
-      }
+    if (errVisita || !visita) {
+      setNvGuardando(false);
+      alert("Error al guardar la visita: " + (errVisita?.message || "Sin respuesta de la base de datos"));
+      return;
     }
+
+    const { error: errCompr } = await supabase.from("visita_compradores").insert(
+      nvCompradores.map((c, i) => ({ visita_id: visita.id, comprador_id: c.id, orden: i + 1 }))
+    );
+    if (errCompr) console.warn("Error vinculando compradores:", errCompr.message);
+
+    for (const c of nvCompradores) {
+      await fetch("/api/visitas/programar-cualificacion", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          compradorId: c.id, compradorTel: c.telefono,
+          propiedadId: nvPropiedad.id, fecha: new Date(nvHora).toISOString(),
+        }),
+      });
+    }
+
     setNvGuardando(false);
     setModalNuevaVisita(false);
     setNvPropiedad(null); setNvCompradores([]);
