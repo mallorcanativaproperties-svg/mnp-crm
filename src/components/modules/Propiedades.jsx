@@ -10,7 +10,7 @@ import PropietariosEditor, { PROPIETARIO_VACIO } from "@/components/Propietarios
 import dynamic from "next/dynamic";
 const VisitasResumen = dynamic(() => import("@/components/VisitasResumen"), { ssr: false });
 import { PlusIcon, MagnifyingGlassIcon, PencilSquareIcon, TrashIcon, PhotoIcon, GlobeAltIcon, ArrowUpTrayIcon, ArrowDownTrayIcon } from "@heroicons/react/24/outline";
-import { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 
 function mapDbToJs(row) {

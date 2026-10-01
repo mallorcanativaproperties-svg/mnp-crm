@@ -36,7 +36,7 @@ export default function SimuladorClaudia() {
       if (data.error) {
         setLog([`ERROR: ${data.error}`]);
       } else {
-        setLog([`â Conv creada: ${data.conv_id || "â"}`, `â Canal: ${data.canal || "simulador"}`]);
+        setLog([`✓ Conv creada: ${data.conv_id || "—"}`, `✓ Canal: ${data.canal || "simulador"}`]);
         if (data.claudia_response) {
           setMessages([{ from: "claudia", text: data.claudia_response, time: new Date() }]);
         }
@@ -61,7 +61,7 @@ export default function SimuladorClaudia() {
         body: JSON.stringify({ action: "message", phone, text }),
       });
       const data = await res.json();
-      setLog(prev => [...prev, `â estado:${data.estado || "â"} modo:${data.modo || "auto"}`]);
+      setLog(prev => [...prev, `→ estado:${data.estado || "—"} modo:${data.modo || "auto"}`]);
       if (data.claudia_response) {
         setMessages(prev => [...prev, { from: "claudia", text: data.claudia_response, time: new Date() }]);
       }
@@ -89,11 +89,10 @@ export default function SimuladorClaudia() {
 
   return (
     <div style={{ padding: "40px 48px", maxWidth: 960, margin: "0 auto" }}>
-      <div style={{ marginBottom: 40 }}>
-        <div style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 12, fontFamily: "Inter, sans-serif" }}>NATIVA PROPERTIES</div>
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 600, margin: 0, lineHeight: 1.1, color: "#A8854A" }}>Simulador Claudia</h1>
-            <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "10px 0 0" }}>Simulador de financiaciÃ³n y cÃ¡lculo de hipotecas con Claudia</p>
-            <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginTop: 28, marginBottom: 28 }} /></div>
+      <div style={{ marginBottom: 32 }}>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Simulador Claudia</h1>
+            <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Simulador de financiación y cálculo de hipotecas con Claudia</p>
+            <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} /></div>
 
       {!started ? (
         <div style={{ background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, padding: "28px 32px", maxWidth: 480 }}>
@@ -104,7 +103,7 @@ export default function SimuladorClaudia() {
               <input style={inputSt} value={nombre} onChange={e => setNombre(e.target.value)} placeholder="Test Lead" />
             </div>
             <div>
-              <label style={labelSt}>TelÃ©fono simulado (sin +34)</label>
+              <label style={labelSt}>Teléfono simulado (sin +34)</label>
               <input style={inputSt} value={phone} onChange={e => setPhone(e.target.value)} placeholder="666000001" />
             </div>
             <div>
@@ -119,7 +118,7 @@ export default function SimuladorClaudia() {
           )}
           <button onClick={startConversation} disabled={loading}
             style={{ marginTop: 24, width: "100%", background: loading ? "#E7E1D4" : "#AC8A54", border: "none", borderRadius: 0, color: loading ? "#9A968A" : "#F8F6F1", fontSize: 12, fontWeight: 700, cursor: loading ? "not-allowed" : "pointer", padding: "12px", fontFamily: "Inter, sans-serif", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-            {loading ? "Iniciando..." : "â¶ Iniciar simulaciÃ³n"}
+            {loading ? "Iniciando..." : "▶ Iniciar simulación"}
           </button>
         </div>
       ) : (
@@ -128,12 +127,12 @@ export default function SimuladorClaudia() {
           <div style={{ flex: 1 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
               <div style={{ fontSize: 11, color: "#9A968A" }}>
-                Lead: <span style={{ color: "#AC8A54" }}>{nombre}</span> Â· {phone}
-                {refProp && <span style={{ marginLeft: 8, color: "#2C6E52" }}>Â· {refProp}</span>}
+                Lead: <span style={{ color: "#AC8A54" }}>{nombre}</span> · {phone}
+                {refProp && <span style={{ marginLeft: 8, color: "#2C6E52" }}>· {refProp}</span>}
               </div>
               <button onClick={resetSim}
                 style={{ background: "transparent", border: "1px solid #2A2926", borderRadius: 0, color: "#9A968A", fontSize: 10, cursor: "pointer", padding: "4px 12px", fontFamily: "Inter, sans-serif" }}>
-                âº Reiniciar
+                ↺ Reiniciar
               </button>
             </div>
 
@@ -179,7 +178,7 @@ export default function SimuladorClaudia() {
               />
               <button onClick={sendMessage} disabled={loading || !input.trim()}
                 style={{ background: loading || !input.trim() ? "#E7E1D4" : "#2C6E52", border: "none", borderRadius: 0, color: loading || !input.trim() ? "#C8BFB0" : "#F8F6F1", fontSize: 12, fontWeight: 700, cursor: loading || !input.trim() ? "not-allowed" : "pointer", padding: "0 20px", fontFamily: "Inter, sans-serif" }}>
-                â¶
+                ▶
               </button>
             </div>
           </div>

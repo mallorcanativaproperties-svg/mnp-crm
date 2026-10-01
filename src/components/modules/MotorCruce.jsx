@@ -40,7 +40,7 @@ function WhatsAppCrucePanel({ buyer, prop, onClose }) {
     ? `https://mallorcanativaproperties.com/propiedades/${prop.ref.toLowerCase()}/`
     : null;
 
-  const msgInicial = `Hola!\nTe escribimos de Nativa Properties y segÃºn tus preferencias, esta propiedad podrÃ­a interesarte. Si quieres hacer visita, comÃ©ntanos tu disponibilidad.${propUrl ? "\n\n" + propUrl : ""}`;
+  const msgInicial = `Hola!\nTe escribimos de Nativa Properties y según tus preferencias, esta propiedad podría interesarte. Si quieres hacer visita, coméntanos tu disponibilidad.${propUrl ? "\n\n" + propUrl : ""}`;
 
   useEffect(() => {
     async function loadConv() {
@@ -140,7 +140,7 @@ function WhatsAppCrucePanel({ buyer, prop, onClose }) {
     setModoManual(nuevo);
     if (convId) {
       await supabase.from("conversaciones").update({ estado: nuevo ? "manual" : "activo", updated_at: new Date().toISOString() }).eq("id", convId);
-      const txt = nuevo ? "Modo manual activado â Claudia en pausa" : "IA reactivada";
+      const txt = nuevo ? "Modo manual activado — Claudia en pausa" : "IA reactivada";
       setMensajes(prev => [...prev, { from: "sistema", text: txt, ts: "" }]);
     }
   }
@@ -176,7 +176,7 @@ function WhatsAppCrucePanel({ buyer, prop, onClose }) {
             <button onClick={toggleModo} style={{ padding: "4px 10px", background: modoManual ? "rgba(172,138,84,0.15)" : "rgba(64,92,107,0.3)", border: `1px solid ${modoManual ? BRONZE : "#405c6b"}`, color: modoManual ? BRONZE : "#7aafc4", cursor: "pointer", fontSize: 9, fontWeight: 600, letterSpacing: "0.08em", fontFamily: "Inter, sans-serif" }}>
               {modoManual ? "MANUAL" : "IA ACTIVA"}
             </button>
-            <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(248,246,241,0.4)", fontSize: 18, cursor: "pointer", lineHeight: 1 }}>â</button>
+            <button onClick={onClose} style={{ background: "none", border: "none", color: "rgba(248,246,241,0.4)", fontSize: 18, cursor: "pointer", lineHeight: 1 }}>✕</button>
           </div>
         </div>
         {/* Propiedad + link */}
@@ -187,7 +187,7 @@ function WhatsAppCrucePanel({ buyer, prop, onClose }) {
             <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <span style={{ fontSize: 11, color: "rgba(248,246,241,0.5)", wordBreak: "break-all", flex: 1 }}>{propUrl}</span>
               <button
-                onClick={e => { navigator.clipboard.writeText(propUrl); e.currentTarget.textContent = "â"; setTimeout(() => { if(e.currentTarget) e.currentTarget.innerHTML = `<span style="display:flex;align-items:center;gap:4px"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"2\" stroke=\"currentColor\" style=\"width:13px;height:13px\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244\"/></svg>Copiar</span>`; }, 2000); }}
+                onClick={e => { navigator.clipboard.writeText(propUrl); e.currentTarget.textContent = "✓"; setTimeout(() => { if(e.currentTarget) e.currentTarget.innerHTML = `<span style="display:flex;align-items:center;gap:4px"><svg xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"2\" stroke=\"currentColor\" style=\"width:13px;height:13px\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244\"/></svg>Copiar</span>`; }, 2000); }}
                 style={{ fontSize: 10, color: BRONZE, background: "none", border: `1px solid ${BRONZE}44`, padding: "2px 8px", cursor: "pointer", flexShrink: 0, fontFamily: "Inter, sans-serif", letterSpacing: "0.06em" }}>
                 Copiar
               </button>
@@ -202,8 +202,8 @@ function WhatsAppCrucePanel({ buyer, prop, onClose }) {
           <div style={{ textAlign: "center", padding: 40, color: "var(--muted)", fontSize: 12 }}>Cargando...</div>
         ) : mensajes.length === 0 ? (
           <div style={{ textAlign: "center", padding: 40 }}>
-            <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 24, color: "#C8BFB0", marginBottom: 10 }}>â¦</div>
-            <div style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.6 }}>Sin mensajes. El mensaje de presentaciÃ³n<br/>estÃ¡ listo en el campo de texto.</div>
+            <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 24, color: "#C8BFB0", marginBottom: 10 }}>✦</div>
+            <div style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.6 }}>Sin mensajes. El mensaje de presentación<br/>está listo en el campo de texto.</div>
           </div>
         ) : (() => {
           const elements = []; let lastDate = null;
@@ -220,7 +220,7 @@ function WhatsAppCrucePanel({ buyer, prop, onClose }) {
                 <div style={{ maxWidth: "80%", padding: "8px 12px 6px", background: isAgent ? PETROL : "var(--white)", color: isAgent ? CREAM : "var(--text)", borderRadius: isAgent ? "12px 12px 2px 12px" : "12px 12px 12px 2px", fontSize: 13, lineHeight: 1.55, boxShadow: "0 1px 3px rgba(0,0,0,0.07)", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
                   {m.text}
                   {m.ts && <div style={{ fontSize: 10, color: isAgent ? "rgba(248,246,241,0.4)" : "var(--muted)", marginTop: 3, textAlign: "right", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 3 }}>
-                    {m.ts}{isAgent && <span style={{ fontSize: 12, color: m.leido ? "#4FC3F7" : "rgba(248,246,241,0.4)" }}>ââ</span>}
+                    {m.ts}{isAgent && <span style={{ fontSize: 12, color: m.leido ? "#4FC3F7" : "rgba(248,246,241,0.4)" }}>✓✓</span>}
                   </div>}
                 </div>
               </div>
@@ -309,7 +309,7 @@ function MatchCard({ buyer, prop, view, onWa }) {
             </div>
             <span style={{ fontSize: 10, color: "var(--muted)", marginLeft: 6 }}>{pct}% del ppto</span>
           </div>
-          {/* BotÃ³n WhatsApp â icono dorado igual al de base de compradores */}
+          {/* Botón WhatsApp — icono dorado igual al de base de compradores */}
           <button onClick={() => onWa && onWa(buyer, prop)}
             style={{ marginTop: 12, width: 38, height: 38, display: "flex", alignItems: "center", justifyContent: "center", background: "none", border: "none", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.25))", transition: "transform 0.2s", cursor: "pointer", padding: 0, marginLeft: "auto" }}
             title="Enviar propiedad por WhatsApp"
@@ -372,7 +372,7 @@ export default function MotorCruce() {
       if (bRes.data) setBUYERS(bRes.data.map(r => ({
         id: r.id, nombre: r.nombre || "", ppto: r.presupuesto || 0, fin: r.finalidad || "",
         hab: r.habitaciones || "", zd: r.zona_deseada || [], ze: r.zona_excluida || [],
-        tel: r.telefono || "", st: r.estado || "activo", agente: r.agente_asignado || "", pais: r.pais || "EspaÃ±a",
+        tel: r.telefono || "", st: r.estado || "activo", agente: r.agente_asignado || "", pais: r.pais || "España",
       })));
       if (pRes.data) setPROPS(pRes.data.map(r => ({
         id: r.id, ref: r.ref || "", titulo: r.titulo || "", tipo: r.tipo || "",
@@ -402,25 +402,25 @@ export default function MotorCruce() {
   }, [PROPS, fMunicipio]);
   const operaciones = useMemo(() => [...new Set(PROPS.map((p) => p.op).filter(Boolean))].sort(), [PROPS]);
 
-  // Matching logic: presupuesto (Â±30.000â¬) + municipio + operacion
+  // Matching logic: presupuesto (±30.000€) + municipio + operacion
   function isMatch(buyer, prop) {
-    // 1. Presupuesto: rango Â±30.000â¬ del precio de publicaciÃ³n
+    // 1. Presupuesto: rango ±30.000€ del precio de publicación
     const precio = Number(prop.precio) || Number(prop.precioVenta) || 0;
     const ppto = Number(buyer.ppto) || 0;
     if (ppto > 0 && precio > 0 && (precio > ppto + 30000 || precio < ppto - 30000)) return false;
 
     // Helper: comprueba si una etiqueta de zona del comprador coincide con municipio+zona de la propiedad
-    // Las etiquetas pueden ser "Municipio Â· Zona" (formato nuevo) o texto libre (retrocompatibilidad)
+    // Las etiquetas pueden ser "Municipio · Zona" (formato nuevo) o texto libre (retrocompatibilidad)
     function zonaCoincide(etiqueta, municipio, zona) {
       const e = etiqueta.toLowerCase().trim();
       const m = (municipio || "").toLowerCase().trim();
       const z = (zona || "").toLowerCase().trim();
-      // Formato nuevo: "Municipio Â· Zona" â match exacto
-      if (e.includes(" Â· ")) {
-        const [eMuni, eZona] = e.split(" Â· ").map(s => s.trim());
+      // Formato nuevo: "Municipio · Zona" — match exacto
+      if (e.includes(" · ")) {
+        const [eMuni, eZona] = e.split(" · ").map(s => s.trim());
         return m === eMuni && (!eZona || z === eZona);
       }
-      // Solo municipio seleccionado (botÃ³n "Todo municipio")
+      // Solo municipio seleccionado (botón "Todo municipio")
       if (m === e) return true;
       // Retrocompatibilidad: texto libre fuzzy
       return m.includes(e) || e.includes(m) || z.includes(e) || e.includes(z);
@@ -443,7 +443,7 @@ export default function MotorCruce() {
       const finL = buyer.fin.toLowerCase();
       const opL = prop.op.toLowerCase();
       // Mapeo: "Primera vivienda"/"Inversion"/"Cambio de vivienda" = Compraventa, "Alquiler" = Alquiler, "Traspaso" = Traspaso
-      const buyerIsCompra = finL.includes("vivienda") || finL.includes("inversion") || finL.includes("inversiÃ³n") || finL.includes("compra");
+      const buyerIsCompra = finL.includes("vivienda") || finL.includes("inversion") || finL.includes("inversión") || finL.includes("compra");
       const propIsCompra = opL.includes("compraventa") || opL.includes("compra") || opL.includes("venta");
       const buyerIsAlquiler = finL.includes("alquiler");
       const propIsAlquiler = opL.includes("alquiler");
@@ -575,12 +575,10 @@ export default function MotorCruce() {
       <div style={{ maxWidth: 920, margin: "0 auto" }}>
 
         {/* Header */}
-        <div style={{ marginBottom: 40 }}>
-          <div style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 12, fontFamily: "Inter, sans-serif" }}>NATIVA PROPERTIES</div>
-      <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 600, margin: 0, lineHeight: 1.1, color: "#A8854A" }}>Motor de Cruce</h1>
-            <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "10px 0 0" }}>Cruce automático entre propiedades y compradores</p>
-            <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginTop: 28, marginBottom: 28 }} />
-        </div>
+        <div style={{ marginBottom: 40, borderBottom: "1px solid var(--text)", paddingBottom: 32 }}>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Motor de Cruce</h1>
+            <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Cruce automático entre propiedades y compradores con criterios coincidentes</p>
+            <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} /></div>
 
         {/* Stats */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 16, marginBottom: 28 }}>
@@ -707,7 +705,7 @@ export default function MotorCruce() {
                           const webUrl = `https://mallorcanativaproperties.com/propiedades/${prop.ref.toLowerCase()}/`;
                           return (
                             <button
-                              onClick={e => { navigator.clipboard.writeText(webUrl); e.currentTarget.textContent = "â Copiado"; setTimeout(() => { if(e.currentTarget) e.currentTarget.textContent = "Copiar link web"; }, 2000); }}
+                              onClick={e => { navigator.clipboard.writeText(webUrl); e.currentTarget.textContent = "✓ Copiado"; setTimeout(() => { if(e.currentTarget) e.currentTarget.textContent = "Copiar link web"; }, 2000); }}
                               style={{ marginTop: 8, fontSize: 11, color: "var(--gold)", background: "none", border: "1px solid var(--gold-l)33", padding: "3px 10px", cursor: "pointer", letterSpacing: "0.04em", fontFamily: "Inter, sans-serif", display: "inline-block" }}>
                               Copiar link web
                             </button>
@@ -721,7 +719,7 @@ export default function MotorCruce() {
                       </div>
 
                       <div style={{ fontSize: 11, color: "var(--muted)", marginBottom: 12, letterSpacing: "0.06em" }}>
-                        {matches.length} compradores compatibles automÃ¡ticamente (presupuesto + zona)
+                        {matches.length} compradores compatibles automáticamente (presupuesto + zona)
                       </div>
 
                       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -740,7 +738,7 @@ export default function MotorCruce() {
                                       await actualizarEstado(prop.id, buyer.id, "interesado");
                                     }}
                                       style={{ padding: "5px 14px", background: vinc?.estado === "interesado" ? "var(--success)" : "none", border: "1px solid var(--success)", color: vinc?.estado === "interesado" ? "#fff" : "var(--success)", fontSize: 11, cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
-                                      â Interesado
+                                      ✓ Interesado
                                     </button>
                                   )}
                                   {(!vinc || vinc.estado === "pendiente" || vinc.estado === "interesado") && (
@@ -749,7 +747,7 @@ export default function MotorCruce() {
                                       await actualizarEstado(prop.id, buyer.id, "descartado");
                                     }}
                                       style={{ padding: "5px 14px", background: vinc?.estado === "descartado" ? "var(--danger)" : "none", border: "1px solid var(--danger)", color: vinc?.estado === "descartado" ? "#fff" : "var(--danger)", fontSize: 11, cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
-                                      â Descartar
+                                      ✕ Descartar
                                     </button>
                                   )}
                                   {vinc && (
@@ -763,7 +761,7 @@ export default function MotorCruce() {
                           })}
                         {matches.length === 0 && (
                           <div style={{ textAlign: "center", padding: "24px 0", color: "var(--muted)", fontSize: 13, fontStyle: "italic" }}>
-                            NingÃºn comprador compatible automÃ¡ticamente
+                            Ningún comprador compatible automáticamente
                           </div>
                         )}
                       </div>
@@ -784,11 +782,11 @@ export default function MotorCruce() {
                                   <div style={{ display: "flex", gap: 6, padding: "6px 0 10px", justifyContent: "flex-end", alignItems: "center" }}>
                                     <button onClick={() => actualizarEstado(prop.id, buyer.id, "interesado")}
                                       style={{ padding: "5px 14px", background: estado === "interesado" ? "var(--success)" : "none", border: "1px solid var(--success)", color: estado === "interesado" ? "#fff" : "var(--success)", fontSize: 11, cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
-                                      â Interesado
+                                      ✓ Interesado
                                     </button>
                                     <button onClick={() => actualizarEstado(prop.id, buyer.id, "descartado")}
                                       style={{ padding: "5px 14px", background: estado === "descartado" ? "var(--danger)" : "none", border: "1px solid var(--danger)", color: estado === "descartado" ? "#fff" : "var(--danger)", fontSize: 11, cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
-                                      â Descartar
+                                      ✕ Descartar
                                     </button>
                                   </div>
                                 </div>
@@ -815,7 +813,7 @@ export default function MotorCruce() {
                               <input
                                 value={busquedaManual}
                                 onChange={e => setBusquedaManual(e.target.value)}
-                                placeholder="Buscar por nombre, telÃ©fono o zona..."
+                                placeholder="Buscar por nombre, teléfono o zona..."
                                 autoFocus
                                 style={{ flex: 1, padding: "10px 14px", border: "1px solid var(--border)", borderRight: "none", background: "#fff", color: "#1a2528", fontSize: 13, fontFamily: "Inter, sans-serif", outline: "none" }}
                               />
@@ -835,7 +833,7 @@ export default function MotorCruce() {
                                     <div key={buyer.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: "#fff", border: "1px solid var(--border)", gap: 12 }}>
                                       <div>
                                         <div style={{ fontSize: 13, fontWeight: 600, color: "#1a2528", fontFamily: "Inter, sans-serif" }}>{buyer.nombre}</div>
-                                        <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 2 }}>{buyer.tel} Â· {fmtP(buyer.ppto)} Â· {(buyer.zd || []).slice(0, 2).join(", ")}</div>
+                                        <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 2 }}>{buyer.tel} · {fmtP(buyer.ppto)} · {(buyer.zd || []).slice(0, 2).join(", ")}</div>
                                       </div>
                                       {yaVinculado
                                         ? <span style={{ fontSize: 11, color: "var(--gold)", letterSpacing: "0.04em" }}>Ya vinculado</span>

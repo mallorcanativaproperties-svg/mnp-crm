@@ -101,7 +101,7 @@ export default function FirmaElectronica() {
   }
 
   async function deleteFirma(firmaId) {
-    if (!confirm("Â¿Eliminar este documento de firma y todos sus datos? Esta accion no se puede deshacer.")) return;
+    if (!confirm("¿Eliminar este documento de firma y todos sus datos? Esta accion no se puede deshacer.")) return;
     await supabase.from("firmantes").delete().eq("firma_id", firmaId);
     await supabase.from("firmas").delete().eq("id", firmaId);
     setDetail(null);
@@ -323,16 +323,16 @@ export default function FirmaElectronica() {
       <div style={{ maxWidth: 920, margin: "0 auto" }}>
 
         {/* Header */}
-      <div style={{ marginBottom: 40 }}>
-        <div style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 12, fontFamily: "Inter, sans-serif" }}>NATIVA PROPERTIES</div>
-        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 600, margin: 0, lineHeight: 1.1, color: "#A8854A" }}>Firma Electrónica</h1>
-        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "10px 0 0" }}>Gestión y envío de documentos para firma digital</p>
-        <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginTop: 28, marginBottom: 28 }} />
-      </div>
-        <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />
+        <div style={{ marginBottom: 40, borderBottom: "1px solid #2A2926", paddingBottom: 32 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: 16 }}>
+            <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Firma Electrónica</h1>
+            <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Firma digital de documentos de forma segura y legalmente válida</p>
+            <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} />
             <button onClick={() => { setCreating(true); setNewLinks(null); setSelectedFile(null); setPreviewUrl(null); }} style={btnGold}>
               + Nuevo documento
             </button>
+          </div>
+        </div>
 
         {/* Create new */}
         {creating && !newLinks && (
@@ -459,7 +459,7 @@ export default function FirmaElectronica() {
                   </div>
                   {f.estado === "firmado" ? (
                     <div style={{ fontSize: 12, color: "#22262E" }}>
-                      <div style={{ marginBottom: 4 }}>{f.nombre} {f.apellidos} â {f.dni_nie}</div>
+                      <div style={{ marginBottom: 4 }}>{f.nombre} {f.apellidos} — {f.dni_nie}</div>
                       <div style={{ color: "#9A968A", fontSize: 11 }}>{f.email}</div>
                       <div style={{ color: "#9A968A", fontSize: 11 }}>Firmado: {fmtDate(f.firmado_at)}</div>
                       {f.ip && <div style={{ color: "#C8BFB0", fontSize: 10 }}>IP: {f.ip}</div>}
