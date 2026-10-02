@@ -1285,7 +1285,15 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                             })
                             .eq("id", docId);
                           if (dbErr) throw dbErr;
-                          notificarGuardado("Justificante de depósito adjuntado ✅");
+                          // Enviar firma al propietario automáticamente tras subir justificante
+                          try {
+                            await fetch("/api/visitas/enviar-firma", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ docId, destinatario: "vendedor" }),
+                            });
+                          } catch (e) { console.error("[subirJustificante] enviar-firma vendedor:", e); }
+                          notificarGuardado("Justificante adjuntado ✅ — link de firma enviado al propietario");
                           onActualizado();
                         } catch (err) {
                           alert("Error al subir el justificante: " + err.message);
