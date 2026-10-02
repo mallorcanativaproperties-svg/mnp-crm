@@ -82,7 +82,7 @@ async function rellenarDocx(tipo, contenido) {
       ? fmtPrecioLargo(contenido.precio_oferta)
       : (prop.precio_publicacion ? fmtPrecioLargo(prop.precio_publicacion) : ""),
     condiciones_particulares: contenido.condiciones_particulares
-      ? `\n${contenido.condiciones_particulares}` : "",
+      ? contenido.condiciones_particulares : "",
     // Respuesta del vendedor — casilla marcada según decisión
     acepta_propuesta:    contenido.respuesta_vendedor === "acepta"    ? "☑" : "☐",
     no_acepta_propuesta: contenido.respuesta_vendedor === "no_acepta" ? "☑" : "☐",
