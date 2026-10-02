@@ -103,13 +103,11 @@ export default function FirmarVisita() {
           const { data: docData } = await sb.from("visita_documentos")
             .select("id, tipo, estado, pdf_url").eq("id", firmaVend.doc_id).single();
           setDoc(docData);
-          if (docData?.pdf_url) {
-            setPdfUrl(docData.pdf_url);
-          } else {
-            await fetch(`/api/visitas/documento?id=${docData.id}`);
-            const { data: docAct } = await sb.from("visita_documentos").select("pdf_url").eq("id", docData.id).single();
-            if (docAct?.pdf_url) setPdfUrl(docAct.pdf_url);
-          }
+          // Siempre regenerar para el vendedor: así ve las firmas de los compradores estampadas
+          await fetch(`/api/visitas/documento?id=${docData.id}`);
+          const { data: docAct } = await sb.from("visita_documentos").select("pdf_url").eq("id", docData.id).single();
+          if (docAct?.pdf_url) setPdfUrl(docAct.pdf_url);
+          else if (docData?.pdf_url) setPdfUrl(docData.pdf_url);
           setLoading(false);
           return;
         }
@@ -122,15 +120,12 @@ export default function FirmarVisita() {
         if (data.firmado_vendedor_at) { setFirmado(true); setLoading(false); return; }
         setDoc(data);
 
-        // Cargar PDF — usar pdf_url pública si existe
-        if (data.pdf_url) {
-          setPdfUrl(data.pdf_url);
-        } else {
-          await fetch(`/api/visitas/documento?id=${data.id}`);
-          const { data: docActualizado } = await sb
-            .from("visita_documentos").select("pdf_url").eq("id", data.id).single();
-          if (docActualizado?.pdf_url) setPdfUrl(docActualizado.pdf_url);
-        }
+        // Siempre regenerar para el vendedor: así ve las firmas de los compradores estampadas
+        await fetch(`/api/visitas/documento?id=${data.id}`);
+        const { data: docActualizado } = await sb
+          .from("visita_documentos").select("pdf_url").eq("id", data.id).single();
+        if (docActualizado?.pdf_url) setPdfUrl(docActualizado.pdf_url);
+        else if (data.pdf_url) setPdfUrl(data.pdf_url);
       }
       setLoading(false);
     }
