@@ -1587,8 +1587,8 @@ function TarjetaVisita({ visita, propiedad, agente, currentUser, onActualizado, 
                                       {subiendoJustificante ? "Subiendo…" : "Adjuntar justificante de depósito"}
                                     </button>
                                   )}
-                                  {/* Enviar firma al propietario — solo cuando estado es firmado_comprador y no hay firma del vendedor aún */}
-                                  {doc.estado === "firmado_comprador" && !doc.firmado_vendedor_at && (
+                                  {/* Enviar firma al propietario — cuando estado es firmado_comprador o deposito_recibido y no hay firma del vendedor aún */}
+                                  {["firmado_comprador","deposito_recibido"].includes(doc.estado) && !doc.firmado_vendedor_at && (
                                     <>
                                       <button onClick={() => tieneJustificante ? enviarFirma("vendedor") : null}
                                         disabled={!tieneJustificante}
