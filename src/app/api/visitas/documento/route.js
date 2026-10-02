@@ -93,16 +93,27 @@ async function rellenarDocx(tipo, contenido) {
 
 async function docxAPdf(docxBytes) {
   const GOTENBERG_URL = process.env.GOTENBERG_URL || "https://gotenberg-production-bcc0.up.railway.app";
-  const formData = new FormData();
-  formData.append("files", new Blob([docxBytes], {
-    type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-  }), "documento.docx");
-  const res = await fetch(`${GOTENBERG_URL}/forms/libreoffice/convert`, {
-    method: "POST",
-    body: formData,
-  });
-  if (!res.ok) throw new Error(`Gotenberg error ${res.status}: ${await res.text()}`);
-  return Buffer.from(await res.arrayBuffer());
+  const MAX_INTENTOS = 3;
+  let lastError;
+  for (let intento = 1; intento <= MAX_INTENTOS; intento++) {
+    const formData = new FormData();
+    formData.append("files", new Blob([docxBytes], {
+      type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    }), "documento.docx");
+    const res = await fetch(`${GOTENBERG_URL}/forms/libreoffice/convert`, {
+      method: "POST",
+      body: formData,
+    });
+    if (res.ok) return Buffer.from(await res.arrayBuffer());
+    const errText = await res.text();
+    lastError = new Error(`Gotenberg error ${res.status}: ${errText}`);
+    console.error(`[docxAPdf] intento ${intento}/${MAX_INTENTOS} falló:`, errText.slice(0, 200));
+    if (intento < MAX_INTENTOS) {
+      // Esperar antes de reintentar: 2s, 4s
+      await new Promise(r => setTimeout(r, intento * 2000));
+    }
+  }
+  throw lastError;
 }
 
 // Estampa las firmas (base64 PNG del canvas) en la última página del PDF
