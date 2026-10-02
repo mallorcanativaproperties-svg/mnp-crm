@@ -84,8 +84,8 @@ async function rellenarDocx(tipo, contenido) {
     condiciones_particulares: contenido.condiciones_particulares
       ? contenido.condiciones_particulares : "",
     // Respuesta del vendedor — casilla marcada según decisión
-    acepta_propuesta:    contenido.respuesta_vendedor === "acepta"    ? "☑" : "☐",
-    no_acepta_propuesta: contenido.respuesta_vendedor === "no_acepta" ? "☑" : "☐",
+    acepta_propuesta:    contenido.respuesta_vendedor === "acepta"    ? "[X]" : "[ ]",
+    no_acepta_propuesta: contenido.respuesta_vendedor === "no_acepta" ? "[X]" : "[ ]",
   });
 
   return doc.getZip().generate({ type: "nodebuffer" });
