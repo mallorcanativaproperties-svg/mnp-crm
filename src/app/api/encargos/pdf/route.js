@@ -3,6 +3,7 @@ export const maxDuration = 60;
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import { sendWhatsApp, logMensajeWA } from "@/lib/evolutionApi";
 
 function getSupabase() {
   return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
@@ -252,6 +253,18 @@ export async function POST(request) {
         });
       } catch (e) { console.error("Error enviando email a", dest.email, e.message); }
     }
+  }
+
+
+  // Enviar WhatsApp a todos los firmantes con PDF listo
+  const BASE_URL = "https://crm.mallorcanativaproperties.com";
+  const tipoLabel = enc.categoria === "arrendamiento" ? "Encargo de Arrendamiento"
+    : enc.categoria === "traspaso" ? "Encargo de Traspaso"
+    : "Encargo de Venta";
+  for (const f of firmantes) {
+    if (!f.telefono) continue;
+    const waMsg = `Estimado/a ${f.nombre || "Propietario"},\n\nEl *${tipoLabel}* de Nativa Properties ha sido firmado por todas las partes. Puede descargar el documento firmado aquí:\n\n🔗 ${pdfUrl}\n\nGracias por su confianza.\n\n_Nativa Properties — 655 88 26 82_`;
+    try { await sendWhatsApp(f.telefono, waMsg); await logMensajeWA(supabase, f.telefono, waMsg, "sistema"); } catch(e) { console.error("WA pdf error", e.message); }
   }
 
   return NextResponse.json({ ok: true, pdf_url: pdfUrl });
