@@ -569,73 +569,123 @@ export default function EncargosVenta() {
                     )}
                   </div>
                 )}
-                {enc.firma_propietario_fecha && !enc.todos_firmado && (
+                {/* Firma agente — estilo Visitas */}
+                {enc.firma_propietario_fecha && !enc.todos_firmado && !enc.firma_agente_data && (
                   <button onClick={e => { e.stopPropagation(); setFirmaAgenteModal(enc); }}
-                    style={{ marginTop: 8, padding: "6px 14px", background: "var(--success)", border: "none", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>
-                    ✍ Firmar como agente y generar PDF
+                    style={{ marginTop: 10, padding: "12px 16px", background: BRONZE, border: "none",
+                      color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer",
+                      fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center",
+                      justifyContent: "center", gap: 8, width: "100%", boxSizing: "border-box" }}>
+                    ✍️ Firmar como agente y generar PDF
                   </button>
                 )}
+                {enc.firma_agente_data && !enc.todos_firmado && (
+                  <div style={{ marginTop: 8, padding: "10px 14px", background: "var(--success)12",
+                    border: "1px solid var(--success)40", fontSize: 12, color: "var(--success)",
+                    fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center", gap: 8 }}>
+                    ✅ Agente firmó
+                  </div>
+                )}
                 {enc.todos_firmado && enc.pdf_url && (
-                  <div style={{ marginTop: 6 }}>
+                  <div style={{ marginTop: 10, padding: "10px 14px", background: "rgba(0,0,0,0.04)",
+                    border: `1px solid ${BRONZE}40`, display: "flex", alignItems: "center", gap: 10,
+                    fontFamily: "Inter, sans-serif" }}>
+                    <span style={{ fontSize: 13, color: "var(--success)", fontWeight: 700, flex: 1 }}>
+                      ✅ Encargo completado y firmado
+                    </span>
                     <a href={enc.pdf_url} target="_blank" rel="noopener noreferrer"
-                      style={{ fontSize: 11, color: BRONZE, textDecoration: "none", border: `1px solid ${BRONZE}44`, padding: "4px 10px" }}>
-                      ↓ Descargar PDF firmado
+                      style={{ fontSize: 12, color: BRONZE, fontWeight: 600, textDecoration: "none",
+                        padding: "5px 12px", border: `1px solid ${BRONZE}60` }}>
+                      ↓ Descargar PDF
                     </a>
                   </div>
                 )}
-                {enc.firma_propietario_fecha && (
-                  <div style={{ fontSize: 11, color: "var(--success)", marginTop: 4 }}>
-                    ✓ Todos firmaron el {new Date(enc.firma_propietario_fecha).toLocaleDateString("es-ES")}
+                {enc.firma_propietario_fecha && !enc.todos_firmado && (
+                  <div style={{ fontSize: 11, color: "var(--success)", marginTop: 6, fontFamily: "Inter, sans-serif" }}>
+                    ✓ Todos los propietarios firmaron · {new Date(enc.firma_propietario_fecha).toLocaleDateString("es-ES")}
                   </div>
                 )}
               </div>
-              <div style={{ display: "flex", gap: 8, flexShrink: 0, flexWrap: "wrap", justifyContent: "flex-end", flexDirection: "column", alignItems: "flex-end" }}>
-                {(enc.encargo_firmantes || []).map((f, i) => {
-                  const enlace = `${typeof window !== "undefined" ? window.location.origin : "https://crm.mallorcanativaproperties.com"}/encargo?token=${f.token_firma}`;
-                  const waFallback = `https://wa.me/${(f.telefono || "").replace(/\D/g, "")}?text=${encodeURIComponent(`Estimado/a ${f.nombre || "Propietario"},\n\nLe enviamos el Encargo de Venta de Nativa Properties para que lo revise y firme desde su móvil:\n\n${enlace}\n\nNativa Properties — 655 88 26 82`)}`;
-                  return (
-                  <div key={f.id} style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" }}>
-                    <span style={{ fontSize: 10, color: f.estado === "firmado" ? "var(--success)" : f.estado === "otp_enviado" ? "var(--amber)" : "var(--muted)" }}>
-                      {f.nombre || `Prop. ${i+1}`} {f.estado === "firmado" ? "✓" : f.estado === "otp_enviado" ? "⏳" : "○"}
-                    </span>
-                    {/* Botón copiar enlace */}
-                    <button onClick={() => { navigator.clipboard.writeText(enlace); setCopied(f.token_firma); setTimeout(() => setCopied(null), 2000); }}
-                      style={{ padding: "4px 10px", background: "none", border: `1px solid ${BORDER}`, color: copied === f.token_firma ? "var(--success)" : "var(--muted)", fontSize: 10, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>
-                      {copied === f.token_firma ? "✓ Copiado" : "📋 Enlace"}
-                    </button>
-                    {/* Botón WA: envía automáticamente, muestra enlace fallback */}
-                    {f.telefono && f.estado !== "firmado" && (
-                      <button
-                        onClick={async () => {
-                          const userLogin = localStorage.getItem("mnp_user_login") || "";
-                          const res = await fetch("/api/encargos/enviar", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json", "x-user-login": userLogin },
-                            body: JSON.stringify({ encargo_id: enc.id, firmante_id: f.id }),
-                          });
-                          const data = await res.json();
-                          if (data.ok) {
-                            alert(`✅ WhatsApp enviado a ${f.nombre || f.telefono}`);
-                          } else {
-                            // Si falla, abrir wa.me como fallback
-                            alert(`⚠️ Error al enviar automáticamente: ${data.error}\n\nSe abrirá WhatsApp manualmente.`);
-                            window.open(waFallback, "_blank");
-                          }
-                        }}
-                        style={{ padding: "4px 10px", background: "#25D366", border: "none", color: "#fff", fontSize: 10, cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
-                        📲 WA
-                      </button>
-                    )}
+              {/* Bloque visual firma propietarios — estilo Visitas */}
+              {(enc.encargo_firmantes || []).length > 0 && (
+                <div style={{ marginTop: 12, padding: "10px 12px", background: `${BRONZE}10`,
+                  border: `1px solid ${BRONZE}40` }}>
+                  <div style={{ fontSize: 10, color: BRONZE, fontWeight: 800,
+                    letterSpacing: "0.1em", marginBottom: 8, fontFamily: "Inter, sans-serif" }}>
+                    🔗 LINKS FIRMA PROPIETARIO{enc.encargo_firmantes.length > 1 ? "S" : ""}
                   </div>
-                  );
-                })}
-                {(!enc.encargo_firmantes || enc.encargo_firmantes.length === 0) && enc.prop1_tel && (
+                  {enc.encargo_firmantes.map((f, i) => {
+                    const enlace = `${typeof window !== "undefined" ? window.location.origin : "https://crm.mallorcanativaproperties.com"}/encargo?token=${f.token_firma}`;
+                    const waFallback = `https://wa.me/${(f.telefono || "").replace(/\D/g, "")}?text=${encodeURIComponent(`Estimado/a ${f.nombre || "Propietario"},\n\nLe enviamos el Encargo de Venta de Nativa Properties para que lo revise y firme desde su móvil:\n\n${enlace}\n\nNativa Properties — 655 88 26 82`)}`;
+                    return (
+                      <div key={f.id} style={{ marginBottom: 10 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+                          <span style={{ fontSize: 13 }}>{f.estado === "firmado" ? "✅" : f.estado === "otp_enviado" ? "⏳" : "○"}</span>
+                          <span style={{ fontSize: 12, fontWeight: 600, color: f.estado === "firmado" ? "var(--success)" : PETROL,
+                            fontFamily: "Inter, sans-serif" }}>{f.nombre || `Propietario ${i + 1}`}</span>
+                          {f.estado === "firmado" && f.firmado_at && (
+                            <span style={{ fontSize: 10, color: "var(--muted)", fontFamily: "Inter, sans-serif" }}>
+                              firmó {new Date(f.firmado_at).toLocaleDateString("es-ES")}
+                            </span>
+                          )}
+                          {f.estado === "otp_enviado" && f.otp_codigo && (
+                            <span style={{ fontSize: 10, color: "var(--amber)", fontFamily: "Inter, sans-serif" }}>
+                              Código: <strong>{f.otp_codigo}</strong>
+                            </span>
+                          )}
+                        </div>
+                        {f.estado !== "firmado" && (
+                          <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                            <input readOnly value={enlace}
+                              style={{ flex: 1, fontSize: 10, padding: "5px 8px", border: `1px solid ${BORDER}`,
+                                color: "var(--muted)", fontFamily: "Inter, sans-serif",
+                                background: "var(--white, #fff)", cursor: "text" }} />
+                            <button onClick={() => {
+                              navigator.clipboard.writeText(enlace);
+                              setCopied(f.token_firma); setTimeout(() => setCopied(null), 2000);
+                            }} style={{ padding: "5px 10px", background: PETROL, border: "none",
+                              color: CREAM, fontSize: 11, cursor: "pointer",
+                              fontFamily: "Inter, sans-serif", whiteSpace: "nowrap" }}>
+                              {copied === f.token_firma ? "✓" : "Copiar"}
+                            </button>
+                            {f.telefono && (
+                              <button onClick={async () => {
+                                const userLogin = localStorage.getItem("mnp_user_login") || "";
+                                const res = await fetch("/api/encargos/enviar", {
+                                  method: "POST",
+                                  headers: { "Content-Type": "application/json", "x-user-login": userLogin },
+                                  body: JSON.stringify({ encargo_id: enc.id, firmante_id: f.id }),
+                                });
+                                const data = await res.json();
+                                if (data.ok) {
+                                  alert(`✅ WhatsApp enviado a ${f.nombre || f.telefono}`);
+                                } else {
+                                  alert(`⚠️ Error: ${data.error}\n\nSe abrirá WhatsApp manualmente.`);
+                                  window.open(waFallback, "_blank");
+                                }
+                              }} style={{ padding: "5px 12px", background: "#25D366", border: "none",
+                                color: "#fff", fontSize: 11, cursor: "pointer",
+                                fontFamily: "Inter, sans-serif", fontWeight: 700, whiteSpace: "nowrap" }}>
+                                📲 WA
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              {(!enc.encargo_firmantes || enc.encargo_firmantes.length === 0) && enc.prop1_tel && (
+                <div style={{ marginTop: 12 }}>
                   <a href={`https://wa.me/${enc.prop1_tel.replace(/\D/g, "")}?text=${getMsgWA(enc)}`} target="_blank" rel="noopener noreferrer"
-                    style={{ padding: "6px 14px", background: PETROL, color: CREAM, fontSize: 11, textDecoration: "none", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
-                    WhatsApp
+                    style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 14px",
+                      background: "#25D366", color: "#fff", fontSize: 12, textDecoration: "none",
+                      fontFamily: "Inter, sans-serif", fontWeight: 700 }}>
+                    📲 Enviar WhatsApp
                   </a>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         ))}
