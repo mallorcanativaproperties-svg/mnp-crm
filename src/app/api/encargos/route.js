@@ -20,6 +20,31 @@ async function checkAuth(request) {
   return !!data;
 }
 
+// Campos de texto que SÍ pueden enviarse vacíos (se guardan como "")
+const TEXT_FIELDS = new Set([
+  "tipo", "estado", "categoria", "tipo_arrendamiento", "honorarios_paga", "tipo_negocio",
+  "prop1_nombre", "prop1_dni", "prop1_tel", "prop1_email",
+  "prop2_nombre", "prop2_dni", "prop2_tel", "prop2_email",
+  "dir_propietarios", "prop_direccion", "prop_tipo", "prop_garaje", "prop_trastero",
+  "prop_ref_catastral", "prop_reg_registral", "prop_ref",
+  "consultor_nombre", "consultor_dni", "consultor_poliza", "consultor_id",
+  "clausulas_especificas", "agente", "firma_agente_nombre",
+  "token_firma", "pdf_url", "otp_codigo", "otp_email", "ip_firma",
+]);
+
+// Convierte "" → null para campos numéricos, de fecha y cualquier otro no-texto
+function sanitizePayload(obj) {
+  const result = {};
+  for (const [k, v] of Object.entries(obj)) {
+    if (v === "" && !TEXT_FIELDS.has(k)) {
+      result[k] = null;
+    } else {
+      result[k] = v;
+    }
+  }
+  return result;
+}
+
 // GET — listar encargos con firmantes
 export async function GET(request) {
   if (!await checkAuth(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -40,22 +65,12 @@ export async function POST(request) {
 
   const token = crypto.randomBytes(32).toString("hex");
   const { propietarios, ...rest } = body;
-
-  // Sanear TODOS los campos de fecha: string vacío "" → null para evitar error tipo date en Postgres
-  const DATE_FIELDS = ["fecha_contrato", "arrendamiento_fecha_inicio", "arrendamiento_vencimiento",
-    "arrendamiento_fecha_fin", "fecha_inicio", "fecha_fin", "fecha_firma", "fecha_vencimiento"];
-  for (const f of DATE_FIELDS) {
-    if (rest[f] === "" || rest[f] === undefined) rest[f] = null;
-  }
-  // Saneado genérico: cualquier string vacío en campo que contenga "fecha" → null
-  for (const [k, v] of Object.entries(rest)) {
-    if (v === "" && k.includes("fecha")) rest[k] = null;
-  }
+  const payload = sanitizePayload(rest);
 
   // Crear encargo
   const { data: encargo, error: encError } = await supabase
     .from("encargos_venta")
-    .insert({ ...rest, token_firma: token, estado: "borrador", prop1_nombre: propietarios?.[0]?.nombre || "" })
+    .insert({ ...payload, token_firma: token, estado: "borrador", prop1_nombre: propietarios?.[0]?.nombre || "" })
     .select().single();
 
   if (encError) {
@@ -91,19 +106,10 @@ export async function POST(request) {
 export async function PATCH(request) {
   if (!await checkAuth(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id, ...updates } = await request.json();
-  // Sanear TODOS los campos de fecha: string vacío "" → null
-  const DATE_FIELDS = ["fecha_contrato", "arrendamiento_fecha_inicio", "arrendamiento_vencimiento",
-    "arrendamiento_fecha_fin", "fecha_inicio", "fecha_fin", "fecha_firma", "fecha_vencimiento"];
-  for (const f of DATE_FIELDS) {
-    if (updates[f] === "" || updates[f] === undefined) updates[f] = null;
-  }
-  // Saneado genérico: cualquier string vacío en campo que contenga "fecha" → null
-  for (const [k, v] of Object.entries(updates)) {
-    if (v === "" && k.includes("fecha")) updates[k] = null;
-  }
+  const payload = sanitizePayload(updates);
   const { data, error } = await getSupabase()
     .from("encargos_venta")
-    .update({ ...updates, updated_at: new Date().toISOString() })
+    .update({ ...payload, updated_at: new Date().toISOString() })
     .eq("id", id).select().single();
   if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true, data });
