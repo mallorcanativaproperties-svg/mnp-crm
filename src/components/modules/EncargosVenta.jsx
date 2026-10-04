@@ -200,7 +200,7 @@ export default function EncargosVenta() {
   }
 
   async function loadProps() {
-    const { data, error } = await supabase.from("propiedades").select("id, ref, dir, num, municipio, tipo, precio_venta, precio_alquiler, precio_prop, honorarios, honorarios_tipo, iva_hon, ref_cat, trastero, parking, n_plazas").order("created_at", { ascending: false }).limit(100);
+    const { data, error } = await supabase.from("propiedades").select("id, ref, dir, num, municipio, tipo, precio_venta, precio_alquiler, precio_prop, honorarios, honorarios_tipo, iva_hon, ref_cat, trastero, parking, n_plazas, propietarios").order("created_at", { ascending: false }).limit(100);
     console.log("Propiedades cargadas:", data?.length, "error:", error?.message);
     setPropiedades(data || []);
   }
@@ -215,7 +215,7 @@ export default function EncargosVenta() {
     if (!prop) {
       const { data } = await supabase
         .from("propiedades")
-        .select("id,ref,dir,num,municipio,tipo,precio_venta,precio_alquiler,precio_prop,honorarios,honorarios_tipo,iva_hon,ref_cat,trastero,parking,n_plazas")
+        .select("id,ref,dir,num,municipio,tipo,precio_venta,precio_alquiler,precio_prop,honorarios,honorarios_tipo,iva_hon,ref_cat,trastero,parking,n_plazas,propietarios")
         .eq("id", propId)
         .single();
       prop = data;
