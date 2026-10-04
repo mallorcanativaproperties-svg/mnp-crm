@@ -41,10 +41,15 @@ export async function POST(request) {
   const token = crypto.randomBytes(32).toString("hex");
   const { propietarios, ...rest } = body;
 
-  // Sanear campos de fecha: string vacío "" → null para evitar error de tipo en Postgres
-  const DATE_FIELDS = ["fecha_contrato", "arrendamiento_fecha_inicio", "arrendamiento_vencimiento"];
+  // Sanear TODOS los campos de fecha: string vacío "" → null para evitar error tipo date en Postgres
+  const DATE_FIELDS = ["fecha_contrato", "arrendamiento_fecha_inicio", "arrendamiento_vencimiento",
+    "arrendamiento_fecha_fin", "fecha_inicio", "fecha_fin", "fecha_firma", "fecha_vencimiento"];
   for (const f of DATE_FIELDS) {
     if (rest[f] === "" || rest[f] === undefined) rest[f] = null;
+  }
+  // Saneado genérico: cualquier string vacío en campo que contenga "fecha" → null
+  for (const [k, v] of Object.entries(rest)) {
+    if (v === "" && k.includes("fecha")) rest[k] = null;
   }
 
   // Crear encargo
@@ -86,10 +91,15 @@ export async function POST(request) {
 export async function PATCH(request) {
   if (!await checkAuth(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id, ...updates } = await request.json();
-  // Sanear campos de fecha: string vacío "" → null
-  const DATE_FIELDS = ["fecha_contrato", "arrendamiento_fecha_inicio", "arrendamiento_vencimiento"];
+  // Sanear TODOS los campos de fecha: string vacío "" → null
+  const DATE_FIELDS = ["fecha_contrato", "arrendamiento_fecha_inicio", "arrendamiento_vencimiento",
+    "arrendamiento_fecha_fin", "fecha_inicio", "fecha_fin", "fecha_firma", "fecha_vencimiento"];
   for (const f of DATE_FIELDS) {
     if (updates[f] === "" || updates[f] === undefined) updates[f] = null;
+  }
+  // Saneado genérico: cualquier string vacío en campo que contenga "fecha" → null
+  for (const [k, v] of Object.entries(updates)) {
+    if (v === "" && k.includes("fecha")) updates[k] = null;
   }
   const { data, error } = await getSupabase()
     .from("encargos_venta")
