@@ -258,12 +258,12 @@ export async function POST(request) {
 
   // Enviar WhatsApp a todos los firmantes con PDF listo
   const BASE_URL = "https://crm.mallorcanativaproperties.com";
-  const tipoLabel = enc.categoria === "arrendamiento" ? "Encargo de Arrendamiento"
+  const tipoLabelWA = enc.categoria === "arrendamiento" ? "Encargo de Arrendamiento"
     : enc.categoria === "traspaso" ? "Encargo de Traspaso"
     : "Encargo de Venta";
   for (const f of firmantes) {
     if (!f.telefono) continue;
-    const waMsg = `Estimado/a ${f.nombre || "Propietario"},\n\nEl *${tipoLabel}* de Nativa Properties ha sido firmado por todas las partes. Puede descargar el documento firmado aquí:\n\n🔗 ${pdfUrl}\n\nGracias por su confianza.\n\n_Nativa Properties — 655 88 26 82_`;
+    const waMsg = `Estimado/a ${f.nombre || "Propietario"},\n\nEl *${tipoLabelWA}* de Nativa Properties ha sido firmado por todas las partes. Puede descargar el documento firmado aquí:\n\n🔗 ${pdfUrl}\n\nGracias por su confianza.\n\n_Nativa Properties — 655 88 26 82_`;
     try { await sendWhatsApp(f.telefono, waMsg); await logMensajeWA(supabase, f.telefono, waMsg, "sistema"); } catch(e) { console.error("WA pdf error", e.message); }
   }
 
