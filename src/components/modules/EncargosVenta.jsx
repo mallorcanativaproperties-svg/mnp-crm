@@ -590,30 +590,45 @@ export default function EncargosVenta() {
                 )}
               </div>
               <div style={{ display: "flex", gap: 8, flexShrink: 0, flexWrap: "wrap", justifyContent: "flex-end", flexDirection: "column", alignItems: "flex-end" }}>
-                {(enc.encargo_firmantes || []).map((f, i) => (
-                  <div key={f.id} style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                {(enc.encargo_firmantes || []).map((f, i) => {
+                  const enlace = `${typeof window !== "undefined" ? window.location.origin : "https://crm.mallorcanativaproperties.com"}/encargo?token=${f.token_firma}`;
+                  const waFallback = `https://wa.me/${(f.telefono || "").replace(/\D/g, "")}?text=${encodeURIComponent(`Estimado/a ${f.nombre || "Propietario"},\n\nLe enviamos el Encargo de Venta de Nativa Properties para que lo revise y firme desde su móvil:\n\n${enlace}\n\nNativa Properties — 655 88 26 82`)}`;
+                  return (
+                  <div key={f.id} style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" }}>
                     <span style={{ fontSize: 10, color: f.estado === "firmado" ? "var(--success)" : f.estado === "otp_enviado" ? "var(--amber)" : "var(--muted)" }}>
                       {f.nombre || `Prop. ${i+1}`} {f.estado === "firmado" ? "✓" : f.estado === "otp_enviado" ? "⏳" : "○"}
                     </span>
-                    <button onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/encargo?token=${f.token_firma}`); setCopied(f.token_firma); setTimeout(() => setCopied(null), 2000); }}
+                    {/* Botón copiar enlace */}
+                    <button onClick={() => { navigator.clipboard.writeText(enlace); setCopied(f.token_firma); setTimeout(() => setCopied(null), 2000); }}
                       style={{ padding: "4px 10px", background: "none", border: `1px solid ${BORDER}`, color: copied === f.token_firma ? "var(--success)" : "var(--muted)", fontSize: 10, cursor: "pointer", fontFamily: "Inter, sans-serif" }}>
-                      {copied === f.token_firma ? "✓" : "Enlace"}
+                      {copied === f.token_firma ? "✓ Copiado" : "📋 Enlace"}
                     </button>
-                    {f.telefono && (
-                      <a href={`https://wa.me/${f.telefono.replace(/\D/g, "")}?text=${encodeURIComponent(`Hola ${f.nombre || ""},
-
-Te enviamos el encargo de gestión de Nativa Properties para que lo revises y firmes desde tu móvil:
-
-https://${typeof window !== "undefined" ? window.location.host : "crm.mallorcanativaproperties.com"}/encargo?token=${f.token_firma}
-
-Gracias.`)}`}
-                        target="_blank" rel="noopener noreferrer"
-                        style={{ padding: "4px 10px", background: PETROL, color: CREAM, fontSize: 10, textDecoration: "none", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
-                        WA
-                      </a>
+                    {/* Botón WA: envía automáticamente, muestra enlace fallback */}
+                    {f.telefono && f.estado !== "firmado" && (
+                      <button
+                        onClick={async () => {
+                          const userLogin = localStorage.getItem("mnp_user_login") || "";
+                          const res = await fetch("/api/encargos/enviar", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json", "x-user-login": userLogin },
+                            body: JSON.stringify({ encargo_id: enc.id, firmante_id: f.id }),
+                          });
+                          const data = await res.json();
+                          if (data.ok) {
+                            alert(`✅ WhatsApp enviado a ${f.nombre || f.telefono}`);
+                          } else {
+                            // Si falla, abrir wa.me como fallback
+                            alert(`⚠️ Error al enviar automáticamente: ${data.error}\n\nSe abrirá WhatsApp manualmente.`);
+                            window.open(waFallback, "_blank");
+                          }
+                        }}
+                        style={{ padding: "4px 10px", background: "#25D366", border: "none", color: "#fff", fontSize: 10, cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
+                        📲 WA
+                      </button>
                     )}
                   </div>
-                ))}
+                  );
+                })}
                 {(!enc.encargo_firmantes || enc.encargo_firmantes.length === 0) && enc.prop1_tel && (
                   <a href={`https://wa.me/${enc.prop1_tel.replace(/\D/g, "")}?text=${getMsgWA(enc)}`} target="_blank" rel="noopener noreferrer"
                     style={{ padding: "6px 14px", background: PETROL, color: CREAM, fontSize: 11, textDecoration: "none", fontFamily: "Inter, sans-serif", fontWeight: 600 }}>
