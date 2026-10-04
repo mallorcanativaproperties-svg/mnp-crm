@@ -863,13 +863,42 @@ function Detail({ b, onClose, onSave, onDelete, onWhatsApp, currentUser, puedeEl
   const [tab, setTab] = useState("ficha"); // "ficha" | "historial"
   const [historial, setHistorial] = useState([]);
   const [loadingHistorial, setLoadingHistorial] = useState(false);
+  const [visitas, setVisitas] = useState([]);
 
   async function cargarHistorial() {
     if (!puedeVerHistorial) return;
     setLoadingHistorial(true);
-    const { data } = await supabase.from("compradores_historial")
-      .select("*").eq("comprador_id", b.id).order("created_at", { ascending: false }).limit(50);
-    if (data) setHistorial(data);
+    const [{ data: h }, { data: vc }] = await Promise.all([
+      supabase.from("compradores_historial")
+        .select("*").eq("comprador_id", b.id).order("created_at", { ascending: false }).limit(50),
+      supabase.from("visita_compradores")
+        .select("visita_id, visitas(id, created_at, propiedad_id, propiedades(dir, municipio))")
+        .eq("comprador_id", b.id),
+    ]);
+    if (h) setHistorial(h);
+    if (vc && vc.length > 0) {
+      // Cargar documentos de cada visita
+      const visitaIds = vc.map(r => r.visita_id).filter(Boolean);
+      const { data: docsData } = await supabase.from("visita_documentos")
+        .select("id, visita_id, tipo, estado, created_at")
+        .in("visita_id", visitaIds)
+        .order("created_at", { ascending: false });
+      // Aplanar: una fila por documento
+      const docs = [];
+      vc.forEach(row => {
+        const visita = row.visitas;
+        if (!visita) return;
+        const prop = visita.propiedades;
+        const docsVisita = (docsData || []).filter(d => d.visita_id === visita.id);
+        if (docsVisita.length === 0) {
+          docs.push({ visita_id: visita.id, fecha: visita.created_at, prop, tipo: null, estado: null, doc_id: null });
+        } else {
+          docsVisita.forEach(d => docs.push({ visita_id: visita.id, fecha: d.created_at, prop, tipo: d.tipo, estado: d.estado, doc_id: d.id }));
+        }
+      });
+      docs.sort((a, bx) => new Date(bx.fecha) - new Date(a.fecha));
+      setVisitas(docs);
+    }
     setLoadingHistorial(false);
   }
   const s = score(b);
@@ -910,27 +939,55 @@ function Detail({ b, onClose, onSave, onDelete, onWhatsApp, currentUser, puedeEl
       {tab === "historial" && (
         /* ─── PESTAÑA HISTORIAL ─── */
         <div>
-          {loadingHistorial ? <div style={{ textAlign: "center", padding: 40, color: "var(--muted)", fontSize: 13 }}>Cargando historial...</div> :
-           historial.length === 0 ? <div style={{ textAlign: "center", padding: 40, color: "var(--muted)", fontSize: 13, fontStyle: "italic" }}>Sin cambios registrados aún</div> :
-           <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-             {historial.map((h, i) => (
-               <div key={h.id} style={{ padding: "12px 0", borderBottom: "1px solid var(--border)", display: "grid", gridTemplateColumns: "120px 1fr 1fr", gap: 12, alignItems: "start" }}>
-                 <div>
-                   <div style={{ fontSize: 10, color: "var(--gold)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600 }}>{h.campo}</div>
-                   <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 2 }}>{new Date(h.created_at).toLocaleDateString("es-ES", { day:"2-digit", month:"short", year:"2-digit", hour:"2-digit", minute:"2-digit" })}</div>
-                   <div style={{ fontSize: 10, color: "var(--muted)" }}>por {h.usuario}</div>
-                 </div>
-                 <div>
-                   <div style={{ fontSize: 9, color: "var(--muted)", textTransform: "uppercase", marginBottom: 2 }}>Antes</div>
-                   <div style={{ fontSize: 12, color: "var(--danger)", background: "#FFF5F5", padding: "4px 8px" }}>{h.valor_anterior || "—"}</div>
-                 </div>
-                 <div>
-                   <div style={{ fontSize: 9, color: "var(--muted)", textTransform: "uppercase", marginBottom: 2 }}>Después</div>
-                   <div style={{ fontSize: 12, color: "var(--success)", background: "#F5FFF8", padding: "4px 8px" }}>{h.valor_nuevo || "—"}</div>
-                 </div>
-               </div>
-             ))}
-           </div>}
+          {loadingHistorial ? <div style={{ textAlign: "center", padding: 40, color: "var(--muted)", fontSize: 13 }}>Cargando historial...</div> : <>
+            {/* ─── Visitas y documentos ─── */}
+            {visitas.length > 0 && <div style={{ marginBottom: 28 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: "var(--gold)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 12, paddingBottom: 6, borderBottom: "1px solid var(--border)" }}>Visitas y documentos</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+                {visitas.map((v, i) => {
+                  const TIPOS = { hoja_visita: "Hoja de visita", oferta: "Propuesta de compra", reserva: "Reserva exclusiva", contraoferta: "Contraoferta" };
+                  const ESTADOS_COLOR = { borrador: "#888", enviado: "#D4A017", firmado_comprador: "#2563EB", deposito_recibido: "#7C3AED", firmado_vendedor: "#059669", completado: "#16a34a" };
+                  const ESTADOS_LABEL = { borrador: "Borrador", enviado: "Enviado", firmado_comprador: "Comprador firmó", deposito_recibido: "Depósito recibido", firmado_vendedor: "Vendedor firmó", completado: "Completado" };
+                  const dir = v.prop ? [v.prop.dir, v.prop.municipio].filter(Boolean).join(", ") : "Propiedad sin datos";
+                  return <div key={v.doc_id || v.visita_id + i} style={{ padding: "10px 0", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{ fontSize: 18 }}>{v.tipo === "reserva" ? "🔑" : v.tipo === "oferta" ? "📋" : v.tipo === "hoja_visita" ? "🏠" : v.tipo === "contraoferta" ? "🔄" : "📁"}</div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text)" }}>{v.tipo ? TIPOS[v.tipo] || v.tipo : "Visita"}</div>
+                      <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 2 }}>{dir}</div>
+                    </div>
+                    <div style={{ textAlign: "right" }}>
+                      {v.estado && <div style={{ fontSize: 10, fontWeight: 700, color: ESTADOS_COLOR[v.estado] || "#888", textTransform: "uppercase", letterSpacing: "0.08em" }}>{ESTADOS_LABEL[v.estado] || v.estado}</div>}
+                      <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 2 }}>{new Date(v.fecha).toLocaleDateString("es-ES", { day:"2-digit", month:"short", year:"2-digit" })}</div>
+                    </div>
+                  </div>;
+                })}
+              </div>
+            </div>}
+            {/* ─── Cambios de datos ─── */}
+            {historial.length > 0 && <div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: "var(--gold)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 12, paddingBottom: 6, borderBottom: "1px solid var(--border)" }}>Cambios en ficha</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+                {historial.map((h, i) => (
+                  <div key={h.id} style={{ padding: "12px 0", borderBottom: "1px solid var(--border)", display: "grid", gridTemplateColumns: "120px 1fr 1fr", gap: 12, alignItems: "start" }}>
+                    <div>
+                      <div style={{ fontSize: 10, color: "var(--gold)", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 600 }}>{h.campo}</div>
+                      <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 2 }}>{new Date(h.created_at).toLocaleDateString("es-ES", { day:"2-digit", month:"short", year:"2-digit", hour:"2-digit", minute:"2-digit" })}</div>
+                      <div style={{ fontSize: 10, color: "var(--muted)" }}>por {h.usuario}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 9, color: "var(--muted)", textTransform: "uppercase", marginBottom: 2 }}>Antes</div>
+                      <div style={{ fontSize: 12, color: "var(--danger)", background: "#FFF5F5", padding: "4px 8px" }}>{h.valor_anterior || "—"}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 9, color: "var(--muted)", textTransform: "uppercase", marginBottom: 2 }}>Después</div>
+                      <div style={{ fontSize: 12, color: "var(--success)", background: "#F5FFF8", padding: "4px 8px" }}>{h.valor_nuevo || "—"}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>}
+            {visitas.length === 0 && historial.length === 0 && <div style={{ textAlign: "center", padding: 40, color: "var(--muted)", fontSize: 13, fontStyle: "italic" }}>Sin actividad registrada aún</div>}
+          </>}
         </div>
       )}
       {/* ─── PESTAÑA FICHA ─── */}
