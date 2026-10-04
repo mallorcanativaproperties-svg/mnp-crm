@@ -41,6 +41,12 @@ export async function POST(request) {
   const token = crypto.randomBytes(32).toString("hex");
   const { propietarios, ...rest } = body;
 
+  // Sanear campos de fecha: string vacío "" → null para evitar error de tipo en Postgres
+  const DATE_FIELDS = ["fecha_contrato", "arrendamiento_fecha_inicio", "arrendamiento_vencimiento"];
+  for (const f of DATE_FIELDS) {
+    if (rest[f] === "" || rest[f] === undefined) rest[f] = null;
+  }
+
   // Crear encargo
   const { data: encargo, error: encError } = await supabase
     .from("encargos_venta")
@@ -80,6 +86,11 @@ export async function POST(request) {
 export async function PATCH(request) {
   if (!await checkAuth(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id, ...updates } = await request.json();
+  // Sanear campos de fecha: string vacío "" → null
+  const DATE_FIELDS = ["fecha_contrato", "arrendamiento_fecha_inicio", "arrendamiento_vencimiento"];
+  for (const f of DATE_FIELDS) {
+    if (updates[f] === "" || updates[f] === undefined) updates[f] = null;
+  }
   const { data, error } = await getSupabase()
     .from("encargos_venta")
     .update({ ...updates, updated_at: new Date().toISOString() })
