@@ -11,7 +11,18 @@ import { PlusIcon, PencilSquareIcon, TrashIcon, LinkIcon, EnvelopeIcon, Document
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 
-const BRONZE = "var(--gold)", PETROL = "#1a2528", CREAM = "var(--cream)", BORDER = "var(--border)";
+const GOLD   = "var(--gold)";
+const GOLD_L = "var(--gold-l)";
+const CREAM  = "var(--cream)";
+const WHITE  = "var(--white)";
+const DARK   = "#1a2528";
+const TEXT   = "var(--text)";
+const MUTED  = "var(--muted)";
+const BORDER = "var(--border)";
+const SUCCESS = "var(--success)";
+// Aliases para compatibilidad con código existente
+const BRONZE = GOLD;
+const PETROL = DARK;
 const ESTADO_COLOR = { borrador: "var(--muted)", enviado: "#405c6b", firmado_propietario: "var(--amber)", completado: "var(--success)" };
 const ESTADO_LABEL = { borrador: "Borrador", enviado: "Enviado", firmado_propietario: "Firmado por propietario", completado: "Completado" };
 
@@ -123,7 +134,7 @@ function FirmaAgenteModal({ encargo, onClose, onComplete }) {
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 1100, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }} onClick={onClose}>
-      <div style={{ background: "var(--cream)", width: "100%", maxWidth: 520 }} onClick={e => e.stopPropagation()}>
+      <div style={{ background: "var(--cream)", width: "100%", maxWidth: 520, margin: "16px" }} onClick={e => e.stopPropagation()}>
         <div style={{ background: "#1a2528", padding: "18px 24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
             <div style={{ fontSize: 9, color: "var(--gold)", letterSpacing: "0.2em", marginBottom: 4 }}>FIRMA DEL AGENTE</div>
@@ -329,7 +340,7 @@ export default function EncargosVenta() {
   });
 
   return (
-    <div style={{ fontFamily: "Inter, sans-serif", background: CREAM, minHeight: "100vh", padding: "clamp(20px,4vw,40px) clamp(16px,3vw,32px)" }}>
+    <div style={{ fontFamily: "Inter, sans-serif", background: CREAM, minHeight: "100vh", padding: "clamp(12px,3vw,40px) clamp(12px,3vw,32px)" }}>
       <div style={{ maxWidth: 900, margin: "0 auto" }}>
 
         {/* Header */}
@@ -338,7 +349,7 @@ export default function EncargosVenta() {
             <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 34, lineHeight: 1.15, color: "#A8854A", margin: "0 0 10px 0", letterSpacing: "-0.01em" }}>Encargos de Venta</h1>
             <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "0 0 20px 0", lineHeight: 1.5, fontWeight: 400 }}>Control y seguimiento de los encargos de venta en cartera</p>
             <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginBottom: 28 }} /><button onClick={() => { setShowForm(true); loadCurrentUser(); }}
-              style={{ padding: "10px 24px", background: PETROL, border: "none", color: CREAM, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.14em", borderRadius: 0 }}>
+              style={{ padding: "10px 20px", background: PETROL, border: "none", color: CREAM, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: "Inter, sans-serif", letterSpacing: "0.14em", borderRadius: 0, whiteSpace: "nowrap" }}>
               + Nuevo encargo
             </button>
           </div>
@@ -352,7 +363,7 @@ export default function EncargosVenta() {
               if (form.propietarios[0]?.nombre && !confirm("¿Cerrar sin guardar? Se perderán los datos introducidos.")) return;
               setShowForm(false);
             }}>
-            <div style={{ background: CREAM, width: "100%", maxWidth: 720 }} onClick={e => e.stopPropagation()}>
+            <div style={{ background: CREAM, width: "100%", maxWidth: 720, margin: "16px" }} onClick={e => e.stopPropagation()}>
 
               <div style={{ background: PETROL, padding: "20px 24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
@@ -532,8 +543,8 @@ export default function EncargosVenta() {
             <div style={{ fontSize: 13, color: "var(--muted)" }}>No hay encargos de venta. Pulsa "+ Nuevo encargo" para crear el primero.</div>
           </div>
         ) : encargos.map(enc => (
-          <div key={enc.id} style={{ background: "#fff", border: `1px solid ${BORDER}`, borderLeft: `3px solid ${ESTADO_COLOR[enc.estado] || "var(--muted)"}`, marginBottom: 10, padding: "16px 20px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, flexWrap: "wrap" }}>
+          <div key={enc.id} style={{ background: "#fff", border: `1px solid ${BORDER}`, borderLeft: `3px solid ${ESTADO_COLOR[enc.estado] || "var(--muted)"}`, marginBottom: 10, padding: "14px 16px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6, flexWrap: "wrap" }}>
                   <span style={{ fontSize: 10, padding: "2px 8px", background: `${BRONZE}11`, color: BRONZE, letterSpacing: "0.06em" }}>
@@ -572,10 +583,11 @@ export default function EncargosVenta() {
                 {/* Firma agente — estilo Visitas */}
                 {enc.firma_propietario_fecha && !enc.todos_firmado && !enc.firma_agente_data && (
                   <button onClick={e => { e.stopPropagation(); setFirmaAgenteModal(enc); }}
-                    style={{ marginTop: 10, padding: "12px 16px", background: BRONZE, border: "none",
-                      color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer",
+                    style={{ marginTop: 10, padding: "14px 16px", background: GOLD, border: "none",
+                      color: WHITE, fontSize: 13, fontWeight: 700, cursor: "pointer",
                       fontFamily: "Inter, sans-serif", display: "flex", alignItems: "center",
-                      justifyContent: "center", gap: 8, width: "100%", boxSizing: "border-box" }}>
+                      justifyContent: "center", gap: 8, width: "100%", boxSizing: "border-box",
+                      letterSpacing: "0.02em", borderRadius: 0 }}>
                     ✍️ Firmar como agente y generar PDF
                   </button>
                 )}
@@ -587,15 +599,16 @@ export default function EncargosVenta() {
                   </div>
                 )}
                 {enc.todos_firmado && enc.pdf_url && (
-                  <div style={{ marginTop: 10, padding: "10px 14px", background: "rgba(0,0,0,0.04)",
-                    border: `1px solid ${BRONZE}40`, display: "flex", alignItems: "center", gap: 10,
-                    fontFamily: "Inter, sans-serif" }}>
-                    <span style={{ fontSize: 13, color: "var(--success)", fontWeight: 700, flex: 1 }}>
+                  <div style={{ marginTop: 10, padding: "12px 14px", background: `${GOLD}08`,
+                    border: `1px solid ${GOLD}40`, display: "flex", alignItems: "center",
+                    gap: 10, fontFamily: "Inter, sans-serif", flexWrap: "wrap" }}>
+                    <span style={{ fontSize: 13, color: SUCCESS, fontWeight: 700, flex: 1, minWidth: 120 }}>
                       ✅ Encargo completado y firmado
                     </span>
                     <a href={enc.pdf_url} target="_blank" rel="noopener noreferrer"
-                      style={{ fontSize: 12, color: BRONZE, fontWeight: 600, textDecoration: "none",
-                        padding: "5px 12px", border: `1px solid ${BRONZE}60` }}>
+                      style={{ fontSize: 12, color: GOLD, fontWeight: 700, textDecoration: "none",
+                        padding: "7px 14px", border: `1px solid ${GOLD}60`, borderRadius: 0,
+                        background: WHITE, whiteSpace: "nowrap" }}>
                       ↓ Descargar PDF
                     </a>
                   </div>
@@ -606,25 +619,29 @@ export default function EncargosVenta() {
                   </div>
                 )}
               </div>
-              {/* Bloque visual firma propietarios — estilo Visitas */}
+              {/* Bloque firmantes — idéntico a Visitas + WA responsive */}
               {(enc.encargo_firmantes || []).length > 0 && (
-                <div style={{ marginTop: 12, padding: "10px 12px", background: `${BRONZE}10`,
-                  border: `1px solid ${BRONZE}40` }}>
-                  <div style={{ fontSize: 10, color: BRONZE, fontWeight: 800,
+                <div style={{ marginTop: 12, padding: "10px 12px", background: `${GOLD}10`,
+                  border: `1px solid ${GOLD}40` }}>
+                  <div style={{ fontSize: 10, color: GOLD, fontWeight: 800,
                     letterSpacing: "0.1em", marginBottom: 8, fontFamily: "Inter, sans-serif" }}>
                     🔗 LINKS FIRMA PROPIETARIO{enc.encargo_firmantes.length > 1 ? "S" : ""}
                   </div>
                   {enc.encargo_firmantes.map((f, i) => {
-                    const enlace = `${typeof window !== "undefined" ? window.location.origin : "https://crm.mallorcanativaproperties.com"}/encargo?token=${f.token_firma}`;
-                    const waFallback = `https://wa.me/${(f.telefono || "").replace(/\D/g, "")}?text=${encodeURIComponent(`Estimado/a ${f.nombre || "Propietario"},\n\nLe enviamos el Encargo de Venta de Nativa Properties para que lo revise y firme desde su móvil:\n\n${enlace}\n\nNativa Properties — 655 88 26 82`)}`;
+                    const enlace = `https://crm.mallorcanativaproperties.com/encargo?token=${f.token_firma}`;
+                    const tipoEnc = enc.categoria === "arrendamiento" ? "Encargo de Arrendamiento"
+                      : enc.categoria === "traspaso" ? "Encargo de Traspaso" : "Encargo de Venta";
+                    const waMsgFirma = `Estimado/a ${f.nombre || "Propietario"},\n\nLe enviamos el ${tipoEnc} de Nativa Properties para que lo revise y firme desde su móvil:\n\n${enlace}\n\nNativa Properties — 655 88 26 82`;
+                    const waFallback = `https://wa.me/${(f.telefono || "").replace(/\D/g, "")}?text=${encodeURIComponent(waMsgFirma)}`;
                     return (
-                      <div key={f.id} style={{ marginBottom: 10 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                          <span style={{ fontSize: 13 }}>{f.estado === "firmado" ? "✅" : f.estado === "otp_enviado" ? "⏳" : "○"}</span>
-                          <span style={{ fontSize: 12, fontWeight: 600, color: f.estado === "firmado" ? "var(--success)" : PETROL,
+                      <div key={f.id} style={{ marginBottom: 8 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
+                          <span style={{ fontSize: 13 }}>{f.estado === "firmado" ? "✅" : "⏳"}</span>
+                          <span style={{ fontSize: 12, fontWeight: 600,
+                            color: f.estado === "firmado" ? SUCCESS : TEXT,
                             fontFamily: "Inter, sans-serif" }}>{f.nombre || `Propietario ${i + 1}`}</span>
                           {f.estado === "firmado" && f.firmado_at && (
-                            <span style={{ fontSize: 10, color: "var(--muted)", fontFamily: "Inter, sans-serif" }}>
+                            <span style={{ fontSize: 10, color: MUTED, fontFamily: "Inter, sans-serif" }}>
                               firmó {new Date(f.firmado_at).toLocaleDateString("es-ES")}
                             </span>
                           )}
@@ -635,36 +652,39 @@ export default function EncargosVenta() {
                           )}
                         </div>
                         {f.estado !== "firmado" && (
-                          <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                          <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
                             <input readOnly value={enlace}
-                              style={{ flex: 1, fontSize: 10, padding: "5px 8px", border: `1px solid ${BORDER}`,
-                                color: "var(--muted)", fontFamily: "Inter, sans-serif",
-                                background: "var(--white, #fff)", cursor: "text" }} />
+                              style={{ flex: 1, minWidth: 0, fontSize: 10, padding: "7px 8px",
+                                border: `1px solid ${BORDER}`, borderRadius: 0, color: MUTED,
+                                fontFamily: "Inter, sans-serif", background: WHITE, cursor: "text" }} />
                             <button onClick={() => {
                               navigator.clipboard.writeText(enlace);
-                              setCopied(f.token_firma); setTimeout(() => setCopied(null), 2000);
-                            }} style={{ padding: "5px 10px", background: PETROL, border: "none",
-                              color: CREAM, fontSize: 11, cursor: "pointer",
-                              fontFamily: "Inter, sans-serif", whiteSpace: "nowrap" }}>
-                              {copied === f.token_firma ? "✓" : "Copiar"}
+                              alert("✅ Link copiado");
+                            }} style={{ padding: "7px 12px", background: GOLD, border: "none",
+                              color: WHITE, borderRadius: 0, fontSize: 12, cursor: "pointer",
+                              fontFamily: "Inter, sans-serif", whiteSpace: "nowrap", fontWeight: 600 }}>
+                              Copiar
                             </button>
                             {f.telefono && (
                               <button onClick={async () => {
-                                const userLogin = localStorage.getItem("mnp_user_login") || "";
-                                const res = await fetch("/api/encargos/enviar", {
-                                  method: "POST",
-                                  headers: { "Content-Type": "application/json", "x-user-login": userLogin },
-                                  body: JSON.stringify({ encargo_id: enc.id, firmante_id: f.id }),
-                                });
-                                const data = await res.json();
-                                if (data.ok) {
-                                  alert(`✅ WhatsApp enviado a ${f.nombre || f.telefono}`);
-                                } else {
-                                  alert(`⚠️ Error: ${data.error}\n\nSe abrirá WhatsApp manualmente.`);
+                                const userLogin = (typeof localStorage !== "undefined" && localStorage.getItem("mnp_user_login")) || "";
+                                try {
+                                  const res = await fetch("/api/encargos/enviar", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json", "x-user-login": userLogin },
+                                    body: JSON.stringify({ encargo_id: enc.id, firmante_id: f.id }),
+                                  });
+                                  const data = await res.json();
+                                  if (data.ok) {
+                                    alert(`✅ WhatsApp enviado a ${f.nombre || f.telefono}`);
+                                  } else {
+                                    window.open(waFallback, "_blank");
+                                  }
+                                } catch {
                                   window.open(waFallback, "_blank");
                                 }
-                              }} style={{ padding: "5px 12px", background: "#25D366", border: "none",
-                                color: "#fff", fontSize: 11, cursor: "pointer",
+                              }} style={{ padding: "7px 12px", background: "#25D366", border: "none",
+                                color: "#fff", borderRadius: 0, fontSize: 12, cursor: "pointer",
                                 fontFamily: "Inter, sans-serif", fontWeight: 700, whiteSpace: "nowrap" }}>
                                 📲 WA
                               </button>
