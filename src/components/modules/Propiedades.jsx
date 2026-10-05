@@ -3656,8 +3656,10 @@ REGLAS:
                     .select('id, fecha_visita, visita_compradores(orden, compradores(id,nombre,apellidos,dni,telefono,email,pais)), visita_documentos(tipo,estado,precio_oferta)')
                     .eq('propiedad_id', p.id).eq('activo', true)
                     .then(({ data, error }) => {
+                      console.log('[ARRAS DEBUG] data:', JSON.stringify(data), 'error:', error);
                       if (error || !data) return;
                       const candidatas = data.filter(v => v.visita_compradores && v.visita_compradores.length > 0);
+                      console.log('[ARRAS DEBUG] candidatas:', candidatas.length);
                       setVisitasCandidatas(candidatas);
                       // Auto-importar siempre que haya visita con reserva/oferta
                       if (candidatas.length > 0) {
