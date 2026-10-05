@@ -3662,6 +3662,33 @@ REGLAS:
                         return tieneComprador;
                       });
                       setVisitasCandidatas(candidatas);
+                      // Auto-importar la visita con reserva u oferta si los compradores están vacíos
+                      const yaRellenos = compradores.some(c => c.nombre && c.nombre.trim() !== '');
+                      if (!yaRellenos && candidatas.length > 0) {
+                        const conReserva = candidatas.find(v => {
+                          const docs = v.visita_documentos || [];
+                          return docs.some(d => ['reserva','oferta','contraoferta'].includes(d.tipo) || ['deposito_recibido','firmado_comprador','firmado_vendedor','completado'].includes(d.estado));
+                        }) || candidatas[0];
+                        if (conReserva) {
+                          const comps = conReserva.visita_compradores && conReserva.visita_compradores.length > 0
+                            ? conReserva.visita_compradores.sort((a,b) => a.orden - b.orden).map(vc => vc.compradores).filter(Boolean)
+                            : conReserva.compradores ? [conReserva.compradores] : [];
+                          if (comps.length > 0) {
+                            const nuevos = comps.map(c => ({
+                              nombre: [c.nombre, c.apellidos].filter(Boolean).join(' '),
+                              dni: c.dni || '',
+                              domicilio: '',
+                              estado_civil: '',
+                              regimen: '',
+                              iban: '',
+                              hipoteca: 'no',
+                            }));
+                            setCompradores(nuevos);
+                            setDocsCompradores(nuevos.map(() => ({ dni: null })));
+                            setVisitaSeleccionada(String(conReserva.id));
+                          }
+                        }
+                      }
                     });
                 }, []);
 
@@ -3810,6 +3837,33 @@ REGLAS:
 
                     React.createElement('div', { style: { marginTop: 24 } }),
                     secHdr('Documentos - Comprador' + (compradores.length > 1 ? 'es' : '')),
+                    visitasCandidatas.length > 0 && React.createElement('div', { style: { background: 'var(--bg)', border: '1px solid var(--amber)', padding: '10px 14px', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' } },
+                      React.createElement('span', { style: { fontSize: 11, fontWeight: 700, color: 'var(--amber)', letterSpacing: '0.1em', textTransform: 'uppercase' } }, '↓ Importar comprador/es'),
+                      React.createElement('select', {
+                        style: { ...selStyle, flex: 1, minWidth: 200, border: '1px solid var(--amber)' },
+                        value: visitaSeleccionada,
+                        onChange: function(e) { setVisitaSeleccionada(e.target.value); }
+                      },
+                        React.createElement('option', { value: '' }, '— Seleccionar visita/oferta —'),
+                        visitasCandidatas.map(function(v) {
+                          const comps = v.visita_compradores && v.visita_compradores.length > 0
+                            ? v.visita_compradores.sort(function(a,b){ return a.orden - b.orden; }).map(function(vc){ return vc.compradores; }).filter(Boolean)
+                            : v.compradores ? [v.compradores] : [];
+                          const nombres = comps.map(function(c){ return [c.nombre,c.apellidos].filter(Boolean).join(' '); }).join(', ');
+                          const docs = v.visita_documentos || [];
+                          const mejorDoc = docs.find(function(d){ return ['deposito_recibido','firmado_comprador','firmado_vendedor','completado'].includes(d.estado); })
+                            || docs.find(function(d){ return ['oferta','reserva','contraoferta'].includes(d.tipo); });
+                          const etiqueta = mejorDoc ? (mejorDoc.tipo === 'oferta' ? 'Oferta' : mejorDoc.tipo === 'reserva' ? 'Reserva' : 'Contraoferta') + ' · ' + (mejorDoc.estado === 'deposito_recibido' ? 'Depósito ✓' : mejorDoc.estado === 'firmado_comprador' ? 'Firmado' : mejorDoc.estado) : 'Doc';
+                          const fecha = new Date(v.fecha_visita).toLocaleDateString('es-ES', { day:'2-digit', month:'short', year:'numeric' });
+                          return React.createElement('option', { key: v.id, value: v.id }, fecha + ' · ' + nombres + ' (' + etiqueta + ')');
+                        })
+                      ),
+                      React.createElement('button', {
+                        onClick: function() { if (visitaSeleccionada) importarCompradoresDeVisita(visitaSeleccionada); },
+                        disabled: !visitaSeleccionada,
+                        style: { padding: '7px 14px', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'Inter, sans-serif', background: visitaSeleccionada ? 'var(--amber)' : 'var(--border)', color: visitaSeleccionada ? 'var(--white)' : 'var(--muted)', border: 'none', cursor: visitaSeleccionada ? 'pointer' : 'default' }
+                      }, 'Importar')
+                    ),
                     compradores.map(function(c, idx) { return React.createElement('div', { key: idx, style: { marginBottom: 16 } },
                       React.createElement('div', { style: { fontSize: 11, fontWeight: 700, color: 'var(--muted)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 8 } },
                         compradores.length > 1 ? ('Comprador ' + (idx+1) + (c.nombre ? ' - ' + c.nombre : '')) : (c.nombre || 'Comprador')
