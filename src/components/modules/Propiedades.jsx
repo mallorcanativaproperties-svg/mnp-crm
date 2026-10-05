@@ -3710,7 +3710,7 @@ REGLAS:
                 };
 
                 /* Documentos — estructurado por parte y por inmueble */
-                const [docsVendedores, setDocsVendedores] = React.useState([{ dni: null, poder_notarial: null }]);
+                const [docsVendedores, setDocsVendedores] = React.useState([{ dni: null, poder_notarial: null, cert_bancario: null }]);
                 const [docsCompradores, setDocsCompradores] = React.useState([{ dni: null }]);
                 const [docsInmuebles, setDocsInmuebles] = React.useState([{ nota_simple: null, catastro: null, cert_energetico: null, cedula: null, cert_bancario: null, actas_comunidad: null, cert_titularidad: null, otros: null }]);
                 const [docsExtra, setDocsExtra] = React.useState({ ibi_recibo: null, planos: null, otros_general: null });
@@ -3720,7 +3720,7 @@ REGLAS:
 
                 /* Helpers de estado arrays */
                 const updateVendedor = (idx, k, v) => setVendedores(prev => { const n = [...prev]; n[idx] = { ...n[idx], [k]: v }; return n; });
-                const addVendedor = () => { setVendedores(v => [...v, { ...VENDEDOR_VACIO }]); setDocsVendedores(d => [...d, { dni: null, poder_notarial: null }]); };
+                const addVendedor = () => { setVendedores(v => [...v, { ...VENDEDOR_VACIO }]); setDocsVendedores(d => [...d, { dni: null, poder_notarial: null, cert_bancario: null }]); };
                 const removeVendedor = (idx) => { if (vendedores.length === 1) return; setVendedores(v => v.filter((_, i) => i !== idx)); setDocsVendedores(d => d.filter((_, i) => i !== idx)); };
                 const updateComprador = (idx, k, v) => setCompradores(prev => { const n = [...prev]; n[idx] = { ...n[idx], [k]: v }; return n; });
                 const addComprador = () => { setCompradores(c => [...c, { ...COMPRADOR_VACIO }]); setDocsCompradores(d => [...d, { dni: null }]); };
@@ -3827,7 +3827,8 @@ REGLAS:
                         vendedores.length > 1 ? ('Vendedor ' + (idx+1) + (v.nombre ? ' - ' + v.nombre : '')) : (v.nombre || 'Vendedor')
                       ),
                       DocSlot({ label: 'DNI / NIE / Pasaporte', icon: '🪧', file: docsVendedores[idx] && docsVendedores[idx].dni, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],dni:f}; return n; }); }, syncKey: idx === 0 ? 'dni_propietario' : null, required: true }),
-                      DocSlot({ label: 'Poder notarial (si aplica)', icon: '✍️', file: docsVendedores[idx] && docsVendedores[idx].poder_notarial, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],poder_notarial:f}; return n; }); }, required: false })
+                      DocSlot({ label: 'Poder notarial (si aplica)', icon: '✍️', file: docsVendedores[idx] && docsVendedores[idx].poder_notarial, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],poder_notarial:f}; return n; }); }, required: false }),
+                      DocSlot({ label: 'Cert. Titularidad Bancaria (IBAN vendedor)', icon: '🏦', file: docsVendedores[idx] && docsVendedores[idx].cert_bancario, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],cert_bancario:f}; return n; }); }, required: false })
                     ); }),
 
                     React.createElement('div', { style: { marginTop: 24 } }),
