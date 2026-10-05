@@ -3653,18 +3653,14 @@ REGLAS:
                 React.useEffect(() => {
                   if (!p || !p.id) return;
                   supabase.from('visitas')
-                    .select('id, fecha_visita, compradores(id,nombre,apellidos,dni,telefono,email,pais), visita_compradores(orden, compradores(id,nombre,apellidos,dni,telefono,email,pais)), visita_documentos(tipo,estado,precio_oferta)')
+                    .select('id, fecha_visita, visita_compradores(orden, compradores(id,nombre,apellidos,dni,telefono,email,pais)), visita_documentos(tipo,estado,precio_oferta)')
                     .eq('propiedad_id', p.id).eq('activo', true)
-                    .then(({ data }) => {
-                      if (!data) return;
-                      const candidatas = data.filter(v => {
-                        const tieneComprador = (v.visita_compradores && v.visita_compradores.length > 0) || v.compradores;
-                        return tieneComprador;
-                      });
+                    .then(({ data, error }) => {
+                      if (error || !data) return;
+                      const candidatas = data.filter(v => v.visita_compradores && v.visita_compradores.length > 0);
                       setVisitasCandidatas(candidatas);
-                      // Auto-importar la visita con reserva u oferta si los compradores están vacíos
-                      const yaRellenos = compradores.some(c => c.nombre && c.nombre.trim() !== '');
-                      if (!yaRellenos && candidatas.length > 0) {
+                      // Auto-importar siempre que haya visita con reserva/oferta
+                      if (candidatas.length > 0) {
                         const conReserva = candidatas.find(v => {
                           const docs = v.visita_documentos || [];
                           return docs.some(d => ['reserva','oferta','contraoferta'].includes(d.tipo) || ['deposito_recibido','firmado_comprador','firmado_vendedor','completado'].includes(d.estado));
