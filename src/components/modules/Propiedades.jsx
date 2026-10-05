@@ -3653,7 +3653,7 @@ REGLAS:
                 React.useEffect(() => {
                   if (!p || !p.id) return;
                   supabase.from('visitas')
-                    .select('id, fecha_visita, visita_compradores(orden, compradores(id,nombre,apellidos,dni,telefono,email,pais)), visita_documentos(tipo,estado,precio_oferta)')
+                    .select('id, fecha_visita, visita_compradores(orden, compradores(id,nombre,apellidos,dni,telefono,email,pais)), visita_documentos(tipo,estado)')
                     .eq('propiedad_id', p.id).eq('activo', true)
                     .then(({ data, error }) => {
                       console.log('[ARRAS DEBUG] data:', JSON.stringify(data), 'error:', error);
