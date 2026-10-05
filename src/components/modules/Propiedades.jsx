@@ -3904,34 +3904,11 @@ REGLAS:
                         React.createElement('label', { style: lblStyle }, 'Domicilio a efectos de notificaciones'),
                         React.createElement('input', { style: inpStyle, value: v.domicilio, onChange: function(e) { updateVendedor(idx, 'domicilio', e.target.value); }, placeholder: 'Calle, numero, piso, municipio, CP' })
                       ),
-                      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 16 } },
-                        React.createElement('div', { style: fGrp },
-                          React.createElement('label', { style: lblStyle }, 'Estado civil'),
-                          React.createElement('select', { style: selStyle, value: v.estado_civil, onChange: function(e) { updateVendedor(idx, 'estado_civil', e.target.value); } },
-                            React.createElement('option', { value: '' }, '- Seleccionar -'),
-                            React.createElement('option', { value: 'soltero' }, 'Soltero/a'),
-                            React.createElement('option', { value: 'casado' }, 'Casado/a'),
-                            React.createElement('option', { value: 'divorciado' }, 'Divorciado/a'),
-                            React.createElement('option', { value: 'viudo' }, 'Viudo/a'),
-                            React.createElement('option', { value: 'pareja_hecho' }, 'Pareja de hecho')
-                          )
-                        ),
-                        React.createElement('div', { style: fGrp },
-                          React.createElement('label', { style: lblStyle }, 'Regimen matrimonial'),
-                          React.createElement('select', { style: selStyle, value: v.regimen, onChange: function(e) { updateVendedor(idx, 'regimen', e.target.value); } },
-                            React.createElement('option', { value: '' }, '- Si aplica -'),
-                            React.createElement('option', { value: 'gananciales' }, 'Sociedad de gananciales'),
-                            React.createElement('option', { value: 'separacion' }, 'Separacion de bienes'),
-                            React.createElement('option', { value: 'participacion' }, 'Participacion'),
-                            React.createElement('option', { value: 'na' }, 'No aplica')
-                          )
-                        ),
-                        React.createElement('div', { style: fGrp },
-                          React.createElement('label', { style: lblStyle }, 'Vivienda habitual conyugal?'),
-                          React.createElement('select', { style: selStyle, value: v.vivienda_habitual, onChange: function(e) { updateVendedor(idx, 'vivienda_habitual', e.target.value); } },
-                            React.createElement('option', { value: 'no' }, 'No'),
-                            React.createElement('option', { value: 'si' }, 'Si')
-                          )
+                      React.createElement('div', { style: fGrp },
+                        React.createElement('label', { style: lblStyle }, 'Vivienda habitual conyugal?'),
+                        React.createElement('select', { style: selStyle, value: v.vivienda_habitual, onChange: function(e) { updateVendedor(idx, 'vivienda_habitual', e.target.value); } },
+                          React.createElement('option', { value: 'no' }, 'No'),
+                          React.createElement('option', { value: 'si' }, 'Si')
                         )
                       ),
                       !ibanCompartidoVendedor && React.createElement('div', { style: fGrp },
@@ -3992,35 +3969,12 @@ REGLAS:
                         React.createElement('label', { style: lblStyle }, 'Domicilio a efectos de notificaciones'),
                         React.createElement('input', { style: inpStyle, value: c.domicilio, onChange: function(e) { updateComprador(idx, 'domicilio', e.target.value); }, placeholder: 'Calle, numero, piso, municipio, CP' })
                       ),
-                      React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 16 } },
-                        React.createElement('div', { style: fGrp },
-                          React.createElement('label', { style: lblStyle }, 'Estado civil'),
-                          React.createElement('select', { style: selStyle, value: c.estado_civil, onChange: function(e) { updateComprador(idx, 'estado_civil', e.target.value); } },
-                            React.createElement('option', { value: '' }, '- Seleccionar -'),
-                            React.createElement('option', { value: 'soltero' }, 'Soltero/a'),
-                            React.createElement('option', { value: 'casado' }, 'Casado/a'),
-                            React.createElement('option', { value: 'divorciado' }, 'Divorciado/a'),
-                            React.createElement('option', { value: 'viudo' }, 'Viudo/a'),
-                            React.createElement('option', { value: 'pareja_hecho' }, 'Pareja de hecho')
-                          )
-                        ),
-                        React.createElement('div', { style: fGrp },
-                          React.createElement('label', { style: lblStyle }, 'Regimen matrimonial'),
-                          React.createElement('select', { style: selStyle, value: c.regimen, onChange: function(e) { updateComprador(idx, 'regimen', e.target.value); } },
-                            React.createElement('option', { value: '' }, '- Si aplica -'),
-                            React.createElement('option', { value: 'gananciales' }, 'Sociedad de gananciales'),
-                            React.createElement('option', { value: 'separacion' }, 'Separacion de bienes'),
-                            React.createElement('option', { value: 'participacion' }, 'Participacion'),
-                            React.createElement('option', { value: 'na' }, 'No aplica')
-                          )
-                        ),
-                        React.createElement('div', { style: fGrp },
-                          React.createElement('label', { style: lblStyle }, 'Financiacion hipotecaria?'),
-                          React.createElement('select', { style: selStyle, value: c.hipoteca, onChange: function(e) { updateComprador(idx, 'hipoteca', e.target.value); } },
-                            React.createElement('option', { value: 'no' }, 'No'),
-                            React.createElement('option', { value: 'si' }, 'Si - con condicion suspensiva'),
-                            React.createElement('option', { value: 'tramite' }, 'En tramite')
-                          )
+                      React.createElement('div', { style: fGrp },
+                        React.createElement('label', { style: lblStyle }, 'Financiacion hipotecaria?'),
+                        React.createElement('select', { style: selStyle, value: c.hipoteca, onChange: function(e) { updateComprador(idx, 'hipoteca', e.target.value); } },
+                          React.createElement('option', { value: 'no' }, 'No'),
+                          React.createElement('option', { value: 'si' }, 'Si - con condicion suspensiva'),
+                          React.createElement('option', { value: 'tramite' }, 'En tramite')
                         )
                       ),
                       !ibanCompartidoComprador && React.createElement('div', { style: fGrp },
