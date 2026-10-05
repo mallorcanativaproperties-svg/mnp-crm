@@ -3878,16 +3878,10 @@ REGLAS:
                       DocSlot({ label: 'Consulta descriptiva y grafica - Catastro', icon: '🗺️', file: docsInmuebles[idx] && docsInmuebles[idx].catastro, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],catastro:f}; return n; }); }, syncKey: 'descripcion_catastral', required: true }),
                       DocSlot({ label: 'Certificado de Eficiencia Energetica', icon: '⚡', file: docsInmuebles[idx] && docsInmuebles[idx].cert_energetico, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],cert_energetico:f}; return n; }); }, syncKey: 'certificado_energetico', required: false }),
                       DocSlot({ label: 'Cedula de Habitabilidad / Licencia 1a Ocupacion', icon: '🏠', file: docsInmuebles[idx] && docsInmuebles[idx].cedula, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],cedula:f}; return n; }); }, syncKey: 'cedula_habitabilidad', required: false }),
-                      DocSlot({ label: 'Cert. Titularidad Bancaria (IBAN vendedor)', icon: '🏦', file: docsInmuebles[idx] && docsInmuebles[idx].cert_bancario, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],cert_bancario:f}; return n; }); }, required: false }),
                       
                       DocSlot({ label: 'Otros documentos del inmueble', icon: '📎', file: docsInmuebles[idx] && docsInmuebles[idx].otros, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],otros:f}; return n; }); }, required: false })
                     ); }),
 
-                    React.createElement('div', { style: { marginTop: 24 } }),
-                    secHdr('Documentos generales'),
-                    DocSlot({ label: 'Recibo IBI (ultimo ejercicio)', icon: '🏦', file: docsExtra.ibi_recibo, onSet: function(f) { setDocsExtra(function(d) { return {...d, ibi_recibo: f}; }); }, syncKey: 'ibi_recibo', required: false }),
-                    DocSlot({ label: 'Planos / Catastro', icon: '📐', file: docsExtra.planos, onSet: function(f) { setDocsExtra(function(d) { return {...d, planos: f}; }); }, syncKey: 'planos', required: false }),
-                    DocSlot({ label: 'Otros (general)', icon: '📎', file: docsExtra.otros_general, onSet: function(f) { setDocsExtra(function(d) { return {...d, otros_general: f}; }); }, required: false })
                   ),
 
                   /* TAB DATOS */
