@@ -3710,7 +3710,7 @@ REGLAS:
                 };
 
                 /* Documentos — estructurado por parte y por inmueble */
-                const [docsVendedores, setDocsVendedores] = React.useState([{ dni: null, escritura: null, poder_notarial: null }]);
+                const [docsVendedores, setDocsVendedores] = React.useState([{ dni: null, poder_notarial: null }]);
                 const [docsCompradores, setDocsCompradores] = React.useState([{ dni: null }]);
                 const [docsInmuebles, setDocsInmuebles] = React.useState([{ nota_simple: null, catastro: null, cert_energetico: null, cedula: null, cert_bancario: null, actas_comunidad: null, cert_titularidad: null, otros: null }]);
                 const [docsExtra, setDocsExtra] = React.useState({ ibi_recibo: null, planos: null, otros_general: null });
@@ -3720,7 +3720,7 @@ REGLAS:
 
                 /* Helpers de estado arrays */
                 const updateVendedor = (idx, k, v) => setVendedores(prev => { const n = [...prev]; n[idx] = { ...n[idx], [k]: v }; return n; });
-                const addVendedor = () => { setVendedores(v => [...v, { ...VENDEDOR_VACIO }]); setDocsVendedores(d => [...d, { dni: null, escritura: null, poder_notarial: null }]); };
+                const addVendedor = () => { setVendedores(v => [...v, { ...VENDEDOR_VACIO }]); setDocsVendedores(d => [...d, { dni: null, poder_notarial: null }]); };
                 const removeVendedor = (idx) => { if (vendedores.length === 1) return; setVendedores(v => v.filter((_, i) => i !== idx)); setDocsVendedores(d => d.filter((_, i) => i !== idx)); };
                 const updateComprador = (idx, k, v) => setCompradores(prev => { const n = [...prev]; n[idx] = { ...n[idx], [k]: v }; return n; });
                 const addComprador = () => { setCompradores(c => [...c, { ...COMPRADOR_VACIO }]); setDocsCompradores(d => [...d, { dni: null }]); };
@@ -3827,7 +3827,6 @@ REGLAS:
                         vendedores.length > 1 ? ('Vendedor ' + (idx+1) + (v.nombre ? ' - ' + v.nombre : '')) : (v.nombre || 'Vendedor')
                       ),
                       DocSlot({ label: 'DNI / NIE / Pasaporte', icon: '🪧', file: docsVendedores[idx] && docsVendedores[idx].dni, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],dni:f}; return n; }); }, syncKey: idx === 0 ? 'dni_propietario' : null, required: true }),
-                      DocSlot({ label: 'Escritura de propiedad / Titulo', icon: '📜', file: docsVendedores[idx] && docsVendedores[idx].escritura, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],escritura:f}; return n; }); }, syncKey: 'escritura', required: false }),
                       DocSlot({ label: 'Poder notarial (si aplica)', icon: '✍️', file: docsVendedores[idx] && docsVendedores[idx].poder_notarial, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],poder_notarial:f}; return n; }); }, required: false })
                     ); }),
 
@@ -3873,6 +3872,7 @@ REGLAS:
                       inmuebles.length > 1 && React.createElement('div', { style: { fontSize: 11, fontWeight: 700, color: 'var(--muted)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 8 } },
                         (m.tipo.charAt(0).toUpperCase() + m.tipo.slice(1)) + ' ' + (idx+1) + (m.direccion ? ' - ' + m.direccion : '')
                       ),
+                      DocSlot({ label: 'Escritura de propiedad / Titulo', icon: '📜', file: docsInmuebles[idx] && docsInmuebles[idx].escritura, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],escritura:f}; return n; }); }, syncKey: 'escritura', required: false }),
                       DocSlot({ label: 'Nota Simple (Registro de la Propiedad)', icon: '📋', file: docsInmuebles[idx] && docsInmuebles[idx].nota_simple, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],nota_simple:f}; return n; }); }, syncKey: 'nota_simple', required: true }),
                       DocSlot({ label: 'Certificado de Titularidad', icon: '🏙️', file: docsInmuebles[idx] && docsInmuebles[idx].cert_titularidad, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],cert_titularidad:f}; return n; }); }, syncKey: 'cert_titularidad', required: true }),
                       DocSlot({ label: 'Consulta descriptiva y grafica - Catastro', icon: '🗺️', file: docsInmuebles[idx] && docsInmuebles[idx].catastro, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],catastro:f}; return n; }); }, syncKey: 'descripcion_catastral', required: true }),
