@@ -3615,6 +3615,7 @@ REGLAS:
                 });
                 const [ibanCompartidoVendedor, setIbanCompartidoVendedor] = React.useState(false);
                 const [ibanVendedorComun, setIbanVendedorComun] = React.useState('');
+                const [certBancarioComun, setCertBancarioComun] = React.useState(null);
 
                 /* Compradores: array de personas */
                 const COMPRADOR_VACIO = { nombre: '', dni: '', domicilio: '', estado_civil: '', regimen: '', iban: '', hipoteca: 'no' };
@@ -3828,7 +3829,7 @@ REGLAS:
                       ),
                       DocSlot({ label: 'DNI / NIE / Pasaporte', icon: '🪧', file: docsVendedores[idx] && docsVendedores[idx].dni, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],dni:f}; return n; }); }, syncKey: idx === 0 ? 'dni_propietario' : null, required: true }),
                       DocSlot({ label: 'Poder notarial (si aplica)', icon: '✍️', file: docsVendedores[idx] && docsVendedores[idx].poder_notarial, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],poder_notarial:f}; return n; }); }, required: false }),
-                      DocSlot({ label: 'Cert. Titularidad Bancaria (IBAN vendedor)', icon: '🏦', file: docsVendedores[idx] && docsVendedores[idx].cert_bancario, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],cert_bancario:f}; return n; }); }, required: false })
+                      !ibanCompartidoVendedor && DocSlot({ label: 'Cert. Titularidad Bancaria (IBAN vendedor)', icon: '🏦', file: docsVendedores[idx] && docsVendedores[idx].cert_bancario, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],cert_bancario:f}; return n; }); }, required: false })
                     ); }),
 
                     React.createElement('div', { style: { marginTop: 24 } }),
@@ -3924,6 +3925,7 @@ REGLAS:
                       React.createElement('label', { htmlFor: 'iban_vendedor_comun', style: { fontSize: 12, fontWeight: 600, cursor: 'pointer', color: 'var(--text)' } }, 'Cuenta bancaria compartida entre todos los vendedores'),
                       ibanCompartidoVendedor && React.createElement('input', { style: { ...inpStyle, flex: 1, minWidth: 200 }, value: ibanVendedorComun, onChange: function(e) { setIbanVendedorComun(e.target.value); }, placeholder: 'ES00 0000 0000 0000 0000 0000' })
                     ),
+                    ibanCompartidoVendedor && DocSlot({ label: 'Cert. Titularidad Bancaria (cuenta compartida)', icon: '🏦', file: certBancarioComun, onSet: function(f) { setCertBancarioComun(f); }, required: false }),
 
                     secHdr('Compradores'),
                     visitasCandidatas.length > 0 && React.createElement('div', { style: { background: 'var(--bg)', border: '1px solid var(--amber)', padding: '14px 18px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' } },
