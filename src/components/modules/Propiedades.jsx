@@ -203,7 +203,7 @@ const CALIDADES = [
 ];
 
 const PROVINCIAS_MAP = {
-  "Illes Balears": [
+  "Mallorca": [
     "Alaró","Alcúdia","Algaida","Andratx","Ariany","Artà","Banyalbufar","Binissalem",
     "Búger","Bunyola","Calvià","Campanet","Campos","Capdepera","Consell","Costitx",
     "Deià","Escorca","Esporles","Estellencs","Felanitx","Fornalutx","Inca","Lloret de Vistalegre",
@@ -212,16 +212,20 @@ const PROVINCIAS_MAP = {
     "Sant Joan","Sant Llorenç des Cardassar","Santa Eugènia","Santa Margalida","Santa Maria del Camí",
     "Santanyí","Selva","Sencelles","Ses Salines","Sineu","Sóller","Son Servera","Valldemossa","Vilafranca de Bonany"
   ],
-  "Comunitat Valenciana": [
+  "Menorca": [
+    "Maó","Ciutadella","Alaior","Es Mercadal","Ferreries","Es Castell","Sant Lluís","Es Migjorn Gran"
+  ],
+  "Valencia": [
     "Alacant","Alcoi","Altea","Benidorm","Calp","Dénia","Elx","Gandia","Guardamar del Segura",
     "La Vila Joiosa","Novelda","Orihuela","Pego","Santa Pola","Torrevieja","Xàbia",
     "Alzira","Burjassot","Cullera","Mislata","Ontinyent","Paterna","Requena","Sueca",
     "Torrent","Utiel","Valencia","Xàtiva","Castelló de la Plana","Benicarló","Morella",
-    "Nules","Peníscola","Segorbe","Vinaròs","Vinaròs"
+    "Nules","Peníscola","Segorbe","Vinaròs"
   ]
 };
 
 const ZONAS_MAP = {
+  // Mallorca
   "Palma": ["Casco Antiguo","Santa Catalina","El Terreno","Son Espanyolet","Son Cotoner","Son Dameto","La Bonanova","Genova","Cala Major","Son Rapinya","La Vileta","Pere Garau","Foners","Plaza de Toros","Son Gotleu","La Soledad","Vivero","Son Oliva","Rafal","Son Cladera","Son Ferriol","Sant Jordi","Can Pastilla","Coll den Rabassa","Nou Llevant","SIndioteria","SAranjassa","Es Pilari","Amanecer","Son Sardina","Establiments","Secar de la Real"],
   "Calvia": ["Palmanova","Magaluf","Santa Ponsa","Peguera","Illetes","Portals Nous","Bendinat","Calvia Vila","Costa de la Calma","Son Ferrer","El Toro"],
   "Marratxi": ["Portol","Sa Cabaneta","Pont dInca","Es Figueral","Sa Cabana"],
@@ -246,6 +250,20 @@ const ZONAS_MAP = {
   "Sineu": ["Centro"],
   "Consell": ["Centro"],
   "Lloseta": ["Centro"],
+  // Menorca
+  "Maó": ["Centro","Es Grau","Cala Llonga","Sant Climent","Trepucó"],
+  "Ciutadella": ["Centro","Cala Blanca","Son Xoriguer","Cala en Bosch","Cala en Forcat","Son Oleo","Cala Morell"],
+  "Alaior": ["Centro","Cala en Porter","Son Bou","Arenal den Castell"],
+  "Es Mercadal": ["Centro","Fornells","Arenal den Castell","Cala Tirant"],
+  "Ferreries": ["Centro","Cala Galdana","Santa Galdana"],
+  "Es Castell": ["Centro","Cala Corb","Binissafúller"],
+  "Sant Lluís": ["Centro","Binibèquer","Punta Prima","Alcaufar","Biniancolla"],
+  "Es Migjorn Gran": ["Centro","Sant Tomàs"],
+  // Valencia
+  "Valencia": ["Centro Histórico","Ensanche","Ruzafa","Benimaclet","Campanar","Patraix","Jesús","Quatre Carreres","Poblats Marítims","Extramurs","La Saïdia","Algirós","Camins al Grau","L'Olivereta","Benicalap","Pobles del Nord","Pobles de l'Oest","Pobles del Sud"],
+  "Alacant": ["Centro","Playa de San Juan","El Campello","Carolinas","Benalúa"],
+  "Benidorm": ["Levante","Poniente","Centro","Rincon de Loix"],
+  "Torrevieja": ["Centro","La Mata","Los Locos","Playa del Cura"],
 };
 
 const SAMPLE = [
@@ -253,7 +271,7 @@ const SAMPLE = [
     id: 1, ref: "MNP-001", tipo: "Piso", op: "Compraventa",
     titulo: "Piso reformado con terraza en Pere Garau",
     dir: "C/ de Sa Coma", num: "12", cp: "07007",
-    provincia: "Illes Balears", municipio: "Palma", zona: "Pere Garau",
+    provincia: "Mallorca", municipio: "Palma", zona: "Pere Garau",
     visDir: "Direccion exacta", orient: "Sur", distPlaya: "2 km",
     precioVenta: 399000, precioProp: 374861, precioAnt: 420000, precioTraspaso: 0,
     honorariosTipo: "porcentaje", honorarios: 5, ivaHon: 21, honNetoManual: 0,
@@ -285,7 +303,7 @@ const SAMPLE = [
     id: 2, ref: "MNP-002", tipo: "Atico", op: "Compraventa",
     titulo: "Atico panoramico con terraza de 35m2",
     dir: "C/ Arxiduc Lluis Salvador", num: "45", cp: "07004",
-    provincia: "Illes Balears", municipio: "Palma", zona: "Plaza de Toros",
+    provincia: "Mallorca", municipio: "Palma", zona: "Plaza de Toros",
     visDir: "Solo calle", orient: "Sureste", distPlaya: "3 km",
     precioVenta: 485000, precioProp: 466850, precioAnt: 0, precioTraspaso: 0,
     honorariosTipo: "fijo", honorarios: 15000, ivaHon: 21,
@@ -317,7 +335,7 @@ const SAMPLE = [
     id: 3, ref: "MNP-003", tipo: "Casa", op: "Compraventa",
     titulo: "Casa con jardin y piscina privada en Sa Cabaneta",
     dir: "C/ des Pont", num: "8", cp: "07141",
-    provincia: "Illes Balears", municipio: "Marratxi", zona: "Sa Cabaneta",
+    provincia: "Mallorca", municipio: "Marratxi", zona: "Sa Cabaneta",
     visDir: "Direccion exacta", orient: "Oeste", distPlaya: "15 km",
     precioVenta: 520000, precioProp: 494848, precioAnt: 550000, precioTraspaso: 0,
     honorariosTipo: "porcentaje", honorarios: 4, ivaHon: 21,
