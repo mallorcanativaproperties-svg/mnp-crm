@@ -3738,21 +3738,19 @@ REGLAS:
                 /* Sincronizacion con seccion Documentos de la propiedad */
                 const [docsPropiedad, setDocsPropiedad] = React.useState({});
                 React.useEffect(() => {
-                  if (!p || !p.id) return;
+                  if (!p?.id) return;
                   supabase.from('docs_propiedades').select('tipo,url,nombre').eq('propiedad_id', p.id).order('created_at', { ascending: false })
                     .then(({ data }) => {
                       if (!data) return;
-                      // Para cada tipo, guarda el documento más reciente como File-like object con url
                       const map = {};
                       data.forEach(function(row) {
                         if (!map[row.tipo]) {
-                          // Crear objeto compatible con DocSlot (necesita .name y ser truthy)
                           map[row.tipo] = { name: row.nombre || row.tipo, url: row.url, _fromSupabase: true };
                         }
                       });
                       setDocsPropiedad(map);
                     });
-                }, [p && p.id]);
+                }, [p?.id]);
 
                 /* Helpers de estado arrays */
                 const updateVendedor = (idx, k, v) => setVendedores(prev => { const n = [...prev]; n[idx] = { ...n[idx], [k]: v }; return n; });
