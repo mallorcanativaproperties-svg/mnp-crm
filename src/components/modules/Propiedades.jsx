@@ -3621,6 +3621,7 @@ REGLAS:
             >
               {(() => {
                 /* ─── Estado principal ─── */
+                const arrasCanGenerate = ["director","administrador"].includes(currentUser?.role?.toLowerCase());
                 const [arrasTab, setArrasTab] = React.useState('docs');
 
                 /* Vendedores: array de personas */
@@ -3861,7 +3862,7 @@ REGLAS:
                   React.createElement('div', { style: { display: 'flex', gap: 4, marginBottom: 24, flexWrap: 'wrap' } },
                     React.createElement('button', { onClick: () => setArrasTab('docs'), style: tabPill(arrasTab === 'docs') }, 'Documentos (' + totalDocsSubidos + ')'),
                     React.createElement('button', { onClick: () => setArrasTab('datos'), style: tabPill(arrasTab === 'datos') }, 'Datos del contrato'),
-                    React.createElement('button', { onClick: () => setArrasTab('ia'), style: tabPill(arrasTab === 'ia') }, 'Generar con IA')
+                    arrasCanGenerate && React.createElement('button', { onClick: () => setArrasTab('ia'), style: tabPill(arrasTab === 'ia') }, 'Generar con IA')
                   ),
 
                   /* TAB DOCUMENTOS */
@@ -4221,7 +4222,7 @@ REGLAS:
                     )
                   ),
                   /* TAB IA */
-                  arrasTab === 'ia' && React.createElement('div', null,
+                  arrasCanGenerate && arrasTab === 'ia' && React.createElement('div', null,
                     React.createElement('div', { style: { padding: '16px 20px', background: 'var(--bg)', border: '1px solid var(--amber)', marginBottom: 24 } },
                       React.createElement('div', { style: { fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: 8 } }, 'Resumen del contrato a generar'),
                       React.createElement('div', { style: { fontSize: 12, color: 'var(--muted)', lineHeight: 1.8 } },
