@@ -3642,10 +3642,10 @@ REGLAS:
                 const [ibanCompradorComun, setIbanCompradorComun] = React.useState('');
 
                 /* Inmuebles: array de fincas registrales */
-                const INMUEBLE_VACIO = { tipo: 'vivienda', direccion: '', ref_catastral: '', ref_registral: '', libre_arrendatarios: 'si', inquilino_detalle: '', precio: '' };
+                const INMUEBLE_VACIO = { tipo: 'vivienda', direccion: '', ref_catastral: '', ref_registral: '', idufir: '', libre_arrendatarios: 'si', inquilino_detalle: '', precio: '' };
                 const [inmuebles, setInmuebles] = React.useState(() => {
                   if (p) {
-                    return [{ tipo: 'vivienda', direccion: p.dir || '', ref_catastral: p.refCatastral || '', ref_registral: '', libre_arrendatarios: 'si', inquilino_detalle: '', precio: '' }];
+                    return [{ tipo: 'vivienda', direccion: p.dir || '', ref_catastral: p.refCatastral || '', ref_registral: '', idufir: '', libre_arrendatarios: 'si', inquilino_detalle: '', precio: '' }];
                   }
                   return [{ ...INMUEBLE_VACIO }];
                 });
@@ -3776,7 +3776,7 @@ REGLAS:
                   try {
                     const vStr = vendedores.map((v, i) => `  Vendedor ${i+1}: ${v.nombre} | DNI: ${v.dni} | Dom: ${v.domicilio} | E.Civil: ${v.estado_civil} | Regimen: ${v.regimen} | IBAN: ${ibanCompartidoVendedor ? ibanVendedorComun + ' (compartido)' : v.iban} | Viv.habitual: ${v.vivienda_habitual}`).join('\n');
                     const cStr = compradores.map((c, i) => `  Comprador ${i+1}: ${c.nombre} | DNI: ${c.dni} | Dom: ${c.domicilio} | E.Civil: ${c.estado_civil} | Regimen: ${c.regimen} | IBAN: ${ibanCompartidoComprador ? ibanCompradorComun + ' (compartido)' : c.iban} | Hipoteca: ${c.hipoteca}`).join('\n');
-                    const iStr = inmuebles.map((m, i) => `  Inmueble ${i+1} (${m.tipo}): ${m.direccion} | Catastro: ${m.ref_catastral} | Registro: ${m.ref_registral} | Libre arrendatarios: ${m.libre_arrendatarios}${m.inquilino_detalle ? ' (' + m.inquilino_detalle + ')' : ''} | Precio: ${precioMode === 'desglosado' ? m.precio + '€' : 'ver precio global'}`).join('\n');
+                    const iStr = inmuebles.map((m, i) => `  Inmueble ${i+1} (${m.tipo}): ${m.direccion} | Catastro: ${m.ref_catastral} | Registro: ${m.ref_registral}${m.idufir ? ' | IDUFIR/CRU: ' + m.idufir : ''} | Libre arrendatarios: ${m.libre_arrendatarios}${m.inquilino_detalle ? ' (' + m.inquilino_detalle + ')' : ''} | Precio: ${precioMode === 'desglosado' ? m.precio + '€' : 'ver precio global'}`).join('\n');
                     const resumen = [
                       `CONTRATO ARRAS PENITENCIALES - ${p && p.titulo ? p.titulo : 'Propiedad'} (Ref: ${p && p.refInterna ? p.refInterna : (p && p.ref ? p.ref : '')})`,
                       `\nVENDEDORES (${vendedores.length}):\n${vStr}`,
@@ -3788,7 +3788,7 @@ REGLAS:
                       `\nCOMUNIDAD: IEE aplica: ${form.iee_aplica} | Derramas: ${form.derramas}${form.derramas_detalle ? ' - ' + form.derramas_detalle : ''} | Actas: ${form.actas_relevantes || 'Sin incidencias'}`,
                       `\nPLAZO ESCRITURA: ${form.plazo_escritura} dias ${form.plazo_tipo} | Fecha prevista firma arras: ${form.fecha_firma_arras || 'Por determinar'}`,
                       `CONDICIONES SUSPENSIVAS: ${form.condiciones_suspensivas || 'Ninguna'}`,
-                      `\nHONORARIOS: ${form.honorarios}€ ${form.honorarios_iva === 'si' ? '+ IVA' : 'IVA incluido'} | Reparto: ${form.honorarios_pago}`,
+                      `\nHONORARIOS: ${form.honorarios}€ ${form.honorarios_iva === 'si' ? '+ IVA' : 'IVA incluido'} | Reparto: ${form.honorarios_pago} | Cobro: ${form.honorarios_momento === '100_arras' ? '100% en arras' : form.honorarios_momento === '100_notaria' ? '100% en notaría' : '50% arras / 50% notaría'}`,
                       `ACUERDOS VERBALES: ${form.acuerdos_verbales || 'Ninguno'}`,
                       `\nDOCUMENTOS APORTADOS: ${totalDocsSubidos} documentos`,
                     ].join('\n');
@@ -3828,6 +3828,32 @@ REGLAS:
                   );
                 };
 
+                /* ─── Extracción IA desde documentos ─── */
+                const extractFromDoc = async (file, tipo, onResult) => {
+                  if (!file) return;
+                  try {
+                    const toBase64 = (f) => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result.split(',')[1]); r.onerror = rej; r.readAsDataURL(f); });
+                    const b64 = await toBase64(file);
+                    const ext = file.name.split('.').pop().toLowerCase();
+                    const mediaType = ext === 'pdf' ? 'application/pdf' : ext === 'png' ? 'image/png' : (ext === 'jpg' || ext === 'jpeg') ? 'image/jpeg' : 'application/pdf';
+                    const prompts = {
+                      dni: 'Extrae del documento de identidad (DNI/NIE/Pasaporte): numero_documento, nombre_completo, domicilio_completo (calle, número, piso, puerta, bloque, escalera, CP, municipio, provincia). Responde SOLO con JSON válido, sin texto adicional. Ejemplo: {"numero_documento":"12345678A","nombre_completo":"Juan García López","domicilio_completo":"Calle Mayor 5, 3º B, 07001 Palma, Mallorca"}',
+                      cert_bancario: 'Extrae del certificado de titularidad bancaria: iban, titular. Responde SOLO con JSON válido. Ejemplo: {"iban":"ES12 3456 7890 1234 5678 9012","titular":"Juan García López"}',
+                      catastro: 'Extrae de la consulta descriptiva catastral: ref_catastral, direccion_completa (calle, número, planta, puerta, bloque, escalera, CP, municipio, provincia). Responde SOLO con JSON válido. Ejemplo: {"ref_catastral":"0000000AA0000A0000AA","direccion_completa":"Calle Mayor 5, 3ºB, 07001 Palma, Mallorca"}',
+                      nota_simple: 'Extrae de la nota simple registral: idufir_cru (número CRU/IDUFIR de 14 dígitos), ref_registral (número de finca registral, tomo, libro, folio). Responde SOLO con JSON válido. Ejemplo: {"idufir_cru":"12345678901234","ref_registral":"Finca 1234, Tomo 567, Libro 89, Folio 123"}'
+                    };
+                    const res = await fetch('/api/claude', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ model: 'claude-haiku-4-5', max_tokens: 512, messages: [{ role: 'user', content: [{ type: 'document', source: { type: 'base64', media_type: mediaType, data: b64 } }, { type: 'text', text: prompts[tipo] }] }] })
+                    });
+                    const data = await res.json();
+                    const text = data.content && data.content[0] && data.content[0].text ? data.content[0].text.trim() : '';
+                    const jsonMatch = text.match(/\{[\s\S]*\}/);
+                    if (jsonMatch) { const parsed = JSON.parse(jsonMatch[0]); onResult(parsed); }
+                  } catch(e) { console.error('extractFromDoc error:', e); }
+                };
+
                 /* Render principal */
                 return React.createElement('div', null,
 
@@ -3845,9 +3871,9 @@ REGLAS:
                       React.createElement('div', { style: { fontSize: 11, fontWeight: 700, color: 'var(--muted)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 8 } },
                         vendedores.length > 1 ? ('Vendedor ' + (idx+1) + (v.nombre ? ' - ' + v.nombre : '')) : (v.nombre || 'Vendedor')
                       ),
-                      DocSlot({ label: 'DNI / NIE / Pasaporte', icon: '🪧', file: docsVendedores[idx] && docsVendedores[idx].dni, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],dni:f}; return n; }); }, syncKey: idx === 0 ? 'dni_propietario' : null, required: true }),
+                      DocSlot({ label: 'DNI / NIE / Pasaporte', icon: '🪧', file: docsVendedores[idx] && docsVendedores[idx].dni, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],dni:f}; return n; }); extractFromDoc(f, 'dni', function(d) { if (d.numero_documento) updateVendedor(idx, 'dni', d.numero_documento); if (d.domicilio_completo) updateVendedor(idx, 'domicilio', d.domicilio_completo); }); }, syncKey: idx === 0 ? 'dni_propietario' : null, required: true }),
                       DocSlot({ label: 'Poder notarial (si aplica)', icon: '✍️', file: docsVendedores[idx] && docsVendedores[idx].poder_notarial, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],poder_notarial:f}; return n; }); }, required: false }),
-                      !ibanCompartidoVendedor && DocSlot({ label: 'Cert. Titularidad Bancaria (IBAN vendedor)', icon: '🏦', file: docsVendedores[idx] && docsVendedores[idx].cert_bancario, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],cert_bancario:f}; return n; }); }, required: false })
+                      !ibanCompartidoVendedor && DocSlot({ label: 'Cert. Titularidad Bancaria (IBAN vendedor)', icon: '🏦', file: docsVendedores[idx] && docsVendedores[idx].cert_bancario, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],cert_bancario:f}; return n; }); extractFromDoc(f, 'cert_bancario', function(d) { if (d.iban) updateVendedor(idx, 'iban', d.iban); }); }, required: false })
                     ); }),
 
                     React.createElement('div', { style: { marginTop: 24 } }),
@@ -3883,7 +3909,7 @@ REGLAS:
                       React.createElement('div', { style: { fontSize: 11, fontWeight: 700, color: 'var(--muted)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 8 } },
                         compradores.length > 1 ? ('Comprador ' + (idx+1) + (c.nombre ? ' - ' + c.nombre : '')) : (c.nombre || 'Comprador')
                       ),
-                      DocSlot({ label: 'DNI / NIE / Pasaporte', icon: '🪧', file: docsCompradores[idx] && docsCompradores[idx].dni, onSet: function(f) { setDocsCompradores(function(prev) { var n=[...prev]; n[idx]={...n[idx],dni:f}; return n; }); }, required: true })
+                      DocSlot({ label: 'DNI / NIE / Pasaporte', icon: '🪧', file: docsCompradores[idx] && docsCompradores[idx].dni, onSet: function(f) { setDocsCompradores(function(prev) { var n=[...prev]; n[idx]={...n[idx],dni:f}; return n; }); extractFromDoc(f, 'dni', function(d) { if (d.numero_documento) updateComprador(idx, 'dni', d.numero_documento); if (d.domicilio_completo) updateComprador(idx, 'domicilio', d.domicilio_completo); }); }, required: true })
                     ); }),
 
                     React.createElement('div', { style: { marginTop: 24 } }),
@@ -3893,8 +3919,8 @@ REGLAS:
                         (m.tipo.charAt(0).toUpperCase() + m.tipo.slice(1)) + ' ' + (idx+1) + (m.direccion ? ' - ' + m.direccion : '')
                       ),
                       DocSlot({ label: 'Escritura de propiedad / Titulo', icon: '📜', file: docsInmuebles[idx] && docsInmuebles[idx].escritura, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],escritura:f}; return n; }); }, syncKey: 'escritura', required: false }),
-                      DocSlot({ label: 'Nota Simple (Registro de la Propiedad)', icon: '📋', file: docsInmuebles[idx] && docsInmuebles[idx].nota_simple, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],nota_simple:f}; return n; }); }, syncKey: 'nota_simple', required: true }),
-                      DocSlot({ label: 'Consulta descriptiva y grafica - Catastro', icon: '🗺️', file: docsInmuebles[idx] && docsInmuebles[idx].catastro, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],catastro:f}; return n; }); }, syncKey: 'descripcion_catastral', required: true }),
+                      DocSlot({ label: 'Nota Simple (Registro de la Propiedad)', icon: '📋', file: docsInmuebles[idx] && docsInmuebles[idx].nota_simple, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],nota_simple:f}; return n; }); extractFromDoc(f, 'nota_simple', function(d) { if (d.ref_registral) updateInmueble(idx, 'ref_registral', d.ref_registral); if (d.idufir_cru) updateInmueble(idx, 'idufir', d.idufir_cru); }); }, syncKey: 'nota_simple', required: true }),
+                      DocSlot({ label: 'Consulta descriptiva y grafica - Catastro', icon: '🗺️', file: docsInmuebles[idx] && docsInmuebles[idx].catastro, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],catastro:f}; return n; }); extractFromDoc(f, 'catastro', function(d) { if (d.ref_catastral) updateInmueble(idx, 'ref_catastral', d.ref_catastral); if (d.direccion_completa) updateInmueble(idx, 'direccion', d.direccion_completa); }); }, syncKey: 'descripcion_catastral', required: true }),
                       DocSlot({ label: 'Certificado de Eficiencia Energetica', icon: '⚡', file: docsInmuebles[idx] && docsInmuebles[idx].cert_energetico, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],cert_energetico:f}; return n; }); }, syncKey: 'certificado_energetico', required: false }),
                       DocSlot({ label: 'Cedula de Habitabilidad / Licencia 1a Ocupacion', icon: '🏠', file: docsInmuebles[idx] && docsInmuebles[idx].cedula, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],cedula:f}; return n; }); }, syncKey: 'cedula_habitabilidad', required: false }),
                       
@@ -3943,7 +3969,7 @@ REGLAS:
                       React.createElement('label', { htmlFor: 'iban_vendedor_comun', style: { fontSize: 12, fontWeight: 600, cursor: 'pointer', color: 'var(--text)' } }, 'Cuenta bancaria compartida entre todos los vendedores'),
                       ibanCompartidoVendedor && React.createElement('input', { style: { ...inpStyle, flex: 1, minWidth: 200 }, value: ibanVendedorComun, onChange: function(e) { setIbanVendedorComun(e.target.value); }, placeholder: 'ES00 0000 0000 0000 0000 0000' })
                     ),
-                    ibanCompartidoVendedor && DocSlot({ label: 'Cert. Titularidad Bancaria (cuenta compartida)', icon: '🏦', file: certBancarioComun, onSet: function(f) { setCertBancarioComun(f); }, required: false }),
+                    ibanCompartidoVendedor && DocSlot({ label: 'Cert. Titularidad Bancaria (cuenta compartida)', icon: '🏦', file: certBancarioComun, onSet: function(f) { setCertBancarioComun(f); extractFromDoc(f, 'cert_bancario', function(d) { if (d.iban) setIbanVendedorComun(d.iban); }); }, required: false }),
 
                     secHdr('Compradores'),
                     visitasCandidatas.length > 0 && React.createElement('div', { style: { background: 'var(--bg)', border: '1px solid var(--amber)', padding: '14px 18px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' } },
@@ -4040,6 +4066,10 @@ REGLAS:
                         React.createElement('div', { style: fGrp },
                           React.createElement('label', { style: lblStyle }, 'Referencia registral'),
                           React.createElement('input', { style: inpStyle, value: m.ref_registral, onChange: function(e) { updateInmueble(idx, 'ref_registral', e.target.value); }, placeholder: 'Finca No / Tomo / Folio' })
+                        ),
+                        React.createElement('div', { style: fGrp },
+                          React.createElement('label', { style: lblStyle }, 'IDUFIR / CRU (Nota Simple)'),
+                          React.createElement('input', { style: inpStyle, value: m.idufir || '', onChange: function(e) { updateInmueble(idx, 'idufir', e.target.value); }, placeholder: '14 dígitos (ej: 07001000123456)' })
                         ),
                         React.createElement('div', { style: fGrp },
                           React.createElement('label', { style: lblStyle }, 'Libre de arrendatarios'),
@@ -4178,6 +4208,14 @@ REGLAS:
                           React.createElement('option', { value: 'vendedor' }, '100% a cargo del vendedor'),
                           React.createElement('option', { value: 'comprador' }, '100% a cargo del comprador'),
                           React.createElement('option', { value: 'otro' }, 'Otro acuerdo')
+                        )
+                      ),
+                      React.createElement('div', { style: fGrp },
+                        React.createElement('label', { style: lblStyle }, 'Momento de cobro'),
+                        React.createElement('select', { style: selStyle, value: form.honorarios_momento || '50_50_momento', onChange: function(e) { setF('honorarios_momento', e.target.value); } },
+                          React.createElement('option', { value: '50_50_momento' }, '50% en arras / 50% en notaría'),
+                          React.createElement('option', { value: '100_arras' }, '100% en arras'),
+                          React.createElement('option', { value: '100_notaria' }, '100% en notaría')
                         )
                       )
                     )
