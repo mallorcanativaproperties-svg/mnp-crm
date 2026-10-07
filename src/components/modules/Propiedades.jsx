@@ -3736,7 +3736,23 @@ REGLAS:
                 const [docsExtra, setDocsExtra] = React.useState({ ibi_recibo: null, planos: null, otros_general: null });
 
                 /* Sincronizacion con seccion Documentos de la propiedad */
-                const docsPropiedad = p && p.docs ? p.docs : {};
+                const [docsPropiedad, setDocsPropiedad] = React.useState({});
+                React.useEffect(() => {
+                  if (!p || !p.id) return;
+                  supabase.from('docs_propiedades').select('tipo,url,nombre').eq('propiedad_id', p.id).order('created_at', { ascending: false })
+                    .then(({ data }) => {
+                      if (!data) return;
+                      // Para cada tipo, guarda el documento más reciente como File-like object con url
+                      const map = {};
+                      data.forEach(function(row) {
+                        if (!map[row.tipo]) {
+                          // Crear objeto compatible con DocSlot (necesita .name y ser truthy)
+                          map[row.tipo] = { name: row.nombre || row.tipo, url: row.url, _fromSupabase: true };
+                        }
+                      });
+                      setDocsPropiedad(map);
+                    });
+                }, [p && p.id]);
 
                 /* Helpers de estado arrays */
                 const updateVendedor = (idx, k, v) => setVendedores(prev => { const n = [...prev]; n[idx] = { ...n[idx], [k]: v }; return n; });
@@ -3815,8 +3831,9 @@ REGLAS:
                         label,
                         required && React.createElement('span', { style: { color: 'var(--amber)', marginLeft: 4 } }, '*')
                       ),
+                      file && file._fromSupabase ? React.createElement('div', { style: { fontSize: 11, color: '#2d7a2d' } }, '✓ Desde ficha') :
                       file ? React.createElement('div', { style: { fontSize: 11, color: '#2d7a2d' } }, '✓ Subido') :
-                        propFile ? React.createElement('div', { style: { fontSize: 11, color: 'var(--blue)' } }, 'Disponible en ficha') :
+                        propFile ? React.createElement('div', { style: { fontSize: 11, color: 'var(--blue)' } }, '📎 Disponible en ficha') :
                         React.createElement('div', { style: { fontSize: 11, color: 'var(--muted)' } }, 'Pendiente')
                     ),
                     React.createElement('div', { style: { display: 'flex', gap: 6 } },
@@ -3833,10 +3850,20 @@ REGLAS:
                 const extractFromDoc = async (file, tipo, onResult) => {
                   if (!file) return;
                   try {
-                    const toBase64 = (f) => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result.split(',')[1]); r.onerror = rej; r.readAsDataURL(f); });
-                    const b64 = await toBase64(file);
-                    const ext = file.name.split('.').pop().toLowerCase();
-                    const mediaType = ext === 'pdf' ? 'application/pdf' : ext === 'png' ? 'image/png' : (ext === 'jpg' || ext === 'jpeg') ? 'image/jpeg' : 'application/pdf';
+                    let b64, mediaType;
+                    if (file._fromSupabase && file.url) {
+                      // Doc subido en la ficha: descargar desde Supabase URL
+                      const resp = await fetch(file.url);
+                      const blob = await resp.blob();
+                      const toBase64Blob = (b) => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result.split(',')[1]); r.onerror = rej; r.readAsDataURL(b); });
+                      b64 = await toBase64Blob(blob);
+                      mediaType = blob.type || 'application/pdf';
+                    } else {
+                      const toBase64 = (f) => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result.split(',')[1]); r.onerror = rej; r.readAsDataURL(f); });
+                      b64 = await toBase64(file);
+                      const ext = file.name.split('.').pop().toLowerCase();
+                      mediaType = ext === 'pdf' ? 'application/pdf' : ext === 'png' ? 'image/png' : (ext === 'jpg' || ext === 'jpeg') ? 'image/jpeg' : 'application/pdf';
+                    }
                     const prompts = {
                       dni: 'Extrae del documento de identidad (DNI/NIE/Pasaporte): numero_documento, nombre_completo, domicilio_completo (calle, número, piso, puerta, bloque, escalera, CP, municipio, provincia). Responde SOLO con JSON válido, sin texto adicional. Ejemplo: {"numero_documento":"12345678A","nombre_completo":"Juan García López","domicilio_completo":"Calle Mayor 5, 3º B, 07001 Palma, Mallorca"}',
                       cert_bancario: 'Extrae del certificado de titularidad bancaria: iban, titular. Responde SOLO con JSON válido. Ejemplo: {"iban":"ES12 3456 7890 1234 5678 9012","titular":"Juan García López"}',
