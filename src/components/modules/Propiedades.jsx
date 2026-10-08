@@ -3782,6 +3782,20 @@ REGLAS:
                           return [...prev, ...extras];
                         });
                       }
+                      // Si hay más DNIs de comprador que compradores inicializados, expandir los arrays
+                      const dnisComprador = map['dni_comprador'] || [];
+                      if (dnisComprador.length > 1) {
+                        setCompradores(prev => {
+                          if (prev.length >= dnisComprador.length) return prev;
+                          const extras = dnisComprador.slice(prev.length).map(() => ({ nombre: '', dni: '', domicilio: '', estado_civil: '', regimen: '', iban: '', hipoteca: 'no' }));
+                          return [...prev, ...extras];
+                        });
+                        setDocsCompradores(prev => {
+                          if (prev.length >= dnisComprador.length) return prev;
+                          const extras = dnisComprador.slice(prev.length).map(() => ({ dni: null }));
+                          return [...prev, ...extras];
+                        });
+                      }
                     });
                 }, [p?.id]);
 
