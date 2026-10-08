@@ -3621,6 +3621,16 @@ REGLAS:
             >
               {(() => {
                 /* ─── Estado principal ─── */
+                React.useEffect(function() {
+                  var styleId = 'arras-preview-styles';
+                  if (!document.getElementById(styleId)) {
+                    var s = document.createElement('style');
+                    s.id = styleId;
+                    s.textContent = '@keyframes slideInRight { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }';
+                    document.head.appendChild(s);
+                  }
+                }, []);
+                /* @arras-keyframes */
                 const arrasCanGenerate = ["director","administrador"].includes(currentUser?.role?.toLowerCase());
                 const [arrasTab, setArrasTab] = React.useState('docs');
                 const [previewDoc, setPreviewDoc] = React.useState(null); // { label, url, name }
@@ -3966,7 +3976,7 @@ REGLAS:
 
                   ),
                   /* Panel previsualización lateral */
-                  previewDoc && React.createElement('div', { style: { width: 380, flexShrink: 0, position: 'sticky', top: 16 } },
+                  previewDoc && React.createElement('div', { style: { width: 380, flexShrink: 0, position: 'sticky', top: 16, animation: 'slideInRight 0.25s cubic-bezier(0.25,0.46,0.45,0.94) both' } },
                     React.createElement('div', { style: { background: 'var(--bg)', border: '1px solid var(--border)', padding: '10px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 0 } },
                       React.createElement('div', { style: { fontSize: 11, fontWeight: 700, color: 'var(--text)', textTransform: 'uppercase', letterSpacing: '0.08em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 280 } }, previewDoc.label),
                       React.createElement('button', { onClick: () => setPreviewDoc(null), style: { background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: 'var(--muted)', padding: '0 4px', lineHeight: 1 } }, '✕')
