@@ -3821,6 +3821,36 @@ REGLAS:
                         });
                         return next;
                       });
+                      // Extraer datos automáticamente de nota simple y catastro si no hay datos guardados
+                      // (se ejecuta con setTimeout para que setInmuebles del arras_contratos tenga prioridad)
+                      setTimeout(function() {
+                        if (map['nota_simple']) {
+                          extractFromDoc(map['nota_simple'], 'nota_simple', function(d) {
+                            setInmuebles(function(prev) {
+                              const n = [...prev];
+                              if (!n[0]) return prev;
+                              const updated = { ...n[0] };
+                              if (d.ref_registral && !updated.ref_registral) updated.ref_registral = d.ref_registral;
+                              if (d.idufir_cru && !updated.idufir) updated.idufir = d.idufir_cru;
+                              n[0] = updated;
+                              return n;
+                            });
+                          });
+                        }
+                        if (map['descripcion_catastral']) {
+                          extractFromDoc(map['descripcion_catastral'], 'catastro', function(d) {
+                            setInmuebles(function(prev) {
+                              const n = [...prev];
+                              if (!n[0]) return prev;
+                              const updated = { ...n[0] };
+                              if (d.ref_catastral && !updated.ref_catastral) updated.ref_catastral = d.ref_catastral;
+                              if (d.direccion_completa && !updated.direccion) updated.direccion = d.direccion_completa;
+                              n[0] = updated;
+                              return n;
+                            });
+                          });
+                        }
+                      }, 1500);
                     });
                 }, [p?.id]);
 
