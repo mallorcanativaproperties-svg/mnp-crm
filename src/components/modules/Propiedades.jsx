@@ -3756,7 +3756,7 @@ REGLAS:
                       if (!data) return;
                       const map = {};
                       // Tipos que pueden tener múltiples entradas (una por persona)
-                      const multiTipos = ['dni_propietario'];
+                      const multiTipos = ['dni_propietario', 'dni_comprador'];
                       data.forEach(function(row) {
                         if (multiTipos.includes(row.tipo)) {
                           if (!map[row.tipo]) map[row.tipo] = [];
@@ -3989,7 +3989,7 @@ REGLAS:
                       React.createElement('div', { style: { fontSize: 11, fontWeight: 700, color: 'var(--muted)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 8 } },
                         compradores.length > 1 ? ('Comprador ' + (idx+1) + (c.nombre ? ' - ' + c.nombre : '')) : (c.nombre || 'Comprador')
                       ),
-                      DocSlot({ label: 'DNI / NIE / Pasaporte', icon: '🪧', file: docsCompradores[idx] && docsCompradores[idx].dni, onSet: function(f) { setDocsCompradores(function(prev) { var n=[...prev]; n[idx]={...n[idx],dni:f}; return n; }); extractFromDoc(f, 'dni', function(d) { if (d.nombre_completo) updateComprador(idx, 'nombre', d.nombre_completo); if (d.numero_documento) updateComprador(idx, 'dni', d.numero_documento); if (d.domicilio_completo) updateComprador(idx, 'domicilio', d.domicilio_completo); }); }, required: true }),
+                      DocSlot({ label: 'DNI / NIE / Pasaporte', icon: '🪧', file: docsCompradores[idx] && docsCompradores[idx].dni, onSet: function(f) { setDocsCompradores(function(prev) { var n=[...prev]; n[idx]={...n[idx],dni:f}; return n; }); extractFromDoc(f, 'dni', function(d) { if (d.nombre_completo) updateComprador(idx, 'nombre', d.nombre_completo); if (d.numero_documento) updateComprador(idx, 'dni', d.numero_documento); if (d.domicilio_completo) updateComprador(idx, 'domicilio', d.domicilio_completo); }); }, syncKey: 'dni_comprador', syncIdx: idx, required: true }),
                       
                     ); }),
 
@@ -4139,7 +4139,7 @@ REGLAS:
                         React.createElement('label', { style: lblStyle }, 'Domicilio a efectos de notificaciones'),
                         React.createElement('input', { style: inpStyle, value: c.domicilio, onChange: function(e) { updateComprador(idx, 'domicilio', e.target.value); }, placeholder: 'Calle, numero, piso, municipio, CP' })
                       ),
-                      docsCompradores[idx] && docsCompradores[idx].dni ? React.createElement('button', { onClick: function() { var f = docsCompradores[idx].dni; extractFromDoc(f, 'dni', function(d) { if (d.nombre_completo) updateComprador(idx, 'nombre', d.nombre_completo); if (d.numero_documento) updateComprador(idx, 'dni', d.numero_documento); if (d.domicilio_completo) updateComprador(idx, 'domicilio', d.domicilio_completo); }); }, style: { background: 'var(--amber)', color: '#000', border: 'none', padding: '6px 12px', fontSize: 10, fontWeight: 700, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12, borderRadius: 2 } }, '🔍 Extraer datos del DNI') : null,
+                      (docsCompradores[idx] && docsCompradores[idx].dni) || (docsPropiedad['dni_comprador'] && docsPropiedad['dni_comprador'][idx]) ? React.createElement('button', { onClick: function() { var f = (docsCompradores[idx] && docsCompradores[idx].dni) || (docsPropiedad['dni_comprador'] && docsPropiedad['dni_comprador'][idx]); extractFromDoc(f, 'dni', function(d) { if (d.nombre_completo) updateComprador(idx, 'nombre', d.nombre_completo); if (d.numero_documento) updateComprador(idx, 'dni', d.numero_documento); if (d.domicilio_completo) updateComprador(idx, 'domicilio', d.domicilio_completo); }); }, style: { background: 'var(--amber)', color: '#000', border: 'none', padding: '6px 12px', fontSize: 10, fontWeight: 700, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12, borderRadius: 2 } }, '🔍 Extraer datos del DNI') : null,
                       React.createElement('div', { style: fGrp },
                         React.createElement('label', { style: lblStyle }, 'Financiacion hipotecaria?'),
                         React.createElement('select', { style: selStyle, value: c.hipoteca, onChange: function(e) { updateComprador(idx, 'hipoteca', e.target.value); } },
