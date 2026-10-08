@@ -3911,8 +3911,8 @@ REGLAS:
                   ),
 
                   /* TAB DOCUMENTOS */
-                  arrasTab === 'docs' && React.createElement('div', { style: { display: 'flex', gap: 24, alignItems: 'flex-start' } },
-                  React.createElement('div', { style: { flex: 1, minWidth: 0 } },
+                  arrasTab === 'docs' && React.createElement('div', null,
+                  React.createElement('div', null,
                     secHdr('Documentos - Vendedor' + (vendedores.length > 1 ? 'es' : '')),
                     vendedores.map(function(v, idx) { return React.createElement('div', { key: idx, style: { marginBottom: 16 } },
                       React.createElement('div', { style: { fontSize: 11, fontWeight: 700, color: 'var(--muted)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 8 } },
@@ -3975,18 +3975,22 @@ REGLAS:
                     ); }),
 
                   ),
-                  /* Panel previsualización lateral */
-                  previewDoc && React.createElement('div', { style: { width: 380, flexShrink: 0, position: 'sticky', top: 16, animation: 'slideInRight 0.25s cubic-bezier(0.25,0.46,0.45,0.94) both' } },
-                    React.createElement('div', { style: { background: 'var(--bg)', border: '1px solid var(--border)', padding: '10px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 0 } },
-                      React.createElement('div', { style: { fontSize: 11, fontWeight: 700, color: 'var(--text)', textTransform: 'uppercase', letterSpacing: '0.08em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 280 } }, previewDoc.label),
-                      React.createElement('button', { onClick: () => setPreviewDoc(null), style: { background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: 'var(--muted)', padding: '0 4px', lineHeight: 1 } }, '✕')
+                  /* Panel previsualización overlay */
+                  previewDoc && React.createElement('div', { style: { position: 'fixed', top: 0, right: 0, width: 380, height: '100vh', zIndex: 1200, display: 'flex', flexDirection: 'column', boxShadow: '-4px 0 24px rgba(0,0,0,0.18)', animation: 'slideInRight 0.28s cubic-bezier(0.25,0.46,0.45,0.94) both' } },
+                    /* Cabecera oscura estilo WhatsApp */
+                    React.createElement('div', { style: { background: '#1a1a1a', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 } },
+                      React.createElement('button', { onClick: () => setPreviewDoc(null), style: { background: 'none', border: 'none', cursor: 'pointer', color: '#fff', fontSize: 20, lineHeight: 1, padding: '0 4px 0 0', display: 'flex', alignItems: 'center' } }, '←'),
+                      React.createElement('div', { style: { flex: 1, minWidth: 0 } },
+                        React.createElement('div', { style: { fontSize: 13, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, previewDoc.label)
+                      ),
+                      React.createElement('a', { href: previewDoc.url, target: '_blank', rel: 'noopener noreferrer', style: { color: '#ccc', fontSize: 18, lineHeight: 1, textDecoration: 'none', padding: '0 0 0 8px' }, title: 'Abrir en nueva pestaña' }, '↗')
                     ),
-                    React.createElement('div', { style: { height: 520, background: '#000', overflow: 'hidden' } },
+                    /* Contenido documento */
+                    React.createElement('div', { style: { flex: 1, background: '#111', overflow: 'hidden' } },
                       (previewDoc.url.match(/\.pdf(\?|$)/i) || previewDoc.name?.toLowerCase().endsWith('.pdf'))
                         ? React.createElement('iframe', { src: previewDoc.url + '#toolbar=0', style: { width: '100%', height: '100%', border: 'none' } })
                         : React.createElement('img', { src: previewDoc.url, style: { width: '100%', height: '100%', objectFit: 'contain' }, alt: previewDoc.label })
-                    ),
-                    React.createElement('a', { href: previewDoc.url, target: '_blank', rel: 'noopener noreferrer', style: { display: 'block', background: 'var(--bg)', border: '1px solid var(--border)', borderTop: 'none', padding: '8px 12px', fontSize: 10, fontWeight: 700, color: 'var(--blue)', textAlign: 'center', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.08em' } }, '↗ Abrir en nueva pestaña')
+                    )
                   )
                   ),
                   /* TAB DATOS */
