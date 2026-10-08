@@ -3623,6 +3623,7 @@ REGLAS:
                 /* ─── Estado principal ─── */
                 const arrasCanGenerate = ["director","administrador"].includes(currentUser?.role?.toLowerCase());
                 const [arrasTab, setArrasTab] = React.useState('docs');
+                const [previewDoc, setPreviewDoc] = React.useState(null); // { label, url, name }
 
                 /* Vendedores: array de personas */
                 const VENDEDOR_VACIO = { nombre: '', dni: '', domicilio: '', estado_civil: '', regimen: '', iban: '', vivienda_habitual: 'no' };
@@ -3822,7 +3823,12 @@ REGLAS:
                 /* Renderizado de un campo de documento */
                 const DocSlot = ({ label, icon, file, onSet, syncKey, required }) => {
                   const propFile = syncKey && docsPropiedad[syncKey];
-                  return React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid var(--border)' } },
+                  const activeFile = file || (syncKey && !file ? propFile : null);
+                  const previewUrl = activeFile
+                    ? (activeFile._fromSupabase ? activeFile.url : (activeFile instanceof File ? URL.createObjectURL(activeFile) : null))
+                    : null;
+                  const isActive = previewDoc && previewDoc.label === label;
+                  return React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid var(--border)', background: isActive ? 'var(--bg)' : 'transparent', marginLeft: isActive ? -8 : 0, paddingLeft: isActive ? 8 : 0, transition: 'all 0.15s' } },
                     React.createElement('span', { style: { fontSize: 20, width: 28, textAlign: 'center' } }, icon || '📄'),
                     React.createElement('div', { style: { flex: 1, minWidth: 0 } },
                       React.createElement('div', { style: { fontSize: 12, fontWeight: 600, color: 'var(--text)' } },
@@ -3834,7 +3840,11 @@ REGLAS:
                         propFile ? React.createElement('div', { style: { fontSize: 11, color: 'var(--blue)' } }, '📎 Disponible en ficha') :
                         React.createElement('div', { style: { fontSize: 11, color: 'var(--muted)' } }, 'Pendiente')
                     ),
-                    React.createElement('div', { style: { display: 'flex', gap: 6 } },
+                    React.createElement('div', { style: { display: 'flex', gap: 6, alignItems: 'center' } },
+                      previewUrl && React.createElement('button', {
+                        onClick: () => setPreviewDoc(isActive ? null : { label, url: previewUrl, name: activeFile.name || label }),
+                        style: { background: isActive ? 'var(--text)' : 'var(--bg)', color: isActive ? 'var(--white)' : 'var(--text)', border: '1px solid var(--border)', padding: '4px 8px', fontSize: 10, fontWeight: 700, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.08em' }
+                      }, isActive ? '✕ Cerrar' : '👁 Ver'),
                       propFile && !file && React.createElement('button', { onClick: () => onSet(propFile), style: { background: 'var(--blue)', color: 'var(--white)', border: 'none', padding: '4px 8px', fontSize: 10, fontWeight: 700, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.08em' } }, 'Usar de ficha'),
                       React.createElement('label', { style: { background: file ? '#2d7a2d' : 'var(--amber)', color: 'var(--white)', padding: '4px 10px', fontSize: 10, fontWeight: 700, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'inline-block' } },
                         file ? '↑ Cambiar' : '↑ Subir',
@@ -3891,7 +3901,8 @@ REGLAS:
                   ),
 
                   /* TAB DOCUMENTOS */
-                  arrasTab === 'docs' && React.createElement('div', null,
+                  arrasTab === 'docs' && React.createElement('div', { style: { display: 'flex', gap: 24, alignItems: 'flex-start' } },
+                  React.createElement('div', { style: { flex: 1, minWidth: 0 } },
                     secHdr('Documentos - Vendedor' + (vendedores.length > 1 ? 'es' : '')),
                     vendedores.map(function(v, idx) { return React.createElement('div', { key: idx, style: { marginBottom: 16 } },
                       React.createElement('div', { style: { fontSize: 11, fontWeight: 700, color: 'var(--muted)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 8 } },
@@ -3955,6 +3966,21 @@ REGLAS:
 
                   ),
 
+                  ),
+                  /* Panel previsualización lateral */
+                  previewDoc && React.createElement('div', { style: { width: 380, flexShrink: 0, position: 'sticky', top: 16 } },
+                    React.createElement('div', { style: { background: 'var(--bg)', border: '1px solid var(--border)', padding: '10px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 0 } },
+                      React.createElement('div', { style: { fontSize: 11, fontWeight: 700, color: 'var(--text)', textTransform: 'uppercase', letterSpacing: '0.08em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 280 } }, previewDoc.label),
+                      React.createElement('button', { onClick: () => setPreviewDoc(null), style: { background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: 'var(--muted)', padding: '0 4px', lineHeight: 1 } }, '✕')
+                    ),
+                    React.createElement('div', { style: { height: 520, background: '#000', overflow: 'hidden' } },
+                      (previewDoc.url.match(/\.pdf(\?|$)/i) || previewDoc.name?.toLowerCase().endsWith('.pdf'))
+                        ? React.createElement('iframe', { src: previewDoc.url + '#toolbar=0', style: { width: '100%', height: '100%', border: 'none' } })
+                        : React.createElement('img', { src: previewDoc.url, style: { width: '100%', height: '100%', objectFit: 'contain' }, alt: previewDoc.label })
+                    ),
+                    React.createElement('a', { href: previewDoc.url, target: '_blank', rel: 'noopener noreferrer', style: { display: 'block', background: 'var(--bg)', border: '1px solid var(--border)', borderTop: 'none', padding: '8px 12px', fontSize: 10, fontWeight: 700, color: 'var(--blue)', textAlign: 'center', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.08em' } }, '↗ Abrir en nueva pestaña')
+                  )
+                  ),
                   /* TAB DATOS */
                   arrasTab === 'datos' && React.createElement('div', null,
 
