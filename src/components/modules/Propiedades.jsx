@@ -3799,6 +3799,28 @@ REGLAS:
                     });
                 }, [p?.id]);
 
+                /* Cargar datos guardados de arras */
+                React.useEffect(() => {
+                  if (!p?.id) return;
+                  supabase.from('arras_contratos').select('*').eq('propiedad_id', p.id).maybeSingle()
+                    .then(({ data }) => {
+                      if (!data) return;
+                      if (data.vendedores && data.vendedores.length > 0) setVendedores(data.vendedores);
+                      if (data.compradores && data.compradores.length > 0) setCompradores(data.compradores);
+                      if (data.inmuebles && data.inmuebles.length > 0) setInmuebles(data.inmuebles);
+                      if (data.iban_compartido_vendedor != null) setIbanCompartidoVendedor(data.iban_compartido_vendedor);
+                      if (data.iban_vendedor_comun) setIbanVendedorComun(data.iban_vendedor_comun);
+                      if (data.iban_compartido_comprador != null) setIbanCompartidoComprador(data.iban_compartido_comprador);
+                      if (data.iban_comprador_comun) setIbanCompradorComun(data.iban_comprador_comun);
+                      if (data.precio_mode) setPrecioMode(data.precio_mode);
+                      if (data.precio_global) setPrecioGlobal(data.precio_global);
+                      const formFields = ['iee_aplica','derramas','derramas_detalle','actas_relevantes','incluye_muebles','muebles_detalle','importe_arras','forma_pago_arras','plazo_escritura','plazo_tipo','honorarios','honorarios_iva','honorarios_pago','honorarios_momento','fecha_firma_arras','condiciones_suspensivas','acuerdos_verbales','docs_adicionales'];
+                      const patch = {};
+                      formFields.forEach(function(k) { if (data[k] != null && data[k] !== '') patch[k] = data[k]; });
+                      if (Object.keys(patch).length > 0) setForm(function(f) { return { ...f, ...patch }; });
+                    });
+                }, [p?.id]);
+
                 /* Helpers de estado arrays */
                 const updateVendedor = (idx, k, v) => setVendedores(prev => { const n = [...prev]; n[idx] = { ...n[idx], [k]: v }; return n; });
                 const addVendedor = () => { setVendedores(v => [...v, { ...VENDEDOR_VACIO }]); setDocsVendedores(d => [...d, { dni: null, poder_notarial: null, cert_bancario: null }]); };
@@ -3811,6 +3833,28 @@ REGLAS:
                 const removeInmueble = (idx) => { if (inmuebles.length === 1) return; setInmuebles(i => i.filter((_, i2) => i2 !== idx)); setDocsInmuebles(d => d.filter((_, i2) => i2 !== idx)); };
 
                 /* IA */
+                const [arrasGuardando, setArrasGuardando] = React.useState(false);
+                const [arrasGuardado, setArrasGuardado] = React.useState(false);
+                const saveArras = async () => {
+                  if (!p?.id) return;
+                  setArrasGuardando(true);
+                  const payload = {
+                    propiedad_id: p.id,
+                    vendedores, compradores, inmuebles,
+                    iban_compartido_vendedor: ibanCompartidoVendedor,
+                    iban_vendedor_comun: ibanVendedorComun,
+                    iban_compartido_comprador: ibanCompartidoComprador,
+                    iban_comprador_comun: ibanCompradorComun,
+                    precio_mode: precioMode,
+                    precio_global: precioGlobal,
+                    ...form
+                  };
+                  await supabase.from('arras_contratos').upsert(payload, { onConflict: 'propiedad_id' });
+                  setArrasGuardando(false);
+                  setArrasGuardado(true);
+                  setTimeout(function() { setArrasGuardado(false); }, 3000);
+                };
+
                 const [generando, setGenerando] = React.useState(false);
                 const [resultado, setResultado] = React.useState(null);
                 const [errorIA, setErrorIA] = React.useState(null);
@@ -4376,6 +4420,11 @@ REGLAS:
                         React.createElement('strong', null, 'Documentos aportados: '), totalDocsSubidos
                       )
                     ),
+                    React.createElement('button', {
+                      onClick: saveArras,
+                      disabled: arrasGuardando,
+                      style: { background: arrasGuardado ? '#22c55e' : 'var(--bg)', color: arrasGuardado ? '#fff' : 'var(--text)', border: '1px solid ' + (arrasGuardado ? '#22c55e' : 'var(--border)'), padding: '10px 32px', fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', cursor: arrasGuardando ? 'not-allowed' : 'pointer', fontFamily: 'Inter, sans-serif', width: '100%', marginBottom: 12, borderRadius: 2 }
+                    }, arrasGuardando ? '⧗ Guardando...' : arrasGuardado ? '✓ Guardado' : '↓ Guardar datos del contrato'),
                     React.createElement('button', {
                       onClick: generarArras,
                       disabled: generando,
