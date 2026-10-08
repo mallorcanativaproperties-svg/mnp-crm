@@ -3672,7 +3672,7 @@ REGLAS:
                   iee_aplica: 'no', derramas: 'no', derramas_detalle: '',
                   actas_relevantes: '',
                   incluye_muebles: 'no', muebles_detalle: '',
-                  importe_arras: '', forma_pago_arras: '',
+                  importe_arras: '', arras_modo: 'eur', forma_pago_arras: '',
                   plazo_escritura: '', plazo_tipo: 'naturales',
                   honorarios: p && p.honorarios ? String(p.honorarios) : '', honorarios_iva: 'si', honorarios_pago: '50_50',
                   fecha_firma_arras: '', condiciones_suspensivas: '', acuerdos_verbales: '', docs_adicionales: '',
@@ -3814,7 +3814,7 @@ REGLAS:
                       if (data.iban_comprador_comun) setIbanCompradorComun(data.iban_comprador_comun);
                       if (data.precio_mode) setPrecioMode(data.precio_mode);
                       if (data.precio_global) setPrecioGlobal(data.precio_global);
-                      const formFields = ['iee_aplica','derramas','derramas_detalle','actas_relevantes','incluye_muebles','muebles_detalle','importe_arras','forma_pago_arras','plazo_escritura','plazo_tipo','honorarios','honorarios_iva','honorarios_pago','honorarios_momento','fecha_firma_arras','condiciones_suspensivas','acuerdos_verbales','docs_adicionales'];
+                      const formFields = ['iee_aplica','derramas','derramas_detalle','actas_relevantes','incluye_muebles','muebles_detalle','importe_arras','arras_modo','forma_pago_arras','plazo_escritura','plazo_tipo','honorarios','honorarios_iva','honorarios_pago','honorarios_momento','fecha_firma_arras','condiciones_suspensivas','acuerdos_verbales','docs_adicionales'];
                       const patch = {};
                       formFields.forEach(function(k) { if (data[k] != null && data[k] !== '') patch[k] = data[k]; });
                       if (Object.keys(patch).length > 0) setForm(function(f) { return { ...f, ...patch }; });
@@ -4291,8 +4291,26 @@ REGLAS:
                     ),
                     React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 } },
                       React.createElement('div', { style: fGrp },
-                        React.createElement('label', { style: lblStyle }, 'Importe de las arras (€)'),
-                        React.createElement('input', { style: inpStyle, value: form.importe_arras, onChange: function(e) { setF('importe_arras', e.target.value); }, placeholder: '0,00' })
+                        React.createElement('label', { style: lblStyle }, 'Importe de las arras'),
+                        React.createElement('div', { style: { display: 'flex', gap: 6, alignItems: 'center' } },
+                          React.createElement('select', { style: { ...selStyle, width: 70, flexShrink: 0 }, value: form.arras_modo || 'eur', onChange: function(e) { setF('arras_modo', e.target.value); setF('importe_arras', ''); } },
+                            React.createElement('option', { value: 'eur' }, '€'),
+                            React.createElement('option', { value: 'pct' }, '%')
+                          ),
+                          React.createElement('input', { style: { ...inpStyle, flex: 1 }, value: form.importe_arras, onChange: function(e) {
+                            var val = e.target.value;
+                            setF('importe_arras', val);
+                          }, placeholder: form.arras_modo === 'pct' ? 'ej. 10' : '0,00' }),
+                          (function() {
+                            if (form.arras_modo !== 'pct') return null;
+                            var pct = parseFloat((form.importe_arras || '0').replace(',','.')) || 0;
+                            var base = precioMode === 'global'
+                              ? (parseFloat((precioGlobal || '0').replace(/\./g,'').replace(',','.')) || 0)
+                              : inmuebles.reduce(function(s, m) { return s + (parseFloat((m.precio || '0').replace(/\./g,'').replace(',','.')) || 0); }, 0);
+                            var calc = base > 0 && pct > 0 ? (base * pct / 100) : null;
+                            return calc !== null ? React.createElement('span', { style: { fontSize: 11, color: 'var(--muted)', whiteSpace: 'nowrap' } }, '= ' + calc.toLocaleString('es-ES', { minimumFractionDigits: 2 }) + ' €') : null;
+                          })()
+                        )
                       ),
                       React.createElement('div', { style: fGrp },
                         React.createElement('label', { style: lblStyle }, 'Forma de pago de las arras'),
