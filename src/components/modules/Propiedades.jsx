@@ -3898,7 +3898,6 @@ REGLAS:
                   try {
                     let b64, mediaType;
                     if (file._fromSupabase && file.url) {
-                      // Doc subido en la ficha: descargar desde Supabase URL
                       const resp = await fetch(file.url);
                       const blob = await resp.blob();
                       const toBase64Blob = (b) => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result.split(',')[1]); r.onerror = rej; r.readAsDataURL(b); });
@@ -3907,23 +3906,28 @@ REGLAS:
                     } else {
                       const toBase64 = (f) => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result.split(',')[1]); r.onerror = rej; r.readAsDataURL(f); });
                       b64 = await toBase64(file);
-                      const ext = file.name.split('.').pop().toLowerCase();
-                      mediaType = ext === 'pdf' ? 'application/pdf' : ext === 'png' ? 'image/png' : (ext === 'jpg' || ext === 'jpeg') ? 'image/jpeg' : 'application/pdf';
+                      const ext = (file.name || '').split('.').pop().toLowerCase();
+                      mediaType = ext === 'pdf' ? 'application/pdf' : ext === 'png' ? 'image/png' : (ext === 'jpg' || ext === 'jpeg') ? 'image/jpeg' : 'image/jpeg';
                     }
+                    const isImage = mediaType.startsWith('image/');
+                    const contentBlock = isImage
+                      ? { type: 'image', source: { type: 'base64', media_type: mediaType, data: b64 } }
+                      : { type: 'document', source: { type: 'base64', media_type: mediaType, data: b64 } };
                     const prompts = {
-                      dni: 'Extrae del documento de identidad (DNI/NIE/Pasaporte): numero_documento, nombre_completo, domicilio_completo (calle, número, piso, puerta, bloque, escalera, CP, municipio, provincia). Responde SOLO con JSON válido, sin texto adicional. Ejemplo: {"numero_documento":"12345678A","nombre_completo":"Juan García López","domicilio_completo":"Calle Mayor 5, 3º B, 07001 Palma, Mallorca"}',
-                      cert_bancario: 'Extrae del certificado de titularidad bancaria: iban, titular. Responde SOLO con JSON válido. Ejemplo: {"iban":"ES12 3456 7890 1234 5678 9012","titular":"Juan García López"}',
-                      catastro: 'Extrae de la consulta descriptiva catastral: ref_catastral, direccion_completa (calle, número, planta, puerta, bloque, escalera, CP, municipio, provincia). Responde SOLO con JSON válido. Ejemplo: {"ref_catastral":"0000000AA0000A0000AA","direccion_completa":"Calle Mayor 5, 3ºB, 07001 Palma, Mallorca"}',
-                      nota_simple: 'Extrae de la nota simple registral: idufir_cru (número CRU/IDUFIR de 14 dígitos), ref_registral (número de finca registral, tomo, libro, folio). Responde SOLO con JSON válido. Ejemplo: {"idufir_cru":"12345678901234","ref_registral":"Finca 1234, Tomo 567, Libro 89, Folio 123"}'
+                      dni: 'Extract from this Spanish identity document (DNI/NIE/Passport). Return ONLY valid JSON with: numero_documento, nombre_completo (full name as shown), domicilio_completo (full address). Example: {"numero_documento":"12345678A","nombre_completo":"Juan Garcia Lopez","domicilio_completo":"Calle Mayor 5, 3B, 07001 Palma"}',
+                      cert_bancario: 'Extract from this Spanish bank certificate. Return ONLY valid JSON with: iban, titular. Example: {"iban":"ES12 3456 7890 1234 5678 9012","titular":"Juan Garcia Lopez"}',
+                      catastro: 'Extract from this Spanish cadastral document. Return ONLY valid JSON with: ref_catastral, direccion_completa. Example: {"ref_catastral":"0000000AA0000A0000AA","direccion_completa":"Calle Mayor 5, 3B, 07001 Palma"}',
+                      nota_simple: 'Extract from this Spanish property registry document. Return ONLY valid JSON with: idufir_cru (14-digit CRU/IDUFIR number), ref_registral. Example: {"idufir_cru":"12345678901234","ref_registral":"Finca 1234, Tomo 567"}'
                     };
                     const res = await fetch('/api/claude', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ model: 'claude-haiku-4-5', max_tokens: 512, messages: [{ role: 'user', content: [{ type: 'document', source: { type: 'base64', media_type: mediaType, data: b64 } }, { type: 'text', text: prompts[tipo] }] }] })
+                      body: JSON.stringify({ model: 'claude-haiku-4-5', max_tokens: 512, messages: [{ role: 'user', content: [contentBlock, { type: 'text', text: prompts[tipo] }] }] })
                     });
                     const data = await res.json();
+                    console.log('[extractFromDoc]', tipo, JSON.stringify(data).substring(0, 200));
                     const text = data.content && data.content[0] && data.content[0].text ? data.content[0].text.trim() : '';
-                    const jsonMatch = text.match(/\{[\s\S]*\}/);
+                    const jsonMatch = text.match(/{[\s\S]*}/);
                     if (jsonMatch) { const parsed = JSON.parse(jsonMatch[0]); onResult(parsed); }
                   } catch(e) { console.error('extractFromDoc error:', e); }
                 };
@@ -3947,6 +3951,7 @@ REGLAS:
                         vendedores.length > 1 ? ('Vendedor ' + (idx+1) + (v.nombre ? ' - ' + v.nombre : '')) : (v.nombre || 'Vendedor')
                       ),
                       DocSlot({ label: 'DNI / NIE / Pasaporte', icon: '🪧', file: docsVendedores[idx] && docsVendedores[idx].dni, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],dni:f}; return n; }); extractFromDoc(f, 'dni', function(d) { if (d.nombre_completo) updateVendedor(idx, 'nombre', d.nombre_completo); if (d.numero_documento) updateVendedor(idx, 'dni', d.numero_documento); if (d.domicilio_completo) updateVendedor(idx, 'domicilio', d.domicilio_completo); }); }, syncKey: 'dni_propietario', syncIdx: idx, required: true }),
+                      (docsVendedores[idx] && docsVendedores[idx].dni) || (docsPropiedad['dni_propietario'] && docsPropiedad['dni_propietario'][idx]) ? React.createElement('button', { onClick: function() { var f = (docsVendedores[idx] && docsVendedores[idx].dni) || (docsPropiedad['dni_propietario'] && docsPropiedad['dni_propietario'][idx]); extractFromDoc(f, 'dni', function(d) { if (d.nombre_completo) updateVendedor(idx, 'nombre', d.nombre_completo); if (d.numero_documento) updateVendedor(idx, 'dni', d.numero_documento); if (d.domicilio_completo) updateVendedor(idx, 'domicilio', d.domicilio_completo); }); }, style: { background: 'var(--amber)', color: '#000', border: 'none', padding: '4px 10px', fontSize: 10, fontWeight: 700, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8, borderRadius: 2 } }, '🔍 Extraer datos del DNI') : null,
                       DocSlot({ label: 'Poder notarial (si aplica)', icon: '✍️', file: docsVendedores[idx] && docsVendedores[idx].poder_notarial, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],poder_notarial:f}; return n; }); }, required: false }),
                       !ibanCompartidoVendedor && DocSlot({ label: 'Cert. Titularidad Bancaria (IBAN vendedor)', icon: '🏦', file: docsVendedores[idx] && docsVendedores[idx].cert_bancario, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],cert_bancario:f}; return n; }); extractFromDoc(f, 'cert_bancario', function(d) { if (d.iban) updateVendedor(idx, 'iban', d.iban); }); }, required: false })
                     ); }),
@@ -3984,7 +3989,8 @@ REGLAS:
                       React.createElement('div', { style: { fontSize: 11, fontWeight: 700, color: 'var(--muted)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 8 } },
                         compradores.length > 1 ? ('Comprador ' + (idx+1) + (c.nombre ? ' - ' + c.nombre : '')) : (c.nombre || 'Comprador')
                       ),
-                      DocSlot({ label: 'DNI / NIE / Pasaporte', icon: '🪧', file: docsCompradores[idx] && docsCompradores[idx].dni, onSet: function(f) { setDocsCompradores(function(prev) { var n=[...prev]; n[idx]={...n[idx],dni:f}; return n; }); extractFromDoc(f, 'dni', function(d) { if (d.nombre_completo) updateComprador(idx, 'nombre', d.nombre_completo); if (d.numero_documento) updateComprador(idx, 'dni', d.numero_documento); if (d.domicilio_completo) updateComprador(idx, 'domicilio', d.domicilio_completo); }); }, required: true })
+                      DocSlot({ label: 'DNI / NIE / Pasaporte', icon: '🪧', file: docsCompradores[idx] && docsCompradores[idx].dni, onSet: function(f) { setDocsCompradores(function(prev) { var n=[...prev]; n[idx]={...n[idx],dni:f}; return n; }); extractFromDoc(f, 'dni', function(d) { if (d.nombre_completo) updateComprador(idx, 'nombre', d.nombre_completo); if (d.numero_documento) updateComprador(idx, 'dni', d.numero_documento); if (d.domicilio_completo) updateComprador(idx, 'domicilio', d.domicilio_completo); }); }, required: true }),
+                      (docsCompradores[idx] && docsCompradores[idx].dni) ? React.createElement('button', { onClick: function() { var f = docsCompradores[idx].dni; extractFromDoc(f, 'dni', function(d) { if (d.nombre_completo) updateComprador(idx, 'nombre', d.nombre_completo); if (d.numero_documento) updateComprador(idx, 'dni', d.numero_documento); if (d.domicilio_completo) updateComprador(idx, 'domicilio', d.domicilio_completo); }); }, style: { background: 'var(--amber)', color: '#000', border: 'none', padding: '4px 10px', fontSize: 10, fontWeight: 700, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8, borderRadius: 2 } }, '🔍 Extraer datos del DNI') : null
                     ); }),
 
                     React.createElement('div', { style: { marginTop: 24 } }),
