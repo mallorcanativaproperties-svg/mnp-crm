@@ -3768,6 +3768,20 @@ REGLAS:
                         }
                       });
                       setDocsPropiedad(map);
+                      // Si hay más DNIs de propietario que vendedores inicializados, expandir los arrays
+                      const dnisPropietario = map['dni_propietario'] || [];
+                      if (dnisPropietario.length > 1) {
+                        setVendedores(prev => {
+                          if (prev.length >= dnisPropietario.length) return prev;
+                          const extras = dnisPropietario.slice(prev.length).map(() => ({ nombre: '', dni: '', domicilio: '', estado_civil: '', regimen: '', iban: '', vivienda_habitual: 'no' }));
+                          return [...prev, ...extras];
+                        });
+                        setDocsVendedores(prev => {
+                          if (prev.length >= dnisPropietario.length) return prev;
+                          const extras = dnisPropietario.slice(prev.length).map(() => ({ dni: null, poder_notarial: null, cert_bancario: null }));
+                          return [...prev, ...extras];
+                        });
+                      }
                     });
                 }, [p?.id]);
 
