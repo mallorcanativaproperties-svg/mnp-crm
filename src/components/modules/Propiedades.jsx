@@ -4024,7 +4024,7 @@ REGLAS:
                       React.createElement('a', { href: previewDoc.url, target: '_blank', rel: 'noopener noreferrer', style: { color: '#ccc', fontSize: 18, lineHeight: 1, textDecoration: 'none', padding: '0 0 0 8px' }, title: 'Abrir en nueva pestaña' }, '↗')
                     ),
                     /* Contenido documento */
-                    React.createElement('div', { style: { flex: 1, background: '#111', overflow: 'hidden' } },
+                    React.createElement('div', { style: { flex: 1, minHeight: 0, background: '#111', overflow: 'hidden' } },
                       (previewDoc.url.match(/\.pdf(\?|$)/i) || previewDoc.name?.toLowerCase().endsWith('.pdf'))
                         ? React.createElement('iframe', { src: previewDoc.url + '#toolbar=0', style: { width: '100%', height: '100%', border: 'none' } })
                         : React.createElement('img', { src: previewDoc.url, style: { width: '100%', height: '100%', objectFit: 'contain' }, alt: previewDoc.label })
