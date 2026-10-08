@@ -3751,13 +3751,20 @@ REGLAS:
                 const [docsPropiedad, setDocsPropiedad] = React.useState({});
                 React.useEffect(() => {
                   if (!p?.id) return;
-                  supabase.from('docs_propiedades').select('tipo,url,nombre').eq('propiedad_id', p.id).order('created_at', { ascending: false })
+                  supabase.from('docs_propiedades').select('tipo,url,nombre').eq('propiedad_id', p.id).order('created_at', { ascending: true })
                     .then(({ data }) => {
                       if (!data) return;
                       const map = {};
+                      // Tipos que pueden tener múltiples entradas (una por persona)
+                      const multiTipos = ['dni_propietario'];
                       data.forEach(function(row) {
-                        if (!map[row.tipo]) {
-                          map[row.tipo] = { name: row.nombre || row.tipo, url: row.url, _fromSupabase: true };
+                        if (multiTipos.includes(row.tipo)) {
+                          if (!map[row.tipo]) map[row.tipo] = [];
+                          map[row.tipo].push({ name: row.nombre || row.tipo, url: row.url, _fromSupabase: true });
+                        } else {
+                          if (!map[row.tipo]) {
+                            map[row.tipo] = { name: row.nombre || row.tipo, url: row.url, _fromSupabase: true };
+                          }
                         }
                       });
                       setDocsPropiedad(map);
@@ -3832,9 +3839,15 @@ REGLAS:
                 };
 
                 /* Renderizado de un campo de documento */
-                const DocSlot = ({ label, icon, file, onSet, syncKey, required }) => {
-                  const propFile = syncKey && docsPropiedad[syncKey];
-                  const activeFile = file || (syncKey && !file ? propFile : null);
+                const DocSlot = ({ label, icon, file, onSet, syncKey, syncIdx, required }) => {
+                  // syncKey puede ser string; si syncIdx está definido, docsPropiedad[syncKey] es array
+                  const propFileRaw = syncKey && docsPropiedad[syncKey];
+                  const propFile = propFileRaw
+                    ? (Array.isArray(propFileRaw)
+                        ? (syncIdx !== undefined ? propFileRaw[syncIdx] || null : propFileRaw[0] || null)
+                        : propFileRaw)
+                    : null;
+                  const activeFile = file || (!file && propFile ? propFile : null);
                   const previewUrl = activeFile
                     ? (activeFile._fromSupabase ? activeFile.url : (activeFile instanceof File ? URL.createObjectURL(activeFile) : null))
                     : null;
@@ -3919,7 +3932,7 @@ REGLAS:
                       React.createElement('div', { style: { fontSize: 11, fontWeight: 700, color: 'var(--muted)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 8 } },
                         vendedores.length > 1 ? ('Vendedor ' + (idx+1) + (v.nombre ? ' - ' + v.nombre : '')) : (v.nombre || 'Vendedor')
                       ),
-                      DocSlot({ label: 'DNI / NIE / Pasaporte', icon: '🪧', file: docsVendedores[idx] && docsVendedores[idx].dni, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],dni:f}; return n; }); extractFromDoc(f, 'dni', function(d) { if (d.numero_documento) updateVendedor(idx, 'dni', d.numero_documento); if (d.domicilio_completo) updateVendedor(idx, 'domicilio', d.domicilio_completo); }); }, syncKey: idx === 0 ? 'dni_propietario' : null, required: true }),
+                      DocSlot({ label: 'DNI / NIE / Pasaporte', icon: '🪧', file: docsVendedores[idx] && docsVendedores[idx].dni, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],dni:f}; return n; }); extractFromDoc(f, 'dni', function(d) { if (d.numero_documento) updateVendedor(idx, 'dni', d.numero_documento); if (d.domicilio_completo) updateVendedor(idx, 'domicilio', d.domicilio_completo); }); }, syncKey: 'dni_propietario', syncIdx: idx, required: true }),
                       DocSlot({ label: 'Poder notarial (si aplica)', icon: '✍️', file: docsVendedores[idx] && docsVendedores[idx].poder_notarial, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],poder_notarial:f}; return n; }); }, required: false }),
                       !ibanCompartidoVendedor && DocSlot({ label: 'Cert. Titularidad Bancaria (IBAN vendedor)', icon: '🏦', file: docsVendedores[idx] && docsVendedores[idx].cert_bancario, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],cert_bancario:f}; return n; }); extractFromDoc(f, 'cert_bancario', function(d) { if (d.iban) updateVendedor(idx, 'iban', d.iban); }); }, required: false })
                     ); }),
