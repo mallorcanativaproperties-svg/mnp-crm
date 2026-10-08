@@ -3821,7 +3821,36 @@ REGLAS:
                         });
                         return next;
                       });
-
+                      // Extraer datos automáticamente de nota simple y catastro si no hay datos guardados
+                      // (se ejecuta con setTimeout para que setInmuebles del arras_contratos tenga prioridad)
+                      setTimeout(function() {
+                        if (map['nota_simple']) {
+                          extractFromDoc(map['nota_simple'], 'nota_simple', function(d) {
+                            setInmuebles(function(prev) {
+                              const n = [...prev];
+                              if (!n[0]) return prev;
+                              const updated = { ...n[0] };
+                              if (d.ref_registral && !updated.ref_registral) updated.ref_registral = d.ref_registral;
+                              if (d.idufir_cru && !updated.idufir) updated.idufir = d.idufir_cru;
+                              n[0] = updated;
+                              return n;
+                            });
+                          });
+                        }
+                        if (map['descripcion_catastral']) {
+                          extractFromDoc(map['descripcion_catastral'], 'catastro', function(d) {
+                            setInmuebles(function(prev) {
+                              const n = [...prev];
+                              if (!n[0]) return prev;
+                              const updated = { ...n[0] };
+                              if (d.ref_catastral && !updated.ref_catastral) updated.ref_catastral = d.ref_catastral;
+                              if (d.direccion_completa && !updated.direccion) updated.direccion = d.direccion_completa;
+                              n[0] = updated;
+                              return n;
+                            });
+                          });
+                        }
+                      }, 1500);
                     });
                 }, [p?.id]);
 
@@ -3936,6 +3965,35 @@ REGLAS:
                   finally { setGenerando(false); }
                 };
 
+                /* ─── Subida automática de documentos Arras a Supabase ─── */
+                const uploadDocArras = async (file, tipo) => {
+                  if (!file || file._fromSupabase || !p?.id) return;
+                  try {
+                    const ext = (file.name || 'doc').split('.').pop().toLowerCase();
+                    const path = `documentos/${p.id}/${tipo}-${Date.now()}.${ext}`;
+                    const { error: upErr } = await supabase.storage.from('propiedades').upload(path, file, { upsert: true });
+                    if (upErr) { console.error('uploadDocArras storage error:', upErr); return; }
+                    const { data: urlData } = supabase.storage.from('propiedades').getPublicUrl(path);
+                    const url = urlData?.publicUrl;
+                    if (!url) return;
+                    const multiTipos = ['dni_propietario', 'dni_comprador'];
+                    if (multiTipos.includes(tipo)) {
+                      await supabase.from('docs_propiedades').insert({ propiedad_id: p.id, tipo, url, nombre: file.name || tipo });
+                    } else {
+                      await supabase.from('docs_propiedades').delete().eq('propiedad_id', p.id).eq('tipo', tipo);
+                      await supabase.from('docs_propiedades').insert({ propiedad_id: p.id, tipo, url, nombre: file.name || tipo });
+                    }
+                    const docObj = { name: file.name || tipo, url, _fromSupabase: true };
+                    setDocsPropiedad(function(prev) {
+                      if (multiTipos.includes(tipo)) {
+                        const arr = Array.isArray(prev[tipo]) ? [...prev[tipo], docObj] : [docObj];
+                        return { ...prev, [tipo]: arr };
+                      }
+                      return { ...prev, [tipo]: docObj };
+                    });
+                  } catch(e) { console.error('uploadDocArras error:', e); }
+                };
+
                 /* Renderizado de un campo de documento */
                 const DocSlot = ({ label, icon, file, onSet, syncKey, syncIdx, required }) => {
                   // syncKey puede ser string; si syncIdx está definido, docsPropiedad[syncKey] es array
@@ -4016,41 +4074,6 @@ REGLAS:
                   } catch(e) { console.error('extractFromDoc error:', e); }
                 };
 
-                /* Auto-extraer datos de nota simple y catastro cuando se cargan documentos de Supabase */
-                React.useEffect(() => {
-                  if (!docsPropiedad['nota_simple'] && !docsPropiedad['descripcion_catastral']) return;
-                  // Esperar 2s para que arras_contratos haya cargado y no sobreescribir datos guardados
-                  const timer = setTimeout(function() {
-                    if (docsPropiedad['nota_simple']) {
-                      extractFromDoc(docsPropiedad['nota_simple'], 'nota_simple', function(d) {
-                        setInmuebles(function(prev) {
-                          const n = [...prev];
-                          if (!n[0]) return prev;
-                          const u = { ...n[0] };
-                          if (d.ref_registral && !u.ref_registral) u.ref_registral = d.ref_registral;
-                          if (d.idufir_cru && !u.idufir) u.idufir = d.idufir_cru;
-                          n[0] = u;
-                          return n;
-                        });
-                      });
-                    }
-                    if (docsPropiedad['descripcion_catastral']) {
-                      extractFromDoc(docsPropiedad['descripcion_catastral'], 'catastro', function(d) {
-                        setInmuebles(function(prev) {
-                          const n = [...prev];
-                          if (!n[0]) return prev;
-                          const u = { ...n[0] };
-                          if (d.ref_catastral && !u.ref_catastral) u.ref_catastral = d.ref_catastral;
-                          if (d.direccion_completa && !u.direccion) u.direccion = d.direccion_completa;
-                          n[0] = u;
-                          return n;
-                        });
-                      });
-                    }
-                  }, 2000);
-                  return () => clearTimeout(timer);
-                }, [docsPropiedad['nota_simple'], docsPropiedad['descripcion_catastral']]);
-
                 /* Render principal */
                 return React.createElement('div', null,
 
@@ -4069,10 +4092,10 @@ REGLAS:
                       React.createElement('div', { style: { fontSize: 11, fontWeight: 700, color: 'var(--muted)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 8 } },
                         vendedores.length > 1 ? ('Vendedor ' + (idx+1) + (v.nombre ? ' - ' + v.nombre : '')) : (v.nombre || 'Vendedor')
                       ),
-                      DocSlot({ label: 'DNI / NIE / Pasaporte', icon: '🪧', file: docsVendedores[idx] && docsVendedores[idx].dni, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],dni:f}; return n; }); extractFromDoc(f, 'dni', function(d) { if (d.nombre_completo) updateVendedor(idx, 'nombre', d.nombre_completo); if (d.numero_documento) updateVendedor(idx, 'dni', d.numero_documento); if (d.domicilio_completo) updateVendedor(idx, 'domicilio', d.domicilio_completo); }); }, syncKey: 'dni_propietario', syncIdx: idx, required: true }),
-                      
-                      DocSlot({ label: 'Poder notarial (si aplica)', icon: '✍️', file: docsVendedores[idx] && docsVendedores[idx].poder_notarial, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],poder_notarial:f}; return n; }); }, required: false }),
-                      !ibanCompartidoVendedor && DocSlot({ label: 'Cert. Titularidad Bancaria (IBAN vendedor)', icon: '🏦', file: docsVendedores[idx] && docsVendedores[idx].cert_bancario, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],cert_bancario:f}; return n; }); extractFromDoc(f, 'cert_bancario', function(d) { if (d.iban) updateVendedor(idx, 'iban', d.iban); }); }, required: false })
+                      DocSlot({ label: 'DNI / NIE / Pasaporte', icon: '🪧', file: docsVendedores[idx] && docsVendedores[idx].dni, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],dni:f}; return n; }); if (f instanceof File) uploadDocArras(f, 'dni_propietario'); extractFromDoc(f, 'dni', function(d) { if (d.nombre_completo) updateVendedor(idx, 'nombre', d.nombre_completo); if (d.numero_documento) updateVendedor(idx, 'dni', d.numero_documento); if (d.domicilio_completo) updateVendedor(idx, 'domicilio', d.domicilio_completo); }); }, syncKey: 'dni_propietario', syncIdx: idx, required: true }),
+
+                      DocSlot({ label: 'Poder notarial (si aplica)', icon: '✍️', file: docsVendedores[idx] && docsVendedores[idx].poder_notarial, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],poder_notarial:f}; return n; }); if (f instanceof File) uploadDocArras(f, 'poder_notarial_vendedor'); }, required: false }),
+                      !ibanCompartidoVendedor && DocSlot({ label: 'Cert. Titularidad Bancaria (IBAN vendedor)', icon: '🏦', file: docsVendedores[idx] && docsVendedores[idx].cert_bancario, onSet: function(f) { setDocsVendedores(function(prev) { var n=[...prev]; n[idx]={...n[idx],cert_bancario:f}; return n; }); if (f instanceof File) uploadDocArras(f, 'cert_bancario_vendedor'); extractFromDoc(f, 'cert_bancario', function(d) { if (d.iban) updateVendedor(idx, 'iban', d.iban); }); }, required: false })
                     ); }),
 
                     React.createElement('div', { style: { marginTop: 24 } }),
@@ -4108,7 +4131,7 @@ REGLAS:
                       React.createElement('div', { style: { fontSize: 11, fontWeight: 700, color: 'var(--muted)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 8 } },
                         compradores.length > 1 ? ('Comprador ' + (idx+1) + (c.nombre ? ' - ' + c.nombre : '')) : (c.nombre || 'Comprador')
                       ),
-                      DocSlot({ label: 'DNI / NIE / Pasaporte', icon: '🪧', file: docsCompradores[idx] && docsCompradores[idx].dni, onSet: function(f) { setDocsCompradores(function(prev) { var n=[...prev]; n[idx]={...n[idx],dni:f}; return n; }); extractFromDoc(f, 'dni', function(d) { if (d.nombre_completo) updateComprador(idx, 'nombre', d.nombre_completo); if (d.numero_documento) updateComprador(idx, 'dni', d.numero_documento); if (d.domicilio_completo) updateComprador(idx, 'domicilio', d.domicilio_completo); }); }, syncKey: 'dni_comprador', syncIdx: idx, required: true }),
+                      DocSlot({ label: 'DNI / NIE / Pasaporte', icon: '🪧', file: docsCompradores[idx] && docsCompradores[idx].dni, onSet: function(f) { setDocsCompradores(function(prev) { var n=[...prev]; n[idx]={...n[idx],dni:f}; return n; }); if (f instanceof File) uploadDocArras(f, 'dni_comprador'); extractFromDoc(f, 'dni', function(d) { if (d.nombre_completo) updateComprador(idx, 'nombre', d.nombre_completo); if (d.numero_documento) updateComprador(idx, 'dni', d.numero_documento); if (d.domicilio_completo) updateComprador(idx, 'domicilio', d.domicilio_completo); }); }, syncKey: 'dni_comprador', syncIdx: idx, required: true }),
                       
                     ); }),
 
@@ -4118,13 +4141,13 @@ REGLAS:
                       inmuebles.length > 1 && React.createElement('div', { style: { fontSize: 11, fontWeight: 700, color: 'var(--muted)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 8 } },
                         (m.tipo.charAt(0).toUpperCase() + m.tipo.slice(1)) + ' ' + (idx+1) + (m.direccion ? ' - ' + m.direccion : '')
                       ),
-                      DocSlot({ label: 'Escritura de propiedad / Titulo', icon: '📜', file: docsInmuebles[idx] && docsInmuebles[idx].escritura, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],escritura:f}; return n; }); }, syncKey: 'escritura', required: false }),
-                      DocSlot({ label: 'Nota Simple (Registro de la Propiedad)', icon: '📋', file: docsInmuebles[idx] && docsInmuebles[idx].nota_simple, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],nota_simple:f}; return n; }); extractFromDoc(f, 'nota_simple', function(d) { if (d.ref_registral) updateInmueble(idx, 'ref_registral', d.ref_registral); if (d.idufir_cru) updateInmueble(idx, 'idufir', d.idufir_cru); }); }, syncKey: 'nota_simple', required: true }),
-                      DocSlot({ label: 'Consulta descriptiva y grafica - Catastro', icon: '🗺️', file: docsInmuebles[idx] && docsInmuebles[idx].catastro, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],catastro:f}; return n; }); extractFromDoc(f, 'catastro', function(d) { if (d.ref_catastral) updateInmueble(idx, 'ref_catastral', d.ref_catastral); if (d.direccion_completa) updateInmueble(idx, 'direccion', d.direccion_completa); }); }, syncKey: 'descripcion_catastral', required: true }),
-                      DocSlot({ label: 'Certificado de Eficiencia Energetica', icon: '⚡', file: docsInmuebles[idx] && docsInmuebles[idx].cert_energetico, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],cert_energetico:f}; return n; }); }, syncKey: 'certificado_energetico', required: false }),
-                      DocSlot({ label: 'Cedula de Habitabilidad / Licencia 1a Ocupacion', icon: '🏠', file: docsInmuebles[idx] && docsInmuebles[idx].cedula, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],cedula:f}; return n; }); }, syncKey: 'cedula_habitabilidad', required: false }),
-                      
-                      DocSlot({ label: 'Otros documentos del inmueble', icon: '📎', file: docsInmuebles[idx] && docsInmuebles[idx].otros, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],otros:f}; return n; }); }, required: false })
+                      DocSlot({ label: 'Escritura de propiedad / Titulo', icon: '📜', file: docsInmuebles[idx] && docsInmuebles[idx].escritura, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],escritura:f}; return n; }); if (f instanceof File) uploadDocArras(f, 'escritura'); }, syncKey: 'escritura', required: false }),
+                      DocSlot({ label: 'Nota Simple (Registro de la Propiedad)', icon: '📋', file: docsInmuebles[idx] && docsInmuebles[idx].nota_simple, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],nota_simple:f}; return n; }); if (f instanceof File) uploadDocArras(f, 'nota_simple'); extractFromDoc(f, 'nota_simple', function(d) { if (d.ref_registral) updateInmueble(idx, 'ref_registral', d.ref_registral); if (d.idufir_cru) updateInmueble(idx, 'idufir', d.idufir_cru); }); }, syncKey: 'nota_simple', required: true }),
+                      DocSlot({ label: 'Consulta descriptiva y grafica - Catastro', icon: '🗺️', file: docsInmuebles[idx] && docsInmuebles[idx].catastro, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],catastro:f}; return n; }); if (f instanceof File) uploadDocArras(f, 'descripcion_catastral'); extractFromDoc(f, 'catastro', function(d) { if (d.ref_catastral) updateInmueble(idx, 'ref_catastral', d.ref_catastral); if (d.direccion_completa) updateInmueble(idx, 'direccion', d.direccion_completa); }); }, syncKey: 'descripcion_catastral', required: true }),
+                      DocSlot({ label: 'Certificado de Eficiencia Energetica', icon: '⚡', file: docsInmuebles[idx] && docsInmuebles[idx].cert_energetico, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],cert_energetico:f}; return n; }); if (f instanceof File) uploadDocArras(f, 'certificado_energetico'); }, syncKey: 'certificado_energetico', required: false }),
+                      DocSlot({ label: 'Cedula de Habitabilidad / Licencia 1a Ocupacion', icon: '🏠', file: docsInmuebles[idx] && docsInmuebles[idx].cedula, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],cedula:f}; return n; }); if (f instanceof File) uploadDocArras(f, 'cedula_habitabilidad'); }, syncKey: 'cedula_habitabilidad', required: false }),
+
+                      DocSlot({ label: 'Otros documentos del inmueble', icon: '📎', file: docsInmuebles[idx] && docsInmuebles[idx].otros, onSet: function(f) { setDocsInmuebles(function(prev) { var n=[...prev]; n[idx]={...n[idx],otros:f}; return n; }); if (f instanceof File) uploadDocArras(f, 'otros_inmueble'); }, required: false })
                     ); }),
 
                   ),
@@ -4211,7 +4234,7 @@ REGLAS:
                       React.createElement('label', { htmlFor: 'iban_vendedor_comun', style: { fontSize: 12, fontWeight: 600, cursor: 'pointer', color: 'var(--text)' } }, 'Cuenta bancaria compartida entre todos los vendedores'),
                       ibanCompartidoVendedor && React.createElement('input', { style: { ...inpStyle, flex: 1, minWidth: 200 }, value: ibanVendedorComun, onChange: function(e) { setIbanVendedorComun(e.target.value); }, placeholder: 'ES00 0000 0000 0000 0000 0000' })
                     ),
-                    ibanCompartidoVendedor && DocSlot({ label: 'Cert. Titularidad Bancaria (cuenta compartida)', icon: '🏦', file: certBancarioComun, onSet: function(f) { setCertBancarioComun(f); extractFromDoc(f, 'cert_bancario', function(d) { if (d.iban) setIbanVendedorComun(d.iban); }); }, required: false }),
+                    ibanCompartidoVendedor && DocSlot({ label: 'Cert. Titularidad Bancaria (cuenta compartida)', icon: '🏦', file: certBancarioComun, onSet: function(f) { setCertBancarioComun(f); if (f instanceof File) uploadDocArras(f, 'cert_bancario_vendedor'); extractFromDoc(f, 'cert_bancario', function(d) { if (d.iban) setIbanVendedorComun(d.iban); }); }, required: false }),
 
                     secHdr('Compradores'),
                     visitasCandidatas.length > 0 && React.createElement('div', { style: { background: 'var(--bg)', border: '1px solid var(--amber)', padding: '14px 18px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' } },
