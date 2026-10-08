@@ -3796,37 +3796,27 @@ REGLAS:
                           return [...prev, ...extras];
                         });
                       }
-                      // Auto-activar documentos de Supabase en los estados de memoria (evita tener que pulsar "Usar de ficha")
-                      // DNIs de vendedores
+                      // Auto-activar documentos de Supabase en estados de memoria (sin necesidad de pulsar "Usar de ficha")
                       if (dnisPropietario.length > 0) {
-                        setDocsVendedores(prev => {
-                          const next = prev.map(function(v, i) {
-                            if (dnisPropietario[i] && !v.dni) return { ...v, dni: dnisPropietario[i] };
-                            return v;
-                          });
-                          return next;
-                        });
+                        setDocsVendedores(prev => prev.map(function(v, i) {
+                          if (dnisPropietario[i] && !v.dni) return { ...v, dni: dnisPropietario[i] };
+                          return v;
+                        }));
                       }
-                      // DNIs de compradores
                       if (dnisComprador.length > 0) {
-                        setDocsCompradores(prev => {
-                          const next = prev.map(function(v, i) {
-                            if (dnisComprador[i] && !v.dni) return { ...v, dni: dnisComprador[i] };
-                            return v;
-                          });
-                          return next;
-                        });
+                        setDocsCompradores(prev => prev.map(function(v, i) {
+                          if (dnisComprador[i] && !v.dni) return { ...v, dni: dnisComprador[i] };
+                          return v;
+                        }));
                       }
-                      // Documentos de inmuebles (nota simple, catastro, etc.) - solo el primero
                       const inmuebleDocKeys = ['escritura', 'nota_simple', 'descripcion_catastral', 'certificado_energetico', 'cedula_habitabilidad'];
                       const inmuebleStateKeys = ['escritura', 'nota_simple', 'catastro', 'cert_energetico', 'cedula'];
                       setDocsInmuebles(prev => {
-                        const next = [...prev];
+                        const next = prev.map(function(d) { return { ...d }; });
                         inmuebleDocKeys.forEach(function(syncKey, ki) {
                           const docFile = map[syncKey];
-                          if (docFile && next[0]) {
-                            const stateKey = inmuebleStateKeys[ki];
-                            if (!next[0][stateKey]) next[0] = { ...next[0], [stateKey]: docFile };
+                          if (docFile && next[0] && !next[0][inmuebleStateKeys[ki]]) {
+                            next[0] = { ...next[0], [inmuebleStateKeys[ki]]: docFile };
                           }
                         });
                         return next;
