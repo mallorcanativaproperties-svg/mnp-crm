@@ -3821,36 +3821,7 @@ REGLAS:
                         });
                         return next;
                       });
-                      // Extraer datos automáticamente de nota simple y catastro si no hay datos guardados
-                      // (se ejecuta con setTimeout para que setInmuebles del arras_contratos tenga prioridad)
-                      setTimeout(function() {
-                        if (map['nota_simple']) {
-                          extractFromDoc(map['nota_simple'], 'nota_simple', function(d) {
-                            setInmuebles(function(prev) {
-                              const n = [...prev];
-                              if (!n[0]) return prev;
-                              const updated = { ...n[0] };
-                              if (d.ref_registral && !updated.ref_registral) updated.ref_registral = d.ref_registral;
-                              if (d.idufir_cru && !updated.idufir) updated.idufir = d.idufir_cru;
-                              n[0] = updated;
-                              return n;
-                            });
-                          });
-                        }
-                        if (map['descripcion_catastral']) {
-                          extractFromDoc(map['descripcion_catastral'], 'catastro', function(d) {
-                            setInmuebles(function(prev) {
-                              const n = [...prev];
-                              if (!n[0]) return prev;
-                              const updated = { ...n[0] };
-                              if (d.ref_catastral && !updated.ref_catastral) updated.ref_catastral = d.ref_catastral;
-                              if (d.direccion_completa && !updated.direccion) updated.direccion = d.direccion_completa;
-                              n[0] = updated;
-                              return n;
-                            });
-                          });
-                        }
-                      }, 1500);
+
                     });
                 }, [p?.id]);
 
@@ -4044,6 +4015,41 @@ REGLAS:
                     if (jsonMatch) { const parsed = JSON.parse(jsonMatch[0]); onResult(parsed); }
                   } catch(e) { console.error('extractFromDoc error:', e); }
                 };
+
+                /* Auto-extraer datos de nota simple y catastro cuando se cargan documentos de Supabase */
+                React.useEffect(() => {
+                  if (!docsPropiedad['nota_simple'] && !docsPropiedad['descripcion_catastral']) return;
+                  // Esperar 2s para que arras_contratos haya cargado y no sobreescribir datos guardados
+                  const timer = setTimeout(function() {
+                    if (docsPropiedad['nota_simple']) {
+                      extractFromDoc(docsPropiedad['nota_simple'], 'nota_simple', function(d) {
+                        setInmuebles(function(prev) {
+                          const n = [...prev];
+                          if (!n[0]) return prev;
+                          const u = { ...n[0] };
+                          if (d.ref_registral && !u.ref_registral) u.ref_registral = d.ref_registral;
+                          if (d.idufir_cru && !u.idufir) u.idufir = d.idufir_cru;
+                          n[0] = u;
+                          return n;
+                        });
+                      });
+                    }
+                    if (docsPropiedad['descripcion_catastral']) {
+                      extractFromDoc(docsPropiedad['descripcion_catastral'], 'catastro', function(d) {
+                        setInmuebles(function(prev) {
+                          const n = [...prev];
+                          if (!n[0]) return prev;
+                          const u = { ...n[0] };
+                          if (d.ref_catastral && !u.ref_catastral) u.ref_catastral = d.ref_catastral;
+                          if (d.direccion_completa && !u.direccion) u.direccion = d.direccion_completa;
+                          n[0] = u;
+                          return n;
+                        });
+                      });
+                    }
+                  }, 2000);
+                  return () => clearTimeout(timer);
+                }, [docsPropiedad['nota_simple'], docsPropiedad['descripcion_catastral']]);
 
                 /* Render principal */
                 return React.createElement('div', null,
