@@ -3965,8 +3965,6 @@ REGLAS:
                     ); }),
 
                   ),
-
-                  ),
                   /* Panel previsualización lateral */
                   previewDoc && React.createElement('div', { style: { width: 380, flexShrink: 0, position: 'sticky', top: 16 } },
                     React.createElement('div', { style: { background: 'var(--bg)', border: '1px solid var(--border)', padding: '10px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 0 } },
