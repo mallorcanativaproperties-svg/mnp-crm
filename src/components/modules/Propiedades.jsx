@@ -3634,6 +3634,7 @@ REGLAS:
                 const arrasCanGenerate = ["director","administrador"].includes(currentUser?.role?.toLowerCase());
                 const [arrasTab, setArrasTab] = React.useState('docs');
                 const [previewDoc, setPreviewDoc] = React.useState(null); // { label, url, name }
+                const [previewWidth, setPreviewWidth] = React.useState(380);
 
                 /* Vendedores: array de personas */
                 const VENDEDOR_VACIO = { nombre: '', dni: '', domicilio: '', estado_civil: '', regimen: '', iban: '', vivienda_habitual: 'no' };
@@ -3976,10 +3977,34 @@ REGLAS:
 
                   ),
                   /* Panel previsualización overlay */
-                  previewDoc && React.createElement('div', { style: { position: 'fixed', top: 0, right: 0, width: 380, height: '100vh', zIndex: 1200, display: 'flex', flexDirection: 'column', boxShadow: '-4px 0 24px rgba(0,0,0,0.18)', animation: 'slideInRight 0.28s cubic-bezier(0.25,0.46,0.45,0.94) both' } },
+                  previewDoc && React.createElement('div', { style: { position: 'fixed', top: 0, right: 0, width: previewWidth, height: '100vh', zIndex: 1200, display: 'flex', flexDirection: 'column', boxShadow: '-4px 0 24px rgba(0,0,0,0.18)', animation: 'slideInRight 0.28s cubic-bezier(0.25,0.46,0.45,0.94) both' } },
+                    /* Borde redimensionable izquierdo */
+                    React.createElement('div', {
+                      style: { position: 'absolute', left: 0, top: 0, width: 6, height: '100%', cursor: 'ew-resize', zIndex: 10, background: 'transparent' },
+                      onMouseDown: function(e) {
+                        e.preventDefault();
+                        var startX = e.clientX;
+                        var startW = previewWidth;
+                        function onMove(ev) {
+                          var delta = startX - ev.clientX;
+                          var newW = Math.max(280, Math.min(window.innerWidth - 80, startW + delta));
+                          setPreviewWidth(newW);
+                        }
+                        function onUp() {
+                          document.removeEventListener('mousemove', onMove);
+                          document.removeEventListener('mouseup', onUp);
+                          document.body.style.cursor = '';
+                          document.body.style.userSelect = '';
+                        }
+                        document.body.style.cursor = 'ew-resize';
+                        document.body.style.userSelect = 'none';
+                        document.addEventListener('mousemove', onMove);
+                        document.addEventListener('mouseup', onUp);
+                      }
+                    }),
                     /* Cabecera oscura estilo WhatsApp */
                     React.createElement('div', { style: { background: '#1a1a1a', padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 } },
-                      React.createElement('button', { onClick: () => setPreviewDoc(null), style: { background: 'none', border: 'none', cursor: 'pointer', color: '#fff', fontSize: 20, lineHeight: 1, padding: '0 4px 0 0', display: 'flex', alignItems: 'center' } }, '←'),
+                      React.createElement('button', { onClick: () => { setPreviewDoc(null); setPreviewWidth(380); }, style: { background: 'none', border: 'none', cursor: 'pointer', color: '#fff', fontSize: 20, lineHeight: 1, padding: '0 4px 0 0', display: 'flex', alignItems: 'center' } }, '←'),
                       React.createElement('div', { style: { flex: 1, minWidth: 0 } },
                         React.createElement('div', { style: { fontSize: 13, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, previewDoc.label)
                       ),
