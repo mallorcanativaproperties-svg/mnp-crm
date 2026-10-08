@@ -4038,10 +4038,10 @@ REGLAS:
                       React.createElement('a', { href: previewDoc.url, target: '_blank', rel: 'noopener noreferrer', style: { color: '#ccc', fontSize: 18, lineHeight: 1, textDecoration: 'none', padding: '0 0 0 8px' }, title: 'Abrir en nueva pestaña' }, '↗')
                     ),
                     /* Contenido documento */
-                    React.createElement('div', { style: { flex: 1, minHeight: 0, background: '#111', overflow: 'hidden', display: 'flex', flexDirection: 'column' } },
+                    React.createElement('div', { style: { flex: 1, minHeight: 0, background: '#111', overflow: 'hidden', position: 'relative' } },
                       (previewDoc.url.match(/\.pdf(\?|$)/i) || previewDoc.name?.toLowerCase().endsWith('.pdf'))
-                        ? React.createElement('iframe', { src: previewDoc.url + '#toolbar=0', style: { flex: 1, width: '100%', border: 'none', display: 'block' } })
-                        : React.createElement('img', { src: previewDoc.url, style: { flex: 1, width: '100%', objectFit: 'contain', display: 'block' }, alt: previewDoc.label })
+                        ? React.createElement('iframe', { key: previewDoc.url, src: previewDoc.url + '#toolbar=0', style: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' } })
+                        : React.createElement('img', { src: previewDoc.url, style: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'contain' }, alt: previewDoc.label })
                     )
                   )
                   ),
