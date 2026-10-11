@@ -141,14 +141,14 @@ function detectarIdioma() {
   return "es";
 }
 
-// ── Paleta Nativa Properties — Azul Marino ───────────────────────
-const B  = "#0f2a50";   // azul marino oscuro — firma
-const BL = "#1a4a8a";   // azul marino medio — acento
-const P  = "#2d6099";   // azul medio — títulos sección
-const DK = "#0d1f3c";   // azul marino profundo — hero y botón
-const CR = "#f0f4f8";   // fondo claro azulado
+// ── Paleta Nativa Properties ─────────────────────────────────────
+const B  = "#9E8054";   // oro oscuro — firma
+const BL = "#C3A171";   // oro principal — acento
+const P  = "#16294A";   // azul marino medio — títulos sección
+const DK = "#0d1520";   // azul marino profundo — hero y botón
+const CR = "#F2EFEB";   // crema muy suave — fondo
 const WH = "#FFFFFF";
-const BD = "#c8d6e5";   // borde azulado
+const BD = "#DDD8D0";   // borde crema
 
 function interpretarPresupuesto(raw) {
   if (!raw) return 0;
@@ -185,8 +185,8 @@ const ZONAS_MAP_F = {
 
 function SelectorZonasForm({ value = [], onChange, tipo = "deseada", idioma = "es" }) {
   const [muniSel, setMuniSel] = useState("");
-  const accentColor = tipo === "deseada" ? "#1a4a8a" : "#A23A3A";
-  const accentBg    = tipo === "deseada" ? "#1a4a8a18" : "#D4545415";
+  const accentColor = tipo === "deseada" ? "#C3A171" : "#A23A3A";
+  const accentBg    = tipo === "deseada" ? "#C8A97E15" : "#D4545415";
   const prefix      = tipo === "excluida" ? "✕ " : "";
   const municipios  = Object.keys(ZONAS_MAP_F);
   const zonasDeMuni = muniSel ? (ZONAS_MAP_F[muniSel] || []) : [];
@@ -214,7 +214,7 @@ function SelectorZonasForm({ value = [], onChange, tipo = "deseada", idioma = "e
       </div>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
         <select value={muniSel} onChange={e => setMuniSel(e.target.value)}
-          style={{ flex: 1, minWidth: 140, padding: "12px 16px", background: "#FFFFFF", border: "1px solid #c8d6e5", borderRadius: 0, color: muniSel ? "#0d1f3c" : "#9A968A", fontSize: 15, fontFamily: "Inter, sans-serif", cursor: "pointer" }}>
+          style={{ flex: 1, minWidth: 140, padding: "12px 16px", background: "#FFFFFF", border: "1px solid #DDD8D0", borderRadius: 0, color: muniSel ? "#0d1520" : "#9A968A", fontSize: 15, fontFamily: "Inter, sans-serif", cursor: "pointer" }}>
           <option value="">+ {labelMuni}</option>
           {municipios.map(m => <option key={m} value={m}>{m}</option>)}
         </select>
@@ -232,7 +232,7 @@ function SelectorZonasForm({ value = [], onChange, tipo = "deseada", idioma = "e
             const sel = value.includes(etiqueta);
             return (
               <button key={z} type="button" onClick={() => toggleZona(etiqueta)}
-                style={{ padding: "6px 12px", border: "1px solid " + (sel ? accentColor : "#c8d6e5"), background: sel ? accentBg : "transparent", color: sel ? accentColor : "#6B7280", fontSize: 13, cursor: "pointer", fontFamily: "Inter, sans-serif", transition: "all 0.15s" }}>
+                style={{ padding: "6px 12px", border: "1px solid " + (sel ? accentColor : "#DDD8D0"), background: sel ? accentBg : "transparent", color: sel ? accentColor : "#6B7280", fontSize: 13, cursor: "pointer", fontFamily: "Inter, sans-serif", transition: "all 0.15s" }}>
                 {sel ? "✓ " : ""}{z}
               </button>
             );
@@ -412,18 +412,18 @@ export default function CualificacionCompradores() {
         {/* Instagram */}
         <a href="https://www.instagram.com/mallorcanativaproperties/" target="_blank" rel="noopener noreferrer"
           style={{ display: "inline-flex", alignItems: "center", gap: 8, marginBottom: 24, textDecoration: "none",
-            padding: "10px 20px", border: "1px solid #c8d6e5", background: "#FFFFFF" }}>
+            padding: "10px 20px", border: "1px solid #E7E1D4", background: "#FFFFFF" }}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="2" y="2" width="20" height="20" rx="5" stroke="#1a4a8a" strokeWidth="1.5"/>
-            <circle cx="12" cy="12" r="4" stroke="#1a4a8a" strokeWidth="1.5"/>
-            <circle cx="17.5" cy="6.5" r="1" fill="#1a4a8a"/>
+            <rect x="2" y="2" width="20" height="20" rx="5" stroke="#C3A171" strokeWidth="1.5"/>
+            <circle cx="12" cy="12" r="4" stroke="#C3A171" strokeWidth="1.5"/>
+            <circle cx="17.5" cy="6.5" r="1" fill="#C3A171"/>
           </svg>
-          <span style={{ fontSize: 13, color: "#1a4a8a", fontFamily: "Inter, sans-serif", fontWeight: 500 }}>
+          <span style={{ fontSize: 13, color: "#C3A171", fontFamily: "Inter, sans-serif", fontWeight: 500 }}>
             {t.instagram || "Síguenos en Instagram"}
           </span>
         </a>
         <div style={{ height: 1, background: BD, marginBottom: 28 }} />
-        <div style={{ fontSize: 11, color: BL, letterSpacing: "0.18em", marginBottom: 6 }}>MALLORCA NATIVA PROPERTIES</div>
+        <div style={{ fontSize: 11, color: BL, letterSpacing: "0.18em", marginBottom: 6 }}>NATIVA PROPERTIES</div>
         <a href="https://mallorcanativaproperties.com" style={{ fontSize: 12, color: "#9A968A", textDecoration: "none", fontFamily: "Inter, sans-serif" }}>
           mallorcanativaproperties.com
         </a>
@@ -447,13 +447,13 @@ export default function CualificacionCompradores() {
         {/* Overlay degradado sobre imagen imaginada */}
         <div style={{
           position: "absolute", inset: 0,
-          background: `linear-gradient(160deg, ${DK} 0%, rgba(13,31,60,0.82) 50%, rgba(26,74,138,0.6) 100%)`,
+          background: `linear-gradient(160deg, ${DK} 0%, rgba(13,21,32,0.82) 50%, rgba(22,41,74,0.65) 100%)`,
           zIndex: 1,
         }} />
         {/* Textura de puntos sutil */}
         <div style={{
           position: "absolute", inset: 0, opacity: 0.035,
-          backgroundImage: "radial-gradient(circle, #1a4a8a 1px, transparent 1px)",
+          backgroundImage: "radial-gradient(circle, #C3A171 1px, transparent 1px)",
           backgroundSize: "24px 24px", zIndex: 2,
         }} />
 
@@ -462,14 +462,14 @@ export default function CualificacionCompradores() {
           <div style={{ position: "absolute", top: 16, right: 20, zIndex: 10, display: "flex", gap: 4 }}>
             {["es","en","de","nl","fr"].map(l => (
               <button key={l} onClick={() => setIdioma(l)}
-                style={{ padding: "3px 8px", border: "1px solid " + (idioma === l ? BL : "rgba(26,74,138,0.3)"), background: idioma === l ? BL : "transparent", color: idioma === l ? "#fff" : BL, fontSize: 9, cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+                style={{ padding: "3px 8px", border: "1px solid " + (idioma === l ? BL : "rgba(195,161,113,0.3)"), background: idioma === l ? BL : "transparent", color: idioma === l ? "#fff" : BL, fontSize: 9, cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600, letterSpacing: "0.05em", textTransform: "uppercase" }}>
                 {l === "es" ? "ES" : l === "en" ? "EN" : l === "de" ? "DE" : l === "nl" ? "NL" : "FR"}
               </button>
             ))}
           </div>
           {/* Logotipo texto */}
           <div style={{ marginBottom: 28 }}>
-            <div style={{ fontSize: 10, color: BL, letterSpacing: "0.28em", marginBottom: 4, fontWeight: 400 }}>MALLORCA NATIVA</div>
+            <div style={{ fontSize: 10, color: BL, letterSpacing: "0.28em", marginBottom: 4, fontWeight: 400 }}>NATIVA PROPERTIES</div>
             <div style={{ width: 32, height: 1, background: `${BL}80` }} />
           </div>
 
@@ -511,7 +511,7 @@ export default function CualificacionCompradores() {
 
           <Field label={t.tel} required>
             <div style={{
-              background: "#0d1f3c",
+              background: "#0d1520",
               padding: "10px 14px",
               marginBottom: 10,
               display: "flex",
@@ -520,14 +520,14 @@ export default function CualificacionCompradores() {
               boxSizing: "border-box",
               width: "100%",
             }}>
-              <svg width="20" height="20" viewBox="0 0 36 36" fill="none" style={{ flexShrink: 0 }}><circle cx="18" cy="18" r="18" fill="#1a4a8a"/><path d="M18 7C12.48 7 8 11.48 8 17c0 1.74.47 3.37.92 4.41L7 29l7.59-1.92A9.96 9.96 0 0018 27c5.52 0 10-4.48 10-10S23.52 7 18 7z" fill="white" fillOpacity="0.9"/><path d="M23.5 21.2c-.3.75-1.4 1.4-2.25 1.55-.6.1-1.4.15-4.15-.95C13.7 20.45 11.55 17 11.4 16.8c-.15-.2-1.2-1.6-1.2-3.05 0-1.45.75-2.15 1.05-2.5.3-.3.65-.4.85-.4.2 0 .4 0 .6 0 .2 0 .45-.05.7.5.25.55.85 2 .9 2.15.05.15.1.35 0 .55-.1.25-.15.35-.35.6-.15.2-.35.45-.5.6-.2.2-.4.4-.2.7.2.35.95 1.55 2.05 2.55 1.4 1.25 2.55 1.65 2.9 1.8.35.15.55.1.75-.1.2-.25.95-1.1 1.15-1.4.2-.35.45-.3.75-.2.3.1 1.75.8 2.05.95.3.15.5.2.6.35.1.15.1.85 0 1.3z" fill="#0f2a50"/></svg>
+              <svg width="20" height="20" viewBox="0 0 36 36" fill="none" style={{ flexShrink: 0 }}><circle cx="18" cy="18" r="18" fill="#C3A171"/><path d="M18 7C12.48 7 8 11.48 8 17c0 1.74.47 3.37.92 4.41L7 29l7.59-1.92A9.96 9.96 0 0018 27c5.52 0 10-4.48 10-10S23.52 7 18 7z" fill="white" fillOpacity="0.9"/><path d="M23.5 21.2c-.3.75-1.4 1.4-2.25 1.55-.6.1-1.4.15-4.15-.95C13.7 20.45 11.55 17 11.4 16.8c-.15-.2-1.2-1.6-1.2-3.05 0-1.45.75-2.15 1.05-2.5.3-.3.65-.4.85-.4.2 0 .4 0 .6 0 .2 0 .45-.05.7.5.25.55.85 2 .9 2.15.05.15.1.35 0 .55-.1.25-.15.35-.35.6-.15.2-.35.45-.5.6-.2.2-.4.4-.2.7.2.35.95 1.55 2.05 2.55 1.4 1.25 2.55 1.65 2.9 1.8.35.15.55.1.75-.1.2-.25.95-1.1 1.15-1.4.2-.35.45-.3.75-.2.3.1 1.75.8 2.05.95.3.15.5.2.6.35.1.15.1.85 0 1.3z" fill="#8B6500"/></svg>
               <span style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#F8F6F1", flex: 1, minWidth: 0, lineHeight: 1.4 }}>
                 Te enviaremos las oportunidades por WhatsApp
               </span>
             </div>
             <div style={{ display: "flex", gap: 0 }}>
               <select value={pais} onChange={e => setPais(e.target.value)}
-                style={{ ...INP, width: "auto", maxWidth: 90, flexShrink: 0, borderRight: "none", background: "#dde8f2", color: "#0d1f3c", cursor: "pointer", appearance: "auto", paddingLeft: 8, paddingRight: 4, fontSize: 14 }}>
+                style={{ ...INP, width: "auto", maxWidth: 90, flexShrink: 0, borderRight: "none", background: "#F0ECE6", color: "#0d1520", cursor: "pointer", appearance: "auto", paddingLeft: 8, paddingRight: 4, fontSize: 14 }}>
                 {PAISES.map(p => (
                   <option key={p.pais} value={p.pais}>{p.flag} {p.prefijo || p.pais}</option>
                 ))}
@@ -610,20 +610,20 @@ export default function CualificacionCompradores() {
           {/* Consentimiento RGPD — obligatorio antes del envío */}
           <div style={{ marginBottom: 20, boxSizing: "border-box", width: "100%", overflow: "hidden" }}
             onClick={() => setRgpdAceptado(v => !v)}>
-            <div style={{ display: "flex", alignItems: "flex-start", gap: 12, cursor: "pointer", padding: "14px 16px", background: "#eaf0f8", border: "1px solid #c8d6e5", boxSizing: "border-box", width: "100%" }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 12, cursor: "pointer", padding: "14px 16px", background: "#F8F6F1", border: "1px solid #E7E1D4", boxSizing: "border-box", width: "100%" }}>
               <div style={{ marginTop: 2, flexShrink: 0 }}>
                 <input
                   type="checkbox"
                   checked={rgpdAceptado}
                   onChange={e => { e.stopPropagation(); setRgpdAceptado(e.target.checked); }}
-                  style={{ accentColor: "#1a4a8a", width: 18, height: 18, cursor: "pointer", display: "block" }}
+                  style={{ accentColor: "#C3A171", width: 18, height: 18, cursor: "pointer", display: "block" }}
                 />
               </div>
               <p style={{ fontSize: 13, color: "#5C5852", lineHeight: 1.6, fontFamily: "Inter, sans-serif", margin: 0, flex: 1, minWidth: 0, wordBreak: "break-word" }}>
                 {t.rgpd}{" "}
                 <a href="/privacy" target="_blank" rel="noopener noreferrer"
                   onClick={e => e.stopPropagation()}
-                  style={{ color: "#1a4a8a", textDecoration: "underline" }}>
+                  style={{ color: "#C3A171", textDecoration: "underline" }}>
                   {t.privacidad}
                 </a>
                 {" "}{t.rgpdLey}
@@ -633,7 +633,7 @@ export default function CualificacionCompradores() {
 
           <button type="submit" disabled={sending || !camposValidos} style={{
             width: "100%", padding: "17px 24px",
-            background: (sending || !camposValidos) ? "#8ba8c8" : DK,
+            background: (sending || !camposValidos) ? "#C8BFB5" : DK,
             border: "none", color: WH,
             fontSize: 13, fontWeight: 500, letterSpacing: "0.1em",
             cursor: (sending || !camposValidos) ? "not-allowed" : "pointer",
@@ -657,7 +657,7 @@ export default function CualificacionCompradores() {
 
         <Divider />
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 10, color: BL, letterSpacing: "0.22em", marginBottom: 6 }}>MALLORCA NATIVA PROPERTIES</div>
+          <div style={{ fontSize: 10, color: BL, letterSpacing: "0.22em", marginBottom: 6 }}>NATIVA PROPERTIES</div>
           <a href="https://mallorcanativaproperties.com" style={{ fontSize: 12, color: "#9A968A", textDecoration: "none", fontFamily: "Inter, sans-serif" }}>
             mallorcanativaproperties.com
           </a>
