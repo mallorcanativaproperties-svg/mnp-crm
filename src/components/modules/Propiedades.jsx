@@ -202,68 +202,168 @@ const CALIDADES = [
   { cat: "Extras", items: ["Amueblado","Reforma reciente","Obra nueva"] },
 ];
 
+const CCAA_MAP = {
+  "Andalucía": ["Almería","Cádiz","Córdoba","Granada","Huelva","Jaén","Málaga","Sevilla"],
+  "Aragón": ["Huesca","Teruel","Zaragoza"],
+  "Asturias": ["Asturias"],
+  "Illes Balears": ["Illes Balears"],
+  "Canarias": ["Las Palmas","Santa Cruz de Tenerife"],
+  "Cantabria": ["Cantabria"],
+  "Castilla-La Mancha": ["Albacete","Ciudad Real","Cuenca","Guadalajara","Toledo"],
+  "Castilla y León": ["Ávila","Burgos","León","Palencia","Salamanca","Segovia","Soria","Valladolid","Zamora"],
+  "Cataluña": ["Barcelona","Girona","Lleida","Tarragona"],
+  "Comunitat Valenciana": ["Alicante","Castellón","Valencia"],
+  "Extremadura": ["Badajoz","Cáceres"],
+  "Galicia": ["A Coruña","Lugo","Ourense","Pontevedra"],
+  "La Rioja": ["La Rioja"],
+  "Madrid": ["Madrid"],
+  "Murcia": ["Murcia"],
+  "Navarra": ["Navarra"],
+  "País Vasco": ["Álava","Gipuzkoa","Bizkaia"],
+  "Ceuta": ["Ceuta"],
+  "Melilla": ["Melilla"]
+};
+
 const PROVINCIAS_MAP = {
-  "Mallorca": [
-    "Alaró","Alcúdia","Algaida","Andratx","Ariany","Artà","Banyalbufar","Binissalem",
-    "Búger","Bunyola","Calvià","Campanet","Campos","Capdepera","Consell","Costitx",
-    "Deià","Escorca","Esporles","Estellencs","Felanitx","Fornalutx","Inca","Lloret de Vistalegre",
-    "Lloseta","Llubí","Llucmajor","Manacor","Mancor de la Vall","Maria de la Salut","Marratxí",
-    "Montuïri","Muro","Palma","Petra","Pollença","Porreres","Puigpunyent","Sa Pobla",
-    "Sant Joan","Sant Llorenç des Cardassar","Santa Eugènia","Santa Margalida","Santa Maria del Camí",
-    "Santanyí","Selva","Sencelles","Ses Salines","Sineu","Sóller","Son Servera","Valldemossa","Vilafranca de Bonany"
-  ],
-  "Menorca": [
-    "Maó","Ciutadella","Alaior","Es Mercadal","Ferreries","Es Castell","Sant Lluís","Es Migjorn Gran"
-  ],
-  "Valencia": [
-    "Alacant","Alcoi","Altea","Benidorm","Calp","Dénia","Elx","Gandia","Guardamar del Segura",
-    "La Vila Joiosa","Novelda","Orihuela","Pego","Santa Pola","Torrevieja","Xàbia",
-    "Alzira","Burjassot","Cullera","Mislata","Ontinyent","Paterna","Requena","Sueca",
-    "Torrent","Utiel","Valencia","Xàtiva","Castelló de la Plana","Benicarló","Morella",
-    "Nules","Peníscola","Segorbe","Vinaròs"
-  ]
+  "Almería": ["Almería","Roquetas de Mar","El Ejido","Vícar","Adra","Berja","Huércal de Almería","Níjar","Carboneras","Mojácar","Vera","Cuevas del Almanzora"],
+  "Cádiz": ["Algeciras","Cádiz","Chiclana de la Frontera","El Puerto de Santa María","Jerez de la Frontera","La Línea de la Concepción","Sanlúcar de Barrameda","San Fernando","Tarifa","Conil de la Frontera","Barbate","Vejer de la Frontera","Rota","Puerto Real","Medina-Sidonia"],
+  "Córdoba": ["Córdoba","Lucena","Montilla","Puente Genil","Priego de Córdoba","Baena","Cabra","Pozoblanco","Palma del Río","Aguilar de la Frontera"],
+  "Granada": ["Granada","Motril","Baza","Guadix","Loja","Almuñécar","Maracena","Armilla","Ogíjares","La Zubia","Salobreña","Nerja","Albolote"],
+  "Huelva": ["Huelva","Lepe","Almonte","Moguer","Isla Cristina","Ayamonte","Palos de la Frontera","Punta Umbría","Bollullos Par del Condado","Cartaya"],
+  "Jaén": ["Jaén","Úbeda","Linares","Andújar","Martos","Baeza","Alcalá la Real","La Carolina","Bailén"],
+  "Málaga": ["Málaga","Marbella","Fuengirola","Benalmádena","Torremolinos","Vélez-Málaga","Estepona","Mijas","Rincón de la Victoria","Nerja","Antequera","Ronda","Manilva","Casares","Frigiliana","Ojén","Benahavís"],
+  "Sevilla": ["Sevilla","Dos Hermanas","Alcalá de Guadaíra","Écija","Utrera","Mairena del Aljarafe","Bormujos","Camas","Tomares","San Juan de Aznalfarache","Gelves","Coria del Río"],
+  "Huesca": ["Huesca","Barbastro","Monzón","Sabiñánigo","Jaca","Fraga","Binéfar"],
+  "Teruel": ["Teruel","Alcañiz","Calamocha","Andorra","Utrillas"],
+  "Zaragoza": ["Zaragoza","Calatayud","Ejea de los Caballeros","Tarazona","Utebo","Cuarte de Huerva","Caspe"],
+  "Asturias": ["Oviedo","Gijón","Avilés","Siero","Mieres","Langreo","Cangas de Onís","Castrillón","Llanera"],
+  "Illes Balears": ["Palma","Calvià","Marratxí","Llucmajor","Inca","Manacor","Sóller","Andratx","Felanitx","Pollença","Alcúdia","Sa Pobla","Campos","Santanyí","Artà","Capdepera","Bunyola","Binissalem","Alaior","Maó","Ciutadella de Menorca","Ferreries","Es Mercadal","Es Castell","Sant Lluís","Es Migjorn Gran","Eivissa","Santa Eulària des Riu","Sant Antoni de Portmany","Sant Josep de sa Talaia","Sant Joan de Labritja","Formentera"],
+  "Las Palmas": ["Las Palmas de Gran Canaria","Telde","Santa Lucía de Tirajana","San Bartolomé de Tirajana","Arrecife","Teguise","Puerto del Rosario","Pájara","La Oliva","Arucas","Gáldar","Mogán"],
+  "Santa Cruz de Tenerife": ["Santa Cruz de Tenerife","San Cristóbal de La Laguna","Arona","Adeje","La Orotava","Puerto de la Cruz","Los Llanos de Aridane","Santiago del Teide","Granadilla de Abona","Guía de Isora","Candelaria"],
+  "Cantabria": ["Santander","Torrelavega","Camargo","El Astillero","Laredo","Castro-Urdiales","Piélagos","San Vicente de la Barquera","Santillana del Mar"],
+  "Albacete": ["Albacete","Hellín","Villarrobledo","Almansa","La Roda","Caudete"],
+  "Ciudad Real": ["Ciudad Real","Puertollano","Tomelloso","Valdepeñas","Alcázar de San Juan","Manzanares","Daimiel"],
+  "Cuenca": ["Cuenca","Tarancón","Motilla del Palancar","San Clemente"],
+  "Guadalajara": ["Guadalajara","Azuqueca de Henares","Alovera","Cabanillas del Campo","Sigüenza"],
+  "Toledo": ["Toledo","Talavera de la Reina","Illescas","Seseña","Madridejos","Torrijos","Consuegra","Ocaña"],
+  "Ávila": ["Ávila","Arévalo","El Barco de Ávila","Arenas de San Pedro"],
+  "Burgos": ["Burgos","Miranda de Ebro","Aranda de Duero","Briviesca","Lerma"],
+  "León": ["León","Ponferrada","San Andrés del Rabanedo","Villaquilambre","Astorga","La Bañeza"],
+  "Palencia": ["Palencia","Aguilar de Campoo","Guardo","Venta de Baños"],
+  "Salamanca": ["Salamanca","Béjar","Ciudad Rodrigo","Santa Marta de Tormes"],
+  "Segovia": ["Segovia","Cuéllar","El Espinar","San Ildefonso"],
+  "Soria": ["Soria","Almazán","El Burgo de Osma"],
+  "Valladolid": ["Valladolid","Medina del Campo","Laguna de Duero","Arroyo de la Encomienda","Tordesillas","Peñafiel"],
+  "Zamora": ["Zamora","Benavente","Toro"],
+  "Barcelona": ["Barcelona","Badalona","Hospitalet de Llobregat","Sabadell","Terrassa","Sant Cugat del Vallès","Mataró","Manresa","Cornellà de Llobregat","El Prat de Llobregat","Rubí","Castelldefels","Gavà","Viladecans","Esplugues de Llobregat","Sitges","Vilanova i la Geltrú","Sant Feliu de Llobregat","Mollet del Vallès","Cerdanyola del Vallès"],
+  "Girona": ["Girona","Lloret de Mar","Blanes","Figueres","Roses","Palafrugell","Palamós","Salt","Platja d'Aro","Tossa de Mar","Cadaqués"],
+  "Lleida": ["Lleida","Tàrrega","Mollerussa","La Seu d'Urgell","Balaguer"],
+  "Tarragona": ["Tarragona","Reus","Cambrils","Salou","Vila-seca","Valls","El Vendrell","Torredembarra","Amposta","Tortosa","Vandellòs i l'Hospitalet de l'Infant"],
+  "Alicante": ["Alicante","Benidorm","Torrevieja","Orihuela","Elche","Santa Pola","Guardamar del Segura","Pilar de la Horadada","San Miguel de Salinas","Rojales","Denia","Jávea","Calpe","Altea","Moraira","Benissa","La Nucía","Alfàs del Pi","Villajoyosa","El Campello","Mutxamel","Sant Joan d'Alacant","Novelda","Elda","Petrer","Villena","Alcoy","Ibi"],
+  "Castellón": ["Castellón de la Plana","Vinaròs","Benicarló","Peñíscola","Benicàssim","Nules","Almassora","Oropesa del Mar","Torreblanca","Segorbe"],
+  "Valencia": ["Valencia","Torrent","Gandia","Paterna","Sagunto","Mislata","Burjassot","Alzira","Xàtiva","Sueca","Cullera","Oliva","Ontinyent","Requena","Utiel","Llíria","Manises","Aldaia","Alaquàs","Picassent","Catarroja","Paiporta"],
+  "Badajoz": ["Badajoz","Mérida","Don Benito","Villanueva de la Serena","Zafra","Almendralejo"],
+  "Cáceres": ["Cáceres","Plasencia","Miajadas","Coria","Navalmoral de la Mata"],
+  "A Coruña": ["A Coruña","Santiago de Compostela","Ferrol","Oleiros","Culleredo","Cambre","Arteixo","Narón","Carballo"],
+  "Lugo": ["Lugo","Monforte de Lemos","Vilalba","Sarria","Viveiro"],
+  "Ourense": ["Ourense","Verín","O Barco de Valdeorras","Xinzo de Limia"],
+  "Pontevedra": ["Vigo","Pontevedra","Vilagarcía de Arousa","Redondela","Marín","Cangas","Moaña","O Grove","Sanxenxo","Bayona","Nigrán"],
+  "La Rioja": ["Logroño","Calahorra","Lardero","Arnedo","Haro","Alfaro","Nájera"],
+  "Madrid": ["Madrid","Alcalá de Henares","Fuenlabrada","Getafe","Leganés","Móstoles","Alcorcón","Torrejón de Ardoz","Parla","Alcobendas","Pozuelo de Alarcón","Majadahonda","Boadilla del Monte","Las Rozas de Madrid","San Sebastián de los Reyes","Rivas-Vaciamadrid","Pinto","Valdemoro","Aranjuez","Arganda del Rey","Collado Villalba","Galapagar","Tres Cantos","Colmenar Viejo","Coslada","Navalcarnero"],
+  "Murcia": ["Murcia","Cartagena","Lorca","Molina de Segura","Alcantarilla","Mazarrón","San Javier","San Pedro del Pinatar","Torre-Pacheco","Los Alcázares","Águilas","Totana","Cieza","Jumilla","Yecla"],
+  "Navarra": ["Pamplona","Tudela","Barañáin","Burlada","Estella-Lizarra","Tafalla","Zizur Mayor"],
+  "Álava": ["Vitoria-Gasteiz","Amurrio","Llodio","Salvatierra"],
+  "Gipuzkoa": ["San Sebastián","Irun","Eibar","Arrasate","Rentería","Zarautz","Tolosa","Hernani"],
+  "Bizkaia": ["Bilbao","Barakaldo","Getxo","Basauri","Leioa","Sestao","Santurtzi","Portugalete","Durango"],
+  "Ceuta": ["Ceuta"],
+  "Melilla": ["Melilla"]
 };
 
 const ZONAS_MAP = {
-  // Mallorca
-  "Palma": ["Casco Antiguo","Santa Catalina","El Terreno","Son Espanyolet","Son Cotoner","Son Dameto","La Bonanova","Genova","Cala Major","Son Rapinya","La Vileta","Pere Garau","Foners","Plaza de Toros","Son Gotleu","La Soledad","Vivero","Son Oliva","Rafal","Son Cladera","Son Ferriol","Sant Jordi","Can Pastilla","Coll den Rabassa","Nou Llevant","SIndioteria","SAranjassa","Es Pilari","Amanecer","Son Sardina","Establiments","Secar de la Real"],
-  "Calvia": ["Palmanova","Magaluf","Santa Ponsa","Peguera","Illetes","Portals Nous","Bendinat","Calvia Vila","Costa de la Calma","Son Ferrer","El Toro"],
-  "Marratxi": ["Portol","Sa Cabaneta","Pont dInca","Es Figueral","Sa Cabana"],
-  "Inca": ["Centro","Poligono","Afueras"],
-  "Manacor": ["Centro","Porto Cristo","Cala Murada"],
-  "Llucmajor": ["Centro","SArenal","Bahia Grande","Cala Pi","Sa Torre"],
-  "Andratx": ["Puerto de Andratx","Camp de Mar","Sant Elm"],
-  "Soller": ["Centro","Puerto de Soller"],
-  "Alcudia": ["Centro","Puerto de Alcudia"],
-  "Pollensa": ["Centro","Puerto de Pollensa"],
-  "Santa Maria": ["Centro"],
-  "Esporles": ["Centro"],
-  "Alaro": ["Centro"],
-  "Arta": ["Centro","Colonia de Sant Pere"],
-  "Felanitx": ["Centro","Portocolom"],
-  "Santanyi": ["Centro","Cala dOr","Cala Figuera"],
-  "Campos": ["Centro","Sa Rapita"],
-  "Bunyola": ["Centro"],
-  "Algaida": ["Centro"],
-  "Sencelles": ["Centro"],
-  "Binissalem": ["Centro"],
-  "Sineu": ["Centro"],
-  "Consell": ["Centro"],
-  "Lloseta": ["Centro"],
-  // Menorca
-  "Maó": ["Centro","Es Grau","Cala Llonga","Sant Climent","Trepucó"],
-  "Ciutadella": ["Centro","Cala Blanca","Son Xoriguer","Cala en Bosch","Cala en Forcat","Son Oleo","Cala Morell"],
-  "Alaior": ["Centro","Cala en Porter","Son Bou","Arenal den Castell"],
-  "Es Mercadal": ["Centro","Fornells","Arenal den Castell","Cala Tirant"],
-  "Ferreries": ["Centro","Cala Galdana","Santa Galdana"],
-  "Es Castell": ["Centro","Cala Corb","Binissafúller"],
-  "Sant Lluís": ["Centro","Binibèquer","Punta Prima","Alcaufar","Biniancolla"],
-  "Es Migjorn Gran": ["Centro","Sant Tomàs"],
-  // Valencia
-  "Valencia": ["Centro Histórico","Ensanche","Ruzafa","Benimaclet","Campanar","Patraix","Jesús","Quatre Carreres","Poblats Marítims","Extramurs","La Saïdia","Algirós","Camins al Grau","L'Olivereta","Benicalap","Pobles del Nord","Pobles de l'Oest","Pobles del Sud"],
-  "Alacant": ["Centro","Playa de San Juan","El Campello","Carolinas","Benalúa"],
-  "Benidorm": ["Levante","Poniente","Centro","Rincon de Loix"],
-  "Torrevieja": ["Centro","La Mata","Los Locos","Playa del Cura"],
+  "Palma": ["Casco Antiguo","Santa Catalina","El Terreno","Son Espanyolet","La Bonanova","Génova","Cala Major","Son Rapinya","La Vileta","Pere Garau","Foners","Plaza de Toros","Son Gotleu","La Soledad","Son Ferriol","Sant Jordi","Can Pastilla","Coll den Rabassa","Nou Llevant","Son Sardina","Establiments"],
+  "Calvià": ["Palmanova","Magaluf","Santa Ponsa","Peguera","Illetes","Portals Nous","Bendinat","Calvià Vila","Costa de la Calma","Son Ferrer","El Toro","Camp de Mar"],
+  "Marratxí": ["Pont d'Inca","Pont d'Inca Nou","Sa Cabaneta","Pòrtol","Es Pla de na Tesa"],
+  "Llucmajor": ["Centro","s'Arenal","Bahia Azul","Badia Gran"],
+  "Inca": ["Centro","Polígono","Afueras"],
+  "Manacor": ["Centro","Porto Cristo","Cala Millor","Cala Bona"],
+  "Sóller": ["Centro","Puerto de Sóller","Fornalutx","Deià"],
+  "Andratx": ["Andratx Centro","Puerto de Andratx","Camp de Mar","Sant Elm"],
+  "Felanitx": ["Centro","Portocolom","Cala Ferrera"],
+  "Alcúdia": ["Centro","Puerto de Alcúdia"],
+  "Pollença": ["Centro","Puerto de Pollença","Cala Sant Vicenç"],
+  "Campos": ["Centro","Sa Ràpita","Colònia de Sant Jordi"],
+  "Santanyí": ["Centro","Cala Figuera","Cala d'Or","Portopetro"],
+  "Artà": ["Centro","Cala Rajada","Colònia de Sant Pere"],
+  "Capdepera": ["Centro","Cala Rajada","Canyamel"],
+  "Santa Margalida": ["Centro","Can Picafort","Son Serra de Marina"],
+  "Maó": ["Centro","Es Grau","Cala Llonga","Sant Climent"],
+  "Ciutadella de Menorca": ["Centro","Cala Blanca","Son Xoriguer","Cala en Bosch","Cala Morell"],
+  "Alaior": ["Centro","Cala en Porter","Son Bou"],
+  "Es Mercadal": ["Centro","Fornells","Arenal d'en Castell"],
+  "Ferreries": ["Centro","Cala Galdana"],
+  "Sant Lluís": ["Centro","Binibèquer","Punta Prima"],
+  "Eivissa": ["Centro","Talamanca","Figueretes","Vara de Rey"],
+  "Santa Eulària des Riu": ["Centro","Cala Llonga","Es Canar","Siesta"],
+  "Sant Antoni de Portmany": ["Centro","Cala de Bou","Cala Tarida"],
+  "Sant Josep de sa Talaia": ["Centro","Playa d'en Bossa","Salinas","Cala Jondal"],
+  "Málaga": ["Centro Histórico","El Palo","Pedregalejo","Teatinos","Cruz de Humilladero"],
+  "Marbella": ["Centro","Puerto Banús","Nueva Andalucía","Marbella Este","Las Chapas","Guadalmina","Elviria","Los Monteros","Sierra Blanca","La Zagaleta"],
+  "Fuengirola": ["Centro","Los Boliches","Torreblanca","Carvajal"],
+  "Benalmádena": ["Benalmádena Pueblo","Arroyo de la Miel","Benalmádena Costa"],
+  "Torremolinos": ["Centro","La Carihuela","El Bajondillo","Los Álamos","Montemar"],
+  "Estepona": ["Centro","Playa del Cristo","Selwo","Cancelada"],
+  "Mijas": ["Mijas Pueblo","Mijas Costa","Calahonda","La Cala de Mijas","Las Lagunas"],
+  "Nerja": ["Centro","Burriana","Maro","Torrecilla"],
+  "Ronda": ["Centro","La Ciudad","El Mercadillo"],
+  "Benahavís": ["Centro","La Quinta","Los Arqueros"],
+  "Madrid": ["Centro","Salamanca","Chamberí","Retiro","Chamartín","Hortaleza","Lavapiés","Malasaña","Chueca","Moncloa-Aravaca","Fuencarral-El Pardo","Tetuán","Carabanchel","Usera","Vallecas","Vicálvaro","Villaverde","Ciudad Lineal","Barajas"],
+  "Barcelona": ["Eixample","Gràcia","Sant Martí","Sants-Montjuïc","Nou Barris","Sant Andreu","Sarrià-Sant Gervasi","Les Corts","Horta-Guinardó","Ciutat Vella"],
+  "Valencia": ["Centro Histórico","Ensanche","Ruzafa","Benimaclet","Campanar","Patraix","Jesús","Quatre Carreres","Poblats Marítims","Extramurs","La Saïdia","Algirós"],
+  "Sevilla": ["Casco Antiguo","Triana","Nervión","Los Remedios","Macarena","Sur","San Pablo-Santa Justa","Cerro-Amate"],
+  "Alicante": ["Centro","Playa de San Juan","El Campello","Carolinas","Benalúa","Vistahermosa"],
+  "Torrevieja": ["Centro","La Mata","Los Locos","Punta Prima"],
+  "Orihuela": ["Orihuela Centro","Campoamor","Dehesa de Campoamor","La Zenia","Cabo Roig","Playa Flamenca"],
+  "Denia": ["Centro","Las Marinas","Les Rotes","Montgó"],
+  "Jávea": ["Centro","El Arenal","La Granadella","Portichol","Cabo de la Nao"],
+  "Calpe": ["Centro","La Manzanera","Empedrola"],
+  "Altea": ["Centro","Altea Hills","Cap Negret"],
+  "Moraira": ["Centro","El Portet","Pla del Mar"],
+  "Benidorm": ["Levante","Poniente","Centro","Rincón de Loix","La Cala"],
+  "Las Palmas de Gran Canaria": ["Vegueta","Triana","Siete Palmas","Ciudad Alta","Las Canteras"],
+  "Arona": ["Los Cristianos","Playa de las Américas","Las Galletas","El Médano"],
+  "Adeje": ["Adeje Centro","Costa Adeje","Fañabé","Torviscas","La Caleta"],
+  "Puerto de la Cruz": ["Centro","La Paz","Botánico","Punta Brava"],
+  "Bilbao": ["Casco Viejo","Ensanche","Abando","Deusto","Indautxu","Begoña"],
+  "San Sebastián": ["Centro","Gros","Amara","Egia","Antiguo","Ibaeta"],
+  "Vitoria-Gasteiz": ["Centro","Ensanche","Lakua","Salburua"],
+  "Zaragoza": ["Centro","Delicias","Las Fuentes","San José","Universidad","Torrero","Miralbueno"],
+  "Pamplona": ["Casco Antiguo","Ensanche","Rochapea","Chantrea","Txantrea"],
+  "Logroño": ["Centro","El Cubo","Madre de Dios","Cascajos"],
+  "Santander": ["Centro","El Sardinero","Cuatro Caminos"],
+  "Oviedo": ["Centro","El Cristo","La Corredoria","Montecerrao"],
+  "Gijón": ["Centro","El Natahoyo","El Llano","La Calzada","Roces"],
+  "Santiago de Compostela": ["Centro Histórico","Ensanche","Vista Alegre","Fontiñas"],
+  "Vigo": ["Centro","Bouzas","Coia","Lavadores","Beiramar","Teis"],
+  "A Coruña": ["Centro","Os Mallos","Monte Alto","Riazor","Elviña"],
+  "Murcia": ["Centro","La Flota","El Carmen","El Ranero","Santa María de Gracia"],
+  "Cartagena": ["Centro","La Manga","Los Alcázares","Mar Menor"],
+  "Granada": ["Centro","Albaicín","Sacromonte","Realejo","Zaidín","Chana","Beiro"],
+  "Córdoba": ["Centro","Ciudad Jardín","El Brillante","Poniente Sur"],
+  "Sevilla": ["Casco Antiguo","Triana","Nervión","Los Remedios","Macarena"],
+  "Cádiz": ["Centro Histórico","La Viña","El Balón","Santa María"],
+  "Almería": ["Centro","Zapillo","El Quemadero","Ciudad Jardín"],
+  "Huelva": ["Centro","El Torrejón","Isla Chica"],
+  "Jaén": ["Centro","La Merced","La Coronación"],
+  "Valladolid": ["Centro","Parquesol","La Victoria","Pilarica","Covaresa"],
+  "Salamanca": ["Centro","Garrido","Pizarrales","Tejares"],
+  "Burgos": ["Centro","Gamonal","Capiscol","San Cristóbal"],
+  "León": ["Centro","El Crucero","La Lastra","Armunia"],
+  "Toledo": ["Casco Histórico","Palomarejos","Santa María de Benquerencia"],
+  "Albacete": ["Centro","Los Llanos","El Pilar","San Pedro"],
+  "Badajoz": ["Centro","San Roque","Valdepasillas"],
+  "Cáceres": ["Centro Histórico","Rincón de Ballesteros"],
+  "Guadalajara": ["Centro","El Alamín","Los Manantiales"],
+  "Ciudad Real": ["Centro","Larache","Pío XII"]
 };
 
 const SAMPLE = [
@@ -2287,6 +2387,10 @@ function PropDetail({ p, currentUser, onClose, onUpdate, onDelete, onDuplicate }
     if (!src.op) errs.add("op");
     if (!src.dir) errs.add("dir");
     if (!src.municipio) errs.add("municipio");
+    if (!src.ccaa) errs.add("ccaa");
+    if (!src.conserv) errs.add("conserv");
+    if (!src.ocupacionActual) errs.add("ocupacionActual");
+    if (!src.cualPosArr || src.cualPosArr.filter(Boolean).length < 4) errs.add("cualPos");
     if (!src.cp && !(src.latitud && src.longitud)) errs.add("cp");
     const precioCheck = src.op === "Alquiler" ? Number(src.precioAlquiler) : src.op === "Traspaso" ? Number(src.precioTraspaso) : Number(src.precioVenta);
     if (!precioCheck || precioCheck <= 0) {
@@ -2677,7 +2781,7 @@ REGLAS:
           };
           // Validar campos obligatorios — comportamiento según estado
           if (idealistaFieldErrors.size > 0) {
-            const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","precioAlquiler":"Renta mensual","precioTraspaso":"Precio traspaso","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético","refCatastral":"Referencia catastral","fianzaMeses":"Fianza (meses)","duracionMinMeses":"Duración mínima (meses)","alqEquipamiento":"Equipamiento (cocina/mobiliario)"};
+            const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","precioAlquiler":"Renta mensual","precioTraspaso":"Precio traspaso","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético","refCatastral":"Referencia catastral","fianzaMeses":"Fianza (meses)","duracionMinMeses":"Duración mínima (meses)","alqEquipamiento":"Equipamiento (cocina/mobiliario)","ccaa":"Comunidad Autónoma","conserv":"Estado de conservación","ocupacionActual":"Ocupación","cualPos":"Puntos positivos (mínimo 4)"};
             const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join("\n• ");
             const esPublicada = (draft.estado || p.estado) === "publicada";
             if (esPublicada) {
@@ -2715,7 +2819,7 @@ REGLAS:
             )}
             <button onClick={() => {
               if (idealistaFieldErrors.size > 0) {
-                const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","precioAlquiler":"Renta mensual","precioTraspaso":"Precio traspaso","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético","refCatastral":"Referencia catastral","fianzaMeses":"Fianza (meses)","duracionMinMeses":"Duración mínima (meses)","alqEquipamiento":"Equipamiento (cocina/mobiliario)"};
+                const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","precioAlquiler":"Renta mensual","precioTraspaso":"Precio traspaso","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético","refCatastral":"Referencia catastral","fianzaMeses":"Fianza (meses)","duracionMinMeses":"Duración mínima (meses)","alqEquipamiento":"Equipamiento (cocina/mobiliario)","ccaa":"Comunidad Autónoma","conserv":"Estado de conservación","ocupacionActual":"Ocupación","cualPos":"Puntos positivos (mínimo 4)"};
                 const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join("\n• ");
                 if (!confirm("⚠ Campos con * sin completar:\n\n• " + faltantes + "\n\n¿Volver sin guardar igualmente?")) return;
               }
@@ -2737,7 +2841,7 @@ REGLAS:
                 destinos: draft.destinos || [],
               };
               if (idealistaFieldErrors.size > 0) {
-                const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","precioAlquiler":"Renta mensual","precioTraspaso":"Precio traspaso","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético","refCatastral":"Referencia catastral","fianzaMeses":"Fianza (meses)","duracionMinMeses":"Duración mínima (meses)","alqEquipamiento":"Equipamiento (cocina/mobiliario)"};
+                const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","precioAlquiler":"Renta mensual","precioTraspaso":"Precio traspaso","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético","refCatastral":"Referencia catastral","fianzaMeses":"Fianza (meses)","duracionMinMeses":"Duración mínima (meses)","alqEquipamiento":"Equipamiento (cocina/mobiliario)","ccaa":"Comunidad Autónoma","conserv":"Estado de conservación","ocupacionActual":"Ocupación","cualPos":"Puntos positivos (mínimo 4)"};
                 const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join("\n• ");
                 const esPublicada = (draft.estado || p.estado) === "publicada";
                 if (esPublicada) {
@@ -2989,10 +3093,27 @@ REGLAS:
             {EFl({label: "Direccion", req: true, field: "dir", pub: true})}
             {EFl({label: "Numero", field: "num", pub: true})}
             {EFl({label: "Codigo postal", req: true, field: "cp", pub: true})}
-                        {/* Provincia */}
+                        {/* Comunidad Autonoma */}
+            {(() => {
+              const inputStyleCcaa = { width: "100%", background: "var(--white)", border: "1px solid var(--text)", borderRadius: 0, color: "var(--text)", padding: "10px 14px", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" };
+              return (
+                <div style={{ marginBottom: 14 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 5 }}>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Comunidad Autónoma</span>
+                    <span style={{ color: "var(--danger)", fontSize: 14, fontWeight: 700 }}>*</span>
+                  </div>
+                  <select value={d.ccaa || ""} onChange={e => { upd("ccaa", e.target.value); upd("provincia", ""); upd("municipio", ""); upd("zona", ""); }} onBlur={() => autoSave(draft)} style={inputStyleCcaa}>
+                    <option value="">-</option>
+                    {Object.keys(CCAA_MAP).map(m => <option key={m} value={m}>{m}</option>)}
+                  </select>
+                </div>
+              );
+            })()}
+            {/* Provincia */}
             {(() => {
               const hasErr = editMode && idealistaFieldErrors.has("provincia");
               const inputStyle = { width: "100%", background: "var(--white)", border: `1px solid ${hasErr ? "var(--danger)" : "var(--text)"}`, borderRadius: 0, color: "var(--text)", padding: "10px 14px", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" };
+              const provOpts = d.ccaa && CCAA_MAP[d.ccaa] ? CCAA_MAP[d.ccaa] : Object.keys(PROVINCIAS_MAP);
               return (
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 5 }}>
@@ -3001,7 +3122,7 @@ REGLAS:
                   </div>
                   <select value={d.provincia || ""} onChange={e => { upd("provincia", e.target.value); upd("municipio", ""); upd("zona", ""); }} onBlur={() => autoSave({ ...draft, municipio: d.municipio, zona: "" })} style={inputStyle}>
                     <option value="">-</option>
-                    {Object.keys(PROVINCIAS_MAP).map(m => <option key={m} value={m}>{m}</option>)}
+                    {provOpts.map(m => <option key={m} value={m}>{m}</option>)}
                   </select>
                   {hasErr && <div style={{ fontSize: 10, color: "var(--danger)", marginTop: 3 }}>Requerido para Idealista</div>}
                 </div>
@@ -3157,7 +3278,7 @@ REGLAS:
           </div>}
           <div style={{ ...g3, marginTop: 8 }}>
             {!esTerreno && EFl({label: "Ano construccion", field: "anoConstruc", pub: true})}
-            {EFl({label: "Conservacion", field: "conserv", pub: true, options: ["Buen estado","Reformado","A reformar","Obra nueva","En construccion"], type: "select"})}
+            {EFl({label: "Conservacion", field: "conserv", pub: true, req: true, options: ["Buen estado","Reformado","A reformar","Obra nueva","En construccion"], type: "select"})}
           </div>
         </Sec>
         <div style={sep} />
@@ -3329,7 +3450,7 @@ REGLAS:
           {esResidencial && <div style={{ ...g4, marginTop: 8 }}>
             {EFl({label: "Alarma seguridad", field: "alarmaSeguridad", pub: true, type: "bool"})}
             {EFl({label: "Plantas edificio", field: "plantasEdificio", pub: true, type: "number"})}
-            {EFl({label: "Ocupacion actual", field: "ocupacionActual", pub: true, options: ["","Vacía","Alquilada","Ocupada"], type: "select"})}
+            {EFl({label: "Ocupacion actual", field: "ocupacionActual", pub: true, req: true, options: ["","Vacía","Alquilada","Ocupada"], type: "select"})}
             <div />
           </div>}
           {esGaraje && <div style={{ ...g2, marginTop: 8 }}>
@@ -4577,7 +4698,7 @@ REGLAS:
                 destinos: draft.destinos || [],
               };
               if (idealistaFieldErrors.size > 0) {
-                const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","precioAlquiler":"Renta mensual","precioTraspaso":"Precio traspaso","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético","refCatastral":"Referencia catastral","fianzaMeses":"Fianza (meses)","duracionMinMeses":"Duración mínima (meses)","alqEquipamiento":"Equipamiento (cocina/mobiliario)"};
+                const labels = {"ref":"Referencia","tipo":"Tipo de propiedad","op":"Tipo de operación","dir":"Dirección","municipio":"Municipio","cp":"Código postal","precioVenta":"Precio de venta","precioAlquiler":"Renta mensual","precioTraspaso":"Precio traspaso","mConst":"m² construidos","desc":"Descripción","banos":"Baños","certEnerg":"Certificado energético","refCatastral":"Referencia catastral","fianzaMeses":"Fianza (meses)","duracionMinMeses":"Duración mínima (meses)","alqEquipamiento":"Equipamiento (cocina/mobiliario)","ccaa":"Comunidad Autónoma","conserv":"Estado de conservación","ocupacionActual":"Ocupación","cualPos":"Puntos positivos (mínimo 4)"};
                 const faltantes = [...idealistaFieldErrors].map(f => labels[f] || f).join("\n• ");
                 const esPublicada = (draft.estado || p.estado) === "publicada";
                 if (esPublicada) { alert(" Propiedad PUBLICADA. Completa los campos * antes de guardar."); return; }
