@@ -899,14 +899,8 @@ export default function FormularioCaptacion() {
     if (!ocupacionActual) advertencias.push("Ocupación actual");
     if (cualPos.filter(Boolean).length < 4) advertencias.push("Puntos positivos (mínimo 4)");
     if (advertencias.length > 0) {
-      const ok = window.confirm("⚠️ Atención: Faltan campos recomendados:
-
-• " + advertencias.join("
-• ") + "
-
-Puedes guardar igualmente, pero completa estos campos antes de publicar en Idealista.
-
-¿Guardar de todas formas?");
+      const msg = "\u26a0\ufe0f Atenci\u00f3n: Faltan campos recomendados:\n- " + advertencias.join("\n- ") + "\n\nPuedes guardar igualmente, pero completa estos campos antes de publicar en Idealista.\n\n\u00bfGuardar de todas formas?";
+      const ok = window.confirm(msg);
       if (!ok) return;
     }
     setSaving(true);
