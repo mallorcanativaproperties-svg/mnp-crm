@@ -190,7 +190,7 @@ const ESTADOS = [
   { key: "retirada",  label: "Retirada",  accent: "var(--muted)" },
 ];
 
-const DESTINOS = ["Web propia", "Idealista", "Marketplace Facebook", "Catalogo WhatsApp"];
+const DESTINOS = ["Web propia", "Idealista"];
 
 const CALIDADES = [
   { cat: "Exterior", items: ["Terraza","Terraza acristalada","Balcon","Jardin","Patio","Pergola","Piscina propia","Piscina comunitaria","Barbacoa","Vistas al mar","Vistas montana","Vistas despejadas"] },
@@ -325,7 +325,7 @@ const SAMPLE = [
     notasPriv: "Promotor ofrece comision extra si se vende antes de julio.",
     propNombre: "Construcciones Balear SL", propTel: "971456789", propEmail: "ventas@construcbalear.es",
     agente: "Ana R.", estado: "publicada",
-    destinos: ["Web propia", "Idealista", "Marketplace Facebook"],
+    destinos: ["Web propia", "Idealista"],
     fotos: 18, videos: 3, tour360: true, planos: 2,
     fechaCap: "22/02/2026", visitas: 15,
     cualPos: ["Vistas 360", "Terraza enorme", "Calidades premium"],
