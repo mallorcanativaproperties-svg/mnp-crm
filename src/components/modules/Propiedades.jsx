@@ -592,75 +592,66 @@ function DatosVentaPanel({ d, editMode, calcDesde, setCalcDesde, EFl, upd, draft
   );
 }
 
-// ── Sección grande (contenedor de nivel 1) ────────────────────────────────────
-// Las secciones grandes agrupan las subsecciones Sec.
-// defaultOpen: estado inicial; el usuario siempre puede abrirla/cerrarla manualmente.
-function SeccionGrande({ title, badge, badgeColor, children, defaultOpen = true, accentColor = "var(--gold)" }) {
-  const [open, setOpen] = useState(defaultOpen);
+// ── SeccionGrande: panel hijo de TabsContainer ────────────────────────────────
+function SeccionGrande({ title, badge, badgeColor, children, tabKey, active = false, onSelect, accentColor = "var(--gold)" }) {
+  if (onSelect !== undefined) {
+    return active ? (
+      <div style={{ padding: "4px 0 0 0", background: "var(--cream)", borderLeft: `3px solid ${accentColor}22` }}>
+        {children}
+      </div>
+    ) : null;
+  }
+  // Modo acordeón de respaldo
   return (
     <div style={{ marginBottom: 2 }}>
-      {/* Cabecera de sección grande */}
-      <div
-        onClick={() => setOpen(o => !o)}
-        style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          cursor: "pointer", padding: "13px 20px",
-          background: "#F0EAE0",
-          borderTop: "1px solid #E0D9CE",
-          borderBottom: open ? "1px solid #E0D9CE" : "1px solid #E0D9CE",
-          borderLeft: `3px solid ${accentColor}`,
-          userSelect: "none", transition: "background 0.15s",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{
-            fontSize: 9, color: accentColor,
-            transform: open ? "rotate(90deg)" : "rotate(0deg)",
-            transition: "transform 0.2s", display: "inline-block",
-          }}>▶</span>
-          <span style={{
-            fontSize: 10, fontWeight: 700, color: "#5C4A2A",
-            textTransform: "uppercase", letterSpacing: "0.18em",
-            fontFamily: "Inter, sans-serif",
-          }}>{title}</span>
-          {badge && (
-            <span style={{
-              fontSize: 9, fontWeight: 600,
-              color: badgeColor || accentColor,
-              background: (badgeColor || accentColor) + "15",
-              padding: "2px 8px", letterSpacing: "0.08em",
-              border: `1px solid ${(badgeColor || accentColor)}30`,
-              fontFamily: "Inter, sans-serif",
-            }}>{badge}</span>
-          )}
-        </div>
-        <span style={{ fontSize: 14, color: accentColor, opacity: 0.6, lineHeight: 1 }}>
-          {open ? "−" : "+"}
-        </span>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 20px", background: "#F0EAE0", borderTop: "1px solid #E0D9CE", borderBottom: "1px solid #E0D9CE", borderLeft: `3px solid ${accentColor}` }}>
+        <span style={{ fontSize: 10, fontWeight: 700, color: "#5C4A2A", textTransform: "uppercase", letterSpacing: "0.18em", fontFamily: "Inter, sans-serif" }}>{title}</span>
       </div>
-      {/* Contenido */}
-      {open && (
-        <div style={{
-          padding: "4px 0 0 0",
-          background: "var(--cream)",
-          borderLeft: `3px solid ${accentColor}22`,
-        }}>
-          {children}
-        </div>
-      )}
+      <div style={{ padding: "4px 0 0 0", background: "var(--cream)", borderLeft: `3px solid ${accentColor}22` }}>{children}</div>
     </div>
   );
 }
 
-// Devuelve qué secciones grandes van abiertas por defecto según el estado
-function seccionesPorEstado(estado) {
+// TabsContainer: barra de pestañas con banner de estado encima
+function TabsContainer({ tabs, defaultTab, estadoLabel, estadoColor, children }) {
+  const [activeTab, setActiveTab] = React.useState(defaultTab || (tabs[0] && tabs[0].key));
+  React.useEffect(() => { setActiveTab(defaultTab || (tabs[0] && tabs[0].key)); }, [defaultTab]);
+  const activeTabDef = tabs.find(t => t.key === activeTab) || tabs[0];
+  const accentColor = activeTabDef ? activeTabDef.accentColor : "var(--gold)";
+  return (
+    <div>
+      {estadoLabel && (
+        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 20px", background: "#F7F4EF", borderTop: "1px solid #E0D9CE", borderBottom: "1px solid #E0D9CE", borderLeft: `4px solid ${estadoColor || "var(--gold)"}`, marginBottom: 0 }}>
+          <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.18em", color: estadoColor || "var(--gold)", fontFamily: "Inter, sans-serif" }}>Estado</span>
+          <span style={{ fontSize: 11, fontWeight: 700, color: "#fff", background: estadoColor || "var(--gold)", padding: "3px 12px", fontFamily: "Inter, sans-serif", letterSpacing: "0.12em", textTransform: "uppercase" }}>{estadoLabel}</span>
+        </div>
+      )}
+      <div style={{ display: "flex", gap: 0, background: "#EDE8E0", borderBottom: `2px solid ${accentColor}`, overflowX: "auto" }}>
+        {tabs.map(tab => {
+          const isActive = activeTab === tab.key;
+          return (
+            <button key={tab.key} onClick={() => setActiveTab(tab.key)} style={{ padding: "11px 20px", border: "none", cursor: "pointer", fontSize: 10, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", background: isActive ? "var(--cream)" : "transparent", color: isActive ? (tab.accentColor || "var(--gold)") : "var(--muted)", borderBottom: isActive ? `2px solid ${tab.accentColor || "var(--gold)"}` : "2px solid transparent", marginBottom: -2, whiteSpace: "nowrap", transition: "all 0.15s" }}>
+              {tab.title}
+              {tab.badge && (<span style={{ marginLeft: 6, fontSize: 8, fontWeight: 600, color: tab.badgeColor || tab.accentColor || "var(--gold)", background: (tab.badgeColor || tab.accentColor || "var(--gold)") + "20", padding: "1px 6px", letterSpacing: "0.08em", border: `1px solid ${(tab.badgeColor || tab.accentColor || "var(--gold)")}40` }}>{tab.badge}</span>)}
+            </button>
+          );
+        })}
+      </div>
+      {React.Children.map(children, child => {
+        if (!child) return null;
+        return React.cloneElement(child, { active: child.props.tabKey === activeTab, onSelect: (key) => setActiveTab(key), accentColor: (tabs.find(t => t.key === child.props.tabKey) || {}).accentColor });
+      })}
+    </div>
+  );
+}
+
+// Devuelve la pestaña activa por defecto según el estado de la propiedad
+function tabPorEstado(estado) {
   const e = estado || "captada";
-  return {
-    informacion:  ["captada", "borrador", "caida", "retirada", "vendida"].includes(e),
-    visitas:      ["publicada", "reservada"].includes(e),
-    arras:        e === "arras",
-    notaria:      e === "notaria",
-  };
+  if (["publicada", "reservada"].includes(e)) return "visitas";
+  if (e === "arras") return "arras";
+  if (e === "notaria") return "notaria";
+  return "informacion";
 }
 
 function Fl({ label, value, pub, gold, req }) {
@@ -2876,15 +2867,26 @@ REGLAS:
 
         <div style={sep} />
 
-        {/* ══ SECCIONES GRANDES ══ */}
+        {/* ══ SECCIONES GRANDES (pestañas) ══ */}
         {(() => {
-          const secs = seccionesPorEstado(editMode ? draft.estado : p.estado);
+          const estadoActual = editMode ? draft.estado : p.estado;
+          const estadoDef = ESTADOS.find(e => e.key === estadoActual);
           return (
-            <>
+            <TabsContainer
+              tabs={[
+                { key: "informacion", title: "Información de la propiedad", accentColor: "var(--gold)" },
+                { key: "visitas",     title: "Visitas y documentos",        accentColor: "var(--success)" },
+                { key: "arras",       title: "Reserva a arras",             accentColor: "var(--amber)" },
+                { key: "notaria",     title: "Arras a notaría",             accentColor: "var(--blue)", badge: "Próximamente", badgeColor: "var(--blue)" },
+              ]}
+              defaultTab={tabPorEstado(estadoActual)}
+              estadoLabel={estadoActual ? estadoActual.replace(/_/g, " ") : ""}
+              estadoColor={estadoDef ? estadoDef.accent : "var(--gold)"}
+            >
             {/* ── INFORMACIÓN DE LA PROPIEDAD ── */}
             <SeccionGrande
+              tabKey="informacion"
               title="Información de la propiedad"
-              defaultOpen={secs.informacion}
               accentColor="var(--gold)"
             >
               <div style={{ paddingTop: 8 }} />
@@ -3604,8 +3606,8 @@ REGLAS:
 
             {/* ── VISITAS Y DOCUMENTOS ── */}
             <SeccionGrande
+              tabKey="visitas"
               title="Visitas y documentos"
-              defaultOpen={secs.visitas}
               accentColor="var(--success)"
             >
               <div style={{ padding: "20px 0" }}>
@@ -3615,8 +3617,8 @@ REGLAS:
 
             {/* ── RESERVA A ARRAS ── */}
             <SeccionGrande
+              tabKey="arras"
               title="Reserva a arras"
-              defaultOpen={secs.arras}
               accentColor="var(--amber)"
             >
               {(() => {
@@ -4546,18 +4548,16 @@ REGLAS:
             </SeccionGrande>
             {/* ── ARRAS A NOTARÍA ── */}
             <SeccionGrande
+              tabKey="notaria"
               title="Arras a notaría"
-              defaultOpen={secs.notaria}
               accentColor="var(--blue)"
-              badge="Próximamente"
-              badgeColor="var(--blue)"
             >
               <div style={{ padding: "32px 0", textAlign: "center", color: "var(--muted)", fontSize: 13, fontFamily: "Inter, sans-serif" }}>
                 Esta sección se habilitará cuando las arras estén firmadas por todas las partes.
               </div>
             </SeccionGrande>
 
-            </>
+            </TabsContainer>
           );
         })()}
 
