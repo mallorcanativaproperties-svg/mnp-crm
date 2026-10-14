@@ -1,0 +1,1365 @@
+"use client";
+// notificarGuardado inline para evitar problemas de code splitting
+function notificarGuardado(msg) {
+  if (typeof window !== "undefined") {
+    try { window.dispatchEvent(new CustomEvent("mnp:guardado", { detail: { msg: msg || "Guardado correctamente" } })); } catch {}
+  }
+}
+import PropietariosEditor, { PROPIETARIO_VACIO } from "@/components/PropietariosEditor";
+import { useState, useEffect, useRef } from "react";
+import { supabase } from "@/lib/supabase";
+
+// Tipos alineados con Propiedades.jsx y schema de Idealista
+const TIPO_GROUPS = [
+  { label: "Piso / Apartamento", items: ["Piso","Apartamento","Estudio","Loft","Atico","Atico Duplex","Duplex","Planta baja"] },
+  { label: "Casa / Chalet", items: ["Casa","Chalet","Adosado","Bungalow","Pareado","Villa","Villa de Lujo","Casa Tipo Duplex"] },
+  { label: "Finca", items: ["Finca rustica","Finca"] },
+  { label: "Local / Oficina / Nave", items: ["Local comercial","Oficina","Nave industrial","Almacen","Negocio"] },
+  { label: "Terreno", items: ["Parcela","Solar","Terreno urbano","Terreno urbanizable","Terreno rustico","Terreno rural","Terreno industrial"] },
+  { label: "Otros", items: ["Garaje","Parking","Trastero","Edificio"] },
+];
+const OPERACIONES = ["Compraventa", "Alquiler", "Traspaso"];
+// Valores alineados con mapeo Idealista en Propiedades.jsx
+const CONSERVACION = ["Buen estado","Reformado","A reformar","Obra nueva","En construccion"];
+const ORIENTACIONES = ["Norte","Sur","Este","Oeste","Noreste","Noroeste","Sureste","Suroeste"];
+const CERT_ENERG = ["A","B","C","D","E","F","G","Exento"];
+const PARKING_OPTS = ["No","Si","Comunitario","Opcional"];
+const VIS_DIR = ["Direccion exacta", "Solo calle", "Ocultar direccion"];
+// Opciones alineadas con ficha de propiedad
+const AIRE_ACOND_OPTS = ["No disponible","Solo frio","Frio/Calor","Preinstalacion"];
+const CALEFACCION_OPTS = ["Gas central","Gas individual","Electrica central","Electrica individual","Bomba de calor","Aerotermia","Suelo radiante","Sin calefaccion"];
+const AGUA_CALIENTE = ["Aerotermia","Biomasa","Bomba de calor","Calentador Butano","Central","Central con contador individual","Gas Ciudad","Gas Natural","Gas Propano","Gasoil","Geotermia","No Tiene","Pellets","Placas Solares","Termo Electrico"];
+const DRENAJE_OPTS = ["Alcantarillado", "Fosa septica"];
+const SUMINISTROS_OPTS = ["Luz", "Placas solares", "Agua comunitaria", "Agua individual", "Pozo"];
+const IEE_OPTS = ["Favorable", "Desfavorable", "Pendiente", "No aplica"];
+
+
+const ZONAS_MAP = {
+  "Palma": ["Casco Antiguo","Santa Catalina","El Terreno","Son Espanyolet","Son Cotoner","Son Dameto","La Bonanova","Genova","Cala Major","Son Rapinya","La Vileta","Pere Garau","Foners","Plaza de Toros","Son Gotleu","La Soledad","Vivero","Son Oliva","Rafal","Son Cladera","Son Ferriol","Sant Jordi","Can Pastilla","Coll den Rabassa","Nou Llevant","SIndioteria","SAranjassa","Es Pilari","Amanecer","Son Sardina","Establiments","Secar de la Real"],
+  "Calvia": ["Palmanova","Magaluf","Santa Ponsa","Peguera","Illetes","Portals Nous","Bendinat","Calvia Vila","Costa de la Calma","Son Ferrer","El Toro"],
+  "Marratxi": ["Portol","Sa Cabaneta","Pont dInca","Es Figueral","Sa Cabana"],
+  "Inca": ["Centro","Poligono","Afueras"],
+  "Manacor": ["Centro","Porto Cristo","Cala Murada"],
+  "Llucmajor": ["Centro","SArenal","Bahia Grande","Cala Pi","Sa Torre"],
+  "Andratx": ["Puerto de Andratx","Camp de Mar","Sant Elm"],
+  "Soller": ["Centro","Puerto de Soller"],
+  "Alcudia": ["Centro","Puerto de Alcudia"],
+  "Pollensa": ["Centro","Puerto de Pollensa"],
+  "Santa Maria": ["Centro"],
+  "Esporles": ["Centro"],
+  "Alaro": ["Centro"],
+  "Arta": ["Centro","Colonia de Sant Pere"],
+  "Felanitx": ["Centro","Portocolom"],
+  "Santanyi": ["Centro","Cala dOr","Cala Figuera"],
+  "Campos": ["Centro","Sa Rapita"],
+  "Bunyola": ["Centro"],
+  "Algaida": ["Centro"],
+  "Sencelles": ["Centro"],
+  "Binissalem": ["Centro"],
+  "Sineu": ["Centro"],
+  "Consell": ["Centro"],
+  "Lloseta": ["Centro"],
+};
+
+function fmtP(n) {
+  if (!n) return "-";
+  return Number(n).toLocaleString("es-ES") + " EUR";
+}
+
+function Sec({ title, children, startOpen }) {
+  const [open, setOpen] = useState(startOpen !== false);
+  return (
+    <div style={{ marginBottom: 24 }}>
+      <div onClick={() => setOpen(!open)} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", marginBottom: open ? 14 : 0, padding: "8px 0", borderBottom: open ? "1px solid #2A2926" : "none" }}>
+        <span style={{ fontSize: 9, color: "#AC8A54", transform: open ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.2s", display: "inline-block" }}>{">"}</span>
+        <span style={{ fontSize: 11, fontWeight: 600, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.12em" }}>{title}</span>
+      </div>
+      {open && <div style={{ paddingTop: 8 }}>{children}</div>}
+    </div>
+  );
+}
+
+function Input({ label, value, onChange, type, placeholder, required, maxLength }) {
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
+        {label}{required && <span style={{ color: "#A23A3A", marginLeft: 3, fontWeight: 700, fontSize: 16 }}>*</span>}
+      </label>
+      <input
+        type={type || "text"}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder || ""}
+        maxLength={maxLength}
+        style={{ width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box", outline: "none" }}
+        onFocus={(e) => { e.target.style.borderColor = "#C8A97E44"; }}
+        onBlur={(e) => { e.target.style.borderColor = "#E7E1D4"; }}
+      />
+    </div>
+  );
+}
+
+function Select({ label, value, onChange, options, groups, required }) {
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
+        {label}{required && <span style={{ color: "#A23A3A", marginLeft: 3, fontWeight: 700, fontSize: 16 }}>*</span>}
+      </label>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        style={{ width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" }}
+      >
+        <option value="">Seleccionar...</option>
+        {groups ? groups.map((g) => (
+          <optgroup key={g.label} label={g.label}>
+            {g.items.map((item) => <option key={item} value={item}>{item}</option>)}
+          </optgroup>
+        )) : options.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
+      </select>
+    </div>
+  );
+}
+
+function Textarea({ label, value, onChange, maxLength, rows }) {
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+        <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em" }}>{label}</label>
+        {maxLength && <span style={{ fontSize: 10, color: (value || "").length > maxLength ? "#A23A3A" : "#9A968A" }}>{(value || "").length} / {maxLength.toLocaleString()}</span>}
+      </div>
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        maxLength={maxLength}
+        rows={rows || 4}
+        style={{ width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box", outline: "none", resize: "vertical" }}
+        onFocus={(e) => { e.target.style.borderColor = "#C8A97E44"; }}
+        onBlur={(e) => { e.target.style.borderColor = "#E7E1D4"; }}
+      />
+    </div>
+  );
+}
+
+function Toggle({ label, value, onChange }) {
+  return (
+    <div style={{ marginBottom: 14, display: "flex", alignItems: "center", gap: 10 }}>
+      <div
+        onClick={() => onChange(!value)}
+        style={{ width: 36, height: 20, borderRadius: 20, background: value ? "#2C6E52" : "#E7E1D4", cursor: "pointer", position: "relative", transition: "background 0.2s" }}
+      >
+        <div style={{ width: 16, height: 16, borderRadius: "50%", background: "#22262E", position: "absolute", top: 2, left: value ? 18 : 2, transition: "left 0.2s" }} />
+      </div>
+      <span style={{ fontSize: 12, color: "#22262E" }}>{label}</span>
+    </div>
+  );
+}
+
+function CheckGroup({ label, options, selected, onChange }) {
+  const toggle = (item) => {
+    if (selected.includes(item)) {
+      onChange(selected.filter((s) => s !== item));
+    } else {
+      onChange([...selected, item]);
+    }
+  };
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 8 }}>{label}</label>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+        {options.map((opt) => {
+          const on = selected.includes(opt);
+          return (
+            <div
+              key={opt}
+              onClick={() => toggle(opt)}
+              style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 16px", borderRadius: 0, border: "2px solid " + (on ? "#AC8A54" : "#9A968A"), background: on ? "#AC8A5415" : "#FFFFFF", cursor: "pointer", transition: "all 0.15s" }}
+            >
+              <div style={{ width: 18, height: 18, borderRadius: 0, border: "2px solid " + (on ? "#AC8A54" : "#9A968A"), background: on ? "#AC8A54" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                {on && <span style={{ color: "#FFFFFF", fontSize: 12, fontWeight: 700, lineHeight: 1 }}>✓</span>}
+              </div>
+              <span style={{ fontSize: 13, fontWeight: 600, color: on ? "#AC8A54" : "#22262E", fontFamily: "Inter, sans-serif" }}>{opt}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function QualRow({ items, onChange, color, symbol }) {
+  const safeItems = items && items.length > 0 ? items : ["", "", ""];
+  const update = (idx, val) => {
+    const copy = [...safeItems];
+    copy[idx] = val;
+    onChange(copy);
+  };
+  const addRow = () => onChange([...safeItems, ""]);
+  const removeRow = (idx) => {
+    if (safeItems.length <= 1) return;
+    onChange(safeItems.filter((_, i) => i !== idx));
+  };
+  return (
+    <div>
+      {safeItems.map((item, i) => (
+        <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+          <span style={{ color: color, fontSize: 14, fontWeight: 600, width: 16, flexShrink: 0 }}>{symbol}</span>
+          <input
+            value={item}
+            onChange={(e) => update(i, e.target.value)}
+            placeholder={"Punto " + (i + 1)}
+            style={{ flex: 1, padding: "8px 12px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 12, fontFamily: "Inter, sans-serif", outline: "none", boxSizing: "border-box" }}
+          />
+          <button onClick={() => removeRow(i)} style={{ background: "none", border: "none", color: "#C8BFB0", cursor: "pointer", fontSize: 16, lineHeight: 1, padding: "0 4px", flexShrink: 0 }}>×</button>
+        </div>
+      ))}
+      <button onClick={addRow} style={{ marginTop: 4, background: "none", border: `1px dashed ${color}`, color: color, fontSize: 11, fontWeight: 600, cursor: "pointer", padding: "5px 12px", fontFamily: "Inter, sans-serif", letterSpacing: "0.05em" }}>
+        + Añadir punto
+      </button>
+    </div>
+  );
+}
+
+function CatastroImportCuestionario({ setDir, setNum, setPlanta, setPuerta, setCp, setMunicipio, setMConst, setAnoCon, setRefCat }) {
+  const [refCatInput, setRefCatInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState(null);
+
+  const TIPO_VIA = { CL:"Calle", AV:"Avenida", PZ:"Plaza", CM:"Camino", CR:"Carretera", PS:"Paseo", RD:"Ronda", GL:"Glorieta", RB:"Rambla", TR:"Travesia", UR:"Urbanizacion" };
+  const LABELS = { dir:"Dirección", num:"Número", planta:"Planta", puerta:"Puerta", cp:"CP", municipio:"Municipio", mConst:"m² construidos", anoCon:"Año construcción" };
+  const SETTERS = { dir: setDir, num: setNum, planta: setPlanta, puerta: setPuerta, cp: setCp, municipio: setMunicipio, mConst: (v) => setMConst(String(v)), anoCon: setAnoCon };
+
+  async function importar() {
+    const ref = refCatInput.trim().replace(/\s/g, "").toUpperCase();
+    if (!ref || ref.length < 14) { setMsg({ type: "error", text: "Referencia catastral no válida (mínimo 14 caracteres)" }); return; }
+    setLoading(true); setMsg(null);
+    try {
+      const url = `https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/COVCCallejero.svc/json/Consulta_DNPRC?RefCat=${ref}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Error al conectar con el Catastro");
+      const data = await res.json();
+      const rc = data?.consulta_dnprcResult;
+      if (!rc || rc.control?.cudnp === "0") throw new Error("Referencia catastral no encontrada");
+      const biRaw = rc.bico?.bi;
+      const inmueble = Array.isArray(biRaw) ? biRaw[0] : biRaw;
+      if (!inmueble) throw new Error("No se encontraron datos del inmueble");
+      const dt = inmueble.dt;
+      const ds = inmueble.ds;
+      const lourb = dt?.locs?.lous?.lourb;
+      const loint = lourb?.loint;
+      const campos = {};
+      if (lourb?.dir?.tv && lourb?.dir?.nv) campos.dir = `${TIPO_VIA[lourb.dir.tv] || lourb.dir.tv} ${lourb.dir.nv}`.trim();
+      if (lourb?.dir?.pnp) campos.num = String(lourb.dir.pnp);
+      if (loint?.pt) campos.planta = String(loint.pt);
+      if (loint?.pu) campos.puerta = String(loint.pu);
+      if (lourb?.dp) campos.cp = String(lourb.dp).padStart(5, "0");
+      const municipioNombre = lourb?.nm || lourb?.npa || dt?.locs?.lous?.lourb?.nm;
+      if (municipioNombre) campos.municipio = municipioNombre;
+      if (ds?.sfc) { const m2 = parseFloat(String(ds.sfc).replace(",", ".")); if (m2 > 0) campos.mConst = m2; }
+      if (!campos.mConst && inmueble?.debi?.sfc) { const m2 = parseFloat(String(inmueble.debi.sfc).replace(",", ".")); if (m2 > 0) campos.mConst = m2; }
+      if (!campos.mConst && ds?.stl) { const m2 = parseFloat(String(ds.stl).replace(",", ".")); if (m2 > 0) campos.mConst = m2; }
+      const antRaw = ds?.ant || inmueble?.debi?.ant || dt?.crop?.ant;
+      if (antRaw) { const ano = parseInt(String(antRaw).trim()); if (ano > 1800 && ano <= new Date().getFullYear()) campos.anoCon = String(ano); }
+      // Guardar ref catastral en el estado del componente padre
+      if (setRefCat) setRefCat(refCatInput.trim().replace(/\s/g, "").toUpperCase());
+      const aplicados = ["Ref. catastral"];
+      Object.entries(campos).forEach(([k, v]) => { if (v !== undefined && v !== null && v !== "" && SETTERS[k]) { SETTERS[k](v); aplicados.push(LABELS[k] || k); } });
+      const noImportados = Object.keys(LABELS).filter(k => !campos[k]).map(k => LABELS[k]);
+      if (aplicados.length === 0) setMsg({ type: "error", text: "⚠️ Referencia encontrada pero sin datos disponibles. Completa manualmente." });
+      else if (noImportados.length > 0) setMsg({ type: "warn", text: `✅ Importados: ${aplicados.join(", ")}. ⚠️ Sin datos: ${noImportados.join(", ")} — completa manualmente.` });
+      else setMsg({ type: "ok", text: `✅ Todos los datos importados: ${aplicados.join(", ")}` });
+    } catch (err) {
+      setMsg({ type: "error", text: `⚠️ ${err.message}. Comprueba la referencia e inténtalo de nuevo.` });
+    }
+    setLoading(false);
+  }
+
+  const iSt = { flex: 1, padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", outline: "none" };
+
+  return (
+    <div style={{ marginBottom: 20, padding: "14px 16px", background: "#F4EEE0", border: "1px solid #2A2926", borderRadius: 0 }}>
+      <div style={{ fontSize: 10, fontWeight: 700, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>Importar del Catastro</div>
+      <div style={{ display: "flex", gap: 8 }}>
+        <input type="text" value={refCatInput} onChange={e => setRefCatInput(e.target.value.toUpperCase())} onKeyDown={e => e.key === "Enter" && importar()} placeholder="Ej: 9872023VH5797S0001WX" style={iSt} />
+        <button onClick={importar} disabled={loading || !refCatInput.trim()}
+          style={{ background: loading || !refCatInput.trim() ? "#E7E1D4" : "#AC8A54", border: "none", borderRadius: 0, color: loading || !refCatInput.trim() ? "#C8BFB0" : "#F8F6F1", fontSize: 11, fontWeight: 700, cursor: loading || !refCatInput.trim() ? "not-allowed" : "pointer", padding: "0 16px", fontFamily: "Inter, sans-serif", whiteSpace: "nowrap" }}>
+          {loading ? "Consultando..." : "Importar"}
+        </button>
+      </div>
+      {msg && <div style={{ fontSize: 11, marginTop: 8, padding: "6px 10px", borderRadius: 0, color: msg.type === "ok" ? "#2C6E52" : msg.type === "warn" ? "#AC8A54" : "#A23A3A", background: msg.type === "ok" ? "#6AAF8D11" : msg.type === "warn" ? "#C8A97E11" : "#F6E7E5", border: "1px solid " + (msg.type === "ok" ? "#6AAF8D44" : msg.type === "warn" ? "#C8A97E44" : "#D4545444") }}>{msg.text}</div>}
+      <div style={{ fontSize: 10, color: "#C8BFB0", marginTop: 8 }}>Autocumplimenta: dirección, número, planta, puerta, CP, municipio, m² y año construcción</div>
+    </div>
+  );
+}
+
+// build: 1788109297
+export default function FormularioCaptacion() {
+  const [submitted, setSubmitted] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [agentesDB, setAgentesDB] = useState([]);
+  const [fichaId, setFichaId] = useState(null); // ID de la ficha ya creada
+  const [autoSaveStatus, setAutoSaveStatus] = useState(null); // null | "saving" | "saved" | "error"
+
+  // Cargar agentes dinámicamente desde Supabase
+  useEffect(() => {
+    supabase.from("usuarios").select("nombre,agente_codigo").eq("activo", true).not("agente_codigo", "is", null)
+      .then(({ data }) => { if (data) setAgentesDB(data); });
+  }, []);
+
+  // Generar referencia automática — 4 dígitos fijos, máximo real por agente
+  async function generarRef(agenteName) {
+    const found = agentesDB.find(a => a.nombre === agenteName);
+    const prefix = found?.agente_codigo;
+    if (!prefix) return;
+    const { data: existing } = await supabase.from("propiedades").select("ref").like("ref", `${prefix}%`);
+    let maxNum = 0;
+    (existing || []).forEach(row => {
+      const numStr = row.ref?.slice(prefix.length);
+      if (numStr && /^\d+$/.test(numStr)) {
+        maxNum = Math.max(maxNum, parseInt(numStr));
+      }
+    });
+    setRef(prefix + String(maxNum + 1).padStart(4, "0"));
+  }
+
+  // Resumen
+  const [ref, setRef] = useState("");
+  const [tipo, setTipo] = useState("");
+  const [op, setOp] = useState("Compraventa");
+  const [agente, setAgente] = useState("");
+
+  // Localizacion
+  const [dir, setDir] = useState("");
+  const [num, setNum] = useState("");
+  const [cp, setCp] = useState("");
+  const [municipio, setMunicipio] = useState("");
+  const [zona, setZona] = useState("");
+  const [orient, setOrient] = useState("");
+  const [distPlaya, setDistPlaya] = useState("");
+  const [visDir, setVisDir] = useState("Solo calle");
+
+  // Venta
+  const [precioVenta, setPrecioVenta] = useState("");
+  const [precioProp, setPrecioProp] = useState("");
+  const [precioTraspaso, setPrecioTraspaso] = useState("");
+  const [precioAlquiler, setPrecioAlquiler] = useState("");
+  const [fianzaMeses, setFianzaMeses] = useState("");
+  const [duracionMinMeses, setDuracionMinMeses] = useState("");
+  const [mascotas, setMascotas] = useState(false);
+  const [alqEquipamiento,  setAlqEquipamiento]  = useState("");
+  const [alqTipoOperacion, setAlqTipoOperacion] = useState("residencia");
+  const [alqMaxInquilinos, setAlqMaxInquilinos] = useState("");
+  const [alqAptoNinos,     setAlqAptoNinos]     = useState(null);
+  const [honorariosTipo, setHonorariosTipo] = useState("porcentaje");
+  const [honNetoManual, setHonNetoManual] = useState("");
+  const [calcDesde, setCalcDesde] = useState("venta");
+  const [honorarios, setHonorarios] = useState("5");
+  const [ivaHon, setIvaHon] = useState("21");
+
+  // Motor de cálculo — puede calcularse desde precio venta O desde precio propietario
+  // Gastos
+  const [ibi, setIbi] = useState("");
+  const [basuras, setBasuras] = useState("");
+  const [comunidad, setComunidad] = useState("");
+  const [extraCom, setExtraCom] = useState("");
+  const [otrosGastos, setOtrosGastos] = useState("");
+
+  // Superficies
+  const [mUtil, setMUtil] = useState("");
+  const [mConst, setMConst] = useState("");
+  const [mParcela, setMParcela] = useState("");
+  const [mTerraza, setMTerraza] = useState("");
+  const [mBalcon, setMBalcon] = useState("");
+  const [mPorche, setMPorche] = useState("");
+  const [habDob, setHabDob] = useState("0");
+  const [habSim, setHabSim] = useState("0");
+  const [totalHab, setTotalHab] = useState("");
+  const [refCatCuest, setRefCatCuest] = useState("");
+  const [latitud, setLatitud] = useState("");
+  const [longitud, setLongitud] = useState("");
+  const [tipologiaChalet, setTipologiaChalet] = useState("");
+  const [plantasChalet, setPlantasChalet] = useState("");
+  const [banos, setBanos] = useState("0");
+  const [aseos, setAseos] = useState("0");
+  const [planta, setPlanta] = useState("");
+  const [puerta, setPuerta] = useState("");
+  const [anoCon, setAnoCon] = useState("");
+  const [conserv, setConserv] = useState("");
+  const [suelos, setSuelos] = useState("");
+  const [carpExt, setCarpExt] = useState("");
+  const [carpInt, setCarpInt] = useState("");
+  const [emisionesEnerg, setEmisionesEnerg] = useState("");
+
+  // Caracteristicas
+  const [certE, setCertE] = useState("");
+  const [iee, setIee] = useState("");
+  const [ventaMob, setVentaMob] = useState(false);
+  const [terraza, setTerraza] = useState(false);
+  const [balcon, setBalcon] = useState(false);
+  const [jardin, setJardin] = useState(false);
+  const [piscina, setPiscina] = useState(false);
+  const [ascensor, setAscensor] = useState(false);
+  const [armarios, setArmarios] = useState(false);
+  const [trastero, setTrastero] = useState(false);
+  const [parking, setParking] = useState("No");
+  const [nPlazas, setNPlazas] = useState("");
+  const [precioParking, setPrecioParking] = useState("");
+  const [cualNeg, setCualNeg] = useState(["", "", "", "", "", ""]);
+  const [aireAcond, setAireAcond] = useState(false);
+  const [aireAcondTipo, setAireAcondTipo] = useState("");
+  const [calefaccion, setCalefaccion] = useState("");
+  const [aguaCal, setAguaCal] = useState("");
+
+  // Instalaciones
+  const [suministros, setSuministros] = useState([]);
+  const [drenaje, setDrenaje] = useState("");
+  const [ventExt, setVentExt] = useState(false);
+  const [elecRef, setElecRef] = useState(false);
+  const [fontRef, setFontRef] = useState(false);
+
+  // Local / Nave
+  const [localUbicacion, setLocalUbicacion] = useState("");
+  const [localActividad, setLocalActividad] = useState([]);
+  const [localAlquilerMes, setLocalAlquilerMes] = useState("");
+  const [localFianzaMeses, setLocalFianzaMeses] = useState("");
+  const [localFinContrato, setLocalFinContrato] = useState("");
+  const [localNEscaparates, setLocalNEscaparates] = useState("");
+  const [localNPlantas, setLocalNPlantas] = useState("");
+  const [localCalefaccion, setLocalCalefaccion] = useState(false);
+  const [localAC, setLocalAC] = useState(false);
+  const [localSalidaHumos, setLocalSalidaHumos] = useState(false);
+  const [localCocinaEquipada, setLocalCocinaEquipada] = useState(false);
+  const [localPuertaSeguridad, setLocalPuertaSeguridad] = useState(false);
+  const [localAlarma, setLocalAlarma] = useState(false);
+  const [localCCTV, setLocalCCTV] = useState(false);
+  const [localAlmacen, setLocalAlmacen] = useState(false);
+  const [localHaceEsquina, setLocalHaceEsquina] = useState(false);
+  const [localEntradaAuxiliar, setLocalEntradaAuxiliar] = useState(false);
+  const [localTieneOficina, setLocalTieneOficina] = useState(false);
+
+  // Dirección extendida
+  const [bloque, setBloque] = useState("");
+  const [escalera, setEscalera] = useState("");
+  const [urbanizacion, setUrbanizacion] = useState("");
+
+  // Características residenciales adicionales (Idealista v6)
+  const [chimenea, setChimenea] = useState(false);
+  const [cocinaEquipada, setCocinaEquipada] = useState(false);
+  const [dobleAcristalamiento, setDobleAcristalamiento] = useState(false);
+  const [puertaBlindada, setPuertaBlindada] = useState(false);
+  const [alarmaSeguridad, setAlarmaSeguridad] = useState(false);
+  const [plantasEdificio, setPlantasEdificio] = useState("");
+  const [ocupacionActual, setOcupacionActual] = useState("");
+  const [tipoGaraje, setTipoGaraje] = useState("");
+  const [garajePuertaAuto, setGarajePuertaAuto] = useState(false);
+  const [garajePlazaCubierta, setGarajePlazaCubierta] = useState(false);
+  const [garajeTipo, setGarajeTipo] = useState("");
+  const [mEdificable, setMEdificable] = useState("");
+  const [terrenoAcceso, setTerrenoAcceso] = useState("");
+  const [terrenoLuz, setTerrenoLuz] = useState(false);
+  const [terrenoAgua, setTerrenoAgua] = useState(false);
+  const [terrenoGas, setTerrenoGas] = useState(false);
+  const [terrenoAlcantarillado, setTerrenoAlcantarillado] = useState(false);
+  const [terrenoAceras, setTerrenoAceras] = useState(false);
+  const [terrenoAlumbrado, setTerrenoAlumbrado] = useState(false);
+  const [terrenoCarretera, setTerrenoCarretera] = useState(false);
+  const [trasteroAltura, setTrasteroAltura] = useState("");
+  const [trasteroAcceso24h, setTrasteroAcceso24h] = useState(false);
+  const [trasteroSeguridad24h, setTrasteroSeguridad24h] = useState(false);
+  const [trasteroMuelleCarga, setTrasteroMuelleCarga] = useState(false);
+
+  // Publicacion
+
+  // Propietarios (array dinámico)
+  const [propietarios, setPropietarios] = useState([{ ...PROPIETARIO_VACIO }]);
+  const [notasPriv, setNotasPriv] = useState("");
+
+  // Cualificacion
+  const [cualPos, setCualPos] = useState(["", "", "", "", "", ""]);
+
+  // autoSaveRef + useEffect autoguardado — después de todos los useState
+  const autoSaveRef = useRef(null);
+  useEffect(() => {
+    if (!ref || !tipo || !op) return;
+    if (autoSaveRef.current) clearTimeout(autoSaveRef.current);
+    autoSaveRef.current = setTimeout(async () => {
+      setAutoSaveStatus("saving");
+      try {
+        const data = buildDbData();
+        if (fichaId) {
+          const { error } = await supabase.from("propiedades").update(data).eq("id", fichaId);
+          if (error) throw error;
+        } else {
+          // Verificar si ya existe una ficha con esa ref antes de crear
+          const { data: existing } = await supabase.from("propiedades").select("id").eq("ref", data.ref).maybeSingle();
+          if (existing) {
+            // Ya existe — enlazar y actualizar en lugar de duplicar
+            setFichaId(existing.id);
+            const { error } = await supabase.from("propiedades").update(data).eq("id", existing.id);
+            if (error) throw error;
+          } else {
+            const { data: inserted, error } = await supabase.from("propiedades").insert(data).select().single();
+            if (error) throw error;
+            setFichaId(inserted.id);
+          }
+        }
+        setAutoSaveStatus("saved");
+        setTimeout(() => setAutoSaveStatus(null), 2000);
+      } catch (e) {
+        setAutoSaveStatus("error");
+        setTimeout(() => setAutoSaveStatus(null), 3000);
+      }
+    }, 1500);
+    return () => { if (autoSaveRef.current) clearTimeout(autoSaveRef.current); };
+  }, [ref, tipo, op, agente, dir, num, cp, municipio, zona, orient, distPlaya, visDir,
+      planta, puerta, precioVenta, precioProp, precioTraspaso, precioAlquiler,
+      fianzaMeses, duracionMinMeses, mascotas, honorarios, honNetoManual,
+      honorariosTipo, ivaHon, ibi, basuras, comunidad, extraCom, otrosGastos,
+      mUtil, mConst, mParcela, mTerraza, mBalcon, mPorche,
+      habDob, habSim, totalHab, banos, aseos, conserv, anoCon, certE, iee,
+      ventaMob, terraza, balcon, jardin, piscina, ascensor, armarios, trastero,
+      parking, nPlazas, precioParking, aireAcond, aireAcondTipo, tipologiaChalet, plantasChalet, suelos, carpExt, carpInt,
+      emisionesEnerg, calefaccion, aguaCal, suministros, drenaje,
+      ventExt, elecRef, fontRef, notasPriv, propietarios, cualPos, cualNeg, refCatCuest, latitud, longitud,
+      alqEquipamiento, alqTipoOperacion, alqMaxInquilinos, alqAptoNinos,
+      bloque, escalera, urbanizacion, chimenea, cocinaEquipada, dobleAcristalamiento,
+      puertaBlindada, alarmaSeguridad, plantasEdificio, ocupacionActual, tipoGaraje,
+      garajePuertaAuto, garajePlazaCubierta, garajeTipo,
+      mEdificable, terrenoAcceso, terrenoLuz, terrenoAgua, terrenoGas, terrenoAlcantarillado,
+      terrenoAceras, terrenoAlumbrado, terrenoCarretera,
+      trasteroAltura, trasteroAcceso24h, trasteroSeguridad24h, trasteroMuelleCarga]);
+  const pv = op === "Alquiler" ? (Number(precioAlquiler)||0) : op === "Traspaso" ? (Number(precioTraspaso)||0) : (Number(precioVenta) || 0);
+  const pp = Number(precioProp) || 0;
+
+  const ivaRate = (Number(ivaHon)||21) / 100;
+  const pct = (Number(honorarios)||0) / 100;
+
+  let honNeto, honIva, honTotal, netoProp, precioCalc;
+  if (calcDesde === "propietario" && pp > 0 && op !== "Alquiler") {
+    if (honorariosTipo === "porcentaje") {
+      precioCalc = pp / (1 - pct * (1 + ivaRate));
+      honNeto = precioCalc * pct;
+    } else {
+      honNeto = Number(honNetoManual) || 0;
+      precioCalc = pp + honNeto + honNeto * ivaRate;
+    }
+  } else {
+    precioCalc = pv;
+    if (honorariosTipo === "porcentaje") {
+      honNeto = precioCalc * pct;
+    } else {
+      honNeto = Number(honNetoManual) || 0;
+    }
+  }
+  honIva = honNeto * ivaRate;
+  honTotal = honNeto + honIva;
+  netoProp = (calcDesde === "propietario" && pp > 0 && op !== "Alquiler") ? pp : precioCalc - honTotal;
+
+  // Helper condicionalidad por tipo — después de todos los hooks
+  const TIPO_MAP_COND = {
+    // Piso → flat
+    Piso:"flat", Apartamento:"flat", Estudio:"flat", Loft:"flat",
+    Atico:"flat", "Atico Duplex":"flat", Duplex:"flat", "Planta baja":"flat",
+    // Casa → house
+    Casa:"house", Chalet:"house", Adosado:"house", Bungalow:"house",
+    Pareado:"house", Villa:"house", "Villa de Lujo":"house", "Casa Tipo Duplex":"house",
+    // Finca → rustic
+    "Finca rustica":"rustic", Finca:"rustic",
+    // Local/Nave → premises_commercial
+    "Local comercial":"premises_commercial", Oficina:"office",
+    "Nave industrial":"premises_commercial", Almacen:"premises_commercial", Negocio:"premises_commercial",
+    // Terreno → land
+    Parcela:"land", Solar:"land", "Terreno urbano":"land", "Terreno urbanizable":"land",
+    "Terreno rustico":"land", "Terreno rural":"land", "Terreno industrial":"land",
+    // Otros
+    Garaje:"garage", Parking:"garage", Trastero:"storage", Edificio:"building",
+  };
+  const ft = TIPO_MAP_COND[tipo] || "flat";
+  const esResidencial = ["flat","house","rustic"].includes(ft);
+  const esComercial = ["premises_commercial","office"].includes(ft);
+  const esGaraje = ft === "garage";
+  const esTrastero = ft === "storage";
+  const esTerreno = ft === "land";
+  const esEdificio = ft === "building";
+  const tieneHab = ["flat","house","rustic"].includes(ft);
+  const tieneCert = ["flat","house","rustic"].includes(ft);
+  const tieneExtras = ["flat","house","rustic"].includes(ft);
+  // Gastos condicionados por operación Y tipo de propiedad
+  const esCompraventa = op === "Compraventa";
+  const esAlquilerOp  = op === "Alquiler";
+  const esTraspasoOp  = op === "Traspaso";
+
+  const tieneIBI = esCompraventa || esTraspasoOp;
+  const tienesComunidadTipo = ["flat","house","premises_commercial","office","garage","storage"].includes(ft);
+  const tieneComunidad = tienesComunidadTipo && (esCompraventa || esTraspasoOp || (esAlquilerOp && esResidencial));
+  const tieneBasuras = esCompraventa || esTraspasoOp;
+  const tieneDerrama = esCompraventa && ["flat","house"].includes(ft);
+  const tieneInstalaciones = ["flat","house","rustic","premises_commercial","office","building"].includes(ft);
+  const tieneElecFont = ["flat","house","rustic","premises_commercial","office"].includes(ft);
+  const tieneAireCalef = ["flat","house","rustic","premises_commercial","office"].includes(ft);
+
+
+  
+
+
+  const g2 = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "0 20px" };
+  const g3 = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "0 20px" };
+  const g4 = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "0 20px" };
+
+  // Construir objeto dbData desde el estado actual
+  function buildDbData() {
+    const data = {
+      ref, tipo, op, agente,
+      dir, num: num || null, cp: cp || null, municipio, zona: zona || null,
+      orient: orient || null, dist_playa: distPlaya || null, vis_dir: visDir,
+      planta: planta || null, puerta: puerta || null,
+      bloque: bloque || null, escalera: escalera || null, urbanizacion: urbanizacion || null,
+      precio_venta: Number(precioVenta) || 0,
+      precio_prop: Number(precioProp) || 0,
+      precio_traspaso: Number(precioTraspaso) || 0,
+      precio_alquiler: Number(precioAlquiler) || 0,
+      fianza_meses: fianzaMeses !== "" ? Number(fianzaMeses) : null,
+      duracion_min_meses: duracionMinMeses !== "" ? Number(duracionMinMeses) : null,
+      mascotas: mascotas,
+      alq_equipamiento:   alqEquipamiento   || null,
+      ...(op === "Alquiler" ? { alq_tipo_operacion: alqTipoOperacion || null } : {}),
+      alq_max_inquilinos: Number(alqMaxInquilinos) || null,
+      alq_apto_ninos:     alqAptoNinos      ?? null,
+      honorarios: Number(honorarios) || 5,
+      hon_neto_manual: Number(honNetoManual) || 0,
+      honorarios_tipo: honorariosTipo,
+      iva_hon: Number(ivaHon) || 21,
+      ibi: Number(ibi) || 0,
+      basuras: Number(basuras) || 0,
+      comunidad: Number(comunidad) || 0,
+      extra_comunidad: Number(extraCom) || 0,
+      otros_gastos: otrosGastos || null,
+      m_util: Number(mUtil) || 0,
+      m_const: Number(mConst) || 0,
+      m_parcela: Number(mParcela) || 0,
+      m_terraza: Number(mTerraza) || 0,
+      m_balcon: Number(mBalcon) || 0,
+      m_porche: Number(mPorche) || 0,
+      hab_dobles: Number(habDob) || 0,
+      total_hab: Number(totalHab) || (Number(habDob)||0) + (Number(habSim)||0),
+      hab_simples: Number(habSim) || 0,
+      banos: Number(banos) || 0,
+      aseos: Number(aseos) || 0,
+      conserv: conserv || null,
+      ano_construc: anoCon || null,
+      cert_energ: certE || null,
+      iee: iee || null,
+      venta_mobiliario: ventaMob,
+      terraza, balcon, jardin, piscina, ascensor, armarios, trastero,
+      parking: parking || "No",
+      n_plazas: Number(nPlazas) || 0,
+      precio_parking: (parking === "Si" || parking === "Opcional") && precioParking ? Number(precioParking) : null,
+      cual_neg: cualNeg.filter(Boolean),
+      aire_acond: aireAcond,
+      ref_cat: refCatCuest || null,
+      latitud: latitud !== "" ? Number(latitud) : null,
+      longitud: longitud !== "" ? Number(longitud) : null,
+      aire_acond_tipo: aireAcondTipo || null,
+      tipologia_chalet: tipologiaChalet || null,
+      plantas_chalet: Number(plantasChalet) || null,
+      suelos: suelos || null,
+      carp_ext: carpExt || null,
+      carp_int: carpInt || null,
+      emisiones_energ: emisionesEnerg || null,
+      calefaccion: calefaccion || null,
+      agua_cal: aguaCal || null,
+      suministros: suministros.length > 0 ? suministros : [],
+      drenaje: drenaje || null,
+      vent_ext: ventExt,
+      chimenea, cocina_equipada: cocinaEquipada,
+      doble_acristalamiento: dobleAcristalamiento,
+      puerta_blindada: puertaBlindada,
+      alarma_seguridad: alarmaSeguridad,
+      plantas_edificio: plantasEdificio ? Number(plantasEdificio) : null,
+      ocupacion_actual: ocupacionActual || null,
+      tipo_garaje: tipoGaraje || null,
+      garaje_puerta_auto: garajePuertaAuto || false,
+      garaje_plaza_cubierta: garajePlazaCubierta || false,
+      garaje_tipo: garajeTipo || null,
+      m_edificable: Number(mEdificable) || null,
+      terreno_acceso: terrenoAcceso || null,
+      terreno_luz: terrenoLuz || false,
+      terreno_agua: terrenoAgua || false,
+      terreno_gas: terrenoGas || false,
+      terreno_alcantarillado: terrenoAlcantarillado || false,
+      terreno_aceras: terrenoAceras || false,
+      terreno_alumbrado: terrenoAlumbrado || false,
+      terreno_carretera: terrenoCarretera || false,
+      trastero_altura: Number(trasteroAltura) || null,
+      trastero_acceso_24h: trasteroAcceso24h || false,
+      trastero_seguridad_24h: trasteroSeguridad24h || false,
+      trastero_muelle_carga: trasteroMuelleCarga || false,
+      elec_reformada: elecRef,
+      font_reformada: fontRef,
+      local_ubicacion: localUbicacion || null,
+      local_actividad: localActividad.length ? localActividad : null,
+      local_alquiler_mes: localAlquilerMes ? Number(localAlquilerMes) : null,
+      local_fianza_meses: localFianzaMeses ? Number(localFianzaMeses) : null,
+      local_fin_contrato: localFinContrato || null,
+      local_n_escaparates: localNEscaparates ? Number(localNEscaparates) : null,
+      local_n_plantas: localNPlantas ? Number(localNPlantas) : null,
+      local_calefaccion: localCalefaccion || null,
+      local_ac: localAC || null,
+      local_salida_humos: localSalidaHumos || null,
+      local_cocina_equipada: localCocinaEquipada || null,
+      local_puerta_seguridad: localPuertaSeguridad || null,
+      local_alarma: localAlarma || null,
+      local_cctv: localCCTV || null,
+      local_almacen: localAlmacen || null,
+      local_hace_esquina: localHaceEsquina || null,
+      local_entrada_auxiliar: localEntradaAuxiliar || null,
+      local_tiene_oficina: localTieneOficina || null,
+      notas_priv: notasPriv || null,
+      estado: "captada",
+      fecha_cap: new Date().toISOString().split("T")[0],
+      prop_nombre: propietarios[0]?.nombre || null,
+      prop_tel:    propietarios[0]?.tel    || null,
+      prop_email:  propietarios[0]?.email  || null,
+      propietarios: propietarios,
+      cual_pos: cualPos.filter(Boolean),
+      visitas: 0,
+      fotos: 0, videos: 0, planos: 0,
+      destinos: [],
+    };
+    Object.keys(data).forEach(k => { if (data[k] === null || data[k] === "") delete data[k]; });
+    return data;
+  }
+
+  const handleSubmit = async () => {
+    // Validar campos obligatorios Idealista
+    const errores = [];
+    if (!ref) errores.push("Referencia");
+    if (!tipo) errores.push("Tipo de propiedad");
+    if (!op) errores.push("Tipo de operación");
+    if (!dir) errores.push("Dirección");
+    if (!municipio) errores.push("Municipio");
+    if (!cp) errores.push("Código postal");
+    if (op === "Compraventa" && (!precioVenta || Number(precioVenta) <= 0)) errores.push("Precio de venta");
+    if (op === "Alquiler" && (!precioAlquiler || Number(precioAlquiler) <= 0)) errores.push("Renta mensual");
+    if (op === "Traspaso" && (!precioTraspaso || Number(precioTraspaso) <= 0)) errores.push("Precio traspaso");
+    if (op === "Alquiler" && esResidencial && !alqEquipamiento) errores.push("Equipamiento (cocina/mobiliario)");
+    if (op === "Traspaso" && (!precioTraspaso || Number(precioTraspaso) <= 0)) errores.push("Precio de traspaso");
+    if (!esTerreno && !esGaraje && (!mConst || Number(mConst) <= 0)) errores.push("m² construidos");
+    if (tieneHab && (Number(banos)||0) + (Number(aseos)||0) <= 0) errores.push("Baños");
+    if (tieneCert && !certE) errores.push("Certificado energético");
+    if (esTerreno && (!mParcela || Number(mParcela) <= 0)) errores.push("m² parcela");
+    if (errores.length > 0) {
+      alert("⚠️ Campos obligatorios incompletos:\n\n• " + errores.join("\n• ") + "\n\nCompleta estos campos antes de crear la ficha.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const dbData = buildDbData();
+
+      let error;
+      if (fichaId) {
+        // Ficha ya existe — actualizar
+        ({ error } = await supabase.from("propiedades").update(dbData).eq("id", fichaId));
+      } else {
+        // Crear nueva
+        ({ error } = await supabase.from("propiedades").insert(dbData));
+      }
+      if (error) {
+        alert("Error al guardar: " + error.message);
+        setSaving(false);
+        return;
+      }
+      notificarGuardado(fichaId ? "Ficha actualizada" : "Ficha creada");
+
+      // Enviar email de notificación a info@mallorcanativaproperties.com
+      try {
+        await fetch("/api/email-captacion", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ref, tipo, op, agente,
+            dir, num, cp, municipio, zona, orient, distPlaya, visDir,
+            precioVenta: Number(precioVenta) || 0,
+            precioProp: Number(precioProp) || 0,
+            precioTraspaso: Number(precioTraspaso) || 0,
+            precioAlquiler: Number(precioAlquiler) || 0,
+            honorariosTipo, honorarios, ivaHon,
+            ibi, basuras, comunidad, extraCom, otrosGastos,
+            mConst, mUtil, mParcela, mTerraza, mBalcon,
+            habDob, habSim, banos, aseos,
+            planta, puerta, anoCon, conserv,
+            suelos, carpExt, carpInt,
+            certE, iee, parking, nPlazas,
+            aireAcond, aireAcondTipo, calefaccion, aguaCal,
+            suministros, drenaje,
+            terraza, balcon, jardin, piscina, ascensor,
+            armarios, trastero, ventaMob, ventExt, elecRef, fontRef,
+            cualPos: cualPos.filter(Boolean),
+            cualNeg: cualNeg.filter(Boolean),
+            notasPriv,
+            propNom: propietarios[0]?.nombre || "", propTel: propietarios[0]?.tel || "", propEmail: propietarios[0]?.email || "",
+            refCatastral: refCatCuest,
+          }),
+        });
+      } catch (emailErr) {
+        console.error("Error enviando email captación:", emailErr);
+        // No bloquear el flujo si falla el email
+      }
+
+      setSubmitted(true);
+    } catch (e) {
+      alert("Error inesperado: " + e.message);
+    }
+    setSaving(false);
+  };
+
+  if (submitted) {
+    return (
+      <div style={{ fontFamily: "Inter, sans-serif", background: "#F8F6F1", minHeight: "100vh", color: "#22262E", padding: "80px 24px", textAlign: "center" }}>
+        <div style={{ maxWidth: 500, margin: "0 auto" }}>
+          <div style={{ width: 60, height: 60, borderRadius: "50%", background: "#6AAF8D22", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
+            <span style={{ fontSize: 28, color: "#2C6E52" }}>v</span>
+          </div>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fontWeight: 600, marginBottom: 12 }}>Propiedad <em>registrada</em></h2>
+          <p style={{ color: "#9A968A", fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
+            La ficha {ref} se ha creado en la cartera de propiedades con estado "Captada". Puedes completar los campos restantes desde el CRM.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            style={{ padding: "12px 28px", borderRadius: 0, border: "1px solid #C8A97E", background: "transparent", color: "#AC8A54", cursor: "pointer", fontSize: 11, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase" }}
+          >
+            Nuevo formulario
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ fontFamily: "Inter, sans-serif", background: "#F8F6F1", minHeight: "100vh", color: "#22262E", padding: "clamp(16px, 4vw, 40px) clamp(12px, 3vw, 24px)" }}>
+      <div style={{ maxWidth: 720, margin: "0 auto" }}>
+
+        {/* Header */}
+      <div style={{ marginBottom: 40 }}>
+        <div style={{ fontSize: 10, fontWeight: 600, color: "var(--muted)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 12, fontFamily: "Inter, sans-serif" }}>NATIVA PROPERTIES</div>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 34, fontWeight: 600, margin: 0, lineHeight: 1.1, color: "#A8854A" }}>Formulario de Captación</h1>
+        <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--muted)", margin: "10px 0 0" }}>Formulario de captación de nuevas propiedades</p>
+        <div style={{ height: 1, background: "linear-gradient(90deg, #A8854A 0%, transparent 100%)", opacity: 0.35, marginTop: 28, marginBottom: 28 }} />
+      </div>{autoSaveStatus === "saving" && <span style={{ fontSize: 11, color: "#AC8A54", fontFamily: "Inter, sans-serif" }}>⏳ Guardando...</span>}
+            {autoSaveStatus === "saved" && <span style={{ fontSize: 11, color: "#2C6E52", fontFamily: "Inter, sans-serif" }}>✓ Guardado automáticamente</span>}
+            {autoSaveStatus === "error" && <span style={{ fontSize: 11, color: "#A23A3A", fontFamily: "Inter, sans-serif" }}>⚠️ Error al guardar</span>}
+            {fichaId && !autoSaveStatus && <span style={{ fontSize: 10, color: "#9A968A", fontFamily: "Inter, sans-serif" }}>📋 Ficha creada</span>}
+          </div>
+          <p style={{ fontSize: 12, color: "#9A968A", margin: "10px 0 0", letterSpacing: "0.04em" }}>El agente cumplimenta este formulario delante del propietario. Al enviar se crea la ficha en el CRM.</p>
+        </div>
+
+        {/* 1. Resumen */}
+        <Sec title="Resumen de la propiedad">
+          <div style={g3}>
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
+                Agente que gestiona<span style={{ color: "#9C6E1B", marginLeft: 3 }}>*</span>
+              </label>
+              <select value={agente} onChange={async e => { setAgente(e.target.value); if (e.target.value) await generarRef(e.target.value); }}
+                style={{ width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" }}>
+                <option value="">Seleccionar agente...</option>
+                {agentesDB.map(a => <option key={a.nombre} value={a.nombre}>{a.nombre} ({a.agente_codigo})</option>)}
+              </select>
+            </div>
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>
+                Referencia<span style={{ color: "#9C6E1B", marginLeft: 3 }}>*</span>
+              </label>
+              <input value={ref} onChange={e => setRef(e.target.value)} placeholder="Se genera al elegir agente"
+                style={{ width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid " + (ref ? "#6AAF8D44" : "#E7E1D4"), borderRadius: 0, color: ref ? "#2C6E52" : "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" }} />
+            </div>
+            <Select label="Tipo de operacion" value={op} onChange={setOp} options={OPERACIONES} required />
+          </div>
+          <Select label="Tipo de propiedad" value={tipo} onChange={setTipo} groups={TIPO_GROUPS} required />
+        </Sec>
+
+        {/* 2. Localizacion */}
+        <Sec title="Localizacion">
+          <CatastroImportCuestionario
+            setDir={setDir} setNum={setNum} setPlanta={setPlanta} setPuerta={setPuerta}
+            setCp={setCp} setMunicipio={setMunicipio} setMConst={setMConst} setAnoCon={setAnoCon}
+            setRefCat={setRefCatCuest}
+          />
+          <Input label="Referencia catastral" value={refCatCuest} onChange={setRefCatCuest} placeholder="9872023VH5797S0001WX" />
+          <div style={g2}>
+            <Input label="Direccion (calle/via)" value={dir} onChange={setDir} required placeholder="C/ Ejemplo" />
+            <Input label="Numero" value={num} onChange={setNum} placeholder="12" />
+            <Input label="Planta" value={planta} onChange={setPlanta} placeholder="2, Bajo, Entreplanta..." />
+            <Input label="Puerta" value={puerta} onChange={setPuerta} placeholder="A, 1..." />
+            <Input label="Bloque" value={bloque} onChange={setBloque} placeholder="A, 1..." />
+            <Input label="Escalera" value={escalera} onChange={setEscalera} placeholder="1, A..." />
+          </div>
+          {esResidencial && <Input label="Urbanizacion" value={urbanizacion} onChange={setUrbanizacion} placeholder="Urb. Los Pinos" />}
+          <div style={g3}>
+            <Input label="Codigo postal" value={cp} onChange={setCp} placeholder="07007" required />
+            <Select label="Municipio" value={municipio} onChange={(v) => { setMunicipio(v); setZona(""); }} options={Object.keys(ZONAS_MAP)} required />
+            <Select label="Zona" value={zona} onChange={setZona} options={municipio && ZONAS_MAP[municipio] ? ZONAS_MAP[municipio] : []} />
+            <Input label="Latitud (GPS)" value={latitud} onChange={setLatitud} type="number" placeholder="39.5696" />
+            <Input label="Longitud (GPS)" value={longitud} onChange={setLongitud} type="number" placeholder="2.6502" />
+          </div>
+          <div style={g3}>
+            {esResidencial && <Select label="Orientacion" value={orient} onChange={setOrient} options={ORIENTACIONES} />}
+            {esResidencial && <Input label="Distancia playa" value={distPlaya} onChange={setDistPlaya} placeholder="2 km" />}
+            <Select label="Visibilidad direccion (portales)" value={visDir} onChange={setVisDir} options={VIS_DIR} />
+          </div>
+        </Sec>
+
+        {/* 4. Gastos */}
+        <Sec title="Gastos asociados">
+          <div style={g3}>
+            <Input label="IBI anual" value={ibi} onChange={setIbi} type="number" placeholder="850" />
+            <Input label="Tasa basuras" value={basuras} onChange={setBasuras} type="number" placeholder="120" />
+            {tieneComunidad && <Input label="Comunidad /mes" value={comunidad} onChange={setComunidad} type="number" placeholder="95" />}
+          </div>
+          <div style={g2}>
+            {tieneDerrama && <Input label="Extra comunidad (derramas)" value={extraCom} onChange={setExtraCom} type="number" />}
+            <Input label="Otros gastos" value={otrosGastos} onChange={setOtrosGastos} placeholder="Mantenimiento piscina..." />
+          </div>
+        </Sec>
+
+        {/* 5. Superficies */}
+        <Sec title="Superficies y estancias">
+          <div style={g4}>
+            {!esTerreno && <Input label="m2 utiles" value={mUtil} onChange={setMUtil} type="number" />}
+            {!esTerreno && <Input label="m2 construidos" value={mConst} required={!esTerreno} onChange={setMConst} type="number" />}
+            <Input label={esTerreno ? "m2 parcela *" : "m2 parcela"} value={mParcela} onChange={setMParcela} type="number" required={esTerreno} />
+            {tieneExtras && <Input label="m2 terraza" value={mTerraza} onChange={setMTerraza} type="number" />}
+          </div>
+          {tieneExtras && <div style={g4}>
+            <Input label="m2 balcon" value={mBalcon} onChange={setMBalcon} type="number" />
+            <Input label="m2 porche" value={mPorche} onChange={setMPorche} type="number" />
+            <div /><div />
+          </div>}
+          {(ft === "house" || ft === "rustic") && (
+            <div style={g2}>
+              <div>
+                <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 }}>Tipologia chalet <span style={{color:"#A23A3A"}}>*</span></label>
+                <select value={tipologiaChalet} onChange={e => setTipologiaChalet(e.target.value)} style={{ width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif" }}>
+                  <option value="">Seleccionar...</option>
+                  <option value="Adosado">Chalet adosado</option>
+                  <option value="Pareado">Chalet pareado</option>
+                  <option value="Independiente">Chalet independiente</option>
+                  <option value="En hilera">Chalet en hilera</option>
+                </select>
+              </div>
+              <Input label="Plantas del chalet *" value={plantasChalet} onChange={setPlantasChalet} type="number" placeholder="2" />
+            </div>
+          )}
+          {tieneHab && <div style={g4}>
+            <Input label="Hab. dobles" value={habDob} required onChange={v => { setHabDob(v); if(!totalHab) setTotalHab(String((Number(v)||0)+(Number(habSim)||0))); }} type="number" />
+            <Input label="Hab. simples" value={habSim} onChange={v => { setHabSim(v); if(!totalHab) setTotalHab(String((Number(habDob)||0)+(Number(v)||0))); }} type="number" />
+            <Input label="Banos" value={banos} required onChange={setBanos} type="number" />
+            <Input label="Aseos" value={aseos} onChange={setAseos} type="number" />
+          </div>}
+          {tieneHab && <div style={g3}>
+            <div>
+              <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 4 }}>Total hab. (Idealista) <span style={{color:"#A23A3A"}}>*</span></label>
+              <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                <div style={{ width: 80, background: "#F8F6F1", border: "1px solid #E7E1D4", borderRadius: 0, color: "#AC8A54", padding: "9px 12px", fontSize: 13, fontFamily: "Inter, sans-serif", fontWeight: 700, textAlign: "center" }}>
+                  {(Number(habDob)||0)+(Number(habSim)||0)}
+                </div>
+                <span style={{ fontSize: 10, color: "#9A968A" }}>Total enviado a Idealista</span>
+              </div>
+            </div>
+            <div>
+              <label style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 4 }}>Total baños (Idealista)</label>
+              <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                <div style={{ width: 80, background: "#F8F6F1", border: "1px solid #E7E1D4", borderRadius: 0, color: "#AC8A54", padding: "9px 12px", fontSize: 13, fontFamily: "Inter, sans-serif", fontWeight: 700, textAlign: "center" }}>
+                  {(Number(banos)||0)+(Number(aseos)||0)}
+                </div>
+                <span style={{ fontSize: 10, color: "#9A968A" }}>Baños + aseos — bathNumber</span>
+              </div>
+            </div>
+          </div>}
+          {!tieneHab && esComercial && <div style={g2}>
+            <Input label="Banos" value={banos} onChange={setBanos} type="number" />
+            <Input label="Aseos" value={aseos} onChange={setAseos} type="number" />
+          </div>}
+          {esTerreno && <div style={g2}>
+            <Input label="m2 edificables" value={mEdificable} onChange={setMEdificable} type="number" />
+            <Select label="Tipo de acceso" value={terrenoAcceso} onChange={setTerrenoAcceso}
+              options={["","Urbano","Carretera","Pista","Autovía/Autopista","Desconocido"]} />
+          </div>}
+          {esTerreno && <div style={{ display: "flex", flexWrap: "wrap", gap: 20 }}>
+            <Toggle label="Luz" value={terrenoLuz} onChange={setTerrenoLuz} />
+            <Toggle label="Agua" value={terrenoAgua} onChange={setTerrenoAgua} />
+            <Toggle label="Gas" value={terrenoGas} onChange={setTerrenoGas} />
+            <Toggle label="Alcantarillado" value={terrenoAlcantarillado} onChange={setTerrenoAlcantarillado} />
+            <Toggle label="Aceras" value={terrenoAceras} onChange={setTerrenoAceras} />
+            <Toggle label="Alumbrado" value={terrenoAlumbrado} onChange={setTerrenoAlumbrado} />
+            <Toggle label="Acceso carretera" value={terrenoCarretera} onChange={setTerrenoCarretera} />
+          </div>}
+          <div style={g3}>
+            {!esTerreno && <Input label="Ano construccion" value={anoCon} onChange={setAnoCon} placeholder="2005" />}
+            <Select label="Conservacion" value={conserv} onChange={setConserv} options={CONSERVACION} />
+          </div>
+        </Sec>
+
+        {/* 6. Caracteristicas */}
+        {(esResidencial || esComercial) && <Sec title="Caracteristicas principales">
+          {tieneCert && <div style={g3}>
+            <Select label="Cert. energetico" value={certE} onChange={setCertE} required options={CERT_ENERG} />
+            <Select label="Emisiones energeticas" value={emisionesEnerg} onChange={setEmisionesEnerg} options={["A","B","C","D","E","F","G"]} />
+            {esResidencial && <Select label="IEE" value={iee} onChange={setIee} options={IEE_OPTS} />}
+          </div>}
+          {esResidencial && <div style={g3}>
+            <Select label="Suelos" value={suelos} onChange={setSuelos} options={["Gres","Gres porcelanico","Marmol","Terrazo","Tarima flotante","Parquet","Laminado","Madera maciza","Vinilo","Microcemento","Ceramica","Piedra natural","Hormigon pulido"]} />
+            <Select label="Carp. exterior" value={carpExt} onChange={setCarpExt} options={["Aluminio","Aluminio con RPT","PVC","Madera","Climalit","Doble cristal","Triple cristal","Hierro/Forja"]} />
+            <Select label="Carp. interior" value={carpInt} onChange={setCarpInt} options={["Lacado blanco","Roble","Cerezo","Haya","Pino","Wengue","Nogal","DM lacado","Cristal","Corredera","Block"]} />
+          </div>}
+          {tieneAireCalef && <div style={g3}>
+            <Select label="Calefaccion" value={calefaccion} onChange={setCalefaccion} options={CALEFACCION_OPTS} />
+            {esResidencial && <Select label="Agua caliente" value={aguaCal} onChange={setAguaCal} options={AGUA_CALIENTE} />}
+
+          </div>}
+
+          {/* Local / Nave: características específicas */}
+          {esComercial && (() => {
+            const LBL = { fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 };
+            const INP = { width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" };
+            const SEL = { ...INP, appearance: "none", WebkitAppearance: "none" };
+            return (
+              <div style={{ marginTop: 16 }}>
+                {/* Ubicación + Nº escaparates + Nº plantas */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14, marginBottom: 14 }}>
+                  <div>
+                    <label style={LBL}>Ubicación</label>
+                    <select value={localUbicacion} onChange={e => setLocalUbicacion(e.target.value)} style={SEL}>
+                      <option value="">— Sin especificar —</option>
+                      <option value="pie_calle">Pie de calle</option>
+                      <option value="centro_comercial">Centro comercial</option>
+                      <option value="entreplanta">Entreplanta</option>
+                      <option value="sotano">Sótano</option>
+                      <option value="planta_superior">Planta superior</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style={LBL}>Nº escaparates</label>
+                    <input type="number" min="0" value={localNEscaparates} onChange={e => setLocalNEscaparates(e.target.value)} style={INP} />
+                  </div>
+                  <div>
+                    <label style={LBL}>Nº plantas</label>
+                    <input type="number" min="1" value={localNPlantas} onChange={e => setLocalNPlantas(e.target.value)} style={INP} />
+                  </div>
+                </div>
+
+                {/* Actividad comercial */}
+                <div style={{ marginBottom: 16 }}>
+                  <label style={LBL}>Actividad comercial</label>
+                  {[
+                    { grupo: "Hostelería", opciones: ["Bar","Restaurante","Cafetería","Discoteca / pub / sala","Hotel / hostal","Otros hostelería"] },
+                    { grupo: "Comercio", opciones: ["Alimentación","Moda y complementos","Electrónica","Mobiliario y decoración","Farmacia / parafarmacia","Joyería / relojería","Papelería / librería","Juguetería","Otros comercio"] },
+                    { grupo: "Servicios", opciones: ["Peluquería / estética","Lavandería / tintorería","Agencia de viajes","Inmobiliaria","Financiero / seguros","Clínica / centro médico","Centro de formación","Gimnasio / deporte","Otros servicios"] },
+                    { grupo: "Otras actividades", opciones: ["Taller / reparación","Almacén / logística","Industria ligera"] },
+                  ].map(({ grupo, opciones }) => (
+                    <div key={grupo} style={{ marginBottom: 10 }}>
+                      <div style={{ fontSize: 9, fontWeight: 700, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>{grupo}</div>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                        {opciones.map(opt => {
+                          const sel = localActividad.includes(opt);
+                          return (
+                            <button key={opt} type="button"
+                              onClick={() => setLocalActividad(sel ? localActividad.filter(a => a !== opt) : [...localActividad, opt])}
+                              style={{
+                                padding: "5px 10px", fontSize: 11, fontFamily: "Inter, sans-serif",
+                                border: sel ? "2px solid #AC8A54" : "1px solid #D5CFC4",
+                                background: sel ? "#FBF6EC" : "#FFFFFF",
+                                color: sel ? "#7A5C2E" : "#5C5850",
+                                fontWeight: sel ? 600 : 400,
+                                cursor: "pointer", borderRadius: 0,
+                                boxShadow: sel ? "0 0 0 1px #AC8A54" : "none",
+                                transition: "all 0.15s",
+                              }}
+                            >{opt}</button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Equipamiento */}
+                <div style={{ marginBottom: 8 }}>
+                  <label style={LBL}>Equipamiento</label>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 24px" }}>
+                    {[
+                      [localCalefaccion, setLocalCalefaccion, "Calefacción"],
+                      [localAC, setLocalAC, "Aire acondicionado"],
+                      [localSalidaHumos, setLocalSalidaHumos, "Salida de humos"],
+                      [localCocinaEquipada, setLocalCocinaEquipada, "Cocina equipada"],
+                      [localPuertaSeguridad, setLocalPuertaSeguridad, "Puerta de seguridad"],
+                      [localAlarma, setLocalAlarma, "Alarma"],
+                      [localCCTV, setLocalCCTV, "CCTV"],
+                      [localAlmacen, setLocalAlmacen, "Almacén en edificio"],
+                      [localHaceEsquina, setLocalHaceEsquina, "Hace esquina"],
+                      [localEntradaAuxiliar, setLocalEntradaAuxiliar, "Entrada auxiliar"],
+                      [localTieneOficina, setLocalTieneOficina, "Oficina en local"],
+                    ].map(([val, setter, lbl]) => (
+                      <label key={lbl} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#3A3731", cursor: "pointer" }}>
+                        <input type="checkbox" checked={!!val} onChange={e => setter(e.target.checked)}
+                          style={{ accentColor: "#AC8A54", width: 14, height: 14 }} />
+                        {lbl}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+        </Sec>}
+
+        {/* 6b. Extras y dotaciones */}
+        {(esResidencial || esComercial) && <Sec title="Extras y dotaciones">
+          {tieneExtras && <div style={{ display: "flex", flexWrap: "wrap", gap: "0 40px" }}>
+            <Toggle label="Terraza" value={terraza} onChange={setTerraza} />
+            {ft !== "rustic" && <Toggle label="Balcon" value={balcon} onChange={setBalcon} />}
+            <Toggle label="Jardin" value={jardin} onChange={setJardin} />
+            <Toggle label="Piscina" value={piscina} onChange={setPiscina} />
+            {ft !== "rustic" && <Toggle label="Ascensor" value={ascensor} onChange={setAscensor} />}
+            <Toggle label="Armarios empotrados" value={armarios} onChange={setArmarios} />
+            <Toggle label="Trastero" value={trastero} onChange={setTrastero} />
+            <Toggle label="Ventanas exteriores" value={ventExt} onChange={setVentExt} />
+            {(esResidencial || esComercial) && <Toggle label="Incluye mobiliario" value={ventaMob} onChange={setVentaMob} />}
+            {tieneAireCalef && <Toggle label="Aire acondicionado" value={aireAcond} onChange={e => { setAireAcond(e); setAireAcondTipo(e ? "Frio/Calor" : ""); }} />}
+            {tieneAireCalef && aireAcond && <Select label="Tipo aire" value={aireAcondTipo} onChange={setAireAcondTipo} options={["Solo frio","Frio/Calor","Preinstalacion"]} />}
+            {esResidencial && <Toggle label="Chimenea" value={chimenea} onChange={setChimenea} />}
+            {esResidencial && <Toggle label="Cocina equipada" value={cocinaEquipada} onChange={setCocinaEquipada} />}
+            {esResidencial && <Toggle label="Doble acristalamiento" value={dobleAcristalamiento} onChange={setDobleAcristalamiento} />}
+            {esResidencial && <Toggle label="Puerta blindada" value={puertaBlindada} onChange={setPuertaBlindada} />}
+            {esResidencial && <Toggle label="Alarma de seguridad" value={alarmaSeguridad} onChange={setAlarmaSeguridad} />}
+          </div>}
+          {esResidencial && <div style={g3}>
+            <Input label="Plantas del edificio" value={plantasEdificio} onChange={setPlantasEdificio} type="number" placeholder="5" />
+            <Select label="Ocupacion actual" value={ocupacionActual} onChange={setOcupacionActual}
+              options={["Vacía","Alquilada","Ocupada"]} />
+          </div>}
+          {esGaraje && <div style={g3}>
+            <Select label="Tipo de garaje (capacidad)" value={tipoGaraje} onChange={setTipoGaraje}
+              options={["Coche compacto","Coche sedán","Moto","Coche y moto","Dos coches o más","Desconocido"]} />
+            <Select label="Tipología plaza" value={garajeTipo} onChange={setGarajeTipo}
+              options={["","Plaza aparcamiento","Trastero/Depósito","Desconocido"]} />
+          </div>}
+          {esGaraje && <div style={{ display: "flex", gap: 30 }}>
+            <Toggle label="Puerta automática" value={garajePuertaAuto} onChange={setGarajePuertaAuto} />
+            <Toggle label="Plaza cubierta" value={garajePlazaCubierta} onChange={setGarajePlazaCubierta} />
+          </div>}
+          {esTrastero && <div style={g2}>
+            <Input label="Altura interior (m)" value={trasteroAltura} onChange={setTrasteroAltura} type="number" />
+          </div>}
+          {esTrastero && <div style={{ display: "flex", gap: 30 }}>
+            <Toggle label="Acceso 24h" value={trasteroAcceso24h} onChange={setTrasteroAcceso24h} />
+            <Toggle label="Seguridad 24h" value={trasteroSeguridad24h} onChange={setTrasteroSeguridad24h} />
+            <Toggle label="Muelle de carga" value={trasteroMuelleCarga} onChange={setTrasteroMuelleCarga} />
+          </div>}
+          {!esGaraje && !esTrastero && <div style={g3}>
+            <Select label="Parking" value={parking} onChange={setParking} options={["Si","No","Comunitario","Opcional"]} />
+            <Input label="N plazas" value={nPlazas} onChange={setNPlazas} type="number" />
+            {(parking === "Si" || parking === "Opcional") &&
+              <Input label="Precio garaje (si va aparte)" value={precioParking} onChange={setPrecioParking} type="number" placeholder="Dejar vacío si incluido" />
+            }
+          </div>}
+        </Sec>}
+
+        {/* 7. Instalaciones */}
+        {tieneInstalaciones && <Sec title="Instalaciones y suministros">
+          <CheckGroup label="Suministros" options={SUMINISTROS_OPTS} selected={suministros} onChange={setSuministros} />
+          <Select label="Drenaje sanitario" value={drenaje} onChange={setDrenaje} options={DRENAJE_OPTS} />
+          {tieneElecFont && <div style={{ display: "flex", gap: 30 }}>
+            <Toggle label="Electricidad reformada" value={elecRef} onChange={setElecRef} />
+            <Toggle label="Fontaneria reformada" value={fontRef} onChange={setFontRef} />
+          </div>}
+        </Sec>}
+
+        {/* 10. Datos de venta */}
+        <Sec title="Datos de venta">
+          <div style={g2}>
+            {/* COMPRAVENTA: precio venta (editable o calculado) + precio propietario */}
+            {op === "Compraventa" && (
+              calcDesde === "venta"
+                ? <Input label="Precio de venta *" value={precioVenta} onChange={setPrecioVenta} type="number" placeholder="399000" required />
+                : <div>
+                    <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Precio de venta (calculado)</div>
+                    <div style={{ padding: "9px 12px", background: "#F8F6F1", border: "1px solid #E7E1D4", fontSize: 13, color: "#16294A", fontWeight: 700 }}>
+                      {precioCalc > 0 ? fmtP(Math.round(precioCalc)) : "—"}
+                    </div>
+                  </div>
+            )}
+            {op === "Compraventa" && (
+              calcDesde === "propietario"
+                ? <Input label="Precio propietario *" value={precioProp} onChange={setPrecioProp} type="number" placeholder="0" />
+                : <div>
+                    <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Precio propietario (calculado)</div>
+                    <div style={{ padding: "9px 12px", background: "#F8F6F1", border: "1px solid #E7E1D4", fontSize: 13, color: "#2C6E52", fontWeight: 700 }}>
+                      {netoProp > 0 ? fmtP(Math.round(netoProp)) : "—"}
+                    </div>
+                  </div>
+            )}
+            {/* ALQUILER: renta mensual + precio neto propietario */}
+            {op === "Alquiler" && <Input label="Renta mensual *" value={precioAlquiler} onChange={setPrecioAlquiler} type="number" placeholder="1200" required />}
+            {op === "Alquiler" && <Input label="Renta neta propietario" value={precioProp} onChange={setPrecioProp} type="number" placeholder="0" />}
+            {/* TRASPASO: precio traspaso + precio propietario */}
+            {op === "Traspaso" && <Input label="Precio traspaso *" value={precioTraspaso} onChange={setPrecioTraspaso} type="number" placeholder="0" required />}
+            {op === "Traspaso" && <Input label="Precio propietario" value={precioProp} onChange={setPrecioProp} type="number" placeholder="0" />}
+          </div>
+
+          {/* LOCAL / NAVE: datos del contrato traspaso */}
+          {esComercial && op === "Traspaso" && (() => {
+            const LBL = { fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 5 };
+            const INP = { width: "100%", padding: "10px 14px", background: "#FFFFFF", border: "1px solid #2A2926", borderRadius: 0, color: "#22262E", fontSize: 13, fontFamily: "Inter, sans-serif", boxSizing: "border-box" };
+            return (
+              <div style={{ borderTop: "1px solid #E7E1D4", paddingTop: 14, marginTop: 16 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: "#AC8A54", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 12 }}>
+                  Datos del contrato (traspaso)
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
+                  <div>
+                    <label style={LBL}>Alquiler / mes (€)</label>
+                    <input type="number" value={localAlquilerMes} onChange={e => setLocalAlquilerMes(e.target.value)} style={INP} placeholder="0" />
+                  </div>
+                  <div>
+                    <label style={LBL}>Fianza (meses)</label>
+                    <input type="number" value={localFianzaMeses} onChange={e => setLocalFianzaMeses(e.target.value)} style={INP} placeholder="2" />
+                  </div>
+                  <div>
+                    <label style={LBL}>Fin de contrato</label>
+                    <input type="date" value={localFinContrato} onChange={e => setLocalFinContrato(e.target.value)} style={INP} />
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* ALQUILER: campos específicos Idealista */}
+          {op === "Alquiler" && (
+            <>
+              <div style={g3}>
+                <Input label="Fianza (meses)" value={fianzaMeses} onChange={setFianzaMeses} type="number" placeholder="1" />
+                <Input label="Duración mínima (meses)" value={duracionMinMeses} onChange={setDuracionMinMeses} type="number" placeholder="11" />
+                <Input label="Nº máx. inquilinos" value={alqMaxInquilinos} onChange={setAlqMaxInquilinos} type="number" placeholder="2" />
+              </div>
+              <div style={g3}>
+                <Select label="Tipo de alquiler" value={alqTipoOperacion} onChange={setAlqTipoOperacion}
+                  options={["residencia", "temporada"]} />
+                <Toggle label="Mascotas permitidas" value={mascotas} onChange={setMascotas} />
+                <Select label="Apto para niños" value={alqAptoNinos === true ? "si" : alqAptoNinos === false ? "no" : ""}
+                  onChange={v => setAlqAptoNinos(v === "si" ? true : v === "no" ? false : null)}
+                  options={["si","no"]} />
+              </div>
+              {esResidencial && (
+                <Select label="Equipamiento *" value={alqEquipamiento} onChange={setAlqEquipamiento}
+                  options={[
+                    "Cocina con electrodomésticos y casa amueblada",
+                    "Cocina con electrodomésticos y casa sin amueblar",
+                    "Cocina vacía y casa sin amueblar",
+                    "No lo sé",
+                  ]} />
+              )}
+            </>
+          )}
+          <div style={g3}>
+            <Select label="Tipo honorarios" value={honorariosTipo} onChange={setHonorariosTipo} options={["porcentaje", "fijo"]} />
+            {honorariosTipo === "porcentaje"
+              ? <Input label="Honorarios (%)" value={honorarios} onChange={setHonorarios} type="number" placeholder="5" />
+              : <Input label="Hon. neto — base imponible (€)" value={honNetoManual} onChange={setHonNetoManual} type="number" placeholder="15000" />
+            }
+            <Input label="IVA honorarios (%)" value={ivaHon} onChange={setIvaHon} type="number" placeholder="21" />
+          </div>
+          {honorariosTipo === "porcentaje" && (
+            <div style={{ marginBottom: 8 }}>
+              <div style={{ fontSize: 10, fontWeight: 600, color: "#9A968A", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Hon. neto (calculado)</div>
+              <div style={{ padding: "9px 12px", background: "#F8F6F1", border: "1px solid #E7E1D4", fontSize: 13, color: "#16294A", fontWeight: 600 }}>{(pv > 0 || pp > 0) ? fmtP(Math.round(honNeto)) : "—"}</div>
+            </div>
+          )}
+          {/* Panel cálculo automático — siempre visible */}
+          <div style={{ padding: "16px 18px", background: "#F4EEE0", border: "1px solid #E7D9C0", marginTop: 8, marginBottom: 4 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
+              <div style={{ fontSize: 10, color: "#8C6E3F", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase" }}>Cálculo Automático</div>
+              {op !== "Alquiler" && (
+                <div style={{ display: "flex", gap: 6 }}>
+                  <button onClick={() => setCalcDesde("venta")} style={{ fontSize: 10, padding: "5px 12px", border: "1px solid #AC8A54", borderRadius: 0, background: calcDesde === "venta" ? "#AC8A54" : "transparent", color: calcDesde === "venta" ? "#fff" : "#AC8A54", cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600, letterSpacing: "0.04em" }}>Desde precio venta</button>
+                  <button onClick={() => setCalcDesde("propietario")} style={{ fontSize: 10, padding: "5px 12px", border: "1px solid #AC8A54", borderRadius: 0, background: calcDesde === "propietario" ? "#AC8A54" : "transparent", color: calcDesde === "propietario" ? "#fff" : "#AC8A54", cursor: "pointer", fontFamily: "Inter, sans-serif", fontWeight: 600, letterSpacing: "0.04em" }}>Desde precio propietario</button>
+                </div>
+              )}
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "12px 20px" }}>
+              <div>
+                <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 4 }}>{op === "Alquiler" ? "Renta mensual" : "Precio de venta"}</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "#16294A" }}>{pv > 0 || precioCalc > 0 ? fmtP(Math.round(calcDesde === "propietario" && precioCalc > 0 ? precioCalc : pv)) : "—"}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 4 }}>Hon. neto</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "#16294A" }}>{honNeto > 0 ? fmtP(Math.round(honNeto)) : "—"}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 4 }}>IVA ({Number(ivaHon)||21}%)</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "#16294A" }}>{honIva > 0 ? fmtP(Math.round(honIva)) : "—"}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 4 }}>Hon. total (neto+IVA)</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "#AC8A54" }}>{honTotal > 0 ? fmtP(Math.round(honTotal)) : "—"}</div>
+              </div>
+              <div style={{ gridColumn: "span 2" }}>
+                <div style={{ fontSize: 10, color: "#9A968A", marginBottom: 4 }}>Neto propietario</div>
+                <div style={{ fontSize: 17, fontWeight: 700, color: "#2C6E52" }}>{netoProp > 0 ? fmtP(Math.round(netoProp)) : "—"}</div>
+              </div>
+            </div>
+          </div>
+        </Sec>
+
+        {/* 11. Datos propietario */}
+        <Sec title="Datos del propietario (interno)">
+          <div style={{ background: "#FFFFFF", border: "1px solid #D4545422", borderRadius: 0, padding: "16px 20px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 14 }}>
+              <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#A23A3A" }} />
+              <span style={{ fontSize: 10, fontWeight: 600, color: "#A23A3A", textTransform: "uppercase", letterSpacing: "0.1em" }}>Datos internos - no se publican</span>
+            </div>
+            <PropietariosEditor
+              propietarios={propietarios}
+              onChange={setPropietarios}
+            />
+            <Textarea label="Notas privadas" value={notasPriv} onChange={setNotasPriv} rows={3} />
+          </div>
+        </Sec>
+
+        {/* 11. Cualificacion */}
+        <Sec title="Cualificacion del inmueble (interno)">
+          <div style={{ background: "#FFFFFF", border: "1px solid #D4545422", borderRadius: 0, padding: "16px 20px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 14 }}>
+              <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#A23A3A" }} />
+              <span style={{ fontSize: 10, fontWeight: 600, color: "#A23A3A", textTransform: "uppercase", letterSpacing: "0.1em" }}>Formulario interno</span>
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <span style={{ fontSize: 10, fontWeight: 600, color: "#2C6E52", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", marginBottom: 8 }}>Puntos positivos del inmueble</span>
+              <QualRow items={cualPos} onChange={setCualPos} color="#2C6E52" symbol="+" />
+              <span style={{ fontSize: 10, fontWeight: 600, color: "#A23A3A", textTransform: "uppercase", letterSpacing: "0.1em", display: "block", margin: "16px 0 8px" }}>Puntos negativos o limitaciones</span>
+              <QualRow items={cualNeg} onChange={setCualNeg} color="#A23A3A" symbol="-" />
+            </div>
+          </div>
+        </Sec>
+
+        {/* Submit */}
+        <div style={{ borderTop: "1px solid #2A2926", paddingTop: 28, marginTop: 12, display: "flex", justifyContent: "flex-end", gap: 12 }}>
+          <button
+            onClick={handleSubmit}
+            disabled={saving}
+            style={{
+              padding: "14px 36px", borderRadius: 0, border: "none",
+              background: saving ? "#E7E1D4" : "linear-gradient(135deg, #C8A97E, #D4B896)",
+              color: saving ? "#9A968A" : "#F8F6F1", cursor: saving ? "not-allowed" : "pointer", fontSize: 12, fontWeight: 700,
+              letterSpacing: "0.1em", textTransform: "uppercase",
+              fontFamily: "Inter, sans-serif", transition: "all 0.3s",
+            }}
+          >
+            {saving ? "Guardando..." : fichaId ? "Ficha guardada ✓" : "Crear ficha de propiedad"}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  );
+}
