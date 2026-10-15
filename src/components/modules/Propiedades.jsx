@@ -773,21 +773,92 @@ function TabsContainer({ tabs, defaultTab, estadoLabel, estadoColor, children })
   React.useEffect(() => { setActiveTab(defaultTab || (tabs[0] && tabs[0].key)); }, [defaultTab]);
   const activeTabDef = tabs.find(t => t.key === activeTab) || tabs[0];
   const accentColor = activeTabDef ? activeTabDef.accentColor : "var(--gold)";
+  // Pipeline de estados para barra visual
+  const PIPELINE = [
+    { key: "borrador",  label: "Borrador"  },
+    { key: "captada",   label: "Captada"   },
+    { key: "publicada", label: "Publicada" },
+    { key: "reservada", label: "Reservada" },
+    { key: "arras",     label: "Arras"     },
+    { key: "notaria",   label: "Notaría"   },
+    { key: "vendida",   label: "Vendida"   },
+  ];
+  const estadoKey = estadoLabel ? estadoLabel.toLowerCase().replace(/ /g, "_") : "";
+  const pipelineIdx = PIPELINE.findIndex(s => estadoKey.startsWith(s.key));
   return (
     <div>
       {estadoLabel && (
-        <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 20px", background: "#F7F4EF", borderTop: "1px solid #E0D9CE", borderBottom: "1px solid #E0D9CE", borderLeft: `4px solid ${estadoColor || "var(--gold)"}`, marginBottom: 0 }}>
-          <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.18em", color: estadoColor || "var(--gold)", fontFamily: "Inter, sans-serif" }}>Estado</span>
-          <span style={{ fontSize: 11, fontWeight: 700, color: "#fff", background: estadoColor || "var(--gold)", padding: "3px 12px", fontFamily: "Inter, sans-serif", letterSpacing: "0.12em", textTransform: "uppercase" }}>{estadoLabel}</span>
+        <div style={{ background: estadoColor || "var(--gold)", padding: "14px 24px 0 24px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.7)", letterSpacing: "0.12em", fontFamily: "Inter, sans-serif" }}>ESTADO</span>
+              <span style={{ fontSize: 18, fontWeight: 800, color: "#fff", fontFamily: "Inter, sans-serif", letterSpacing: "-0.01em" }}>{estadoLabel.toUpperCase()}</span>
+            </div>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 0, paddingBottom: 0 }}>
+            {PIPELINE.map((step, idx) => {
+              const isPast = pipelineIdx > idx;
+              const isCurrent = pipelineIdx === idx;
+              const isFuture = pipelineIdx < idx;
+              return (
+                <React.Fragment key={step.key}>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, minWidth: 0, flex: 1 }}>
+                    <div style={{
+                      width: 24, height: 24, borderRadius: "50%", flexShrink: 0,
+                      background: isCurrent ? "#fff" : isPast ? "rgba(255,255,255,0.55)" : "rgba(255,255,255,0.18)",
+                      border: isCurrent ? "3px solid rgba(255,255,255,0.5)" : "none",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      boxShadow: isCurrent ? "0 0 0 3px rgba(255,255,255,0.25)" : "none",
+                      transition: "all 0.2s",
+                    }}>
+                      {isPast && <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke={estadoColor || "var(--gold)"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                      {isCurrent && <div style={{ width: 8, height: 8, borderRadius: "50%", background: estadoColor || "var(--gold)" }} />}
+                    </div>
+                    <span style={{
+                      fontSize: 9, fontWeight: isCurrent ? 700 : 500,
+                      color: isCurrent ? "#fff" : isPast ? "rgba(255,255,255,0.75)" : "rgba(255,255,255,0.35)",
+                      fontFamily: "Inter, sans-serif", whiteSpace: "nowrap", letterSpacing: "0.05em",
+                      paddingBottom: 6,
+                    }}>{step.label}</span>
+                  </div>
+                  {idx < PIPELINE.length - 1 && (
+                    <div style={{ flex: 1, height: 2, background: idx < pipelineIdx ? "rgba(255,255,255,0.55)" : "rgba(255,255,255,0.18)", marginBottom: 22, flexShrink: 1 }} />
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </div>
         </div>
       )}
-      <div style={{ display: "flex", gap: 0, background: "#EDE8E0", borderBottom: `2px solid ${accentColor}`, overflowX: "auto" }}>
+      <div style={{ display: "flex", gap: 0, background: "#F0ECE4", borderBottom: "1px solid #DDD7CC", overflowX: "auto" }}>
         {tabs.map(tab => {
           const isActive = activeTab === tab.key;
+          const tabAccent = tab.accentColor || "var(--gold)";
           return (
-            <button key={tab.key} onClick={() => setActiveTab(tab.key)} style={{ padding: "11px 20px", border: "none", cursor: "pointer", fontSize: 10, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", fontFamily: "Inter, sans-serif", background: isActive ? "var(--cream)" : "transparent", color: isActive ? (tab.accentColor || "var(--gold)") : "var(--muted)", borderBottom: isActive ? `2px solid ${tab.accentColor || "var(--gold)"}` : "2px solid transparent", marginBottom: -2, whiteSpace: "nowrap", transition: "all 0.15s" }}>
+            <button key={tab.key} onClick={() => setActiveTab(tab.key)} style={{
+              padding: "14px 22px", border: "none", cursor: "pointer",
+              fontSize: 13, fontWeight: isActive ? 700 : 500,
+              fontFamily: "Inter, sans-serif",
+              background: isActive ? "#fff" : "transparent",
+              color: isActive ? tabAccent : "#7A7066",
+              borderBottom: isActive ? `3px solid ${tabAccent}` : "3px solid transparent",
+              borderTop: isActive ? "1px solid #DDD7CC" : "1px solid transparent",
+              borderLeft: isActive ? "1px solid #DDD7CC" : "1px solid transparent",
+              borderRight: isActive ? "1px solid #DDD7CC" : "1px solid transparent",
+              marginBottom: -1, whiteSpace: "nowrap",
+              transition: "all 0.15s",
+              boxShadow: isActive ? "0 -1px 4px rgba(0,0,0,0.04)" : "none",
+            }}>
+              {tab.icon && <span style={{ marginRight: 7, fontSize: 15, verticalAlign: "middle" }}>{tab.icon}</span>}
               {tab.title}
-              {tab.badge && (<span style={{ marginLeft: 6, fontSize: 8, fontWeight: 600, color: tab.badgeColor || tab.accentColor || "var(--gold)", background: (tab.badgeColor || tab.accentColor || "var(--gold)") + "20", padding: "1px 6px", letterSpacing: "0.08em", border: `1px solid ${(tab.badgeColor || tab.accentColor || "var(--gold)")}40` }}>{tab.badge}</span>)}
+              {tab.badge && (
+                <span style={{
+                  marginLeft: 8, fontSize: 10, fontWeight: 700,
+                  color: "#fff",
+                  background: tab.badgeColor || tabAccent,
+                  padding: "2px 7px", borderRadius: 10,
+                }}>{tab.badge}</span>
+              )}
             </button>
           );
         })}
@@ -3033,10 +3104,10 @@ REGLAS:
           return (
             <TabsContainer
               tabs={[
-                { key: "informacion", title: "Información de la propiedad", accentColor: "var(--gold)" },
-                { key: "visitas",     title: "Visitas y documentos",        accentColor: "var(--success)" },
-                { key: "arras",       title: "Reserva a arras",             accentColor: "var(--amber)" },
-                { key: "notaria",     title: "Arras a notaría",             accentColor: "var(--blue)", badge: "Próximamente", badgeColor: "var(--blue)" },
+                { key: "informacion", title: "Información de la propiedad", icon: "🏠", accentColor: "var(--gold)" },
+                { key: "visitas",     title: "Visitas y documentos",        icon: "📅", accentColor: "var(--success)" },
+                { key: "arras",       title: "Reserva a arras",             icon: "📝", accentColor: "var(--amber)" },
+                { key: "notaria",     title: "Arras a notaría",             icon: "⚖️",  accentColor: "var(--blue)", badge: "Próximamente", badgeColor: "var(--blue)" },
               ]}
               defaultTab={tabPorEstado(estadoActual)}
               estadoLabel={estadoActual ? estadoActual.replace(/_/g, " ") : ""}
