@@ -11,7 +11,7 @@ import { supabase } from "@/lib/supabase";
 
 // director = Suren (acceso total), administrador = Silvia (gestión sin Agentes IA), agente = comerciales
 const ROLES = ["director", "administrador", "agente"];
-const CODIGOS = ["MNSLA", "MNSKB", "MNAQA", "MNJAC", "MNGET"];
+// agente_codigo: input libre (ej: MNSLA, MNABC). Formato: 2-6 letras mayúsculas.
 
 export default function Usuarios({ currentUser }) {
   const [usuarios, setUsuarios] = useState([]);
@@ -229,19 +229,37 @@ export default function Usuarios({ currentUser }) {
                 </div>
                 <div>
                   <label style={lSt}>Código agente</label>
-                  <select style={iSt} value={form.agente_codigo || ""} onChange={e => setForm(f => ({ ...f, agente_codigo: e.target.value }))}>
-                    <option value="">Sin código</option>
-                    {CODIGOS.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
+                  <input
+                    style={iSt}
+                    value={form.agente_codigo || ""}
+                    onChange={e => setForm(f => ({ ...f, agente_codigo: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8) }))}
+                    placeholder="ej: MNSLA"
+                    maxLength={8}
+                  />
+                  <span style={{ fontSize: 10, color: "#9A968A", marginTop: 3, display: "block" }}>Prefijo de referencia. Letras mayúsculas, sin espacios. Ej: MNSLA</span>
                 </div>
               </div>
-              <div>
-                <label style={lSt}>Teléfono</label>
-                <input style={iSt} value={form.agente_telefono || ""} onChange={e => setForm(f => ({ ...f, agente_telefono: e.target.value }))} placeholder="ej: 640130766" />
-                <input style={iSt} value={form.email || ""} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="Email del agente" />
-                <input style={iSt} value={form.dni || ""} onChange={e => setForm(f => ({ ...f, dni: e.target.value }))} placeholder="DNI/NIE del agente" />
-                <input style={iSt} value={form.poliza_rc || ""} onChange={e => setForm(f => ({ ...f, poliza_rc: e.target.value }))} placeholder="Número de póliza RC (para encargos)" />
-                <input style={iSt} value={form.numero_registro || ""} onChange={e => setForm(f => ({ ...f, numero_registro: e.target.value }))} placeholder="Nº registro agente inmobiliario (ROAI Baleares)" />
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div>
+                  <label style={lSt}>Teléfono</label>
+                  <input style={iSt} value={form.agente_telefono || ""} onChange={e => setForm(f => ({ ...f, agente_telefono: e.target.value }))} placeholder="ej: 640130766" />
+                </div>
+                <div>
+                  <label style={lSt}>Email</label>
+                  <input style={iSt} value={form.email || ""} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="agente@empresa.com" />
+                </div>
+                <div>
+                  <label style={lSt}>DNI / NIE</label>
+                  <input style={iSt} value={form.dni || ""} onChange={e => setForm(f => ({ ...f, dni: e.target.value }))} placeholder="12345678A" />
+                </div>
+                <div>
+                  <label style={lSt}>Póliza RC</label>
+                  <input style={iSt} value={form.poliza_rc || ""} onChange={e => setForm(f => ({ ...f, poliza_rc: e.target.value }))} placeholder="Para encargos de venta" />
+                </div>
+                <div style={{ gridColumn: "1 / -1" }}>
+                  <label style={lSt}>Nº Registro (ROAI Baleares)</label>
+                  <input style={iSt} value={form.numero_registro || ""} onChange={e => setForm(f => ({ ...f, numero_registro: e.target.value }))} placeholder="Registro Oficial de Agentes Inmobiliarios" />
+                </div>
               </div>
               {modal !== "nuevo" && (
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
